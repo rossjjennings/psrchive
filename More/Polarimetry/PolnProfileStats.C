@@ -286,6 +286,12 @@ catch (Error& error)
   throw error += "Pulsar::PolnProfileStats::build";
 }
 
+//! Returns the vairance of the linearly polarized flux
+double Pulsar::PolnProfileStats::get_linear_variance () const
+{
+  return profile->get_linear_variance();
+}
+
 #include "Pulsar/PolnProfileStatsInterface.h"
 
 //! Return a text interface that can be used to configure this instance

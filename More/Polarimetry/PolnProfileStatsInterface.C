@@ -36,6 +36,9 @@ Pulsar::PolnProfileStats::Interface::Interface (PolnProfileStats* instance)
   add( &PolnProfileStats::get_total_abs_circular,
        "sumC", "Total circularly polarized flux of on-pulse phase bins" );
 
+  add (&PolnProfileStats::get_linear_variance,
+       "varL", "Variance of the off-pulse linearly polarized flux");
+
   typedef ProfileStats*(PolnProfileStats::*the_mutable_one)();
 
   import ( "", ProfileStats::Interface(),

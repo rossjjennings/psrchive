@@ -142,6 +142,12 @@ namespace Pulsar {
     //! Return the linear polarization profile
     void get_linear (Profile* linear) const;
 
+    //! Return the variance of L estimated from off-pulse Q and U
+    double get_linear_variance () const;
+
+    //! Return the variance of L, Q and U
+    double get_linear_variance (std::pair<double,double>& qu_var) const;
+
     //! Return the absolute circular polarization profile
     void get_circular (Profile* circular) const;
 
