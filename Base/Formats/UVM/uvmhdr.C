@@ -35,6 +35,8 @@ int main (int argc, char** argv)
       return -1;
     }
 
+  cerr << "newscan=" << newscan << endl;
+
   char buffer[80];
 
   uvm_get_source (&header, buffer);
@@ -72,6 +74,7 @@ int main (int argc, char** argv)
 
   cout << "admplen (=anumsbc X alensbc)=" << header.admplen << endl;
   cout << "admpsrd=" << header.admplen << endl;
+  cout << "admptot=" << header.admptot << endl;
 
   cout << endl;
 

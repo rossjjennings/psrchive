@@ -6,7 +6,7 @@ libFormats_la_SOURCES = Agent_static.C
 SUBDIRS = Timer EPN ASCII BPP WAPP PRESTO UVM
 
 libFormats_la_LIBADD = Timer/libtimer.la EPN/libepn.la ASCII/libascii.la \
-       BPP/libbpp.la WAPP/libwapp.la PRESTO/libpresto.la
+       BPP/libbpp.la WAPP/libwapp.la PRESTO/libpresto.la UVM/libuvm.la
 
 if HAVE_CFITSIO
 SUBDIRS += PSRFITS ASP

@@ -77,12 +77,17 @@ template
 Registry::List<Archive::Agent>::Enter<BPPArchive::Agent>
 Archive::Advocate<BPPArchive>::entry;
 
+#include "Pulsar/UVMArchive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<UVMArchive::Agent>
+Archive::Advocate<UVMArchive>::entry;
+
 #include "Pulsar/ASCIIArchive.h"
 
 template
 Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
 Archive::Advocate<ASCIIArchive>::entry;
-
 
 
 Pulsar::Option<string> Pulsar::Archive::unload_class
