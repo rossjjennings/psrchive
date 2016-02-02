@@ -204,7 +204,6 @@ Reference::To<Pulsar::Profile> Pulsar::FourthMomentStats::get_modulation_index()
   return result;
 }
 
-
 void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 				       PolnProfile* v2,
 				       PolnProfile* v3)
@@ -267,6 +266,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   eigen_value.resize(3);
   regression_coefficient.resize(3);
+  natural_covariance.resize(3);
 
   for (unsigned i=0; i<3; i++)
   {
@@ -275,6 +275,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
     eigen_value[i] = new Profile (nbin);
     regression_coefficient[i] = new Profile (nbin);
+    natural_covariance[i] = new Profile (nbin);
   }
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
@@ -303,7 +304,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     // extract the 3x3 covariance matrix of the polarization vector
     partition (C, Ivar, Icovar, pcovar);
 
-    Vector<3,double> regression = Icovar; //inv(pcovar) * Icovar;
+    Vector<3,double> regression = inv(pcovar) * Icovar;
 
     Matrix<3,3,double> peigen;
     Vector<3,double> pvar;
@@ -311,11 +312,27 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     // compute the eigen vector matrix (a 3D rotation)
     Jacobi (pcovar, peigen, pvar);
 
-    sort (pvar);
+    Vector<3,double> natural = peigen * Icovar;
+
+#if 0
+    for (unsigned i=0; i<3; i++)
+      if (peigen[i] * mean.get_vector() < 0)
+	peigen[i] *= -1.0;
+#endif
+
+#define METRIC(i) (pvar[i] + fabs(natural[i]))
+
+    // sort the eigen values from greatest to least
+    unsigned order [3] = { 0, 1, 2 };
+    for (unsigned j=0; j<2; j++)
+      for (unsigned i=j+1; i<3; i++)
+	if ( METRIC(order[i]) > METRIC(order[j]) )
+	  std::swap (order[i], order[j]);
 
     for (unsigned i=0; i < 3; i++)
     {
-      eigen_value[i]->get_amps()[ibin] = pvar[i];
+      eigen_value[i]->get_amps()[ibin] = pvar[order[i]];
+      natural_covariance[i]->get_amps()[ibin] = fabs(natural[order[i]]);
       regression_coefficient[i]->get_amps()[ibin] = regression[i];
     }
 
