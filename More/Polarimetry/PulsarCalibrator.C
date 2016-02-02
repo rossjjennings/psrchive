@@ -196,7 +196,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 
   mtm.resize (nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
+  for (unsigned ichan=0; ichan<nchan; ichan++) try
   {
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::build ichan=" << ichan << endl;
@@ -239,6 +239,13 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     mtm[ichan]->set_regions ( onpulse, baseline );
     mtm[ichan]->set_standard ( integration->new_PolnProfile (mchan) );
 
+  }
+  catch (Error& error)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::PulsarCalibrator::build ichan=" << ichan 
+           << " error=" << error.get_message() << " (flagged invalid)" << endl;
+    mtm[ichan] = 0;
   }
 
   if (verbose)
