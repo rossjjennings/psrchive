@@ -49,6 +49,10 @@ namespace Pulsar {
     const Profile* get_regression_coefficient (unsigned k)
     { return regression_coefficient.at(k); }
 
+    //! Get covariance between polarized and total intensity in natural basis
+    const Profile* get_natural_covariance (unsigned k)
+    { return natural_covariance.at(k); }
+
     //! Get the mode-separated profiles
     void separate (PolnProfile& modeA, PolnProfile& modeB);
 
@@ -73,6 +77,7 @@ namespace Pulsar {
 
     std::vector< Reference::To<Profile> > eigen_value;
     std::vector< Reference::To<Profile> > regression_coefficient;
+    std::vector< Reference::To<Profile> > natural_covariance;
     
     //! The variance of the baseline for each moment
     mutable std::vector< Estimate<double> > moment_variance;
