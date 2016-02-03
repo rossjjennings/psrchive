@@ -1,6 +1,7 @@
 /***************************************************************************
  *
  *   Copyright (C) 200? by Gregory Desvignes
+ *   Updates and bugfixes by Stefan Oslowski
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -95,7 +96,7 @@ void Pulsar::ManualPolnCalibrator::calibrate (Archive* arch) try
 
   if (arch->get_npol() == 4)
   {
-    if (arch->get_state() != State::Coherence )
+    if (arch->get_state() != Signal::Coherence )
       throw Error (InvalidState, "Pulsar::ManualPolnCalibrator::calibrate", "The archive needs to be in Coherence state");
   // Response need to be a vector of vector
   vector< vector<Jones<float> > > response(arch->get_nsubint(), vector< Jones<float> > (arch->get_nchan()));
