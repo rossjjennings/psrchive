@@ -50,7 +50,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lL:M:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -73,7 +73,7 @@ void usage ()
     "\n"
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
-    "  -L filename    Use the Jones calibrator in filename \n"
+    "  -Q filename    Use the Jones calibrator in filename \n"
     "  -C model       Use the specified model of the calibrator solution \n"
     "  -P             Calibrate polarisation only (not flux)\n"
     "  -R             Calibrate the receiver (feed) only \n"
@@ -97,7 +97,7 @@ void usage ()
     "  -b             Do not try to match bandwidths\n"
     "  -o             Allow opposite sidebands\n"
     "  -a             Per-channel matching\n"
-    //"  -L             Print verbose matching information \n"
+    "  -L             Print verbose matching information \n"
     "\n"
     "Expert options: \n"
     "  -f             Override flux calibration flag\n"
@@ -310,6 +310,10 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'L':
+      Database::match_verbose = true;
+      break;
+
+    case 'Q':
       ascii_model_file = optarg;
       command += " -L ";
 
