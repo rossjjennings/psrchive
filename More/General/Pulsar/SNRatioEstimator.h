@@ -1,0 +1,47 @@
+//-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2016 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+// psrchive/More/General/Pulsar/SNRatioEstimator.h
+
+#ifndef __Pulsar_SNRatioEstimator_h
+#define __Pulsar_SNRatioEstimator_h
+
+#include "Pulsar/Algorithm.h"
+#include "TextInterface.h"
+
+namespace Pulsar {
+
+  class Profile;
+
+  //! Algorithms that produce PhaseWeight objects
+  /*! This pure virtual base class of PhaseWeight algorithms defines the
+      interface by which various routines, such as baseline estimators
+      can be accessed */
+  class SNRatioEstimator : public Algorithm
+  {
+
+  public:
+
+    //! Return the signal to noise ratio
+    virtual float get_snr (const Profile* profile) = 0;
+
+    //! Return a text interface that can be used to configure this instance
+    virtual TextInterface::Parser* get_interface () = 0;
+
+    //! Return a copy constructed instance of self
+    virtual SNRatioEstimator* clone () const = 0;
+
+    //! Construct a new SNRatioEstimator from a string
+    static SNRatioEstimator* factory (const std::string& name_and_parse);
+
+  };
+
+}
+
+
+#endif // !defined __Pulsar_SNRatioEstimator_h
