@@ -58,8 +58,6 @@ float Pulsar::ModularSNR::get_snr (const Profile* profile)
   baseline = baseline_estimator->operate (profile);
   unsigned off_nbin = baseline->get_nonzero_weight_count();
 
-  cerr << "Pulsar::ModularSNR::get_snr off nbin=" << off_nbin << endl;
-
   Estimate<double> mean = baseline->get_mean();
   Estimate<double> variance = baseline->get_variance();
 
@@ -67,11 +65,7 @@ float Pulsar::ModularSNR::get_snr (const Profile* profile)
   onpulse = onpulse_estimator->operate (profile);
   unsigned on_nbin = onpulse->get_nonzero_weight_count();
 
-  cerr << "Pulsar::ModularSNR::get_snr on nbin=" << on_nbin << endl;
-
   double energy = onpulse->get_weighted_sum() - mean.val * on_nbin;
-
-  cerr << "Pulsar::ModularSNR::get_snr energy=" << energy << endl;
 
   double snr = energy / sqrt(variance.val*on_nbin);
 
