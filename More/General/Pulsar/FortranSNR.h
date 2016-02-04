@@ -1,26 +1,24 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FortranSNR.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/17 05:58:13 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/FortranSNR.h
 
 #ifndef __Pulsar_FortranSNR_h
 #define __Pulsar_FortranSNR_h
 
-#include "Pulsar/Profile.h"
+#include "Pulsar/SNRatioEstimator.h"
 #include <vector>
 
 namespace Pulsar {
 
   //! Calculates the signal-to-noise ratio by fitting against a standard
-  class FortranSNR : public Reference::Able {
+  class FortranSNR : public SNRatioEstimator
+  {
 
   public:
 
@@ -28,6 +26,16 @@ namespace Pulsar {
     
     //! Return the signal to noise ratio based on the shift
     float get_snr (const Profile* profile);
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! The class that is returned by get_interface
+    class Interface;
+
+    //! Return a copy constructed instance of self
+    FortranSNR* clone () const;
+
     int get_bestwidth(){ return bestwidth; }
 
     void set_rms( float new_rms ) { rms = new_rms; rms_set = true; }

@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2002-2009 by Willem van Straten
+ *   Copyright (C) 2002 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.117 $
-   $Date: 2011/03/03 16:16:03 $
-   $Author: demorest $ */
+// psrchive/Base/Classes/Pulsar/Profile.h
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -25,6 +22,7 @@ namespace Pulsar {
 
   class PhaseWeight;
   class ProfileWeightFunction;
+  class SNRatioEstimator;
 
   //! Any quantity recorded as a function of pulse phase
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
@@ -172,9 +170,8 @@ namespace Pulsar {
     //! The default implementation of the onpulse finding algorithm
     static Option<Mask> onpulse_strategy;
 
-    typedef Functor< float (const Pulsar::Profile*) > Float;
     //! The default implementation of the snr method
-    static Option<Float> snr_strategy;
+    static Option< Reference::To<SNRatioEstimator> > snr_strategy;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;

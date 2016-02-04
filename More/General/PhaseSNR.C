@@ -62,7 +62,7 @@ public:
       set_instance (instance);
   }
 
-  std::string get_interface_name () const { return "pdmp"; }
+  std::string get_interface_name () const { return "phase"; }
 };
 
 

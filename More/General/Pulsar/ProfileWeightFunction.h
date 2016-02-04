@@ -53,6 +53,10 @@ namespace Pulsar {
 
   };
 
+  std::ostream& operator<< (std::ostream&, ProfileWeightFunction*);
+
+  std::istream& operator>> (std::istream&, ProfileWeightFunction*&);
+
 }
 
 

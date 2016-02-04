@@ -32,6 +32,9 @@ namespace Pulsar {
     //! Returns a new PhaseWeight instance
     PhaseWeight* operator () (const Profile*);
 
+    //! Convenience interface
+    PhaseWeight* operate (const Profile*);
+
     //! Include only the specified phase bins for consideration
     void set_include (PhaseWeight* include);
 

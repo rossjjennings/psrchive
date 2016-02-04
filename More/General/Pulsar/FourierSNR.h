@@ -1,38 +1,45 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FourierSNR.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/FourierSNR.h
 
 #ifndef __Pulsar_FourierSNR_h
 #define __Pulsar_FourierSNR_h
 
-#include "ReferenceAble.h"
+#include "Pulsar/SNRatioEstimator.h"
 
 namespace Pulsar {
 
   class Profile;
 
   //! Calculates the signal-to-noise ratio in the Fourier domain
-  class FourierSNR : public Reference::Able {
+  class FourierSNR : public SNRatioEstimator {
 
   public:
 
     //! Default constructor
     FourierSNR ();
 
-    //! Set the fractional number of high frequencies used to calculate noise
-    void set_baseline_extent (float width);
-
     //! Return the signal to noise ratio
     float get_snr (const Profile* profile);
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! The class that is returned by get_interface
+    class Interface;
+
+    //! Return a copy constructed instance of self
+    FourierSNR* clone () const;
+
+    //! Set the fractional number of high frequencies used to calculate noise
+    void set_baseline_extent (float width);
+    float get_baseline_extent () const { return baseline_extent; }
 
   protected:
 
