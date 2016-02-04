@@ -160,12 +160,12 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_exponential test_StraightLine test_ThreadStream		\
 	test_Horizon test_LogFile test_Warning test_RunningMedian
 
-if HAVE_GSL
-TESTS += test_SplineFit
-endif
-
 check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
 	test_Angle test_expand test_VirtualMemory
+
+if HAVE_GSL
+check_PROGRAMS += test_SplineFit
+endif
 
 test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
