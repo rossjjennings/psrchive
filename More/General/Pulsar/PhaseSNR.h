@@ -6,23 +6,27 @@
  *
  ***************************************************************************/
 
-// psrchive/More/General/Pulsar/FortranSNR.h
+// psrchive/More/General/Pulsar/PhaseSNR.h
 
-#ifndef __Pulsar_FortranSNR_h
-#define __Pulsar_FortranSNR_h
+#ifndef __Pulsar_PhaseSNR_h
+#define __Pulsar_PhaseSNR_h
 
 #include "Pulsar/SNRatioEstimator.h"
 #include <vector>
 
 namespace Pulsar {
 
-  //! Calculates the signal-to-noise ratio by fitting against a standard
-  class FortranSNR : public SNRatioEstimator
+  //! Calculates the signal-to-noise ratio using old default algorithm
+  /*!
+    This default implementation of the Profile::snr method is taken
+    from the old timer archive code.  Using Profile::find_min_phase and
+    Profile::find_peak_edges, this function finds the integrated power in
+    the pulse profile and divides this by the noise in the baseline.
+  */
+  class PhaseSNR : public SNRatioEstimator
   {
 
   public:
-
-    FortranSNR(); 
     
     //! Return the signal to noise ratio based on the shift
     float get_snr (const Profile* profile);
@@ -34,23 +38,8 @@ namespace Pulsar {
     class Interface;
 
     //! Return a copy constructed instance of self
-    FortranSNR* clone () const;
+    PhaseSNR* clone () const;
 
-    int get_bestwidth(){ return bestwidth; }
-
-    void set_rms( float new_rms ) { rms = new_rms; rms_set = true; }
-    void set_minwidthbins ( int bins ) { minwidthbins = bins; }
-    void set_maxwidthbins ( int bins ) { maxwidthbins = bins; }
-    void set_bestwidth(int bw) { bestwidth=bw; };
-
-  private:
-    float rms;
-    int minwidthbins;
-    int maxwidthbins;
-    int bestwidth;
-    bool rms_set;
-
-    std::vector<float> work;
   };
 
 }

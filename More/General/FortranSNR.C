@@ -72,3 +72,28 @@ float FortranSNR::get_snr (const Profile* profile)
 
 
 
+class Pulsar::FortranSNR::Interface
+  : public TextInterface::To<FortranSNR>
+{
+public:
+  Interface (FortranSNR* instance)
+  {
+    if (instance)
+      set_instance (instance);
+  }
+
+  std::string get_interface_name () const { return "pdmp"; }
+};
+
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::FortranSNR::get_interface ()
+{
+  return new Interface (this);
+}
+
+//! Return a copy constructed instance of self
+Pulsar::FortranSNR* Pulsar::FortranSNR::clone () const
+{
+  return new FortranSNR (*this);
+}

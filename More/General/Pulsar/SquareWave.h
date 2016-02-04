@@ -1,27 +1,24 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SquareWave.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/SquareWave.h
 
 #ifndef __Pulsar_SquareWave_h
 #define __Pulsar_SquareWave_h
 
-#include "Pulsar/Algorithm.h"
+#include "Pulsar/SNRatioEstimator.h"
 
 namespace Pulsar {
 
   class Profile;
 
   //! Calculates the signal-to-noise ratio using (on-off)/rms
-  class SquareWave : public Algorithm {
+  class SquareWave : public SNRatioEstimator {
 
   public:
 
@@ -30,6 +27,15 @@ namespace Pulsar {
     
     //! Return the signal to noise ratio
     float get_snr (const Profile* profile);
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! The class that is returned by get_interface
+    class Interface;
+
+    //! Return a copy constructed instance of self
+    SquareWave* clone () const;
 
     //! Search for multiple level transitions
     void get_transitions (const Profile* profile,

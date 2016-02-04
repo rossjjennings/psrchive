@@ -67,6 +67,7 @@ nobase_include_HEADERS = \
 	Pulsar/PeakEdgesInterpreter.h \
 	Pulsar/PeakConsecutive.h \
 	Pulsar/PeakCumulative.h \
+	Pulsar/PhaseSNR.h \
         Pulsar/PhaseWeightFunction.h \
 	Pulsar/PhaseWeightInterface.h \
 	Pulsar/PhaseWeightModifier.h \
@@ -92,7 +93,7 @@ nobase_include_HEADERS = \
         Pulsar/SmoothMean.h \
         Pulsar/SmoothMedian.h \
 	Pulsar/SmoothSinc.h \
-	Pulsar/SNRatioInterpreter.h \
+	Pulsar/SNRatioEstimator.h \
         Pulsar/SNRWeight.h \
         Pulsar/SquareWave.h \
 	Pulsar/StandardOptions.h \
@@ -206,6 +207,7 @@ libGeneral_la_SOURCES = \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
 	PeakCumulative.C \
+	PhaseSNR.C \
 	PhaseWeightInterface.C \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
@@ -236,7 +238,7 @@ libGeneral_la_SOURCES = \
         SmoothMean.C \
         SmoothMedian.C \
 	SmoothSinc.C \
-	SNRatioInterpreter.C \
+	SNRatioEstimator.C \
         SNRWeight.C \
         SquareWave.C \
 	standard_interface.C \

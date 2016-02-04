@@ -24,7 +24,7 @@ namespace Pulsar {
   class Profile;
   class ProfileStats;
   class PhaseWeight;
-  class SNRatioInterpreter;
+  class SNRatioEstimator;
 
   //! Interface to a variety of useful statistics
   class Statistics : public Reference::Able
@@ -116,7 +116,7 @@ namespace Pulsar {
 
     mutable std::vector< Reference::To<Plugin> > plugins;
 
-    Reference::To<SNRatioInterpreter> snr_estimator_interpreter;
+    Reference::To<SNRatioEstimator> snr_estimator;
     
   };
 
