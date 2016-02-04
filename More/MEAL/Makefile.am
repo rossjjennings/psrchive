@@ -227,11 +227,6 @@ libMEAL_la_SOURCES = \
         UnivariatePolicy.C \
         VelocityModel.C 
 
-bin_PROGRAMS = lmfit j2m
-
-lmfit_SOURCES = lmfit.C
-j2m_SOURCES = j2m.C
-
 TESTS = \
 	test_copy test_Axis test_Projection test_Composite test_get_imap \
 	test_BasisRule test_Scalar test_Complex2Product			 \
