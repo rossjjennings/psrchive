@@ -42,6 +42,7 @@ include_HEADERS = \
         Physical.h \
 	Probability.h \
         Plugin.h \
+	Ranges.h \
         RealTimer.h \
         RegularExpression.h \
 	RobustStats.h \
@@ -111,6 +112,7 @@ libgenutil_la_SOURCES = \
 	printable.C \
 	Probability.C \
         Plugin.C \
+	Ranges.C \
         RealTimer.C \
         RegularExpression.C \
 	replace_extension.C \
@@ -148,9 +150,10 @@ endif
 
 libgenutil_la_LIBADD = @READLINE_LIBS@ @GSL_LIBS@
 
-bin_PROGRAMS = getMJD
+bin_PROGRAMS = getMJD grid_coord
 
 getMJD_SOURCES = getMJD.C
+grid_coord_SOURCES = grid_coord.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_sum test_NormalDistribution			\
