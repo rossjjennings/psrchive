@@ -142,7 +142,7 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-#include "range.h"
+#include "Ranges.h"
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -156,7 +156,7 @@ string Pulsar::DeleteInterpreter::freq (const string& args) try
 
   for (unsigned iarg=0; iarg < arguments.size(); iarg++)
   {
-    range r = fromstring<range> (arguments[iarg]);
+    Range r = fromstring<Range> (arguments[iarg]);
 
     Archive* archive = get();
 
