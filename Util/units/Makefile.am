@@ -43,6 +43,7 @@ include_HEADERS = \
 	ReferenceVector.h \
         Registry.h \
         separate.h \
+	Separator.h \
         Stokes.h \
 	stringcase.h \
         stringtok.h \
@@ -81,6 +82,7 @@ libunits_la_SOURCES = \
 	random.C \
         ReferenceAble.C \
         separate.C \
+	Separator.C \
 	stringcase.C \
         stringtok.C \
 	test.cfg \
@@ -105,7 +107,7 @@ TESTS = test_Alias test_tostring test_Conventions		    \
         test_TextInterface test_parse_indeces test_TextIndex	    \
 	test_Vector test_Matrix test_Jacobi test_eigen		    \
 	test_Jones test_Quaternion test_Pauli			    \
-	test_ModifyRestore test_Dirac
+	test_ModifyRestore test_Dirac test_Hermitian_sqrt
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
@@ -143,6 +145,7 @@ test_TextIndex_SOURCES		= test_TextIndex.C
 test_ModifyRestore_SOURCES      = test_ModifyRestore.C
 test_Mueller_SOURCES		= test_Mueller.C
 test_inner_product_SOURCES	= test_inner_product.C 
+test_Hermitian_sqrt_SOURCES	= test_Hermitian_sqrt.C
 
 many_references_SOURCES		= many_references.C
 many_calls_SOURCES		= many_calls.C
