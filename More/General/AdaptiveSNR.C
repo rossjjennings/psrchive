@@ -53,19 +53,18 @@ float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
   Estimate<double> mean = baseline->get_mean();
   Estimate<double> variance = baseline->get_variance();
 
-  double rms = sqrt (variance.val);
   unsigned nbin = profile->get_nbin();
+  unsigned off_pulse = baseline->get_nonzero_weight_count();
+  unsigned on_pulse = nbin - off_pulse;
+
   double energy = profile->sum() - mean.val * nbin;
-
-  double total = baseline->get_weight_sum();
-  double max   = baseline->get_weight_max();
-
-  double on_pulse = nbin * max - total;
   double snr = energy / sqrt(variance.val*on_pulse);
 
   if (Profile::verbose)
   {
-    cerr << "Pulsar::AdaptiveSNR::get_snr " << total << " out of " << nbin*max
+    double rms = sqrt (variance.val);
+
+    cerr << "Pulsar::AdaptiveSNR::get_snr " << off_pulse << " out of " << nbin
 	 << " bins in baseline\n  mean=" << mean << " rms=" << rms 
 	 << " energy=" << energy << " S/N=" << snr << endl;
   }
@@ -74,7 +73,6 @@ float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
     return 0.0;
 
   return snr;
-
 }    
 
 class Pulsar::AdaptiveSNR::Interface
