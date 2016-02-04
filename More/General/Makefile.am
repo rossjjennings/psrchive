@@ -60,6 +60,7 @@ nobase_include_HEADERS = \
 	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
 	Pulsar/MaskSmooth.h \
+	Pulsar/ModularSNR.h \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
@@ -201,6 +202,7 @@ libGeneral_la_SOURCES = \
 	LastHarmonic.C \
         LastSignificant.C \
 	MaskSmooth.C \
+	ModularSNR.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
 	PatchTime.C \
