@@ -283,8 +283,6 @@ namespace Pulsar {
     mutable std::vector< Reference::To<Extension> > extension;
   };
 
-  //! Default implementation of Profile::snr method
-  double snr_phase (const Profile* profile);
 }
 
 
