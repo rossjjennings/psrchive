@@ -47,9 +47,14 @@ void TemporaryDirectory::build () const
   string root = "/tmp/" + base;
 
   const char* unknown = "unknown";
+
   const char* userid = getenv ("USER");
   if (!userid)
     userid = unknown;
+
+  const char *t2userid = getenv ("T2USER");
+  if (t2userid)
+    userid = t2userid;
 
   path = (root + "/") + userid;
 
