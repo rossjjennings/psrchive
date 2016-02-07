@@ -11,6 +11,8 @@
 
 #include "Pulsar/ArchiveExpert.h"
 
+#include "Pulsar/DigitiserCounts.h"
+
 #include <iostream>
 using namespace std;
 
@@ -40,6 +42,9 @@ void insert (Pulsar::Archive* archive, unsigned isub, const MJD& epoch)
   empty->set_epoch( epoch );
 
   archive->expert()->insert (isub, empty);
+
+  Pulsar::DigitiserCounts *dc = archive->get<Pulsar::DigitiserCounts>();
+  if (dc!=NULL) dc->insert(isub);
 }
 
 void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned isubA)
@@ -61,6 +66,10 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
 {
   A->expert()->sort();
   B->expert()->sort();
+
+  // If policy has not been set, default to "time"
+  if (!contemporaneity_policy)
+    contemporaneity_policy = new Pulsar::Contemporaneity::AtEarth;
 
   contemporaneity_policy->set_archives (A, B);
 

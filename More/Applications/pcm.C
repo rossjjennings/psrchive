@@ -65,6 +65,8 @@ void usage ()
     "  -V level   set verbosity level [0->4] \n"
     "\n"
     "  -A archive set the output archive class name \n"
+    "  -O fname   set cal solution output filename (default=pcm.fits)\n"
+    "  -N         do not unload calibrated data files\n"
     "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
     "  -m model   receiver model name: van09, bri00e19 or van04e18 [default]\n"
     "  -l solver  solver: MEAL [default] of GSL \n"
@@ -616,7 +618,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:kL:l:"
-    "M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
+    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -687,6 +689,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'I':
+      cerr << "pcm: loading impurity transformation from " << optarg << endl;
       impurity = MEAL::Function::load<MEAL::Real4> (optarg);
       break;
 
@@ -750,6 +753,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'N':
       unload_each_calibrated = false;
+      break;
+
+    case 'O':
+      unloader.set_filename(optarg);
       break;
 
     case 'o': {

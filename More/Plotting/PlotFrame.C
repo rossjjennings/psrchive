@@ -114,18 +114,34 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
   }
 }
 
+bool unset (const string& txt)
+{
+  return txt.empty() || txt == "" || txt == Pulsar::PlotLabel::unset;
+}
+
 void Pulsar::PlotFrame::label_axes (const string& default_x,
 				    const string& default_y)
 {
   setup ();
 
+  /*
+    Axis label priority:
+    1) get_?_axis()->get_label() - set by user, overrides all
+    2) default_? - set by calling object, overrides scale default
+    3) get_?_scale()->get_label() - set by the scale object (default)
+  */
+
   string xlabel = get_x_axis()->get_label();
-  if (xlabel == PlotLabel::unset)
+  if ( unset(xlabel) )
     xlabel = default_x;
+  if ( unset(xlabel) )
+    xlabel =  get_x_scale()->get_label();
 
   string ylabel = get_y_axis()->get_label();
-  if (ylabel == PlotLabel::unset)
-    ylabel = default_y;
+  if ( unset(ylabel) )
+    ylabel = default_y;    
+  if ( unset(ylabel) )
+    ylabel =  get_y_scale()->get_label();
 
   if (transpose)
     swap (xlabel, ylabel);

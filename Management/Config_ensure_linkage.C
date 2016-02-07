@@ -7,8 +7,14 @@
 
 #include "Pulsar/Config.h"
 #include "Pulsar/Interpreter.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 void ensure_FrequencyAppend_linkage ();
+#if HAVE_PGPLOT
+void ensure_ColourMap_linkage ();
+#endif
 
 void Pulsar::Config::ensure_linkage ()
 {
@@ -16,5 +22,9 @@ void Pulsar::Config::ensure_linkage ()
   Reference::To<Interpreter> temp = standard_shell();
 
   ensure_FrequencyAppend_linkage ();
+
+#if HAVE_PGPLOT
+  ensure_ColourMap_linkage ();
+#endif
 }
 

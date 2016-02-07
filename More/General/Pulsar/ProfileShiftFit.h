@@ -89,6 +89,9 @@ namespace Pulsar
     //! Get the resulting Mean Squared Error (per fit DOF)
     double get_mse();
 
+    //! Get the resulting noise per harmonic
+    double get_sigma2();
+
     //! Get the resulting SNR
     double get_snr();
 
@@ -101,6 +104,9 @@ namespace Pulsar
       pairs].  The effective duty cycle is obtained when gain, g, and
       noise, sigma, both equal unity. */
     double get_effective_duty_cycle () const;
+
+    //! Determine, then apply a shift a scale to data profile
+    void apply_scale_and_shift(Profile *p);
 
     //! Current MCMC accept stats
     int mcmc_trials;

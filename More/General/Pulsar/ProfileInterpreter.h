@@ -19,6 +19,7 @@
 namespace Pulsar {
 
   class Smooth;
+  class RemoveBaseline;
 
   class ProfileInterpreter : public Interpreter::Extension {
 
@@ -48,6 +49,9 @@ namespace Pulsar {
     //! Form the low-pass filtered profile
     std::string sinc (const std::string& args);
 
+    //! Extract the specified phase bin range
+    std::string extract (const std::string& args);
+
     //! Subtract the named archive from the current
     std::string subtract (const std::string& args);
 
@@ -64,6 +68,7 @@ namespace Pulsar {
 
     std::string smooth (Smooth*, const std::string& args);
 
+    Reference::To<RemoveBaseline> remove_baseline;
   };
 
 }

@@ -12,8 +12,14 @@ Pulsar::PhaseWeight::Interface::Interface (PhaseWeight* instance)
   if (instance)
     set_instance (instance);
 
-  add( &PhaseWeight::get_weight_sum,
+  add( &PhaseWeight::get_nonzero_weight_count,
        "count", "Count of selected phase bins" );
+
+  add( &PhaseWeight::get_start_index,
+	"start", "Start of the phase region" );
+
+  add( &PhaseWeight::get_end_index,
+	"end", "End of the phase region" );
 
   add( &PhaseWeight::get_weighted_sum,
        "sum", "Sum of selected phase bins" );

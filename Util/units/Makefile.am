@@ -29,6 +29,7 @@ include_HEADERS = \
         Jones.h \
 	lazy.h \
         Matrix.h \
+	Minkowski.h \
         ModifyRestore.h \
 	NestedTextInterface.h \
 	OwnStream.h \
@@ -42,6 +43,7 @@ include_HEADERS = \
 	ReferenceVector.h \
         Registry.h \
         separate.h \
+	Separator.h \
         Stokes.h \
 	stringcase.h \
         stringtok.h \
@@ -77,8 +79,10 @@ libunits_la_SOURCES = \
         pad.C \
 	parse_indeces.C \
         Pauli.C \
+	random.C \
         ReferenceAble.C \
         separate.C \
+	Separator.C \
 	stringcase.C \
         stringtok.C \
 	test.cfg \

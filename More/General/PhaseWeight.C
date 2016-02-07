@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 
 #include <float.h>
+#include <strutil.h>
 
 #include <algorithm>
 
@@ -128,6 +129,62 @@ double Pulsar::PhaseWeight::get_weight_sum () const
   return total;
 }
 
+unsigned Pulsar::PhaseWeight::get_nonzero_weight_count () const
+{
+  unsigned count = 0;
+  for (unsigned i=0; i<weight.size(); i++)
+    if (weight[i] != 0.0)
+      count ++;
+
+  return count;
+}
+
+//! Retrieve the beginning of the phase region with non-zero weight
+string Pulsar::PhaseWeight::get_start_index () const
+{
+  unsigned first = 1;
+  unsigned transitioned = 0;
+  stringstream ss;
+  for (unsigned i=0; i< weight.size(); i++)
+  {
+    if ( weight[i] == 0 )
+      transitioned = 1;
+    if ( transitioned == 1 && weight[i] > 0 ) {
+      if ( first == 1 ) {
+	ss << i;
+	first = 0;
+      } else {
+	ss << "," << i;
+      }
+      transitioned = 0;
+    }
+  }
+  return ss.str();;
+}
+
+//! Retrieve the end of the phase region with non-zero weight
+string Pulsar::PhaseWeight::get_end_index () const
+{
+  unsigned first = 1;
+  unsigned transitioned = 0;
+  stringstream ss;
+  for (unsigned i=0; i< weight.size(); i++)
+  {
+    if ( weight[i] > 0 )
+      transitioned = 1;
+    if ( transitioned == 1 && weight[i] == 0 ) {
+      if ( first == 1 ) {
+	ss << i - 1;
+	first = 0;
+      } else {
+	ss << "," << i-1;
+      }
+      transitioned = 0;
+    }
+  }
+  return ss.str();
+}
+
 double Pulsar::PhaseWeight::get_weight_max () const
 {
   double max = 0.0;
@@ -233,7 +290,7 @@ float Pulsar::PhaseWeight::get_median_difference () const
 }
 
 //! Set the Profile to which the weights apply
-void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
+void Pulsar::PhaseWeight::set_Profile (const Profile* _profile) const
 {
   profile = _profile;
   built = false;

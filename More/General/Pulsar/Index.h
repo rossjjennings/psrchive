@@ -36,11 +36,18 @@ namespace Pulsar {
     //! Set the integrate flag
     void set_integrate (bool flag) { integrate = flag; }
 
+    //! Get the extension flag
+    /*! Provides access to extended data sets, such as MoreProfile */
+    bool get_extension () const { return extension; }
+    //! Set the extension flag
+    /*! Provides access to extended data sets, such as MoreProfile */
+    void set_extension (bool flag) { extension = flag; }
+
   protected:
 
     unsigned index;
     bool integrate;
-
+    bool extension;
   };
 
   std::ostream& operator << (std::ostream& os, const Index&);

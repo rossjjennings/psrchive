@@ -40,7 +40,6 @@ c
 c Define quantitites
       obfreq=freq
       write(source,'(a8," ")') pulsar
-      write(*,'(a9)') source
       id=obsdat/10000
       im=obsdat/100-id*100
       iy=obsdat-id*10000-im*100

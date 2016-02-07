@@ -12,6 +12,9 @@ noinst_SCRIPTS = release.csh
 
 dist_bin_SCRIPTS = psrchive_install
 
+INSTALL_SCRIPT = $(srcdir)/install_with_githash.sh
+EXTRA_DIST = install_with_githash.sh
+
 dist_data_DATA = psrchive_version
 
 aclocaldir = $(datadir)/aclocal
@@ -26,6 +29,15 @@ dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la
+
+LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
+
+if HAVE_PGPLOT
+psrchive_config_LDADD = $(LDPLOT)
+else
+psrchive_config_LDADD = $(LDADD)
+endif
+
 
 include $(top_srcdir)/config/Makefile.include
 

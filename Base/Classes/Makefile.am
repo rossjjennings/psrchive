@@ -57,6 +57,7 @@ libClasses_la_SOURCES = \
 	Archive_match.C \
         Archive_resize.C \
         Archive_remove_chan.C \
+	Archive_update_centre_frequency.C \
 	Archive_verify.C \
         Archive_unload.C \
         Archive_verbose.C \

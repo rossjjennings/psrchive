@@ -789,12 +789,34 @@ void Pulsar::PolnProfile::get_ellipticity (vector< Estimate<double> >& ell,
 
 }
 
-void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
-				      float threshold) const
-{
-  Profile linear;
-  get_linear (&linear);
+/*!
+  L = sqrt(Q^2 + U^2)
+  var{L} = (Q^2 var{Q} + U^2 var{U}) / L^2
+    
+  To avoid the division by zero where L==0, you could turn
 
+  L > threshold * sigma_L
+  
+  into
+    
+  L*L > threshold * sigma_L * L
+
+  where sigma_L = sqrt(var{L})
+  
+  However, sigma_L*L goes to zero where L==0 ...
+
+  If it is assumed that var{Q} ~= var{U}, then var{L} = var{Q or U} ...
+  Therefore, take the mean: var{L}=(var{Q}+var{U})/2
+*/
+double Pulsar::PolnProfile::get_linear_variance () const
+{
+  std::pair<double,double> var;
+  return get_linear_variance (var);
+}
+
+double
+Pulsar::PolnProfile::get_linear_variance (std::pair<double,double>& var) const
+{
   // Determine baseline weights from I profile.
   Reference::To<PhaseWeight> base = get_baseline();
 
@@ -804,30 +826,21 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
 
   // Apply I baseline to determine Q, U variance.
   base->set_Profile(get_Profile(1));
-  double var_q = base->get_variance().get_value();
+  var.first = base->get_variance().get_value();
   base->set_Profile(get_Profile(2));
-  double var_u = base->get_variance().get_value();
+  var.second = base->get_variance().get_value();
 
-  /*
-    L = sqrt(Q^2 + U^2)
-    var{L} = (Q^2 var{Q} + U^2 var{U}) / L^2
-    
-    To avoid the division by zero where L==0, you could turn
+  return 0.5 * (var.first + var.second);
+}
 
-    L < threshold * sigma_L
-	
-    into
+void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
+				      float threshold) const
+{
+  Profile linear;
+  get_linear (&linear);
 
-    L*L < threshold * sigma_L * L
-
-    where sigma_L = sqrt(var{L})
-
-    However, sigma_L*L goes to zero where L==0 ...
-
-    If it is assumed that var{Q} ~= var{U}, then var{L} = var{Q or U} ...
-    Therefore, take the mean: var{L}=(var{Q}+var{U})/2
-  */
-  double sigma_L = sqrt( (var_q+var_u) / 2.0 );
+  std::pair<double,double> var;
+  double sigma_L = sqrt( get_linear_variance(var) );
 
   if (Profile::verbose)
     cerr << "Pulsar::PolnProfile::get_linear sigma_L=" << sigma_L << endl;
@@ -844,8 +857,8 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
   {
     if ( !threshold || (linear.get_amps()[ibin] > threshold * sigma_L) )
     {
-      Estimate<double> Q (q[ibin], var_q);
-      Estimate<double> U (u[ibin], var_u);
+      Estimate<double> Q (q[ibin], var.first);
+      Estimate<double> U (u[ibin], var.second);
     
       L[ibin] = complex< Estimate<double> > (Q, U);
       
@@ -859,6 +872,7 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
     cerr << "Pulsar::PolnProfile::get_linear kept=" << kept << endl;
 }
 
+//! Returns a vector of position angle estimates as a function of pulse phase
 void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
 					   float threshold) const
 {

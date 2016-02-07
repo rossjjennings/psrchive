@@ -79,3 +79,32 @@ float Pulsar::FourierSNR::get_snr (const Profile* profile)
 
 }    
 
+class Pulsar::FourierSNR::Interface
+  : public TextInterface::To<FourierSNR>
+{
+public:
+  Interface (FourierSNR* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &FourierSNR::get_baseline_extent,
+         &FourierSNR::set_baseline_extent,
+         "baseline", "fractional width of spectrum used to estimate baseline" );
+  }
+
+  std::string get_interface_name () const { return "fourier"; }
+};
+
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::FourierSNR::get_interface ()
+{
+  return new Interface (this);
+}
+
+//! Return a copy constructed instance of self
+Pulsar::FourierSNR* Pulsar::FourierSNR::clone () const
+{
+  return new FourierSNR (*this);
+}

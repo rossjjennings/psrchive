@@ -102,7 +102,10 @@ void Tempo::load_obsys () try
 					    coordinate[2]);
     }
 
-    observatory->set_name( line.substr (50, 19) );
+    string name = line.substr (50, 19);
+    name.erase(name.find_last_not_of(" \n\r\t")+1);
+
+    observatory->set_name( name );
     observatory->set_code( line[70] );
     observatory->set_itoa_code( line.substr (73, 2) );
 

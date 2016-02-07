@@ -23,7 +23,7 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
   AC_MSG_CHECKING([for TEMPO2 Predictor library])
 
   TEMPO2_CFLAGS="-I$TEMPO2/include"
-  TEMPO2_LIBS="-L$TEMPO2/lib -ltempo2pred"
+  TEMPO2_LIBS="-L$TEMPO2/lib -ltempo2pred -lm"
 
   ac_save_CXXFLAGS="$CXXFLAGS"
   ac_save_LIBS="$LIBS"

@@ -296,11 +296,10 @@ void Pulsar::SimplePredictor::unload (FILE* fptr) const
 MJD 
 Pulsar::SimplePredictor::iphase (const Phase& phase, const MJD* guess) const
 {
-  if (!guess)
-    throw Error (InvalidState, "Pulsar::SimplePredictor::iphase",
-		 "cannot compute inverse phase without a first guess");
-
-  return Pulsar::inverse_phase (*this, phase, *guess);
+  if (guess)
+    return Pulsar::inverse_phase (*this, phase, *guess);
+  else
+    return Pulsar::inverse_phase (*this, phase);
 }
 
 Pulsar::Generator* Pulsar::SimplePredictor::generator () const

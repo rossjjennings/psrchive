@@ -182,3 +182,11 @@ void DigitiserCounts::resize (unsigned nsubint, unsigned npol, unsigned nchan, u
 {
   subints.resize(nsubint);
 }
+
+void DigitiserCounts::insert (unsigned isub)
+{
+  SubintCounts new_subint;
+  new_subint.data.resize(subints[0].data.size());
+  for (unsigned i=0; i<new_subint.data.size(); i++) new_subint.data[i]=0;
+  subints.insert(subints.begin() + isub, new_subint);
+}

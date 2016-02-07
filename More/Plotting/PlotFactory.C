@@ -14,6 +14,7 @@
 #include "Pulsar/PhaseVsHist.h"
 #include "Pulsar/PosAngPlot.h"
 #include "Pulsar/EllAngPlot.h"
+#include "Pulsar/StokesCovariancePlot.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/StokesCylindricalPlus.h"
 #include "Pulsar/StokesSpherical.h"
@@ -137,6 +138,10 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<DigitiserCountsPlot>
         ( 'A', "digcnts", "Digitiser Counts histogram" ) );
+
+  add ( new PlotFactory::Advocate<StokesCovariancePlot>
+	( '4', "fourth", "4x4 covariance of Stokes parameters") );
+
 }
 
 //! Return a new instance of the named plotter

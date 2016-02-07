@@ -288,32 +288,38 @@ void Pulsar::BasebandArchive::set_header ()
 
 void Pulsar::BasebandArchive::check_extensions ()
 {
-  const TwoBitStats* twobit = get<TwoBitStats>();
-  if (twobit) {
+  if (verbose == 3)
+    cerr << "Pulsar::BasebandArchive::check_extensions" << endl;
 
+  const TwoBitStats* twobit = get<TwoBitStats>();
+  if (twobit)
+  {
     bhdr.ppweight = twobit->get_nsample ();
     bhdr.analog_channels = twobit->get_ndig ();
     bhdr.dls_threshold_limit = 0;
-
   }
   else
     bhdr.analog_channels = 0;
 
   const Passband* passband = get<Passband>();
-  if (passband) {
-
+  if (passband)
+  {
     bhdr.pband_resolution = passband->get_nchan() * passband->get_nband();
     bhdr.pband_channels = passband->get_npol ();
 
-    if (verbose == 3) cerr << "Pulsar::BasebandArchive::set_header Passband"
-		   " nfreq=" << bhdr.pband_resolution <<
-		   " nchan=" << bhdr.pband_channels << endl;
-
+    if (verbose == 3)
+      cerr << "Pulsar::BasebandArchive::check_extensions Passband"
+	" nfreq=" << bhdr.pband_resolution <<
+	" nchan=" << bhdr.pband_channels << endl;
   }
   else
-    bhdr.pband_resolution = bhdr.pband_channels = 0;
-}
+  {
+    if (verbose == 3)
+      cerr << "Pulsar::BasebandArchive::check_extensions no Passband" << endl;
 
+    bhdr.pband_resolution = bhdr.pband_channels = 0;
+  }
+}
 
 /*! Update the dspReduction attribute with the current state of the
   baseband_header struct */
@@ -370,6 +376,10 @@ void Pulsar::BasebandArchive::set_be_data_size ()
 
 void Pulsar::BasebandArchive::check_be_data_size ()
 {
+  if (verbose == 3)
+    cerr << "Pulsar::BasebandArchive::check_be_data_size"
+      " sizeof(baseband_header)=" << sizeof (baseband_header) << endl;
+
   check_extensions ();
 
   //
@@ -383,10 +393,20 @@ void Pulsar::BasebandArchive::check_be_data_size ()
 
   bhdr.size = sizeof (baseband_header);
   if (bhdr.ppweight)
-    bhdr.size += bhdr.analog_channels * ( c_hdr + bhdr.ppweight * s_ush );
+  {
+    int extra = bhdr.analog_channels * ( c_hdr + bhdr.ppweight * s_ush );
+    if (verbose == 3) cerr << "Pulsar::BasebandArchive::check_be_data_size"
+			" 2-bit histogram size=" << extra << endl;
+    bhdr.size += extra;
+  }
   if (bhdr.pband_resolution)
-    bhdr.size += bhdr.pband_channels * (c_hdr + bhdr.pband_resolution * s_ush);
-  
+  {
+    int extra = bhdr.pband_channels * (c_hdr + bhdr.pband_resolution * s_ush);
+    if (verbose == 3) cerr << "Pulsar::BasebandArchive::check_be_data_size"
+			" passband size=" << extra << endl;
+    bhdr.size += extra;
+  }
+
   //
   // Set the information in the 'timer' header that allows TimerArchive
   // to ignore the information specific to this class
@@ -595,8 +615,6 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
 void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 {
-  const_cast<BasebandArchive*>(this)->check_be_data_size ();
-
   if (verbose == 3) cerr << "BasebandArchive::backend_unload header size=" 
                     << bhdr.size << endl;
 
@@ -636,8 +654,8 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 
   }
 
-  if (bhdr.pband_resolution) {
-
+  if (bhdr.pband_resolution)
+  {
     const Passband* passband = get<Passband>();
     if (!passband) 
       throw Error (InvalidState, "BasebandArchive::backend_unload",

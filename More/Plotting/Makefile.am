@@ -15,7 +15,8 @@ nobase_include_HEADERS = \
 	Pulsar/Plot.h Pulsar/PlotFactory.h			       \
 	Pulsar/PlotLoop.h					       \
 	Pulsar/PlotEdge.h					       \
-	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h \
+	Pulsar/PlotScale.h Pulsar/PhaseScale.h			       \
+	Pulsar/FrequencyScale.h Pulsar/TimeScale.h 		       \
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h   \
 	Pulsar/PlotFrame.h Pulsar/MultiFrame.h Pulsar/FramedPlot.h     \
 	Pulsar/SimplePlot.h Pulsar/FrequencyPlot.h Pulsar/PhasePlot.h  \
@@ -28,6 +29,7 @@ nobase_include_HEADERS = \
 	Pulsar/MultiFrequency.h					       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
 	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
+	Pulsar/StokesCovariancePlot.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
@@ -65,7 +67,7 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	PlotEdgeTI.C \
 	PlotScale.C PlotScaleTI.C \
 	PhaseScale.C PhaseScaleTI.C \
-	FrequencyScale.C \
+	FrequencyScale.C TimeScale.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C InfoLabel.C \
 	PlotAttributes.C PlotAttributesTI.C \
@@ -89,6 +91,7 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	MultiFrequency.C \
 	MultiPlot.C \
 	MultiPhase.C \
+	StokesCovariancePlot.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesCylindricalPlus.C StokesCylindricalPlusTI.C \
 	StokesSpherical.C StokesSphericalTI.C \

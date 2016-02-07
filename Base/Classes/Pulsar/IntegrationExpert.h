@@ -54,6 +54,10 @@ namespace Pulsar {
     void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0)
     { instance->resize (npol, nchan, nbin); }
 
+    //! Remove the specified channel
+    void remove (unsigned ichan)
+    { instance->remove (ichan); }
+
     //! Inserts Profiles from Integration into this
     void insert (Integration* from)
     { instance->insert (from); }

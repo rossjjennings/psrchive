@@ -17,6 +17,7 @@
 
 #include "TextInterface.h"
 #include "pairutil.h"
+#include "Ranges.h"
 
 using namespace std;
 
@@ -306,59 +307,7 @@ catch (Error& error)
   return response (Fail, error.get_message());
 }
 
-class range
-{
-  bool gt, lt;
-  double x0,x1;
-public:
-  range () { gt = lt = false; x0 = x1 = 0; }
-  friend ostream& operator<< (ostream&, const range&);
-  friend istream& operator>> (istream&, range&);
-  bool within (double x) const;
-};
 
-ostream& operator<< (ostream& os, const range& r)
-{
-  if (r.gt) os << ">" << r.x0;
-  else if (r.lt) os << "<" << r.x0;
-  else os << r.x0 << ":" << r.x1;
-  return os;
-}
-
-istream& operator>> (istream& is, range& r)
-{
-  r.lt = is.peek() == '<';
-  r.gt = is.peek() == '>';
-
-  if (r.lt || r.gt)
-  {
-    is.get();
-    is >> r.x0;
-    return is;
-  }
-
-  char separator = 0;
-  is >> r.x0 >> separator >> r.x1;
-
-  if (r.x0 > r.x1)
-    std::swap (r.x0, r.x1);
-
-  if ( separator != ':' )
-    is.setstate (std::istream::failbit);
-
-  return is;
-}
-
-bool range::within (double x) const
-{
-  if (lt && x < x0)
-    return true;
-
-  if (gt && x > x0)
-    return true;
-
-  return (x>x0 && x<x1);
-}
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -368,7 +317,7 @@ string Pulsar::ZapInterpreter::freq (const string& args) try
 
   for (unsigned iarg=0; iarg < arguments.size(); iarg++)
   {
-    range r = fromstring<range> (arguments[iarg]);
+    Range r = fromstring<Range> (arguments[iarg]);
 
     Archive* archive = get();
 

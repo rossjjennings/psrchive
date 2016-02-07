@@ -103,7 +103,10 @@ PavApp::PavApp()
   y_max = 1.0;
   y_min = 0.0;
   truncate_amp = 0.0;
-  colour_map = pgplot::ColourMap::Heat;
+
+  std::stringstream ss;
+  ss << pgplot::ColourMap::default_colour_map;
+  ss >> colour_map;
   centre_profile = false;
 
   plot_error_box = false;
@@ -784,7 +787,7 @@ int PavApp::run( int argc, char *argv[] )
     case 'f':
       {
         ostringstream s_job;
-        s_job << "fscrunch " << optarg;
+        s_job << "fscrunch x" << optarg;
         jobs.push_back( s_job.str() );
         break;
       }
@@ -794,7 +797,7 @@ int PavApp::run( int argc, char *argv[] )
     case 't':
       {
         ostringstream s_job;
-        s_job << "tscrunch " << optarg;
+        s_job << "tscrunch x" << optarg;
         jobs.push_back( s_job.str() );
         break;
       }

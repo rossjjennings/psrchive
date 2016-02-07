@@ -4,10 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PhaseVsFrequency.h"
 #include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Profile.h"
 
 Pulsar::PhaseVsFrequency::PhaseVsFrequency ()
 {

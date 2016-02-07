@@ -367,6 +367,9 @@ namespace Pulsar
     //! Delete the specified inclusive channel range from the Archive
     void remove_chan(unsigned first, unsigned last);
 
+    //! Update the centre frequency
+    void update_centre_frequency();
+
     //! Phase rotate pulsar Integrations so that pulse phase zero is centred
     void centre (double phase_offset = 0.5);
 

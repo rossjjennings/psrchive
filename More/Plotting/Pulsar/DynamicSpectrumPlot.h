@@ -10,6 +10,8 @@
 #define __Pulsar_DynamicSpectrumPlot_h
 
 #include "Pulsar/SimplePlot.h"
+#include "Pulsar/TimeScale.h"
+#include "Pulsar/FrequencyScale.h"
 #include "ColourMap.h"
 
 namespace Pulsar {
@@ -33,14 +35,8 @@ namespace Pulsar {
       Interface (DynamicSpectrumPlot* = 0);
     };
 
-    //! Figure out axis limits
-    void prepare(const Archive* data);
-
-    //! Preprocess Archive 
-    void preprocess(const Archive* data);
-
     //! Derived classes must fill in the nsubint by nchan data array
-    virtual void get_plot_array(const Archive *data, float *array) = 0;
+    virtual void get_plot_array (const Archive *data, float *array) = 0;
 
     //! Draw in the current viewport
     void draw (const Archive*);
@@ -48,20 +44,12 @@ namespace Pulsar {
     //! Provide access to the colour map
     pgplot::ColourMap* get_colour_map () { return &colour_map; }
 
-    //! srange is the subint range
-    std::pair<int,int> get_srange() const { return srange; }
-    void set_srange( const std::pair<int,int> &s_srange ) { 
-      srange_set = true;
-      srange = s_srange; 
-    }
-    void set_srange( int fsub, int lsub ) { 
-      set_srange(std::pair<int,int>(fsub,lsub)); 
-    }
+    std::pair<unsigned,unsigned> get_subint_range (const Archive* data);
+    std::pair<unsigned,unsigned> get_chan_range (const Archive* data);
 
-    //! Returns x axis label
-    std::string get_xlabel (const Archive *data);
-    //! Returns y axis label
-    std::string get_ylabel (const Archive *data);
+    //! srange is the subint range
+    std::pair<int,int> get_srange() const;
+    void set_srange( const std::pair<int,int> &range );
       
     //! Pick a polarization
     void set_pol (int s_pol) { pol = s_pol; }
@@ -71,18 +59,23 @@ namespace Pulsar {
     void set_method (int s_method) { method = s_method; }
     int get_method() const { return method; }
     
+    //! Return pointer to x scale
+    TimeScale* get_x_scale () { return x_scale; }
+
+    //! Return pointer to y scale
+    FrequencyScale* get_y_scale () { return y_scale; }
+
   protected:
 
     pgplot::ColourMap colour_map;
 
-    bool srange_set;
-    std::pair<int,int> srange;
-    std::pair<int,int> crange;
     int pol;
     int method;
 
     bool zero_check;
 
+    Reference::To<TimeScale> x_scale;
+    Reference::To<FrequencyScale> y_scale;
   };
 
 }

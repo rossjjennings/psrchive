@@ -131,6 +131,9 @@ namespace Pulsar {
     //! append one archive to another
     std::string append (const std::string& args);
 
+    //! append one archive to another in frequency direction
+    std::string freq_append (const std::string& args);
+
     //! frequency scrunch an archive in the stack
     std::string fscrunch (const std::string& args);
     
@@ -172,6 +175,9 @@ namespace Pulsar {
 
     //! rotate each profile by the specified value
     std::string rotate (const std::string& args);
+
+    //! compute dynamic spectrum of archive on stack
+    std::string dynspec (const std::string& args);
 
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);

@@ -25,6 +25,10 @@
 #include "Pulsar/Transposer.h"
 
 #include "Pulsar/FluxCentroid.h"
+#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/StandardFlux.h"
+
+#include "Pulsar/FrequencyAppend.h"
 
 #include "strutil.h"
 #include "substitute.h"
@@ -133,6 +137,13 @@ void Pulsar::Interpreter::init()
       "append", "append data from one archive to another",
       "usage: append <name> \n"
       "  string name       name of archive to be appended \n" );
+
+  add_command
+    ( &Interpreter::freq_append,
+      "freq_append", "frequency-append data from one archive to another",
+      "usage: freq_append <name> \n"
+      "  string name       name of archive to be appended \n" );
+
   
   add_command
     ( &Interpreter::edit, 'e',
@@ -247,6 +258,11 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::scattered_power_correct,
       "spc", "apply scattered power correction",
       "usage: spc \n");
+
+  add_command 
+    ( &Interpreter::dynspec,
+      "dynspec", "compute and write out dynamic spectrum",
+      "usage: dynspec output [template]\n");
 
 }
 
@@ -828,6 +844,33 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+string Pulsar::Interpreter::freq_append (const string& args) try
+{ 
+  vector<string> arguments = setup (args);
+
+  if (arguments.size() < 1)
+    return response (Fail, "please specify one name");
+
+  FrequencyAppend frequency;
+  frequency.init( get());
+
+  for (unsigned iarch=0; iarch < arguments.size(); iarch++) {
+    frequency.append( get(), getmap(arguments[iarch]) );
+  }
+
+  if (get()->get_dedispersed())
+    get()->dedisperse();
+  if (get()->get_faraday_corrected())
+    get()->defaraday();
+  if (get()->has_model() && get()->has_ephemeris())
+    get()->update_model();
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -1201,6 +1244,56 @@ catch (Error& error)
 string Pulsar::Interpreter::rotate (const string& args) try
 {
   get()->rotate_phase( setup<double>(args) );
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::Interpreter::dynspec(const string& args) try {
+
+  vector<string> arguments = setup (args);
+
+  // make total intensity copy of original archive
+  Reference::To<Archive> arch_copy = get()->clone();
+  arch_copy->convert_state(Signal::Intensity);
+  arch_copy->dedisperse();
+  Reference::To<Archive> arch_total = arch_copy->total();
+
+  // load template if provided
+  Reference::To<Archive> standard;
+  if (arguments.size() == 2) {
+    // interpret second argument as template
+    Reference::To<Archive> temp = Archive::load(arguments[1]);
+    standard = temp->total();
+    standard->convert_state(Signal::Intensity);
+  }
+  // otherwise, use scrunched archive
+  else {
+    standard = arch_total;
+  }
+
+  // align standard to the scrunched archive
+  Estimate<double> shift = arch_total->get_Profile(0,0,0)->shift(standard->get_Profile(0,0,0));
+  standard->get_Profile(0,0,0)->rotate_phase(-1.0*shift.get_value());
+
+  // Load up object to fit fluxes with standard
+  Reference::To<StandardFlux> flux = new StandardFlux;
+  flux->set_fit_shift(false);
+  flux->set_standard(standard->get_Profile(0,0,0));
+
+  // compute dynamic spectrum
+  DynamicSpectrum ds;
+  ds.set_flux_method(flux);
+  ds.set_Archive(arch_copy);
+  ds.compute();
+
+  // output
+  string output = arguments[0];
+  cerr << "dynspec: unloading " << output << endl;
+  ds.unload(output);
+
   return response (Good);
 }
 catch (Error& error)

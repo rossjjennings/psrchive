@@ -24,6 +24,7 @@ namespace Pulsar {
   class Profile;
   class ProfileStats;
   class PhaseWeight;
+  class SNRatioEstimator;
 
   //! Interface to a variety of useful statistics
   class Statistics : public Reference::Able
@@ -50,6 +51,9 @@ namespace Pulsar {
     //! Set the polarization to plot
     void set_pol (Index _ipol);
     Index get_pol () const;
+
+    //! Set the signal-to-noise ratio estimator
+    void set_snr_estimator (const std::string& name);
 
     //! Get the signal-to-noise ratio
     double get_snr () const;
@@ -111,6 +115,8 @@ namespace Pulsar {
     mutable Reference::To<const Integration> integration;
 
     mutable std::vector< Reference::To<Plugin> > plugins;
+
+    Reference::To<SNRatioEstimator> snr_estimator;
     
   };
 

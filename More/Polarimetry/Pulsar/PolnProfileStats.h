@@ -81,6 +81,9 @@ namespace Pulsar {
     //! Returns the variance of the baseline for the specified polarization
     Estimate<double> get_baseline_variance (unsigned ipol) const;
 
+    //! Returns the vairance of the linearly polarized flux
+    double get_linear_variance () const;
+
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 

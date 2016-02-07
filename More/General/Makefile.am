@@ -28,6 +28,7 @@ nobase_include_HEADERS = \
 	Pulsar/ConvertIsolated.h \
 	Pulsar/Convolve.h \
 	Pulsar/Correlate.h \
+	Pulsar/DeleteInterpreter.h \
 	Pulsar/Differentiate.h \
 	Pulsar/DisperseWeight.h \
         Pulsar/DispersionDelay.h \
@@ -38,6 +39,7 @@ nobase_include_HEADERS = \
 	Pulsar/EvenlySpaced.h \
 	Pulsar/EvenlyWeighted.h \
         Pulsar/ExponentialBaseline.h \
+	Pulsar/Extract.h \
 	Pulsar/FixFluxCal.h \
 	Pulsar/FixInterpreter.h \
 	Pulsar/Flux.h \
@@ -58,6 +60,7 @@ nobase_include_HEADERS = \
 	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
 	Pulsar/MaskSmooth.h \
+	Pulsar/ModularSNR.h \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
@@ -65,6 +68,7 @@ nobase_include_HEADERS = \
 	Pulsar/PeakEdgesInterpreter.h \
 	Pulsar/PeakConsecutive.h \
 	Pulsar/PeakCumulative.h \
+	Pulsar/PhaseSNR.h \
         Pulsar/PhaseWeightFunction.h \
 	Pulsar/PhaseWeightInterface.h \
 	Pulsar/PhaseWeightModifier.h \
@@ -90,7 +94,7 @@ nobase_include_HEADERS = \
         Pulsar/SmoothMean.h \
         Pulsar/SmoothMedian.h \
 	Pulsar/SmoothSinc.h \
-	Pulsar/SNRatioInterpreter.h \
+	Pulsar/SNRatioEstimator.h \
         Pulsar/SNRWeight.h \
         Pulsar/SquareWave.h \
 	Pulsar/StandardOptions.h \
@@ -117,6 +121,7 @@ libGeneral_la_SOURCES = \
 	counter_drift.C \
 	find_spike_edges.C \
         model_profile.C \
+		range.h \
 	morphological_difference.C \
 	Accumulate.C \
         AdaptiveSNR.C \
@@ -158,6 +163,7 @@ libGeneral_la_SOURCES = \
 	Contemporaneity.C \
 	Convolve.C \
 	Correlate.C \
+	DeleteInterpreter.C \
 	Differentiate.C \
 	DisperseWeight.C \
         Dispersion.C \
@@ -165,6 +171,7 @@ libGeneral_la_SOURCES = \
         DurationWeight.C \
         DynamicSpectrum.C \
         ExponentialBaseline.C \
+	Extract.C \
 	FixFluxCal.C \
 	FixInterpreter.C \
 	FortranSNR.C \
@@ -195,12 +202,14 @@ libGeneral_la_SOURCES = \
 	LastHarmonic.C \
         LastSignificant.C \
 	MaskSmooth.C \
+	ModularSNR.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
 	PatchTime.C \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
 	PeakCumulative.C \
+	PhaseSNR.C \
 	PhaseWeightInterface.C \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
@@ -231,7 +240,7 @@ libGeneral_la_SOURCES = \
         SmoothMean.C \
         SmoothMedian.C \
 	SmoothSinc.C \
-	SNRatioInterpreter.C \
+	SNRatioEstimator.C \
         SNRWeight.C \
         SquareWave.C \
 	standard_interface.C \

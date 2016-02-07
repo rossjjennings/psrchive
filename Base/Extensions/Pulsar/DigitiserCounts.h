@@ -76,6 +76,9 @@ namespace Pulsar
 		    unsigned nchan = 0,
 		    unsigned nbin  = 0);
 
+    //! Insert a new zeroed subint at the given location
+    void insert (unsigned isub);
+
     void set_dig_mode( string s_dig_mode ) { dig_mode = s_dig_mode; }
     void set_nlev( int s_nlev ) { nlev = s_nlev; }
     void set_npthist( int s_npthist ) { npthist = s_npthist; }

@@ -48,6 +48,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        "weff", "Effective pulse width (turns)" );
 
   add( &Statistics::get_snr,
+       &Statistics::set_snr_estimator,
        "snr", "Signal-to-noise ratio" );
 
   add( &Statistics::get_nfnr,

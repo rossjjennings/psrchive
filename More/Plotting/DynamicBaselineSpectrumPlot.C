@@ -51,8 +51,9 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
     data_copy->dedisperse();
   }
 
-  int nsub = srange.second - srange.first + 1;
-  int nchan = crange.second - crange.first + 1;
+  std::pair<unsigned,unsigned> srange = get_subint_range (data);
+  std::pair<unsigned,unsigned> crange = get_chan_range (data);
+
   int ii = 0;
 
   // WvS - set up to use the profile statistics interpreter if needed  
@@ -64,14 +65,16 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
 
   if (!expression.empty())
   {
-    cout << ">> Using user-specified expression" << endl;
+    if (verbose)
+      cout << ">> Using user-specified expression" << endl;
 
     stats = new ProfileStats;
     parser = stats->get_interface ();
   }
   if (method==false)
   {
-    cout << ">> Using baseline method" << endl;
+    if (verbose)
+      cout << ">> Using baseline method" << endl;
 
     // Only recalc baseline if needed 
     if (!base || !reuse_baseline)
@@ -81,15 +84,16 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
   }
   else
   {
-    cout << ">> Using full profile method" << endl;
+    if (verbose)
+      cout << ">> Using full profile method" << endl;
 
     window = new PhaseWeight (data->get_nbin());
     window -> set_all (1.0);
   }
 
-  for (int ichan = crange.first; ichan <= crange.second; ichan++) 
+  for (int ichan = crange.first; ichan < crange.second; ichan++) 
   {
-    for (int isub = srange.first; isub <= srange.second; isub++ )
+    for (int isub = srange.first; isub < srange.second; isub++ )
     {
       Reference::To<const Profile> prof = 
 	data_copy->get_Profile(isub, pol, ichan);
@@ -103,7 +107,7 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
 	  stats->set_Profile (prof);
 	  string text = process( parser, expression );
 	  value = fromstring<float>( text );
-	  cerr << ichan << " " << isub << " " << text << " " << value << endl;
+	  //cerr << ichan << " " << isub << " " << text << " " << value << endl;
 	}
 	else
 	{

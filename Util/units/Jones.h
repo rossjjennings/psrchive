@@ -155,6 +155,10 @@ public:
   const std::complex<T>& operator [] (unsigned n) const
   { const std::complex<T>* val = &j00; return val[n]; }
 
+  //! Return true if the off-diagonal elements are zero
+  const bool is_diagonal () const { return (j01==std::complex<T>(0.0)) 
+    && (j10==std::complex<T>(0.0)); }
+
   //! The identity matrix
   static const Jones& identity();
 

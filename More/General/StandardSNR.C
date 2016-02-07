@@ -19,3 +19,28 @@ float Pulsar::StandardSNR::get_snr (const Profile* profile)
   return fit.get_snr();
 }    
 
+class Pulsar::StandardSNR::Interface
+  : public TextInterface::To<StandardSNR>
+{
+public:
+  Interface (StandardSNR* instance)
+  {
+    if (instance)
+      set_instance (instance);
+  }
+
+  std::string get_interface_name () const { return "standard"; }
+};
+
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::StandardSNR::get_interface ()
+{
+  return new Interface (this);
+}
+
+//! Return a copy constructed instance of self
+Pulsar::StandardSNR* Pulsar::StandardSNR::clone () const
+{
+  return new StandardSNR (*this);
+}

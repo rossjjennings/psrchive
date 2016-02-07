@@ -96,20 +96,17 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
 					  vector<unsigned>& down)
 {
   unsigned nbin = profile->get_nbin();
-  unsigned scrunch = 1;
 
   Reference::To<Profile> clone;
-  if (use_nbin && nbin > use_nbin) {
+  if (use_nbin && nbin/use_nbin > 1)
+  {
     clone = profile->clone();
-    scrunch = nbin/use_nbin;
-    clone->bscrunch(scrunch);
+    clone->bscrunch(nbin/use_nbin);
     profile = clone;
     nbin = profile->get_nbin();
   }
 
   unsigned offset = (unsigned) (risetime * nbin);
-
-cerr << "nbin=" << nbin << " offset=" << offset << endl;
 
   // differentiate the profile
   Reference::To<Profile> difference = differentiate (profile, offset);
@@ -127,7 +124,7 @@ cerr << "nbin=" << nbin << " offset=" << offset << endl;
   double variance = 0;
   difference->stats (zero, &mean, &variance);
 
-cerr << "mean=" << mean << " rms=" << sqrt(variance) << endl;
+  // cerr << "mean=" << mean << " rms=" << sqrt(variance) << endl;
 
   // check that the mean is actually zero
   double rms = sqrt(variance);
@@ -158,4 +155,38 @@ unsigned Pulsar::SquareWave::count_transitions (const Profile* profile)
 #endif
 
   return std::min( up.size(), down.size() );
+}
+
+class Pulsar::SquareWave::Interface
+  : public TextInterface::To<SquareWave>
+{
+public:
+  Interface (SquareWave* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &SquareWave::get_threshold,
+         &SquareWave::set_threshold,
+         "threshold", "threshold used to count transitions" );
+
+    add( &SquareWave::get_risetime,
+         &SquareWave::set_risetime,
+         "risetime", "turns omitted from consideration at transitions" );
+  }
+
+  std::string get_interface_name () const { return "square"; }
+};
+
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::SquareWave::get_interface ()
+{
+  return new Interface (this);
+}
+
+//! Return a copy constructed instance of self
+Pulsar::SquareWave* Pulsar::SquareWave::clone () const
+{
+  return new SquareWave (*this);
 }

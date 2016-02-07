@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RemoveBaseline.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/09 10:44:47 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/RemoveBaseline.h
 
 #ifndef _Pulsar_RemoveBaseline_H
 #define _Pulsar_RemoveBaseline_H
@@ -24,11 +21,41 @@ namespace Pulsar
   {
   public:
 
+    RemoveBaseline ();
+
     /* Two simple baseline removal algorithms
        (Not every child of RemoveBaseline needs to be nested.) */
 
     class Total;
     class Each;
+
+    //! Performs the baseline removal operation
+    /*! 
+      Given a Profile and its baseline window, this operation
+      defines how the baseline is removed
+    */
+    class Operation : public Reference::Able
+    {
+    public:
+      static Operation* factory (const std::string&);
+
+      virtual void operate (Profile*, const PhaseWeight*) = 0;
+    };
+
+    /* Some simple baseline removal operations
+       (Not every child of RemoveBaseline::Operation needs to be nested.) */
+
+    class SubtractMean;
+    class SubtractMedian;
+    class NormalizeByMean;
+    class NormalizeByMedian;
+    class NormalizeByStdDev;
+    class NormalizeByMedAbsDif;
+
+    void set_operation (Operation*);
+
+  protected:
+    Reference::To<Operation> profile_operation;
   };
 
   //! Find the baseline from the total integrated total intensity profile
@@ -41,6 +68,9 @@ namespace Pulsar
 
     //! Remove the baseline
     void transform (Archive*);
+
+    //! Remove the baseline
+    void operate (Integration*, const PhaseWeight*);
   };
 
   //! Find the baseline from each total intensity profile
@@ -54,6 +84,50 @@ namespace Pulsar
     //! Remove the baseline
     void transform (Archive*);
   };
+
+  class RemoveBaseline::SubtractMean
+    : public RemoveBaseline::Operation
+  {
+  public:
+    virtual void operate (Profile*, const PhaseWeight*);
+  };
+
+  class RemoveBaseline::SubtractMedian
+    : public RemoveBaseline::Operation
+  {
+  public:
+    virtual void operate (Profile*, const PhaseWeight*);
+  };
+
+  class RemoveBaseline::NormalizeByMean
+    : public RemoveBaseline::Operation
+  {
+  public:
+    virtual void operate (Profile*, const PhaseWeight*);
+  };
+
+  class RemoveBaseline::NormalizeByMedian
+    : public RemoveBaseline::Operation
+  {
+  public:
+    virtual void operate (Profile*, const PhaseWeight*);
+  };
+
+  class RemoveBaseline::NormalizeByStdDev
+    : public RemoveBaseline::Operation
+  {
+  public:
+    virtual void operate (Profile*, const PhaseWeight*);
+  };
+
+  class RemoveBaseline::NormalizeByMedAbsDif
+    : public RemoveBaseline::Operation
+  {
+  public:
+    virtual void operate (Profile*, const PhaseWeight*);
+  };
+
+  
 }
 
 #endif

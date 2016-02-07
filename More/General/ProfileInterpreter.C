@@ -9,15 +9,20 @@
 #include "Pulsar/ArchiveTemplates.h"
 #include "Pulsar/Archive.h"
 
+#include "Pulsar/RemoveBaseline.h"
+
 #include "Pulsar/Accumulate.h"
 #include "Pulsar/Differentiate.h"
 #include "Pulsar/SmoothMean.h"
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothSinc.h"
 
+#include "Pulsar/Extract.h"
 #include "Pulsar/Subtract.h"
 #include "Pulsar/Convolve.h"
 #include "Pulsar/Correlate.h"
+
+#include "pairutil.h"
 
 using namespace std;
 
@@ -32,11 +37,18 @@ string help_smooth (const string& method)
 
 Pulsar::ProfileInterpreter::ProfileInterpreter ()
 {
+  remove_baseline = new RemoveBaseline::Total;
+
   add_command 
     ( &ProfileInterpreter::baseline,
       "baseline", "remove the profile baseline",
       "usage: baseline \n" );
-
+  /*
+  add_command 
+    ( &ProfileInterpreter::scale,
+      "scale", "scale profile by a mathematical expression",
+      "usage: scale <exp>\n" );
+  */
   add_command 
     ( &ProfileInterpreter::mean,
       "mean", "form the mean smoothed profile",
@@ -68,6 +80,11 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
       "usage: subtract <name>\n" );
 
   add_command
+    ( &ProfileInterpreter::extract,
+      "extract", "extract (and keep) the specified phase bin range",
+      "usage: extract <first:last>\n" );
+
+  add_command
     ( &ProfileInterpreter::convolve,
       "convolve", "convolve the named archive with the current",
       "usage: convolve <name>\n" );
@@ -85,7 +102,11 @@ Pulsar::ProfileInterpreter::~ProfileInterpreter ()
 
 string Pulsar::ProfileInterpreter::baseline (const string& args) try
 {
-  get()->remove_baseline();
+  if (args.empty())
+    remove_baseline->transform( get() );
+  else
+    remove_baseline->set_operation( RemoveBaseline::Operation::factory(args) );
+
   return response (Good);
 }
 catch (Error& error) {
@@ -140,6 +161,23 @@ try {
   foreach( get(), smooth );
   return response (Good);
 
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ProfileInterpreter::extract (const string& args) try
+{
+  typedef std::pair<unsigned,unsigned> range;
+  range bins = setup<range> (args);
+
+  Archive* data = get();
+  foreach( data, new Extract(bins) );
+
+  data->resize( data->get_nsubint(), data->get_npol(), data->get_nchan(),
+                bins.second - bins.first );
+
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());

@@ -181,10 +181,15 @@ TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
     if (label_elements && ind.size() > 1)
       result += tostring(ind[i]) + ")";
 
-    Reference::To<Parser> parser = (const_cast<V*>(ptr)->*get)(ind[i])->get_interface();
+    Reference::To<Parser> parser;
+    parser = (const_cast<V*>(ptr)->*get)(ind[i])->get_interface();
 
     parser->set_delimiter( this->parent->get_delimiter() );
-    result += parser->get_value (remainder);
+
+    if (remainder == "help")
+      result += "\n" + parser->help();
+    else
+      result += parser->get_value (remainder);
   }
 
   return result;
@@ -217,6 +222,9 @@ template<class C,class Get,class Size>
     return false;
 
   if (remainder == "<name>")
+    return true;
+
+  if (remainder == "help")
     return true;
 
   if (!this->instance)

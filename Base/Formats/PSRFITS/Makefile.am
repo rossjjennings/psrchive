@@ -10,6 +10,7 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	ProfileColumn.C Pulsar/ProfileColumn.h \
 	unload_Plasma.C load_Plasma.C \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
+	unload_ObsDescription.C load_ObsDescription.C \
 	unload_Receiver.C load_Receiver.C \
 	unload_WidebandCorrelator.C load_WidebandCorrelator.C \
 	unload_CalibratorStokes.C load_CalibratorStokes.C \
@@ -35,6 +36,7 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_integrations.C load_integration_state.C \
 	CalibratorExtensionIO.C FITSAgent.C \
 	P236_reference_epoch_correction.C \
+	refmjd_rounding_correction.C \
 	fitsio_psrephem.C fitsio_polyco.C fitsio_tempo.h
 
 if HAVE_TEMPO2

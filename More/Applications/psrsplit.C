@@ -117,6 +117,11 @@ void psrsplit::process (Pulsar::Archive* archive)
   unsigned isub=0;
   unsigned ichan=0;
 
+  Pulsar::Dispersion correction;
+  bool was_dedispersed = archive->get_dedispersed () ;
+  if ( was_dedispersed && nchannel > 0 )
+    correction.revert (archive);
+
   while( isub < nsub )
   {
     cerr << "psrsplit: extracting";
@@ -132,9 +137,19 @@ void psrsplit::process (Pulsar::Archive* archive)
     Reference::To<Pulsar::Archive> sub_archive = archive->extract(subints);
     Reference::To<Pulsar::Archive> sub_chan_archive;
 
+#if THIS_IS_EVER_FIXED // or necessary
+
+A) this loop repeatedly deletes the first subints.size() sub-integrations
+   (not the sub-integrations indexed by the subints array)
+
+B) after deleting these sub-integrations, the Archive tries to reload them
+   (causing TimerArchive to fail)
+
     // delete the subintegrations that have been cloned in sub_archive
     for (unsigned isub=0; isub < subints.size(); isub++)
       delete archive->get_Integration (isub);
+
+#endif
 
     // resize extensions to avoid bloating of the disk space used
     if ( resize_extensions )
@@ -148,10 +163,6 @@ void psrsplit::process (Pulsar::Archive* archive)
 
       if ( nchannel > 0 )
       {
-	Pulsar::Dispersion correction;
-	bool was_dedispersed = sub_chan_archive->get_dedispersed () ;
-	if ( was_dedispersed )
-	  correction.revert (sub_chan_archive);
 
 	ichan += nchannel ;
 

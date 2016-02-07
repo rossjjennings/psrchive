@@ -1,0 +1,17 @@
+#!/bin/csh -f
+
+set start = 2002
+set end = 2009
+set year = $start
+
+while ( $year <= $end )
+
+  echo $year
+  ~/pks_rcvr.csh ${year}*.tcs_ctrl.log* > ~/pks_rcvr.log.$year
+
+  @ year = $year + 1
+
+end
+
+cat ~/pks_rcvr.log.* | sed -f ~/pks_rcvr.sed | uniq -1 > ~/pks_rcvr.db
+

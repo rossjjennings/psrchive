@@ -147,8 +147,17 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   if (anynul || status)
     throw FITSError (status, "load polynomial failed to parse REF_MJD");
 
+  // TEMPO rounds the fractional part of the MJD to exactly 10 (base 10)
+  // digits of precision, but CFITSIO adds random digits during I/O.
+  // The following code from Lucas Guillemot removes these random digits.
+
+  long double mjdldi = (long double)((int)ref_mjd);
+  long double mjdldf = (long double)ref_mjd - mjdldi;
+  mjdldf = roundl(1.e10 * mjdldf)*1.e-10;
+  MJD new_mjd = MJD((int)mjdldi,(double)mjdldf);
+  
   // set the attribute
-  set.set_reftime (ref_mjd);
+  set.set_reftime(new_mjd);
 
 #ifdef _DEBUG
   cerr << "load polynomial PSRFITS 4" << endl;

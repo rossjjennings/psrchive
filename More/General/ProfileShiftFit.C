@@ -453,6 +453,12 @@ double Pulsar::ProfileShiftFit::get_snr()
   return(snr);
 }
 
+double Pulsar::ProfileShiftFit::get_sigma2()
+{
+  if (!computed) compute();
+  return(sigma2);
+}
+
 double Pulsar::ProfileShiftFit::get_effective_duty_cycle () const
 {
   if (!std)
@@ -480,5 +486,14 @@ double Pulsar::ProfileShiftFit::get_reduced_chisq () const
     const_cast<ProfileShiftFit*>(this)->compute();
 
   return chi2/dof;
+}
+
+//! Convenience function to determine, then apply, scale and shift
+void Pulsar::ProfileShiftFit::apply_scale_and_shift(Profile *p)
+{
+  set_Profile(p);
+  compute();
+  p->rotate_phase(shift);
+  p->scale(1.0/scale);
 }
 

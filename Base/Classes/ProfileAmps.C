@@ -11,6 +11,8 @@
 #include "VirtualMemory.h"
 #include "malloc16.h"
 
+#include <float.h>
+
 using namespace std;
 
 static Pulsar::Option<string> profile_swap_filename
@@ -151,3 +153,32 @@ float* Pulsar::ProfileAmps::get_amps ()
   return amps;
 }
 
+//! remove the phase bins specified in the array of indeces
+void Pulsar::ProfileAmps::remove (const std::vector<unsigned>& indeces)
+{
+  // flag bins to be deleted
+  for (unsigned i=0; i<indeces.size(); i++)
+  {
+    if (indeces[i] >= nbin)
+      throw Error (InvalidParam, "Pulsar::ProfileAmps::remove",
+		   "index[%u]=%u >= nbin=%u", i, indeces[i], nbin);
+    amps[i] = FLT_MAX;
+  }
+
+  // remove flagged bins
+  unsigned ibin = 0;
+  unsigned jbin = 0;
+  while (jbin < nbin)
+  {
+    while (ibin < nbin && amps[ibin] != FLT_MAX) ibin++;
+
+    // search for next good bin
+    jbin = ibin + 1;
+    while (jbin < nbin && amps[jbin] == FLT_MAX) jbin++;
+
+    if (jbin < nbin)
+      swap (amps[ibin], amps[jbin]);
+  }
+
+  nbin = ibin;
+}

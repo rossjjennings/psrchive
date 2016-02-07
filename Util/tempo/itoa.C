@@ -23,6 +23,7 @@ static int default_aliases ()
 
   add_alias ("G1", "gb43m");
   add_alias ("G1", "gb 140ft");
+  add_alias ("G1", "gb140ft");
 
   add_alias ("G8", "gb85-3");
   add_alias ("G8", "gb853");
@@ -47,6 +48,7 @@ static int default_aliases ()
 
   add_alias ("JB", "jodrell");
   add_alias ("JB", "jodrell bank");
+  add_alias ("JB", "lovell");
 
   add_alias ("VL", "vla");
 
@@ -58,6 +60,14 @@ static int default_aliases ()
 
   add_alias ("EF", "effelsberg");
 
+  add_alias ("LF", "LOFAR");
+  add_alias ("LF", "lofar");
+  add_alias ("FL", "FR606");
+  add_alias ("DL", "DE601");
+  add_alias ("D3", "DE603");
+  add_alias ("D5", "DE605");
+  add_alias ("UL", "UK608");
+
   add_alias ("WT", "wsrt");
   add_alias ("WT", "westerbork");
 
@@ -65,6 +75,12 @@ static int default_aliases ()
 
   add_alias ("SH", "shao");
   add_alias ("SH", "shao65");
+
+  add_alias ("LW", "lwa");
+  add_alias ("LW", "lwa1");
+
+  // Sardinia Radio Telescope
+  add_alias ("SR", "srt");
 
   return 1;
 }

@@ -280,10 +280,16 @@ c     Line 3
 c
       lct=lct+1
       if (reading) then
-        read(recrd((lct-1)*80+1:lct*80),33) 
+        read(recrd((lct-1)*80+1:lct*80),33,ERR=23) 
      &               rah,ram,iras,rras,dsign,ded,dem,des, 
      &               telname, epoch, opos, paflag, timflag
-        ras=float(iras)+rras
+        goto 25
+ 23      read(recrd((lct-1)*80+1:lct*80),34) 
+     &               rah,ram,iras,rras,dsign,ded, 
+     &               telname, epoch, opos, paflag, timflag
+        dem=0
+        des=0
+ 25     ras=float(iras)+rras
         if (dsign.eq.'-') ded=-1*ded
         if (dsign.eq.'-'.and.ded.eq.0) then
            dem=-1*dem
@@ -304,6 +310,7 @@ c      write(*,33) rah, ram, iras, rras, dsign, ded, dem, des, telname,
 c     &           epoch, opos, paflag, timflag
 c
  33    format(3i2.2,f4.3,a1,2i2.2,f6.3,a8,f10.3,f8.3,a1,a1,31x)
+ 34    format(3i2.2,f4.3,a1,i2.2,8x,a8,f10.3,f8.3,a1,a1,31x)
 c
 c     Line 4 - (X,Y,Z) of telescope - NEW - implemented in V 6.0
 c
@@ -335,6 +342,9 @@ c
      &              cdd,cdm,cdy,scanno,subscan,npol,nfreq, 
      &              nbin, tbin, nint, ncal, lcal, fcal
             endif
+         endif
+         if (nfreq.eq.0) then
+            nfreq = 1
          endif
       else
        write(line(lct),57) cdd, cdm, cdy, scanno, subscan, npol, nfreq, 

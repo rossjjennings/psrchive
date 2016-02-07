@@ -97,13 +97,14 @@ Pulsar::EPNArchive* Pulsar::EPNArchive::clone () const
 
 std::string Pulsar::EPNArchive::get_telescope () const
 {
-  return "7";
+  return std::string(line3.telname,8);
 }
 
 void Pulsar::EPNArchive::set_telescope (const std::string& code)
 {
 
 }
+
 
 Signal::Source Pulsar::EPNArchive::get_type () const
 {
@@ -403,14 +404,29 @@ void Pulsar::EPNArchive::load_header (const char* filename)
 
 double MHz_scale (const char* units)
 {
-  if (strcasecmp (units, "GHz"))
+
+  if(strlen(units) > 3)
+	 return MHz_scale(units+1);
+  if (strcasecmp (units, "GHz")==0)
     return 1e3;
-  if (strcasecmp (units, "MHz"))
+  if (strcasecmp (units, "MHz")==0)
     return 1.0;
-  if (strcasecmp (units, "kHz"))
+  if (strcasecmp (units, "kHz")==0)
     return 1e-3;
-  if (strcasecmp (units, "Hz"))
+  if (strcasecmp (units, "Hz")==0)
     return 1e-6;
+  if (strcasecmp (units, " nm")==0)
+	 return 299792458000.0;
+  if (strcasecmp (units, " um")==0)
+	 return 299792458.0;
+  if (strcasecmp (units, " mm")==0)
+	 return 299792458e-3;
+  if (strcasecmp (units, "MeV")==0)
+	 return 2.41798935e14;
+  if (strcasecmp (units, "keV")==0)
+	 return 2.41798935e11;
+  if (strcasecmp (units, " eV")==0)
+	 return 2.41798935e8;
   
   throw Error (InvalidParam, "MHz_scale", "unrecognized units '%s'", units);
 }
@@ -426,6 +442,8 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
   BasicIntegration* integration = new BasicIntegration;
   resize_Integration (integration);
+
+
 
   MJD epoch (line3.epoch);
   epoch += sub_line1.tstart[0] * 1e-6;
@@ -447,7 +465,7 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
       if (verbose == 3) {
 	cerr << "cf=" << sub_line1.f0[iblock] << sub_line1.f0u[iblock] << endl;
-	cerr << "bw=" << sub_line1.df[iblock] << sub_line1.dfu[iblock] << endl;
+	cerr << "bw=" << sub_line1.df[iblock] << sub_line1.dfu[iblock] <<  MHz_scale (sub_line1.dfu[iblock]) << endl;
 	cerr << "state=" << sub_line1.idfield[iblock] << endl;
       }
       

@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/PhaseWeight.h"
 
+#include "Pulsar/RemoveBaseline.h"
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/DisperseWeight.h"
 
@@ -40,32 +41,8 @@ void Pulsar::Integration::remove_baseline (const PhaseWeight* baseline) try
   if (!baseline)
     baseline = my_baseline = this->baseline();
 
-  DisperseWeight shift (this);
-  shift.set_weight (baseline);
-
-  // the output of the PhaseWeight shifter
-  PhaseWeight shifted_baseline;
-
-  for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-  {
-    if (Profile::verbose)
-      cerr << "Pulsar::Integration::remove_baseline ichan=" << ichan << endl;
-
-    shift.get_weight (ichan, &shifted_baseline);
-
-    for (unsigned ipol=0; ipol<get_npol(); ipol++)
-    {
-      if (Profile::verbose)
-	cerr << "Pulsar::Integration::remove_baseline ipol=" << ipol << endl;
-
-      Profile* profile = get_Profile(ipol,ichan);
-
-      double mean, variance;
-      shifted_baseline.stats (profile, &mean, &variance);
-
-      profile->offset (-mean);
-    }
-  }
+  RemoveBaseline::Total remove;
+  remove.operate (this, baseline);
 }
 catch (Error& error)
 {

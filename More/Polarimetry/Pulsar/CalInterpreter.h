@@ -22,6 +22,7 @@ namespace Pulsar {
 
   class Database;
   class PolnCalibrator;
+  class HybridCalibrator;
   class FluxCalibrator;
 
   class CalInterpreter : public Interpreter::Extension {
@@ -62,6 +63,9 @@ namespace Pulsar {
 
     //! Calibrator to be applied
     Reference::To<PolnCalibrator> calibrator;
+
+    //! Hybrid calibrator to be applied
+    Reference::To<HybridCalibrator> hybrid_calibrator;
 
     //! Flux calibrator to be applied
     Reference::To<FluxCalibrator> flux_calibrator;

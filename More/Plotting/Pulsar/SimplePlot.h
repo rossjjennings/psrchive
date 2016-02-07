@@ -41,13 +41,13 @@ namespace Pulsar {
     virtual void plot (const Archive*);
 
     //! Get the default label for the x axis
-    virtual std::string get_xlabel (const Archive*) = 0;
+    virtual std::string get_xlabel (const Archive*) { return ""; }
 
     //! Get the default label for the y axis
-    virtual std::string get_ylabel (const Archive*) = 0;
+    virtual std::string get_ylabel (const Archive*) { return ""; }
 
     //! Derived classes must prepare to draw
-    virtual void prepare (const Archive*) = 0;
+    virtual void prepare (const Archive*) {}
 
     //! Derived classes must draw in the current viewport
     virtual void draw (const Archive*) = 0;

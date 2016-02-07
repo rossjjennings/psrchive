@@ -75,10 +75,10 @@ MJD getMeanMjd(const Archive* archive);
 
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 		double maxx, const string& xlabel, double miny, double maxy, const string& ylabel,
-		const string& title, float * trf, int numVertTicks);
+		const string& title, float * trf, int numVertTicks, pgplot::ColourMap::Name colour_map);
 
 void draw_colour_map_only(const int rows, const int columns, const double minx,
-    const double maxx, const double miny, const double maxy, const float* trf);
+    const double maxx, const double miny, const double maxy, const float* trf, pgplot::ColourMap::Name colour_map);
 
 bool output_PDM_SNR = false;
 
@@ -110,7 +110,8 @@ void solve_and_plot (Archive* archive,
 		     double dmOffset, double dmStep, double dmHalfRange,
 		     double periodOffset_us, double periodStep_us, double periodHalfRange_us,
 		     double pdotOffset, double pdotStep, double pdotHalfRange,
-		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs);
+		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs,
+		     pgplot::ColourMap::Name colour_map);
 
 // Default call to solve_and_plot above
 // archive: The archive data
@@ -118,7 +119,8 @@ void solve_and_plot (Archive* archive,
 // refP: The reference Period in microseconds
 
 void solve_and_plot (Archive* archive,
-		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs);
+		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs,
+		     pgplot::ColourMap::Name colour_map);
 
 // Gets the natural DM step if none was provided
 // Precondition: nchan > 1
@@ -554,6 +556,7 @@ void usage (bool verbose_usage)
     "               4 -> Plasma                                                     \n"
     "               5 -> Forest                                                     \n"
     "               6 -> Alien Glow                                                 \n"
+    "               7 -> Cubehelix                                                  \n"
     "                                                                               \n"
     "Utility options:                                                               \n"
     " -h         Display this useful help page (most useful options)                \n"
@@ -617,6 +620,9 @@ void init() {
   // Computed SNRs
   SNRs.clear();
   pdotSNRs.clear();
+
+
+
 }
 
 
@@ -937,7 +943,7 @@ void cpg_next ()
   cpgpage ();
 }
 
-void process (Archive* archive, double minwidthsecs, string & bestfilename);
+void process (Archive* archive, double minwidthsecs, string & bestfilename, pgplot::ColourMap::Name colour_map);
 
 double periodOffset_us = 0;
 double periodStep_us = -1;
@@ -967,7 +973,10 @@ int main (int argc, char** argv)
 	string option;
 	string bestfilename = "";
 
-	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
+	stringstream ss;
+	ss << pgplot::ColourMap::default_colour_map;
+	pgplot::ColourMap::Name colour_map;
+	ss >> colour_map;
 
 
 
@@ -1026,7 +1035,7 @@ int main (int argc, char** argv)
 
 		reorder(joined_archive);
     tmjdctr = getMeanMjd(joined_archive).in_seconds();
-		process(joined_archive, minwidthsecs, bestfilename);
+		process(joined_archive, minwidthsecs, bestfilename, colour_map);
 
 		// total->unload(newname); // THIS IS BROKEN!!!
 	}
@@ -1039,7 +1048,31 @@ int main (int argc, char** argv)
 	    // reset global variables
 	    init();
 
-	    process(archive, minwidthsecs, bestfilename);
+		if (ifile > 0){
+		   // reset the search parameters so that automatic step sizes are re-calculated.
+		   periodOffset_us = 0;
+		   periodStep_us = -1;
+		   periodHalfRange_us = -1;
+		   pdotOffset = 0;
+		   pdotStep = -1;
+		   pdotHalfRange = -1;
+		   accnOffset = 0;
+		   accnStep = -1;
+		   accnHalfRange = -1;
+		   dmOffset = 0;
+		   dmStep = -1;
+		   dmHalfRange = -1;
+
+		   // reload the command line parameters in case any are not auto set.
+		   parseParameters(argc, argv,  periodOffset_us, periodStep_us,
+				 periodHalfRange_us,accnOffset, accnStep, accnHalfRange,
+				 dmOffset, dmStep, dmHalfRange, colour_map,
+				 minwidthsecs, bestfilename);
+		}
+
+
+
+	    process(archive, minwidthsecs, bestfilename, colour_map);
 	  }
 	  catch (Error& error)
 	  {
@@ -1058,7 +1091,7 @@ int main (int argc, char** argv)
 }
 
 
-void process (Archive* archive, double minwidthsecs, string & bestfilename)
+void process (Archive* archive, double minwidthsecs, string & bestfilename, pgplot::ColourMap::Name colour_map)
 {
   getDopplerFactor(archive, dopplerFactor, barycentricMjd);
 
@@ -1229,7 +1262,8 @@ pdotHalfRange = accn2pdot*accnHalfRange;
 		  dmOffset, dmStep, dmHalfRange, 
 		  periodOffset_us, periodStep_us, periodHalfRange_us,
 		  pdotOffset, pdotStep, pdotHalfRange,
-		  total_plot, flui, minwidthsecs);
+		  total_plot, flui, minwidthsecs,
+		  colour_map);
 
   // Create two copies. One for the phase time plot and one
   // for the phase vs. frequency plot.
@@ -1408,7 +1442,8 @@ void solve_and_plot (Archive* archive,
 		     double periodHalfRange_us,
 		     double pdotOffset, double pdotStep,
 		     double pdotHalfRange,
-		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs)
+		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs,
+		     pgplot::ColourMap::Name colour_map)
 {
   /* optimization: setting the phase prediction model to NULL disables
      the phase prediction model resynchronization that may otherwise take
@@ -1682,12 +1717,13 @@ void solve_and_plot (Archive* archive,
 	  const double maxx = periodOffset_us + periodHalfRange_us;
 
 	  if (onlyDisplayDmPlot)
-	    draw_colour_map_only (dmBins, periodBins + 1,
-				  minx, maxx, minDM, maxDM, trf);
+	    draw_colour_map_only (dmBins, periodBins + 1, minx,
+			    maxx, minDM, maxDM, trf, colour_map);
 	  else
 	    draw_colour_map(&SNRs[0], dmBins, periodBins+1,
 			    minx, maxx, "delta Period (us)", 
-			    minDM, maxDM, "DM", "", trf, 5);
+			    minDM, maxDM, "DM", "", trf, 5,
+			    colour_map);
 
 	  if (output_PDM_SNR)
 	  {
@@ -1744,9 +1780,10 @@ void solve_and_plot (Archive* archive,
 // Use the the default natural values for offset, step and half-range
 void solve_and_plot (Archive* archive,
 		     ProfilePlot* total_plot,
-		     TextInterface::Parser* flui, double minwidthsecs)
+		     TextInterface::Parser* flui, double minwidthsecs,
+		     pgplot::ColourMap::Name colour_map)
 {
-  solve_and_plot(archive, 0,-1,-1, 0,-1,-1,0,-1,-1, total_plot, flui, minwidthsecs);
+  solve_and_plot(archive, 0,-1,-1, 0,-1,-1,0,-1,-1, total_plot, flui, minwidthsecs, colour_map);
 }
 
 
@@ -2822,7 +2859,7 @@ void plotPhaseFreq (const Archive * archive,
 	phase_freq_copy->remove_baseline();
 
 	fui->set_value("x:view", "(0.55, 0.95)");
-	fui->set_value("y:view", "(0.33, 0.56)");
+	fui->set_value("y:view", "(0.35, 0.57)");
 	fui->set_value("x:range", "(0, 1.2)");
 	fui->set_value("ch", "0.8");
 	fui->set_value("above:c", "");
@@ -2856,7 +2893,7 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 
 
 	tui->set_value("x:view", "(0.05, 0.45)");
-	tui->set_value("y:view", "(0.33, 0.56)");
+	tui->set_value("y:view", "(0.35, 0.57)");
 	tui->set_value("x:range", "(0, 1.2)");
 	tui->set_value("ch", "0.8");
 	tui->set_value("above:c", "");
@@ -3068,7 +3105,7 @@ void reorder(Reference::To<Archive> archive)
 }
 
 void draw_colour_map_only(const int rows, const int columns, const double minx,
-    const double maxx, const double miny, const double maxy, const float* trf)
+    const double maxx, const double miny, const double maxy, const float* trf, pgplot::ColourMap::Name colour_map)
 {
   if (columns <= 0 || rows <= 0) {
     throw Error(InvalidRange, "draw_colour_map_only",
@@ -3085,7 +3122,7 @@ void draw_colour_map_only(const int rows, const int columns, const double minx,
   cpgscf(2);    // Roman font
 	cpgsci(1);    // colour index 
 
-	pgplot::ColourMap cmap(pgplot::ColourMap::Heat);
+	pgplot::ColourMap cmap(colour_map);
 	cmap.apply();
 
 	cpgswin(minx, maxx, miny, maxy);
@@ -3125,10 +3162,7 @@ void draw_colour_map_only(const int rows, const int columns, const double minx,
 
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 		double maxx, const string& xlabel, double miny, double maxy, const string& ylabel,
-		const string& title, float * trf, int numVertTicks) {
-
-	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
-	colour_map = pgplot::ColourMap::Heat;
+		const string& title, float * trf, int numVertTicks, pgplot::ColourMap::Name colour_map) {
 
 	pgplot::ColourMap cmap;
 	cmap.set_name (colour_map);

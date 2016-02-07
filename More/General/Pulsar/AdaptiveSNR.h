@@ -1,28 +1,24 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/AdaptiveSNR.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/01/30 03:23:13 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/AdaptiveSNR.h
 
 #ifndef __Pulsar_AdaptiveSNR_h
 #define __Pulsar_AdaptiveSNR_h
 
-#include "Pulsar/Algorithm.h"
+#include "Pulsar/SNRatioEstimator.h"
 
 namespace Pulsar {
 
-  class Profile;
-  class BaselineEstimator;
+  class ProfileWeightFunction;
 
-  //! Calculates the signal-to-noise ratio using a BaselineEstimator
-  class AdaptiveSNR : public Algorithm {
+  //! Calculates the signal-to-noise ratio using a ProfileWeightFunction
+  class AdaptiveSNR : public SNRatioEstimator {
 
   public:
 
@@ -33,15 +29,26 @@ namespace Pulsar {
     ~AdaptiveSNR ();
 
     //! Set the function used to compute the baseline
-    void set_baseline_estimator (BaselineEstimator* function);
+    void set_baseline_estimator (ProfileWeightFunction* function);
+
+    ProfileWeightFunction* get_baseline_estimator () const;
 
     //! Return the signal to noise ratio
     float get_snr (const Profile* profile);
 
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! The class that is returned by get_interface
+    class Interface;
+
+    //! Return a copy constructed instance of self
+    AdaptiveSNR* clone () const;
+
   protected:
 
     //! The function used to compute the baseline
-    Reference::To<BaselineEstimator> baseline_estimator;
+    Reference::To<ProfileWeightFunction> baseline_estimator;
 
   };
 

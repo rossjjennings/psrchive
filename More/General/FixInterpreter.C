@@ -8,6 +8,7 @@
 #include "Pulsar/FixInterpreter.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/FITSArchive.h"
 
 using namespace std;
 
@@ -30,13 +31,18 @@ Pulsar::FixInterpreter::FixInterpreter ()
   add_command
     ( &FixInterpreter::freq,
       "freq", "recompute the frequency of each channel",
-      "usage: freq [sideband]\n"
-      "  freq           frequency computed using standard equation \n"
-      "  freq sideband  freq[i] = freq[N-1-i] and bw = -bw \n" );
+      "usage: freq [sideband|offset <MHz>]\n"
+      "  freq               frequency computed using standard equation \n"
+      "  freq sideband      freq[i] = freq[N-1-i] and bw = -bw \n" 
+      "  freq offset <MHz>  offset all frequencies by <MHz> \n");
 
   add_command
     ( &FixInterpreter::pointing,
       "pointing", "fix the Pointing extension info\n");
+
+  add_command
+    ( &FixInterpreter::psrfits_refmjd,
+      "refmjd", "fix epoch error due to polyco REF_MJD precision in PSRFITS\n");
 }
 
 Pulsar::FixInterpreter::~FixInterpreter ()
@@ -140,7 +146,23 @@ string Pulsar::FixInterpreter::freq (const string& args) try
       for (ichan = 0; ichan < nchan; ichan++)
 	subint->set_centre_frequency( ichan, labels[nchan-1-ichan] );
 
-      archive->set_bandwidth( - archive->get_bandwidth() );
+    }
+    archive->set_bandwidth( - archive->get_bandwidth() );
+  }
+
+  else if (arguments[0] == "offset" && arguments.size() == 2)
+  {
+    double delta_f = fromstring<double>(arguments[1]);
+
+    for (isub = 0; isub < nsub; isub++)
+    {
+      Integration* subint = archive->get_Integration (isub);
+
+      for (ichan = 0; ichan < nchan; ichan++)
+      {
+	double freq = subint->get_centre_frequency( ichan );
+	subint->set_centre_frequency( ichan, freq + delta_f );
+      }
     }
   }
 
@@ -168,6 +190,20 @@ string Pulsar::FixInterpreter::pointing (const string& args) try
   return response (Good);
 }
 catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::FixInterpreter::psrfits_refmjd (const string& args) try
+{
+  FITSArchive* archive = dynamic_cast<FITSArchive*>(get());
+  if (archive)
+  {
+    archive->refmjd_rounding_correction();
+  }
+  return response (Good);
+}
+catch (Error &error)
 {
   return response (Fail, error.get_message());
 }

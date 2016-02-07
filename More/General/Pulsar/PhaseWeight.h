@@ -76,20 +76,29 @@ namespace Pulsar {
     //! Set all weights to the specified value
     void set_all (float weight);
   
-    //! Retrieve the sum of all weights
+    //! Get the sum of all weights
     double get_weight_sum () const;
 
-    //! Retrieve the max of all weights
+    //! Get the count of all non-zero weights
+    unsigned get_nonzero_weight_count () const;
+
+    //! Get the beginning of the phase region with non-zero weight
+    std::string get_start_index () const;
+
+    //! Get the end of the phase region with non-zero weight
+    std::string get_end_index () const;
+
+    //! Get the max of all weights
     double get_weight_max () const;
 
-    //! Retrieve the weights
+    //! Get the weights
     void get_weights (std::vector<float>& weights) const;
 
     //! Weight the Profile amplitudes by the weights
     void weight_Profile (Profile* profile) const;
 
     //! Set the Profile from which statistics are calculated
-    void set_Profile (const Profile* profile);
+    void set_Profile (const Profile* profile) const;
 
     //! Get the weighted total of the amplitudes
     double get_weighted_sum () const;
@@ -141,10 +150,10 @@ namespace Pulsar {
     std::vector<float> weight;
 
     //! The Profile to which the weights apply
-    Reference::To<const Profile> profile;
+    mutable Reference::To<const Profile> profile;
 
     //! Flag set when the statistics have been calculated
-    bool built;
+    mutable bool built;
 
     //! The weighted mean of the Profile
     Estimate<double> mean;
