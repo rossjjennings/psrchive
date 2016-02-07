@@ -93,7 +93,7 @@ int main (int argc, char* argv[])
     mjd = MJD (date);
   }
 
-  cout << mjd.printdays(5) << endl;
+  cout << mjd.printdays(10) << endl;
 
   if (verbose)
   {
