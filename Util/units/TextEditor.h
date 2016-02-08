@@ -15,6 +15,7 @@
 #define __TextEditor_h
 
 #include "TextInterface.h"
+#include "strutil.h"
 
 //! Edit the metadata in a pulsar archive
 template<class T>
@@ -32,6 +33,9 @@ class TextEditor : public Reference::Able
   //! Add a semi-colon or comma-separated list of commands to execute
   void add_commands (const std::string& str)
   { standard_separation (commands, str); }
+
+  void add_script (const std::string& filename)
+  { loadlines (filename, commands); }
 
   //! Add a semi-colon or comma-separated list of extensions to install
   void add_extensions (const std::string& str)
