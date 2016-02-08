@@ -17,6 +17,66 @@
 
 namespace TextInterface
 {
+  //! Dynamically embeds the interface of something that can be got and set
+  /*! In this template: C is a composite; Get is the method of C that
+    returns something, Set is the method of C that sets something, and
+    Parser is the method of C that returns the embedded interface
+    to something. */
+  template<class C, class Type, class Get, class Set, class GetParser>
+  class DynamicInterface : public AttributeGetSet<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    DynamicInterface (const std::string& t, Get g, Set s, GetParser p)
+      : AttributeGetSet<C,Type,Get,Set> (t,g,s)
+    { get_parser = p; }
+
+    //! Copy constructor
+    DynamicInterface (const DynamicInterface& copy)
+      : AttributeGetSet<C,Type,Get,Set> (copy)
+    {  get_parser=copy.get_parser; }
+
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+    { return new DynamicInterface(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+    { return AttributeGetSet<C,Type,Get,Set>::get_name() + "[:<name>]"; }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const;
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value);
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+  protected:
+
+    //! Method of C that returns TextInterface::Parser
+    GetParser get_parser;
+
+    //! Remainder parsed from name during matches
+    mutable std::string remainder;
+  };
+
+  template<class C, class Type>
+  class EmbedAllocator 
+  {
+  public:
+    //! Generate a new DynamicInterface instance with description
+    template<class Get, class Set, class GetParser>
+    DynamicInterface<C,Type,Get,Set,GetParser>* 
+    operator () (const std::string& n, Get g, Set s, GetParser p)
+    {
+      return new DynamicInterface<C,Type,Get,Set,GetParser> (n,g,s,p);
+    }
+  };
+
   //! Dynamically embeds the interfaces of elements in a vector
   /*! In this template: V is a vector of elements; Get is the method of
     V that returns the element at the specified index; and Size is the
@@ -159,6 +219,83 @@ namespace TextInterface
   };
 
 }
+
+
+
+
+
+template<class C, class T, class G, class S, class P> 
+std::string
+TextInterface::DynamicInterface<C,T,G,S,P>::get_value (const C* ptr) const
+{
+  if (remainder == "")
+    return AttributeGetSet<C,T,G,S>::get_value (ptr);
+
+  Parser* parser = (const_cast<C*>(this->instance)->*get_parser)();
+
+  if (remainder == "help")
+    return "\n" + parser->help();
+  else
+    return parser->get_value (remainder);
+}
+
+template<class C, class T, class G, class S, class P>
+void TextInterface::DynamicInterface<C,T,G,S,P>::set_value (C* ptr,
+							  const std::string& val)
+{
+  if (remainder == "")
+    AttributeGetSet<C,T,G,S>::set_value (ptr, val);
+  else
+  {
+    Parser* parser = (this->instance->*get_parser)();
+    parser->set_value (remainder, val);
+  }
+}
+
+template<class C, class T, class G, class S, class P>
+bool TextInterface::DynamicInterface<C,T,G,S,P>::matches
+  (const std::string& text) const
+{
+#ifdef _DEBUG
+  std::cerr << "TextInterface::DynamicInterface::matches"
+    " text='" << text << "'" << std::endl;
+#endif
+
+  remainder = "";
+
+  if (text == this->name)
+    return true;
+
+  std::string range;
+  if (!match (this->name, text, &range, &remainder))
+    return false;
+
+  if (remainder == "[:<name>]")
+    return true;
+
+  if (remainder == "help")
+    return true;
+
+  if (!this->instance)
+    return false;
+
+  Parser* parser = (const_cast<C*>(this->instance)->*get_parser)();
+  if (! parser->found (remainder))
+    return false;
+
+  return true;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 template<class V, class G, class S> 
 std::string
