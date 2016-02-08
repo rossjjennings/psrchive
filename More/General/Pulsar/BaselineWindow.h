@@ -49,6 +49,9 @@ namespace Pulsar {
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);
 
+    unsigned get_found_bin_start () const { return found_bin_start; }
+    unsigned get_found_bin_end () const { return found_bin_end; }
+
     //! Return the phase at which minimum or maximum mean is found
     float find_phase (const std::vector<float>& amps);
 
@@ -90,6 +93,8 @@ namespace Pulsar {
     //! Set true when range is specified
     bool range_specified;
 
+    unsigned found_bin_start;
+    unsigned found_bin_end;
   };
 
 }

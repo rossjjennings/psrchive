@@ -31,6 +31,8 @@ Pulsar::BaselineWindow::BaselineWindow ()
 
   mean = 0;
 
+  found_bin_start = found_bin_end = 0;
+
   /* The default smoothing algorithm is not set in the constructor
      because the Smooth constructor uses a Pulsar::Config attribute
      that may not be initialized at the time of construction of this
@@ -84,8 +86,8 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
   float centre = find_phase (nbin, profile->get_amps());
   float bins = get_smooth()->get_last_bins();
 
-  unsigned ibin1 = nbin + unsigned (nbin * centre - 0.5 * bins);
-  unsigned ibin2 = nbin + unsigned (nbin * centre + 0.5 * bins);
+  found_bin_start = nbin + unsigned (nbin * centre - 0.5 * bins);
+  found_bin_end = nbin + unsigned (nbin * centre + 0.5 * bins);
 
 #ifdef _DEBUG
   cerr << "Pulsar::BaselineWindow::calculate centre=" << centre
@@ -95,7 +97,7 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
   weight->resize( nbin );
   weight->set_all( 0.0 );
 
-  for (unsigned ibin=ibin1; ibin<ibin2; ibin++)
+  for (unsigned ibin=found_bin_start; ibin<found_bin_end; ibin++)
     (*weight)[ibin%nbin] = 1.0;
 }
 
@@ -246,6 +248,12 @@ public:
     add( &BaselineWindow::get_find_minimum,
 	 &BaselineWindow::set_find_minimum,
 	 "min", "find the minimum" );
+
+    add( &BaselineWindow::get_found_bin_start,
+	 "bin0", "first bin of the found region" );
+
+    add( &BaselineWindow::get_found_bin_end,
+	 "binN", "last bin of the found region" );
   }
 
   std::string get_interface_name () const { return "minimum"; }
