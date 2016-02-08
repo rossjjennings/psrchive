@@ -4,7 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PhaseVsHistPlus.h"
+#include "Pulsar/PhaseScale.h"
+
 #include "Pulsar/Profile.h"
 
 Pulsar::PhaseVsHistPlus::PhaseVsHistPlus ()

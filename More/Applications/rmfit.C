@@ -28,6 +28,7 @@
 
 #if HAVE_PGPLOT
 #include "Pulsar/StokesCylindrical.h"
+#include "Pulsar/PhaseScale.h"
 #include <cpgplot.h>
 #endif
 
@@ -130,6 +131,7 @@ void usage ()
     "\n"
     "Fit options: \n"
     "  -r                Refine the RM using two halves of band \n"
+    "  -T threshold      Adjust the threshold used to select bins \n"
     "\n"
     "Preprocessing options: \n"
     "  -b [+/-][range]   Include/exclude phase bins \n"
@@ -382,6 +384,7 @@ int main (int argc, char** argv)
 	cerr << "That is not a valid cut-off!" << endl;
 	return -1;
       }
+      refine_threshold = threshold;
       break;
 
     case 'J':
@@ -1352,7 +1355,10 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
   Pulsar::DeltaRM delta_rm;
 
   if (refine_threshold)
+  {
+    cerr << "rmfit: do_refine set threshold = " << refine_threshold << endl;
     delta_rm.set_threshold (refine_threshold);
+  }
 
   delta_rm.set_include (include_bins);
   delta_rm.set_exclude (exclude_bins);

@@ -6,16 +6,15 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/12 07:45:10 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h
 
 #ifndef __Pulsar_PhaseVsFrequencyPlus_h
 #define __Pulsar_PhaseVsFrequencyPlus_h
 
 #include "Pulsar/MultiPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
+#include "Pulsar/PhaseScale.h"
+
 #include "Pulsar/ProfilePlot.h"
 #include "Pulsar/SpectrumPlot.h"
 
