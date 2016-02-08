@@ -7,6 +7,8 @@
 
 #include "Pulsar/FluxPlot.h"
 #include "Pulsar/PlotFrame.h"
+#include "Pulsar/PhaseScale.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"

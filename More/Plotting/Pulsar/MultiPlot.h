@@ -29,6 +29,9 @@ namespace Pulsar {
     //! Default constructor
     MultiPlot ();
 
+    //! Factory returns appropriate derived class
+    static MultiPlot* factory (Plot*);
+
     //! Get the text interface to the frame attributes
     TextInterface::Parser* get_frame_interface ();
 
@@ -37,6 +40,11 @@ namespace Pulsar {
 
     //! Plot in the current viewport
     void plot (const Archive*);
+
+    //! Auto-manage a plot
+    /*! Gives plot a default name and automatically scales all viewports.
+     Throws an exception if Plot is not a Framed Plot. */
+    void manage (Plot*);
 
     //! Manage a plot
     void manage (const std::string& name, FramedPlot*);

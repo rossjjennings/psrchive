@@ -107,7 +107,7 @@ TESTS = test_Alias test_tostring test_Conventions		    \
         test_TextInterface test_parse_indeces test_TextIndex	    \
 	test_Vector test_Matrix test_Jacobi test_eigen		    \
 	test_Jones test_Quaternion test_Pauli			    \
-	test_ModifyRestore test_Dirac
+	test_ModifyRestore test_Dirac test_DynamicInterface
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
@@ -139,6 +139,7 @@ test_Basis_SOURCES		= test_Basis.C
 test_Stokes_SOURCES		= test_Stokes.C
 
 test_TextInterface_SOURCES	= test_TextInterface.C
+test_DynamicInterface_SOURCES	= test_DynamicInterface.C
 test_parse_indeces_SOURCES	= test_parse_indeces.C
 test_TextIndex_SOURCES		= test_TextIndex.C
 

@@ -58,6 +58,9 @@ namespace Pulsar {
     //! Get the signal-to-noise ratio
     double get_snr () const;
 
+    //! Get the text interface of the signal-to-noise ratio estimator
+    TextInterface::Parser* get_snr_interface ();
+
     //! Get the effective duty cycle
     double get_effective_duty_cycle () const;
 

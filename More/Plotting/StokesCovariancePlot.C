@@ -51,9 +51,13 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data)
 
   else if (what == EigenValues)
   {
+    get_frame()->get_y_axis()->set_label("\\(2255)C\\dii");
+
     unsigned npol = 4;
 
     plotter.profiles.resize( npol );
+    plotter.plot_sls.resize( npol );
+    plotter.plot_slw.resize( npol );
     
     stats->eigen();
     plotter.profiles[0] = stats->get_covariance()->get_Profile(0);
@@ -65,6 +69,28 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data)
       Profile* tmp = plotter.profiles[i]->clone();
       tmp->square_root();
       plotter.profiles[i] = tmp;
+      plotter.plot_sls[i] = 1;
+      plotter.plot_slw[i] = 3;
+    }
+  }
+
+  else if (what == NaturalCovariances)
+  {
+    get_frame()->get_y_axis()->set_label("C\\d0i");
+
+    plotter.plot_sci.resize(3);
+    plotter.plot_sls.resize(3);
+    plotter.plot_slw.resize(3);
+
+    plotter.profiles.resize( 3 );
+    
+    stats->eigen();
+    for (unsigned i=0; i<3; i++)
+    {
+      plotter.profiles[i] = stats->get_natural_covariance(i);
+      plotter.plot_sci[i] = i+2;
+      plotter.plot_sls[i] = 1;
+      plotter.plot_slw[i] = 3;
     }
   }
 
@@ -75,7 +101,6 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data)
     stats->eigen();
     for (unsigned i=0; i<3; i++)
       plotter.profiles[i] = stats->get_regression_coefficient(i);
-
   }
 
   else if (what == ModulationIndex)
@@ -109,7 +134,7 @@ Pulsar::StokesCovariancePlot::Interface::Interface (StokesCovariancePlot* obj)
 
   add( &StokesCovariancePlot::get_what,
        &StokesCovariancePlot::set_what,
-       "what", "What to plot (var, eigen, reg, beta)");
+       "what", "What to plot (var, eigen, covar, reg, beta)");
 }
 
 
@@ -122,6 +147,8 @@ std::ostream& Pulsar::operator << (std::ostream& os,
     return os << "var";
   case StokesCovariancePlot::EigenValues:
     return os << "eigen";
+  case StokesCovariancePlot::NaturalCovariances:
+    return os << "covar";
   case StokesCovariancePlot::RegressionCoefficients:
     return os << "reg";
   case StokesCovariancePlot::ModulationIndex:
@@ -142,6 +169,8 @@ std::istream& Pulsar::operator >> (std::istream& is,
     what = StokesCovariancePlot::Variances;
   else if (unit == "eigen")
     what = StokesCovariancePlot::EigenValues;
+  else if (unit == "covar")
+    what = StokesCovariancePlot::NaturalCovariances;
   else if (unit == "reg")
     what = StokesCovariancePlot::RegressionCoefficients;
   else if (unit == "beta")

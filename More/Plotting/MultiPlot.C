@@ -115,6 +115,58 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
   frame->get_y_scale(true)->set_viewport( yvp );
 }
 
+void Pulsar::MultiPlot::manage (Plot* plot)
+{
+  FramedPlot* framed = dynamic_cast<FramedPlot*> (plot);
+  if (!framed)
+    throw Error (InvalidParam, "Pulsar::MultiPlot::manage",
+		 "Plot is not a FramedPlot");
+
+  string name = tostring(plots.size());
+  manage (name, framed);
+
+  if (frames.has_shared_x_scale())
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::manage stacking vertically" << endl;
+
+    unsigned counter = 0;
+
+    double y_each = 1.0 / plots.size();
+
+    std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
+    for (ptr = plots.begin(); ptr != plots.end(); ptr++)
+    {
+      cerr << "stacking " << ptr->first << endl;
+
+      FramedPlot* plot = ptr->second;
+      PlotFrame* frame = plot->get_frame();
+
+      if (counter > 0)
+      {
+	// remove the above frame labels
+	frame->get_label_above()->set_all ("");
+
+	// remove the below frame labels
+	frame->get_label_below()->set_all ("");
+      }
+
+      frame->set_viewport (0,1, 1.0-(counter+1)*y_each, 1.0-counter*y_each);
+
+      counter ++;
+
+      if (plots.size() > 1 && counter < plots.size())
+      {
+	// remove the x label
+	frame->get_x_axis()->set_label(" ");
+
+	// remove the x enumeration
+	frame->get_x_axis()->rem_opt('N');
+      }
+    }
+  }
+}
+
 //! Manage a plot
 void Pulsar::MultiPlot::manage (const std::string& name, FramedPlot* plot)
 {
@@ -150,4 +202,22 @@ void Pulsar::MultiPlot::unmanage (FramedPlot* plot)
       plots.erase (ptr);
       return;
     }
+}
+
+
+#include "Pulsar/MultiPhase.h"
+
+#include "Pulsar/MultiFrequency.h"
+#include "Pulsar/FrequencyPlot.h"
+
+Pulsar::MultiPlot* Pulsar::MultiPlot::factory (Plot* plot)
+{
+  if (dynamic_cast<HasPhaseScale*>(plot))
+    return new MultiPhase;
+
+  if (dynamic_cast<FrequencyPlot*>(plot))
+    return new MultiFrequency;
+
+  throw Error (InvalidParam, "Pulsar::MultiPlot::factory",
+	       "Plot is neither PhasePlot nor FrequencyPlot");
 }

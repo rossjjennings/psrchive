@@ -15,14 +15,15 @@
 #define __Pulsar_PhasePlot_h
 
 #include "Pulsar/SimplePlot.h"
-#include "Pulsar/PhaseScale.h"
+#include "Pulsar/HasPhaseScale.h"
 
 #include <vector>
 
 namespace Pulsar {
 
   //! Simple plots with pulse phase along the x-axis
-  class PhasePlot : public SimplePlot {
+  class PhasePlot : public SimplePlot, public HasPhaseScale
+  {
 
   public:
 

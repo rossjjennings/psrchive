@@ -15,7 +15,7 @@ nobase_include_HEADERS = \
 	Pulsar/Plot.h Pulsar/PlotFactory.h			       \
 	Pulsar/PlotLoop.h					       \
 	Pulsar/PlotEdge.h					       \
-	Pulsar/PlotScale.h Pulsar/PhaseScale.h			       \
+	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/HasPhaseScale.h  \
 	Pulsar/FrequencyScale.h Pulsar/TimeScale.h 		       \
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h   \
 	Pulsar/PlotFrame.h Pulsar/MultiFrame.h Pulsar/FramedPlot.h     \
@@ -33,6 +33,7 @@ nobase_include_HEADERS = \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
+	Pulsar/StokesFluctPhase.h \
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h		       \
 	Pulsar/TwoBitPlot.h					       \
 	Pulsar/CalibratorInfo.h					       \
@@ -99,6 +100,7 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	PhaseVsHistPlus.C PhaseVsHistPlusTI.C \
 	FluctPlot.C FluctPlotTI.C \
 	StokesFluctPlot.C StokesFluctPlotTI.C \
+	StokesFluctPhase.C \
 	TwoBitPlot.C TwoBitPlotTI.C \
 	Poincare.C PoincareTI.C \
 	ProfileVectorPlotter.C \

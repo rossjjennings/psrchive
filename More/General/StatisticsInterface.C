@@ -49,6 +49,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
 
   add( &Statistics::get_snr,
        &Statistics::set_snr_estimator,
+       &Statistics::get_snr_interface,
        "snr", "Signal-to-noise ratio" );
 
   add( &Statistics::get_nfnr,

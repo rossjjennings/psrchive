@@ -20,6 +20,7 @@
 
 #if HAVE_PGPLOT
 #include "Pulsar/PlotOptions.h"
+#include "Pulsar/PhaseScale.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/PlotAnnotation.h"
 #include <cpgplot.h>

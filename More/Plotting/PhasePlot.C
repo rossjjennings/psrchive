@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PhasePlot.h"
+#include "Pulsar/PhaseScale.h"
 
 Pulsar::PhasePlot::PhasePlot ()
 {
