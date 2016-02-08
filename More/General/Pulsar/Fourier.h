@@ -37,11 +37,17 @@ namespace Pulsar {
   PolnProfile* complex_fourier_transform (const PolnProfile*,
 					  FTransform::Plan* = 0);
 
-  //! Square-law detect the input Profile
+  //! Square-law detect the input complex-valued Profile
   void detect (Profile* input);
 
-  //! Square-law detect the input PolnProfile
+  //! Compute the phase of the input complex-valued Profile
+  void phase (Profile* input);
+
+  //! Square-law detect the input complex-valued PolnProfile
   void detect (PolnProfile* input);
+
+  //! Compute the phase of the input complex-valued PolnProfile
+  void phase (PolnProfile* input);
 
 }
 
