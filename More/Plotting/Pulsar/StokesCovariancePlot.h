@@ -37,6 +37,7 @@ namespace Pulsar {
 
     enum What { Variances,
 		EigenValues,
+		NaturalCovariances,
 		RegressionCoefficients,
 		ModulationIndex };
 
