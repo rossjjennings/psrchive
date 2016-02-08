@@ -97,6 +97,9 @@ protected:
 
   // Overlay plots on top of eachother
   bool overlay_plots;
+
+  // Stack multiple plots vertically
+  bool stack_plots;
 };
 
 int main (int argc, char** argv)
@@ -169,6 +172,9 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
   // Do not overlay plots
   overlay_plots = false;
 
+  // Do not stack multiple plots
+  stack_plots = false;
+
   add( new Pulsar::PlotOptions );
   add( preprocessor = new SpecificPreprocessingOptions(this) );
 }
@@ -206,6 +212,9 @@ void psrplot::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (preprocess, 'x');
   arg->set_help ("disable default preprocessing");
+
+  arg = menu.add (stack_plots, 'S');
+  arg->set_help ("stack plots");
 
   arg = menu.add (overlay_plots, 'O');
   arg->set_help ("overlay plots");
@@ -308,6 +317,7 @@ void psrplot::setup ()
   if (overlay_files)
     overlay_plots = true;
 
+  loop.set_stack (stack_plots);
   loop.set_overlay (overlay_plots);
   loop.set_preprocess (preprocess);
   loop.configure (options);
