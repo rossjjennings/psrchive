@@ -36,10 +36,12 @@ namespace Pulsar {
     Smooth* get_smooth () const;
 
     //! Set to find the minimum mean
-    void set_find_minimum ();
-  
+    void set_find_minimum (bool f = true);
+    bool get_find_minimum () const;
+
     //! Set to find the maximum mean
-    void set_find_maximum ();
+    void set_find_maximum (bool f = true);
+    bool get_find_maximum () const;
 
     //! Set to find the mean closest to the specified value
     void set_find_mean (float mean);

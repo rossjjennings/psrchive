@@ -100,15 +100,26 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
 }
 
 //! Set to find the minimum mean
-void Pulsar::BaselineWindow::set_find_minimum ()
+void Pulsar::BaselineWindow::set_find_minimum (bool f)
 {
-  find_max = false;
+  find_max = !f;
 }
-  
-//! Set to find the maximum mean
-void Pulsar::BaselineWindow::set_find_maximum ()
+ 
+bool Pulsar::BaselineWindow::get_find_minimum () const
 {
-  find_max = true;
+  return !find_max;
+}
+
+ 
+//! Set to find the maximum mean
+void Pulsar::BaselineWindow::set_find_maximum (bool f)
+{
+  find_max = f;
+}
+
+bool Pulsar::BaselineWindow::get_find_maximum () const
+{
+  return find_max;
 }
 
 void Pulsar::BaselineWindow::set_find_mean (float _mean)
@@ -231,6 +242,10 @@ public:
     add( &BaselineWindow::get_smooth,
 	 &BaselineWindow::set_smooth,
 	 "smooth", "smoothing algorithm" );
+
+    add( &BaselineWindow::get_find_minimum,
+	 &BaselineWindow::set_find_minimum,
+	 "min", "find the minimum" );
   }
 
   std::string get_interface_name () const { return "minimum"; }
