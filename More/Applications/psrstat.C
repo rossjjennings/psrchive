@@ -39,6 +39,9 @@ public:
   void add_expressions (const std::string& str)
   { standard_separation (expressions, str); }
 
+  void add_script (const std::string& filename)
+  { loadlines (filename, expressions); }
+
   void add_loop (const std::string& str)
   { loop.add_index( new TextIndex(optarg) ); }
 
@@ -111,6 +114,9 @@ void psrstat::add_options (CommandLine::Menu& menu)
     ("exp is either the name of a parameter (attribute or statistic) \n"
      "or a mathematical expression involving one or more parameters and \n"
      "enclosed in braces");
+
+  arg = menu.add (this, &psrstat::add_script, 'C', "filename");
+  arg->set_help ("read expressions to be evaluated from file");
 
   arg = menu.add (this, &psrstat::add_loop, 'l', "name=<range>");
   arg->set_help ("loop over the range of the named parameter");
