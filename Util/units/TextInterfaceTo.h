@@ -252,9 +252,9 @@ namespace TextInterface
     }
 
     //! Factory generates a new DynamicInterface instance with description
-    template<class P, typename U>
+    template<class P, typename U, typename Parent>
     void add (U*(P::*get)()const, void(P::*set)(U*), 
-	      Parser*(U::*get_parser)(),
+	      Parser*(Parent::*get_parser)(),
 	      const char* name, const char* description = 0)
     {
       EmbedAllocator<C,U*> gen;
