@@ -316,12 +316,17 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
   if (text == this->name)
     return true;
 
+  if (text == this->name + "[:<name>]")
+    return true;
+
   std::string range;
   if (!match (this->name, text, &range, &remainder))
     return false;
 
-  if (remainder == "[:<name>]")
-    return true;
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " remainder='" << remainder << "'" << std::endl;
+#endif
 
   if (remainder == "help")
     return true;
@@ -329,7 +334,18 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
   if (!this->instance)
     return false;
 
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " getting Parser" << std::endl;
+#endif
+
   Parser* parser = get_parser(this->instance);
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " got Parser" << std::endl;
+#endif
+
   if (! parser->found (remainder))
     return false;
 
