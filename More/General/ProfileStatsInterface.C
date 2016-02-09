@@ -39,6 +39,7 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
 
   add( &ProfileStats::get_onpulse_estimator,
        &ProfileStats::set_onpulse_estimator,
+       &ProfileWeightFunction::get_interface,
        "on", "On-pulse estimator" );
 
   import( "on", PhaseWeight::Interface(), 
@@ -46,6 +47,7 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
 
   add( &ProfileStats::get_baseline_estimator,
        &ProfileStats::set_baseline_estimator,
+       &ProfileWeightFunction::get_interface,
        "off", "Off-pulse estimator" );
 
   import( "off", PhaseWeight::Interface(), 
