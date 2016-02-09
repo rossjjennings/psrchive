@@ -135,7 +135,7 @@ template<class Type, bool active>
 Reference::To<Type,active>::To (Type* ref_pointer)
 {
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::To (Type*="<< ref_pointer <<")"<< endl;
+  cerr << "Reference::To<"+name()+">::To (Type*="<< (void*)ref_pointer <<")"<< endl;
 #endif
 
   hook (ref_pointer);
@@ -210,7 +210,8 @@ Reference::To<Type,active>&
 Reference::To<Type,active>::operator = (Type* ref_pointer)
 {
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator = (Type*=" << ref_pointer <<")"<<endl;
+  cerr << "Reference::To<"+name()+">::operator = "
+    "(Type*=" << (void*)ref_pointer <<")"<<endl;
 #endif
 
   if (the_handle && the_handle->pointer == ref_pointer)

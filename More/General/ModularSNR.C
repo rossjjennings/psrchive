@@ -92,10 +92,12 @@ public:
 
     add( &ModularSNR::get_baseline_estimator,
          &ModularSNR::set_baseline_estimator,
+	 &ProfileWeightFunction::get_interface,
          "off", "algorithm used to locate the off-pulse baseline" );
 
     add( &ModularSNR::get_onpulse_estimator,
          &ModularSNR::set_onpulse_estimator,
+	 &ProfileWeightFunction::get_interface,
          "on", "algorithm used to locate the on-pulse region" );
 
   }

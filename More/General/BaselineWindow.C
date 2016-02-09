@@ -243,11 +243,12 @@ public:
 
     add( &BaselineWindow::get_smooth,
 	 &BaselineWindow::set_smooth,
+	 &Smooth::get_interface,
 	 "smooth", "smoothing algorithm" );
 
     add( &BaselineWindow::get_find_minimum,
 	 &BaselineWindow::set_find_minimum,
-	 "min", "find the minimum" );
+	 "find_min", "find the minimum" );
 
     add( &BaselineWindow::get_found_bin_start,
 	 "bin0", "first bin of the found region" );

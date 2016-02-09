@@ -232,7 +232,7 @@ namespace TextInterface
 	      const char* name, const char* description = 0)
     {
       EmbedAllocator<C,U> gen;
-      Attribute<C>* getset = gen (name, get, set, get_parser);
+      Attribute<C>* getset = gen.direct (name, get, set, get_parser);
       if (description)
 	getset->set_description (description);
       add_value (getset);
@@ -245,7 +245,20 @@ namespace TextInterface
 	      const char* name, const char* description = 0)
     {
       EmbedAllocator<C,U> gen;
-      Attribute<C>* getset = gen (name, get, set, get_parser);
+      Attribute<C>* getset = gen.direct (name, get, set, get_parser);
+      if (description)
+	getset->set_description (description);
+      add_value (getset);
+    }
+
+    //! Factory generates a new DynamicInterface instance with description
+    template<class P, typename U, typename Parent>
+    void add (U*(P::*get)()const, void(P::*set)(U*), 
+	      Parser*(Parent::*get_parser)(),
+	      const char* name, const char* description = 0)
+    {
+      EmbedAllocator<C,U*> gen;
+      Attribute<C>* getset = gen.indirect (name, get, set, get_parser);
       if (description)
 	getset->set_description (description);
       add_value (getset);

@@ -8,6 +8,7 @@
 // #define _DEBUG 1
 
 #include "TextInterface.h"
+#include "interface_stream.h"
 
 #include <iostream>
 using namespace std;
@@ -38,9 +39,19 @@ public:
     return text;
   }
 
+  TextInterface::Parser* get_interface();
+  static extension* factory (const std::string&)
+  {
+    cerr << "extension::factory" << endl;
+    return new extension;
+  }
+
 protected:
   std::string text;
 };
+
+
+
 
 class extensionTUI : public TextInterface::To<extension>
 {
@@ -52,19 +63,46 @@ public:
   }
 };
 
+TextInterface::Parser* extension::get_interface()
+{
+  return new extensionTUI (this);
+}
+
 class tester : public Reference::Able
 {
 public:
-  tester () { value = 0; }
+  tester () { value = 0; ext = new extension; }
   void set_value (double _value) { value = _value; }
   double get_value () const { return value; }
   TextInterface::Parser* get_extension_interface()
-  { return new extensionTUI(&ext); }
+  {
+    cerr << "tester::get_extension_interface" << endl;
+    return new extensionTUI(ext);
+  }
+
+  extension* get_extension () const
+  {
+    return const_cast<extension*>( ext.ptr() );
+  }
+
+  void set_extension (extension* e) { ext = e; }
 
 protected:
-  extension ext;
+  Reference::To<extension> ext;
   double value;
 };
+
+std::ostream& operator<< (std::ostream& ostr,
+			  extension* e)
+{
+  return interface_insertion (ostr, e);
+}
+
+std::istream& operator>> (std::istream& istr,
+			  extension* &e)
+{
+  return interface_extraction (istr, e);
+}
 
 
 class testerTUI : public TextInterface::To<tester>
@@ -79,14 +117,26 @@ public:
 	 &tester::set_value,
 	 &tester::get_extension_interface,
 	 "embed", "direct interface to ext");
+#if 0
+    add (&tester::get_extension,
+	 &tester::set_extension,
+	 &extension::get_interface,
+	 "embed", "direct interface to ext");
+#endif
   }
 };
 
 int main () try
 {
+  cerr << "main: construct tester" << endl;
   tester Test;
+
+  cerr << "main: construct testerTUI" << endl;
+
   testerTUI getset;
   getset.set_instance (&Test);
+
+  getset.help(true);
 
   getset.set_value("embed", "3.456");
 
