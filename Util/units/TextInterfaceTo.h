@@ -15,6 +15,7 @@
 #include "TextInterfaceAttribute.h"
 #include "TextInterfaceElement.h"
 #include "TextInterfaceProxy.h"
+#include "TextInterfaceEmbed.h"
 
 namespace TextInterface
 {
@@ -223,7 +224,45 @@ namespace TextInterface
 	  getset->set_description (description);
 	add_value (getset);
       }
+    
+    //! Factory generates a new DynamicInterface instance with description
+    template<class P, typename T, typename U>
+    void add (T(P::*get)()const, void(P::*set)(const U&), 
+	      Parser*(P::*get_parser)(),
+	      const char* name, const char* description = 0)
+    {
+      EmbedAllocator<C,U> gen;
+      Attribute<C>* getset = gen.direct (name, get, set, get_parser);
+      if (description)
+	getset->set_description (description);
+      add_value (getset);
+    }
 
+    //! Factory generates a new DynamicInterface instance with description
+    template<class P, typename T, typename U>
+    void add (T(P::*get)()const, void(P::*set)(U), 
+	      Parser*(P::*get_parser)(),
+	      const char* name, const char* description = 0)
+    {
+      EmbedAllocator<C,U> gen;
+      Attribute<C>* getset = gen.direct (name, get, set, get_parser);
+      if (description)
+	getset->set_description (description);
+      add_value (getset);
+    }
+
+    //! Factory generates a new DynamicInterface instance with description
+    template<class P, typename U, typename Parent>
+    void add (U*(P::*get)()const, void(P::*set)(U*), 
+	      Parser*(Parent::*get_parser)(),
+	      const char* name, const char* description = 0)
+    {
+      EmbedAllocator<C,U*> gen;
+      Attribute<C>* getset = gen.indirect (name, get, set, get_parser);
+      if (description)
+	getset->set_description (description);
+      add_value (getset);
+    }
 
     //! Add adaptable unary function object template
     template<class U>

@@ -109,6 +109,14 @@ double Pulsar::Statistics::get_snr () const
     return get_Profile()->snr();
 }
 
+TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
+{
+  if (snr_estimator)
+    return snr_estimator->get_interface();
+  else
+    return Profile::snr_strategy.get_value()->get_interface();
+}
+
 //! Get the Fourier-noise-to-noise ratio
 double Pulsar::Statistics::get_nfnr () const
 {

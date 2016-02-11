@@ -10,6 +10,7 @@
 #define __Pulsar_PhaseVsHistPlus_h
 
 #include "Pulsar/MultiPlot.h"
+#include "Pulsar/PhaseScale.h"
 #include "Pulsar/PhaseVsHist.h"
 #include "Pulsar/StokesPlot.h"
 

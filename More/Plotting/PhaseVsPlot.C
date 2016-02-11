@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/PhaseVsPlot.h"
+#include "Pulsar/PhaseScale.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/RemoveBaseline.h"

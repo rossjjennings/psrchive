@@ -121,3 +121,36 @@ void Pulsar::detect (Profile* data) try
 catch (Error& error) {
   throw error += "Pulsar::detect (Profile)";
 }
+
+void Pulsar::phase (PolnProfile* data) try
+{
+  unsigned npol = 4;
+  for (unsigned ipol=0; ipol<npol; ipol++)
+    phase( data->get_Profile(ipol) );
+}
+catch (Error& error) {
+  throw error += "Pulsar::detect (PolnProfile)";
+}
+
+void Pulsar::phase (Profile* data) try
+{
+  unsigned nbin = data->get_nbin() / 2;
+  float* amps = data->get_amps();
+
+  for (unsigned ibin=0; ibin < nbin; ibin++) 
+  {
+    float re = amps[ibin*2];
+    float im = amps[ibin*2+1];
+    amps[ibin] = atan2 (im, re);
+  }
+
+  data->resize(nbin);
+
+  if (data->get_amps() != amps)
+    throw Error (InvalidState, "Pulsar::phase (Profile)",
+		 "Profile::resize does not preserve amps array");
+
+}
+catch (Error& error) {
+  throw error += "Pulsar::phase (Profile)";
+}

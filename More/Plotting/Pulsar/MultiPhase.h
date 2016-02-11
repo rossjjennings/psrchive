@@ -6,21 +6,19 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/10/02 05:08:15 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/MultiPhase.h
 
 #ifndef __Pulsar_MultiPhase_h
 #define __Pulsar_MultiPhase_h
 
 #include "Pulsar/MultiPlot.h"
-#include "Pulsar/PhaseScale.h"
+#include "Pulsar/HasPhaseScale.h"
 
 namespace Pulsar {
 
   //! Plots multiple viewports with pulse phase along the shared x-axis
-  class MultiPhase : public MultiPlot {
+  class MultiPhase : public MultiPlot, public HasPhaseScale
+  {
 
   public:
 

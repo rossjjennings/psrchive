@@ -251,7 +251,7 @@ std::ostream& operator<< (std::ostream& ostr, const Estimate<T,U>& estimate)
   return ostr << "(" << estimate.val << "+-" << sqrt(estimate.var) << ")";
 }
 
-static bool expect (std::istream& is, char c)
+static inline bool expect (std::istream& is, char c)
 {
   if (is.peek() != c) {
     is.setstate (std::ios::failbit);

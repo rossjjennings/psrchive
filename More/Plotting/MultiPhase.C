@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/MultiPhase.h"
+#include "Pulsar/PhaseScale.h"
 
 Pulsar::MultiPhase::MultiPhase ()
 {

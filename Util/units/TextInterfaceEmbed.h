@@ -17,6 +17,120 @@
 
 namespace TextInterface
 {
+  //! Dynamically embeds the interface of something that can be got and set
+  /*! In this template: C is a composite; Get is the method of C that
+    returns something, Set is the method of C that sets something, and
+    get_parser is the method that optionally returns the embedded interface
+    to something. */
+  template<class C, class Type, class Get, class Set>
+  class OptionalInterface : public AttributeGetSet<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    OptionalInterface (const std::string& t, Get g, Set s)
+      : AttributeGetSet<C,Type,Get,Set> (t,g,s)
+    { }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+    { return AttributeGetSet<C,Type,Get,Set>::get_name() + "[:<name>]"; }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const;
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value);
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+  protected:
+
+    virtual Parser* get_parser (const C* ptr) const = 0;
+
+    //! Remainder parsed from name during matches
+    mutable std::string remainder;
+  };
+
+
+
+
+  template<class C, class Type, class Get, class Set, class GetParser>
+  class DirectInterface : public OptionalInterface<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    DirectInterface (const std::string& t, Get g, Set s, GetParser p)
+      : OptionalInterface<C,Type,Get,Set> (t,g,s)
+    { get_parser_method = p; }
+
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+    { return new DirectInterface(*this); }
+
+  protected:
+
+    //! Method of C that returns TextInterface::Parser
+    GetParser get_parser_method;
+
+    Parser* get_parser (const C* ptr) const
+    { 
+      return (const_cast<C*>(ptr)->*get_parser_method)();
+    }
+  };
+
+  template<class C, class Type, class Get, class Set, class GetParser>
+  class IndirectInterface : public OptionalInterface<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    IndirectInterface (const std::string& t, Get g, Set s, GetParser p)
+      : OptionalInterface<C,Type,Get,Set> (t,g,s)
+    { get_parser_method = p; }
+
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+    { return new IndirectInterface(*this); }
+
+  protected:
+
+    //! Method of C that returns TextInterface::Parser
+    GetParser get_parser_method;
+
+    Parser* get_parser (const C* ptr) const
+    { 
+      Type tptr = (const_cast<C*>(ptr)->*(this->get))();
+      return (tptr->*get_parser_method)();
+    }
+  };
+
+  template<class C, class Type>
+  class EmbedAllocator 
+  {
+  public:
+    //! Generate a new OptionalInterface instance with description
+    template<class Get, class Set, class GetParser>
+    OptionalInterface<C,Type,Get,Set>* 
+    direct (const std::string& n, Get g, Set s, GetParser p)
+    {
+      return new DirectInterface<C,Type,Get,Set,GetParser> (n,g,s,p);
+    }
+
+    //! Generate a new OptionalInterface instance with description
+    template<class Get, class Set, class GetParser>
+    OptionalInterface<C,Type,Get,Set>* 
+    indirect (const std::string& n, Get g, Set s, GetParser p)
+    {
+      return new IndirectInterface<C,Type,Get,Set,GetParser> (n,g,s,p);
+    }
+  };
+
   //! Dynamically embeds the interfaces of elements in a vector
   /*! In this template: V is a vector of elements; Get is the method of
     V that returns the element at the specified index; and Size is the
@@ -159,6 +273,95 @@ namespace TextInterface
   };
 
 }
+
+template<class C, class T, class G, class S> 
+std::string
+TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const
+{
+  if (remainder == "")
+    return AttributeGetSet<C,T,G,S>::get_value (ptr);
+
+  Parser* parser = get_parser(ptr);
+
+  if (remainder == "help")
+    return "\n" + parser->help();
+  else
+    return parser->get_value (remainder);
+}
+
+template<class C, class T, class G, class S>
+void TextInterface::OptionalInterface<C,T,G,S>::set_value (C* ptr,
+							  const std::string& val)
+{
+  if (remainder == "")
+    AttributeGetSet<C,T,G,S>::set_value (ptr, val);
+  else
+  {
+    Parser* parser = get_parser(ptr);
+    parser->set_value (remainder, val);
+  }
+}
+
+template<class C, class T, class G, class S>
+bool TextInterface::OptionalInterface<C,T,G,S>::matches
+  (const std::string& text) const
+{
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " text='" << text << "'" << std::endl;
+#endif
+
+  remainder = "";
+
+  if (text == this->name)
+    return true;
+
+  if (text == this->name + "[:<name>]")
+    return true;
+
+  std::string range;
+  if (!match (this->name, text, &range, &remainder))
+    return false;
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " remainder='" << remainder << "'" << std::endl;
+#endif
+
+  if (remainder == "help")
+    return true;
+
+  if (!this->instance)
+    return false;
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " getting Parser" << std::endl;
+#endif
+
+  Parser* parser = get_parser(this->instance);
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " got Parser" << std::endl;
+#endif
+
+  if (! parser->found (remainder))
+    return false;
+
+  return true;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 template<class V, class G, class S> 
 std::string

@@ -42,11 +42,13 @@ namespace Pulsar {
     //! Set the Archive to be plotted
     void set_Archive (Archive*);
 
-    //! Set the overlay flag
+    //! Overlay the data from multiple objects in a single plot
     void set_overlay (bool);
-
-    //! Get the overlay flag
     bool get_overlay () const;
+
+    //! Automatically stack multiple plots
+    void set_stack (bool);
+    bool get_stack () const;
 
     //! Set the preprocess flag
     void set_preprocess (bool);
@@ -68,6 +70,7 @@ namespace Pulsar {
 
     bool preprocess;
     bool overlay;
+    bool stack;
 
     std::stack< Reference::To<TextIndex> > index_stack;
 
