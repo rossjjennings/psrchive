@@ -34,6 +34,8 @@ namespace Phase
   public:
     HasUnit () { nbin=0; period=0; unit=Turns; }
     
+    unsigned get_bin (double value) const;
+
     void set_unit( Unit u ) { unit = u; }
     Unit get_unit () const { return unit; }
     void set_nbin( unsigned N ) { nbin = N; }
@@ -49,6 +51,8 @@ namespace Phase
 
     void set_value( double v ) { value = v; }
     double get_value () const { return value; }
+
+    unsigned get_bin () const { return HasUnit::get_bin(value); }
 
     friend std::ostream& operator<< (std::ostream&, const Value&);
     friend std::istream& operator>> (std::istream&, Value&);

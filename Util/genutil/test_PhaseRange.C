@@ -23,6 +23,7 @@ int main () try
     cerr << "test_PhaseRange ERROR"
       " value=" << val.get_value() << " != 0.03"
 	 << endl;
+    return -1;
   }
 
   if (val.get_unit() != Phase::Milliseconds)
@@ -30,6 +31,17 @@ int main () try
     cerr << "test_PhaseRange ERROR"
       " unit=" << val.get_unit() << " != Milliseconds"
 	 << endl;
+    return -1;
+  }
+
+  val.set_period (1.0);
+  val.set_nbin (1000);
+  if (val.get_bin() != 30)
+  {
+    cerr << "test_PhaseRange ERROR"
+      " bin=" << val.get_bin() << " != 30"
+	 << endl;
+    return -1;
   }
 
   Phase::Range range;
@@ -42,6 +54,7 @@ int main () try
     cerr << "test_PhaseRange ERROR"
       " pair=" << vals << " != 10:180"
 	 << endl;
+    return -1;
   }
 
   if (range.get_unit() != Phase::Degrees)
@@ -49,6 +62,17 @@ int main () try
     cerr << "test_PhaseRange ERROR"
       " unit=" << val.get_unit() << " != Degrees"
 	 << endl;
+    return -1;
+  }
+
+  range.set_nbin (720);
+  std::pair<unsigned,unsigned> bins = range.get_bins();
+  if (bins.first != 20 || bins.second != 360)
+  {
+    cerr << "test_PhaseRange ERROR"
+      " pair=" << bins << " != 20:360"
+	 << endl;
+    return -1;
   }
 
   cerr << "test_PhaseRange: All tests passed!" << endl;

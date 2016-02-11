@@ -12,10 +12,43 @@
 #include "tostring.h"
 
 #include <list>
+#include <math.h>
+
 using namespace std;
+
+unsigned Phase::HasUnit::get_bin (double value) const
+{
+  if (unit == Bins)
+    return value;
+
+  if (!nbin)
+    throw Error (InvalidState, "Phase::HasUnit::get_bin",
+		   "Unit != Bins and nbin not set");
+
+  double turns = 0.0;
+
+  if (unit == Turns)
+    turns = value;
+  else if (unit == Degrees)
+    turns = value / 360.0;
+  else if (unit == Radians)
+    turns = value / (2*M_PI);
+  else if (unit == Milliseconds)
+  {
+    if (!period)
+      throw Error (InvalidState, "Phase::HasUnit::get_bin",
+		   "Unit == Milliseconds and period not set");
+    turns = value / period;
+  }
+
+  return turns * nbin;
+}
 
 std::pair<unsigned,unsigned> Phase::Range::get_bins () const
 {
+  std::pair<double,double> range =  get_range();
+  return std::pair<unsigned,unsigned>( get_bin(range.first),
+				       get_bin(range.second) );
 }
 
 std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
