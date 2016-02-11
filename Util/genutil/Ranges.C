@@ -46,6 +46,16 @@ istream& operator>> (istream& is, Range& r)
   return is;
 }
 
+std::pair<double,double> Range::get_range () const
+{
+  if (lt || gt)
+    throw Error (InvalidState, "Range::get_range",
+		 "range not described by finite bounds");
+
+  return std::pair<double,double> (x0,x1);
+}
+
+
 bool Range::within (double x) const
 {
   if (lt && x < x0)

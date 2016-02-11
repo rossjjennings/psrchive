@@ -7,6 +7,7 @@
 
 #include "PhaseRange.h"
 #include "tostring.h"
+#include "pairutil.h"
 
 #include <iostream>
 using namespace std;
@@ -28,6 +29,25 @@ int main () try
   {
     cerr << "test_PhaseRange ERROR"
       " unit=" << val.get_unit() << " != Milliseconds"
+	 << endl;
+  }
+
+  Phase::Range range;
+
+  range = fromstring<Phase::Range> ("10:180_deg");
+
+  std::pair<double,double> vals = range.get_range();
+  if (vals.first != 10.0 || vals.second != 180.0)
+  {
+    cerr << "test_PhaseRange ERROR"
+      " pair=" << vals << " != 10:180"
+	 << endl;
+  }
+
+  if (range.get_unit() != Phase::Degrees)
+  {
+    cerr << "test_PhaseRange ERROR"
+      " unit=" << val.get_unit() << " != Degrees"
 	 << endl;
   }
 

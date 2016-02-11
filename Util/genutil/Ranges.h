@@ -22,6 +22,9 @@ public:
   Range () { gt = lt = false; x0 = x1 = 0; }
   friend std::ostream& operator<< (std::ostream&, const Range&);
   friend std::istream& operator>> (std::istream&, Range&);
+  
+  std::pair<double,double> get_range () const;
+
   bool within (double x) const;
 };
 

@@ -14,6 +14,9 @@
 #include <list>
 using namespace std;
 
+std::pair<unsigned,unsigned> Phase::Range::get_bins () const
+{
+}
 
 std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
 {
@@ -40,7 +43,7 @@ std::istream& Phase::operator>> (std::istream& is, Value& v)
 {
   is >> v.value;
 
-  cerr << "Phase::operator Value::value=" << v.value << endl;
+  // cerr << "Phase::operator Value::value=" << v.value << endl;
   return v.extraction (is);
 }
 
