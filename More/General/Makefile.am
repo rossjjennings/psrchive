@@ -64,6 +64,7 @@ nobase_include_HEADERS = \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
+	Pulsar/PatchFrequency.h \
 	Pulsar/PatchTime.h \
 	Pulsar/PeakEdgesInterpreter.h \
 	Pulsar/PeakConsecutive.h \
@@ -205,6 +206,7 @@ libGeneral_la_SOURCES = \
 	ModularSNR.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
+	PatchFrequency.C \
 	PatchTime.C \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
