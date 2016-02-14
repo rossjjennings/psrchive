@@ -16,14 +16,17 @@
 
 class Range
 {
+protected:
   bool gt, lt;
   double x0,x1;
 public:
   Range () { gt = lt = false; x0 = x1 = 0; }
+
   friend std::ostream& operator<< (std::ostream&, const Range&);
   friend std::istream& operator>> (std::istream&, Range&);
   
   std::pair<double,double> get_range () const;
+  void set_range (double _0, double _1) { x0=_0; x1=_1; }
 
   bool within (double x) const;
 };
