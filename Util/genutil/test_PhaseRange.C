@@ -152,6 +152,8 @@ int test_PhaseRanges ()
 
   Phase::Ranges bins = ranges.as( Phase::Bins );
 
+  ranges = fromstring<Phase::Ranges> ("10:180");
+
   return 0;
 }
 
