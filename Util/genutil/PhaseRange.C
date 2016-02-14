@@ -122,7 +122,7 @@ std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
 
 std::istream& Phase::HasUnit::extraction (std::istream& is)
 {
-  if (is.peek() == '%')
+  if (!is.eof() && is.peek() == '%')
   {
     is.get();
     is >> unit;
