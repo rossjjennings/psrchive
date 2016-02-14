@@ -41,9 +41,12 @@ Pulsar::PolnProfileStats::Interface::Interface (PolnProfileStats* instance)
 
   typedef ProfileStats*(PolnProfileStats::*the_mutable_one)();
 
-  import ( "", ProfileStats::Interface(),
-	   (the_mutable_one) &PolnProfileStats::get_stats );
+  ProfileStats* stats = 0;
+  if (instance)
+    stats = instance->get_stats();
 
+  import ( "", ProfileStats::Interface(stats),
+	   (the_mutable_one) &PolnProfileStats::get_stats );
 }
 
 
