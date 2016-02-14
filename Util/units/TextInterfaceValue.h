@@ -12,6 +12,8 @@
 #define __TextInterfaceValue_h
 
 #include "ReferenceAble.h"
+#include "Error.h"
+
 #include <string>
 
 // #define _DEBUG 1
@@ -37,9 +39,6 @@ namespace TextInterface {
     //! Get the value as text
     virtual std::string get_value () const = 0;
 
-    //! Get the value with modifiers
-    virtual std::string get_value (const std::string& modifiers) const;
-
     //! Set the value as text
     virtual void set_value (const std::string& value) = 0;
 
@@ -57,6 +56,9 @@ namespace TextInterface {
 #endif
       return name == get_name();
     }
+
+    virtual void set_modifiers (const std::string&) const;
+    virtual void reset_modifiers () const;
 
     virtual void set_parent (Parser* p) { parent = p; }
 

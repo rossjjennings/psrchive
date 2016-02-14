@@ -80,9 +80,9 @@ public:
     return new extensionTUI(ext);
   }
 
-  extension* get_extension () const
+  extension* get_extension ()
   {
-    return const_cast<extension*>( ext.ptr() );
+    return ext;
   }
 
   void set_extension (extension* e) { ext = e; }

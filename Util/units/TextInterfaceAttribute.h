@@ -2,7 +2,7 @@
 
 /***************************************************************************
  *
- *   Copyright (C) 2003-2013 by Willem van Straten
+ *   Copyright (C) 2003 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,7 +12,7 @@
 #ifndef __TextInterfaceAttribute_h
 #define __TextInterfaceAttribute_h
 
-#include "TextInterfaceParser.h"
+#include "TextInterfaceValue.h"
 
 namespace TextInterface
 {
@@ -56,19 +56,75 @@ namespace TextInterface
 
   };
 
+  //! Policy for converting a value to a string
+  /*! Specialize this template to customize the behaviour for different types */
+  template<class Type>
+  class ToStringPolicy
+  {
+    mutable ToString tostring;
+
+  public:
+
+    void set_modifiers (const std::string& modifiers) const
+    {
+      std::cerr << "ToStringPolicy<Type>::set_modifiers "
+		<< modifiers << std::endl;
+      tostring.set_precision ( fromstring<unsigned>(modifiers) );
+    }
+
+    void reset_modifiers () const
+    { 
+      tostring.reset_modifiers ();
+    }
+
+    std::string operator () (const Type& t) const
+    { 
+      return tostring( t );
+    }
+  };
+
+  //! Policy for converting a value to a string
+  /*! Specialize this template to customize the behaviour for different types */
+  template<class C, class Get>
+  class GetToStringPolicy
+  {
+  };
+
+  template<class C, class P, class Type>
+  class GetToStringPolicy<C, Type (P::*)() const>
+  {
+    ToStringPolicy<Type> tostring;
+
+  public:
+
+    void set_modifiers (const std::string& modifiers) const
+    {
+      tostring.set_modifiers(modifiers);
+    }
+
+    void reset_modifiers () const
+    { 
+      tostring.reset_modifiers ();
+    }
+
+    std::string operator () (const C* ptr, Type (P::*get)() const) const
+    { 
+      if (!ptr)
+	return "";
+      return tostring( (ptr->*get) () );
+    }
+  };
+
   //! Interface to a class attribute with an accessor method, C::Get()
   template<class C, class Get>
-  class AttributeGet : public Attribute<C> {
+  class AttributeGet : public Attribute<C>
+  {
 
   public:
 
     //! Constructor
     AttributeGet (const std::string& _name, Get _get)
       { name = _name; get = _get; }
-
-    //! Copy constructor
-    AttributeGet (const AttributeGet& copy)
-      { name = copy.name; description = copy.description; get = copy.get; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGet(*this); }
@@ -92,12 +148,18 @@ namespace TextInterface
 
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const
-      { if (!ptr) return ""; return tostring( (ptr->*get) () ); }
+    { return tostring (ptr,get); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
-      { throw Error (InvalidState, "AttributeGet::set_value", 
-		     name + " cannot be set"); }
+    { throw Error (InvalidState, "AttributeGet::set_value", 
+		   name + " cannot be set"); }
+
+    void set_modifiers (const std::string& modifiers) const
+    { tostring.set_modifiers (modifiers); }
+
+    void reset_modifiers () const
+    { tostring.reset_modifiers (); }
 
   protected:
 
@@ -113,6 +175,7 @@ namespace TextInterface
     //! The get method
     Get get;
 
+    GetToStringPolicy<C,Get> tostring;
   };
 
   //! Interface to a class attribute with an accessor and modifier methods
@@ -125,10 +188,6 @@ namespace TextInterface
     //! Constructor
     AttributeGetSet (const std::string& _name, Get _get, Set _set)
       : AttributeGet<C,Get> (_name, _get) { set = _set; }
-
-    //! Copy constructor
-    AttributeGetSet (const AttributeGetSet& copy) 
-      : AttributeGet<C,Get> (copy) { set = copy.set; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGetSet(*this); }

@@ -31,7 +31,11 @@ namespace TextInterface
     //! Construct from a pointer to element attribute interface
     OptionalInterface (const std::string& t, Get g, Set s)
       : AttributeGetSet<C,Type,Get,Set> (t,g,s)
-    { }
+    {
+#if _DEBUG
+      std::cerr << "OptionalInterface name=" << t << std::endl;
+#endif
+    }
 
     //! Get the name of the attribute
     std::string get_name () const
@@ -46,12 +50,16 @@ namespace TextInterface
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
 
+    void set_modifiers (const std::string&) const;
+    void reset_modifiers () const;
+
   protected:
 
     virtual Parser* get_parser (const C* ptr) const = 0;
 
-    //! Remainder parsed from name during matches
-    mutable std::string remainder;
+    //! Value found during match
+    mutable Value* value;
+    mutable bool help;
   };
 
 
@@ -278,28 +286,26 @@ template<class C, class T, class G, class S>
 std::string
 TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const
 {
-  if (remainder == "")
-    return AttributeGetSet<C,T,G,S>::get_value (ptr);
-
-  Parser* parser = get_parser(ptr);
-
-  if (remainder == "help")
+  if (help)
+  {
+    Parser* parser = get_parser(ptr);
     return "\n" + parser->help();
-  else
-    return parser->get_value (remainder);
+  }
+
+  if (value)
+    return value->get_value();
+
+  return AttributeGetSet<C,T,G,S>::get_value (ptr);
 }
 
 template<class C, class T, class G, class S>
 void TextInterface::OptionalInterface<C,T,G,S>::set_value (C* ptr,
 							  const std::string& val)
 {
-  if (remainder == "")
-    AttributeGetSet<C,T,G,S>::set_value (ptr, val);
+  if (value)
+    value->set_value (val);
   else
-  {
-    Parser* parser = get_parser(ptr);
-    parser->set_value (remainder, val);
-  }
+    AttributeGetSet<C,T,G,S>::set_value (ptr, val);
 }
 
 template<class C, class T, class G, class S>
@@ -311,7 +317,8 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
     " text='" << text << "'" << std::endl;
 #endif
 
-  remainder = "";
+  value = 0;
+  help = false;
 
   if (text == this->name)
     return true;
@@ -320,6 +327,7 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
     return true;
 
   std::string range;
+  std::string remainder;
   if (!match (this->name, text, &range, &remainder))
     return false;
 
@@ -329,10 +337,19 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
 #endif
 
   if (remainder == "help")
+  {
+    help = true;
     return true;
+  }
 
   if (!this->instance)
+  {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " no instance" << std::endl;
+#endif
     return false;
+  }
 
 #ifdef _DEBUG
   std::cerr << "TextInterface::OptionalInterface::matches"
@@ -346,14 +363,43 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
     " got Parser" << std::endl;
 #endif
 
-  if (! parser->found (remainder))
+  value = parser->find (remainder);
+
+  if (!value)
+  {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " Parser::find(" << remainder << ") returns false" << std::endl;
+#endif
     return false;
+  }
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " Parser::find(" << remainder << ") returns true" << std::endl;
+#endif
 
   return true;
 }
 
 
+template<class C, class T, class G, class S>
+void TextInterface::OptionalInterface<C,T,G,S>::set_modifiers (const std::string& modifiers) const
+{
+  if (value)
+    value->set_modifiers (modifiers);
+  else
+    AttributeGetSet<C,T,G,S>::set_modifiers (modifiers);
+}
 
+template<class C, class T, class G, class S>
+void TextInterface::OptionalInterface<C,T,G,S>::reset_modifiers () const
+{
+  if (value)
+    value->reset_modifiers ();
+  else
+    AttributeGetSet<C,T,G,S>::reset_modifiers ();
+}
 
 
 

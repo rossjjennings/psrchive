@@ -51,6 +51,7 @@ include_HEADERS = \
 	TextEditor.h \
 	TextIndex.h \
         TextInterface.h \
+	TextInterfaceAdapter.h \
 	TextInterfaceAttribute.h \
 	TextInterfaceElement.h \
 	TextInterfaceEmbed.h \
@@ -59,6 +60,7 @@ include_HEADERS = \
 	TextInterfaceParser.h \
 	TextInterfaceProxy.h \
 	TextInterfaceTo.h \
+	TextInterfaceValue.h \
 	TextLoop.h \
         tostring.h \
         Traits.h \
@@ -98,16 +100,15 @@ EXTRA_DIST = header_PromoteTraits MatrixTest.h
 nodist_include_HEADERS = PromoteTraits.h
 
 
-TESTS = test_Alias test_tostring test_Conventions		    \
-	test_Error test_Configuration		    \
-	test_HeapTracked test_Reference test_circular_Reference	    \
-	test_Registry test_Functor test_Callback test_separate	    \
-	test_substitute test_escape test_Mueller test_inner_product \
-	test_Basis test_Stokes test_Estimate			    \
-        test_TextInterface test_parse_indeces test_TextIndex	    \
-	test_Vector test_Matrix test_Jacobi test_eigen		    \
-	test_Jones test_Quaternion test_Pauli			    \
-	test_ModifyRestore test_Dirac test_DynamicInterface
+TESTS = test_Alias test_tostring test_Conventions test_Error		\
+	test_Configuration test_HeapTracked test_Reference		\
+	test_circular_Reference test_Registry test_Functor		\
+	test_Callback test_separate test_TextInterface			\
+	test_parse_indeces test_TextIndex test_DynamicInterface		\
+	test_substitute test_escape test_Mueller test_inner_product	\
+	test_Basis test_Stokes test_Estimate test_Vector test_Matrix	\
+	test_Jacobi test_eigen test_Jones test_Quaternion test_Pauli	\
+	test_ModifyRestore test_Dirac
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
