@@ -16,6 +16,8 @@ int main () try
 {
   Phase::Value val;
 
+  cerr << "test_PhaseRange Value in Milliseconds" << endl;
+
   val = fromstring<Phase::Value> ("0.03_ms");
 
   if (val.get_value() != 0.03)
@@ -34,6 +36,8 @@ int main () try
     return -1;
   }
 
+  cerr << "test_PhaseRange Value::get_nbin" << endl;
+
   val.set_period (1.0);
   val.set_nbin (1000);
   if (val.get_bin() != 30)
@@ -43,6 +47,8 @@ int main () try
 	 << endl;
     return -1;
   }
+
+  cerr << "test_PhaseRange Range in Degrees" << endl;
 
   Phase::Range range;
 
