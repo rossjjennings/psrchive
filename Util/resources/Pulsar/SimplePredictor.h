@@ -58,16 +58,16 @@ namespace Pulsar {
     long double get_observing_frequency () const;
 
     //! Return the phase, given the epoch
-    Phase phase (const MJD& t) const;
+    Pulsar::Phase phase (const MJD& t) const;
 
     //! Return the epoch, given the phase
-    MJD iphase (const Phase& phase, const MJD* guess) const;
+    MJD iphase (const Pulsar::Phase& phase, const MJD* guess) const;
 
     //! Return the spin frequency, given the epoch
     long double frequency (const MJD& t) const;
 
     //! Return the phase correction for dispersion delay
-    Phase dispersion (const MJD &t, long double MHz) const;
+    Pulsar::Phase dispersion (const MJD &t, long double MHz) const;
 
     //! Load from an open stream
     void load (FILE*);
@@ -93,7 +93,7 @@ namespace Pulsar {
     //! alias for reference epoch used by Pulsar::inverse_phase
     MJD    get_reftime       () const { return reference_epoch; }
     //! reference phase is always zero; used by Pulsar::inverse_phase
-    Phase  get_refphase      () const { return 0.0; }
+    Pulsar::Phase  get_refphase      () const { return 0.0; }
     //! spin frequency at reference epoch; used by Pulsar::inverse phase
     double get_reffrequency  () const { return coefs.at(0); }
     
