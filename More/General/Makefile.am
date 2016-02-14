@@ -121,7 +121,6 @@ libGeneral_la_SOURCES = \
 	counter_drift.C \
 	find_spike_edges.C \
         model_profile.C \
-		range.h \
 	morphological_difference.C \
 	Accumulate.C \
         AdaptiveSNR.C \
