@@ -7,7 +7,7 @@
  *
  ***************************************************************************/
 
-// psrchive/psrchive/Util/units/TextInterfaceEmbed.h
+// psrchive/Util/units/TextInterfaceEmbed.h
 
 #ifndef __TextInterfaceEmbed_h
 #define __TextInterfaceEmbed_h
@@ -363,7 +363,8 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
     " got Parser" << std::endl;
 #endif
 
-  value = parser->find (remainder);
+  bool throw_exception = false;
+  value = parser->find (remainder, throw_exception);
 
   if (!value)
   {
