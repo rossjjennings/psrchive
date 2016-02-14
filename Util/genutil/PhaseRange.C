@@ -16,53 +16,68 @@
 
 using namespace std;
 
+double Phase::HasUnit::get_scale (Unit u) const
+{
+  switch (u)
+  {
+  case Phase::Turns:
+    return 1.0;
+  case Phase::Degrees:
+    return 360.0;
+  case Phase::Radians:
+    return 2 * M_PI;
+  case Phase::Milliseconds:
+    if (!period)
+      throw Error (InvalidState, "Phase::HasUnit::get_scale",
+		   "Unit == Milliseconds and period not set");
+    return period;
+  case Phase::Bins:
+    if (!nbin)
+      throw Error (InvalidState, "Phase::HasUnit::get_scale",
+		   "Unit == Bins and nbin not set");
+    return nbin;
+  default:
+    throw Error (InvalidState, "Phase::HasUnit::get_scale",
+		   "invalid Unit");
+  }
+}
+
 unsigned Phase::HasUnit::get_bin (double value) const
 {
+  return get_as (Bins, value);
   if (unit == Bins)
     return value;
-
-  if (!nbin)
-    throw Error (InvalidState, "Phase::HasUnit::get_bin",
-		   "Unit != Bins and nbin not set");
-
-  double turns = 0.0;
-
-  if (unit == Turns)
-    turns = value;
-  else if (unit == Degrees)
-    turns = value / 360.0;
-  else if (unit == Radians)
-    turns = value / (2*M_PI);
-  else if (unit == Milliseconds)
-  {
-    if (!period)
-      throw Error (InvalidState, "Phase::HasUnit::get_bin",
-		   "Unit == Milliseconds and period not set");
-    turns = value / period;
-  }
-
-  return turns * nbin;
 }
 
-std::pair<unsigned,unsigned> Phase::Range::get_bins () const
+double Phase::HasUnit::get_as (Unit to, double value) const
 {
-  std::pair<double,double> range =  get_range();
-  return std::pair<unsigned,unsigned>( get_bin(range.first),
-				       get_bin(range.second) );
+  if (unit == to)
+    return value;
+
+  double result = value * get_scale(to) / get_scale (unit);
+
+  if (to == Bins)
+    result = round(result);
+
+  return result;
 }
+
 
 std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
 {
-  return os << "_" << unit;
+  return os << "%" << unit;
 }
 
 std::istream& Phase::HasUnit::extraction (std::istream& is)
 {
-  if (is.peek() == '_')
+  if (is.peek() == '%')
   {
     is.get();
     is >> unit;
   }
+  else
+    unit = Turns;
+
   return is;
 }
 
@@ -82,7 +97,7 @@ std::istream& Phase::operator>> (std::istream& is, Value& v)
 
 ostream& Phase::operator<< (ostream& os, const Phase::Range& r)
 {
-  os << static_cast<const ::Range&> (r);
+  os << r.asRange();
   return r.insertion (os);
 }
 
@@ -90,6 +105,30 @@ istream& Phase::operator>> (istream& is, Phase::Range& r)
 {
   is >> r.asRange();
   return r.extraction (is);
+}
+
+std::pair<unsigned,unsigned> Phase::Range::get_bins () const
+{
+  std::pair<double,double> range = get_range();
+  return std::pair<unsigned,unsigned>( get_bin(range.first),
+				       get_bin(range.second) );
+}
+
+Phase::Range Phase::Range::as (Unit u) const
+{
+  Range range (*this);
+  range.unit = u;
+  range.x0 = HasUnit::get_as (u, x0);
+  range.x1 = HasUnit::get_as (u, x1);
+  return range;
+}
+
+Phase::Value Phase::Value::as (Unit u) const
+{
+  Value val (*this);
+  val.unit = u;
+  val.value = HasUnit::get_as (u, value);
+  return val;
 }
 
 
