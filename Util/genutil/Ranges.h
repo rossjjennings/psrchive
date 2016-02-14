@@ -17,29 +17,37 @@
 class Range
 {
 protected:
-  bool gt, lt;
+  bool gt, lt, eq;
   double x0,x1;
+
+  void clear () { gt = lt = eq = false; }
+
 public:
-  Range () { gt = lt = false; x0 = x1 = 0; }
+  Range () { clear(); x0 = x1 = 0; }
 
   friend std::ostream& operator<< (std::ostream&, const Range&);
   friend std::istream& operator>> (std::istream&, Range&);
   
+  bool is_range () const { return !(eq || gt || lt); }
   std::pair<double,double> get_range () const;
-  void set_range (double _0, double _1) { x0=_0; x1=_1; }
+  void set_range (double _0, double _1) { x0=_0; x1=_1; clear(); }
+
+  bool is_value () const { return eq; }
+  double get_value () const;
+  void set_value (double x) { x0=x; clear(); eq=true; }
 
   bool within (double x) const;
 };
 
 class Ranges
 {
+protected:
   std::vector<Range> ranges;
 
 public:
   friend std::ostream& operator<< (std::ostream&, const Ranges&);
   friend std::istream& operator>> (std::istream&, Ranges&);
   bool within (double x) const;
-  void parse (const std::string& text);
 };
 
 #endif // !__Ranges_H

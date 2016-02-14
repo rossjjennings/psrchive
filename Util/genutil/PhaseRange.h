@@ -22,6 +22,7 @@ namespace Phase
   std::ostream& operator << (std::ostream&, Unit);
   std::istream& operator >> (std::istream&, Unit&);
 
+  //! Base class of objects that have a Phase::Unit
   class HasUnit
   {
   protected:
@@ -33,7 +34,7 @@ namespace Phase
     std::istream& extraction (std::istream&);
 
   public:
-    HasUnit () { nbin=0; period=0; unit=Turns; }
+    HasUnit (Unit u = Turns) { nbin=0; period=0; unit=u; }
     
     unsigned get_bin (double value) const;
     double get_as (Unit, double value) const;
@@ -46,6 +47,7 @@ namespace Phase
     void set_period( double P ) { period = P; }    
   };
 
+  //! A value with a Phase::Unit
   class Value : public HasUnit
   {
     double value;
@@ -65,6 +67,7 @@ namespace Phase
     friend std::istream& operator>> (std::istream&, Value&);
   };
 
+  //! A range of values with a Phase::Unit
   class Range : public HasUnit, public ::Range
   {
     ::Range& asRange () { return *this; }
@@ -72,11 +75,11 @@ namespace Phase
 
   public:
 
+    Range () {}
+    Range (const HasUnit& u, const ::Range& r) : HasUnit(u), ::Range(r) { }
+
     friend std::ostream& operator<< (std::ostream&, const Range&);
     friend std::istream& operator>> (std::istream&, Range&);
-    
-    void set_nbin( unsigned N ) { nbin = N; }
-    void set_period( double P ) { period = P; }
     
     std::pair<unsigned,unsigned> get_bins () const;
     std::pair<double,double> get_as (Unit) const;
@@ -84,18 +87,20 @@ namespace Phase
     Range as (Unit) const;
   };
 
-  class Ranges
+  //! A set of ranges of values with a common Phase::Unit
+  class Ranges : public HasUnit, public ::Ranges
   {
-    std::vector<Range> ranges;
-    
+    ::Ranges& asRanges () { return *this; }
+    const ::Ranges& asRanges () const { return *this; }
+ 
   public:
     friend std::ostream& operator<< (std::ostream&, const Ranges&);
     friend std::istream& operator>> (std::istream&, Ranges&);
-    bool within (double x) const;
-    void parse (const std::string& text);
+
+    Ranges as (Unit) const;
   };
 
-  //! Policy for converting a Range to a string
+  //! Policy for converting any object with a Phase::Unit to a string
   template<class Type>
   class ToStringPolicy
   {
@@ -111,7 +116,9 @@ namespace Phase
 
     void set_modifiers (const std::string& modifiers) const
     {
+#if _DEBUG
       std::cerr << "ToStringPolicy<Phase::HasUnit>::set_modifiers" << std::endl;
+#endif
 
       unit = fromstring<Phase::Unit> (modifiers);
       unit_specified = true;
@@ -125,7 +132,9 @@ namespace Phase
 
     std::string operator () (const Type& t) const
     {
+#if _DEBUG
       std::cerr << "ToStringPolicy<Phase::HasUnit>::operator" << std::endl;
+#endif
       if (this->unit_specified)
 	return tostring( t.as(this->unit) );
       else
@@ -143,10 +152,17 @@ namespace TextInterface
   {
   };
 
-  //! Specialize th policy for converting a Range to a string
+  //! Specialize the policy for converting a Range to a string
   template<>
   class ToStringPolicy<Phase::Range>
     : public Phase::ToStringPolicy<Phase::Range>
+  {
+  };
+
+  //! Specialize the policy for converting a Range to a string
+  template<>
+  class ToStringPolicy<Phase::Ranges>
+    : public Phase::ToStringPolicy<Phase::Ranges>
   {
   };
 }

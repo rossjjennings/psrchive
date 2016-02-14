@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-// #define _DEBUG 1
+#define _DEBUG 1
 
 #include "Ranges.h"
 #include "Separator.h"
@@ -18,6 +18,7 @@ ostream& operator<< (ostream& os, const Range& r)
 {
   if (r.gt) os << ">" << r.x0;
   else if (r.lt) os << "<" << r.x0;
+  else if (r.eq) os << r.x0;
   else os << r.x0 << ":" << r.x1;
   return os;
 }
@@ -26,6 +27,7 @@ istream& operator>> (istream& is, Range& r)
 {
   r.lt = is.peek() == '<';
   r.gt = is.peek() == '>';
+  r.eq = false;
 
   if (r.lt || r.gt)
   {
@@ -34,25 +36,43 @@ istream& operator>> (istream& is, Range& r)
     return is;
   }
 
-  char separator = 0;
-  is >> r.x0 >> separator >> r.x1;
+  is >> r.x0;
 
-  if (r.x0 > r.x1)
-    std::swap (r.x0, r.x1);
+  cerr << "operator>>Range got x0=" << r.x0 << endl;
 
-  if ( separator != ':' )
-    is.setstate (std::istream::failbit);
+  r.eq = !is || !(is.peek() == ':' || is.peek() == '-');
+  if (r.eq)
+  {
+    cerr << "operator>>Range single value" << endl;
+    return is;
+  }
+
+  cerr << "operator>>Range getting x1" << endl;
+
+  is.get();
+  is >> r.x1;
+
+  cerr << "operator>>Range got x1=" << r.x1 << endl;
 
   return is;
 }
 
 std::pair<double,double> Range::get_range () const
 {
-  if (lt || gt)
+  if (lt || gt || eq)
     throw Error (InvalidState, "Range::get_range",
 		 "range not described by finite bounds");
 
   return std::pair<double,double> (x0,x1);
+}
+
+double Range::get_value () const
+{
+  if (!eq)
+    throw Error (InvalidState, "Range::get_value",
+		 "range is not a single value");
+
+  return x0;
 }
 
 
@@ -62,6 +82,9 @@ bool Range::within (double x) const
     return true;
 
   if (gt && x > x0)
+    return true;
+
+  if (eq && x == x0)
     return true;
 
   return (x>x0 && x<x1);
@@ -80,32 +103,14 @@ ostream& operator<< (ostream& os, const Ranges& r)
 
 istream& operator>> (istream& is, Ranges& r)
 {
-  string text;
-  is >> text;
-  r.parse (text);
+  do {
+    Range range;
+    is >> range;
+    r.ranges.push_back(range);
+  } 
+  while (is && is.peek() == ',' && is.get());
 
   return is;
-}
-
-void Ranges::parse (const std::string& text)
-{
-  Separator separator;
-  separator.set_preserve_numeric_ranges (false);
-  separator.set_delimiters (",");
-
-#if _DEBUG
-  cerr << "Ranges::parse calling Separator::separate" << endl;
-#endif
-
-  list<string> tokens;
-  separator.separate (text, tokens);
-
-#if _DEBUG
-  cerr << "Ranges::parse text=" << text << " ntokens=" << tokens.size() << endl;
-#endif
-
-  for (list<string>::iterator i=tokens.begin(); i != tokens.end(); i++)
-    ranges.push_back( fromstring<Range>(*i) );
 }
 
 bool Ranges::within (double x) const

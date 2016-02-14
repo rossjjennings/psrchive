@@ -10,11 +10,64 @@
 #include "PhaseRange.h"
 #include "Separator.h"
 #include "tostring.h"
+#include "stringtok.h"
 
 #include <list>
 #include <math.h>
 
 using namespace std;
+
+/***************************************************************************
+ *
+ *   Phase::Unit
+ *
+ ***************************************************************************/
+
+std::ostream& Phase::operator << (std::ostream& os, Unit units)
+{
+  switch (units) {
+  case Phase::Turns:
+    return os << "turn";
+  case Phase::Degrees:
+    return os << "deg";
+  case Phase::Radians:
+    return os << "rad";
+  case Phase::Milliseconds:
+    return os << "ms";
+  case Phase::Bins:
+    return os << "bin";
+  default:
+    return os << "unknown";
+  }
+}
+
+std::istream& Phase::operator >> (std::istream& is, Phase::Unit& units)
+{
+  std::streampos pos = is.tellg();
+  std::string unit;
+  is >> unit;
+
+  if (unit == "turn")
+    units = Phase::Turns;
+  else if (unit == "deg")
+    units = Phase::Degrees;
+  else if (unit == "rad")
+    units = Phase::Radians;
+  else if (unit == "ms")
+    units = Phase::Milliseconds;
+  else if (unit == "bin")
+    units = Phase::Bins;
+  else
+    is.setstate(std::istream::failbit);
+
+  return is;
+}
+
+/***************************************************************************
+ *
+ *   Phase::HasUnit
+ *
+ ***************************************************************************/
 
 double Phase::HasUnit::get_scale (Unit u) const
 {
@@ -62,7 +115,6 @@ double Phase::HasUnit::get_as (Unit to, double value) const
   return result;
 }
 
-
 std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
 {
   return os << "%" << unit;
@@ -81,6 +133,12 @@ std::istream& Phase::HasUnit::extraction (std::istream& is)
   return is;
 }
 
+/***************************************************************************
+ *
+ *   Phase::Value
+ *
+ ***************************************************************************/
+
 std::ostream& Phase::operator<< (std::ostream& os, const Value& v)
 {
   os << v.value;
@@ -94,6 +152,23 @@ std::istream& Phase::operator>> (std::istream& is, Value& v)
   // cerr << "Phase::operator Value::value=" << v.value << endl;
   return v.extraction (is);
 }
+
+Phase::Value Phase::Value::as (Unit u) const
+{
+  if (unit == u)
+    return *this;
+
+  Value val (*this);
+  val.unit = u;
+  val.value = HasUnit::get_as (u, value);
+  return val;
+}
+
+/***************************************************************************
+ *
+ *   Phase::Range
+ *
+ ***************************************************************************/
 
 ostream& Phase::operator<< (ostream& os, const Phase::Range& r)
 {
@@ -116,6 +191,9 @@ std::pair<unsigned,unsigned> Phase::Range::get_bins () const
 
 Phase::Range Phase::Range::as (Unit u) const
 {
+  if (unit == u)
+    return *this;
+
   Range range (*this);
   range.unit = u;
   range.x0 = HasUnit::get_as (u, x0);
@@ -123,103 +201,37 @@ Phase::Range Phase::Range::as (Unit u) const
   return range;
 }
 
-Phase::Value Phase::Value::as (Unit u) const
-{
-  Value val (*this);
-  val.unit = u;
-  val.value = HasUnit::get_as (u, value);
-  return val;
-}
 
+/***************************************************************************
+ *
+ *   Phase::Ranges
+ *
+ ***************************************************************************/
 
 ostream& Phase::operator<< (ostream& os, const Phase::Ranges& r)
 {
-  for (unsigned i=0; i<r.ranges.size(); i++)
-  {
-    if (i>0)
-      os << ",";
-    os << r.ranges[i];
-  }
-  return os;
+  os << r.asRanges();
+  return r.insertion (os);
 }
 
 istream& Phase::operator>> (istream& is, Phase::Ranges& r)
 {
-  string text;
-  is >> text;
-  r.parse (text);
-
-  return is;
+  is >> r.asRanges();
+  return r.extraction (is);
 }
 
-void Phase::Ranges::parse (const std::string& text)
+Phase::Ranges Phase::Ranges::as (Unit u) const
 {
-  Separator separator;
-  separator.set_preserve_numeric_ranges (false);
-  separator.set_delimiters (",");
+  if (unit == u)
+    return *this;
 
-#if _DEBUG
-  cerr << "Phase::Ranges::parse calling Separator::separate" << endl;
-#endif
+  Ranges result (*this);
 
-  list<string> tokens;
-  separator.separate (text, tokens);
-
-#if _DEBUG
-  cerr << "Phase::Ranges::parse text=" << text << " ntokens=" << tokens.size() << endl;
-#endif
-
-  for (list<string>::iterator i=tokens.begin(); i != tokens.end(); i++)
-    ranges.push_back( fromstring<Phase::Range>(*i) );
-}
-
-bool Phase::Ranges::within (double x) const
-{
   for (unsigned i=0; i<ranges.size(); i++)
-    if (ranges[i].within(x))
-      return true;
-
-  return false;
-}
-
-
-
-std::ostream& Phase::operator << (std::ostream& os, Unit units)
-{
-  switch (units) {
-  case Phase::Turns:
-    return os << "turn";
-  case Phase::Degrees:
-    return os << "deg";
-  case Phase::Radians:
-    return os << "rad";
-  case Phase::Milliseconds:
-    return os << "ms";
-  case Phase::Bins:
-    return os << "bin";
-  default:
-    return os << "unknown";
+  {
+    Range r (*this, ranges[i]);
+    result.ranges[i] = r.as(u);
   }
-}
 
-std::istream& Phase::operator >> (std::istream& is, Phase::Unit& units)
-{
-  std::streampos pos = is.tellg();
-  std::string unit;
-  is >> unit;
-
-  if (unit == "turn")
-    units = Phase::Turns;
-  else if (unit == "deg")
-    units = Phase::Degrees;
-  else if (unit == "rad")
-    units = Phase::Radians;
-  else if (unit == "ms")
-    units = Phase::Milliseconds;
-  else if (unit == "bin")
-    units = Phase::Bins;
-  else
-    is.setstate(std::istream::failbit);
-
-  return is;
+  return result;
 }
