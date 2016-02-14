@@ -37,22 +37,22 @@ istream& operator>> (istream& is, Range& r)
   }
 
   is >> r.x0;
+  
+  // cerr << "operator>>Range got x0=" << r.x0 << endl;
 
-  cerr << "operator>>Range got x0=" << r.x0 << endl;
-
-  r.eq = !is || !(is.peek() == ':' || is.peek() == '-');
+  r.eq = is.eof() || !(is.peek() == ':' || is.peek() == '-');
   if (r.eq)
   {
-    cerr << "operator>>Range single value" << endl;
+    // cerr << "operator>>Range single value" << endl;
     return is;
   }
 
-  cerr << "operator>>Range getting x1" << endl;
+  // cerr << "operator>>Range getting x1" << endl;
 
   is.get();
   is >> r.x1;
 
-  cerr << "operator>>Range got x1=" << r.x1 << endl;
+  // cerr << "operator>>Range got x1=" << r.x1 << endl;
 
   return is;
 }
@@ -108,7 +108,7 @@ istream& operator>> (istream& is, Ranges& r)
     is >> range;
     r.ranges.push_back(range);
   } 
-  while (is && is.peek() == ',' && is.get());
+  while (!is.eof() && is.peek() == ',' && is.get());
 
   return is;
 }
