@@ -233,5 +233,7 @@ Phase::Ranges Phase::Ranges::as (Unit u) const
     result.ranges[i] = r.as(u);
   }
 
+  result.unit = u;
+
   return result;
 }
