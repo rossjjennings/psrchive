@@ -12,6 +12,7 @@
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/FrequencyAppend.h"
 #include "Pulsar/PatchTime.h"
+#include "Pulsar/PatchFrequency.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -112,6 +113,10 @@ protected:
   Reference::To<Pulsar::PatchTime> patch;
   string patch_name;
 
+  // Frequency patching
+  bool patch_freq;
+  Reference::To<Pulsar::PatchFrequency> fpatch;
+
   // for in place operations on an existing archive
   string inplace_name;
 
@@ -159,6 +164,9 @@ psradd::psradd () : Pulsar::Application ("psradd",
 
   // append in the time direction by default
   time_direction = true;
+
+  // No freq patching by default
+  patch_freq = false;
 
   // do not log results by default
   log_results = false;
@@ -244,6 +252,9 @@ void psradd::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (patch_name, 'm', "domain");
   arg->set_help ("Patch missing sub-integrations: domain = time or phase");
+
+  arg = menu.add (patch_freq, 'n');
+  arg->set_help ("Patch missing frequency channels");
 
   arg = menu.add (inplace_name, "inplace", "filename");
   arg->set_help ("Append archives to the specified file");
@@ -359,6 +370,11 @@ void psradd::setup ()
 
     patch = new Pulsar::PatchTime;
     patch->set_contemporaneity_policy( policy );
+  }
+
+  if (patch_freq)
+  {
+    fpatch = new Pulsar::PatchFrequency;
   }
 
   if (!inplace_name.empty())
@@ -639,6 +655,13 @@ void psradd::append (Pulsar::Archive* archive) try
     if (verbose)
       cerr << "psradd: patching any missing sub-integrations" << endl;
     patch->operate (total, archive);
+  }
+
+  if (fpatch)
+  {
+    if (verbose)
+      cerr << "psradd: patching any missing frequency channels" << endl;
+    fpatch->operate (total, archive);
   }
   
   if (verbose)
