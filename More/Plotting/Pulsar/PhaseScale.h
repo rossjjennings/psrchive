@@ -15,6 +15,7 @@
 #define __Pulsar_PhaseScale_h
 
 #include "Pulsar/PlotScale.h"
+#include "PhaseRange.h"
 
 namespace Pulsar {
 
@@ -24,9 +25,6 @@ namespace Pulsar {
   class PhaseScale : public PlotScale {
 
   public:
-
-    //! The units on the phase axis
-    enum Units { Turns, Degrees, Radians, Milliseconds, Bins };
 
     //! Default constructor
     PhaseScale ();
@@ -53,9 +51,9 @@ namespace Pulsar {
     float get_scale (const Archive*) const;
 
     //! Set the units on the phase axis
-    void set_units (Units s) { units = s; }
+    void set_units (Phase::Unit s) { units = s; }
     //! Get the units on the phase axis
-    Units get_units () const { return units; }
+    Phase::Unit get_units () const { return units; }
 
     //! Set the world-normalized coordinates of the origin on the phase axis
     void set_origin_norm (float f) { origin_norm = f; }
@@ -65,16 +63,12 @@ namespace Pulsar {
   protected:
 
     //! Units on the phase axis
-    Units units;
+    Phase::Unit units;
 
     //! Origin on the phase axis
     float origin_norm;
 
   };
-
-  std::ostream& operator << (std::ostream& os, PhaseScale::Units);
-  std::istream& operator >> (std::istream& is, PhaseScale::Units&);
-
 }
 
 #endif

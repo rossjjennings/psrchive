@@ -818,7 +818,7 @@ void rmresult (Pulsar::Archive* archive,
   plot.get_frame()->set_character_height (1.0);
 
   // phase in degrees, with origin at pulse peak
-  plot.get_scale()->set_units (Pulsar::PhaseScale::Degrees);
+  plot.get_scale()->set_units (Phase::Degrees);
   plot.get_scale()->set_origin_norm (-0.5);
 
   // linear polarization with dash-dot-dash-dot

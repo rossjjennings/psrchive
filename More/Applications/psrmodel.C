@@ -491,7 +491,7 @@ void psrmodel::process (Pulsar::Archive* data)
     pa->model.set (rvmfit.get(), &ComplexRVMFit::evaluate);
     pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
 
-    plotter.get_scale()->set_units( PhaseScale::Degrees );
+    plotter.get_scale()->set_units( Phase::Degrees );
     for (unsigned i=0; i<plot_config.size(); i++)
       plotter.configure(plot_config[i]);
 

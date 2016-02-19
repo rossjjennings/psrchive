@@ -89,7 +89,7 @@ long double Pulsar::SimplePredictor::get_observing_frequency () const
 }
 
 //! Return the phase, given the epoch
-Phase Pulsar::SimplePredictor::phase (const MJD& t) const
+Pulsar::Phase Pulsar::SimplePredictor::phase (const MJD& t) const
 {
   if (reference_epoch == MJD::zero)
     const_cast<SimplePredictor*>(this)->reference_epoch = t;
@@ -109,7 +109,7 @@ Phase Pulsar::SimplePredictor::phase (const MJD& t) const
 
   int64_t iphase = int64_t(result);
 
-  return Phase(iphase,result-iphase);
+  return Pulsar::Phase(iphase,result-iphase);
 }
 
 //! Return the spin frequency, given the epoch
@@ -135,7 +135,7 @@ long double Pulsar::SimplePredictor::frequency (const MJD& t) const
 }
 
 //! Return the phase correction for dispersion delay
-Phase Pulsar::SimplePredictor::dispersion (const MJD &t, long double MHz) const
+Pulsar::Phase Pulsar::SimplePredictor::dispersion (const MJD &t, long double MHz) const
 {
   throw Error (InvalidState, "Pulsar::SimplePredictor::dispersion",
 	       "Pulsar::SimplePredictor dispersion not implemented"); 
@@ -294,7 +294,7 @@ void Pulsar::SimplePredictor::unload (FILE* fptr) const
 
 //! Return the epoch, given the phase
 MJD 
-Pulsar::SimplePredictor::iphase (const Phase& phase, const MJD* guess) const
+Pulsar::SimplePredictor::iphase (const Pulsar::Phase& phase, const MJD* guess) const
 {
   if (guess)
     return Pulsar::inverse_phase (*this, phase, *guess);

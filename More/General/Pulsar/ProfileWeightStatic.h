@@ -1,20 +1,18 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2011 by Willem van Straten
+ *   Copyright (C) 2011 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileWeightStatic.h,v $
-   $Revision: 1.1 $
-   $Date: 2011/03/04 06:01:57 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ProfileWeightStatic.h
 
 #ifndef __Pulsar_ProfileWeightStatic_h
 #define __Pulsar_ProfileWeightStatic_h
 
 #include "Pulsar/ProfileWeightFunction.h"
+#include "PhaseRange.h"
 
 namespace Pulsar
 {
@@ -34,21 +32,15 @@ namespace Pulsar
     ProfileWeightStatic* clone () const;
 
     //! Set the profile phase bins
-    void set_bins (const std::string&);
-    std::string get_bins () const;
-
-    //! Set the profile phase ranges in turns
-    void set_turns (const std::string&);
-    std::string get_turns () const;
+    void set_range (const Phase::Ranges& r) { range = r; }
+    Phase::Ranges get_range () const { return range; }
 
   protected:
 
     //! Calculate the PhaseWeight
     void calculate (PhaseWeight* weight);
 
-    std::string bins;
-    std::string turns;
-
+    Phase::Ranges range;
   };
 
 }

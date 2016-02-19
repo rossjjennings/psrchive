@@ -234,6 +234,24 @@ double get_tobs(const char* filename) {
 
 }
 
+%extend Pulsar::PatchTime
+{
+  void set_contemporaneity_policy(std::string policy_name)
+  {
+
+    if (policy_name=="time") 
+    {
+      self->set_contemporaneity_policy(new Pulsar::Contemporaneity::AtEarth);
+    }
+
+    if (policy_name=="phase")
+    {
+      self->set_contemporaneity_policy(new Pulsar::Contemporaneity::AtPulsar);
+    }
+
+  }
+}
+
 %extend Pulsar::Profile
 {
     // Allow indexing

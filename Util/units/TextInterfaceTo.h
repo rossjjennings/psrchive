@@ -2,12 +2,12 @@
 
 /***************************************************************************
  *
- *   Copyright (C) 2003-2013 by Willem van Straten
+ *   Copyright (C) 2003 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-// psrchive/psrchive/Util/units/TextInterfaceTo.h
+// psrchive/Util/units/TextInterfaceTo.h
 
 #ifndef __TextInterfaceTo_h
 #define __TextInterfaceTo_h
@@ -91,14 +91,36 @@ namespace TextInterface
 
     //! Set the instance
     virtual void set_instance (C* c) 
-      { instance = c; }
+    {
+      instance = c; 
+      for (unsigned i=0; i<values.size(); i++)
+	setup (values[i]);
+    }
 
     //! Set the instance of the Attribute<C>
     void setup (const Value* value)
     {
+#if _DEBUG
+      std::cerr << "TextInterface::To<C>::setup"
+	" name=" << value->get_name() <<
+	" instance=" << (void*) instance.ptr() << std::endl;
+#endif
       const Attribute<C>* attribute = dynamic_cast<const Attribute<C>*>(value);
       if (attribute) 
 	attribute->instance = instance.ptr();
+#if _DEBUG
+      else
+	std::cerr << "TextInterface::To<C>::setup " << value->get_name() <<
+	  " is not an Attribute<C>" << std::endl;
+#endif
+    }
+
+    void add_value( Attribute<C>* value )
+    {
+      if (instance)
+	value->instance = instance;
+
+      Parser::add_value( value );
     }
 
     //! Import the attribute interfaces from a parent text interface

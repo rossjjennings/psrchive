@@ -48,7 +48,11 @@ public:
     if (instance)
       set_instance( instance );
 
-    import ( Pulsar::PolnProfileStats::Interface(), 
+    Pulsar::PolnProfileStats* stats = 0;
+    if (instance)
+      stats = instance->get_stats();
+
+    import ( Pulsar::PolnProfileStats::Interface(stats), 
 	     &Pulsar::PolnStatistics::get_stats );
   }
 };

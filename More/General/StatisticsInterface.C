@@ -33,7 +33,11 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        &Statistics::set_pol,
        "pol", "Polarization index" );
 
-  import( ProfileStats::Interface(), &Statistics::get_stats );
+  ProfileStats* stats = 0;
+  if (instance)
+    stats = instance->get_stats();
+
+  import( ProfileStats::Interface(stats), &Statistics::get_stats );
 
   if (instance)
   {

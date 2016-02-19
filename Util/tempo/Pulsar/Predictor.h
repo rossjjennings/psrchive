@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.9 $
-   $Date: 2010/09/22 05:45:52 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Pulsar/Predictor.h
 
 #ifndef __PulsarPredictor_h
 #define __PulsarPredictor_h

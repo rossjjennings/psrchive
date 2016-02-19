@@ -12,8 +12,7 @@ using namespace std;
 
 Pulsar::Smooth::Smooth ()
 {
-  last_turns = turns = Pulsar::Profile::default_duty_cycle;
-  last_bins = bins = 0;
+  width.set_value( Pulsar::Profile::default_duty_cycle );
 }
 
 Pulsar::Smooth::~Smooth ()
@@ -27,20 +26,13 @@ void Pulsar::Smooth::set_turns (float _turns)
     throw Error (InvalidParam, "Pulsar::Smooth::set_turns",
 		 "invalid turns = %f", _turns);
 
-  last_turns = turns = _turns;
-
-  if (turns != 0.0)
-    bins = 0;
+  width.set_unit( Phase::Turns );
+  width.set_value( _turns );
 }
 
 float Pulsar::Smooth::get_turns () const
 {
-  return turns;
-}
-
-float Pulsar::Smooth::get_last_turns () const
-{
-  return last_turns;
+  return width.get_as( Phase::Turns );
 }
 
 //! Set the number of phase bins in the bins used to smooth
@@ -50,37 +42,26 @@ void Pulsar::Smooth::set_bins (float _bins)
     throw Error (InvalidParam, "Pulsar::Smooth::set_bins",
 		 "invalid bins = %f", _bins);
 
-  last_bins = bins = _bins;
-
-  if (bins != 0)
-    turns = 0;
+  width.set_unit( Phase::Bins );
+  width.set_value( _bins );
 }
 
 //! Get the number of phase bins in the bins used to smooth
 float Pulsar::Smooth::get_bins () const
 {
-  return bins;
-}
-
-float Pulsar::Smooth::get_last_bins () const
-{
-  return last_bins;
+  return width.get_as( Phase::Bins );
 }
 
 float Pulsar::Smooth::get_bins (const Profile* profile)
 {
-  if (bins)
-    return bins;
-  else
-    return last_bins = turns * float( profile->get_nbin() );
+  width.set_nbin( profile->get_nbin() );
+  return width.get_as( Phase::Bins );
 }
  
 float Pulsar::Smooth::get_turns (const Profile* profile)
 {
-  if (turns)
-    return turns;
-  else
-    return last_turns = bins / float( profile->get_nbin() );
+  width.set_nbin( profile->get_nbin() );
+  return width.get_as( Phase::Turns );
 }
  
 
@@ -89,13 +70,9 @@ Pulsar::Smooth::Interface::Interface (Smooth* instance)
   if (instance)
     set_instance (instance);
 
-  add( &Smooth::get_turns,
-       &Smooth::set_turns,
-       "turns", "smoothing window size in turns" );
-
-  add( &Smooth::get_bins,
-       &Smooth::set_bins,
-       "bins", "smoothing window size in bins" );
+  add( &Smooth::get_width,
+       &Smooth::set_width,
+       "width", "width of smoothing function" );
 }
 
 //
