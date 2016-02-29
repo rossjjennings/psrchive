@@ -235,15 +235,10 @@ double get_tobs(const char* filename) {
     fits_get_num_rows(fp, &numrows, &status);
     double tsubs[numrows];
     fits_read_col(fp, TDOUBLE, colnum, 1, 1, numrows, NULL, tsubs, NULL, &status);
-    if (status != 0) {
-        fits_close_file(fp, &status);
-        return 0.;
-    }
-    fits_close_file(fp, &status);
-
-    while (numrows >= 0) {
+    if (status == 0)
+      while (numrows >= 0)
         tobs += tsubs[--numrows];
-    }
+    fits_close_file(fp, &status);
     return tobs;
 }
 %}

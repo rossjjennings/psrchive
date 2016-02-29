@@ -1321,7 +1321,7 @@ string Pulsar::Interpreter::dynspec(const string& args) try {
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (Warn, error.get_message());
 }
 
 
