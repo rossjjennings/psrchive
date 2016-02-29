@@ -43,6 +43,10 @@
 #include <fitsio.h>
 #endif
 
+// For some reason SWIG is not picking up the namespace for the emitted
+// code, hence this kluge allowing an unqualified reference to Phase
+using Pulsar::Phase;
+
 %}
 
 #ifdef HAVE_CONFIG_H
@@ -281,13 +285,13 @@ double get_tobs(const char* filename) {
   }
 }
 
-%extend Phase
+%extend Pulsar::Phase
 {
     // see MJD extension
-    Phase operator + (const Phase & right) { return operator + (*self,right); }
-    Phase operator - (const Phase & right) { return operator - (*self,right); }
-    Phase operator + (double right) { return operator + (*self,right); }
-    Phase operator - (double right) { return operator - (*self,right); }
+    Pulsar::Phase operator + (const Pulsar::Phase & right) { return operator + (*self,right); }
+    Pulsar::Phase operator - (const Pulsar::Phase & right) { return operator - (*self,right); }
+    Pulsar::Phase operator + (double right) { return operator + (*self,right); }
+    Pulsar::Phase operator - (double right) { return operator - (*self,right); }
 
   long intturns() {
     return self->intturns();

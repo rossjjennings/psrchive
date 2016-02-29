@@ -8,12 +8,12 @@
 #include "Pulsar/FixedFrequencyPredictor.h"
 
 //! convert a long double to Phase
-static Phase to_Phase (long double p)
+static Pulsar::Phase to_Phase (long double p)
 {
   int64_t turns = int64_t (p);
   double fturns = p - turns;
 
-  return Phase (turns, fturns);
+  return Pulsar::Phase (turns, fturns);
 }
 
 Pulsar::FixedFrequencyPredictor::FixedFrequencyPredictor () {
@@ -48,13 +48,13 @@ const MJD & Pulsar::FixedFrequencyPredictor::get_epoch() const {
   return m_epoch;
 }
 
-Phase Pulsar::FixedFrequencyPredictor::phase (const MJD& t) const {
+Pulsar::Phase Pulsar::FixedFrequencyPredictor::phase (const MJD& t) const {
   MJD dt = t-m_epoch;
   long double prod = dt.in_seconds()*m_freq;
   return to_Phase(prod);
 }
 
-MJD Pulsar::FixedFrequencyPredictor::iphase (const Phase& phase, const MJD* guess) const {
+MJD Pulsar::FixedFrequencyPredictor::iphase (const Pulsar::Phase& phase, const MJD* guess) const {
   MJD days = phase / m_freq;
   return days + m_epoch;
 }
@@ -64,6 +64,6 @@ long double Pulsar::FixedFrequencyPredictor::frequency (const MJD& t) const {
 }
 
 //! Return the phase correction for dispersion delay
-Phase Pulsar::FixedFrequencyPredictor::dispersion (const MJD &t, long double MHz) const {
+Pulsar::Phase Pulsar::FixedFrequencyPredictor::dispersion (const MJD &t, long double MHz) const {
   return to_Phase(0.);
 }
