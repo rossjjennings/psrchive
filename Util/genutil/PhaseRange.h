@@ -37,7 +37,7 @@ namespace Phase
     HasUnit (Unit u = Turns) { nbin=0; period=0; unit=u; }
     
     unsigned get_bin (double value) const;
-    double get_as (Unit, double value) const;
+    double get_as (Unit, double value, bool round_down=false) const;
     double get_scale (Unit) const;
 
     void set_unit( Unit u ) { unit = u; }
@@ -53,7 +53,7 @@ namespace Phase
     double value;
 
   public:
-    Value (double v=0.0) { value = v; }
+    Value (double v=0.0, Unit u=Turns) : HasUnit(u) { value = v; }
 
     void set_value( double v ) { value = v; }
     double get_value () const { return value; }

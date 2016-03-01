@@ -88,7 +88,7 @@ double Phase::HasUnit::get_scale (Unit u) const
     if (!nbin)
       throw Error (InvalidState, "Phase::HasUnit::get_scale",
 		   "Unit == Bins and nbin not set");
-    return nbin;
+    return nbin-1;
   default:
     throw Error (InvalidState, "Phase::HasUnit::get_scale",
 		   "invalid Unit");
@@ -97,22 +97,26 @@ double Phase::HasUnit::get_scale (Unit u) const
 
 unsigned Phase::HasUnit::get_bin (double value) const
 {
-  return get_as (Bins, value);
   if (unit == Bins)
     return value;
+
+  return get_as (Bins, value);
 }
 
-double Phase::HasUnit::get_as (Unit to, double value) const
+double Phase::HasUnit::get_as (Unit to, double value, bool round_down) const
 {
   if (unit == to)
     return value;
 
   double result = value * get_scale(to) / get_scale (unit);
 
-  if (to == Bins)
-    result = round(result);
+  if (to != Bins)
+    return result;
 
-  return result;
+  if (round_down)
+    return floor (result);
+  else
+    return round (result);
 }
 
 std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
@@ -196,7 +200,7 @@ Phase::Range Phase::Range::as (Unit u) const
 
   Range range (*this);
   range.unit = u;
-  range.x0 = HasUnit::get_as (u, x0);
+  range.x0 = HasUnit::get_as (u, x0, true);
   range.x1 = HasUnit::get_as (u, x1);
   return range;
 }
