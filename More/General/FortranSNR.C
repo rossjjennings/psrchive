@@ -70,6 +70,10 @@ float FortranSNR::get_snr (const Profile* profile)
   return snrmax;
 }
 
+Phase::Value Pulsar::FortranSNR::get_width () const
+{
+  return Phase::Value (bestwidth, Phase::Bins);
+}
 
 
 class Pulsar::FortranSNR::Interface
@@ -80,6 +84,10 @@ public:
   {
     if (instance)
       set_instance (instance);
+
+    add( &FortranSNR::get_width,
+         "width", "width of the on-pulse window that maximized S/N" );
+
   }
 
   std::string get_interface_name () const { return "pdmp"; }
