@@ -64,6 +64,9 @@ namespace Pulsar {
 
     //! Mowing algorithm
     Reference::To<Mower> mower;
+
+    //! Store specified set of subints to apply channel/freq zapping
+    std::vector<unsigned> set_subints;
   };
 
 }

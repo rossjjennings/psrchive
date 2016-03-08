@@ -11,6 +11,7 @@
 
 Pulsar::PhaseVsFrequency::PhaseVsFrequency ()
 {
+  // PhaseVsPlot gets row information from y_scale
   get_frame()->set_y_scale( new FrequencyScale );
 
   isubint = 0;
@@ -25,11 +26,6 @@ TextInterface::Parser* Pulsar::PhaseVsFrequency::get_interface ()
 std::string Pulsar::PhaseVsFrequency::get_ylabel (const Archive* data)
 {
   return "Frequency (MHz)";
-}
-
-unsigned Pulsar::PhaseVsFrequency::get_nrow (const Archive* data)
-{
-  return data->get_nchan();
 }
 
 void Pulsar::PhaseVsFrequency::prepare (const Archive *data)

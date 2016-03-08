@@ -33,13 +33,26 @@
 #include "Pulsar/FrequencyAppend.h"
 #include "Pulsar/PatchTime.h"
 #include "Pulsar/Contemporaneity.h"
+#include "Pulsar/Predictor.h"
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
 
+// For some reason SWIG is not picking up the namespace for the emitted
+// code, hence this kluge allowing an unqualified reference to Phase
+using Pulsar::Phase;
+
 %}
 
+#ifdef HAVE_CONFIG_H
+%include <config.h>
+#endif
+ 
 // Language independent exception handler
 %include exception.i       
 %include std_string.i
@@ -74,6 +87,7 @@ using namespace std;
 %newobject Pulsar::Integration::clone;
 %newobject Pulsar::Integration::total;
 %newobject Pulsar::Profile::clone;
+%newobject Pulsar::Predictor::clone;
 
 // Track any pointers handed off to python with a global list
 // of Reference::To objects.  Prevents the C++ routines from
@@ -166,6 +180,27 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %map_enum(Scale)
 %map_enum(Source)
 
+// return long doubles as  numpy scalars
+// implementation left in case wanted later
+//%typemap(out) (long double) {
+//  npy_intp size[1];
+//  size[0] = 1;
+//  PyArrayObject *rval;
+//  rval = (PyArrayObject *)PyArray_SimpleNew(0, size, NPY_LONGDOUBLE);
+//  *((long double *)(rval->data)) = $1;
+//  $result = (PyObject *) rval;
+//}
+
+// return long doubles as Python floats
+%typemap(out) (long double) {
+  $result = PyFloat_FromDouble(double($1));
+}
+
+// read Python floats as long doubles when necessary
+%typemap(in) (long double) {
+  $1 = (long double)(PyFloat_AsDouble($input));
+}
+
 // Header files included here will be wrapped
 %include "ReferenceAble.h"
 %include "Pulsar/Container.h"
@@ -184,12 +219,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
+%include "Pulsar/Predictor.h"
+%include "Phase.h"
 
 // Some useful free functions 
 
+#ifdef HAVE_CFITSIO
 %inline %{
 
-#ifdef HAVE_CFITSIO
 // Least I/O intensive way to grab observation time
 double get_tobs(const char* filename) {
     int status=0,colnum=0;
@@ -202,20 +239,14 @@ double get_tobs(const char* filename) {
     fits_get_num_rows(fp, &numrows, &status);
     double tsubs[numrows];
     fits_read_col(fp, TDOUBLE, colnum, 1, 1, numrows, NULL, tsubs, NULL, &status);
-    if (status != 0) {
-        fits_close_file(fp, &status);
-        return 0.;
-    }
-    fits_close_file(fp, &status);
-
-    while (numrows >= 0) {
+    if (status == 0)
+      while (numrows >= 0)
         tobs += tsubs[--numrows];
-    }
+    fits_close_file(fp, &status);
     return tobs;
 }
-#endif
 %}
-
+#endif
 
 // Python-specific extensions to the classes:
 
@@ -226,6 +257,8 @@ double get_tobs(const char* filename) {
     // try this for now.
     MJD operator + (const MJD & right) { return operator + (*self,right); }
     MJD operator - (const MJD & right) { return operator - (*self,right); }
+    MJD operator + (double right) { return operator + (*self,right); }
+    MJD operator - (double right) { return operator - (*self,right); }
 
     std::string __str__()
     {
@@ -250,6 +283,20 @@ double get_tobs(const char* filename) {
     }
 
   }
+}
+
+%extend Pulsar::Phase
+{
+    // see MJD extension
+    Pulsar::Phase operator + (const Pulsar::Phase & right) { return operator + (*self,right); }
+    Pulsar::Phase operator - (const Pulsar::Phase & right) { return operator - (*self,right); }
+    Pulsar::Phase operator + (double right) { return operator + (*self,right); }
+    Pulsar::Phase operator - (double right) { return operator - (*self,right); }
+
+  long intturns() {
+    return self->intturns();
+  }
+
 }
 
 %extend Pulsar::Profile
@@ -499,5 +546,10 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
                 ((float *)arr->data)[ii*ndims[1]+jj] = \
                     self->get_Integration(ii)->get_weight(jj);
         return (PyObject *)arr;
+    }
+
+    // Return a copy of the predictor
+    Pulsar::Predictor* get_predictor() {
+      return self->get_model()->clone();
     }
 }

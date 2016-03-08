@@ -17,6 +17,13 @@ Pulsar::ProfileWeightStatic* Pulsar::ProfileWeightStatic::clone () const
   return new ProfileWeightStatic (*this);
 }
 
+//! Set the Profile from which the PhaseWeight will be derived
+void Pulsar::ProfileWeightStatic::set_Profile (const Profile* _profile)
+{
+  profile = _profile;
+  range.set_nbin( profile->get_nbin() );
+}
+
 void Pulsar::ProfileWeightStatic::calculate (PhaseWeight* weight)
 {
   unsigned nbin = profile->get_nbin();

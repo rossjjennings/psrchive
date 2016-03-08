@@ -85,7 +85,6 @@ void Pulsar::PatchFrequency::operate (Archive* A, Archive* B) try
 
   // The number of existing channels that match, and that need to be added
   // to each array:
-  unsigned nmatch = count(A_chans_in_B.begin(), A_chans_in_B.end(), true);
   unsigned naddA = count(B_chans_in_A.begin(), B_chans_in_A.end(), false);
   unsigned naddB = count(A_chans_in_B.begin(), A_chans_in_B.end(), false);
 
