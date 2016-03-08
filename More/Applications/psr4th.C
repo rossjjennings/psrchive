@@ -15,6 +15,7 @@ using namespace std;
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FourthMoments.h"
+#include "Pulsar/PhaseResolvedHistogram.h"
 
 #include "Matrix.h"
 #include "Stokes.h"
@@ -47,9 +48,17 @@ protected:
 
     //! Resize arrays and initialize to zero
     void resize (unsigned nbin);
+    void set_histogram_pa (unsigned nbin);
+    void set_histogram_el (unsigned nbin);
+
+    void histogram_pa (const Pulsar::PolnProfile*);
+    void histogram_el (const Pulsar::PolnProfile*);
 
     Matrix<4,4,double> get_covariance (unsigned ibin);
     Stokes<double> get_mean (unsigned ibin);
+
+    Reference::To<Pulsar::PhaseResolvedHistogram> hist_pa;
+    Reference::To<Pulsar::PhaseResolvedHistogram> hist_el;
   };
 
   //! Array of results - one for each frequency channel
@@ -58,6 +67,8 @@ protected:
   Reference::To<Pulsar::Archive> output;
 
   double integration_length;
+  unsigned histogram_pa;
+  unsigned histogram_el;
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -88,6 +99,8 @@ psr4th::psr4th ()
 {
   add( new Pulsar::StandardOptions );
   integration_length = 0;
+  histogram_pa = 0;
+  histogram_el = 0;
 }
 
 
@@ -99,14 +112,17 @@ psr4th::psr4th ()
 
 void psr4th::add_options (CommandLine::Menu& menu)
 {
-  // CommandLine::Argument* arg;
+  CommandLine::Argument* arg;
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "General options:");
 
-  // // add an option that enables the user to set the scale with -s
-  // arg = menu.add (scale, 's', "scale");
-  // arg->set_help ("multiply all amplitudes by 'scale'");
+  // add an option that enables the user to set the scale with -s
+  arg = menu.add (histogram_pa, "pa", "nbin");
+  arg->set_help ("compute the position angle histogram, divided in nbin");
+
+  arg = menu.add (histogram_el, "el", "nbin");
+  arg->set_help ("compute the elipticity histogram, divided in nbin");
 
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
@@ -137,7 +153,13 @@ void psr4th::process (Pulsar::Archive* archive)
 
     results.resize (nchan);
     for (unsigned ichan = 0; ichan < nchan; ichan++)
+    {
       results[ichan].resize (nbin);
+      if (histogram_pa)
+	results[ichan].set_histogram_pa( histogram_pa );
+      if (histogram_el)
+	results[ichan].set_histogram_el( histogram_el );
+    }
   }
 
   if (output->get_nchan() != nchan)
@@ -160,7 +182,8 @@ void psr4th::process (Pulsar::Archive* archive)
       if (subint->get_weight(ichan) == 0)
         continue;
 
-      Reference::To<Pulsar::PolnProfile> profile = subint->new_PolnProfile (ichan);
+      Reference::To<Pulsar::PolnProfile> profile 
+	= subint->new_PolnProfile (ichan);
 
       for (unsigned ibin=0; ibin < nbin; ibin++)
       {
@@ -171,6 +194,12 @@ void psr4th::process (Pulsar::Archive* archive)
       }
 
       results[ichan].count ++;
+
+      if (histogram_pa)
+	results[ichan].histogram_pa (profile);
+
+      if (histogram_el)
+	results[ichan].histogram_el (profile);
     }
   }
 }
@@ -191,7 +220,18 @@ void psr4th::finalize()
     Reference::To<Pulsar::MoreProfiles> more = new Pulsar::FourthMoments;
     more->resize( nmoment, nbin );
 
-    subint->get_Profile(0,ichan)->add_extension(more);
+    if (histogram_pa)
+    {
+      cerr << "psr4th: adding position angle histogram extension" << endl;
+      subint->get_Profile(0,ichan)->add_extension(results[ichan].hist_pa);
+    }
+    else if (histogram_el)
+    {
+      cerr << "psr4th: adding elipticity histogram extension" << endl;
+      subint->get_Profile(0,ichan)->add_extension(results[ichan].hist_el);
+    }
+    else
+      subint->get_Profile(0,ichan)->add_extension(more);
 
     if (results[ichan].count == 0)
     {
@@ -244,6 +284,21 @@ void psr4th::result::resize (unsigned nbin)
   count = 0;
 }
 
+void psr4th::result::set_histogram_pa (unsigned nbin)
+{
+  hist_pa = new Pulsar::PhaseResolvedHistogram;
+  hist_pa->set_range (-90, 90);
+  hist_pa->resize (nbin, stokes.size());
+}
+
+void psr4th::result::set_histogram_el (unsigned nbin)
+{
+  hist_el = new Pulsar::PhaseResolvedHistogram;
+  hist_el->set_range (-1,1);
+  hist_el->resize (nbin, stokes.size());
+}
+
+
 Matrix<4,4,double> psr4th::result::get_covariance (unsigned ibin)
 {
   Matrix<4,4,double> meansq = stokes_squared [ibin];
@@ -259,6 +314,50 @@ Stokes<double> psr4th::result::get_mean (unsigned ibin)
   Stokes<double> mean = stokes [ibin];
   mean /= count;
   return mean;
+}
+
+void psr4th::result::histogram_pa (const Pulsar::PolnProfile* profile)
+{     
+  std::vector< Estimate<double> > PA;
+  profile->get_orientation (PA, 3.0);
+
+  Reference::To<Pulsar::Profile> linear = new Pulsar::Profile;
+  profile->get_linear (linear);
+
+  float* L = linear->get_amps();
+
+  unsigned nbin = profile->get_nbin();
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    if (PA[ibin].get_variance() == 0.0)
+      continue;
+
+    Pulsar::Profile* of = hist_pa->at( PA[ibin].get_value() );
+    of->get_amps()[ibin] += L[ibin];
+  }
+}
+
+void psr4th::result::histogram_el (const Pulsar::PolnProfile* profile)
+{     
+  std::vector< Estimate<double> > epsilon;
+  profile->get_ellipticity (epsilon, 3.0);
+
+  Reference::To<Pulsar::Profile> polarized = new Pulsar::Profile;
+  profile->get_polarized (polarized);
+
+  float* P = polarized->get_amps();
+
+  unsigned nbin = profile->get_nbin();
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    if (epsilon[ibin].get_variance() == 0.0)
+      continue;
+
+    Pulsar::Profile* of = hist_el->at( sin(epsilon[ibin].get_value()*M_PI/90) );
+    of->get_amps()[ibin] += P[ibin];
+  }
 }
 
 /*!
