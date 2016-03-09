@@ -22,16 +22,12 @@ void nbinify (int& istart, int& iend, int nbin);
 //! Default constructor
 Pulsar::BaselineWindow::BaselineWindow ()
 {
-  bin_start = bin_end = 0;
-
   range_specified = false;
 
   find_max = false;
   find_mean = false;
 
   mean = 0;
-
-  found_bin_start = found_bin_end = 0;
 
   /* The default smoothing algorithm is not set in the constructor
      because the Smooth constructor uses a Pulsar::Config attribute
@@ -83,11 +79,17 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
 
   unsigned nbin = profile->get_nbin();
 
-  float centre = find_phase (nbin, profile->get_amps());
-  float bins = get_smooth()->get_last_bins();
+  double centre = find_phase (nbin, profile->get_amps());
+  double width = get_smooth()->get_turns();
 
-  found_bin_start = nbin + unsigned (nbin * centre - 0.5 * bins);
-  found_bin_end = nbin + unsigned (nbin * centre + 0.5 * bins);
+  if (width > centre)
+    centre += 1.0;
+
+  found_range.set_range( centre - 0.5*width, centre + 0.5*width );
+  found_range.set_unit( Phase::Turns );
+  found_range.set_nbin( nbin );
+
+  std::pair<unsigned,unsigned> found_bins = found_range.get_bins();
 
 #ifdef _DEBUG
   cerr << "Pulsar::BaselineWindow::calculate centre=" << centre
@@ -97,7 +99,7 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
   weight->resize( nbin );
   weight->set_all( 0.0 );
 
-  for (unsigned ibin=found_bin_start; ibin<found_bin_end; ibin++)
+  for (unsigned ibin=found_bins.first; ibin<found_bins.second; ibin++)
     (*weight)[ibin%nbin] = 1.0;
 }
 
@@ -133,9 +135,32 @@ void Pulsar::BaselineWindow::set_find_mean (float _mean)
 //! Set the start and end bins of the search
 void Pulsar::BaselineWindow::set_range (int start, int end)
 {
-  bin_start = start;
-  bin_end = end;
+  cerr << "Pulsar::BaselineWindow::set_range"
+    " start=" << start << " end=" << endl;
+  search_range.set_unit (Phase::Bins);
+  search_range.set_range (start, end);
   range_specified = true;
+}
+
+//! Set the range to be searched
+void Pulsar::BaselineWindow::set_search_range (const Phase::Range& range)
+{
+  search_range = range;
+  range_specified = true;
+}
+
+//! Get the range to be search
+Phase::Range Pulsar::BaselineWindow::get_search_range () const
+{
+  return search_range;
+}
+
+//! Get the range found during execution
+Phase::Range Pulsar::BaselineWindow::get_found_range () const
+{
+  if (range_specified)
+    return found_range.as (search_range.get_unit());
+  return found_range;
 }
 
 float Pulsar::BaselineWindow::find_phase (const std::vector<float>& amps)
@@ -161,9 +186,11 @@ try {
   
   if (range_specified)
   {
-    nbinify (bin_start, bin_end, nbin);
-    start = bin_start;
-    stop = bin_end;
+    search_range.set_nbin (nbin);
+    std::pair<int,int> bins = search_range.get_bins();
+    nbinify (bins.first, bins.second, nbin);
+    start = bins.first;
+    stop = bins.second;
   }
   
 #ifdef _DEBUG
@@ -250,11 +277,12 @@ public:
 	 &BaselineWindow::set_find_minimum,
 	 "find_min", "find the minimum" );
 
-    add( &BaselineWindow::get_found_bin_start,
-	 "bin0", "first bin of the found region" );
+    add( &BaselineWindow::get_search_range,
+	 &BaselineWindow::set_search_range,
+	 "search", "range to be searched" );
 
-    add( &BaselineWindow::get_found_bin_end,
-	 "binN", "last bin of the found region" );
+    add( &BaselineWindow::get_found_range,
+	 "found", "found range" );
   }
 
   std::string get_interface_name () const { return "minimum"; }

@@ -1,14 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004-2012 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.20 $
-   $Date: 2010/01/13 07:10:30 $
-   $Author: straten $ */
+
+// psrchive/Util/units/tostring.h
 
 #ifndef __TOSTRING_H
 #define __TOSTRING_H
@@ -17,6 +15,56 @@
 #include <sstream>
 #include <limits>
 #include <typeinfo>
+
+// works around the circular dependence between Error and tostring
+void raise (const char* name, const std::string& exception);
+
+class ToString
+{
+  typedef std::ios_base::fmtflags fmtflags;
+
+  unsigned precision;
+  bool precision_set;
+
+  fmtflags setf; 
+  bool setf_set;
+
+  fmtflags unsetf; 
+  bool unsetf_set;
+
+public:
+
+  ToString () { reset_modifiers(); }
+
+  void reset_modifiers () { precision_set = setf_set = unsetf_set = false; }
+
+  void set_precision (unsigned p) { precision = p; precision_set = true; }
+  void set_setf (fmtflags f) { setf = f; setf_set = true; }
+  void set_unsetf (fmtflags f) { unsetf = f; unsetf_set = true; }
+
+  template<class T>
+  std::string operator () (const T& input) const
+  {
+    std::ostringstream ost;
+
+    if (setf_set)
+      ost.setf (setf);
+
+    if (unsetf_set)
+      ost.unsetf (unsetf);
+    
+    if (precision_set)
+      ost.precision (precision);
+
+    ost << input;
+
+    if (ost.fail())
+      raise ("tostring", 
+	     "failed to convert "+ std::string(typeid(T).name()) +" to string");
+
+    return ost.str();
+  }
+};
 
 
 /* the following global variables are not nested-call or multi-thread
@@ -29,41 +77,30 @@ extern std::ios_base::fmtflags tostring_unsetf;
 
 #define FMTFLAGS_ZERO std::ios_base::fmtflags(0)
 
-
-// works around the circular dependence between Error and tostring
-void raise (const char* name, const std::string& exception);
-
-
 template<class T>
 std::string tostring (const T& input,
 		      unsigned precision = std::numeric_limits<T>::digits10,
 		      std::ios_base::fmtflags set = FMTFLAGS_ZERO,
 		      std::ios_base::fmtflags unset = FMTFLAGS_ZERO)
 {
-  std::ostringstream ost;
+  ToString tostr;
 
   if (tostring_setf)
-    ost.setf (tostring_setf);
+    tostr.set_setf (tostring_setf);
   else if (set)
-    ost.setf (set);
+    tostr.set_setf (set);
   
   if (tostring_unsetf)
-    ost.unsetf (tostring_unsetf);
+    tostr.set_unsetf (tostring_unsetf);
   else if (unset)
-    ost.unsetf (unset);
+    tostr.set_unsetf (unset);
   
   if (tostring_precision)
-    ost.precision (tostring_precision);
+    tostr.set_precision (tostring_precision);
   else
-    ost.precision (precision);
+    tostr.set_precision (precision);
 
-  ost << input;
-
-  if (ost.fail())
-    raise ("tostring", 
-	   "failed to convert "+ std::string(typeid(T).name()) +" to string");
-
-  return ost.str();
+  return tostr( input );
 }
 
 template<class T>

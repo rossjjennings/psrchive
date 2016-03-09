@@ -10,6 +10,7 @@
 #include "Pulsar/ProfilePlot.h"
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
+#include "Pulsar/PhaseVsMore.h"
 #include "Pulsar/PhaseVsTime.h"
 #include "Pulsar/PhaseVsHist.h"
 #include "Pulsar/PosAngPlot.h"
@@ -22,6 +23,7 @@
 #include "Pulsar/PhaseVsFrequencyPlus.h"
 #include "Pulsar/PhaseVsHistPlus.h"
 #include "Pulsar/StokesFluctPlot.h"
+#include "Pulsar/StokesFluctPhase.h"
 #include "Pulsar/TwoBitPlot.h"
 #include "Pulsar/Poincare.h"
 #include "Pulsar/CalibratorInfo.h"
@@ -63,6 +65,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<StokesFluctPlot>
 	('U', "Sfluct", "Stokes; fluctuation power spectra") );
+
+  add ( new PlotFactory::Advocate<StokesFluctPhase>
+	('u', "Sflph", "Stokes; fluctuation phase spectra") );
 
   add ( new PlotFactory::Advocate<PhaseVsFrequency>
 	('G', "freq", "Phase vs. frequency image of flux") );
@@ -141,6 +146,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<StokesCovariancePlot>
 	( '4', "fourth", "4x4 covariance of Stokes parameters") );
+
+  add ( new PlotFactory::Advocate<PhaseVsMore>
+	( 'a', "alt", "Greyscale of auxiliary profiles") );
 
 }
 

@@ -12,6 +12,7 @@
 
 Pulsar::PhaseVsTime::PhaseVsTime ()
 {
+  // PhaseVsPlot gets row information from y_scale
   get_frame()->set_y_scale( y_scale = new TimeScale );
 
   ichan = 0;
@@ -21,11 +22,6 @@ Pulsar::PhaseVsTime::PhaseVsTime ()
 TextInterface::Parser* Pulsar::PhaseVsTime::get_interface ()
 {
   return new Interface (this);
-}
-
-unsigned Pulsar::PhaseVsTime::get_nrow (const Archive* data)
-{
-  return data->get_nsubint();
 }
 
 const Pulsar::Profile*

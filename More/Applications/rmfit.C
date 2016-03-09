@@ -166,7 +166,7 @@ static float auto_step_rad = 0.0;
 static float auto_max_rad = 1.0;
 
 static unsigned auto_minsteps = 10;
-static float refine_threshold = 0;
+static float refine_threshold = -1;
 static unsigned max_iterations = 10;
 
 Estimate<double> best_search_rm;
@@ -822,7 +822,7 @@ void rmresult (Pulsar::Archive* archive,
   plot.get_frame()->set_character_height (1.0);
 
   // phase in degrees, with origin at pulse peak
-  plot.get_scale()->set_units (Pulsar::PhaseScale::Degrees);
+  plot.get_scale()->set_units (Phase::Degrees);
   plot.get_scale()->set_origin_norm (-0.5);
 
   // linear polarization with dash-dot-dash-dot
@@ -1358,7 +1358,7 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
 {
   Pulsar::DeltaRM delta_rm;
 
-  if (refine_threshold)
+  if (refine_threshold != -1)
   {
     cerr << "rmfit: do_refine set threshold = " << refine_threshold << endl;
     delta_rm.set_threshold (refine_threshold);

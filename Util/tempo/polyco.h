@@ -41,7 +41,7 @@ protected:
   std::string utc;
 
   //! The pulsar phase at reftime
-  Phase ref_phase;
+  Pulsar::Phase ref_phase;
 
   //! Reference rotation frequency, F0 (Hz)
   double ref_freq;
@@ -117,16 +117,16 @@ public:
   double period (const MJD &t) const;
 
   //! Returns the pulse phase (in turns) at the given time
-  Phase phase (const MJD &t) const;
+  Pulsar::Phase phase (const MJD &t) const;
 
   //! Returns the time at the given pulse phase
-  MJD iphase (const Phase& p, const MJD* = 0) const;
+  MJD iphase (const Pulsar::Phase& p, const MJD* = 0) const;
 
   //! Returns the spin frequency (in Hz) at the given time
   long double frequency (const MJD &t) const;
 
   //! Return the phase correction for dispersion delay
-  Phase dispersion (const MJD &t, long double MHz) const;
+  Pulsar::Phase dispersion (const MJD &t, long double MHz) const;
 
   //! Returns the spin frequency derivative (in Hz/s) at the given time 
   double chirp (const MJD &t) const;
@@ -138,7 +138,7 @@ public:
   char   get_telescope     () const { return telescope; }
   double get_freq          () const { return freq; }
   MJD    get_reftime       () const { return ref_time; }
-  Phase  get_refphase      () const { return ref_phase; }
+  Pulsar::Phase  get_refphase      () const { return ref_phase; }
   double get_reffrequency  () const { return ref_freq; }
   double get_nspan         () const { return nspan_mins; }
   float  get_dm            () const { return dm; }
@@ -156,9 +156,9 @@ public:
   MJD end_time( double f = flexibility ) const 
   { return ref_time + nspan_mins * (1.0+f) * 60.0/2.0; };
 
-  Phase start_phase( double f = flexibility ) const
+  Pulsar::Phase start_phase( double f = flexibility ) const
   { return phase (start_time(f)); };
-  Phase end_phase( double f = flexibility ) const
+  Pulsar::Phase end_phase( double f = flexibility ) const
   { return phase (end_time(f)); };
   
   friend bool operator == (const polynomial &, const polynomial &);
@@ -185,7 +185,7 @@ public:
   void set_telescope     (char v) { instance->telescope = v; }
   void set_freq          (double v) { instance->freq = v; }
   void set_reftime       (const MJD& v) { instance->ref_time = v; }
-  void set_refphase      (const Phase& v) { instance->ref_phase = v; }
+  void set_refphase      (const Pulsar::Phase& v) { instance->ref_phase = v; }
   void set_reffrequency  (double v) { instance->ref_freq = v; }
   void set_nspan         (double v) { instance->nspan_mins = v; }
   void set_dm            (float v) { instance->dm = v; }
@@ -247,15 +247,15 @@ public:
   long double get_observing_frequency () const;
 
   //! Return the phase, given the epoch
-  Phase phase (const MJD& t) const
+  Pulsar::Phase phase (const MJD& t) const
   { return best(t).phase(t); }
 
   //! Return the phase plus the dispersion delay
-  Phase phase (const MJD& t, long double MHz) const
+  Pulsar::Phase phase (const MJD& t, long double MHz) const
   { const polynomial& b = best(t); return b.phase(t) + b.dispersion(t,MHz); }
 
   //! Return the epoch, given the phase
-  MJD iphase (const Phase& phase, const MJD* guess = 0) const
+  MJD iphase (const Pulsar::Phase& phase, const MJD* guess = 0) const
   { return best(phase).iphase(phase, guess); }
 
   //! Return the spin frequency, given the epoch
@@ -263,7 +263,7 @@ public:
   { return best(t).frequency(t); }
 
   //! Return the phase correction for dispersion delay
-  Phase dispersion (const MJD &t, long double MHz) const
+  Pulsar::Phase dispersion (const MJD &t, long double MHz) const
   { return best(t).dispersion(t,MHz); }
 
   //! Load from an open stream
@@ -296,10 +296,10 @@ public:
   const polynomial* nearest (const MJD &t) const;
 
   const polynomial& best (const MJD &t) const;
-  const polynomial& best (const Phase &p) const;
+  const polynomial& best (const Pulsar::Phase &p) const;
 
   int i_nearest (const MJD &t, bool throw_exception = false) const;
-  int i_nearest (const Phase &p, bool throw_exception = false) const;
+  int i_nearest (const Pulsar::Phase &p, bool throw_exception = false) const;
 
   double doppler_shift (const MJD& t) const
   { return best(t).get_doppler_shift(); };
@@ -327,8 +327,8 @@ public:
   MJD  start_time () const { return pollys.front().start_time(); };
   MJD  end_time ()   const { return pollys.back().end_time(); };
 
-  Phase start_phase () const { return pollys.front().start_phase(); };
-  Phase end_phase ()   const { return pollys.back().end_phase(); };
+  Pulsar::Phase start_phase () const { return pollys.front().start_phase(); };
+  Pulsar::Phase end_phase ()   const { return pollys.back().end_phase(); };
 
   friend bool operator == (const polyco &, const polyco &);
   friend bool operator != (const polyco &, const polyco &);
@@ -349,7 +349,7 @@ private:
   mutable MJD last_epoch;
   mutable double last_span_epoch;
 
-  mutable Phase last_phase;
+  mutable Pulsar::Phase last_phase;
   mutable double last_span_phase;
 
   void init();

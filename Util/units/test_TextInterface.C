@@ -1,9 +1,11 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004, 2006 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+// #define _DEBUG 1
 
 #include "TextInterfaceInterpreter.h"
 #include "Functor.h"
@@ -200,7 +202,7 @@ int main () try
   {
     cerr <<
       "test_TextInterface ERROR precision:\n"
-      "value;2 = " << getset.get_value("value%2") << endl;
+      "value%2 = " << getset.get_value("value%2") << endl;
     return -1;
   }
 
@@ -249,8 +251,9 @@ int main () try
   cerr << "TextInterface::To<> has " << nvalue
        << " attributes after import" << endl;
 
-  if (nvalue != 4) {
-    cerr << "test_TextInterface ERROR!" << endl;
+  if (nvalue != 4)
+  {
+    cerr << "test_TextInterface ERROR! nvalue != 4" << endl;
     return -1;
   }
 
@@ -260,6 +263,7 @@ int main () try
   std::string teststring = "test of TextInterface::import Component passed";
   std::string gotstring;
 
+  cerr << "testerTUI::set_value" << endl;
   getset.set_value ("ext:text", teststring);
 
   cerr << Test.get_extension()->get_text() << endl;

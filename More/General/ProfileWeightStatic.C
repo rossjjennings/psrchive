@@ -17,28 +17,11 @@ Pulsar::ProfileWeightStatic* Pulsar::ProfileWeightStatic::clone () const
   return new ProfileWeightStatic (*this);
 }
 
-//! Set the profile phase bins
-void Pulsar::ProfileWeightStatic::set_bins (const std::string& _bins)
+//! Set the Profile from which the PhaseWeight will be derived
+void Pulsar::ProfileWeightStatic::set_Profile (const Profile* _profile)
 {
-  bins = _bins;
-  turns.clear();
-}
-
-std::string Pulsar::ProfileWeightStatic::get_bins () const
-{
-  return bins;
-}
-
-//! Set the profile phase ranges in turns
-void Pulsar::ProfileWeightStatic::set_turns (const std::string& _turns)
-{
-  turns = _turns;
-  bins.clear();
-}
-
-std::string Pulsar::ProfileWeightStatic::get_turns () const
-{
-  return turns;
+  profile = _profile;
+  range.set_nbin( profile->get_nbin() );
 }
 
 void Pulsar::ProfileWeightStatic::calculate (PhaseWeight* weight)
@@ -47,29 +30,12 @@ void Pulsar::ProfileWeightStatic::calculate (PhaseWeight* weight)
   weight->resize (nbin);
   weight->set_all (0.0);
 
-  if (!bins.empty())
-  {
-    vector<unsigned> phase_bins;
-    TextInterface::parse_indeces (phase_bins, bins, nbin);
-    for (unsigned i=0; i<phase_bins.size(); i++)
-    {
-      if (phase_bins[i] >= nbin)
-	throw Error (InvalidParam, "Pulsar::ProfileWeightStatic::calculate",
-		     "phase_bin[%u]=%u >= nbin=%u", i, phase_bins[i], nbin);
+  range.set_nbin( nbin );
+  Phase::Ranges bins = range.as( Phase::Bins );
 
-      (*weight)[ phase_bins[i] ] = 1.0;
-    }
-  }
-
-  else if (!turns.empty())
-  {
-    Ranges ranges;
-    ranges.parse (turns);
-
-    for (unsigned ibin=0; ibin<nbin; ibin++)
-      if (ranges.within (ibin / double(nbin)))
-	(*weight)[ ibin ] = 1.0;
-  }
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+    if (bins.within (ibin))
+      (*weight)[ ibin ] = 1.0;
 }
 
 class Pulsar::ProfileWeightStatic::Interface 
@@ -81,13 +47,9 @@ public:
     if (instance)
       set_instance (instance);
 
-    add( &ProfileWeightStatic::get_bins,
-	 &ProfileWeightStatic::set_bins,
-	 "bins", "phase bins in window" );
-
-    add( &ProfileWeightStatic::get_turns,
-	 &ProfileWeightStatic::set_turns,
-	 "turns", "phase range(s) in turns" );
+    add( &ProfileWeightStatic::get_range,
+	 &ProfileWeightStatic::set_range,
+	 "range", "phase range(s) in window" );
   }
 
   std::string get_interface_name () const { return "set"; }

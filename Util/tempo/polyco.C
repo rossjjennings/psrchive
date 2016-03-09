@@ -30,6 +30,7 @@
 #include <algorithm>
 
 using namespace std;
+using namespace Pulsar;
 
 bool Pulsar::Predictor::verbose = false;
 bool polyco::debug = false;
@@ -372,7 +373,7 @@ int polynomial::unload (FILE* fptr) const
     return -1;
 
   int size = (int) out.length();
-  int bout = fprintf (fptr, out.c_str());
+  int bout = fwrite (out.c_str(), 1, size, fptr);
   if (bout < size)
   {
     fprintf (stderr, "polynomial::unload(FILE*) ERROR fprintf only %d/%d",
@@ -806,7 +807,7 @@ void polyco::unload (FILE* fptr) const
 		 "polyco::unload (string*) failed");
 
   int size = (int) out.length();
-  int bout = fprintf (fptr, out.c_str());
+  int bout = fwrite (out.c_str(), 1, size, fptr);
 
   if (verbose)
     cerr << "polyco::unload(FILE*) size=" << size << " wrote=" << bout << endl;

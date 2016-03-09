@@ -214,18 +214,36 @@ string TextInterface::Parser::get_name_value (string& name) const
 {
   // an optional precision may be specified
   string::size_type dot = name.find('%');
+  string modifiers;
 
-  if (dot == string::npos)
-    return find(name)->get_value();
+  if (dot != string::npos)
+  {
+    // strip off the modifiers
+    modifiers = name.substr(dot+1);
+    name = name.substr(0,dot);
+  }
+   
+  Value* value = find(name);
 
-  // strip off the precision
-  string precision = name.substr(dot+1);
-  name = name.substr(0,dot);
+  if (modifiers.length() > 0)
+    value->set_modifiers (modifiers);
 
-  ModifyRestore<unsigned> temp ( tostring_precision,
-				 fromstring<unsigned> (precision) );
+  std::string result = value->get_value();
 
-  return find(name)->get_value();
+  value->reset_modifiers();
+
+  return result;
+}
+
+void TextInterface::Value::set_modifiers (const std::string& modifiers) const
+{
+  cerr << "TextInterface::Value::set_modifiers " << modifiers << endl;
+  tostring_precision = fromstring<unsigned> (modifiers);
+}
+
+void TextInterface::Value::reset_modifiers () const
+{
+  tostring_precision = 0;
 }
 
 //! Set the value of the value

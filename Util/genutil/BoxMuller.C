@@ -18,7 +18,7 @@ BoxMuller::BoxMuller (long seed)
 }
 
 //! returns a random variable with a Gaussian distribution
-float BoxMuller::operator () ()
+float BoxMuller::evaluate ()
 {
   if (have_one_ready) {
     /* use value from previous call */

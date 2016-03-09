@@ -27,6 +27,7 @@ string Pulsar::BrittonInfo::get_name_feed (unsigned iclass) const
   switch (iclass)
   {
   case 0:
+    // italic-font greek-delta subscript-k roman-font
     return "\\fi\\gd\\dk\\u\\fr (deg.)";
   case 1:
     return "\\fi\\gs\\dk\\u\\fr (deg.)";

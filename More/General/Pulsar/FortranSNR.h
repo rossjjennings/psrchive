@@ -12,6 +12,8 @@
 #define __Pulsar_FortranSNR_h
 
 #include "Pulsar/SNRatioEstimator.h"
+#include "PhaseRange.h"
+
 #include <vector>
 
 namespace Pulsar {
@@ -42,6 +44,8 @@ namespace Pulsar {
     void set_minwidthbins ( int bins ) { minwidthbins = bins; }
     void set_maxwidthbins ( int bins ) { maxwidthbins = bins; }
     void set_bestwidth(int bw) { bestwidth=bw; };
+
+    Phase::Value get_width () const;
 
   private:
     float rms;
