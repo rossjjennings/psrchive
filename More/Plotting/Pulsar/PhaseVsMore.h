@@ -1,66 +1,65 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequency.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/09 11:58:40 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PhaseVsMore.h
 
-#ifndef __Pulsar_PhaseVsFrequency_h
-#define __Pulsar_PhaseVsFrequency_h
+#ifndef __Pulsar_PhaseVsMore_h
+#define __Pulsar_PhaseVsMore_h
 
 #include "Pulsar/PhaseVsPlot.h"
-#include "Pulsar/Index.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 
 namespace Pulsar {
 
   //! Plots images of something as a function of pulse phase vs something
-  class PhaseVsFrequency : public PhaseVsPlot {
-
+  class PhaseVsMore : public PhaseVsPlot
+  {
   public:
 
     //! Default constructor
-    PhaseVsFrequency ();
+    PhaseVsMore ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Parser* get_interface ();
 
-    // Text interface to the PhaseVsFrequency class
-    class Interface : public TextInterface::To<PhaseVsFrequency> {
+    // Text interface to the PhaseVsMore class
+    class Interface : public TextInterface::To<PhaseVsMore>
+    {
     public:
-      Interface (PhaseVsFrequency* = 0);
+      Interface (PhaseVsMore* = 0);
     };
 
     //! Get the default label for the y axis
     std::string get_ylabel (const Archive*);
 
+    //! Derived classes must provide the number of rows
+    unsigned get_nrow (const Archive* data);
+
     //! Derived classes must provide the Profile for the specified row
     const Profile* get_Profile (const Archive* data, unsigned row);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const Index& _isubint) { isubint = _isubint; }
-    Index get_subint () const { return isubint; }
+    void set_subint (const unsigned& _isubint) { isubint = _isubint; }
+    unsigned get_subint () const { return isubint; }
     
-    //! Set the polarization to plot
-    void set_pol (const Index& _ipol) { ipol = _ipol; }
-    Index get_pol () const { return ipol; }
+    //! Set the frequency channel to plot
+    void set_chan (const unsigned& _ichan) { ichan = _ichan; }
+    unsigned get_chan () const { return ichan; }
 
     //! Prepare for plotting
     void prepare (const Archive *data);
 
   protected:
 
-    Index isubint;
-    Index ipol;
+    unsigned isubint;
+    unsigned ichan;
 
-    Reference::To<const Integration> subint;
-
+    Reference::To<const Profile> profile;
   };
 
 }

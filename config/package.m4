@@ -89,18 +89,18 @@ AC_DEFUN([SWIN_PACKAGE_FIND],
 [
   AC_PROVIDE([SWIN_PACKAGE_FIND])
 
-  swin_[$1]_found=""
-
   TEST_INCS=`echo $CPPFLAGS | awk '{ for (i=1; i<=NF; i++) printf ("%s\n", $i);}' | grep '^-I' | sed -e 's/-I//g'`
   TEST_LIBS=`echo $LDFLAGS | awk '{ for (i=1; i<=NF; i++) printf ("%s\n", $i);}' | grep '^-L' | sed -e 's/-L//g'`
   TEST_PACKAGES=`echo $TEST_INCS $TEST_LIBS $LD_LIBRARY_PATH $PACKAGES | sed -e 's/:/ /g'`
 
+  AC_CACHE_VAL([swin_cv_[$1]_found],
+  [swin_cv_[$1]_found=""
   if test x"$TEST_PACKAGES" != x; then
     for cf_file in `find -L $TEST_PACKAGES -name "[$2]" 2> /dev/null`; do
       cf_path=`dirname $cf_file`
-      swin_[$1]_found="$swin_[$1]_found $cf_path"
+      swin_cv_[$1]_found="$swin_cv_[$1]_found $cf_path"
     done
-  fi
+  fi])
 ])
 
 dnl @synopsis SWIN_PACKAGE_TRY_COMPILE(name,includes,function body)
@@ -109,22 +109,27 @@ AC_DEFUN([SWIN_PACKAGE_TRY_COMPILE],
 [
   AC_PROVIDE([SWIN_PACKAGE_TRY_COMPILE])
 
-  cf_include_path_list="$with_[$1]_include_dir $swin_[$1]_found [$4] ."
+  cf_include_path_list="$with_[$1]_include_dir $swin_cv_[$1]_found [$4] ."
 
   ac_save_CFLAGS="$CFLAGS"
 
+  AC_CACHE_VAL([swin_cv_[$1]_include_dir],
+  [swin_cv_[$1]_include_dir=""
   for cf_dir in $cf_include_path_list; do
     CFLAGS="-I$cf_dir $ac_save_CFLAGS"
     AC_TRY_COMPILE([$2], [$3], have_[$1]=yes, have_[$1]=no)
     if test $have_[$1] = yes; then
-      if test x"$cf_dir" != x.; then
-        [$1]_CFLAGS="-I$cf_dir"
-        swin_[$1]_include_dir="$cf_dir"
-      fi
+      swin_cv_[$1]_include_dir="$cf_dir"
       break
     fi
-  done
+  done])
 
+  if test x"$swin_cv_[$1]_include_dir" != x; then
+    have_[$1]=yes
+    if test x"$swin_cv_[$1]_include_dir" != x.; then
+      [$1]_CFLAGS="-I$swin_cv_[$1]_include_dir"
+    fi
+  fi
   CFLAGS="$ac_save_CFLAGS"
 ])
 
@@ -134,13 +139,13 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
 [
   AC_PROVIDE([SWIN_PACKAGE_TRY_LINK])
 
-  swin_search_path="$swin_[$1]_found"
+  swin_search_path="$swin_cv_[$1]_found"
 
   #
   # If a path/include/ directory is found, then add path/lib/ to the search
   #
-  if test x"$swin_[$1]_include_dir" != x; then
-    swin_base=`dirname $swin_[$1]_include_dir`
+  if test x"$swin_cv_[$1]_include_dir" != x; then
+    swin_base=`dirname $swin_cv_[$1]_include_dir`
     if test -d $swin_base/lib; then
       swin_search_path="$swin_search_path $swin_base/lib"
     fi

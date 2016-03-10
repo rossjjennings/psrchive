@@ -166,7 +166,7 @@ static float auto_step_rad = 0.0;
 static float auto_max_rad = 1.0;
 
 static unsigned auto_minsteps = 10;
-static float refine_threshold = 0;
+static float refine_threshold = -1;
 static unsigned max_iterations = 10;
 
 Estimate<double> best_search_rm;
@@ -228,7 +228,7 @@ int main (int argc, char** argv)
   // estimate the RM using MTM
   Reference::To<Pulsar::Archive> mtm_std;
 
-  const char* args = "a:A:b:B:c:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  const char* args = "a:A:b:B:c:C:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
@@ -365,6 +365,10 @@ int main (int argc, char** argv)
 
     case 'r':
       refine = true;
+      break;
+
+    case 'C':
+      refine_threshold = atof (optarg);
       break;
 
     case 'R':
@@ -1354,7 +1358,7 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
 {
   Pulsar::DeltaRM delta_rm;
 
-  if (refine_threshold)
+  if (refine_threshold != -1)
   {
     cerr << "rmfit: do_refine set threshold = " << refine_threshold << endl;
     delta_rm.set_threshold (refine_threshold);

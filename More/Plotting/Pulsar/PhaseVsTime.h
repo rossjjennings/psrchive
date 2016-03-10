@@ -37,9 +37,6 @@ namespace Pulsar {
       Interface (PhaseVsTime* = 0);
     };
 
-    //! Derived classes must provide the number of rows
-    unsigned get_nrow (const Archive* data);
-
     //! Derived classes must provide the Profile for the specified row
     const Profile* get_Profile (const Archive* data, unsigned row);
 

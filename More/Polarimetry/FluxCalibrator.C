@@ -471,7 +471,8 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 
     if (verbose > 2)
         cerr << "Pulsar::FluxCalibrator::resize required nchan="
-             << required_nchan << " > nchan=" << nchan << endl;
+             << required_nchan << " > nchan=" << nchan 
+             << "\n\t Using FFT to interpolate" << endl;
 
     vector<float> temp (required_nchan);
     fft::interpolate (temp, gain);

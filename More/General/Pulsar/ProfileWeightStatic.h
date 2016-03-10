@@ -28,6 +28,9 @@ namespace Pulsar
     //! Interface to the algorithm
     class Interface;
 
+    //! Set the Profile from which the PhaseWeight will be derived
+    void set_Profile (const Profile*);
+
     //! Return a copy constructed instance of self
     ProfileWeightStatic* clone () const;
 

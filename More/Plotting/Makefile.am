@@ -26,6 +26,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsTime.h		       \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h	       \
 	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h		       \
+	Pulsar/PhaseVsMore.h \
 	Pulsar/MultiFrequency.h					       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
 	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
@@ -60,7 +61,8 @@ nobase_include_HEADERS = \
 	Pulsar/SystemCalibratorPlotter.h \
         Pulsar/ReceptionModelAxisPlotter.h \
 	Pulsar/PlotPen.h \
-	Pulsar/HasPen.h
+	Pulsar/HasPen.h \
+	Pulsar/MoreScale.h
 
 libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	Plot.C PlotFactory.C FramedPlot.C \
@@ -85,8 +87,10 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	PosAngPlot.C EllAngPlot.C \
 	PhaseVsPlot.C PhaseVsPlotTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
+	PhaseVsMore.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
 	PhaseVsHist.C PhaseVsHistTI.C \
+	MoreScale.C \
 	MultiData.C \
 	MultiDataSimple.C \
 	MultiFrequency.C \
