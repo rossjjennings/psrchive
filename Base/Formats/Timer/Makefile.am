@@ -18,7 +18,7 @@ libtimer_la_SOURCES = BasebandArchive.C ScintArchive.C TimerArchive.C \
 	TimerArchive_load.C TimerArchive_unload.C TimerArchive_extensions.C \
 	TimerIntegration.C TimerIntegration_load.C TimerIntegration_unload.C \
 	TimerProfile_load.C TimerProfile_unload.C TimerAgent.C mini++.C \
-	timer++.C convert_endian.c convert_endian.h
+	timer++.C convert_endian.c convert_endian.h fcomp.C fcomp.h
 
 check_PROGRAMS = baseband_header_size timer_size
 TESTS = $(check_PROGRAMS)
