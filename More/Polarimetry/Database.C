@@ -1185,6 +1185,8 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   // unless a CompleteJones transformation is requested,
   // try loading a raw PolnCal observation
   //
+  string polncal_match_report;
+
   if (! type->is_a<CalibratorTypes::CompleteJones>()) try
   {
     if (Calibrator::verbose > 2)
@@ -1197,6 +1199,12 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     //
     // the Hybrid transformations require access to a raw PolnCal observation
     //
+    if (Calibrator::verbose > 2)
+      cerr << "Pulsar::Database::generatePolnCalibrator search for"
+      "Signal::PolnCal failed. closest = " << get_closest_match_report();
+
+    polncal_match_report = get_closest_match_report ();
+
     if (type->is_a<CalibratorTypes::Hybrid>())
     {
       error << "\n\tHybrid Calibrator requires raw PolnCal observation";
@@ -1216,9 +1224,15 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   }
   catch (Error& error)
   {
+    if (Calibrator::verbose > 2)
+      cerr << "Pulsar::Database::generatePolnCalibrator search for "
+           << type->get_name() << " failed. closest = " << get_closest_match_report();
+
     if (entry.obsType == Signal::Unknown)
     {
-      error << "\n\tneither raw nor processed calibrator archives found";
+      error << "\n\tneither raw nor processed calibrator archives found.\n"
+               "\n\tRAW -- closest match: \n\n" << polncal_match_report <<
+               "\n\tPROCESSED";
       throw error += "Pulsar::Database::generatePolnCalibrator";
     }
   }
