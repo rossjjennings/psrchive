@@ -180,8 +180,9 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
     if (exclude_bins.size() && found (ibin, exclude_bins))
       continue;
 
-    if (linear0.get_amps()[ibin] < cutoff0 ||
-	linear1.get_amps()[ibin] < cutoff1)
+    if (threshold != 0 &&
+	( linear0.get_amps()[ibin] < cutoff0 ||
+	  linear1.get_amps()[ibin] < cutoff1) )
       continue;
 
     cos_delta_PA += q0[ibin]*q1[ibin] + u0[ibin]*u1[ibin];
