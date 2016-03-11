@@ -44,6 +44,9 @@ protected:
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
+  // -c add plot options
+  void add_plot_options (const string& name);
+
   //! Automatically discard profiles that do not fit the template well
   Reference::To<ProfileShiftFit> fit;
   //! Threshold used for automatic template-based trash algorithm
@@ -51,6 +54,9 @@ protected:
   
   unsigned plotted;
   string plot_name;
+
+  // Plot options set with -c
+  vector<string> options;
 
   // Available plots
   PlotFactory factory;
@@ -100,8 +106,16 @@ void trash::add_options (CommandLine::Menu& menu)
   arg = menu.add (plot_name, 'p', "plot");
   arg->set_help ("set plot type");
 
+  arg = menu.add (this, &trash::add_plot_options, 'c', "cfg[s]");
+  arg->set_help ("add plot options");
+
   arg = menu.add (this, &trash::set_standard, 'S', "std.ar");
   arg->set_help ("use goodness of template fit");
+}
+
+void trash::add_plot_options (const std::string& arg)
+{
+  separate (arg, options, ",");
 }
 
 //! Set the standard profile used to automatically trash
@@ -144,6 +158,9 @@ void trash::process (Pulsar::Archive* archive)
       // remove the above frame labels
       framed -> get_frame() -> get_label_above()->set_all ("");
     }
+
+    for (unsigned iopt=0; iopt < options.size(); iopt++)
+      plot->configure( options[iopt] );
   }
 
   plot->preprocess (archive);
