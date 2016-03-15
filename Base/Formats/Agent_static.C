@@ -109,7 +109,6 @@ Pulsar::Option<string> Pulsar::Archive::unload_class
 
 bool Pulsar::Archive::Agent::init () try
 {
-  verify_revisions ();
   return true;
 }
 catch (Error& error)

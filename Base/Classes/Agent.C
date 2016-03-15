@@ -84,25 +84,4 @@ void Pulsar::Archive::Agent::get_list( vector<pair<string,string> > &details )
   }
 }
 
-// reports on the status of the plugins
-void Pulsar::Archive::Agent::verify_revisions ()
-{
-  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
-
-  unsigned agent = 0;
-
-  while (agent < registry.size())
-
-    if ( registry[agent]->get_revision() != Archive::get_revision() )  {
-
-      cerr << "Pulsar::Archive::Agent::init " << registry[agent]->get_name() 
- 	   << "::revision=" << registry[agent]->get_revision() 
- 	   << " != Archive::revision=" << Archive::get_revision() << endl;
-
-      registry.erase( agent );
-      
-    }
-    else
-      agent ++;
-}
 
