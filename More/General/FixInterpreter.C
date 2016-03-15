@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/FixInterpreter.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pointing.h"
 #include "Pulsar/FITSArchive.h"

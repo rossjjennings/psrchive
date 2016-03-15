@@ -10,7 +10,7 @@
 #include "Pulsar/MultiData.h"
 
 #include "Pulsar/Plot.h"
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Processor.h"
 
 #include <cpgplot.h>
