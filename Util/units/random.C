@@ -2,8 +2,9 @@
 #include "random.h"
 
 #include <stdlib.h>
-#include <inttypes.h>
 #include <sys/time.h>
+
+// #define _DEBUG 1
 
 #if _DEBUG
 #include <iostream>
@@ -12,11 +13,17 @@ using namespace std;
 
 static const double random_max = RAND_MAX;
 
-void random_init ()
+uint64_t usec_seed ()
 {
   struct timeval t;
   gettimeofday (&t, NULL);
-  srandom (t.tv_usec);
+  // cerr << "usec_seed: usec=" << t.tv_usec << endl;
+  return t.tv_usec;
+}
+
+void random_init ()
+{
+  srandom (usec_seed());
 }
 
 double random_double ()
