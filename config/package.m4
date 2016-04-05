@@ -128,6 +128,9 @@ AC_DEFUN([SWIN_PACKAGE_TRY_COMPILE],
     have_[$1]=yes
     if test x"$swin_cv_[$1]_include_dir" != x.; then
       [$1]_CFLAGS="-I$swin_cv_[$1]_include_dir"
+    else
+      [$1]_CFLAGS=""
+      swin_cv_[$1]_include_dir=""
     fi
   fi
   CFLAGS="$ac_save_CFLAGS"
@@ -146,7 +149,7 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
   #
   if test x"$swin_cv_[$1]_include_dir" != x; then
     swin_base=`dirname $swin_cv_[$1]_include_dir`
-    if test -d $swin_base/lib; then
+    if test x"$swin_base" != x. -a -d $swin_base/lib; then
       swin_search_path="$swin_search_path $swin_base/lib"
     fi
   fi
