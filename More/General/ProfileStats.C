@@ -37,7 +37,7 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 {
   if (Profile::verbose)
     cerr << "Pulsar::ProfileStats::set_profile this=" << this
-	 << " profile=" << _profile << endl;
+	 << " profile=" << _profile << " regions_set=" << regions_set << endl;
 
   profile = _profile;
   built = false;
@@ -47,9 +47,10 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 /*! It is assumed that all subsequent Profile instances passed to
   set_profile will have the same phase as set_profile */
 void Pulsar::ProfileStats::select_profile (const Profile* set_profile) try
-{
+{ 
   if (Profile::verbose)
-    cerr << "Pulsar::ProfileStats::select_profile this=" << this << endl;
+    cerr << "Pulsar::ProfileStats::select_profile this=" << this 
+	 << " Profile=" << set_profile << endl;
 
   regions_set = false;
 
@@ -88,6 +89,10 @@ void Pulsar::ProfileStats::set_onpulse_estimator (ProfileWeightFunction* est)
 //! The algorithm used to find the off-pulse phase bins
 void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_baseline_estimator this=" << this
+	 << " est=" << est << endl;
+
   baseline_estimator = est;
   built = false;
   regions_set = false;
@@ -132,7 +137,13 @@ Estimate<double>
 Pulsar::ProfileStats::get_total (bool subtract_baseline) const try
 {
   if (!built)
+  {
+#if _DEBUG
+    cerr << "Pulsar::ProfileStats::get_total this=" << this
+	 << " regions_set=" << regions_set << " calling build" << endl;
+#endif
     build ();
+  }
 
   double offmean = 0.0;
   
@@ -272,7 +283,8 @@ void Pulsar::ProfileStats::build () const try
   if (regions_set)
   {
     if (Profile::verbose)
-      cerr << "Pulsar::ProfileStats::build regions set" << endl;
+      cerr << "Pulsar::ProfileStats::build this=" << this
+	   << " regions set" << endl;
 
     onpulse.set_Profile (profile);
     baseline.set_Profile (profile);
@@ -282,8 +294,8 @@ void Pulsar::ProfileStats::build () const try
   }
 
   if (Profile::verbose)
-    cerr << "Pulsar::ProfileStats::build computing on-pulse and baseline"
-	 << endl;
+    cerr << "Pulsar::ProfileStats::build this=" << this
+	 << " computing on-pulse and baseline" << endl;
 
   onpulse_estimator->set_Profile (profile);
   onpulse_estimator->get_weight (&onpulse);
@@ -299,6 +311,7 @@ void Pulsar::ProfileStats::build () const try
 	 << " on-pulse=" << onpulse.get_weight_sum()
 	 << " baseline=" << baseline.get_weight_sum() << endl;
 
+#if _DEBUG
     cerr << "onpulse ";
     for (unsigned ibin=0; ibin<profile->get_nbin(); ibin++)
       if (onpulse[ibin])
@@ -310,6 +323,7 @@ void Pulsar::ProfileStats::build () const try
       if (baseline[ibin])
         cerr << ibin << " ";
     cerr << endl;
+#endif
   }
 }
 catch (Error& error)

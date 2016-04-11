@@ -228,7 +228,7 @@ int main (int argc, char** argv)
   // estimate the RM using MTM
   Reference::To<Pulsar::Archive> mtm_std;
 
-  const char* args = "a:A:b:B:c:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  const char* args = "a:A:b:B:c:C:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
@@ -365,6 +365,10 @@ int main (int argc, char** argv)
 
     case 'r':
       refine = true;
+      break;
+
+    case 'C':
+      refine_threshold = atof (optarg);
       break;
 
     case 'R':

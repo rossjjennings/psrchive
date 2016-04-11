@@ -8,6 +8,7 @@
 #include "Pulsar/SyntheticPolnProfile.h"
 #include "Pulsar/PolnProfile.h"
 #include "BoxMuller.h"
+#include "random.h"
 
 using namespace MEAL;
 
@@ -172,7 +173,7 @@ void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
   if (noise_variance) {
 
     // static long idum = -1;
-    static BoxMuller gasdev( time(NULL) );
+    static BoxMuller gasdev( usec_seed() );
 
     float rms = sqrt(noise_variance);
 
