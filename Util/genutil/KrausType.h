@@ -35,6 +35,9 @@ protected:
 
   //! Get the receptor basis in the reference frame of the observatory
   Matrix<3,3,double> get_basis (const Vector<3,double>& from_source) const;
+
+  //! Disable Directional::build
+  void build () const;
 };
 
 #endif

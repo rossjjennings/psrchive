@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Directional.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/07/04 12:19:11 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Directional.h
 
 #ifndef __Directional_H
 #define __Directional_H

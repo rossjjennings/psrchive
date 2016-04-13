@@ -25,3 +25,8 @@ Matrix<3,3,double> KrausType::get_basis (const Vector<3,double>& from) const
 {
   return Matrix<3,3,double>(0.0);
 }
+
+void KrausType::build () const
+{
+  Mount::build ();
+}
