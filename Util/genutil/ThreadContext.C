@@ -41,7 +41,7 @@ void ThreadContext::lock ()
 #if HAVE_PTHREAD
   errno = pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(mutex));
   if (errno != 0)
-    throw Error (FailedSys, "Calibration::ReceptionModel::solve",
+    throw Error (FailedSys, "ThreadContext::lock",
 		 "pthread_mutex_lock");
 #endif
 }
@@ -51,7 +51,7 @@ void ThreadContext::unlock ()
 #if HAVE_PTHREAD
   errno = pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(mutex));
   if (errno != 0)
-    throw Error (FailedSys, "Calibration::ReceptionModel::solve",
+    throw Error (FailedSys, "ThreadContext::unlock",
 		 "pthread_mutex_unlock");
 #endif
 }
@@ -63,7 +63,7 @@ void ThreadContext::wait ()
 			    reinterpret_cast<pthread_mutex_t*>(mutex));
   if (errno != 0) {
     pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(mutex));
-    throw Error (FailedSys, "Calibration::ReceptionModel::solve",
+    throw Error (FailedSys, "ThreadContext::wait",
 		 "pthread_cond_wait");
   }
 #endif
@@ -74,7 +74,7 @@ void ThreadContext::signal ()
 #if HAVE_PTHREAD
   errno = pthread_cond_signal (reinterpret_cast<pthread_cond_t*>(cond));
   if (errno != 0)
-    throw Error (FailedSys, "Calibration::ReceptionModel::solve",
+    throw Error (FailedSys, "ThreadContext::signal",
 		 "pthread_cond_signal");
 #endif
 }
@@ -84,7 +84,7 @@ void ThreadContext::broadcast ()
 #if HAVE_PTHREAD
   errno = pthread_cond_broadcast (reinterpret_cast<pthread_cond_t*>(cond));
   if (errno != 0)
-    throw Error (FailedSys, "Calibration::ReceptionModel::solve",
+    throw Error (FailedSys, "ThreadContext::broadcast",
 		 "pthread_cond_broadcast");
 #endif
 }
