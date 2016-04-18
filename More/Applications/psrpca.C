@@ -772,7 +772,7 @@ void psrpca::solve_eigenproblem()
     fclose( in );
     if ( status == GSL_EFAILED )
     {
-      cerr << "psrpca: Reading the covariance matrix from " << load_prefix <<  "_covariance.dat failed" << endl;
+      cerr << "psrpca: Reading the eigenvalues from " << load_prefix <<  "_evals.dat failed" << endl;
       exit( -1 );
     }
   } // loading eigenvectors / values
