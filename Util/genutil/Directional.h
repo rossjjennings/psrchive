@@ -22,7 +22,7 @@ public:
   Directional ();
 
   //! Get the vertical angle in radians (rotation about the line of sight)
-  double get_vertical () const;
+  virtual double get_vertical () const;
 
   //! Synonym for vertical angle
   double get_parallactic_angle () const;
