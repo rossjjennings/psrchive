@@ -217,6 +217,8 @@ protected:
   //! Use the finder to list pulse information
   void matched_finder (const Archive*);
   void matched_populate_I (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile);
+  //! Minimum number of bins for the pulse finder
+  unsigned minimum_nbin;
 };
 
 
@@ -262,6 +264,7 @@ psrspa::psrspa ()
   b_sigma = -1.0;
 
   polarized_finder = false;
+  minimum_nbin = 256;
 
   std_file = "";
   mean_to_recover = 0.0;
@@ -320,7 +323,13 @@ void psrspa::matched_finder ( const Archive* arch )
   {
     Reference::To<Profile> profile = arch->get_Profile(isub,0,0)->clone();
 
-    while (profile->get_nbin() > 256)
+    if (profile->get_nbin() < minimum_nbin)
+    {
+      cerr << "psrspa::matched_finder data has too few phase bins (" << profile->get_nbin() << ")" << endl;
+      cerr << "                       Please use -N to choose an appropriate minimum number of bins" << endl;
+    }
+
+    while (profile->get_nbin() > minimum_nbin)
     {
       finder->set_Profile( profile );  // might finder optimize on &profile?
 
@@ -329,7 +338,14 @@ void psrspa::matched_finder ( const Archive* arch )
 
       matched_populate_I (name, isub, weight, *profile);
 
-      profile->bscrunch (2);
+      if (profile->get_nbin()%2 == 0)
+	profile->bscrunch (2);
+      else
+      {
+	if ( verbose )
+	  cerr << "psrspa::matched_finder number of bins is not a power of two, will not attempt b-scrunching" << endl;
+	break;
+      }
     }
   }
 }
@@ -503,6 +519,9 @@ void psrspa::add_options ( CommandLine::Menu& menu )
 		"\t\t - BaselineWindow (minimum)\n"
 		"\t\t The name can be followed by configuration options, e.g.:\n"
 		"\t\t -a consecutive:treshold=4\n" );
+
+  arg = menu.add ( minimum_nbin, 'N', "minimum_Nbin");
+  arg->set_help ( "Set the minimum number of phase bins for the pulse finder." );
 /*  arg = menu.add ( polarized_finder, "sp" );
   arg->set_help ( "Output the polarisation properties" );*/
 

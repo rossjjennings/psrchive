@@ -33,14 +33,14 @@ void Mount::set_source_coordinates (const sky_coord& pos)
   declination = pos.dec().getRadians();
   right_ascension = pos.ra().getRadians();
 
-  lst = unset;
+  lst = hour_angle = unset;
 }
 
 void Mount::set_observatory_latitude (double lat)
 {
   latitude = lat;
 
-  lst = unset;
+  lst = hour_angle = unset;
 }
 
 double Mount::get_observatory_latitude () const
@@ -52,7 +52,7 @@ void Mount::set_observatory_longitude (double lon)
 {
   longitude = lon;
 
-  lst = unset;
+  lst = hour_angle = unset;
 }
 
 double Mount::get_observatory_longitude () const
@@ -67,8 +67,7 @@ void Mount::set_epoch (const MJD& _epoch)
 
   epoch = _epoch;
 
-  lst = unset;
-  hour_angle = unset;
+  lst = hour_angle = unset;
 }
 
 MJD Mount::get_epoch () const
