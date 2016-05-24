@@ -35,6 +35,13 @@
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/ArrivalTime.h"
 #include "Pulsar/PhaseGradShift.h"
+#include "Pulsar/SincInterpShift.h"
+#include "Pulsar/GaussianShift.h"
+#include "Pulsar/ParIntShift.h"
+#include "Pulsar/ZeroPadShift.h"
+#include "Pulsar/FourierDomainFit.h"
+#include "Pulsar/FluxCentroid.h"
+
 #include "Pulsar/MatrixTemplateMatching.h"
 #include "toa.h"
 
@@ -141,6 +148,7 @@ protected:
   bool apply_offset;
   bool apply_scale;
   bool prof_to_std;
+  string algorithm;
 
   //! Regression
   bool unweighted_regr;
@@ -218,7 +226,12 @@ void psrpca::setup ()
     full_poln->set_choose_maximum_harmonic( true );
   }
   else
-    arrival->set_shift_estimator ( new PhaseGradShift );
+  {
+    if ( algorithm.size() == 0 )
+      arrival->set_shift_estimator ( new PhaseGradShift );
+    else
+      arrival->set_shift_estimator ( ShiftEstimator::factory(algorithm) );
+  }
   try
   {
     std_archive->fscrunch();
@@ -252,6 +265,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   menu.add ("");
   menu.add ("Fitting options");
 
+  arg = menu.add(algorithm, 'A', "timing algorithm");
+  arg->set_help ("Set timing algorithm as in pat's -A. By default use PGS.");
+  
   arg = menu.add (this, &psrpca::set_standard, 's', "stdfile");
   arg->set_help ("Location of standard profile");
 
@@ -334,7 +350,7 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 void psrpca::process (Archive* archive)
 {
   if ( verbose )
-    cerr << "psrpca::process () entered" << endl;
+    cerr << "psrpca::process () entered and processing " << archive->get_filename() << endl;
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
   {
@@ -772,7 +788,7 @@ void psrpca::solve_eigenproblem()
     fclose( in );
     if ( status == GSL_EFAILED )
     {
-      cerr << "psrpca: Reading the eigenvalues from " << load_prefix <<  "_evals.dat failed" << endl;
+      cerr << "psrpca: Reading the covariance matrix from " << load_prefix <<  "_covariance.dat failed" << endl;
       exit( -1 );
     }
   } // loading eigenvectors / values
