@@ -51,7 +51,8 @@ void usage ()
     " -I        auto-align using invariant profile to estimate phase shift \n"
     " -r ref    Reference profile\n"
     " -v        Verbose output\n"
-    " -V        Very verbose output \n\n"
+    " -V        Very verbose output \n"
+    " -g device       Set graphics device \n\n"
 
     "This program works via keyboard interaction. To set baseline zero\n"
     "you type '0' to set the start point, move the cursor and type '0'\n"
@@ -91,19 +92,26 @@ int main (int argc, char** argv)
   int c = 0;
   float fmax;
   bool zflag = false;
+  bool gflag = false;
   //color of lines
   int ci_ref = 7;  //yellow  
   int ci_std = 5;  //grey
   int ci_tex = 1;  //white
   int ci_dis = 15; //dark 
   float xmin=0.0, xmax=1.0;
-  const char* args = "ahiIr:vV";
+  const char* args = "ahiIr:vVg:";
+  
 
   while ((c = getopt(argc, argv, args)) != -1) {
     switch (c) {
 
     case 'a':
       auto_align = true;
+      break;
+
+    case 'g':
+      gflag=true;      
+      memcpy(plotdev, optarg, 5);
       break;
 
     case 'h':
@@ -220,8 +228,11 @@ int main (int argc, char** argv)
   if(refflag==true)
     cross(refcorr, stdcorr, verbose, vverbose, line);
 
+  if(!gflag)
+ {
   cout << "Input plot device : ";
   cin >> plotdev;
+  }
   //plot profiles
   plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, 
 	  plotdev, refflag, xmin, xmax);
