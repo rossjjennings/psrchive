@@ -27,6 +27,9 @@ dnl @license GPLWithACException
 
 AC_DEFUN([AC_PROG_SWIG],[
         AC_PATH_PROG([SWIG],[swig])
+        if test -n "$SWIG" ; then
+                [swig_version=`$SWIG -version 2>&1 | grep 'SWIG Version' | sed 's/.*\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/g'`]
+        fi
         if test -z "$SWIG" ; then
                 AC_MSG_WARN([cannot find 'swig' program. You should look at http://www.swig.org])
                 SWIG='echo "Error: SWIG is not installed. You should look at http://www.swig.org" ; false'
