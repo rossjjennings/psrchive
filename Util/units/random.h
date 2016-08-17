@@ -12,6 +12,10 @@
 #define __random_H
 
 #include <complex>
+#include <inttypes.h>
+
+// returns the current microsecond
+uint64_t usec_seed ();
 
 // seeds the random number generator with the current microsecond
 void random_init ();

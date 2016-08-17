@@ -184,6 +184,14 @@ namespace TextInterface
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
 
+    //! Parse any modifiers that will alter the behaviour of the output stream
+    void set_modifiers (const std::string& mod) const
+    { modifiers = mod; }
+
+    //! Reset any output stream modifiers
+    void reset_modifiers () const
+    { modifiers.erase(); }
+
   protected:
 
     //! Method of V that returns E*
@@ -200,6 +208,9 @@ namespace TextInterface
 
     //! Remainder parsed from name during matches
     mutable std::string remainder;
+
+    //! Any modifiers set by caller
+    mutable std::string modifiers;
   };
 
   //! Embedded interface factory for TextInterface::To<C>
@@ -388,9 +399,21 @@ template<class C, class T, class G, class S>
 void TextInterface::OptionalInterface<C,T,G,S>::set_modifiers (const std::string& modifiers) const
 {
   if (value)
+  {
+#ifdef _DEBUG
+    std::cerr << "TextInterface::OptionalInterface"
+      " calling Value::set_modifiers (" << modifiers << ")" << std::endl;
+#endif
     value->set_modifiers (modifiers);
+  }
   else
+  {
+#ifdef _DEBUG
+    std::cerr << "TextInterface::OptionalInterface"
+      " calling AttributeGetSet<>::set_modifiers" << std::endl;
+#endif
     AttributeGetSet<C,T,G,S>::set_modifiers (modifiers);
+  }
 }
 
 template<class C, class T, class G, class S>
@@ -439,7 +462,12 @@ TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
     if (remainder == "help")
       result += "\n" + parser->help();
     else
-      result += parser->get_value (remainder);
+    {
+      std::string pass_to_parser = remainder;
+      if (modifiers.length() > 0)
+	pass_to_parser += "%" + modifiers;
+      result += parser->get_value (pass_to_parser);
+    }
   }
 
   return result;

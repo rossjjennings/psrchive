@@ -354,6 +354,18 @@ fi
 
 fi
 
+if test -n "$swig_version"; then
+   swig_major=`echo $swig_version | awk -F. '{print $1}'`
+   if test x"$swig_major" == x3; then
+      echo
+      echo "SWIG version 3.x ($swig_version) found:"
+      echo "  WARNING, this may be incompatible with PSRCHIVE."
+      echo "  If compile errors occur, please try with SWIG 2.x"
+      echo "  or use the --disable-python configure option."
+      echo
+   fi
+fi
+
 echo
 echo "PSRCHIVE is now ready to be compiled.  Please run 'make'"
 echo

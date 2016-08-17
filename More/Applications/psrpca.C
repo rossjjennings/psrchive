@@ -35,6 +35,13 @@
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/ArrivalTime.h"
 #include "Pulsar/PhaseGradShift.h"
+#include "Pulsar/SincInterpShift.h"
+#include "Pulsar/GaussianShift.h"
+#include "Pulsar/ParIntShift.h"
+#include "Pulsar/ZeroPadShift.h"
+#include "Pulsar/FourierDomainFit.h"
+#include "Pulsar/FluxCentroid.h"
+
 #include "Pulsar/MatrixTemplateMatching.h"
 #include "toa.h"
 
@@ -120,6 +127,8 @@ protected:
   //! Total archive
   Reference::To<Archive> total;
   unsigned total_count;
+  //! Auxilliary archive for storing template-matched archives
+  Reference::To<Archive> total_matched;
 
   Reference::To<Archive> evecs_archive;
   //! Covariance calculations
@@ -129,6 +138,7 @@ protected:
   //! Output control
   string prefix;
   bool save_diffs;
+  bool save_matched;
   bool save_evecs;
   bool save_evals;
   bool save_covariance_matrix;
@@ -141,6 +151,7 @@ protected:
   bool apply_offset;
   bool apply_scale;
   bool prof_to_std;
+  string algorithm;
 
   //! Regression
   bool unweighted_regr;
@@ -187,7 +198,7 @@ psrpca::psrpca ()
 
   t_cov = new TimeDomainCovariance;
   covariance = NULL;
-  save_diffs = save_evecs = save_evals = save_covariance_matrix = save_decomps = save_proj = save_res_decomp_corel = true;
+  save_diffs = save_matched = save_evecs = save_evals = save_covariance_matrix = save_decomps = save_proj = save_res_decomp_corel = true;
   prefix = "psrpca";
   load_prefix = "";
 
@@ -218,7 +229,12 @@ void psrpca::setup ()
     full_poln->set_choose_maximum_harmonic( true );
   }
   else
-    arrival->set_shift_estimator ( new PhaseGradShift );
+  {
+    if ( algorithm.size() == 0 )
+      arrival->set_shift_estimator ( new PhaseGradShift );
+    else
+      arrival->set_shift_estimator ( ShiftEstimator::factory(algorithm) );
+  }
   try
   {
     std_archive->fscrunch();
@@ -252,6 +268,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   menu.add ("");
   menu.add ("Fitting options");
 
+  arg = menu.add(algorithm, 'A', "timing algorithm");
+  arg->set_help ("Set timing algorithm as in pat's -A. By default use PGS.");
+  
   arg = menu.add (this, &psrpca::set_standard, 's', "stdfile");
   arg->set_help ("Location of standard profile");
 
@@ -306,6 +325,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   arg = menu.add (save_diffs, "sd");
   arg->set_help ("Don't save the difference profiles");
 
+  arg = menu.add (save_matched, "sa");
+  arg->set_help ("Don't save the template-matched profiles");
+
   arg = menu.add (save_evecs, "se");
   arg->set_help ("Don't save the eigenvectors");
 
@@ -334,7 +356,7 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 void psrpca::process (Archive* archive)
 {
   if ( verbose )
-    cerr << "psrpca::process () entered" << endl;
+    cerr << "psrpca::process () entered and processing " << archive->get_filename() << endl;
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
   {
@@ -389,7 +411,12 @@ void psrpca::finalize ()
 
   FILE *out;
   
+  if ( save_matched )
+    total_matched = total->clone();
   fit_data( std_prof );
+  if ( save_matched )
+    total_matched->unload ( prefix+"_rotated_scaled.ar" );
+
   out = fopen( (prefix+"_profiles.dat").c_str(), "w" );
   gsl_matrix_fprintf( out, profiles, "%g" );
   fclose( out );
@@ -566,6 +593,22 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       //cerr << "offset applied" << endl;
       if ( apply_scale )
 	prof->scale ( 1.0/scale );
+
+      if ( save_matched )
+      {
+	if ( full_stokes_pca )
+	{
+	  for ( unsigned i_pol = 0; i_pol < 4; i_pol++ )
+	  {
+	    total_matched->get_Profile( i_subint, i_pol, 0 )->set_amps( prof->get_amps() + i_pol * (unsigned)(nbin / 4 ) );
+	  }
+	}
+	else
+	{
+	  total_matched->get_Profile( i_subint, which_pol, 0 )->set_amps( prof->get_amps() );
+	}
+      }
+
       //cerr << "scale applied " << scale << endl;
       prof->diff ( std_prof );
       //cerr << "std_prof subtracted" << endl;

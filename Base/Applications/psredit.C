@@ -9,11 +9,11 @@
 #include "Pulsar/UnloadOptions.h"
 
 #include "Pulsar/Editor.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Check.h"
 #include "Pulsar/Profile.h"
 
-#include "TextInterface.h"
 #include "dirutil.h"
 #include "strutil.h"
 

@@ -219,8 +219,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
-%include "Pulsar/Predictor.h"
 %include "Phase.h"
+%include "Pulsar/Predictor.h"
 
 // Some useful free functions 
 

@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Application.h"
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Editor.h"
 #include "Pulsar/UnloadOptions.h"
 
