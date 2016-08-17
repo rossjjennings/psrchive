@@ -67,8 +67,10 @@ namespace TextInterface
 
     void set_modifiers (const std::string& modifiers) const
     {
-      std::cerr << "ToStringPolicy<Type>::set_modifiers "
-		<< modifiers << std::endl;
+#ifdef _DEBUG
+      std::cerr << "ToStringPolicy<Type=" << typeid(Type).name()
+		<< ">::set_modifiers " << modifiers << std::endl;
+#endif
       tostring.set_precision ( fromstring<unsigned>(modifiers) );
     }
 
@@ -78,7 +80,11 @@ namespace TextInterface
     }
 
     std::string operator () (const Type& t) const
-    { 
+    {
+#ifdef _DEBUG
+      std::cerr << "ToStringPolicy<Type=" << typeid(Type).name()
+		<< ">::operator ()" << std::endl;
+#endif
       return tostring( t );
     }
   };
@@ -99,6 +105,10 @@ namespace TextInterface
 
     void set_modifiers (const std::string& modifiers) const
     {
+#ifdef _DEBUG
+      std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
+		<< ">::set_modifiers " << modifiers << std::endl;
+#endif
       tostring.set_modifiers(modifiers);
     }
 
@@ -108,7 +118,11 @@ namespace TextInterface
     }
 
     std::string operator () (const C* ptr, Type (P::*get)() const) const
-    { 
+    {
+#ifdef _DEBUG
+      std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
+		<< ">::operator ()" << std::endl;
+#endif
       if (!ptr)
 	return "";
       return tostring( (ptr->*get) () );
