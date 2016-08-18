@@ -89,7 +89,8 @@ void Pulsar::ProjectionCorrection::set_archive (const Archive* _archive)
     double lon = telescope->get_longitude().getRadians();
 
     if (Archive::verbose > 2)
-      cerr << "Pulsar::ProjectionCorrection::set_archive horizon mount \n"
+      cerr << "Pulsar::ProjectionCorrection::set_archive "
+        << directional->get_name() << " mount \n"
 	" antenna latitude=" << lat*180/M_PI << "deg"
 	" longitude=" << lon*180/M_PI << "deg \n"
 	" source coordinates=" << archive->get_coordinates() << endl;
@@ -256,7 +257,7 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
       Angle pointing_pa = pointing->get_parallactic_angle();
       Angle feed_angle = pointing->get_feed_angle ();
 
-      if (!equal_pi( pointing_pa, para_pa ))
+      if (pointing_pa == 0.0 || !equal_pi( pointing_pa, para_pa ))
       {
         if (Archive::verbose)
         {
