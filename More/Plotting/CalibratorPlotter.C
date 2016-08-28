@@ -26,6 +26,7 @@ Pulsar::CalibratorPlotter::CalibratorPlotter ()
   use_colour = true;
   print_titles = true;
   display_mean_single_line = false;
+  plot_error_bars = true;
 }
 
 Pulsar::CalibratorPlotter::~CalibratorPlotter ()
@@ -137,6 +138,8 @@ try
 
   plotter.set_border (0.03, 0.045);
 
+  plotter.set_plot_error_bars (plot_error_bars);
+  
   // the data to be plotted
   vector< Estimate<float> > data (nchan);
 
