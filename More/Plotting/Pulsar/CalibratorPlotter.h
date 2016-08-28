@@ -61,6 +61,9 @@ namespace Pulsar {
     //! Print titles over top of panel
     bool print_titles;
 
+    //! Plot error bars
+    bool plot_error_bars;
+    
     //! Title to print over top panel
     std::string title;
 
