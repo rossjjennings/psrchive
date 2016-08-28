@@ -40,13 +40,22 @@ string Pulsar::BrittonInfo::get_name_feed (unsigned iclass) const
 //! Return the estimate of the specified parameter
 Estimate<float> 
 Pulsar::BrittonInfo::get_param_feed (unsigned ichan, unsigned iclass,
-					unsigned iparam) const
+				     unsigned iparam) const
 {
   if (iclass >= 2)
     return 0;
 
   const MEAL::Complex2* xform = calibrator->get_transformation (ichan);
 
+  const Calibration::Britton2000* bri00
+    = dynamic_cast<const Calibration::Britton2000*> (xform);
+  if (!bri00)
+    throw Error (InvalidState, "Pulsar::BrittonInfo::get_param_feed"
+		 "xform is not of type Britton2000");
+
+  if (bri00->get_degeneracy_isolated())
+    std::swap (iclass, iparam);
+  
   /*
     Note that the free parameters are equal to one half of the values
     shown in Equation 19 of Britton (2000).  For example,
