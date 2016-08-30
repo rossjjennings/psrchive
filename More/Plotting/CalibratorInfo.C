@@ -94,7 +94,7 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     if (iclass > 0)
     {
       // remove x-axis label
-      plot->get_frame()->get_x_axis()->set_label("");
+      plot->get_frame()->get_x_axis()->set_label(" ");
 
       // remove x-axis enumeration
       plot->get_frame()->get_x_axis()->rem_opt('N');
