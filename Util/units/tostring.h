@@ -55,7 +55,9 @@ public:
     
     if (precision_set)
       ost.precision (precision);
-
+    else
+      ost.precision (std::numeric_limits<T>::digits10);
+    
     ost << input;
 
     if (ost.fail())

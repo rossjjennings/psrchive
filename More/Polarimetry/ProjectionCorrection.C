@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,8 +14,9 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Pointing.h"
 
-#include "Horizon.h"
-#include "Meridian.h"
+#include "Horizon.h"    // like Parkes
+#include "Meridian.h"   // like Hobart
+#include "KrausType.h"  // like Nancay
 
 #include "Pauli.h"
 
@@ -30,6 +31,36 @@ Pulsar::ProjectionCorrection::ProjectionCorrection ()
 
 Pulsar::ProjectionCorrection::~ProjectionCorrection ()
 {
+}
+
+namespace Pulsar {
+  Directional* directional_factory (Telescope::Mount mount)
+  {
+    switch (mount)
+    {
+    case Telescope::Horizon:
+      return new Horizon;
+    case Telescope::Meridian:
+      return new Meridian;
+    case Telescope::KrausType:
+      return new KrausType;
+      
+    case Telescope::Equatorial:
+    case Telescope::Fixed:
+    case Telescope::Mobile:
+      return 0;  // no Directional-derived class for this type
+      
+    default:
+      throw Error (InvalidState, "Pulsar::ProjectionCorrection::set_archive",
+		   "unknown Telescope::Mount type");
+    }
+  }
+  
+  // return true if the mount naturally tracks celestial coordinates
+  bool naturally_celestial (Telescope::Mount mount)
+  {
+    return mount == Telescope::Equatorial;
+  }
 }
 
 //! Return true if the archive needs to be corrected
@@ -50,12 +81,7 @@ void Pulsar::ProjectionCorrection::set_archive (const Archive* _archive)
     throw Error (InvalidState, "Pulsar::ProjectionCorrection::set_archive",
 		 "no Telescope extension available");
 
-  Directional* directional = 0;
-
-  if (telescope->get_mount() == Telescope::Horizon)
-    directional = new Horizon;
-  if (telescope->get_mount() == Telescope::Meridian)
-    directional = new Meridian;
+  Directional* directional = directional_factory (telescope->get_mount());
 
   if (directional)
   {
@@ -63,7 +89,8 @@ void Pulsar::ProjectionCorrection::set_archive (const Archive* _archive)
     double lon = telescope->get_longitude().getRadians();
 
     if (Archive::verbose > 2)
-      cerr << "Pulsar::ProjectionCorrection::set_archive horizon mount \n"
+      cerr << "Pulsar::ProjectionCorrection::set_archive "
+        << directional->get_name() << " mount \n"
 	" antenna latitude=" << lat*180/M_PI << "deg"
 	" longitude=" << lon*180/M_PI << "deg \n"
 	" source coordinates=" << archive->get_coordinates() << endl;
@@ -136,9 +163,9 @@ bool Pulsar::ProjectionCorrection::required (unsigned isub) const try
 
   // determine if if is necessary to correct for known platform projections
 
-  // a horizon mounted antenna that did not track equatorial PA ...
+  // a non-celestial mount that did not track celestial position angle ...
   should_correct_vertical = 
-    telescope->get_mount() == Telescope::Horizon &&
+    !naturally_celestial( telescope->get_mount() ) &&
     receiver->get_tracking_mode() != Receiver::Celestial;
 
   // ... or the angle tracked by the receiver is not zero
@@ -159,7 +186,7 @@ bool Pulsar::ProjectionCorrection::required (unsigned isub) const try
     should_correct_vertical |= receiver->get_tracking_angle () != 0.0;
   }
 
-  // a fixed antenna, such as a dipole array (or Arecibo?)
+  // a fixed antenna, such as a dipole array
   should_correct_projection = 
     telescope->get_mount() == Telescope::Fixed;
 
@@ -230,7 +257,7 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
       Angle pointing_pa = pointing->get_parallactic_angle();
       Angle feed_angle = pointing->get_feed_angle ();
 
-      if (!equal_pi( pointing_pa, para_pa ))
+      if (pointing_pa == 0.0 || !equal_pi( pointing_pa, para_pa ))
       {
         if (Archive::verbose)
         {

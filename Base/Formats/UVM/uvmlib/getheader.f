@@ -102,9 +102,12 @@ c  Check P868 data
         if(istat.ne.0) go to 99
         return
       else
-        stop "Getheader: ambiguous file name"
+c        stop "Getheader: ambiguous file name"
+        istat = -1
+	return
       end if
       return
    99 write(*,*) "Getheader: header record read error",istat
-      stop
+c      stop
+      return
       end

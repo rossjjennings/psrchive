@@ -66,15 +66,15 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
     set_calibrator (archive);
 }
 
-void Pulsar::SystemCalibrator::set_calibrator (Archive* archive)
+void Pulsar::SystemCalibrator::set_calibrator (const Archive* archive)
 {
   if (!archive)
     return;
 
   PolnCalibrator::set_calibrator(archive);
 
-  extension = archive->get<PolnCalibratorExtension>();
-  calibrator_stokes = archive->get<CalibratorStokes>();
+  extension = archive->get<const PolnCalibratorExtension>();
+  calibrator_stokes = archive->get<const CalibratorStokes>();
 }
 
 //! Return true if least squares minimization solvers are available
@@ -709,9 +709,7 @@ void Pulsar::SystemCalibrator::init_estimates
     estimate[ichan].phase_bin = ibin;
 
     string name_prefix = "psr";
-    if (ibin >= 0)
-      name_prefix += "_" + tostring(ibin);
-    name_prefix += "_";
+    name_prefix += "_" + tostring(ibin) + "_";
 
     estimate[ichan].source->set_param_name_prefix( name_prefix );
   }
@@ -807,7 +805,7 @@ void Pulsar::SystemCalibrator::integrate_calibrator_solution
     model[ichan]->integrate_calibrator (transformation);
 }
 
-Pulsar::CalibratorStokes*
+const Pulsar::CalibratorStokes*
 Pulsar::SystemCalibrator::get_CalibratorStokes () const
 {
   if (calibrator_stokes)
@@ -845,10 +843,10 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
     ext->set_valid (ichan, false);
   }
 
+  
   calibrator_stokes = ext;
   
   return calibrator_stokes;
-
 }
 
 void Pulsar::SystemCalibrator::create_model ()
@@ -1251,6 +1249,17 @@ bool Pulsar::SystemCalibrator::get_solved () const
   return is_solved;
 }
 
+bool Pulsar::SystemCalibrator::has_valid () const
+{
+  unsigned nchan = model.size();
+  
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (model[ichan]->get_valid())
+      return true;
+
+  return false;
+}
+
 /*! Retrieves the transformation from the standard model in each channel */
 void Pulsar::SystemCalibrator::calculate_transformation ()
 {
@@ -1468,10 +1477,7 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
   output->set_model (0);
 
   if (calibrator_estimate.size())
-  {
-    Reference::To<CalibratorStokes> stokes = get_CalibratorStokes();
-    output -> add_extension (stokes);
-  }
+    output -> add_extension (get_CalibratorStokes()->clone());
 
   if (receiver)
   {

@@ -90,8 +90,9 @@ unsigned Signal::State2npol (State s)
 }
 
 //! Tells you if your state is consistent with your npol and ndim
-bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string& reason){
-
+bool Signal::valid_state (Signal::State state,
+			  unsigned ndim, unsigned npol, string& reason)
+{
   switch (state) {
   case Signal::Nyquist:
     if (ndim != 1)  {
@@ -232,12 +233,12 @@ Signal::State Signal::string2State (const string& ss)
 	       "Unknown state '" + ss + "'");
 }
 
-std::ostream& operator<< (std::ostream& ostr, Signal::State state)
+std::ostream& Signal::operator<< (std::ostream& ostr, State state)
 {
   return ostr << State2string(state);
 }
 
-std::istream& operator >> (std::istream& is, Signal::State& state)
+std::istream& Signal::operator >> (std::istream& is, State& state)
 {
   return extraction (is, state, Signal::string2State);
 }
@@ -294,12 +295,12 @@ Signal::Source Signal::string2Source (const string& ss)
 	       "Unknown source '" + ss + "'");
 }
 
-std::ostream& operator<< (std::ostream& ostr, Signal::Source source)
+std::ostream& Signal::operator<< (std::ostream& ostr, Source source)
 {
   return ostr << Source2string(source);
 }
 
-std::istream& operator >> (std::istream& is, Signal::Source& source)
+std::istream& Signal::operator >> (std::istream& is, Source& source)
 {
   return extraction (is, source, Signal::string2Source);
 }
@@ -353,12 +354,12 @@ Signal::Scale Signal::string2Scale (const string& ss)
 	       "Unknown scale '" + ss + "'");
 }
 
-std::ostream& operator<< (std::ostream& ostr, Signal::Scale scale)
+std::ostream& Signal::operator<< (std::ostream& ostr, Scale scale)
 {
   return ostr << Scale2string(scale);
 }
 
-std::istream& operator >> (std::istream& is, Signal::Scale& scale)
+std::istream& Signal::operator >> (std::istream& is, Scale& scale)
 {
   return extraction (is, scale, Signal::string2Scale);
 }

@@ -313,7 +313,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   Backend* backend = get<Backend>();
   if (backend && strstr (backend->get_name().c_str(), "BPP"))
   {
-    if (verbose > 3)
+    if (verbose > 2)
       cerr << "FITSArchive::load_header using BPP matching policy" << endl;
     ThresholdMatch::set_BPP (this);
   }

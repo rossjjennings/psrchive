@@ -49,6 +49,14 @@ namespace TextInterface {
     bool matches (const std::string& name) const
     { return TextInterface::matches (name, prefix, value); }
 
+    //! Parse any modifiers that will alter the behaviour of the output stream
+    void set_modifiers (const std::string& modifiers) const
+    { value->set_modifiers (modifiers); }
+
+    //! Reset any output stream modifiers
+    void reset_modifiers () const
+    { value->reset_modifiers (); }
+
     void set_parent (Parser* p)
     { Value::set_parent(p); value->set_parent(p); }
 

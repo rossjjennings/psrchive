@@ -66,7 +66,11 @@ static void model_get (const Calibration::ReceptionModel* model, gsl_vector* x)
   assert( ifit == model->get_solver()->get_nparam_infit() );
 }
 
-
+/*
+  x = model parameters vector
+  f = results vector; the norm of f is the chi squared to be minimized
+  J = Jacobian matrix; J_ij = df_i / dx_j
+ */
 static int model_fdf (const gsl_vector* x, void* data,
 		      gsl_vector* f, gsl_matrix* J)
 {

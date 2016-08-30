@@ -8,7 +8,7 @@
 
 // psrchive/More/Polarimetry/Pulsar/FitGoodnessReport.h
 
-#ifndef __FitGoodnessReport_Ho
+#ifndef __FitGoodnessReport_H
 #define __FitGoodnessReport_H
 
 #include "Pulsar/ReceptionModelReport.h"
