@@ -31,6 +31,7 @@ void usage ()
     "usage: pcmdiff -s pcm.std [options] file1 [file2 ...] \n"
     "where:\n"
     " -c [i|j-k]   mark channel or range of channels as bad \n"
+    " -C           don't plot calibrator Stokes \n"
     " -D dev       display using PGPLOT device \n"
     " -P           produce publication-quality plots\n"
     " -E           plot without error bars\n"
@@ -98,17 +99,22 @@ int main (int argc, char** argv) try
   Reference::To<Pulsar::CalibratorStokes> compare_stokes;
 
   bool plot_errors = true;
+  bool plot_calibrator_stokes = true;
 
   vector<ipair> swaps;
   
   char c;
-  while ((c = getopt(argc, argv, "c:D:EhM:Ps:S:vV")) != -1)  {
+  while ((c = getopt(argc, argv, "Cc:D:EhM:Ps:S:vV")) != -1)  {
 
     switch (c)  {
 
     case 'h':
       usage();
       return 0;
+
+    case 'C':
+      plot_calibrator_stokes = false;
+      break;
 
     case 'c': {
 
@@ -268,12 +274,14 @@ int main (int argc, char** argv) try
     cpgpage ();
     plotter.plot (calibrator);
 
-
-    cpgpage ();
-    plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
-		  calibrator->get_nchan(),
-		  calibrator->get_Archive()->get_centre_frequency(),
-		  calibrator->get_Archive()->get_bandwidth() );
+    if (plot_calibrator_stokes)
+    {
+      cpgpage ();
+      plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+		    calibrator->get_nchan(),
+		    calibrator->get_Archive()->get_centre_frequency(),
+		    calibrator->get_Archive()->get_bandwidth() );
+    }
 
   }
   catch (Error& error) {
