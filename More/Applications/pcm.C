@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2011 by Willem van Straten
+ *   Copyright (C) 2003 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -68,7 +68,7 @@ void usage ()
     "  -O fname   set cal solution output filename (default=pcm.fits)\n"
     "  -N         do not unload calibrated data files\n"
     "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
-    "  -m model   receiver model name: van09, bri00e19 or van04e18 [default]\n"
+    "  -m model   receiver model name: e.g. bri00e19 or van04e18 [default]\n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
     "  -y         always trust the Pointing::feed_angle attribute \n"
@@ -80,7 +80,8 @@ void usage ()
     "  -j job     preprocessing job \n"
     "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
     "\n"
-    "MEM: Measurement Equation Modeling - observations of an unknown source \n"
+    "MEM: Measurement Equation Modeling \n"
+    "  -- observations of an unknown source as in van Straten (2004)\n"
     "\n"
     "  -t nproc   solve using nproc threads \n"
     "\n"
@@ -117,7 +118,8 @@ void usage ()
     "  -F days    use flux calibrators within days of pulsar data mid-time\n"
     "  -L hours   use reference sources within hours of pulsar data mid-time\n"
     "\n"
-    "MTM: Matrix Template Matching -- observations of a known source \n"
+    "METM: Measurement Equation Template Matching\n"
+    "  -- observations of a known source as in van Straten (2013) \n"
     "\n"
     "  -S fname   filename of calibrated standard \n"
     "  -H         allow software to choose the number of harmonics \n"
@@ -1191,7 +1193,8 @@ int actual_main (int argc, char *argv[]) try
     return -1;
   }
 
-  unloader.unload (model);
+  if (model->has_valid())
+    unloader.unload (model);
 
 #if HAVE_PGPLOT
 
