@@ -87,13 +87,13 @@ void Pulsar::PolnProfileFit::init ()
 {
   standard_data = new Calibration::StandardSpectra;
 
-  phases = new MEAL::PhaseGradients;
+  phases = new MEAL::PhaseGradients<MEAL::Complex2>;
 
   // connect to the phase axis via the Univariate<> interface
   phases -> set_argument (0, &phase_axis);
 
   // connect to the index axis via the standard Callback interface
-  index_axis.signal.connect (phases, &MEAL::PhaseGradients::set_igradient);
+  index_axis.signal.connect (phases, &MEAL::PhaseGradients<MEAL::Complex2>::set_igradient);
 
   maximum_harmonic = n_harmonic = 0;
 

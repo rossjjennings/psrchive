@@ -28,7 +28,7 @@
 namespace MEAL
 {
   class Complex2;
-  class PhaseGradients;
+  template<typename T> class PhaseGradients;
 }
 
 namespace Calibration
@@ -198,7 +198,7 @@ namespace Pulsar
     std::vector< Reference::To<Calibration::TemplateUncertainty> > uncertainty;
 
     //! The phase gradient model for each observation added
-    Reference::To<MEAL::PhaseGradients> phases;
+    Reference::To< MEAL::PhaseGradients<MEAL::Complex2> > phases;
 
     //! The phase axis
     MEAL::Axis<double> phase_axis;
