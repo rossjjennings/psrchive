@@ -142,7 +142,7 @@ void Pulsar::UVMArchive::load_header (const char* filename)
   uvm_data data;
   unsigned loaded_subints = 0;
 
-  while (uvm_getdata (program, &data) >= 0)
+  while (uvm_getdata (program, header, &data) >= 0)
   {
     loaded_subints ++;
     resize (loaded_subints);
@@ -153,13 +153,17 @@ void Pulsar::UVMArchive::load_header (const char* filename)
     integration->set_epoch (epoch);
     integration->set_centre_frequency(0, centre_frequency);
 
+    // scaleI is the scale to convert to microJy
+    double scale = header->scaleI * 1e-3;
+    double offset = header->baseval;
+  
     for (unsigned ipol=0; ipol < get_npol(); ipol++)
     {
       float* amps = integration->get_Profile(ipol, 0) -> get_amps();
 
       for (unsigned ibin=0; ibin < get_nbin(); ibin++)
       {
-	amps[ibin] = data.data[ipol][ibin];
+	amps[ibin] = (data.data[ipol][ibin] + offset) * scale;
       }
     }
   }
