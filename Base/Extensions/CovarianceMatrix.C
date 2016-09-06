@@ -13,18 +13,12 @@ using Pulsar::CovarianceMatrix;
 //! Default Constructor 
 CovarianceMatrix::CovarianceMatrix () : Extension ("CovarianceMatrix")
 {
-   nbin =0;
-}
-
-//! Default Constructor for TDC Class
-CovarianceMatrix::CovarianceMatrix(TimeDomainCovariance *t_cov) : Extension ("CovarianceMatrix")
-{
-  tcov = t_cov;
   nbin = 0;
 }
 
 //! Copy constructor
-CovarianceMatrix::CovarianceMatrix (const CovarianceMatrix& extension) : Extension ("CovarianceMatrix")
+CovarianceMatrix::CovarianceMatrix (const CovarianceMatrix& extension)
+ : Extension ("CovarianceMatrix")
 {
   operator = (extension);
 }
@@ -33,7 +27,6 @@ CovarianceMatrix::CovarianceMatrix (const CovarianceMatrix& extension) : Extensi
 const CovarianceMatrix&
 CovarianceMatrix::operator= (const CovarianceMatrix& extension)
 {
-  
   nbin = extension.nbin;
   covariance = extension.covariance;
 
@@ -46,32 +39,15 @@ CovarianceMatrix::~CovarianceMatrix ()
 }
 
 //! Sets the number of phase bins
-void CovarianceMatrix::set_nbin(unsigned nbin)
+void CovarianceMatrix::set_nbin(unsigned _nbin)
 {
-  covariance.resize(nbin*nbin);  
+  nbin = _nbin;
+  covariance.resize (nbin*(nbin+1)/2);  
 }
 
 //! Returns the number of phase bins from TDC Class
 unsigned CovarianceMatrix::get_nbin() const // Write a method in TDC!
 {
-   //return tcov->get_nbins();
+  return nbin;
 }
-
-//! Obtains the Covariance Matrix as produced by TDC Class
-void CovarianceMatrix::get_matrix(double *dest) const
-{
-  tcov->get_covariance_matrix( dest );    
-}
-
-//! Sets the values in the Covariance Matrix to the vector 'covariance'
-void CovarianceMatrix::set_matrix(double *dest)
-{  
-  for(int i =0; i<covariance.size(); i++)  
-      covariance.at(i) = dest[i];        
-}
-
-
-
-
-
 

@@ -1,29 +1,30 @@
+//-*-C++-*-
 /***************************************************************************
  *
- * // CovarianceMatrix.h :: The Extension Class header for the COV_MAT PSRFITS Binary Table
- * 
+ *   Copyright (C) 2016 by Aditya Parthasarathy & Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
  ***************************************************************************/
+
+// psrchive/Base/Extensions/Pulsar/CovarianceMatrix.h
 
 #ifndef __CovarianceMatrix_h
 #define __CovarianceMatrix_h
 
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/TimeDomainCovariance.h" 
 
 #include <vector> 
 
 namespace Pulsar {
 
-  class CovarianceMatrix : public Pulsar::Archive::Extension {
+  class CovarianceMatrix : public Pulsar::Archive::Extension
+  {
 
   public:
  
     //! Default constructor
     CovarianceMatrix ();
-
-    //! Default Constructor [TDC]
-    CovarianceMatrix(TimeDomainCovariance *t_cov);
 
     //! Copy constructor
     CovarianceMatrix (const CovarianceMatrix& extension);  
@@ -49,17 +50,14 @@ namespace Pulsar {
     //! Get the covariance matrix
     void get_matrix(double *dest) const;   
 
-    //! The vector to store the covariance matrix (made public for psrwhite)
-      std::vector<double> covariance;   
-         
     protected:
 
-      unsigned nbin;      
+    unsigned nbin;      
+    std::vector<double> covariance;
             
-      //! Pointer to TimeDomainCovariance Class to get the covariance matrix
-      Pulsar::TimeDomainCovariance *tcov;
-
   };
      
 }
+
 #endif
+

@@ -178,7 +178,7 @@ protected:
 
   //! Unloading Covariance Matrix Data
   Reference::To<Archive> psrfits;
-  CovarianceMatrix* covar;
+  Reference::To<CovarianceMatrix> covar;
 
   struct CastToDouble
   {
@@ -222,7 +222,7 @@ psrpca::psrpca ()
   which_pol = 0;
   full_stokes_pca = false;
 
-  covar = new CovarianceMatrix(t_cov);
+  // WvS to fix: covar = new CovarianceMatrix(t_cov);
 
 }
 
@@ -435,8 +435,8 @@ void psrpca::finalize ()
   fclose( out );
   
   // Unloading Covariance Data in PSRFITS Format  
-  psrfits-> add_extension(covar);
-  psrfits-> unload("covariance.rf");
+  // WvS to fix  psrfits-> add_extension(covar);
+  // psrfits-> unload("covariance.rf");
 
   if ( full_stokes_pca )
     nbin = 4 * nbin;

@@ -42,7 +42,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CovarianceMatrix* covar)
     vector<unsigned> dimensions;  
     
     // Get matrix data from TDC Class
-    covar->get_matrix(dest); 
+    // WvS to fix covar->get_matrix(dest); 
 
     for(int i=0;i<nbin*nbin;i++) 
         covariance_out.at(i) = dest[i];       

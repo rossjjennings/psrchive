@@ -62,7 +62,7 @@ try
       dest[i] = covariance_in.at(i);
 
 	// Set Matrix
-  covar->set_matrix(dest);
+  // WvS to fix covar->set_matrix(dest);
   
   add_extension (covar);
 
