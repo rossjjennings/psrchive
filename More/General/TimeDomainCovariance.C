@@ -165,3 +165,4 @@ string TimeDomainCovariance::get_name () const
 {
   return "TimeDomain";
 }
+

@@ -31,7 +31,8 @@ Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
   if (calibrator->get_type()->is_a<CalibratorTypes::van04_Eq18>())
     return new InstrumentInfo (calibrator);
 
-  if (calibrator->get_type()->is_a<CalibratorTypes::bri00_Eq19>())
+  if (calibrator->get_type()->is_a<CalibratorTypes::bri00_Eq19>() ||
+      calibrator->get_type()->is_a<CalibratorTypes::bri00_Eq19_iso>())
     return new BrittonInfo (calibrator);
 
   return new PolnCalibrator::Info (calibrator);

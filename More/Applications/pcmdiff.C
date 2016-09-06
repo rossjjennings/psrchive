@@ -16,6 +16,7 @@
 
 #include "strutil.h"
 #include "dirutil.h"
+#include "pairutil.h"
 
 #include <cpgplot.h>
 
@@ -30,8 +31,11 @@ void usage ()
     "usage: pcmdiff -s pcm.std [options] file1 [file2 ...] \n"
     "where:\n"
     " -c [i|j-k]   mark channel or range of channels as bad \n"
+    " -C           don't plot calibrator Stokes \n"
     " -D dev       display using PGPLOT device \n"
     " -P           produce publication-quality plots\n"
+    " -E           plot without error bars\n"
+    " -S i:j       swap parameter i and j before comparing\n"
     " -s pcm.std   compare all solutions with this standard\n" << endl;
 }
 
@@ -49,7 +53,7 @@ Pulsar::PolnCalibrator* load_calibrator (const string& filename,
 
   archive = Pulsar::Archive::load( filename );
 
-  if (!archive->get_type() == Signal::Calibrator) {
+  if (archive->get_type() != Signal::Calibrator) {
     cerr << "pcmdiff: Archive " << filename << " is not a Calibrator" << endl;
     return 0;
   }
@@ -75,6 +79,8 @@ Pulsar::PolnCalibrator* load_calibrator (const string& filename,
   return calibrator.release();
 }
 
+typedef std::pair<unsigned,unsigned> ipair;
+
 int main (int argc, char** argv) try
 {
   // filename of filenames
@@ -92,14 +98,23 @@ int main (int argc, char** argv) try
   Reference::To<Pulsar::PolnCalibrator> compare;
   Reference::To<Pulsar::CalibratorStokes> compare_stokes;
 
+  bool plot_errors = true;
+  bool plot_calibrator_stokes = true;
+
+  vector<ipair> swaps;
+  
   char c;
-  while ((c = getopt(argc, argv, "c:D:hM:Ps:vV")) != -1)  {
+  while ((c = getopt(argc, argv, "Cc:D:EhM:Ps:S:vV")) != -1)  {
 
     switch (c)  {
 
     case 'h':
       usage();
       return 0;
+
+    case 'C':
+      plot_calibrator_stokes = false;
+      break;
 
     case 'c': {
 
@@ -125,6 +140,10 @@ int main (int argc, char** argv) try
       device = optarg;
       break;
 
+    case 'E':
+      plot_errors = false;
+      break;
+      
     case 'M':
       metafile = optarg;
       break;
@@ -134,6 +153,10 @@ int main (int argc, char** argv) try
       compare_stokes = calibrator_stokes;
       break;
 
+    case 'S':
+      swaps.push_back( fromstring<ipair>(optarg) );
+      break;
+      
     case 'P':
       publication = true;
       break;
@@ -172,7 +195,7 @@ int main (int argc, char** argv) try
   cpgsvp (.1,.9, .1,.9);
  
   Pulsar::CalibratorPlotter plotter;
-
+  plotter.plot_error_bars = plot_errors;
   if (publication) {
     plotter.npanel = 5;
     plotter.between_panels = 0.08;
@@ -216,6 +239,16 @@ int main (int argc, char** argv) try
 	     << " != " << nparam << endl;
 	return -1;
       }
+
+      for (unsigned iswap=0; iswap < swaps.size(); iswap++)
+      {
+	unsigned a = swaps[iswap].first;
+	unsigned b = swaps[iswap].second;
+	
+	Estimate<double> tmp = cal->get_Estimate(a);
+	cal->set_Estimate(a,cal->get_Estimate(b));
+	cal->set_Estimate(b,tmp);
+      }
       
       for (unsigned iparam=0; iparam < nparam; iparam++)
 	cal->set_Estimate( iparam,
@@ -241,12 +274,14 @@ int main (int argc, char** argv) try
     cpgpage ();
     plotter.plot (calibrator);
 
-
-    cpgpage ();
-    plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
-		  calibrator->get_nchan(),
-		  calibrator->get_Archive()->get_centre_frequency(),
-		  calibrator->get_Archive()->get_bandwidth() );
+    if (plot_calibrator_stokes)
+    {
+      cpgpage ();
+      plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+		    calibrator->get_nchan(),
+		    calibrator->get_Archive()->get_centre_frequency(),
+		    calibrator->get_Archive()->get_bandwidth() );
+    }
 
   }
   catch (Error& error) {

@@ -20,7 +20,6 @@ include_HEADERS = \
 	ExponentialDistribution.h \
 	extutil.h \
 	f77util.h \
-        fcomp.h \
 	format_it.h \
         fsleep.h \
 	Horizon.h \
@@ -94,7 +93,6 @@ libgenutil_la_SOURCES = \
 	evaluate.C \
 	ExponentialDistribution.C \
 	f77util.c \
-        fcomp.C \
 	filesize.c \
 	format_it.C \
         fsleep.c \

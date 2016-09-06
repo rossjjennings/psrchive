@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -37,28 +37,20 @@ void Pulsar::Integration::resize (unsigned new_npol,
 	 << " old npol=" << cur_npol
 	 << " nchan=" << cur_nchan << " nbin=" << cur_nbin << endl;
 
-  unsigned ipol=0, ichan=0;
-
   profiles.resize (new_npol);
-
-  for (ipol=0; ipol < cur_npol; ipol++) {
+  for (unsigned ipol=0; ipol < new_npol; ipol++)
+  {  
     profiles[ipol].resize (new_nchan);
-    for (ichan=cur_nchan; ichan < new_nchan; ichan++)
-      profiles[ipol][ichan] = new_Profile();
-  }
+    for (unsigned ichan=0; ichan < new_nchan; ichan++)
+    {
+      if (!profiles[ipol][ichan])
+	profiles[ipol][ichan] = new_Profile();
 
-  for (ipol=cur_npol; ipol < new_npol; ipol++) {
-    profiles[ipol].resize (new_nchan);
-    for (ichan=0; ichan < new_nchan; ichan++)
-      profiles[ipol][ichan] = new_Profile();
-  }
-
-  for (ipol=0; ipol < new_npol; ipol++)
-    for (ichan=0; ichan < new_nchan; ichan++)
       profiles[ipol][ichan] -> resize(new_nbin);
-
+    }
+  }
+  
   set_npol (new_npol);
   set_nchan (new_nchan);
   set_nbin (new_nbin);
-
 }

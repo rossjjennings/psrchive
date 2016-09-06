@@ -138,6 +138,18 @@ class ManualPoln : public Poln
 
       bool is_a (const Type* that) const { return Type::is_a (that); }
     };
+
+    //! Britton (2000; ApJ 532:1240), equation 19, with isolated degeneracy
+    class bri00_Eq19_iso : public Phenomenological
+    {
+    public:
+      CALIBRATOR_TYPE(bri00_Eq19_iso)
+      {
+        set_identity ("bri00e19iso");
+      }
+
+      bool is_a (const Type* that) const { return Type::is_a (that); }
+    };
     
     //! van Straten (2004; ApJSS 152:129), equation 18
     class van04_Eq18 : public Phenomenological

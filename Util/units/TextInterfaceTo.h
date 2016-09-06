@@ -63,6 +63,16 @@ namespace TextInterface
       { throw Error (InvalidState, "UnaryGet::set_value", 
 		     name + " cannot be set"); }
 
+    void set_modifiers (const std::string& modifiers) const
+    {
+      tostring_precision = fromstring<unsigned> (modifiers);
+    }
+
+    void reset_modifiers () const
+    {
+      tostring_precision = 0;
+    }
+    
   protected:
 
     //! The name of the attribute

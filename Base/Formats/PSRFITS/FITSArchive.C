@@ -32,6 +32,7 @@
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/CoherentDedispersion.h"
 #include "Pulsar/SpectralKurtosis.h"
+#include "Pulsar/CovarianceMatrix.h" 
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
@@ -313,7 +314,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   Backend* backend = get<Backend>();
   if (backend && strstr (backend->get_name().c_str(), "BPP"))
   {
-    if (verbose > 3)
+    if (verbose > 2)
       cerr << "FITSArchive::load_header using BPP matching policy" << endl;
     ThresholdMatch::set_BPP (this);
   }
@@ -728,6 +729,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   
   // Load the parameters from the SUBINT HDU
   load_FITSSUBHdrExtension( read_fptr );
+
+  // Load the Covariance Matrix Data from COV_MAT
+  load_CovarianceMatrix (read_fptr);
 
   // Load the pulsar parameters
   if (get_type() == Signal::Pulsar)
@@ -1149,6 +1153,13 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     unload_integrations (fptr);
   else
     delete_hdu (fptr, "SUBINT");
+
+  // Unload the Covariance Matrix Data values
+  const CovarianceMatrix* covar = get<CovarianceMatrix>();
+  if(covar)
+    unload (fptr,covar);
+  else
+    delete_hdu (fptr,"COV_MAT");
 
   // Write the Spectral Kurtosis integrations to file
 

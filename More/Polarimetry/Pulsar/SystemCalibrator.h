@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2009/10/02 03:38:29 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h
 
 #ifndef __Pulsar_SystemCalibrator_H
 #define __Pulsar_SystemCalibrator_H
@@ -78,7 +75,7 @@ namespace Pulsar
     void set_calibrators (const std::vector<std::string>& filenames);
     
     //! Set the calibrator
-    virtual void set_calibrator (Archive*);
+    virtual void set_calibrator (const Archive*);
 
     //! Set the impurity transformation
     virtual void set_impurity( MEAL::Real4* );
@@ -158,6 +155,9 @@ namespace Pulsar
     //! Get the status of the model
     virtual bool get_solved () const;
 
+    //! Returns true if at least one channel returns get_valid == true
+    virtual bool has_valid () const;
+
     //! Get the reduced chisq of the best fit in the specified channel
     float get_reduced_chisq (unsigned ichan) const;
 
@@ -172,7 +172,7 @@ namespace Pulsar
     virtual Archive* new_solution (const std::string& archive_class) const;
 
     //! Return the CalibratorStokesExtension
-    virtual CalibratorStokes* get_CalibratorStokes () const;
+    virtual const CalibratorStokes* get_CalibratorStokes () const;
 
     //! Return the SignalPath for the specified channel
     virtual const Calibration::SignalPath* get_model (unsigned ichan) const;
@@ -204,7 +204,7 @@ namespace Pulsar
     Reference::To<Solver> solver;
 
     //! The CalibratorStokesExtension of the Archive passed during construction
-    mutable Reference::To<CalibratorStokes> calibrator_stokes;
+    mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;

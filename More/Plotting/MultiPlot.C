@@ -124,7 +124,7 @@ void Pulsar::MultiPlot::manage (Plot* plot)
 
   string name = tostring(plots.size());
   manage (name, framed);
-
+  
   if (frames.has_shared_x_scale())
   {
     if (verbose)
@@ -137,8 +137,6 @@ void Pulsar::MultiPlot::manage (Plot* plot)
     std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
     for (ptr = plots.begin(); ptr != plots.end(); ptr++)
     {
-      cerr << "stacking " << ptr->first << endl;
-
       FramedPlot* plot = ptr->second;
       PlotFrame* frame = plot->get_frame();
 

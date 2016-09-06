@@ -166,6 +166,9 @@ MEAL::Complex2* Pulsar::new_transformation( const Calibrator::Type* type )
   if (type->is_a<CalibratorTypes::bri00_Eq19>())
     return new Calibration::Britton2000;
 
+  if (type->is_a<CalibratorTypes::bri00_Eq19_iso>())
+    return new Calibration::Britton2000 (true);
+  
   //if (type->is_a<CalibratorTypes::ManualPoln>())
   //  return new Pulsar::ManualPolnCalibrator;
 

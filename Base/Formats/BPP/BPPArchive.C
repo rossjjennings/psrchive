@@ -244,6 +244,9 @@ void Pulsar::BPPArchive::load_header (const char* filename)
 
   string src = hdr.pulsar_name;
 
+  // Strip trailing spaces
+  src.erase(src.find_last_not_of(" ")+1);
+
   if (src[0]=='c' || src[0]=='C') {
     set_type(Signal::PolnCal);
     lin_method = Bins; // Use per-bin linearization for cal data

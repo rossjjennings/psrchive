@@ -12,13 +12,13 @@
 
 using namespace std;
 
-class Calibration::Britton2000::Feed 
+class Calibration::Britton2000::Feed
   : public MEAL::ProductRule<MEAL::Complex2>
 {
   public:
 
   //! Default Constructor
-  Feed ()
+  Feed (bool isolate_degeneracy)
   {
     MEAL::Boost1* boost = 0;
     MEAL::Rotation1* rotation = 0;
@@ -28,13 +28,24 @@ class Calibration::Britton2000::Feed
     boost->set_param_name ("b_1");
 
     // b_{\hat v} (\delta_\chi/2)
-    add_model( boost = new MEAL::Boost1 (Vector<3, double>::basis(2)) );
+    boost = new MEAL::Boost1 (Vector<3, double>::basis(2));
     boost->set_param_name ("b_2");
 
     // r_{\hat u} (\sigma_\chi/2)
-    add_model( rotation = new MEAL::Rotation1 (Vector<3, double>::basis(1)) );
+    rotation = new MEAL::Rotation1 (Vector<3, double>::basis(1));
     rotation->set_param_name ("r_1");
 
+    if (isolate_degeneracy)
+    {
+      add_model( rotation );
+      add_model( boost );
+    }
+    else
+    {
+      add_model( boost );
+      add_model( rotation );
+    }
+    
     // b_{\hat v} (\sigma_\theta/2)
     add_model( rotation = new MEAL::Rotation1 (Vector<3, double>::basis(2)) );
     rotation->set_param_name ("r_2");
@@ -49,19 +60,20 @@ class Calibration::Britton2000::Feed
 
 };
 
-void Calibration::Britton2000::init ()
+void Calibration::Britton2000::init (bool iso)
 {
-  add_model( feed = new Feed );
+  isolate_degeneracy = iso;
+  add_model( feed = new Feed(isolate_degeneracy) );
 }
 
-Calibration::Britton2000::Britton2000 ()
+Calibration::Britton2000::Britton2000 (bool iso)
 {
-  init ();
+  init (iso);
 }
 
 Calibration::Britton2000::Britton2000 (const Britton2000& s)
 {
-  init ();
+  init (s.isolate_degeneracy);
   operator = (s);
 }
 

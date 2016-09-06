@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorStokesInfo.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/06/17 08:02:52 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/CalibratorStokesInfo.h
 
 #ifndef __Pulsar_CalibratorStokesInfo_H
 #define __Pulsar_CalibratorStokesInfo_H
@@ -47,6 +44,12 @@ namespace Pulsar {
     Estimate<float> get_param (unsigned ichan, unsigned iclass,
 			       unsigned iparam) const;
 
+    //! Group all three calibrator Stokes parameters in one class
+    void set_together (bool flag) { together = flag; }
+
+    //! Add an additional class for the calibrator degree of polarization
+    void set_degree (bool flag) { degree = flag; }
+    
   protected:
 
     //! The CalibratorStokes to be plotted
@@ -54,6 +57,9 @@ namespace Pulsar {
 
     //! Plot all of the Stokes parameters in one panel
     bool together;
+
+    //! Plot the degree of polarization in a fourth panel
+    bool degree;
 
   };
 

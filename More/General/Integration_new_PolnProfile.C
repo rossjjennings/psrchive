@@ -15,8 +15,16 @@ using namespace std;
 //! Returns a pointer to a new PolnProfile instance specified by ichan
 Pulsar::PolnProfile* Pulsar::Integration::new_PolnProfile (unsigned ichan)
 {
-  const Integration* thiz = this;
-  return const_cast<PolnProfile*>( thiz->new_PolnProfile(ichan) );
+  if (Profile::verbose)
+    cerr << "Pulsar::Integration::new_PolnProfile" << endl;
+
+  if (get_npol() != 4)
+    throw Error (InvalidState, "Pulsar::Integration::new_PolnProfile",
+		 "incomplete polarization information");
+
+  return new PolnProfile (get_basis(), get_state(), 
+			  get_Profile(0,ichan), get_Profile(1,ichan),
+			  get_Profile(2,ichan), get_Profile(3,ichan));
 }
 
 const Pulsar::PolnProfile*
@@ -29,11 +37,9 @@ Pulsar::Integration::new_PolnProfile (unsigned ichan) const
     throw Error (InvalidState, "Pulsar::Integration::new_PolnProfile",
 		 "incomplete polarization information");
 
-  if (ichan >= get_nchan())
-    throw Error (InvalidParam, "Pulsar::Integration::new_PolnProfile",
-		 "ichan=%d >= nchan=%d", ichan, get_nchan());
-
   return new PolnProfile (get_basis(), get_state(), 
-			  profiles[0][ichan], profiles[1][ichan],
-			  profiles[2][ichan], profiles[3][ichan]);
+			  get_Profile(0,ichan)->clone(),
+			  get_Profile(1,ichan)->clone(),
+			  get_Profile(2,ichan)->clone(),
+			  get_Profile(3,ichan)->clone());
 }
