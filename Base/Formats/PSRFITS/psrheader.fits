@@ -654,9 +654,10 @@ PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    1 / Number of fields per row
 #
-EXTNAME = COV_MAT             / name of this binary table extension
-NBIN   =                    * / Number of phase bins
+EXTNAME = COV_MAT              / name of this binary table extension
+NBIN    =                    * / Number of phase bins
+NPOL    =                    * / Number of polarisations
 #
-TTYPE#  = MAT_ONE              / Contains Covariance Matrix in NCHAN=1
-TFORM#  = 1D                   / Covariance Data Floats
+TTYPE#  = DATA                 / Elements of the covariance matrix
+TFORM#  = E                    / M*(M+1)/2 floats, where M=NBIN*NPOL
 END

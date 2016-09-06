@@ -14,48 +14,25 @@ using namespace std;
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const CovarianceMatrix* covar) 
 {
-    if (verbose > 2)
-         cerr << "FITSArchive::unload CovarianceMatrix entered" << endl;
+  if (verbose > 2)
+    cerr << "FITSArchive::unload CovarianceMatrix entered" << endl;
     
-    // Move and Clear existing rows in COV_MAT 
-    psrfits_move_hdu (fptr, "COV_MAT");
-    psrfits_clean_rows (fptr);    
-    
-    // Insert new rows for Covariance Matrix Data
-    int status = 0;
-    fits_insert_rows (fptr, 0, 1, &status);    
-    if (status != 0)
-         throw FITSError (status, "FITSArchive::unload CovarianceMatrix :: fits_insert_rows COV_MAT");
-    
-    // Get nbin from TDC Class
-    int nbin = 1024; //covar->get_nbin(); // No get_nbin as of now
-    if (verbose > 2) 
-        cerr << "FITSArchive::unload CovarianceMatrix nbin = "<< nbin << endl;
-    
-    // Update nbin value in NBIN (COV_MAT)
-    psrfits_update_key (fptr, "NBIN", nbin);
+  // Move and Clear existing rows in COV_MAT 
+  psrfits_move_hdu (fptr, "COV_MAT");
 
-    // Allocating required variables
-    double *dest = (double *)malloc(nbin*nbin*sizeof(double));
-    vector<double> covariance_out;
-    covariance_out.resize(nbin*nbin);
-    vector<unsigned> dimensions;  
+  if (verbose > 2) 
+    cerr << "FITSArchive::unload CovarianceMatrix"
+      " nbin=" << covar->get_nbin() << " npol=" << covar->get_npol() << endl;
     
-    // Get matrix data from TDC Class
-    // WvS to fix covar->get_matrix(dest); 
+  // Update nbin value in NBIN (COV_MAT)
+  psrfits_update_key (fptr, "NBIN", covar->get_nbin());
+  psrfits_update_key (fptr, "NPOL", covar->get_npol());
 
-    for(int i=0;i<nbin*nbin;i++) 
-        covariance_out.at(i) = dest[i];       
+  vector<unsigned> dimensions;  
     
-    // Write Matrix data into the MAT_ONE binary table (COV_MAT)
-    psrfits_write_col (fptr, "MAT_ONE", 1, covariance_out, dimensions);
+  // Write Matrix data into the DATA binary table (COV_MAT)
+  psrfits_write_col (fptr, "DATA", 1, covar->get_data(), dimensions);
 
-    if (verbose > 2) 
-        cerr << "FITSArchive::unload CovarianceMatrix Matrix Data written" << endl;
-
-    free(dest);
-
-    if (verbose > 2)       
-        cerr << "FITSArchive::unload CovarianceMatrix exiting" << endl;    
-    
+  if (verbose > 2)       
+    cerr << "FITSArchive::unload CovarianceMatrix exiting" << endl;
 }

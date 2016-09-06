@@ -30,7 +30,7 @@ nobase_include_HEADERS = \
 	Pulsar/MultiFrequency.h					       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
 	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
-	Pulsar/StokesCovariancePlot.h \
+	Pulsar/StokesCovariancePlot.h Pulsar/StokesCrossCovariancePlot.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
@@ -96,7 +96,7 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	MultiFrequency.C \
 	MultiPlot.C \
 	MultiPhase.C \
-	StokesCovariancePlot.C \
+	StokesCovariancePlot.C StokesCrossCovariancePlot.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesCylindricalPlus.C StokesCylindricalPlusTI.C \
 	StokesSpherical.C StokesSphericalTI.C \

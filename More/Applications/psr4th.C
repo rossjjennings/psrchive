@@ -13,6 +13,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FourthMoments.h"
+#include "Pulsar/CovarianceMatrix.h"
 #include "Pulsar/PhaseResolvedHistogram.h"
 
 #include "Matrix.h"
@@ -253,11 +254,49 @@ void psr4th::finalize()
 {
   unsigned nbin = output->get_nbin();
   unsigned nchan = output->get_nchan();
+  unsigned npol = 4;
   unsigned nmoment = 10;
 
   Pulsar::Integration* subint = output->get_Integration (0);
   subint->set_duration( integration_length );
 
+  if (cross_covariance && nchan == 1)
+  {
+    cerr << "psr4th: cross covariance" << endl;
+    
+    unsigned ichan = 0;
+    
+    Pulsar::CovarianceMatrix* matrix = new Pulsar::CovarianceMatrix;
+    matrix->set_nbin(nbin);
+    matrix->set_npol(npol);
+    matrix->resize();
+
+    vector<double>& data = matrix->get_data();
+    unsigned idat=0;
+    
+    for (unsigned ibin = 0; ibin < nbin ; ibin ++)
+    {
+      for (unsigned jbin = ibin; jbin < nbin ; jbin ++)
+      {
+	Matrix<4,4,double> covar;
+ 	covar = results[ichan].get_cross_covariance (ibin, jbin);
+
+	for (unsigned ipol=0; ipol < npol; ipol++)
+	  for (unsigned jpol = (ibin == jbin) ? ipol : 0; jpol < npol ; jpol++)
+	  {
+	    data.at(idat) = covar[ipol][jpol];
+	    idat ++;
+	  }
+      }
+    }
+
+    assert (idat == data.size());
+
+    output->add_extension( matrix );
+    output->unload ("psr4th_covar.ar");
+    return;
+  }
+      
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
     Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
