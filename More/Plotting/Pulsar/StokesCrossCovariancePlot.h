@@ -12,6 +12,7 @@
 #define __Pulsar_StokesCrossCovariancePlot_h
 
 #include "Pulsar/FluxPlot.h"
+#include "Matrix.h"
 
 namespace Pulsar {
 
@@ -44,11 +45,29 @@ namespace Pulsar {
     void set_lags (unsigned s) { lags = s; }
     //! Get the lags to be plotted
     unsigned get_lags () const { return lags; }
+
+    //! Set the phase bin to be plotted
+    void set_bin (int s) { bin = s; }
+    //! Get the phase bin to be plotted
+    int get_bin () const { return bin; }
+    
+    //! Search for the phase bin to be plotted
+    void set_max_bin (bool s) { max_bin = s; }
+    //! Search for the phase bin to be plotted
+    bool get_max_bin () const { return max_bin; }
     
   private:
 
     unsigned lags;
+    unsigned nbin;
+    int bin;
+    bool max_bin;
     std::pair<unsigned, unsigned> covar;
+    std::vector< Matrix<4,4,double> > stokes_crossed;
+
+    void plot_lags ();
+    void plot_bin ();
+      
   };
 
 }
