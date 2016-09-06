@@ -11,7 +11,7 @@ EXTRA_DIST = psrhelp
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
-	drifting_subpulses dynamic_spectra psr4th psrtxt2 psrwhite
+	drifting_subpulses dynamic_spectra psr4th psrtxt2
 
 pam_SOURCES = pam.C
 
@@ -78,7 +78,18 @@ psr4th_SOURCES = psr4th.C
 
 psrtxt2_SOURCES = psrtxt2.C
 
+
+######################################################################
+#
+# Eigen C++ template library specific code
+#
+if HAVE_EIGEN
+
+bin_PROGRAMS += psrwhite
 psrwhite_SOURCES = psrwhite.C
+
+endif
+
 
 # ######################################################################
 #
