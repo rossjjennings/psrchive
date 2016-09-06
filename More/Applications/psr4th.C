@@ -257,6 +257,8 @@ void psr4th::finalize()
   unsigned npol = 4;
   unsigned nmoment = 10;
 
+  std::string filename = "psr4th.ar";
+  
   Pulsar::Integration* subint = output->get_Integration (0);
   subint->set_duration( integration_length );
 
@@ -292,9 +294,10 @@ void psr4th::finalize()
 
     assert (idat == data.size());
 
+    cerr << "add CovarianceMatrix extension" << endl;
     output->add_extension( matrix );
-    output->unload ("psr4th_covar.ar");
-    return;
+
+    filename = "psr4th_covar.ar";
   }
       
   for (unsigned ichan=0; ichan < nchan; ichan++)
@@ -314,7 +317,7 @@ void psr4th::finalize()
       cerr << "psr4th: adding elipticity histogram extension" << endl;
       subint->get_Profile(0,ichan)->add_extension(results[ichan].hist_el);
     }
-    else
+    else if (!cross_covariance)
       subint->get_Profile(0,ichan)->add_extension(more);
 
     if (results[ichan].count == 0)
@@ -326,10 +329,7 @@ void psr4th::finalize()
     for (unsigned ibin = 0; ibin < nbin ; ibin ++)
     {
       Matrix<4,4,double> covar;
-      if (cross_covariance)
-	covar = results[ichan].get_cross_covariance (ibin, (ibin+1)%nbin);
-      else
-	covar = results[ichan].get_covariance (ibin);
+      covar = results[ichan].get_covariance (ibin);
       
       Stokes<double> mean = results[ichan].get_mean (ibin);
 
@@ -356,7 +356,9 @@ void psr4th::finalize()
     }
   }
 
-  output->unload ("psr4th.ar");
+  Pulsar::CovarianceMatrix* ext = output->get<Pulsar::CovarianceMatrix>();
+  cerr << "unloading npol=" << ext->get_npol() << " nbin=" << ext->get_nbin() << endl;
+  output->unload (filename);
 }
 
 void psr4th::result::set_cross_covariance (bool flag)
@@ -508,7 +510,6 @@ void psr4th::result::histogram_el (const Pulsar::PolnProfile* profile)
 
 int main (int argc, char** argv)
 {
-  cerr << "this is the program that we are currently editing" << endl;
   psr4th program;
   return program.main (argc, argv);
 }
