@@ -28,10 +28,16 @@ else
   cd ../sys_linux
   cp g77_gcc_aout.conf psrchive.conf
 endif
+
+# change the fortran compiler
 perl -pi -e "s/g77/@F77@/" psrchive.conf 
 
 # remove the -u option from FFLAGC
 perl -pi -e 's/-u //' psrchive.conf 
+
+# change the location of X11
+perl -pi -e 's|-I/usr/X11R6/include|@X_CFLAGS@|' psrchive.conf
+perl -pi -e 's|-L/usr/X11R6/lib|@X_LIBS@|' psrchive.conf
 
 mkdir -p $PGPLOT_DIR
 cd $PGPLOT_DIR
