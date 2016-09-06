@@ -98,6 +98,7 @@ void Pulsar::UVMArchive::load_header (const char* filename)
 
   uvm_get_observatory (header, buffer);
   telescope = buffer;
+  telescope = "Arecibo";
 
   uvm_get_windows (header, buffer);
   cerr << "Pulsar::UVMArchive::load_header windows=" << buffer
@@ -107,6 +108,8 @@ void Pulsar::UVMArchive::load_header (const char* filename)
   bandwidth = header->abandwd;
 
   npol = header->anumsbc;
+  if (npol == 4)
+    set_state (Signal::Stokes);
 
   cerr << "anumsbc=" << header->anumsbc << endl;
 
