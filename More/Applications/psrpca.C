@@ -154,6 +154,7 @@ protected:
   bool apply_offset;
   bool apply_scale;
   bool prof_to_std;
+  bool uniform_weighting;
   string algorithm;
 
   //! Regression
@@ -211,6 +212,8 @@ psrpca::psrpca ()
   load_prefix = "";
 
   prof_to_std = apply_shift = apply_offset = apply_scale = true ;
+
+  uniform_weighting = false;
 
   remove_arch_baseline = remove_std_baseline = true;
 
@@ -293,6 +296,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 
   arg = menu.add ( prof_to_std, "ts" );
   arg->set_help ( "Apply scaling, offset and shift to standard instead of profile");
+
+  arg = menu.add ( uniform_weighting, "w" );
+  arg->set_help ("Apply uniform weighting instead of S/N");
 
   menu.add ("");
   menu.add ("Regression and Predictor Options");
@@ -650,7 +656,10 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
       gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
-      t_cov->add_Profile ( prof, snr );
+      if ( uniform_weighting )
+        t_cov->add_Profile ( prof, 1.0 );
+      else
+        t_cov->add_Profile ( prof, snr );
     }
     else
     {// prof_to_std is false
@@ -684,7 +693,10 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
       gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
-      t_cov->add_Profile ( diff, snr );
+      if ( uniform_weighting )
+        t_cov->add_Profile ( diff, 1.0 );
+      else
+        t_cov->add_Profile ( diff, snr );
       prof->set_amps ( diff->get_amps() );
     }
     if ( full_stokes_pca )
