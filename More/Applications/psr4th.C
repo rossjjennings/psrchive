@@ -45,6 +45,7 @@ protected:
     std::vector< Matrix<4,4,double> > stokes_squared;
     std::vector< Stokes<double> > stokes;
     uint64_t count;
+    float histogram_threshold;
 
     //! Resize arrays and initialize to zero
     void resize (unsigned nbin);
@@ -69,6 +70,7 @@ protected:
   double integration_length;
   unsigned histogram_pa;
   unsigned histogram_el;
+  float histogram_threshold;
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -101,6 +103,7 @@ psr4th::psr4th ()
   integration_length = 0;
   histogram_pa = 0;
   histogram_el = 0;
+  histogram_threshold = 3.0;
 }
 
 
@@ -123,6 +126,9 @@ void psr4th::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (histogram_el, "el", "nbin");
   arg->set_help ("compute the elipticity histogram, divided in nbin");
+
+  arg = menu.add (histogram_threshold, "t", "sigma");
+  arg->set_help ("threshold applied when computing histograms");
 
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
@@ -159,6 +165,8 @@ void psr4th::process (Pulsar::Archive* archive)
 	results[ichan].set_histogram_pa( histogram_pa );
       if (histogram_el)
 	results[ichan].set_histogram_el( histogram_el );
+
+      results[ichan].histogram_threshold = histogram_threshold;
     }
   }
 
@@ -317,9 +325,11 @@ Stokes<double> psr4th::result::get_mean (unsigned ibin)
 }
 
 void psr4th::result::histogram_pa (const Pulsar::PolnProfile* profile)
-{     
+{
+  unsigned negative_count = 0;
+
   std::vector< Estimate<double> > PA;
-  profile->get_orientation (PA, 3.0);
+  profile->get_orientation (PA, histogram_threshold);
 
   Reference::To<Pulsar::Profile> linear = new Pulsar::Profile;
   profile->get_linear (linear);
@@ -335,13 +345,17 @@ void psr4th::result::histogram_pa (const Pulsar::PolnProfile* profile)
 
     Pulsar::Profile* of = hist_pa->at( PA[ibin].get_value() );
     of->get_amps()[ibin] += L[ibin];
+
+    if (L[ibin] < 0.0)
+      negative_count ++;
   }
+  //cerr << "psr4th::result::histogram_pa negatives=" << negative_count << endl;
 }
 
 void psr4th::result::histogram_el (const Pulsar::PolnProfile* profile)
-{     
+{
   std::vector< Estimate<double> > epsilon;
-  profile->get_ellipticity (epsilon, 3.0);
+  profile->get_ellipticity (epsilon, histogram_threshold);
 
   Reference::To<Pulsar::Profile> polarized = new Pulsar::Profile;
   profile->get_polarized (polarized);
