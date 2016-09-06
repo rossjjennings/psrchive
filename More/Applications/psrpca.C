@@ -144,6 +144,7 @@ protected:
   bool save_evecs;
   bool save_evals;
   bool save_covariance_matrix;
+  bool save_covariance_matrix_extension;
   bool save_decomps;
   bool save_proj;
   bool save_res_decomp_corel;
@@ -176,8 +177,7 @@ protected:
   unsigned which_pol;
   bool full_stokes_pca;
 
-  //! Unloading Covariance Matrix Data
-  Reference::To<Archive> psrfits;
+  //! Covariance Matrix extension
   Reference::To<CovarianceMatrix> covar;
 
   struct CastToDouble
@@ -205,6 +205,8 @@ psrpca::psrpca ()
   t_cov = new TimeDomainCovariance;
   covariance = NULL;
   save_diffs = save_matched = save_evecs = save_evals = save_covariance_matrix = save_decomps = save_proj = save_res_decomp_corel = true;
+
+  save_covariance_matrix_extension = false;
   prefix = "psrpca";
   load_prefix = "";
 
@@ -221,9 +223,6 @@ psrpca::psrpca ()
 
   which_pol = 0;
   full_stokes_pca = false;
-
-  // WvS to fix: covar = new CovarianceMatrix(t_cov);
-
 }
 
 void psrpca::setup ()
@@ -366,7 +365,6 @@ void psrpca::process (Archive* archive)
 {
   if ( verbose )
     cerr << "psrpca::process () entered and processing " << archive->get_filename() << endl;
-  psrfits = Archive::new_Archive("PSRFITS");
 
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
@@ -395,11 +393,11 @@ void psrpca::process (Archive* archive)
 
 void psrpca::finalize ()
 {
-  evecs_archive = total->clone();
-  psrfits-> copy(evecs_archive);
-
   if ( verbose )
     cerr << "psrpca::finalize () entered" << endl;
+
+  evecs_archive = total->clone();
+
   arrival->set_observation( total );
   arrival->get_toas( toas );
 
@@ -434,10 +432,6 @@ void psrpca::finalize ()
   gsl_matrix_fprintf( out, profiles, "%g" );
   fclose( out );
   
-  // Unloading Covariance Data in PSRFITS Format  
-  // WvS to fix  psrfits-> add_extension(covar);
-  // psrfits-> unload("covariance.rf");
-
   if ( full_stokes_pca )
     nbin = 4 * nbin;
   get_covariance_matrix(); // assuming that this calls the function in TimeDomainCovariance.C - row vector
@@ -453,6 +447,14 @@ void psrpca::finalize ()
   if ( save_diffs ) 
     total->unload ( prefix+"_diffs.ar" );
 
+  if ( save_covariance_matrix_extension )
+  {
+    Reference::To<Archive> psrfits = Archive::new_Archive("PSRFITS");
+    psrfits-> copy(evecs_archive);
+    psrfits-> add_extension(covar);
+    psrfits-> unload("covariance.rf");
+  }
+  
 #ifdef HAVE_CULA
   status = culaInitialize();
   checkStatus(status);
