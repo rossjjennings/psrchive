@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2015 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesFluctPlot.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/02/21 20:42:22 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/StokesFluctPlot.h
 
 #ifndef __Pulsar_StokesFluctPlot_h
 #define __Pulsar_StokesFluctPlot_h
@@ -69,6 +66,10 @@ namespace Pulsar {
     void set_plot_last_harmonic (bool p) { plot_last_harmonic = p; }
     bool get_plot_last_harmonic () const { return plot_last_harmonic; }
 
+    //! Plot the fluctuation phase
+    void set_plot_fluctuation_phase (bool p) { plot_fluctuation_phase = p; }
+    bool get_plot_fluctuation_phase () const { return plot_fluctuation_phase; }
+
   protected:
  
     bool signal_to_noise;
@@ -77,6 +78,7 @@ namespace Pulsar {
     std::string plot_lines;
 
     bool plot_last_harmonic;
+    bool plot_fluctuation_phase;
     unsigned last_harmonic;
 
   };
