@@ -288,7 +288,7 @@ void psr4th::finalize()
     {
       Matrix<4,4,double> covar;
       if (cross_covariance)
-	covar = results[ichan].get_cross_covariance (ibin, ibin+1);
+	covar = results[ichan].get_cross_covariance (ibin, (ibin+1)%nbin);
       else
 	covar = results[ichan].get_covariance (ibin);
       
@@ -385,7 +385,15 @@ Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
     std::swap (ibin, jbin);
 
   unsigned nbin = stokes.size();
-  unsigned icross = ibin * nbin - ibin * (ibin+1) / 2 + jbin - ibin;
+
+  // icross = nbin-1 + nbin-2 + nbin-3, where the number of terms = ibin
+  // then offset by jbin, which starts at ibin+1
+  unsigned icross = ibin * nbin - (ibin * (ibin+1) / 2) + (jbin - ibin - 1);
+
+  if (icross >= stokes_crossed.size())
+    throw Error (InvalidRange, "psr4th::result::get_cross_covariance",
+		 "nbin=%u ibin=%u jbin=%u -> icross=%u >= ncross=%u",
+		 nbin, ibin, jbin, icross, stokes_crossed.size());
   
   Matrix<4,4,double> meansq = stokes_crossed [icross];
   meansq /= count;
