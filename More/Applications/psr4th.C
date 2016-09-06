@@ -5,8 +5,6 @@
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/UnloadOptions.h"
@@ -19,6 +17,9 @@ using namespace std;
 
 #include "Matrix.h"
 #include "Stokes.h"
+#include <assert.h>
+
+using namespace std;
 
 //
 //! Computes the phase-resolved 4x4 covariance matrix of the Stokes parameters
@@ -38,15 +39,26 @@ public:
 
 protected:
 
-  //! Array of 4x4 fourth moments - one for each pulse phase bin
   class result
   {
+    bool cross_covariance;
+    
   public:
+    //! Array of 4x4 fourth moments - one for each pulse phase bin
     std::vector< Matrix<4,4,double> > stokes_squared;
+
+    //! Array of M 4x4 cross covariances, where M = nbin * (nbin-1) / 2
+    std::vector< Matrix<4,4,double> > stokes_crossed;
+
     std::vector< Stokes<double> > stokes;
+
     uint64_t count;
     float histogram_threshold;
 
+    result () { cross_covariance = false; count = 0; }
+
+    void set_cross_covariance (bool flag);
+    
     //! Resize arrays and initialize to zero
     void resize (unsigned nbin);
     void set_histogram_pa (unsigned nbin);
@@ -56,6 +68,8 @@ protected:
     void histogram_el (const Pulsar::PolnProfile*);
 
     Matrix<4,4,double> get_covariance (unsigned ibin);
+    Matrix<4,4,double> get_cross_covariance (unsigned ibin, unsigned jbin);
+    
     Stokes<double> get_mean (unsigned ibin);
 
     Reference::To<Pulsar::PhaseResolvedHistogram> hist_pa;
@@ -71,7 +85,8 @@ protected:
   unsigned histogram_pa;
   unsigned histogram_el;
   float histogram_threshold;
-
+  bool cross_covariance;
+  
   //! Add command line options
   void add_options (CommandLine::Menu&);
 };
@@ -104,6 +119,7 @@ psr4th::psr4th ()
   histogram_pa = 0;
   histogram_el = 0;
   histogram_threshold = 3.0;
+  cross_covariance = false;
 }
 
 
@@ -129,6 +145,9 @@ void psr4th::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (histogram_threshold, "t", "sigma");
   arg->set_help ("threshold applied when computing histograms");
+
+  arg = menu.add (cross_covariance, "c");
+  arg->set_help ("compute the cross covariances between phase bins");
 
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
@@ -160,7 +179,9 @@ void psr4th::process (Pulsar::Archive* archive)
     results.resize (nchan);
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     {
+      results[ichan].set_cross_covariance (cross_covariance);
       results[ichan].resize (nbin);
+
       if (histogram_pa)
 	results[ichan].set_histogram_pa( histogram_pa );
       if (histogram_el)
@@ -201,6 +222,22 @@ void psr4th::process (Pulsar::Archive* archive)
 	results[ichan].stokes_squared[ibin] += outer(S,S);
       }
 
+      if (cross_covariance)
+      {
+	unsigned icross = 0;
+	for (unsigned ibin=0; ibin<nbin; ibin++)
+	  for (unsigned jbin=ibin+1; jbin<nbin; jbin++)
+	  {
+	    Stokes<double> Si = profile->get_Stokes (ibin);
+	    Stokes<double> Sj = profile->get_Stokes (jbin);
+
+	    results[ichan].stokes_crossed[icross] += outer(Si,Sj);
+	    icross ++;
+	  }
+
+	assert (icross == results[ichan].stokes_crossed.size());
+      }
+      
       results[ichan].count ++;
 
       if (histogram_pa)
@@ -249,7 +286,12 @@ void psr4th::finalize()
 
     for (unsigned ibin = 0; ibin < nbin ; ibin ++)
     {
-      Matrix<4,4,double> covar = results[ichan].get_covariance (ibin);
+      Matrix<4,4,double> covar;
+      if (cross_covariance)
+	covar = results[ichan].get_cross_covariance (ibin, ibin+1);
+      else
+	covar = results[ichan].get_covariance (ibin);
+      
       Stokes<double> mean = results[ichan].get_mean (ibin);
 
       /*
@@ -278,6 +320,20 @@ void psr4th::finalize()
   output->unload ("psr4th.ar");
 }
 
+void psr4th::result::set_cross_covariance (bool flag)
+{
+  cross_covariance = flag;
+  if (!cross_covariance || stokes.size() == 0)
+    return;
+
+  unsigned nbin = stokes.size();
+  unsigned ncross = nbin * (nbin-1) / 2;
+  stokes_crossed.resize( ncross );
+
+  for (unsigned icross=0; icross < ncross; icross++)
+    stokes_crossed[icross] = 0.0;
+}
+    
 void psr4th::result::resize (unsigned nbin)
 {
   stokes.resize (nbin);
@@ -288,7 +344,9 @@ void psr4th::result::resize (unsigned nbin)
     stokes[ibin] = 0.0;
     stokes_squared[ibin] = 0.0;
   }
-  
+
+  // also does the resize
+  set_cross_covariance (cross_covariance);
   count = 0;
 }
 
@@ -315,6 +373,27 @@ Matrix<4,4,double> psr4th::result::get_covariance (unsigned ibin)
   Stokes<double> mean = get_mean(ibin);
 
   return meansq - outer(mean,mean);
+}
+
+Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
+							 unsigned jbin)
+{
+  if (ibin == jbin)
+    return get_covariance (ibin);
+
+  if (jbin < ibin)
+    std::swap (ibin, jbin);
+
+  unsigned nbin = stokes.size();
+  unsigned icross = ibin * nbin - ibin * (ibin+1) / 2 + jbin - ibin;
+  
+  Matrix<4,4,double> meansq = stokes_crossed [icross];
+  meansq /= count;
+
+  Stokes<double> imean = get_mean(ibin);
+  Stokes<double> jmean = get_mean(jbin);
+
+  return meansq - outer(imean,jmean);
 }
 
 Stokes<double> psr4th::result::get_mean (unsigned ibin)
