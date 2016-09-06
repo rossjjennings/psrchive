@@ -306,13 +306,17 @@ void Calibration::SolveGSL::fit ()
 
   best_chisq = pow( gsl_blas_dnrm2 (solver->f), 2.0 );
 
-  gsl_matrix *covar = gsl_matrix_alloc (function.p, function.p);
-  gsl_multifit_covar (solver->J, 0.0, covar);
+  gsl_matrix* Jacobian = gsl_matrix_alloc (function.n, function.p);
+  gsl_multifit_fdfsolver_jac (solver, Jacobian);
+
+  gsl_matrix* covar = gsl_matrix_alloc (function.p, function.p);
+  gsl_multifit_covar (Jacobian, 0.0, covar);
 
   unpack_covariance (equation, covariance, covar);
 
   gsl_multifit_fdfsolver_free (solver);
   gsl_matrix_free (covar);
+  gsl_matrix_free (Jacobian);
   gsl_vector_free (initial_guess);
 }
 
