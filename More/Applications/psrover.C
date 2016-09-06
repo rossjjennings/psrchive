@@ -377,6 +377,16 @@ void psrover::process (Pulsar::Archive* archive)
 
 void psrover::over (Archive* archive)
 {
+  if ( use_input_as_base )
+  {
+    nbin = archive->get_nbin();
+    if (profile_values.size() < nbin)
+    {
+      for (unsigned i = profile_values.size() ; i < nbin ; i++) {
+        profile_values.push_back(0.0);
+      }
+    }
+  }
   float* data = 0;
   float* data_vM = new float[nbin];
 
