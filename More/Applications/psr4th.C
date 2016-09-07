@@ -356,8 +356,6 @@ void psr4th::finalize()
     }
   }
 
-  Pulsar::CovarianceMatrix* ext = output->get<Pulsar::CovarianceMatrix>();
-  cerr << "unloading npol=" << ext->get_npol() << " nbin=" << ext->get_nbin() << endl;
   output->unload (filename);
 }
 
