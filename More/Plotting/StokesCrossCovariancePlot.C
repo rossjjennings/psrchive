@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/StokesCrossCovariancePlot.h"
+#include "Pulsar/StokesCrossCovariance.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/CovarianceMatrix.h"
@@ -30,67 +31,21 @@ TextInterface::Parser* Pulsar::StokesCrossCovariancePlot::get_interface ()
   return new Interface (this);
 }
 
-unsigned get_icross (unsigned nbin, unsigned ibin, unsigned jbin)
-{
-  if (jbin < ibin)
-    std::swap (ibin, jbin);
-      
-  // icross = nbin + nbin-1 + nbin-2 + nbin-3,
-  //          where the number of terms = ibin
-  // then offset by jbin, which starts at ibin
 
-  return ibin * nbin - (ibin * (ibin-1) / 2) + (jbin - ibin);
-}
 
 void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
 {
-
   if (verbose)
     cerr << "Pulsar::StokesCrossCovariancePlot::get_profiles" << endl;
 
   const CovarianceMatrix* matrix = archive->get<CovarianceMatrix>();
-
   if (!matrix)
     throw Error (InvalidState,
 		 "Pulsar::StokesCrossCovariancePlot::get_profiles",
 		 "archive does not contain a CovarianceMatrix extension");
+
+  stokes_crossed = new StokesCrossCovariance (matrix);
   
-  nbin = matrix->get_nbin();
-  unsigned npol = matrix->get_npol();
-
-  if (npol != 4)
-    throw Error (InvalidState,
-		 "Pulsar::StokesCrossCovariancePlot::get_profiles",
-		 "CovarianceMatrix::npol=%u != 4", npol);
-
-  const vector<double>& data = matrix->get_data();
-  unsigned idat=0;
-
-  stokes_crossed.resize( nbin * (nbin+1) / 2 );
-  unsigned icov=0;
-  
-  for (unsigned ibin = 0; ibin < nbin ; ibin ++)
-  {
-    for (unsigned jbin = ibin; jbin < nbin ; jbin ++)
-    {
-      Matrix<4,4,double>& c = stokes_crossed[icov];
-      icov ++;
-      
-      for (unsigned ipol=0; ipol < npol; ipol++)
-	for (unsigned jpol = (ibin == jbin) ? ipol : 0; jpol < npol ; jpol++)
-	{
-	  c[ipol][jpol] = data.at(idat);
-	  idat ++;
-
-	  if (ibin == jbin)
-	    c[jpol][ipol] = c[ipol][jpol];
-	}
-    }
-  }
-
-  assert (icov == stokes_crossed.size());
-  assert (idat == data.size());
-
   if (max_bin)
     bin = archive->get_Profile(0,0,0)->find_max_bin();
 
@@ -103,8 +58,13 @@ void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
 void Pulsar::StokesCrossCovariancePlot::plot_bin ()
 {
   unsigned ndim = 10;
+  ndim = 4;
   plotter.profiles.resize( ndim );
+  plotter.plot_sls.resize( ndim );
+  plotter.plot_slw.resize( ndim );
 
+  unsigned nbin = stokes_crossed->get_nbin();
+  
   unsigned jbin = bin;
   assert (jbin < nbin);
 
@@ -112,26 +72,21 @@ void Pulsar::StokesCrossCovariancePlot::plot_bin ()
   unsigned npol=4;
 
   for (unsigned ipol=0; ipol < npol; ipol++)
-    for (unsigned jpol=ipol; jpol < npol; jpol++)
+    //    for (unsigned jpol=ipol; jpol < npol; jpol++)
     {
+      unsigned jpol=ipol;
+      
       Profile* profile = new Profile(nbin);
       plotter.profiles[idim] = profile;
+      plotter.plot_sls[idim] = 1;
+      plotter.plot_slw[idim] = 2;
       idim ++;
     
       float* amps = profile->get_amps();
 
       for (unsigned ibin=0; ibin < nbin; ibin++)
       {
-	unsigned icross = get_icross (nbin, ibin, jbin);
-      
-	if (icross >= stokes_crossed.size())
-	  throw Error (InvalidRange,
-		       "Pulsar::StokesCrossCovariancePlot::plot_bin",
-		       "nbin=%u ibin=%u jbin=%u -> icross=%u >= ncross=%u",
-		       nbin, ibin, jbin, icross, stokes_crossed.size());
- 
-	Matrix<4,4,double>& c = stokes_crossed[icross];
-
+	Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
 	amps[ibin] = c[ipol][jpol];
       }
     }
@@ -142,34 +97,28 @@ void Pulsar::StokesCrossCovariancePlot::plot_bin ()
 void Pulsar::StokesCrossCovariancePlot::plot_lags ()
 {
   plotter.profiles.resize( lags+1 );
+  plotter.plot_sls.resize( lags+1 );
+  plotter.plot_slw.resize( lags+1 );
 
+  unsigned nbin = stokes_crossed->get_nbin();
+  
   for (unsigned ilag=0; ilag < lags+1; ilag++)
   {
     Profile* profile = new Profile(nbin);
     plotter.profiles[ilag] = profile;
+    plotter.plot_sls[ilag] = 1;
+    plotter.plot_slw[ilag] = 2;
+
     float* amps = profile->get_amps();
 
     for (unsigned ibin=0; ibin < nbin; ibin++)
     {
       unsigned jbin = (ibin + ilag) % nbin;
-
-      unsigned icross = get_icross (nbin, ibin, jbin);
-      
-      if (icross >= stokes_crossed.size())
-	throw Error (InvalidRange,
-		     "Pulsar::StokesCrossCovariancePlot::plot_lags",
-		     "nbin=%u ibin=%u jbin=%u -> icross=%u >= ncross=%u",
-		     nbin, ibin, jbin, icross, stokes_crossed.size());
- 
-      Matrix<4,4,double>& c = stokes_crossed[icross];
-
+      Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
       amps[(ibin+ilag/2)%nbin] = c[covar.first][covar.second];
     }
   }
 }
-
-
-
 
 
 Pulsar::StokesCrossCovariancePlot::Interface::Interface (StokesCrossCovariancePlot* obj)

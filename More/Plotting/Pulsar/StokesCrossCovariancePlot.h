@@ -16,6 +16,8 @@
 
 namespace Pulsar {
 
+  class StokesCrossCovariance;
+
   //! Plots a polarization pulse profile
   class StokesCrossCovariancePlot : public FluxPlot {
 
@@ -59,11 +61,11 @@ namespace Pulsar {
   private:
 
     unsigned lags;
-    unsigned nbin;
     int bin;
     bool max_bin;
     std::pair<unsigned, unsigned> covar;
-    std::vector< Matrix<4,4,double> > stokes_crossed;
+
+    Reference::To<StokesCrossCovariance> stokes_crossed;
 
     void plot_lags ();
     void plot_bin ();
