@@ -67,6 +67,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             break;
 
         case '6':
+        case 'c':
             Telescopes::VLA(t);
             break;
 
