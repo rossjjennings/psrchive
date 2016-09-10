@@ -170,13 +170,16 @@ void psr4th::process (Pulsar::Archive* archive)
 
   archive->convert_state( Signal::Stokes );
 
+  if (histogram_pa || histogram_el)
+    archive->remove_baseline();
+  
   if (!output)
   {
     string output_format = "PSRFITS";
     output = Pulsar::Archive::new_Archive (output_format);  
     output->copy (*archive);
-    output->resize(1);
-
+    output->tscrunch();
+    
     results.resize (nchan);
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     {
@@ -250,6 +253,21 @@ void psr4th::process (Pulsar::Archive* archive)
   }
 }
 
+
+void dump (Pulsar::MoreProfiles* hist)
+{
+  unsigned nprof = hist->get_size();
+  unsigned nbin = hist->get_nbin();
+  for (unsigned iprof=0; iprof < nprof; iprof++)
+  {
+    cerr << iprof;
+    float* prof = hist->get_Profile(iprof)->get_amps();
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+      cerr << " " << prof[ibin];
+    cerr << endl;
+  }
+}
+
 void psr4th::finalize()
 {
   unsigned nbin = output->get_nbin();
@@ -311,6 +329,7 @@ void psr4th::finalize()
     {
       cerr << "psr4th: adding position angle histogram extension" << endl;
       subint->get_Profile(0,ichan)->add_extension(results[ichan].hist_pa);
+      // dump (results[ichan].hist_pa);
     }
     else if (histogram_el)
     {
@@ -389,18 +408,20 @@ void psr4th::result::resize (unsigned nbin)
   count = 0;
 }
 
-void psr4th::result::set_histogram_pa (unsigned nbin)
+void psr4th::result::set_histogram_pa (unsigned nhist)
 {
   hist_pa = new Pulsar::PhaseResolvedHistogram;
   hist_pa->set_range (-90, 90);
-  hist_pa->resize (nbin, stokes.size());
+  hist_pa->resize (nhist, stokes.size());
+
+  // dump (hist_pa);
 }
 
-void psr4th::result::set_histogram_el (unsigned nbin)
+void psr4th::result::set_histogram_el (unsigned nhist)
 {
   hist_el = new Pulsar::PhaseResolvedHistogram;
   hist_el->set_range (-1,1);
-  hist_el->resize (nbin, stokes.size());
+  hist_el->resize (nhist, stokes.size());
 }
 
 
