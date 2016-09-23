@@ -12,7 +12,7 @@
 #include "Pulsar/ProfileShiftFit.h"
 
 #include "Pulsar/SNRatioEstimator.h"
-#include "Pulsar/WidthEstimator.h"
+#include "Pulsar/PhaseWidth.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
@@ -27,6 +27,7 @@ using namespace std;
 //! Default constructor
 Pulsar::Statistics::Statistics (const Archive* data)
 {
+  pulse_width_estimator = new PhaseWidth;
   set_Archive (data);
 }
 
