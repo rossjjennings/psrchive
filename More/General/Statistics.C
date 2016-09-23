@@ -10,7 +10,9 @@
 
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ProfileShiftFit.h"
+
 #include "Pulsar/SNRatioEstimator.h"
+#include "Pulsar/WidthEstimator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
@@ -115,6 +117,23 @@ TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
     return snr_estimator->get_interface();
   else
     return Profile::snr_strategy.get_value()->get_interface();
+}
+
+//! Set the pulse width estimator
+void Pulsar::Statistics::set_pulse_width_estimator (const std::string& name)
+{
+  pulse_width_estimator = WidthEstimator::factory (name);
+}
+
+//! Get the pulse width
+Phase::Value Pulsar::Statistics::get_pulse_width () const
+{
+  return pulse_width_estimator->get_width ( get_Profile() );
+}
+
+TextInterface::Parser* Pulsar::Statistics::get_pulse_width_interface ()
+{
+  return pulse_width_estimator->get_interface();
 }
 
 //! Get the Fourier-noise-to-noise ratio

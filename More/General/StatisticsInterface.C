@@ -51,6 +51,11 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_effective_duty_cycle,
        "weff", "Effective pulse width (turns)" );
 
+  add( &Statistics::get_pulse_width,
+       &Statistics::set_pulse_width_estimator,
+       &Statistics::get_pulse_width_interface,
+       "width", "Effective pulse width (turns)" );
+
   add( &Statistics::get_snr,
        &Statistics::set_snr_estimator,
        &Statistics::get_snr_interface,
