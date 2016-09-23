@@ -264,7 +264,7 @@ libGeneral_la_SOURCES = \
 	WeightedFrequency.C \
 	WeightInterpreter.C \
 	width.C \
-	WidthEstimator.h \
+	WidthEstimator.C \
 	ZapInterpreter.C
 
 
