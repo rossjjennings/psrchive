@@ -60,6 +60,12 @@ public:
 	 &PhaseWidth::set_baseline_duty_cycle,
 	 "bdc", "Baseline duty cycle" );
 
+    add( &PhaseWidth::get_fraction_of_maximum,
+	 &PhaseWidth::set_fraction_of_maximum,
+	 "fmax", "Fraction of maximum" );
+
+    add( &PhaseWidth::get_error,
+	 "error", "Error in last width estimate" );
   }
 
   std::string get_interface_name () const { return "phase"; }
