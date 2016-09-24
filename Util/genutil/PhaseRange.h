@@ -167,4 +167,25 @@ namespace TextInterface
   };
 }
 
+// Specialize the std C++ numeric_limits traits for Phase::* classes
+namespace std {
+  template<>
+  class numeric_limits<Phase::Value> {
+    public:
+    static const int digits10 = numeric_limits<double>::digits10;
+  };
+
+  template<>
+  class numeric_limits<Phase::Range> {
+    public:
+    static const int digits10 = numeric_limits<double>::digits10;
+  };
+  
+  template<>
+  class numeric_limits<Phase::Ranges> {
+    public:
+    static const int digits10 = numeric_limits<double>::digits10;
+  };  
+}
+
 #endif // !__PhaseRanges_H
