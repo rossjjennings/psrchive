@@ -55,11 +55,11 @@ pcm_SOURCES = pcm.C
 pcm_LDADD = $(LDPLOT) @PTHREAD_LIBS@
 
 # Note that pdv uses PGPLOT only if it is available
-pdv_SOURCES = pdv.C width.C
+pdv_SOURCES = pdv.C
 pdv_LDADD = $(LDPLOT)
 
 # Note that rmfit uses PGPLOT only if it is available
-rmfit_SOURCES = rmfit.C width.C
+rmfit_SOURCES = rmfit.C
 
 rmfit_LDADD = njkk08/libnjkk08.la $(LDPLOT)
 
