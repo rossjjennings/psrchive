@@ -34,7 +34,7 @@ c     &  maxwidth
 
 c      sanity check
       if (minwidth.gt.maxwidth) then
-         write(5,*) 'smooth_mmw error minwidth > maxwidth',
+         write(*,*) 'smooth_mmw error minwidth > maxwidth',
      &      minwidth, maxwidth
          stop
       endif
@@ -69,7 +69,7 @@ c
  39   continue   
 C      write(*,*) 'nvalid is ',nvalid
       if (nvalid .eq. 0) then
-         write(5,*) 'smooth_mmw no valid widths', minwidth, maxwidth
+         write(*,*) 'smooth_mmw no valid widths', minwidth, maxwidth
          minwidth = nbin/2
          maxwidth = nbin/2
          bail = .true. 
