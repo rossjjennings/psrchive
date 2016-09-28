@@ -31,6 +31,13 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             t->set_name("JB_42ft");
             oldcode=0;
         }
+        if (newcode.compare("JB_MKII")==0){
+            Telescopes::Jodrell(t);
+            t->set_name("JB_MKII");
+            oldcode=0;
+        }
+
+
 
         if(oldcode != -1) oldcode = Tempo2::observatory (a->get_telescope())->get_code();
     }
