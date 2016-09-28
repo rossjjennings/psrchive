@@ -25,11 +25,15 @@ namespace Pulsar {
       can be accessed */
   class WidthEstimator : public Algorithm
   {
+  protected:
+
+    //! Derived classes must implement this method
+    virtual double get_width_turns (const Profile* profile) = 0;
 
   public:
 
     //! Return the width of the pulse profile in turns
-    virtual Phase::Value get_width (const Profile* profile) = 0;
+    virtual Phase::Value get_width (const Profile* profile);
 
     //! Return a text interface that can be used to configure this instance
     virtual TextInterface::Parser* get_interface () = 0;

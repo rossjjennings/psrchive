@@ -24,7 +24,7 @@ Pulsar::PhaseWidth::PhaseWidth ()
 extern float width (const Pulsar::Profile* profile,
 		    float& error, float pc, float dc);
 
-Phase::Value Pulsar::PhaseWidth::get_width (const Profile* profile)
+double Pulsar::PhaseWidth::get_width_turns (const Profile* profile)
 {
   return width (profile, error, fraction_of_maximum*100, baseline_duty_cycle);
 }

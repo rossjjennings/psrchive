@@ -29,8 +29,8 @@ namespace Pulsar {
     //! Default constructor
     PhaseWidth ();
     
-    //! Return the signal to noise ratio based on the shift
-    Phase::Value get_width (const Profile* profile);
+    //! Return the width of the pulse profile in turns
+    double get_width_turns (const Profile* profile);
 
     float get_error () const { return error; }
     float get_baseline_duty_cycle () const { return baseline_duty_cycle; }
