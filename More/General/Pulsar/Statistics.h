@@ -133,8 +133,8 @@ namespace Pulsar {
     Reference::To<SNRatioEstimator> snr_estimator;
     Reference::To<WidthEstimator> pulse_width_estimator;
 
-    //! Set the period attribute of the given Phase::Value
-    Phase::Value with_period (Phase::Value value) const;
+    //! Set the period attribute of the Phase::Value/Range/Ranges argument
+    void set_period (Phase::HasUnit&) const;
 
   };
 

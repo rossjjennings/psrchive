@@ -126,16 +126,18 @@ void Pulsar::Statistics::set_pulse_width_estimator (const std::string& name)
   pulse_width_estimator = WidthEstimator::factory (name);
 }
 
-Phase::Value Pulsar::Statistics::with_period (Phase::Value value) const
+void Pulsar::Statistics::set_period (Phase::HasUnit& value) const
 {
-  value.set_period( get_Integration()->get_folding_period() );
-  return value;
+  // set the period in milliseconds
+  value.set_period( get_Integration()->get_folding_period() * 1e3 );
 }
 
 //! Get the pulse width
 Phase::Value Pulsar::Statistics::get_pulse_width () const
 {
-  return with_period( pulse_width_estimator->get_width ( get_Profile() ));
+  Phase::Value width = pulse_width_estimator->get_width( get_Profile() );
+  set_period (width);
+  return width;
 }
 
 TextInterface::Parser* Pulsar::Statistics::get_pulse_width_interface ()
