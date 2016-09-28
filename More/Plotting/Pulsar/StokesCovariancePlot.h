@@ -35,8 +35,25 @@ namespace Pulsar {
     //! Load the profiles
     void get_profiles (const Archive* data);
 
+    enum What { Variances,
+		EigenValues,
+		NaturalCovariances,
+		NonOrthogonality,
+		Theta,
+		RegressionCoefficients,
+		ModulationIndex };
+
+    void set_what (What w) { what = w; }
+    What get_what () const { return what; }
+
+  private:
+
+    What what;
   };
 
+  std::ostream& operator << (std::ostream& os, StokesCovariancePlot::What);
+
+  std::istream& operator >> (std::istream& is, StokesCovariancePlot::What&);
 }
 
 #endif

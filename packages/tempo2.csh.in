@@ -9,20 +9,15 @@ cd @prefix@/src
 
 if ( ! -d tempo2 ) then
 
-  echo "Downloading TEMPO2 source code"
+  echo "Downloading TEMPO2 source code from bitbucket"
 
-  touch $HOME/.cvspass
-  setenv TEMPO2_CVS anonymous@tempo2.cvs.sourceforge.net:/cvsroot/tempo2
-
-  echo "When prompted for CVS password: <ENTER>"
-
-  cvs -d :pserver:$TEMPO2_CVS login
-  cvs -z3 -d:pserver:$TEMPO2_CVS co -P tempo2
+  setenv TEMPO2_GIT https://bitbucket.org/psrsoft/tempo2.git
+  git clone $TEMPO2_GIT
 
 endif
 
 cd tempo2
-cvs update
+git pull
 
 mkdir -p $TEMPO2
 rsync -at T2runtime/* $TEMPO2

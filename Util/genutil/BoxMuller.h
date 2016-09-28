@@ -23,7 +23,9 @@ class BoxMuller {
   BoxMuller (long seed = 0);
 
   //! returns a normal deviate with zero mean and unit variance
-  float operator () ();
+  float operator () () { return evaluate(); }
+
+  float evaluate ();
 
  protected:
 

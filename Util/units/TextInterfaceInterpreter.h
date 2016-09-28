@@ -56,6 +56,16 @@ namespace TextInterface {
     void set_detailed_description (const std::string& text)
       { detailed_description = text; }
 
+    void set_modifiers (const std::string& modifiers) const
+    {
+      tostring_precision = fromstring<unsigned> (modifiers);
+    }
+
+    void reset_modifiers () const
+    {
+      tostring_precision = 0;
+    }
+    
   protected:
 
     std::string name;

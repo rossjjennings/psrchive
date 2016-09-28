@@ -7,15 +7,11 @@
 
 #include "Pulsar/SimplePolnProfile.h"
 #include "Pulsar/PolnProfile.h"
-
 #include "MEAL/ScalarParameter.h"
-#include "BoxMuller.h"
 
 #include <iostream>
 
 using namespace std;
-
-static BoxMuller gasdev (time(NULL));
 
 Pulsar::SimplePolnProfile::SimplePolnProfile ()
 {

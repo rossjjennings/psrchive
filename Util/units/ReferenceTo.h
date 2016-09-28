@@ -1,20 +1,19 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceTo.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/07/07 00:27:06 $
-   $Author: straten $ */
+// psrchive/Util/units/ReferenceTo.h
 
 #ifndef __ReferenceTo_h
 #define __ReferenceTo_h
 
 #include "ReferenceAble.h"
+#include "Error.h"
+
 #include <typeinfo>
 #include <string>
 
@@ -135,7 +134,7 @@ template<class Type, bool active>
 Reference::To<Type,active>::To (Type* ref_pointer)
 {
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::To (Type*="<< ref_pointer <<")"<< endl;
+  cerr << "Reference::To<"+name()+">::To (Type*="<< (void*)ref_pointer <<")"<< endl;
 #endif
 
   hook (ref_pointer);
@@ -210,7 +209,8 @@ Reference::To<Type,active>&
 Reference::To<Type,active>::operator = (Type* ref_pointer)
 {
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator = (Type*=" << ref_pointer <<")"<<endl;
+  cerr << "Reference::To<"+name()+">::operator = "
+    "(Type*=" << (void*)ref_pointer <<")"<<endl;
 #endif
 
   if (the_handle && the_handle->pointer == ref_pointer)

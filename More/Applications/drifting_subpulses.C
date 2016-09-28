@@ -219,7 +219,7 @@ void drifting_subpulses::process (Pulsar::Archive* archive)
     // calculate the current turn of the pulsar, for padding 
     if ( pad_missing )
     {
-      Phase phase = model->phase( archive->get_Integration(isub)->get_epoch ());
+      Pulsar::Phase phase = model->phase( archive->get_Integration(isub)->get_epoch ());
       fcurrent = floor (phase.fracturns() + 0.5);
       current = phase.intturns() + int64_t(fcurrent);
     }

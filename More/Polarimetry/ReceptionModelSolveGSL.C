@@ -10,6 +10,7 @@
 
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_version.h>
 
 #include <iostream>
 #include <assert.h>
@@ -66,7 +67,11 @@ static void model_get (const Calibration::ReceptionModel* model, gsl_vector* x)
   assert( ifit == model->get_solver()->get_nparam_infit() );
 }
 
-
+/*
+  x = model parameters vector
+  f = results vector; the norm of f is the chi squared to be minimized
+  J = Jacobian matrix; J_ij = df_i / dx_j
+ */
 static int model_fdf (const gsl_vector* x, void* data,
 		      gsl_vector* f, gsl_matrix* J)
 {
@@ -302,13 +307,25 @@ void Calibration::SolveGSL::fit ()
 
   best_chisq = pow( gsl_blas_dnrm2 (solver->f), 2.0 );
 
-  gsl_matrix *covar = gsl_matrix_alloc (function.p, function.p);
-  gsl_multifit_covar (solver->J, 0.0, covar);
+#if GSL_MAJOR_VERSION > 1
+  gsl_matrix* Jacobian = gsl_matrix_alloc (function.n, function.p);
+  gsl_multifit_fdfsolver_jac (solver, Jacobian);
+#else
+  gsl_matrix* Jacobian = solver->J;
+#endif
+
+  gsl_matrix* covar = gsl_matrix_alloc (function.p, function.p);
+  gsl_multifit_covar (Jacobian, 0.0, covar);
 
   unpack_covariance (equation, covariance, covar);
 
   gsl_multifit_fdfsolver_free (solver);
   gsl_matrix_free (covar);
+
+#if GSL_MAJOR_VERSION > 1
+  gsl_matrix_free (Jacobian);
+#endif
+
   gsl_vector_free (initial_guess);
 }
 

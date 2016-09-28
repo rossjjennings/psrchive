@@ -20,6 +20,7 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
   between_panels = 0.05;
 
   calibrator_stokes = false;
+  calibrator_stokes_degree = false;
   reduced_chisq = false;
 }
 
@@ -31,7 +32,12 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
   Calibrator::Info* info = 0;
 
   if (calibrator_stokes)
-    info = new CalibratorStokesInfo (data->get<CalibratorStokes>());
+  {
+    CalibratorStokesInfo* stokes =
+      new CalibratorStokesInfo (data->get<CalibratorStokes>());
+    stokes->set_degree (calibrator_stokes_degree);
+    info = stokes;
+  }
   
   else if (reduced_chisq)
     info = new SolverInfo (new PolnCalibrator(data));
@@ -94,7 +100,7 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     if (iclass > 0)
     {
       // remove x-axis label
-      plot->get_frame()->get_x_axis()->set_label("");
+      plot->get_frame()->get_x_axis()->set_label(" ");
 
       // remove x-axis enumeration
       plot->get_frame()->get_x_axis()->rem_opt('N');
@@ -102,6 +108,15 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
   }
 }
 
+void Pulsar::CalibratorInfo::set_calibrator_stokes_degree (bool x)
+{
+  calibrator_stokes = calibrator_stokes_degree = x;
+}
+
+bool Pulsar::CalibratorInfo::get_calibrator_stokes_degree () const
+{
+  return calibrator_stokes && calibrator_stokes_degree;
+}
 
 //! Get the text interface to the configuration attributes
 TextInterface::Parser* Pulsar::CalibratorInfo::get_interface ()
@@ -125,6 +140,10 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
   add( &CalibratorInfo::get_calibrator_stokes,
        &CalibratorInfo::set_calibrator_stokes,
        "cal", "Plot the calibrator Stokes parameters" );
+
+  add( &CalibratorInfo::get_calibrator_stokes_degree,
+       &CalibratorInfo::set_calibrator_stokes_degree,
+       "calp", "Plot calibrator Stokes parameters w/ degree of polarization" );
 
   add( &CalibratorInfo::get_reduced_chisq,
        &CalibratorInfo::set_reduced_chisq,

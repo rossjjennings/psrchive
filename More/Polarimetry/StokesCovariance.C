@@ -24,7 +24,7 @@ const unsigned Pulsar::StokesCovariance::nmoment = 10;
 //
 //
 //
-Pulsar::StokesCovariance::StokesCovariance (FourthMoments* fourth)
+Pulsar::StokesCovariance::StokesCovariance (const FourthMoments* fourth)
 {
   if (!fourth)
     return;
@@ -34,7 +34,7 @@ Pulsar::StokesCovariance::StokesCovariance (FourthMoments* fourth)
                  "FourthMoments size=%u != expected=%u",
                  fourth->get_size(), nmoment);
 
-  covariance = fourth;
+  covariance = new FourthMoments (*fourth);
 }
 
 //

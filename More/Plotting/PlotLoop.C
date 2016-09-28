@@ -6,10 +6,11 @@
  ***************************************************************************/
 
 #include "Pulsar/PlotLoop.h"
+#include "Pulsar/MultiPlot.h"
 #include "Pulsar/MultiData.h"
 
 #include "Pulsar/Plot.h"
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Processor.h"
 
 #include <cpgplot.h>
@@ -25,6 +26,7 @@ Pulsar::PlotLoop::PlotLoop ()
 {
   preprocess = true;
   overlay = false;
+  stack = false;
 }
 
 //! Set the Plot to be executed
@@ -38,6 +40,16 @@ void Pulsar::PlotLoop::configure (const std::vector<std::string>& options)
   if (overlay)
     for (unsigned i=0; i<plots.size(); i++)
       plots[i] = MultiData::factory (plots[i]);
+
+  if (stack && plots.size())
+  {
+    MultiPlot* plot = MultiPlot::factory (plots[0]);
+    for (unsigned i=0; i<plots.size(); i++)
+      plot->manage (plots[i]);
+
+    plots.resize(1);
+    plots[0] = plot;
+  }
 
   for (unsigned iopt=0; iopt < options.size(); iopt++)
     for (unsigned iplot=0; iplot < plots.size(); iplot++)
@@ -74,7 +86,6 @@ void Pulsar::PlotLoop::set_Archive (Archive* a)
   }
 }
 
-//! Set the overlay flag
 void Pulsar::PlotLoop::set_overlay (bool flag)
 {
   overlay = flag;
@@ -85,6 +96,15 @@ bool Pulsar::PlotLoop::get_overlay () const
   return overlay;
 }
 
+void Pulsar::PlotLoop::set_stack (bool flag)
+{
+  stack = flag;
+}
+
+bool Pulsar::PlotLoop::get_stack () const
+{
+  return stack;
+}
 void Pulsar::PlotLoop::set_preprocess (bool flag)
 {
   preprocess = flag;

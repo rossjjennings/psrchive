@@ -15,7 +15,7 @@ nobase_include_HEADERS = \
 	Pulsar/Plot.h Pulsar/PlotFactory.h			       \
 	Pulsar/PlotLoop.h					       \
 	Pulsar/PlotEdge.h					       \
-	Pulsar/PlotScale.h Pulsar/PhaseScale.h			       \
+	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/HasPhaseScale.h  \
 	Pulsar/FrequencyScale.h Pulsar/TimeScale.h 		       \
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h   \
 	Pulsar/PlotFrame.h Pulsar/MultiFrame.h Pulsar/FramedPlot.h     \
@@ -26,13 +26,15 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsTime.h		       \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h	       \
 	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h		       \
+	Pulsar/PhaseVsMore.h \
 	Pulsar/MultiFrequency.h					       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
 	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
-	Pulsar/StokesCovariancePlot.h \
+	Pulsar/StokesCovariancePlot.h Pulsar/StokesCrossCovariancePlot.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
+	Pulsar/StokesFluctPhase.h \
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h		       \
 	Pulsar/TwoBitPlot.h					       \
 	Pulsar/CalibratorInfo.h					       \
@@ -59,7 +61,8 @@ nobase_include_HEADERS = \
 	Pulsar/SystemCalibratorPlotter.h \
         Pulsar/ReceptionModelAxisPlotter.h \
 	Pulsar/PlotPen.h \
-	Pulsar/HasPen.h
+	Pulsar/HasPen.h \
+	Pulsar/MoreScale.h
 
 libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	Plot.C PlotFactory.C FramedPlot.C \
@@ -84,14 +87,16 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	PosAngPlot.C EllAngPlot.C \
 	PhaseVsPlot.C PhaseVsPlotTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
+	PhaseVsMore.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
 	PhaseVsHist.C PhaseVsHistTI.C \
+	MoreScale.C \
 	MultiData.C \
 	MultiDataSimple.C \
 	MultiFrequency.C \
 	MultiPlot.C \
 	MultiPhase.C \
-	StokesCovariancePlot.C \
+	StokesCovariancePlot.C StokesCrossCovariancePlot.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesCylindricalPlus.C StokesCylindricalPlusTI.C \
 	StokesSpherical.C StokesSphericalTI.C \
@@ -99,6 +104,7 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	PhaseVsHistPlus.C PhaseVsHistPlusTI.C \
 	FluctPlot.C FluctPlotTI.C \
 	StokesFluctPlot.C StokesFluctPlotTI.C \
+	StokesFluctPhase.C \
 	TwoBitPlot.C TwoBitPlotTI.C \
 	Poincare.C PoincareTI.C \
 	ProfileVectorPlotter.C \

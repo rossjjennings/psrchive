@@ -688,7 +688,7 @@ int main (int argc, char *argv[]) try {
       case DD: dededisperse = true; break;
 
       case RM:
-        aux_rm = fromstring<double>(optarg);
+        rm = fromstring<double>(optarg);
         newrm = true;
         command += " --RM ";
         command += optarg;
@@ -828,9 +828,13 @@ int main (int argc, char *argv[]) try {
 
       if (new_cfreq)
       {
-	double nc = arch->get_nchan();
+	unsigned nc = arch->get_nchan();
 	double bw = arch->get_bandwidth();
 	double cw = bw / nc;
+    double old_fr = arch->get_Integration(0)->get_centre_frequency(nc/2);
+    if ( (nc&1) == 0) {
+      old_fr = 0.5*(old_fr+arch->get_Integration(0)->get_centre_frequency(nc/2-1));
+    }
 
 	double fr = new_fr - (bw / 2.0) + (cw / 2.0);
 	
@@ -840,7 +844,11 @@ int main (int argc, char *argv[]) try {
 	  }
 	}
 	
-	arch->set_centre_frequency(new_fr);
+    /* MTK - 07 Oct 2014
+    Do not update the centre frequency directly as it is now associated
+    with OBSFREQ.  Instead, adjust it by the change in frequency.
+    */
+	arch->set_centre_frequency(arch->get_centre_frequency()+(new_fr-old_fr));
       }
 
       if( new_type != Signal::Unknown )

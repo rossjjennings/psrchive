@@ -20,7 +20,6 @@ include_HEADERS = \
 	ExponentialDistribution.h \
 	extutil.h \
 	f77util.h \
-        fcomp.h \
 	format_it.h \
         fsleep.h \
 	Horizon.h \
@@ -28,6 +27,7 @@ include_HEADERS = \
         ierf.h \
         JenetAnderson98A5.h \
         JenetAnderson98.h \
+	KrausType.h \
 	load_factory.h \
 	LogFile.h \
         machine_endian.h \
@@ -39,9 +39,11 @@ include_HEADERS = \
 	NormalDistribution.h \
         orbital.h \
 	pairutil.h \
+	PhaseRange.h \
         Physical.h \
 	Probability.h \
         Plugin.h \
+	Ranges.h \
         RealTimer.h \
         RegularExpression.h \
 	RobustStats.h \
@@ -91,7 +93,6 @@ libgenutil_la_SOURCES = \
 	evaluate.C \
 	ExponentialDistribution.C \
 	f77util.c \
-        fcomp.C \
 	filesize.c \
 	format_it.C \
         fsleep.c \
@@ -100,6 +101,7 @@ libgenutil_la_SOURCES = \
         ierf.c \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
+	KrausType.C \
 	LogFile.C \
 	malloc16.c \
 	Meridian.C \
@@ -107,10 +109,12 @@ libgenutil_la_SOURCES = \
 	Mount.C \
 	FITSUTC.C \
 	NormalDistribution.C \
+	PhaseRange.C \
         Physical.C \
 	printable.C \
 	Probability.C \
         Plugin.C \
+	Ranges.C \
         RealTimer.C \
         RegularExpression.C \
 	replace_extension.C \
@@ -156,14 +160,15 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_sum test_NormalDistribution			\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
-	test_Horizon test_LogFile test_Warning test_RunningMedian
-
-if HAVE_GSL
-TESTS += test_SplineFit
-endif
+	test_Horizon test_LogFile test_Warning test_RunningMedian \
+	test_PhaseRange
 
 check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
 	test_Angle test_expand test_VirtualMemory
+
+if HAVE_GSL
+check_PROGRAMS += test_SplineFit
+endif
 
 test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
@@ -190,6 +195,7 @@ test_VirtualMemory_SOURCES	= test_VirtualMemory.C
 test_LogFile_SOURCES		= test_LogFile.C
 test_Warning_SOURCES		= test_Warning.C
 test_RunningMedian_SOURCES	= test_RunningMedian.C
+test_PhaseRange_SOURCES		= test_PhaseRange.C
 
 #############################################################################
 #

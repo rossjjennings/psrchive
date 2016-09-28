@@ -108,6 +108,12 @@ Pulsar::SingleAxisCalibrator::Info::get_param (unsigned ichan,
   if (iclass == 0)
     return PolnCalibrator::Info::get_param (ichan, iclass, iparam);
 
+  /*
+    See Equation (25) of van Straten (2006) and the text that follows it.
+
+    The SingleAxis model is parameterized by beta and this object provides gamma.
+  */
+  
   if (iclass == 1)
     return 100.0 * 
       ( exp( 2*PolnCalibrator::Info::get_param (ichan, iclass, iparam) ) - 1 );

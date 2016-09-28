@@ -227,16 +227,16 @@ MJD to_MJD (long double t)
 }
 
 //! convert a long double to Phase
-Phase to_Phase (long double p)
+Pulsar::Phase to_Phase (long double p)
 {
   int64_t turns = int64_t (p);
   double fturns = p - turns;
 
-  return Phase (turns, fturns);
+  return Pulsar::Phase (turns, fturns);
 }
 
 //! Return the phase, given the epoch
-Phase Tempo2::Predictor::phase (const MJD& t) const
+Pulsar::Phase Tempo2::Predictor::phase (const MJD& t) const
 {
   if (verbose)
     cerr << "Tempo2::Predictor::phase epoch=" << t << " frequency=" 
@@ -279,7 +279,7 @@ long double Tempo2::Predictor::frequency (const MJD& t) const
 }
 
 //! Return the phase correction for dispersion delay
-Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
+Pulsar::Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 {
   return get_dispersion_constant() / (MHz*MHz);
 }
@@ -318,14 +318,14 @@ public:
   void construct (ChebyModel*, long double obs_freq);
 
   MJD get_reftime() const { return t0; }
-  Phase get_refphase() const { return p0; }
-  bool is_valid_phase(Phase p) const { return ((p-pstart).in_turns() > 0) && ((pend-p).in_turns() > 0); }
+  Pulsar::Phase get_refphase() const { return p0; }
+  bool is_valid_phase(Pulsar::Phase p) const { return ((p-pstart).in_turns() > 0) && ((pend-p).in_turns() > 0); }
   long double get_reffrequency() const { return f0; }
 
-  Phase phase (const MJD&) const;
+  Pulsar::Phase phase (const MJD&) const;
   long double frequency (const MJD&) const;
 
-  MJD iphase (const Phase&, const MJD*) const;
+  MJD iphase (const Pulsar::Phase&, const MJD*) const;
 
 protected:
 
@@ -333,9 +333,9 @@ protected:
   long double obs_freq;
 
   MJD t0;
-  Phase p0;
-  Phase pstart;
-  Phase pend;
+  Pulsar::Phase p0;
+  Pulsar::Phase pstart;
+  Pulsar::Phase pend;
   long double f0;
   
 };
@@ -357,7 +357,7 @@ void cheby_interface::construct (ChebyModel* _model, long double _obs_freq)
   // cerr << "t0=" << t0 << " p0=" << p0 << " f0=" << f0 << endl;
 }
 
-Phase cheby_interface::phase (const MJD& t) const
+Pulsar::Phase cheby_interface::phase (const MJD& t) const
 {
  return to_Phase( ChebyModel_GetPhase (model, from_MJD (t), obs_freq) );
 }
@@ -367,7 +367,7 @@ long double cheby_interface::frequency (const MJD& t) const
  return ChebyModel_GetFrequency (model, from_MJD (t), obs_freq);
 }
 
-MJD cheby_interface::iphase (const Phase& phase, const MJD* guess) const
+MJD cheby_interface::iphase (const Pulsar::Phase& phase, const MJD* guess) const
 {
   if (guess)
     return Pulsar::inverse_phase (*this, phase, *guess);
@@ -376,7 +376,7 @@ MJD cheby_interface::iphase (const Phase& phase, const MJD* guess) const
 }
 
 //! Return the epoch, given the phase
-MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
+MJD Tempo2::Predictor::iphase (const Pulsar::Phase& phase, const MJD* guess) const
 {
   vector<cheby_interface> chebys ( predictor.modelset.cheby.nsegments );
 

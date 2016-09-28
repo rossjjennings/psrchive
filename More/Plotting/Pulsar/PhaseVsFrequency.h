@@ -40,9 +40,6 @@ namespace Pulsar {
     //! Get the default label for the y axis
     std::string get_ylabel (const Archive*);
 
-    //! Derived classes must provide the number of rows
-    unsigned get_nrow (const Archive* data);
-
     //! Derived classes must provide the Profile for the specified row
     const Profile* get_Profile (const Archive* data, unsigned row);
 

@@ -35,6 +35,8 @@ int main (int argc, char** argv)
       return -1;
     }
 
+  cerr << "newscan=" << newscan << endl;
+
   char buffer[80];
 
   uvm_get_source (&header, buffer);
@@ -72,6 +74,7 @@ int main (int argc, char** argv)
 
   cout << "admplen (=anumsbc X alensbc)=" << header.admplen << endl;
   cout << "admpsrd=" << header.admplen << endl;
+  cout << "admptot=" << header.admptot << endl;
 
   cout << endl;
 
@@ -79,6 +82,9 @@ int main (int argc, char** argv)
   cout << "Dispersion measure=" << header.adm << endl;
   cout << "Rotation measure=" << header.arm << endl;
 
+  cout << "scale to convert muJys=" << header.scaleI << endl;
+  cout << "baseline value removed=" << header.baseval << endl;
+  
   cout << "R.A.=" << header.apos1st << " rad" << endl;
   cout << "Dec.=" << header.apos2st << " rad" << endl;
 
@@ -87,11 +93,14 @@ int main (int argc, char** argv)
   {
     uvm_data data;
   
-    if (uvm_getdata (program, &data) < 0)
+    if (uvm_getdata (program, &header, &data) < 0)
       {
 	cerr << "ERROR calling uvm_getdata" << endl;
 	return -1;
       }
+
+    cout << "scale to convert muJys=" << header.scaleI << endl;
+    cout << "baseline value removed=" << header.baseval << endl;
 
     char scanfilename [80];
     sprintf (scanfilename, "scan%04d", scan);

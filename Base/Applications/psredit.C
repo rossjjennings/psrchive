@@ -9,11 +9,11 @@
 #include "Pulsar/UnloadOptions.h"
 
 #include "Pulsar/Editor.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Check.h"
 #include "Pulsar/Profile.h"
 
-#include "TextInterface.h"
 #include "dirutil.h"
 #include "strutil.h"
 
@@ -90,8 +90,14 @@ void psredit::add_options (CommandLine::Menu& menu)
   arg = menu.add (&editor, &Editor::add_commands, 'c', "command[s]");
   arg->set_help ("one or more commands, separated by commas");
 
+  arg = menu.add (&editor, &Editor::add_script, 'C', "filename");
+  arg->set_help ("read commands from file");
+
   arg = menu.add (&editor, &Editor::add_extensions, 'a', "extension[s]");
   arg->set_help ("one or more extensions to be added, separated by commas");
+
+  arg = menu.add (&editor, &Editor::remove_extensions, 'r', "extension[s]");
+  arg->set_help ("one or more extensions to be removed, separated by commas");
 
   arg = menu.add (this, &psredit::detailed_help, 'H');
   arg->set_help ("more detailed help");

@@ -28,6 +28,8 @@
 #include "Pulsar/DynamicSpectrum.h"
 #include "Pulsar/StandardFlux.h"
 
+#include "Pulsar/FrequencyAppend.h"
+
 #include "strutil.h"
 #include "substitute.h"
 #include "tostring.h"
@@ -135,6 +137,13 @@ void Pulsar::Interpreter::init()
       "append", "append data from one archive to another",
       "usage: append <name> \n"
       "  string name       name of archive to be appended \n" );
+
+  add_command
+    ( &Interpreter::freq_append,
+      "freq_append", "frequency-append data from one archive to another",
+      "usage: freq_append <name> \n"
+      "  string name       name of archive to be appended \n" );
+
   
   add_command
     ( &Interpreter::edit, 'e',
@@ -835,6 +844,33 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+string Pulsar::Interpreter::freq_append (const string& args) try
+{ 
+  vector<string> arguments = setup (args);
+
+  if (arguments.size() < 1)
+    return response (Fail, "please specify one name");
+
+  FrequencyAppend frequency;
+  frequency.init( get());
+
+  for (unsigned iarch=0; iarch < arguments.size(); iarch++) {
+    frequency.append( get(), getmap(arguments[iarch]) );
+  }
+
+  if (get()->get_dedispersed())
+    get()->dedisperse();
+  if (get()->get_faraday_corrected())
+    get()->defaraday();
+  if (get()->has_model() && get()->has_ephemeris())
+    get()->update_model();
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -1232,6 +1268,29 @@ string Pulsar::Interpreter::dynspec(const string& args) try {
     Reference::To<Archive> temp = Archive::load(arguments[1]);
     standard = temp->total();
     standard->convert_state(Signal::Intensity);
+    // check for commensurate binning
+    unsigned std_nbin = standard->get_nbin();
+    unsigned arch_nbin = arch_total->get_nbin();
+    if (std_nbin != arch_nbin) {
+      if (std_nbin > arch_nbin) {
+        if (std_nbin % arch_nbin) {
+          throw Error (InvalidState, 
+            "Pulsar::Interpreter::dynspec", 
+            "profile_nbin=%d standard nbin=%d", arch_nbin, std_nbin);
+        }
+        standard->bscrunch(std_nbin/arch_nbin);
+      }
+      else {
+        if (arch_nbin % std_nbin) {
+          throw Error (InvalidState, 
+            "Pulsar::Interpreter::dynspec",
+            "profile_nbin=%d standard nbin=%d", arch_nbin, std_nbin);
+        }
+        arch_total->bscrunch(arch_nbin/std_nbin);
+        arch_copy->bscrunch(arch_nbin/std_nbin);
+      }
+    }
+      
   }
   // otherwise, use scrunched archive
   else {
@@ -1262,7 +1321,7 @@ string Pulsar::Interpreter::dynspec(const string& args) try {
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (Warn, error.get_message());
 }
 
 

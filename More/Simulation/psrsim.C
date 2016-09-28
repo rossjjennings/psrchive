@@ -52,6 +52,9 @@ protected:
   //! Faraday rotation measure
   double rotation_measure;
 
+  //! Number of Pulse Profiles to be output 
+  int profile_number;
+
 };
 
 int main (int argc, char** argv)
@@ -68,6 +71,8 @@ psrsim::psrsim () :
 
   sim = new SimplePolnProfile;
   rotation_measure = 0;
+
+  profile_number = 0;
 }
 
 // defined in RotatingVectorModelOptions.C
@@ -97,6 +102,11 @@ void psrsim::add_options (CommandLine::Menu& menu)
   RotatingVectorModelOptions rvm_options;
   rvm_options.set_model (sim->get_RVM());
   rvm_options.add_options (menu);
+
+  menu.add ("\n" "Simulation Options");
+
+  arg = menu.add (profile_number, 'N');
+  arg->set_help ("Number of Pulse Profiles to be simulated");
 }
 
 
@@ -105,16 +115,22 @@ void psrsim::process (Pulsar::Archive* data)
   if (verbose)
     cerr << "psrsim: using " << data->get_filename() << endl;
 
+for (int i=1;i<=profile_number;i++) // for for multiple outputs from single file
+{
+  ostringstream value;
+  value << i;
+  string unload = value.str() + string("_psrsim.ar");
+
   unsigned nsubint = data->get_nsubint();
   unsigned nchan = data->get_nchan();
   unsigned npol = data->get_npol();
-
+  
   if (npol != 4)
   {
     npol = 4;
     data->resize( nsubint, npol, nchan );
   }
-
+  
   data->set_state (Signal::Stokes);
   data->set_poln_calibrated (true);
 
@@ -141,8 +157,10 @@ void psrsim::process (Pulsar::Archive* data)
   data->set_faraday_corrected (false);
   data->set_rotation_measure (rotation_measure);
   data->set_dispersion_measure (0.0);
+  
+  data->unload (unload);
+} //end of for
 
-  data->unload ("psrsim.ar");
 }
 
 

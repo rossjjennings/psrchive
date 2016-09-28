@@ -15,6 +15,7 @@
 #define __TextEditor_h
 
 #include "TextInterface.h"
+#include "strutil.h"
 
 //! Edit the metadata in a pulsar archive
 template<class T>
@@ -33,9 +34,16 @@ class TextEditor : public Reference::Able
   void add_commands (const std::string& str)
   { standard_separation (commands, str); }
 
+  void add_script (const std::string& filename)
+  { loadlines (filename, commands); }
+
   //! Add a semi-colon or comma-separated list of extensions to install
   void add_extensions (const std::string& str)
-  { standard_separation (extensions, str); }
+  { standard_separation (extensions_to_add, str); }
+
+  //! Add a semi-colon or comma-separated list of extensions to remove
+  void remove_extensions (const std::string& str)
+  { standard_separation (extensions_to_remove, str); }
 
   //! Return true if the process method will modify the archive
   bool will_modify () const;
@@ -45,6 +53,9 @@ class TextEditor : public Reference::Able
 
   //! Add the named extension to the instance
   virtual void add_extension (T*, const std::string& name) { }
+
+  //! Remove the named extension from the instance
+  virtual void remove_extension (T*, const std::string& name) { }
 
   //! Get the identifier for this instance
   virtual std::string get_identifier (const T*) { return std::string(); }
@@ -64,14 +75,20 @@ class TextEditor : public Reference::Able
   std::vector<std::string> commands;
 
   //! extensions to be added
-  std::vector<std::string> extensions;
+  std::vector<std::string> extensions_to_add;
+
+  //! extensions to be removed
+  std::vector<std::string> extensions_to_remove;
 
 };
 
 template <typename T> 
 bool TextEditor<T>::will_modify () const
 {
-  if (extensions.size() > 0)
+  if (extensions_to_add.size() > 0)
+    return true;
+
+  if (extensions_to_remove.size() > 0)
     return true;
 
   for (unsigned j = 0; j < commands.size(); j++)
@@ -84,8 +101,16 @@ bool TextEditor<T>::will_modify () const
 template <typename T> 
 std::string TextEditor<T>::process (T* instance)
 {
-  for (unsigned i = 0; i < extensions.size(); i++)
-    add_extension (instance, extensions[i]);
+  for (unsigned i = 0; i < extensions_to_add.size(); i++)
+    add_extension (instance, extensions_to_add[i]);
+
+  for (unsigned i = 0; i < extensions_to_remove.size(); i++)
+    remove_extension (instance, extensions_to_remove[i]);
+
+  std::string result;
+
+  if (will_modify() && commands.size() == 0)
+    return result;
 
   Reference::To<TextInterface::Parser> interface = instance->get_interface();
 
@@ -98,8 +123,6 @@ std::string TextEditor<T>::process (T* instance)
 
   if (delimiter.length())
     interface->set_delimiter (delimiter);
-
-  std::string result;
 
   if (output_identifier)
     result = get_identifier (instance);

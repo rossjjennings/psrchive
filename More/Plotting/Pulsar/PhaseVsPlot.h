@@ -38,9 +38,6 @@ namespace Pulsar {
       Interface (PhaseVsPlot* = 0);
     };
 
-    //! Derived classes must provide the number of rows
-    virtual unsigned get_nrow (const Archive* data) = 0;
-
     //! Derived classes must provide the Profile for the specified row
     virtual const Profile* get_Profile (const Archive* data, unsigned row) = 0;
 

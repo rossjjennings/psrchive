@@ -129,6 +129,15 @@ double Pulsar::PhaseWeight::get_weight_sum () const
   return total;
 }
 
+unsigned Pulsar::PhaseWeight::get_nonzero_weight_count () const
+{
+  unsigned count = 0;
+  for (unsigned i=0; i<weight.size(); i++)
+    if (weight[i] != 0.0)
+      count ++;
+
+  return count;
+}
 
 //! Retrieve the beginning of the phase region with non-zero weight
 string Pulsar::PhaseWeight::get_start_index () const

@@ -248,9 +248,23 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     Beginning with PSRFITS version 3, the centre frequency and
     bandwidth are stored in the primary header as OBSFREQ and OBSBW.
     These values are over-ridden by the history, if available.
+
+    MTK - 07 Oct 2014
+    The PSRFITS standard indicates that this history entry should be the
+    "weighted centre frequency", which will typically change during the
+    course of processing, e.g. as channels are zapped.  Thus, it is not
+    suitable for matching calibrators, etc.
+
+    Instead, the centre frequency should be a quasi-static "label", and it
+    has been decided the most appropriate candidate is OBSFREQ.  This is set
+    when the primary header is loaded, so here we only use the centre
+    frequency if it was not present, in which case the centre_frequency
+    class member should be 0.
   */
 
-  set_centre_frequency (last.ctr_freq);
+  if (!(get_centre_frequency() > 0)) {
+    set_centre_frequency ( last.ctr_freq );
+  }
   set_bandwidth (last.nchan * last.chan_bw);
 
 

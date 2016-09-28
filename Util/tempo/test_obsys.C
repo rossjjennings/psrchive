@@ -22,6 +22,18 @@ int main () try
 	 << " itoa=" << obs->get_itoa_code() << endl;
   }
 
+  const Tempo::Observatory* wsrt = Tempo::observatory ("wsrt");
+  const Tempo::Observatory* srt = Tempo::observatory ("srt");
+  const Tempo::Observatory* gbt = Tempo::observatory ("gbt");
+
+  if (wsrt == srt)
+  {
+    cerr << "error: wsrt and srt refer to the same object" << endl;
+    cerr << " wsrt->name=" << wsrt->get_name() 
+         << " srt->name=" << srt->get_name() << endl;
+    return -1;
+  }
+
   const Tempo::Observatory* obs = Tempo::observatory ("pks");
 
   double lat, lon, rad;

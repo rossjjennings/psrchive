@@ -40,11 +40,9 @@ void Pulsar::BaselineEstimator::set_median_cut (float cut)
 }
 
 Pulsar::PhaseWeight*
-Pulsar::BaselineEstimator::baseline (const Profile* profile)
+Pulsar::BaselineEstimator::operate (const Profile* profile)
 {
-  Reference::To<PhaseWeight> weight = new PhaseWeight;
-  set_Profile( profile );
-  get_weight( weight );
+  Reference::To<PhaseWeight> weight = ProfileWeightFunction::operate (profile);
 
   if (median_cut == -1)
     median_cut = default_median_cut;
@@ -72,9 +70,15 @@ Pulsar::BaselineEstimator::baseline (const Profile* profile)
 }
 
 Pulsar::PhaseWeight*
+Pulsar::BaselineEstimator::baseline (const Profile* profile)
+{
+  return operate (profile);
+}
+
+Pulsar::PhaseWeight*
 Pulsar::BaselineEstimator::operator () (const Profile* profile)
 {
-  return baseline (profile);
+  return operate (profile);
 }
 
 //! Include only the specified phase bins for consideration

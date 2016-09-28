@@ -53,6 +53,9 @@ namespace Pulsar {
     //! perform the frontend (basis and projection) correction
     std::string frontend (const std::string& arg);
 
+    //! normalize profiles by absolute gain
+    std::string set_gain (const std::string& arg);
+
   protected:
 
     //! The type of calibrator to be used

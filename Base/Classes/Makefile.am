@@ -33,6 +33,7 @@ nobase_include_HEADERS = \
 	Pulsar/IntegrationMeta.h \
         Pulsar/IntegrationTI.h \
 	Pulsar/MoreProfiles.h \
+	Pulsar/PhaseResolvedHistogram.h \
 	Pulsar/Processor.h \
         Pulsar/Profile.h \
 	Pulsar/ProfileAmps.h \
@@ -57,6 +58,7 @@ libClasses_la_SOURCES = \
 	Archive_match.C \
         Archive_resize.C \
         Archive_remove_chan.C \
+	Archive_update_centre_frequency.C \
 	Archive_verify.C \
         Archive_unload.C \
         Archive_verbose.C \
@@ -82,6 +84,7 @@ libClasses_la_SOURCES = \
         Integration_resize.C \
         IntegrationTI.C \
 	MoreProfiles.C \
+	PhaseResolvedHistogram.C \
         Profile_average.C \
 	Profile_rotate.C \
         Profile.C \

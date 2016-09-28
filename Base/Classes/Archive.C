@@ -47,7 +47,7 @@ const Pulsar::Archive::Expert* Pulsar::Archive::expert () const
 }
 
 //! Return a text interface that can be used to access this instance
-TextInterface::Parser* Pulsar::Archive::get_interface ()
+Pulsar::Archive::Interface* Pulsar::Archive::get_interface ()
 {
   if (!text_interface)
     text_interface = new Interface (this);
@@ -83,14 +83,6 @@ Pulsar::Archive::~Archive ()
   if (verbose == 3)
     cerr << "Pulsar::Archive dtor this=" << this
 	 << " instances=" << instance_count << endl;
-}
-
-string Pulsar::Archive::get_revision (const char* revision)
-{
-  char buf1 [64];
-  char buf2 [64];
-  sscanf (revision, "%s %s", buf1, buf2);
-  return buf2;
 }
 
 //! operator =

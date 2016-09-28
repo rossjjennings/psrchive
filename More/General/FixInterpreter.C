@@ -6,9 +6,11 @@
  ***************************************************************************/
 
 #include "Pulsar/FixInterpreter.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pointing.h"
 #include "Pulsar/FITSArchive.h"
+#include "TextInterface.h"
 
 using namespace std;
 
@@ -154,6 +156,7 @@ string Pulsar::FixInterpreter::freq (const string& args) try
   {
     double delta_f = fromstring<double>(arguments[1]);
 
+    // update channel labels
     for (isub = 0; isub < nsub; isub++)
     {
       Integration* subint = archive->get_Integration (isub);
@@ -164,6 +167,13 @@ string Pulsar::FixInterpreter::freq (const string& args) try
 	subint->set_centre_frequency( ichan, freq + delta_f );
       }
     }
+
+    // update metadata
+    double freq = archive->get_centre_frequency();
+	archive->set_centre_frequency(freq + delta_f);
+    Reference::To<TextInterface::Parser> iface = archive->get_interface();
+    freq = fromstring<double>(iface->get_value("ext:obsfreq"));
+    iface->set_value("ext:obsfreq",tostring<double>(freq + delta_f));
   }
 
   return response (Good);

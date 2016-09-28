@@ -11,7 +11,7 @@ EXTRA_DIST = psrhelp
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
-	drifting_subpulses dynamic_spectra psr4th
+	drifting_subpulses dynamic_spectra psr4th psrtxt2
 
 pam_SOURCES = pam.C
 
@@ -54,10 +54,12 @@ pac_SOURCES = pac.C
 pcm_SOURCES = pcm.C
 pcm_LDADD = $(LDPLOT) @PTHREAD_LIBS@
 
-pdv_SOURCES = pdv.C width.C
+# Note that pdv uses PGPLOT only if it is available
+pdv_SOURCES = pdv.C
+pdv_LDADD = $(LDPLOT)
 
 # Note that rmfit uses PGPLOT only if it is available
-rmfit_SOURCES = rmfit.C width.C
+rmfit_SOURCES = rmfit.C
 
 rmfit_LDADD = njkk08/libnjkk08.la $(LDPLOT)
 
@@ -73,6 +75,20 @@ sesdiv_SOURCES = sesdiv.C
 psrcull_SOURCES = psrcull.C
 
 psr4th_SOURCES = psr4th.C
+
+psrtxt2_SOURCES = psrtxt2.C
+
+
+######################################################################
+#
+# Eigen C++ template library specific code
+#
+if HAVE_EIGEN
+
+bin_PROGRAMS += psrwhite
+psrwhite_SOURCES = psrwhite.C
+
+endif
 
 
 # ######################################################################
@@ -101,7 +117,7 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa lmfit pafit
+	psrsp psrtrash spa lmfit pafit pcmdiff
 
 lmfit_SOURCES = lmfit.C
 lmfit_LDADD = $(LDPLOT)
@@ -144,6 +160,9 @@ psrsp_LDADD = $(LDPLOT)
 
 psrtrash_SOURCES = psrtrash.C
 psrtrash_LDADD = $(LDPLOT)
+
+pcmdiff_SOURCES = pcmdiff.C
+pcmdiff_LDADD = $(LDPLOT)
 
 LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 

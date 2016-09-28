@@ -13,24 +13,42 @@
 
 using namespace std;
 
-Pulsar::PolnStatistics::PolnStatistics () {}
-Pulsar::PolnStatistics::~PolnStatistics () {}
+Pulsar::PolnStatistics::PolnStatistics ()
+{
+#if _DEBUG
+  cerr << "Pulsar::PolnStatistics::ctor this=" << this << endl;
+#endif
+}
+
+Pulsar::PolnStatistics::~PolnStatistics ()
+{
+#if _DEBUG
+  cerr << "Pulsar::PolnStatistics::dtor this=" << this << endl;
+#endif
+}
 
 Pulsar::PolnProfileStats* Pulsar::PolnStatistics::get_stats () try
 {
   if (!stats)
+  {
     stats = new PolnProfileStats;
 
-  /*
-    Use the same on-pulse and baseline estimators as used by the 
-    parent Statistics class.
-  */
-  
-  ProfileStats* into = stats->get_stats();
-  ProfileStats* from = parent->get_stats();
+#if _DEBUG
+    cerr << "Pulsar::PolnStatistics::get_stats this=" << this 
+	 << " stats=" << stats.ptr() << endl;
+#endif
 
-  into->set_onpulse_estimator( from->get_onpulse_estimator() );
-  into->set_baseline_estimator( from->get_baseline_estimator() );
+    /*
+      Use the same on-pulse and baseline estimators as used by the 
+      parent Statistics class.
+    */
+  
+    ProfileStats* into = stats->get_stats();
+    ProfileStats* from = parent->get_stats();
+    
+    into->set_onpulse_estimator( from->get_onpulse_estimator() );
+    into->set_baseline_estimator( from->get_baseline_estimator() );
+  }
 
   return stats;
 }
@@ -48,7 +66,11 @@ public:
     if (instance)
       set_instance( instance );
 
-    import ( Pulsar::PolnProfileStats::Interface(), 
+    Pulsar::PolnProfileStats* stats = 0;
+    if (instance)
+      stats = instance->get_stats();
+
+    import ( Pulsar::PolnProfileStats::Interface(stats), 
 	     &Pulsar::PolnStatistics::get_stats );
   }
 };
@@ -61,7 +83,9 @@ TextInterface::Parser* Pulsar::PolnStatistics::get_interface ()
 
 void Pulsar::PolnStatistics::setup () try
 {
-  // cerr << "Pulsar::PolnStatistics::setup this=" << this << endl;
+#if _DEBUG
+  cerr << "Pulsar::PolnStatistics::setup this=" << this << endl;
+#endif
 
   profile = Pulsar::get_Stokes (get_Integration(), parent->get_chan());
 
@@ -76,7 +100,7 @@ void Pulsar::PolnStatistics::setup () try
   }
   profile = p;
 
-  get_stats()->set_profile( profile );
+  get_stats()->select_profile( profile );
 }
  catch (Error& error)
    {

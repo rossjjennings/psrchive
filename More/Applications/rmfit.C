@@ -28,6 +28,7 @@
 
 #if HAVE_PGPLOT
 #include "Pulsar/StokesCylindrical.h"
+#include "Pulsar/PhaseScale.h"
 #include <cpgplot.h>
 #endif
 
@@ -130,6 +131,7 @@ void usage ()
     "\n"
     "Fit options: \n"
     "  -r                Refine the RM using two halves of band \n"
+    "  -T threshold      Adjust the threshold used to select bins \n"
     "\n"
     "Preprocessing options: \n"
     "  -b [+/-][range]   Include/exclude phase bins \n"
@@ -164,7 +166,7 @@ static float auto_step_rad = 0.0;
 static float auto_max_rad = 1.0;
 
 static unsigned auto_minsteps = 10;
-static float refine_threshold = 0;
+static float refine_threshold = -1;
 static unsigned max_iterations = 10;
 
 Estimate<double> best_search_rm;
@@ -226,7 +228,7 @@ int main (int argc, char** argv)
   // estimate the RM using MTM
   Reference::To<Pulsar::Archive> mtm_std;
 
-  const char* args = "a:A:b:B:c:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  const char* args = "a:A:b:B:c:C:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
@@ -365,6 +367,10 @@ int main (int argc, char** argv)
       refine = true;
       break;
 
+    case 'C':
+      refine_threshold = atof (optarg);
+      break;
+
     case 'R':
       rotation_measure = atof (optarg);
       rm_set = true;
@@ -382,6 +388,7 @@ int main (int argc, char** argv)
 	cerr << "That is not a valid cut-off!" << endl;
 	return -1;
       }
+      refine_threshold = threshold;
       break;
 
     case 'J':
@@ -815,7 +822,7 @@ void rmresult (Pulsar::Archive* archive,
   plot.get_frame()->set_character_height (1.0);
 
   // phase in degrees, with origin at pulse peak
-  plot.get_scale()->set_units (Pulsar::PhaseScale::Degrees);
+  plot.get_scale()->set_units (Phase::Degrees);
   plot.get_scale()->set_origin_norm (-0.5);
 
   // linear polarization with dash-dot-dash-dot
@@ -1157,6 +1164,10 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     }
 
 
+  ofstream os ("rm_spectrum.txt");
+  for (unsigned step=0; step < rmsteps; step++)
+    os << rms[step] << " " << fluxes[step] << " " << err[step] << endl;
+    
 #if HAVE_PGPLOT
 
   float ymin = fluxes[0];
@@ -1351,8 +1362,11 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
 {
   Pulsar::DeltaRM delta_rm;
 
-  if (refine_threshold)
+  if (refine_threshold != -1)
+  {
+    cerr << "rmfit: do_refine set threshold = " << refine_threshold << endl;
     delta_rm.set_threshold (refine_threshold);
+  }
 
   delta_rm.set_include (include_bins);
   delta_rm.set_exclude (exclude_bins);

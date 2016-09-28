@@ -64,6 +64,8 @@ static int default_aliases ()
   add_alias ("LF", "lofar");
   add_alias ("FL", "FR606");
   add_alias ("DL", "DE601");
+  add_alias ("D3", "DE603");
+  add_alias ("D5", "DE605");
   add_alias ("UL", "UK608");
 
   add_alias ("WT", "wsrt");
@@ -76,6 +78,11 @@ static int default_aliases ()
 
   add_alias ("LW", "lwa");
   add_alias ("LW", "lwa1");
+
+  add_alias ("PV", "pico veleta");
+
+  // Sardinia Radio Telescope
+  add_alias ("SR", "srt");
 
   return 1;
 }

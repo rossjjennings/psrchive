@@ -142,18 +142,7 @@ int main (int argc, char** argv) try
 	return -1;
       }
 
-      if (strcasecmp (optarg, "fourier") == 0)
-	Profile::snr_strategy.get_value().set (&fourier_snr,
-						       &FourierSNR::get_snr);
-      
-      else if (strcasecmp (optarg, "adaptive") == 0)
-	Profile::snr_strategy.get_value().set (&adaptive_snr,
-						       &AdaptiveSNR::get_snr);
-
-      else {
-	cerr << "psrwt: unrecognized S/N method '" << optarg << "'" << endl;
-	return -1;
-      }
+      Profile::snr_strategy = SNRatioEstimator::factory (optarg);
 
       snr_chosen = true;
       break;
@@ -230,8 +219,7 @@ int main (int argc, char** argv) try
 	return -1;
       }
      
-      Profile::snr_strategy.get_value().set (&standard_snr,
-					     &StandardSNR::get_snr);
+      Profile::snr_strategy = &standard_snr;
 
       cerr << "psrwt: loading standard from " << optarg << endl;
       standard = Archive::load (optarg);

@@ -135,6 +135,11 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
   if (verbose == 3) cerr << "TimerArchive::hdr_unload parameters size = " 
 			 << hdr.nbytesephem << " bytes" << endl;
 
+  const_cast<TimerArchive*>(this)->set_be_data_size();
+
+  if (verbose == 3) cerr << "TimerArchive::hdr_unload backend data size = " 
+			 << hdr.be_data_size << " bytes" << endl;
+
   if (get_nsubint() == 1)
     header->sub_int_time = integration_length();
 
@@ -150,6 +155,12 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 }
 
 void Pulsar::TimerArchive::backend_unload (FILE* fptr) const
+{
+  // nothing to do
+}
+
+//! set the backend data size
+void Pulsar::TimerArchive::set_be_data_size ()
 {
   // nothing to do
 }

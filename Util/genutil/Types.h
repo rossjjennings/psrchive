@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.29 $
-   $Date: 2009/10/07 03:32:42 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Types.h
 
 #ifndef __Types_h
 #define __Types_h
@@ -123,16 +120,16 @@ namespace Signal {
   //! Returns the state resulting from a pscrunch operation
   State pscrunch (State state);
 
+  std::ostream& operator << (std::ostream& ostr, Source source);
+  std::istream& operator >> (std::istream& is, Source& source);
+
+  std::ostream& operator << (std::ostream& ostr, State state);
+  std::istream& operator >> (std::istream& is, State& state);
+
+  std::ostream& operator << (std::ostream& ostr, Scale scale);
+  std::istream& operator >> (std::istream& is, Scale& scale);
+
 }
-
-std::ostream& operator << (std::ostream& ostr, Signal::Source source);
-std::istream& operator >> (std::istream& is, Signal::Source& source);
-
-std::ostream& operator << (std::ostream& ostr, Signal::State state);
-std::istream& operator >> (std::istream& is, Signal::State& state);
-
-std::ostream& operator << (std::ostream& ostr, Signal::Scale scale);
-std::istream& operator >> (std::istream& is, Signal::Scale& scale);
 
 /* note that Basis extraction and insertion operators are defined in
    Conventions.h */

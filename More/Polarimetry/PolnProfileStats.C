@@ -13,7 +13,7 @@
 
 using namespace std;
 
-// #define _DEBUG
+// #define _DEBUG 1
 
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile) try
@@ -21,7 +21,13 @@ Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile) try
   avoid_zero_determinant = false;
   regions_set = false;
   stats = new ProfileStats;
-  set_profile (_profile);
+
+#if _DEBUG
+  cerr << "Pulsar::PolnProfileStats::ctor this=" << this
+       << " calling select_profile" << endl;
+#endif
+
+  select_profile (_profile);
 }
  catch (Error& error)
    {
@@ -42,6 +48,11 @@ void Pulsar::PolnProfileStats::set_avoid_zero_determinant (bool flag)
 void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile) try
 {
   profile = _profile;
+
+#if _DEBUG
+  cerr << "Pulsar::PolnProfileStats::set_profile this=" << this
+       << " calling build" << endl;
+#endif
   build ();
 }
  catch (Error& error)
@@ -54,15 +65,15 @@ void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile) try
   set_profile will have the same phase as set_profile */
 void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile) try
 {
-#ifdef _DEBUG
+#if _DEBUG
   cerr << "Pulsar::PolnProfileStats::select_profile this=" << this
-       << " PolnProfile*=" << _profile << endl;
+       << " PolnProfile=" << _profile << endl;
 #endif
 
   profile = _profile;
   regions_set = false;
   build ();
-  if (profile)
+  if (_profile)
     regions_set = true;
 }
  catch (Error& error)
@@ -72,9 +83,9 @@ void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile) try
 
 void Pulsar::PolnProfileStats::select_profile (const Profile* total) try
 {
-#ifdef _DEBUG
+#if _DEBUG
   cerr << "Pulsar::PolnProfileStats::select_profile this=" << this
-       << " Profile*=" << total << endl;
+       << " Profile=" << total << endl;
 #endif
 
   profile = 0;
@@ -142,7 +153,17 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_linear () const try
   Profile linear;
   profile->get_linear (&linear);
 
+#if _DEBUG
+  cerr << "Pulsar::PolnProfileStats::get_total_linear this=" << this << 
+    " calling ProfileStats::set_profile regions_set=" << regions_set << endl;
+#endif
+
   stats->set_profile (&linear);
+
+#if _DEBUG
+  cerr << "Pulsar::PolnProfileStats::get_total_linear this=" << this <<
+    " calling ProfileStats::get_total" << endl;
+#endif
 
   return stats->get_total (false);
 }
@@ -284,6 +305,12 @@ void Pulsar::PolnProfileStats::build () try
 catch (Error& error)
 {
   throw error += "Pulsar::PolnProfileStats::build";
+}
+
+//! Returns the vairance of the linearly polarized flux
+double Pulsar::PolnProfileStats::get_linear_variance () const
+{
+  return profile->get_linear_variance();
 }
 
 #include "Pulsar/PolnProfileStatsInterface.h"

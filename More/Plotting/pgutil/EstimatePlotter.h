@@ -104,6 +104,9 @@ class EstimatePlotter {
 	       const std::vector<float>& y,
 	       const std::vector<float>& yerr);
 
+  void set_plot_error_bars (bool flag)
+  { plot_error_bars = flag; }
+  
  protected:
 
   //! Set the viewport and/or world coordinates before plotting
@@ -137,6 +140,9 @@ class EstimatePlotter {
   //! PGPLOT Standard Graph Marker
   int graph_marker;
 
+  //! Plot error bars
+  bool plot_error_bars;
+  
   std::vector< std::vector<float> > xval;
   std::vector< std::vector<float> > yval;
   std::vector< std::vector<float> > yerr;

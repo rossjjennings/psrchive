@@ -16,6 +16,7 @@
 #include <math.h>
 
 using namespace std;
+using namespace Pulsar;
 
 double Phase::rounding_threshold = 1e-9;
 
@@ -116,50 +117,52 @@ const Phase& Phase::operator = (const Phase &copy)
   return *this;
 }
 
-Phase operator + (const Phase &p1, const Phase &p2)
+Phase Pulsar::operator + (const Phase &p1, const Phase &p2)
 {
   return Phase(p1.turns + p2.turns,
 	       p1.fturns + p2.fturns); 
 }
 
-Phase operator - (const Phase &p1, const Phase &p2)
+Phase Pulsar::operator - (const Phase &p1, const Phase &p2)
 {
   return Phase(p1.turns - p2.turns,
 	       p1.fturns - p2.fturns); 
 }
 
-Phase operator - (const Phase &p)
+Phase Pulsar::operator - (const Phase &p)
 {
   return Phase( -p.turns, -p.fturns );
 }
 
-
-// period is assumed to be given in seconds
-MJD operator * (const Phase &p1, double period) 
+namespace Pulsar
 {
-  const int64_t secs_per_day = 86400;
+  // period is assumed to be given in seconds
+  MJD operator * (const Phase &p1, double period) 
+  {
+    const int64_t secs_per_day = 86400;
 
-  double bigseconds = double (p1.turns) * period;
-  double smallseconds = p1.fturns * period;
-
-  int64_t b_seconds = int64_t (bigseconds);
-  int64_t s_seconds = int64_t (smallseconds);
-
-  double b_fracsec = bigseconds - double (b_seconds);
-  double s_fracsec = smallseconds - double (s_seconds);
-
-  int b_days = int (b_seconds / secs_per_day);
-  int s_days = int (s_seconds / secs_per_day);
-
-  b_seconds -= b_days * secs_per_day;
-  s_seconds -= s_days * secs_per_day;
-
-  return MJD (b_days+s_days, int(b_seconds+s_seconds), b_fracsec+s_fracsec);
-}
-
-MJD operator / (const Phase &p1, double frequency)
-{
-  return p1 * (1.0/frequency);
+    double bigseconds = double (p1.turns) * period;
+    double smallseconds = p1.fturns * period;
+    
+    int64_t b_seconds = int64_t (bigseconds);
+    int64_t s_seconds = int64_t (smallseconds);
+    
+    double b_fracsec = bigseconds - double (b_seconds);
+    double s_fracsec = smallseconds - double (s_seconds);
+    
+    int b_days = int (b_seconds / secs_per_day);
+    int s_days = int (s_seconds / secs_per_day);
+    
+    b_seconds -= b_days * secs_per_day;
+    s_seconds -= s_days * secs_per_day;
+    
+    return MJD (b_days+s_days, int(b_seconds+s_seconds), b_fracsec+s_fracsec);
+  }
+  
+  MJD operator / (const Phase &p1, double frequency)
+  {
+    return p1 * (1.0/frequency);
+  }
 }
 
 const Phase& Phase::operator ++ ()
@@ -193,12 +196,12 @@ const Phase& Phase::operator -= (int iturns)
 
 // turns is converted to a Phase first, in order that large 'turns' does not
 // destroy the precision of 'p1.fturns' -- WvS
-Phase operator + (const Phase &p1, double turns)
+Phase Pulsar::operator + (const Phase &p1, double turns)
 {
   return p1 + Phase(turns);
 }
 
-Phase operator - (const Phase &p1, double turns)
+Phase Pulsar::operator - (const Phase &p1, double turns)
 {
   return p1 - Phase(turns);
 }
@@ -235,6 +238,8 @@ const Phase& Phase::operator -= (const Phase &sub)
 
 static const double precision_limit = 2.0 * pow (10.0,-DBL_DIG);
 
+namespace Pulsar
+{
 bool operator > (const Phase &p1, const Phase &p2)
 {
   if (p1.turns != p2.turns)
@@ -274,6 +279,8 @@ bool operator <= (const Phase &p1, const Phase &p2)
 bool operator != (const Phase &p1, const Phase &p2)
 {
   return !(p1 == p2);
+}
+
 }
 
 Phase Phase::Ceil ()

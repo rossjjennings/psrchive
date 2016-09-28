@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/21 19:03:52 $
-   $Author: demorest $ */
+// psrchive/Base/Extensions/Pulsar/Telescope.h
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
@@ -55,7 +52,9 @@ namespace Pulsar
       Horizon,
       //! Meridian (aka X-Y, meridianal longitude and latitude)
       Meridian,
-      //! Fixed (LOFAR, Arecibo)
+      //! Kraus-type (e.g. Nancay)
+      KrausType,
+      //! Fixed (e.g. LOFAR)
       Fixed,
       //! Mobile (satellite)
       Mobile

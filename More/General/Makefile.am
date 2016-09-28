@@ -60,19 +60,23 @@ nobase_include_HEADERS = \
 	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
 	Pulsar/MaskSmooth.h \
+	Pulsar/ModularSNR.h \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
+	Pulsar/PatchFrequency.h \
 	Pulsar/PatchTime.h \
 	Pulsar/PeakEdgesInterpreter.h \
 	Pulsar/PeakConsecutive.h \
 	Pulsar/PeakCumulative.h \
+	Pulsar/PhaseSNR.h \
         Pulsar/PhaseWeightFunction.h \
 	Pulsar/PhaseWeightInterface.h \
 	Pulsar/PhaseWeightModifier.h \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
+	Pulsar/PhaseWidth.h \
 	Pulsar/ProfileCovariance.h \
 	Pulsar/ProfileInterpreter.h \
 	Pulsar/ProfilePCA.h \
@@ -92,7 +96,7 @@ nobase_include_HEADERS = \
         Pulsar/SmoothMean.h \
         Pulsar/SmoothMedian.h \
 	Pulsar/SmoothSinc.h \
-	Pulsar/SNRatioInterpreter.h \
+	Pulsar/SNRatioEstimator.h \
         Pulsar/SNRWeight.h \
         Pulsar/SquareWave.h \
 	Pulsar/StandardOptions.h \
@@ -113,13 +117,13 @@ nobase_include_HEADERS = \
         Pulsar/Weight.h \
 	Pulsar/WeightedFrequency.h \
 	Pulsar/WeightInterpreter.h \
+	Pulsar/WidthEstimator.h \
         Pulsar/ZapInterpreter.h
 
 libGeneral_la_SOURCES = \
 	counter_drift.C \
 	find_spike_edges.C \
         model_profile.C \
-		range.h \
 	morphological_difference.C \
 	Accumulate.C \
         AdaptiveSNR.C \
@@ -200,16 +204,20 @@ libGeneral_la_SOURCES = \
 	LastHarmonic.C \
         LastSignificant.C \
 	MaskSmooth.C \
+	ModularSNR.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
+	PatchFrequency.C \
 	PatchTime.C \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
 	PeakCumulative.C \
+	PhaseSNR.C \
 	PhaseWeightInterface.C \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
         PhaseWeight.C \
+	PhaseWidth.C \
 	ProfileInterpreter.C \
 	ProfileShiftFit.C \
 	ProfileStats.C \
@@ -236,7 +244,7 @@ libGeneral_la_SOURCES = \
         SmoothMean.C \
         SmoothMedian.C \
 	SmoothSinc.C \
-	SNRatioInterpreter.C \
+	SNRatioEstimator.C \
         SNRWeight.C \
         SquareWave.C \
 	standard_interface.C \
@@ -255,6 +263,8 @@ libGeneral_la_SOURCES = \
         Weight.C \
 	WeightedFrequency.C \
 	WeightInterpreter.C \
+	width.C \
+	WidthEstimator.C \
 	ZapInterpreter.C
 
 

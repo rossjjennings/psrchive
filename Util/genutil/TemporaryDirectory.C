@@ -51,6 +51,10 @@ void TemporaryDirectory::build () const
   if (!userid)
     userid = unknown;
 
+  const char *tmp_userid = getenv ("TMP_USER");
+  if (tmp_userid)
+    userid = tmp_userid;
+
   path = (root + "/") + userid;
 
   if (makedir (path.c_str()) < 0)

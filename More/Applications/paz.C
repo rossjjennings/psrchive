@@ -419,8 +419,7 @@ void paz::setup ()
     thestd = data->get_Profile (0, 0, 0);
     
     standard_snr.set_standard (thestd);
-    Pulsar::Profile::snr_strategy.get_value().set (&standard_snr,
-						   &Pulsar::StandardSNR::get_snr);
+    Pulsar::Profile::snr_strategy = new Pulsar::StandardSNR;
   }
 }
 

@@ -74,6 +74,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             break;
 
         case '6':
+        case 'c':
             Telescopes::VLA(t);
             break;
 
@@ -176,8 +177,8 @@ void Pulsar::Telescopes::GB85_3(Telescope *t)
 void Pulsar::Telescopes::Nancay(Telescope *t)
 {
     t->set_name("Nancay");
-    t->set_mount(Telescope::Horizon);
-    t->set_primary(Telescope::Parabolic);
+    t->set_mount(Telescope::KrausType);
+    t->set_primary(Telescope::Spherical);
     t->set_focus(Telescope::Gregorian); 
 }
 

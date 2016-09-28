@@ -76,19 +76,22 @@ namespace Pulsar {
     //! Set all weights to the specified value
     void set_all (float weight);
   
-    //! Retrieve the sum of all weights
+    //! Get the sum of all weights
     double get_weight_sum () const;
 
-    //! Retrieve the beginning of the phase region with non-zero weight
+    //! Get the count of all non-zero weights
+    unsigned get_nonzero_weight_count () const;
+
+    //! Get the beginning of the phase region with non-zero weight
     std::string get_start_index () const;
 
-    //! Retrieve the end of the phase region with non-zero weight
+    //! Get the end of the phase region with non-zero weight
     std::string get_end_index () const;
 
-    //! Retrieve the max of all weights
+    //! Get the max of all weights
     double get_weight_max () const;
 
-    //! Retrieve the weights
+    //! Get the weights
     void get_weights (std::vector<float>& weights) const;
 
     //! Weight the Profile amplitudes by the weights

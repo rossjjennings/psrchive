@@ -16,6 +16,7 @@
 
 #include "Pulsar/Index.h"
 #include "TextInterface.h"
+#include "PhaseRange.h"
 
 namespace Pulsar {
 
@@ -24,7 +25,9 @@ namespace Pulsar {
   class Profile;
   class ProfileStats;
   class PhaseWeight;
-
+  class SNRatioEstimator;
+  class WidthEstimator;
+  
   //! Interface to a variety of useful statistics
   class Statistics : public Reference::Able
   {
@@ -51,9 +54,24 @@ namespace Pulsar {
     void set_pol (Index _ipol);
     Index get_pol () const;
 
+    //! Set the signal-to-noise ratio estimator
+    void set_snr_estimator (const std::string& name);
+
     //! Get the signal-to-noise ratio
     double get_snr () const;
 
+    //! Get the text interface of the signal-to-noise ratio estimator
+    TextInterface::Parser* get_snr_interface ();
+
+    //! Set the pulse width estimator
+    void set_pulse_width_estimator (const std::string& name);
+
+    //! Get the pulse width
+    Phase::Value get_pulse_width () const;
+
+    //! Get the text interface of the pulse width estimator   
+    TextInterface::Parser* get_pulse_width_interface ();
+    
     //! Get the effective duty cycle
     double get_effective_duty_cycle () const;
 
@@ -111,7 +129,13 @@ namespace Pulsar {
     mutable Reference::To<const Integration> integration;
 
     mutable std::vector< Reference::To<Plugin> > plugins;
-    
+
+    Reference::To<SNRatioEstimator> snr_estimator;
+    Reference::To<WidthEstimator> pulse_width_estimator;
+
+    //! Set the period attribute of the Phase::Value/Range/Ranges argument
+    void set_period (Phase::HasUnit&) const;
+
   };
 
   class Statistics::Plugin : public Reference::Able

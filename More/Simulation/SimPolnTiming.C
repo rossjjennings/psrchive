@@ -26,8 +26,7 @@
 
 #include "MEAL/Polar.h"
 #include "BoxMuller.h"
-
-// #include "spectra.h"
+#include "random.h"
 
 #ifdef HAVE_PGPLOT
 #include <cpgplot.h>
@@ -37,7 +36,7 @@
 
 using namespace std;
 
-static BoxMuller gasdev (time(NULL));
+static BoxMuller gasdev (usec_seed());
 
 
 Pulsar::Range::Range (unsigned _steps, double _min, double _max)

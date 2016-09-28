@@ -215,11 +215,16 @@ void Pulsar::ProfileColumn::unload (int row,
 
   const bool save_signed = true;
 
+  // due to definition of offset, max_short should be the same when
+  // using either signed or unsigned
   float max_short;
+
   if (save_signed)
     max_short = pow(2.0,15.0)-1.0;
   else
     max_short = pow(2.0,16.0)-1.0;
+  
+  //= pow(2.0,16.0)-1.0;
 
   unsigned bins_written = 0;
 

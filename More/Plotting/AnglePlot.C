@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/AnglePlot.h"
-#include "Pulsar/AnglePlot.h"
+#include "Pulsar/PhaseScale.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"

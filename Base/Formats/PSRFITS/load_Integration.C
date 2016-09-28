@@ -167,6 +167,10 @@ try {
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_read_col OFFS_SUB");
 
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::load_Integration"
+      " start_time=" << hdr_ext->get_start_time() <<
+      " time=" << time << endl;
 
   MJD epoch = hdr_ext->get_start_time() + time;
 

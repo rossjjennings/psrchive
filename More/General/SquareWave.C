@@ -124,7 +124,7 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
   double variance = 0;
   difference->stats (zero, &mean, &variance);
 
-cerr << "mean=" << mean << " rms=" << sqrt(variance) << endl;
+  // cerr << "mean=" << mean << " rms=" << sqrt(variance) << endl;
 
   // check that the mean is actually zero
   double rms = sqrt(variance);
@@ -155,4 +155,38 @@ unsigned Pulsar::SquareWave::count_transitions (const Profile* profile)
 #endif
 
   return std::min( up.size(), down.size() );
+}
+
+class Pulsar::SquareWave::Interface
+  : public TextInterface::To<SquareWave>
+{
+public:
+  Interface (SquareWave* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &SquareWave::get_threshold,
+         &SquareWave::set_threshold,
+         "threshold", "threshold used to count transitions" );
+
+    add( &SquareWave::get_risetime,
+         &SquareWave::set_risetime,
+         "risetime", "turns omitted from consideration at transitions" );
+  }
+
+  std::string get_interface_name () const { return "square"; }
+};
+
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::SquareWave::get_interface ()
+{
+  return new Interface (this);
+}
+
+//! Return a copy constructed instance of self
+Pulsar::SquareWave* Pulsar::SquareWave::clone () const
+{
+  return new SquareWave (*this);
 }

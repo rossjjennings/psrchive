@@ -7,7 +7,7 @@
  *
  ***************************************************************************/
 
-// psrchive/psrchive/Util/units/TextInterfaceEmbed.h
+// psrchive/Util/units/TextInterfaceEmbed.h
 
 #ifndef __TextInterfaceEmbed_h
 #define __TextInterfaceEmbed_h
@@ -17,6 +17,128 @@
 
 namespace TextInterface
 {
+  //! Dynamically embeds the interface of something that can be got and set
+  /*! In this template: C is a composite; Get is the method of C that
+    returns something, Set is the method of C that sets something, and
+    get_parser is the method that optionally returns the embedded interface
+    to something. */
+  template<class C, class Type, class Get, class Set>
+  class OptionalInterface : public AttributeGetSet<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    OptionalInterface (const std::string& t, Get g, Set s)
+      : AttributeGetSet<C,Type,Get,Set> (t,g,s)
+    {
+#if _DEBUG
+      std::cerr << "OptionalInterface name=" << t << std::endl;
+#endif
+    }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+    { return AttributeGetSet<C,Type,Get,Set>::get_name() + "[:<name>]"; }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const;
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value);
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+    void set_modifiers (const std::string&) const;
+    void reset_modifiers () const;
+
+  protected:
+
+    virtual Parser* get_parser (const C* ptr) const = 0;
+
+    //! Value found during match
+    mutable Value* value;
+    mutable bool help;
+  };
+
+
+
+
+  template<class C, class Type, class Get, class Set, class GetParser>
+  class DirectInterface : public OptionalInterface<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    DirectInterface (const std::string& t, Get g, Set s, GetParser p)
+      : OptionalInterface<C,Type,Get,Set> (t,g,s)
+    { get_parser_method = p; }
+
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+    { return new DirectInterface(*this); }
+
+  protected:
+
+    //! Method of C that returns TextInterface::Parser
+    GetParser get_parser_method;
+
+    Parser* get_parser (const C* ptr) const
+    { 
+      return (const_cast<C*>(ptr)->*get_parser_method)();
+    }
+  };
+
+  template<class C, class Type, class Get, class Set, class GetParser>
+  class IndirectInterface : public OptionalInterface<C,Type,Get,Set>
+  {
+
+  public:
+    
+    //! Construct from a pointer to element attribute interface
+    IndirectInterface (const std::string& t, Get g, Set s, GetParser p)
+      : OptionalInterface<C,Type,Get,Set> (t,g,s)
+    { get_parser_method = p; }
+
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+    { return new IndirectInterface(*this); }
+
+  protected:
+
+    //! Method of C that returns TextInterface::Parser
+    GetParser get_parser_method;
+
+    Parser* get_parser (const C* ptr) const
+    { 
+      Type tptr = (const_cast<C*>(ptr)->*(this->get))();
+      return (tptr->*get_parser_method)();
+    }
+  };
+
+  template<class C, class Type>
+  class EmbedAllocator 
+  {
+  public:
+    //! Generate a new OptionalInterface instance with description
+    template<class Get, class Set, class GetParser>
+    OptionalInterface<C,Type,Get,Set>* 
+    direct (const std::string& n, Get g, Set s, GetParser p)
+    {
+      return new DirectInterface<C,Type,Get,Set,GetParser> (n,g,s,p);
+    }
+
+    //! Generate a new OptionalInterface instance with description
+    template<class Get, class Set, class GetParser>
+    OptionalInterface<C,Type,Get,Set>* 
+    indirect (const std::string& n, Get g, Set s, GetParser p)
+    {
+      return new IndirectInterface<C,Type,Get,Set,GetParser> (n,g,s,p);
+    }
+  };
+
   //! Dynamically embeds the interfaces of elements in a vector
   /*! In this template: V is a vector of elements; Get is the method of
     V that returns the element at the specified index; and Size is the
@@ -62,6 +184,14 @@ namespace TextInterface
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
 
+    //! Parse any modifiers that will alter the behaviour of the output stream
+    void set_modifiers (const std::string& mod) const
+    { modifiers = mod; }
+
+    //! Reset any output stream modifiers
+    void reset_modifiers () const
+    { modifiers.erase(); }
+
   protected:
 
     //! Method of V that returns E*
@@ -78,6 +208,9 @@ namespace TextInterface
 
     //! Remainder parsed from name during matches
     mutable std::string remainder;
+
+    //! Any modifiers set by caller
+    mutable std::string modifiers;
   };
 
   //! Embedded interface factory for TextInterface::To<C>
@@ -160,6 +293,146 @@ namespace TextInterface
 
 }
 
+template<class C, class T, class G, class S> 
+std::string
+TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const
+{
+  if (help)
+  {
+    Parser* parser = get_parser(ptr);
+    return "\n" + parser->help();
+  }
+
+  if (value)
+    return value->get_value();
+
+  return AttributeGetSet<C,T,G,S>::get_value (ptr);
+}
+
+template<class C, class T, class G, class S>
+void TextInterface::OptionalInterface<C,T,G,S>::set_value (C* ptr,
+							  const std::string& val)
+{
+  if (value)
+    value->set_value (val);
+  else
+    AttributeGetSet<C,T,G,S>::set_value (ptr, val);
+}
+
+template<class C, class T, class G, class S>
+bool TextInterface::OptionalInterface<C,T,G,S>::matches
+  (const std::string& text) const
+{
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " text='" << text << "'" << std::endl;
+#endif
+
+  value = 0;
+  help = false;
+
+  if (text == this->name)
+    return true;
+
+  if (text == this->name + "[:<name>]")
+    return true;
+
+  std::string range;
+  std::string remainder;
+  if (!match (this->name, text, &range, &remainder))
+    return false;
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " remainder='" << remainder << "'" << std::endl;
+#endif
+
+  if (remainder == "help")
+  {
+    help = true;
+    return true;
+  }
+
+  if (!this->instance)
+  {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " no instance" << std::endl;
+#endif
+    return false;
+  }
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " getting Parser" << std::endl;
+#endif
+
+  Parser* parser = get_parser(this->instance);
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " got Parser" << std::endl;
+#endif
+
+  bool throw_exception = false;
+  value = parser->find (remainder, throw_exception);
+
+  if (!value)
+  {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " Parser::find(" << remainder << ") returns false" << std::endl;
+#endif
+    return false;
+  }
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::OptionalInterface::matches"
+    " Parser::find(" << remainder << ") returns true" << std::endl;
+#endif
+
+  return true;
+}
+
+
+template<class C, class T, class G, class S>
+void TextInterface::OptionalInterface<C,T,G,S>::set_modifiers (const std::string& modifiers) const
+{
+  if (value)
+  {
+#ifdef _DEBUG
+    std::cerr << "TextInterface::OptionalInterface"
+      " calling Value::set_modifiers (" << modifiers << ")" << std::endl;
+#endif
+    value->set_modifiers (modifiers);
+  }
+  else
+  {
+#ifdef _DEBUG
+    std::cerr << "TextInterface::OptionalInterface"
+      " calling AttributeGetSet<>::set_modifiers" << std::endl;
+#endif
+    AttributeGetSet<C,T,G,S>::set_modifiers (modifiers);
+  }
+}
+
+template<class C, class T, class G, class S>
+void TextInterface::OptionalInterface<C,T,G,S>::reset_modifiers () const
+{
+  if (value)
+    value->reset_modifiers ();
+  else
+    AttributeGetSet<C,T,G,S>::reset_modifiers ();
+}
+
+
+
+
+
+
+
+
+
 template<class V, class G, class S> 
 std::string
 TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
@@ -189,7 +462,12 @@ TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
     if (remainder == "help")
       result += "\n" + parser->help();
     else
-      result += parser->get_value (remainder);
+    {
+      std::string pass_to_parser = remainder;
+      if (modifiers.length() > 0)
+	pass_to_parser += "%" + modifiers;
+      result += parser->get_value (pass_to_parser);
+    }
   }
 
   return result;

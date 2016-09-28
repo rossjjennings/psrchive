@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Britton2000.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/03/03 16:38:52 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/Britton2000.h
 
 #ifndef __CalibrationBritton2000_H
 #define __CalibrationBritton2000_H
@@ -35,7 +32,7 @@ namespace Calibration {
   public:
 
     //! Default Constructor
-    Britton2000 ();
+    Britton2000 (bool isolate_degeneracy = false);
 
     //! Copy Constructor
     Britton2000 (const Britton2000& s);
@@ -63,6 +60,8 @@ namespace Calibration {
     
     const MEAL::Complex2* get_frontend () const;
 
+    bool get_degeneracy_isolated() const { return isolate_degeneracy; }
+    
     // ///////////////////////////////////////////////////////////////////
     //
     // Model implementation
@@ -78,11 +77,12 @@ namespace Calibration {
 
     //! Feed model
     Reference::To<Feed> feed;
-
+    bool isolate_degeneracy;
+    
   private:
 
     //! Initialize function used by constructors
-    void init ();
+    void init (bool iso);
 
   };
 

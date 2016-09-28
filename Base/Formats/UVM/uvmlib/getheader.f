@@ -48,7 +48,6 @@ c  Check P110 program
       else if(file(1:1).eq."H".and.file(8:8).ge."a"
      .           .and.file(17:17).eq."u") then
         prgm=110
-        write(*,'("Willem Program:",i5)') prgm
         call P110readhdr(istat)
         if(istat.ne.0) go to 99
         close(41)
@@ -64,7 +63,7 @@ c  Check P110 program
         ival=0
         nvals=0
 c  Read first record
-        call P110readdata(convert,istat)
+c        call P110readdata(convert,istat)
         return
 c  Check P467 program
       else if(file(1:1).eq."H".and.file(8:8).ge."a"
@@ -84,7 +83,7 @@ c  Check P467 program
         open(unit=41,file=infile,status='old')
         call sgigetfd(fd)
 c  Read first record
-        call P467readdata(convert,istat)
+c        call P467readdata(convert,istat)
         return
 c  Check spulses/WSRT format
       else if(file(1:1).eq."s".or.file(1:1).eq."a") then
@@ -93,7 +92,7 @@ c  Check spulses/WSRT format
         call SPULreadhdr(istat)
         if(istat.ne.0) go to 99
 c  Read first record
-        call SPULreaddata(convert,istat)
+c        call SPULreaddata(convert,istat)
         return
 c  Check P868 data
       else if(file(1:1).eq."G".or.file(1:1).eq."A") then
@@ -103,9 +102,12 @@ c  Check P868 data
         if(istat.ne.0) go to 99
         return
       else
-        stop "Getheader: ambiguous file name"
+c        stop "Getheader: ambiguous file name"
+        istat = -1
+	return
       end if
       return
    99 write(*,*) "Getheader: header record read error",istat
-      stop
+c      stop
+      return
       end
