@@ -44,7 +44,9 @@ namespace Phase
     Unit get_unit () const { return unit; }
 
     void set_nbin( unsigned N ) { nbin = N; }
-    void set_period( double P ) { period = P; }    
+
+    //! Set the period in milliseconds
+    void set_period( double P_ms ) { period = P_ms; }    
   };
 
   //! A value with a Phase::Unit
