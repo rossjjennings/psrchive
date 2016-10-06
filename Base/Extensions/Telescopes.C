@@ -98,6 +98,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             Telescopes::LOFAR(t);
             break;
 
+        case 'm':
+            Telescopes::MeerKAT(t);
+            break;
+
         case 'i':
             Telescopes::WSRT(t);
             break;
@@ -186,6 +190,14 @@ void Pulsar::Telescopes::LOFAR(Telescope *t)
 {
     t->set_name ("LOFAR");
     // XXX what about other settings? mount, focus,...
+}
+
+void Pulsar::Telescopes::MeerKAT(Telescope *t)
+{
+    t->set_name ("MeerKAT");
+    t->set_mount (Telescope::Horizon);
+    t->set_primary (Telescope::Parabolic);
+    t->set_focus(Telescope::Gregorian);
 }
 
 void Pulsar::Telescopes::MtPleasant26(Telescope *t)
