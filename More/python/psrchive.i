@@ -39,6 +39,9 @@
 #include <config.h>
 #endif
 
+#include "Pulsar/PeakCumulative.h"
+#include "Pulsar/PeakConsecutive.h"
+
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
@@ -216,6 +219,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TimeAppend.h"
 %include "Pulsar/FrequencyAppend.h"
 %include "Pulsar/PatchTime.h"
+%include "Pulsar/PeakCumulative.h"
+%include "Pulsar/PeakConsecutive.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
@@ -551,5 +556,37 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
     // Return a copy of the predictor
     Pulsar::Predictor* get_predictor() {
       return self->get_model()->clone();
+    }
+}
+
+%extend Pulsar::PeakCumulative
+{
+    PyObject *get_indeces() {
+
+        // Call C++ routine for values
+        int hi, lo;
+        self->get_indeces(hi, lo);
+
+        // Pack arrays into tuple
+        PyTupleObject *result = (PyTupleObject *)PyTuple_New(2);
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyInt_FromLong((long)hi));
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyInt_FromLong((long)lo));
+        return (PyObject *)result;
+    }
+}
+
+%extend Pulsar::PeakConsecutive
+{
+    PyObject *get_indeces() {
+
+        // Call C++ routine for values
+        int hi, lo;
+        self->get_indeces(hi, lo);
+
+        // Pack arrays into tuple
+        PyTupleObject *result = (PyTupleObject *)PyTuple_New(2);
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyInt_FromLong((long)hi));
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyInt_FromLong((long)lo));
+        return (PyObject *)result;
     }
 }

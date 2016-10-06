@@ -38,6 +38,8 @@ namespace Pulsar {
     enum What { Variances,
 		EigenValues,
 		NaturalCovariances,
+		NonOrthogonality,
+		Theta,
 		RegressionCoefficients,
 		ModulationIndex };
 

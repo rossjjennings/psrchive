@@ -178,7 +178,6 @@ libMEAL_la_SOURCES = \
         ParameterPolicy.C \
 	ParameterTracer.C \
         Parameters.C \
-	PhaseGradients.C \
         PhysicalCoherency.C \
         Polar.C \
         Polynomial.C \

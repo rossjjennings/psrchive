@@ -71,7 +71,7 @@ int uvm_getheader ( const char* filename,
 }
 
 
-int uvm_getdata ( int program, uvm_data* data )
+int uvm_getdata ( int program, uvm_header* hdr, uvm_data* data )
 {
 
   int convert = 0;  /* don't compute L and P.A. */
@@ -81,8 +81,9 @@ int uvm_getdata ( int program, uvm_data* data )
   if (istat != 0)
     return -1;
 
+  *hdr = F77_header;
   *data = F77_data;
-
+  
   return 0;
 }
 

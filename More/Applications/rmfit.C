@@ -1164,6 +1164,10 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     }
 
 
+  ofstream os ("rm_spectrum.txt");
+  for (unsigned step=0; step < rmsteps; step++)
+    os << rms[step] << " " << fluxes[step] << " " << err[step] << endl;
+    
 #if HAVE_PGPLOT
 
   float ymin = fluxes[0];

@@ -10,7 +10,9 @@
 
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ProfileShiftFit.h"
+
 #include "Pulsar/SNRatioEstimator.h"
+#include "Pulsar/PhaseWidth.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
@@ -25,6 +27,7 @@ using namespace std;
 //! Default constructor
 Pulsar::Statistics::Statistics (const Archive* data)
 {
+  pulse_width_estimator = new PhaseWidth;
   set_Archive (data);
 }
 
@@ -115,6 +118,31 @@ TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
     return snr_estimator->get_interface();
   else
     return Profile::snr_strategy.get_value()->get_interface();
+}
+
+//! Set the pulse width estimator
+void Pulsar::Statistics::set_pulse_width_estimator (const std::string& name)
+{
+  pulse_width_estimator = WidthEstimator::factory (name);
+}
+
+void Pulsar::Statistics::set_period (Phase::HasUnit& value) const
+{
+  // set the period in milliseconds
+  value.set_period( get_Integration()->get_folding_period() * 1e3 );
+}
+
+//! Get the pulse width
+Phase::Value Pulsar::Statistics::get_pulse_width () const
+{
+  Phase::Value width = pulse_width_estimator->get_width( get_Profile() );
+  set_period (width);
+  return width;
+}
+
+TextInterface::Parser* Pulsar::Statistics::get_pulse_width_interface ()
+{
+  return pulse_width_estimator->get_interface();
 }
 
 //! Get the Fourier-noise-to-noise ratio

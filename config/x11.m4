@@ -12,7 +12,7 @@ AC_DEFUN([SWIN_LIB_X11],
   if test "x$X_LIBS" != "x"; then
     swin_x11_found="yes"
   else
-    swin_lib_x11_path_list="$1 /usr/X11R6/lib"
+    swin_lib_x11_path_list="$1 /opt/X11/lib /usr/X11R6/lib"
     for swin_dir in $swin_lib_x11_path_list; do
       if test -r "$swin_dir/libX11.so"; then
         X_LIBS="-L$swin_dir"
