@@ -13,6 +13,9 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/ArchiveMatch.h"
 
+#include "Pulsar/ArchiveExtension.h"
+#include "Pulsar/FITSHdrExtension.h"
+
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
@@ -150,6 +153,15 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
   DigitiserCounts *from_counts = from->get<DigitiserCounts>();
   if( into_counts != NULL && from_counts != NULL )
     into_counts->Accumulate( *from_counts );
+
+  for (unsigned iext=0; iext<into->get_nextension(); ++iext)
+    if (into->get_extension(iext)->get_extension_name() == "FITSHdrExtension")
+    {
+      FITSHdrExtension *fitshdrext = (FITSHdrExtension*) into->get_extension(iext);
+      fitshdrext->set_obsfreq(weighted_centre_frequency);
+      fitshdrext->set_obsbw(total_bandwidth);
+      fitshdrext->set_obsnchan(into->get_nchan() + from->get_nchan());
+    }
 
   if (Archive::verbose > 2)
     cerr << "Pulsar::FrequencyAppend::combine result"
