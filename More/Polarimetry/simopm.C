@@ -52,6 +52,7 @@ void usage ()
     " -B i,q,u,v  set the Stokes parameters of mode B \n"
     " -l sigma    modulate mode A using a log-normal variate \n"
     " -a Nsamp    box-car smooth the amplitude modulation function \n"
+    " -g Nsamp    use square impulse amplitude modulation function \n"
     " -p          print real part of x and y, plus diff. phase \n"
     " -r          print the statistics of the coherency matrix \n"
     " -d          print only the variances of each Stokes parameter \n"
@@ -434,6 +435,59 @@ public:
 };
 
 
+class square_modulated_mode : public modulated_mode
+{
+  unsigned width;
+  unsigned current;
+  double value;
+
+  modulated_mode* mod;
+
+public:
+
+  square_modulated_mode (modulated_mode* s, unsigned n)
+    : modulated_mode(s->get_source()) { width = n; current = n; mod = s; }
+
+  double modulation ()
+  {
+    if (current == width)
+    {
+      value = mod->modulation();
+      current = 0;
+    }
+
+    current ++;
+    return value;
+  }
+
+  double get_mod_variance ()
+  {
+    return mod->get_mod_variance();
+  }
+
+  double get_mod_mean ()
+  {
+    return mod->get_mod_mean ();
+  }
+
+  //! Return the sum of the intensity autocorrelation function
+  double get_autocorrelation (unsigned nsample) 
+  {
+    // sum the width X width squares along the diagonal
+    double result = 0;
+    while (nsample > width)
+    {
+      result += (width-1)*width;
+      nsample -= width;
+    }
+
+    if (nsample)
+      result += (nsample-1)*nsample;
+    
+    return result * mod->get_mod_variance();
+  }
+};
+
 
 /***************************************************************************
  *
@@ -742,6 +796,8 @@ public:
   unsigned smooth_before;
   // box-car smoothing of modulation function
   unsigned smooth_modulator;
+  // width of square modulation function
+  unsigned square_modulator;
   // variance of logarithm of modulation function
   double log_sigma;
 
@@ -749,6 +805,7 @@ public:
   {
     smooth_before = 0;
     smooth_modulator = 0;
+    square_modulator = 0;
     log_sigma = 0;
   }
 
@@ -761,13 +818,18 @@ public:
 
     if (smooth_modulator > 1 && mod)
       s = new boxcar_modulated_mode (mod, smooth_modulator);
-  
+
+    if (square_modulator > 1 && mod)
+      s = new square_modulated_mode (mod, square_modulator);
+
     if (smooth_before > 1)
       s = new boxcar_mode (s, smooth_before);
 
     return s;
   }
 };
+
+double sqr (double x) { return x*x; }
 
 int main (int argc, char** argv)
 {
@@ -795,7 +857,7 @@ int main (int argc, char** argv)
   bool variances_only = false;
 
   int c;
-  while ((c = getopt(argc, argv, "a:dhn:N:m:M:s:SC:D:A:B:l:oprX")) != -1)
+  while ((c = getopt(argc, argv, "a:dg:hn:N:m:M:s:SC:D:A:B:l:oprX")) != -1)
   {
     switch (c)
     {
@@ -862,6 +924,13 @@ int main (int argc, char** argv)
 	setup_A.smooth_modulator = atoi (optarg);
       break;
 
+    case 'g':
+      if (optarg[0]=='B')
+	setup_B.square_modulator = atoi (optarg+1);
+      else
+	setup_A.square_modulator = atoi (optarg);
+      break;
+
     case 'o':
       subtract_outer_population_mean = true;
       break;
@@ -907,6 +976,7 @@ int main (int argc, char** argv)
   BoxMuller gasdev (time(NULL));
 
   uint64_t ntot = 0;
+  double totp = 0;
   Vector<4, double> tot;
   Matrix<4,4, double> totsq;
 
@@ -945,6 +1015,9 @@ int main (int argc, char** argv)
     tot += mean_stokes;
     totsq += outer(mean_stokes, mean_stokes);
 
+    double psq = sqr(mean_stokes[1])+sqr(mean_stokes[2])+sqr(mean_stokes[3]);
+    totp += sqrt(psq)/mean_stokes[0];
+      
     if (rho_stats)
     {
       Matrix<2,2, complex<double> > rho = convert (Stokes<double>(mean_stokes));
@@ -956,6 +1029,7 @@ int main (int argc, char** argv)
     ntot ++;
   }
 
+  totp /= ntot;
   tot /= ntot;
   totsq /= ntot;
 
@@ -985,6 +1059,10 @@ int main (int argc, char** argv)
     "\n"
     " ******************************************************************* \n"
        << endl;
+
+  cerr << "mean sample dop=" << totp << endl << endl;
+
+  cerr << "modulation index=" << sqrt(totsq[0][0])/tot[0] << endl << endl;
 
   cerr << "mean=" << tot << endl;
   cerr << "expected=" << expected_mean << endl;
