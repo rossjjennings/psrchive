@@ -43,6 +43,7 @@ nobase_include_HEADERS = \
 	Pulsar/FixFluxCal.h \
 	Pulsar/FixInterpreter.h \
 	Pulsar/Flux.h \
+	Pulsar/ForEachProfile.h \
 	Pulsar/FortranSNR.h \
         Pulsar/Fourier.h \
         Pulsar/FourierSNR.h \
@@ -176,6 +177,7 @@ libGeneral_la_SOURCES = \
 	Extract.C \
 	FixFluxCal.C \
 	FixInterpreter.C \
+	ForEachProfile.C \
 	FortranSNR.C \
         Fourier.C \
         FourierSNR.C \
