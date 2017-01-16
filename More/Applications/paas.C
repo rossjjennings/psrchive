@@ -346,7 +346,7 @@ int main (int argc, char** argv) try
 	  "r          - reset phase zoom (0 -> 1) \n"
 	  "left click - add a component at cursor position\n"
 	  "f key      - fit current set of components\n"
-	  "q key      - quit\n"
+	  "q key      - save model and quit\n"
 	  "\n"
 	  "After left click:\n"
 	  "   1) any key - select width of new component, then \n"
