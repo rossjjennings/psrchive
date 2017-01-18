@@ -34,6 +34,7 @@ void usage ()
     " -b name:freq1-freq2    add a band designation \n"
     "                        sessions for a given frequency range will \n"
     "                        be placed in name/*.session \n"
+    " -f frequency           print the band designation for the frequency \n"
     "\n"
     " -T hours               time between sessions \n"
     " -S secs                seconds between sessions \n"
@@ -90,7 +91,9 @@ int main (int argc, char** argv)
   bool verbose = false;
   bool vverbose = false;
 
-  const char* args = "hb:S:T:vV";
+  double frequency = 0.0;
+  
+  const char* args = "hb:f:S:T:vV";
   int c = 0;
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -103,6 +106,10 @@ int main (int argc, char** argv)
       break;
     }
 
+    case 'f':
+      frequency = atof(optarg);
+      break;
+      
     case 'h':
       usage ();
       return 0;
@@ -126,7 +133,27 @@ int main (int argc, char** argv)
       cerr << "invalid param '" << char(c) << "'" << endl;
     }
 
+  if (frequency > 0)
+  {
+    if (!bands.size())
+    {
+      cerr << "sesdiv: -f requires designation of bands using -b" << endl;
+      return -1;
+    }
+    
+    for (unsigned iband=0; iband < bands.size(); iband++)
+      if (bands[iband].min_frequency < frequency &&
+	  bands[iband].max_frequency > frequency)
+	{
+	  cout << bands[iband].name << endl;
+	  return 0;
+	}
 
+    cerr << "sesdiv: specified frequency does not fall within designated bands"
+	 << endl;
+    return -1;
+  }
+  
   list<Pulsar::ArchiveSort> entries;
 
   if (optind < argc) {
