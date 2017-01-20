@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.10 $
-   $Date: 2011/02/12 21:06:49 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Statistics.h
 
 #ifndef __Pulsar_Statistics_h
 #define __Pulsar_Statistics_h
@@ -98,6 +95,12 @@ namespace Pulsar {
 
     //! Get the weighted frequency from the Pulsar::Archive
     double get_weighted_frequency () const;
+
+    //! Get the width of a phase bin in seconds
+    double get_bin_width () const;
+
+    //! Get the dispersive smearing in the worst channel in seconds
+    double get_dispersive_smearing () const;
 
     //! Text interface to statistics
     class Interface;

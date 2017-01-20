@@ -54,7 +54,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_pulse_width,
        &Statistics::set_pulse_width_estimator,
        &Statistics::get_pulse_width_interface,
-       "width", "Effective pulse width (turns)" );
+       "width", "Pulse width (turns)" );
 
   add( &Statistics::get_snr,
        &Statistics::set_snr_estimator,
@@ -72,4 +72,10 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
 
   add( &Statistics::get_weighted_frequency,
        "wtfreq", "Weighted frequency" );
+
+  add( &Statistics::get_bin_width,
+       "bwidth", "Phase bin width" );
+
+  add( &Statistics::get_dispersive_smearing,
+       "dsmear", "Dispersive smearing in worst channel" );
 }

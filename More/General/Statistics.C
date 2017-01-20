@@ -20,6 +20,7 @@
 #include "Pulsar/SquareWave.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
+#include "Physical.h"
 
 using namespace std;
 
@@ -216,6 +217,31 @@ double Pulsar::Statistics::get_weighted_frequency () const
 {
   integration = Pulsar::get_Integration (archive, 0);
   return integration->weighted_frequency (0, archive->get_nchan());
+}
+
+double Pulsar::Statistics::get_bin_width () const
+{
+  integration = Pulsar::get_Integration (archive, 0);
+  return integration->get_folding_period() / integration->get_nbin();
+}
+
+double Pulsar::Statistics::get_dispersive_smearing () const
+{
+  double dm        = archive->get_dispersion_measure();
+  double freq      = archive->get_centre_frequency();
+  double bw        = fabs(archive->get_bandwidth());
+  double chan_bw   = bw / archive->get_nchan();
+
+  freq -= 0.5 * (bw - chan_bw);
+
+  /*
+    cerr << "Frequency = " << freq << endl;
+    cerr << "Channel bandwidth = " << chan_bw << endl;
+    cerr << "DM = " << dm << endl;
+  */
+
+  // DM smearing in seconds
+  return dispersion_smear (dm, freq, chan_bw);
 }
 
 void Pulsar::Statistics::setup_stats ()
