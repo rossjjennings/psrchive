@@ -207,6 +207,10 @@ void Pulsar::ComponentModel::add_component (double centre,
 					    double height,
 					    const char *name)
 {
+  if (log_height && height <= 0)
+    throw Error (InvalidParam, "Pulsar::ComponentModel::add_component",
+		 "log_height==true and height=%f", height);
+  
   components.push_back( new ScaledVonMises (log_height) );
   components[components.size()-1]->set_centre(centre * 2*M_PI);
   components[components.size()-1]->set_concentration(concentration);
@@ -441,7 +445,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
   vector< Axis<double>::Value > xval;  
   vector< Estimate<double> > yval;
 
-  unsigned nfree = 0;
+  nfree = 0;
 
   for (unsigned i=0; i < nbin; i++)
   {
@@ -466,7 +470,13 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
 
   LevenbergMarquardt<double> fit;
   fit.verbose = Function::verbose;
-    
+
+#if 0 // for tweaking
+  fit.lamda = 1e-5;
+  fit.lamda_increase_factor = 10;
+  fit.lamda_decrease_factor = 0.5;
+#endif
+  
   chisq = fit.init (xval, yval, *model);
 
   // fit.singular_threshold = 1e-15; // dodge covariance problems
