@@ -125,10 +125,12 @@ void DigitiserCounts::Append( const DigitiserCounts &src )
 void DigitiserCounts::Accumulate( const DigitiserCounts &src )
 {
   if( subints.size() != src.subints.size() )
-    throw Error( InvalidState, "DigitiserCounts::Accumulate", "source number of subints differs" );
+    throw Error( InvalidState, "DigitiserCounts::Accumulate",
+		 "source number of subints differs" );
 
   if( subints[0].data.size() != src.subints[0].data.size() )
-    throw Error( InvalidState, "DigitiserCounts::Accumulate", "source number of counts differs" );
+    throw Error( InvalidState, "DigitiserCounts::Accumulate",
+		 "source number of counts differs" );
 
   for( unsigned s = 0; s < subints.size(); s ++ )
     for( unsigned d = 0; d < subints[s].data.size(); d ++ )
@@ -171,9 +173,11 @@ void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start
 
   const unsigned dataSize = subints[0].data.size();
 
-  for (unsigned iadd = start; iadd < stop; ++iadd) {
+  // this loop adds histograms together
+  for (unsigned iadd = start; iadd < stop; ++iadd)
+  {
     for (unsigned idata = 0; idata < dataSize; ++idata) {
-      subints[subint].data[idata] = subints[iadd].data[idata];
+      subints[subint].data[idata] += subints[iadd].data[idata];
     }
   }
 }
