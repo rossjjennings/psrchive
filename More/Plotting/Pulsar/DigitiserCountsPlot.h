@@ -33,6 +33,9 @@ namespace Pulsar
 
     TextInterface::Parser *get_interface();
 
+    //! disable default pre-processing of Plot base class
+    void preprocess (Archive* archive);
+  
   class Interface : public TextInterface::To<DigitiserCountsPlot>
     {
     public:
