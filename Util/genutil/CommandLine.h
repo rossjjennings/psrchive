@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.14 $
-   $Date: 2010/07/05 13:27:21 $
-   $Author: straten $ */
+// psrchive/Util/genutil/CommandLine.h
 
 #ifndef __CommandLine_h
 #define __CommandLine_h
