@@ -177,7 +177,7 @@ void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start
   for (unsigned iadd = start; iadd < stop; ++iadd)
   {
     for (unsigned idata = 0; idata < dataSize; ++idata) {
-      subints[subint].data[idata] += subints[iadd].data[idata];
+      subints.at(subint).data[idata] += subints.at(iadd).data[idata];
     }
   }
 }
