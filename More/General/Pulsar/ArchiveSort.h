@@ -48,6 +48,8 @@ namespace Pulsar {
 
     //! The epoch of the observation
     MJD epoch;
+    //! The length of the observation
+    double length;
 
     //! Load a list of ArchiveSort instances and sort them
     static void load (std::istream& input, std::list<ArchiveSort>& entries);

@@ -101,7 +101,7 @@ int main (int argc, char** argv)
     case 'b':
     {
       band b (optarg);
-      cerr << "sesdiv: adding band designation " << b << endl;
+      //cerr << "sesdiv: adding band designation " << b << endl;
       bands.push_back(b);
       break;
     }
@@ -153,7 +153,11 @@ int main (int argc, char** argv)
 	 << endl;
     return -1;
   }
-  
+
+  for (unsigned iband=0; iband < bands.size(); iband++){
+    cerr << "sesdiv: adding band designation " << iband << endl;
+  }
+
   list<Pulsar::ArchiveSort> entries;
 
   if (optind < argc) {
@@ -261,7 +265,7 @@ int main (int argc, char** argv)
 	cerr << "Adding " << entry->filename
 	     << " to session " << session_count << endl;
 
-      fprintf (session, "%s\n", entry->filename.c_str());
+      fprintf (session, "%s %f\n", entry->filename.c_str(), entry->length);
     }
 
     last = entry;
