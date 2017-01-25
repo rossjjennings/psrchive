@@ -61,7 +61,7 @@ void Pulsar::ComponentModel::fix_relative_phases ()
     return;
 
   if (model)
-    throw Error (InvalidState, "Pulsar::ComponentModel::set_retain_memory",
+    throw Error (InvalidState, "Pulsar::ComponentModel::fix_relative_phases",
 		 "cannot fix relative phases after model is built");
 
   phase = new ScalarParameter (0.0);
@@ -89,7 +89,7 @@ void Pulsar::ComponentModel::set_retain_memory (bool flag)
 void Pulsar::ComponentModel::set_fix_widths (bool flag)
 {
   if (model)
-    throw Error (InvalidState, "Pulsar::ComponentModel::set_retain_memory",
+    throw Error (InvalidState, "Pulsar::ComponentModel::set_fix_widths",
 		 "cannot change flag to fix widths after model is built");
 
   fix_widths = flag;
