@@ -50,6 +50,9 @@ namespace Pulsar
     //! Return a copy constructed instance of self
     ComponentModel* clone () const { return new ComponentModel(*this); }
 
+    //! Return the statistical goodness-of-fit
+    double get_reduced_chisq () const { return chisq / nfree; }
+
     // I/O
     void load (const char *fname);
     void unload (const char *fname) const;
