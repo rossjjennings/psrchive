@@ -83,7 +83,7 @@ trash::trash ()
   plot_options.set_device ("/xs");
 
   // by default, pscrunch, tscrunch, and fscrunch
-  standard_options.add_default_job ("pTFC");
+  //standard_options.add_default_job ("pTFC");
 
   // by default, plot the total intensity
   plot_name = "flux";
