@@ -21,6 +21,10 @@ namespace Pulsar {
   //! Communicates Britton (2000) parameters to plotting routines
   class BrittonInfo : public BackendFeedInfo {
 
+    //! When true, b_v and r_u are swapped in Equation 19
+    bool degeneracy_isolated;
+    bool constant_orientation;
+    
   public:
 
     //! Constructor
