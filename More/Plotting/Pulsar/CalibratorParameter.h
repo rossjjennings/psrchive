@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/07/15 10:14:48 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h
 
 #ifndef __Pulsar_CalibratorParameter_h
 #define __Pulsar_CalibratorParameter_h

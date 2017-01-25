@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotEdge.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/12/02 04:50:55 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PlotEdge.h
 
 #ifndef __Pulsar_PlotEdge_h
 #define __Pulsar_PlotEdge_h

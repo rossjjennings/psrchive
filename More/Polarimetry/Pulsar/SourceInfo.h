@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SourceInfo.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/06/17 07:59:23 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SourceInfo.h
 
 #ifndef __Pulsar_SourceInfo_H
 #define __Pulsar_SourceInfo_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/Plot3D.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $*/
+// psrchive/Util/pgutil/Plot3D.h
 
 #ifndef __CurvePlotter2D3_H
 #define __CurvePlotter2D3_H

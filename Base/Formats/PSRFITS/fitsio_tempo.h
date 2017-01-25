@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/fitsio_tempo.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/15 06:55:51 $
-   $Author: straten $ */
+// psrchive/Base/Formats/PSRFITS/fitsio_tempo.h
 
 #ifndef __FITSIO_TEMPO_H
 #define __FITSIO_TEMPO_H

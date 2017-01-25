@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/03/22 02:07:08 $
-   $Author: straten $*/
+// psrchive/Util/pgutil/BandpassPlotter.h
 
 #ifndef __fft_BandpassPlotter_h
 #define __fft_BandpassPlotter_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/EvenlyWeighted.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/11/29 12:13:49 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/EvenlyWeighted.h
 
 #ifndef __Pulsar_EvenlyWeighted_h
 #define __Pulsar_EvenlyWeighted_h

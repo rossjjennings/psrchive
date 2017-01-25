@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FrontendCorrection.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/03/01 18:04:41 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/FrontendCorrection.h
 
 #ifndef __Pulsar_FrontendCorrection_H
 #define __Pulsar_FrontendCorrection_H

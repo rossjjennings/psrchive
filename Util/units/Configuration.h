@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Configuration.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/11/29 12:13:50 $
-   $Author: straten $ */
+// psrchive/Util/units/Configuration.h
 
 #ifndef __Configuration_h
 #define __Configuration_h

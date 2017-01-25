@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.20 $
-   $Date: 2009/08/14 06:21:40 $
-   $Author: straten $ */
+// psrchive/Util/units/EstimatePlotter.h
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h

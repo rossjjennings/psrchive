@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/DisperseWeight.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/24 05:02:08 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/DisperseWeight.h
 
 #ifndef __Pulsar_DisperseWeight_h
 #define __Pulsar_DisperseWeight_h

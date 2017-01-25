@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/02/24 22:05:30 $
-   $Author: straten $ */
+// psrchive/Util/units/ReferenceAble.h
 
 #ifndef __ReferenceAble_h
 #define __ReferenceAble_h

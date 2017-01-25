@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CoherentDedispersion.h,v $
-   $Revision: 1.4 $
-   $Date: 2010/04/06 21:44:07 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/CoherentDedispersion.h
 
 #ifndef __CoherentDedispersion_h
 #define __CoherentDedispersion_h

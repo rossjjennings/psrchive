@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2Constant.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Complex2Constant.h
 
 #ifndef __Complex2Constant_H
 #define __Complex2Constant_H

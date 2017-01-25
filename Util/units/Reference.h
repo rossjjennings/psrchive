@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Reference.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/units/Reference.h
 
 //! Contains two basic classes that simplify dynamic memory management
 /*! 

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/03/01 18:04:42 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h
 
 #ifndef __HybridCalibrator_H
 #define __HybridCalibrator_H

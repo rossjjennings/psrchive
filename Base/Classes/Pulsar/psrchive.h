@@ -7,10 +7,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/psrchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/07 14:07:13 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/psrchive.h
 
 #ifndef __Pulsar_psrchive_h
 #define __Pulsar_psrchive_h

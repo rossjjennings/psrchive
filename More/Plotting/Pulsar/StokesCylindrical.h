@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesCylindrical.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/12 07:45:10 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/StokesCylindrical.h
 
 #ifndef __Pulsar_StokesCylindrical_h
 #define __Pulsar_StokesCylindrical_h

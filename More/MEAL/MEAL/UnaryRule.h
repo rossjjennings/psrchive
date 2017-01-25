@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryRule.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/04/07 00:38:12 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/UnaryRule.h
 
 #ifndef __MEAL_UnaryRule_H
 #define __MEAL_UnaryRule_H

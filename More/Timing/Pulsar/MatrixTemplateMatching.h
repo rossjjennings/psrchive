@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/MatrixTemplateMatching.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/10/02 03:40:50 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/MatrixTemplateMatching.h
 
 #ifndef __Pulsar_MatrixTemplateMatching_h
 #define __Pulsar_MatrixTemplateMatching_h

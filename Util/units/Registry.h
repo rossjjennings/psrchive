@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Registry.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/11/28 05:18:24 $
-   $Author: straten $ */
+// psrchive/Util/units/Registry.h
 
 #ifndef __Registry_h
 #define __Registry_h

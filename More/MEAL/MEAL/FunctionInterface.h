@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/FunctionInterface.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/08/16 21:15:19 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/FunctionInterface.h
 
 #ifndef __MEAL_FunctionInterface_h
 #define __MEAL_FunctionInterface_h

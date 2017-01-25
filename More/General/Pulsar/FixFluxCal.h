@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FixFluxCal.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/05/01 05:50:00 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/FixFluxCal.h
 
 #ifndef __Pulsar_FixFluxCal_h
 #define __Pulsar_FixFluxCal_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/DurationWeight.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/08/05 13:30:53 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/DurationWeight.h
 
 #ifndef _Pulsar_DurationWeight_H
 #define _Pulsar_DurationWeight_H

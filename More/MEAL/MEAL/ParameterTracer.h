@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ParameterTracer.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/04/07 00:38:18 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ParameterTracer.h
 
 #ifndef __MEAL_ParameterTracer_H
 #define __MEAL_ParameterTracer_H

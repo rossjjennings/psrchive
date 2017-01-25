@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Divided.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/12 02:46:04 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Divided.h
 
 #ifndef __Pulsar_Divided_h
 #define __Pulsar_Divided_h

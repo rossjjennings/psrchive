@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BrittonInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/03/03 11:48:14 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/BrittonInfo.h
 
 #ifndef __Pulsar_BrittonInfo_H
 #define __Pulsar_BrittonInfo_H

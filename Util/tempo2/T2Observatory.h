@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Observatory.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/05/26 20:06:37 $
-   $Author: straten $ */
+// psrchive/Util/tempo2/T2Observatory.h
 
 #ifndef __Tempo2_Observatory_h
 #define __Tempo2_Observatory_h

@@ -7,10 +7,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/BandpassPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/07/15 10:14:48 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/BandpassPlot.h
 
 #ifndef BANDPASSTABLE_PLOT_H
 #define BANDPASSTABLE_PLOT_H

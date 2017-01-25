@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.15 $
-   $Date: 2010/10/25 05:21:26 $
-   $Author: ajameson $ */
+// psrchive/Base/Classes/Pulsar/Application.h
 
 #ifndef __Pulsar_Application_h
 #define __Pulsar_Application_h

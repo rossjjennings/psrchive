@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PowerEstimator.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/PowerEstimator.h
 
 #ifndef __Pulsar_PowerEstimator_h
 #define __Pulsar_PowerEstimator_h

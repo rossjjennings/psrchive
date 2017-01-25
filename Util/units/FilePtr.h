@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/FilePtr.h,v $
-   $Revision: 1.4 $
-   $Date: 2010/04/22 02:42:51 $
-   $Author: straten $ */
+// psrchive/Util/units/FilePtr.h
 
 #ifndef __FilePtr_H
 #define __FilePtr_H

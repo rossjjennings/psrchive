@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Projection.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/05/11 22:59:39 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Projection.h
 
 #ifndef __Projection_H
 #define __Projection_H

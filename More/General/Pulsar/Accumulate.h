@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Accumulate.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/08/22 04:50:46 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Accumulate.h
 
 #ifndef __Pulsar_Accumulate_h
 #define __Pulsar_Accumulate_h

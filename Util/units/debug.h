@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/debug.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/11/24 04:25:25 $
-   $Author: straten $ */
+// psrchive/Util/units/debug.h
 
 #ifndef __debug_h
 #define __debug_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/EllAngPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/12/21 15:07:51 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/EllAngPlot.h
 
 #ifndef __Pulsar_EllAngPlot_h
 #define __Pulsar_EllAngPlot_h

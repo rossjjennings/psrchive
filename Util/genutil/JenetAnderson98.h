@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/05/11 08:15:08 $
-   $Author: straten $ */
+// psrchive/Util/genutil/JenetAnderson98.h
 
 #ifndef __Jenet_Anderson_98
 #define __Jenet_Anderson_98

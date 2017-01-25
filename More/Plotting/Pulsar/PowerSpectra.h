@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.11 $
-   $Date: 2011/01/25 01:51:59 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PowerSpectra.h
 
 #ifndef __Pulsar_PowerSpectra_h
 #define __Pulsar_PowerSpectra_h

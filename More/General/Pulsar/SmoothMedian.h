@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SmoothMedian.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/12 02:45:16 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/SmoothMedian.h
 
 #ifndef __Pulsar_SmoothMedian_h
 #define __Pulsar_SmoothMedian_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/ModifyRestore.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/02/07 21:51:01 $
-   $Author: straten $ */
+// psrchive/Util/units/ModifyRestore.h
 
 #ifndef __ModifyRestore_h
 #define __ModifyRestore_h

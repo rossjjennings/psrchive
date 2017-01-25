@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/convert_endian.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/convert_endian.h
 
 #ifndef __CONVERT_ENDIAN_H
 #define __CONVERT_ENDIAN_H

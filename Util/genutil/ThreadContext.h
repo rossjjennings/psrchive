@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ThreadContext.h,v $
-   $Revision: 1.3 $
-   $Date: 2010/05/20 19:49:58 $
-   $Author: demorest $ */
+// psrchive/Util/genutil/ThreadContext.h
 
 #ifndef __ThreadContext_h
 #define __ThreadContext_h

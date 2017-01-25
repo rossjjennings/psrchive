@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakEdgesInterpreter.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/02 05:19:02 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PeakEdgesInterpreter.h
 
 #ifndef __Pulsar_PeakEdgesInterpreter_h
 #define __Pulsar_PeakEdgesInterpreter_h

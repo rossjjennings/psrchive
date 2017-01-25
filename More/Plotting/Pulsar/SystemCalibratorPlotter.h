@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibratorPlotter.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/08/14 01:53:39 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SystemCalibratorPlotter.h
 
 #ifndef __SystemCalibratorPlotter_H
 #define __SystemCalibratorPlotter_H

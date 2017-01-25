@@ -5,10 +5,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/04/07 07:37:11 $
-   $Author: straten $ */
+// psrchive/Util/units/substitute.h
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H
 #define __UTILS_UNITS_SUBSTITUTE_H

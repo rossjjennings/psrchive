@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/TemporaryFile.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/07/14 00:01:38 $
-   $Author: straten $ */
+// psrchive/Util/genutil/TemporaryFile.h
 
 #ifndef __TemporaryFile_h
 #define __TemporaryFile_h

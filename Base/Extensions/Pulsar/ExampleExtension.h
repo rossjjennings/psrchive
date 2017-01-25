@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ExampleExtension.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/ExampleExtension.h
 
 #ifndef __ExampleExtension_h
 #define __ExampleExtension_h

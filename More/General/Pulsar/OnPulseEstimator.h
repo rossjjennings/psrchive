@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseEstimator.h,v $
-   $Revision: 1.7 $
-   $Date: 2011/03/04 06:01:51 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/OnPulseEstimator.h
 
 #ifndef __Pulsar_OnPulseEstimator_h
 #define __Pulsar_OnPulseEstimator_h

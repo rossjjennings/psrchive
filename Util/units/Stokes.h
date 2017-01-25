@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.22 $
-   $Date: 2009/08/13 21:09:09 $
-   $Author: straten $ */
+// psrchive/Util/units/Stokes.h
 
 #ifndef __Stokes_H
 #define __Stokes_H

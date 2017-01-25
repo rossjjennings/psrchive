@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/05/26 20:51:52 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/ITRFExtension.h
 
 #ifndef __ITRFExtension_h
 #define __ITRFExtension_h

@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/utc.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/09/24 08:53:28 $
-   $Author: straten $ */
+// psrchive/Util/genutil/utc.h
 
 /* ************************************************************************
    UTC time structure - a subset of 'struct tm' used when you don't know

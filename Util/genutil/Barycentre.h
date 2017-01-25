@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Barycentre.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/09/22 02:15:24 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Barycentre.h
 
 #ifndef __Baricentre_H
 #define __Baricentre_H

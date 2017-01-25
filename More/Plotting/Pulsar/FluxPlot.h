@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.33 $
-   $Date: 2010/06/10 20:46:39 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/FluxPlot.h
 
 #ifndef __Pulsar_FluxPlot_h
 #define __Pulsar_FluxPlot_h

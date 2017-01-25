@@ -1,9 +1,6 @@
 //-*-C++-*-
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/01/09 11:40:06 $
-   $Author: straten $ */
+// psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h
 
 #ifndef __PuMaArchive_h
 #define __PuMaArchive_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarTangent.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScalarTangent.h
 
 #ifndef __MEAL_ScalarTangent_H
 #define __MEAL_ScalarTangent_H

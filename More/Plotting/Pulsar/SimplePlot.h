@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SimplePlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/08/20 06:35:22 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/SimplePlot.h
 
 #ifndef __Pulsar_SimplePlot_h
 #define __Pulsar_SimplePlot_h

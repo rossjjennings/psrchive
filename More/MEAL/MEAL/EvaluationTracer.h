@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/EvaluationTracer.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/04/07 00:38:18 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/EvaluationTracer.h
 
 #ifndef __MEAL_EvaluationTracer_H
 #define __MEAL_EvaluationTracer_H

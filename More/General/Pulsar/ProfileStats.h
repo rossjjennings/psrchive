@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.14 $
-   $Date: 2011/03/04 06:02:04 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ProfileStats.h
 
 #ifndef __Pulsar_ProfileStats_h
 #define __Pulsar_ProfileStats_h

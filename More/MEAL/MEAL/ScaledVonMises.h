@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScaledVonMises.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/11/10 04:38:59 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScaledVonMises.h
 
 #ifndef __ScaledVonMises_H
 #define __ScaledVonMises_H

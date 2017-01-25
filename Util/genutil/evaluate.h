@@ -5,10 +5,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/evaluate.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/01/14 05:52:32 $
-   $Author: straten $ */
+// psrchive/Util/genutil/evaluate.h
 
 #ifndef __UTILS_UNITS_EVALUATE_H
 #define __UTILS_UNITS_EVALUATE_H

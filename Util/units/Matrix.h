@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.25 $
-   $Date: 2010/01/20 05:00:16 $
-   $Author: straten $ */
+// psrchive/Util/units/Matrix.h
 
 #ifndef __Matrix_H
 #define __Matrix_H

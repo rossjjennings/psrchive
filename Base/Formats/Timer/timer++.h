@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/timer++.h
 
 #ifndef __TIMER_PLUSPLUS_H
 #define __TIMER_PLUSPLUS_H

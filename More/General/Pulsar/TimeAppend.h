@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/TimeAppend.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/07/14 22:05:12 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/TimeAppend.h
 
 #ifndef _Pulsar_TimeAppend_H
 #define _Pulsar_TimeAppend_H

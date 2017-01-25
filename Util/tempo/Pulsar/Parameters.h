@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Parameters.h,v $
-   $Revision: 1.8 $
-   $Date: 2010/05/18 02:10:34 $
-   $Author: jonathan_khoo $ */
+// psrchive/Util/tempo/Pulsar/Parameters.h
 
 #ifndef __PulsarParameters_h
 #define __PulsarParameters_h

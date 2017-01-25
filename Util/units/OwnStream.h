@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/OwnStream.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/07 01:11:27 $
-   $Author: straten $ */
+// psrchive/Util/units/OwnStream.h
 
 #ifndef __OwnStream_h
 #define __OwnStream_h

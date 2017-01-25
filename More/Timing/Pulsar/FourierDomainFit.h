@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/FourierDomainFit.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/30 02:17:24 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/FourierDomainFit.h
 
 #ifndef __Pulsar_FourierDomainFit_h
 #define __Pulsar_FourierDomainFit_h

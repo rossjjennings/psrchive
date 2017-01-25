@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Parkes.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/07/04 23:40:36 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/Parkes.h
 
 #ifndef __Parkes_h
 #define __Parkes_h

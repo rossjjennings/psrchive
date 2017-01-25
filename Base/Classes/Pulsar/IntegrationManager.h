@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/11/30 16:51:52 $
-   $Author: demorest $ */
+// psrchive/Base/Classes/Pulsar/IntegrationManager.h
 
 #ifndef __Pulsar_IntegrationManager_h
 #define __Pulsar_IntegrationManager_h

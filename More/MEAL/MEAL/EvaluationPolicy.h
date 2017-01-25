@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/EvaluationPolicy.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/EvaluationPolicy.h
 
 #ifndef __MEAL_EvaluationPolicy_H
 #define __MEAL_EvaluationPolicy_H

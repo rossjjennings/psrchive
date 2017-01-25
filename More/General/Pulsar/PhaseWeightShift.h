@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightShift.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/24 05:02:08 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PhaseWeightShift.h
 
 #ifndef __Pulsar_PhaseWeightShift_h
 #define __Pulsar_PhaseWeightShift_h

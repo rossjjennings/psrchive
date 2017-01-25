@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Check.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/12/01 22:46:51 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/Check.h
 
 #ifndef __Pulsar_Check_h
 #define __Pulsar_Check_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NoParameters.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/05/07 01:21:11 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/NoParameters.h
 
 #ifndef __MEAL_NoParameters_H
 #define __MEAL_NoParameters_H

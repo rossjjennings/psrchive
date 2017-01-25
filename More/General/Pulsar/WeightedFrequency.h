@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/WeightedFrequency.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/08 02:55:30 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/WeightedFrequency.h
 
 #ifndef __Pulsar_WeightedFrequency_h
 #define __Pulsar_WeightedFrequency_h

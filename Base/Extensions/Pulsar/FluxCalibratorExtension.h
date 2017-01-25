@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.13 $
-   $Date: 2009/02/20 06:34:32 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ThreadStream.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/02/23 07:11:09 $
-   $Author: straten $ */
+// psrchive/Util/genutil/ThreadStream.h
 
 #ifndef __ThreadStream_h
 #define __ThreadStream_h

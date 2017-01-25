@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/typeutil.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/20 04:55:20 $
-   $Author: straten $ */
+// psrchive/Util/genutil/typeutil.h
 
 #ifndef __typeutil_h
 #define __typeutil_h

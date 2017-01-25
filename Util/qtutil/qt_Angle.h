@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/qtutil/qt_Angle.h
 
 #ifndef __QT_Angle_H
 #define __QT_Angle_H

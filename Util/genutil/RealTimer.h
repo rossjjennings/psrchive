@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RealTimer.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/10/04 09:51:22 $
-   $Author: straten $ */
+// psrchive/Util/genutil/RealTimer.h
 
 #ifndef __RealTimer_H
 #define __RealTimer_H

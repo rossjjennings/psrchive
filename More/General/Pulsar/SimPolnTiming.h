@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SimPolnTiming.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/SimPolnTiming.h
 
 #ifndef __Pulsar_SimPolnTiming_h
 #define __Pulsar_SimPolnTiming_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/06/03 04:57:34 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ReceptionModel.h
 
 #ifndef __ReceptionModel_H
 #define __ReceptionModel_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/ExampleComplex2.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/ExampleComplex2.h
 
 #ifndef __Example_H
 #define __Example_H

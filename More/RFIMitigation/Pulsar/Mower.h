@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/RFIMitigation/Pulsar/MADLM.h,v $
-   $Revision: 1.5 $
-   $Date: 2010/07/13 09:36:38 $
-   $Author: straten $ */
+// psrchive/More/RFIMitigation/Pulsar/MADLM.h
 
 #ifndef __Pulsar_MADLM_h
 #define __Pulsar_MADLM_h

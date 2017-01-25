@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.11 $
-   $Date: 2010/08/20 03:15:20 $
-   $Author: sosl $ */
+// psrchive/Base/Extensions/Pulsar/DigitiserCounts.h
 
 
 

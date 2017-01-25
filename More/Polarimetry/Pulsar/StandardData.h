@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardData.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/06/24 05:11:32 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/StandardData.h
 
 #ifndef __Calibration_StandardData_H
 #define __Calibration_StandardData_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.9 $
-   $Date: 2011/01/19 10:13:49 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ChannelZapMedian.h
 
 #ifndef _Pulsar_ChannelZapMedian_H
 #define _Pulsar_ChannelZapMedian_H

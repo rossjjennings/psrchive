@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StokesCovariance.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/08 19:12:58 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/StokesCovariance.h
 
 #ifndef __Pulsar_StokesCovariance_h
 #define __Pulsar_StokesCovariance_h

@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/band.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/band.h
 
 #ifndef __BAND_H
 #define __BAND_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLoop.h,v $
-   $Revision: 1.4 $
-   $Date: 2010/09/19 08:26:22 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PlotLoop.h
 
 #ifndef __Pulsar_PlotLoop_h
 #define __Pulsar_PlotLoop_h
