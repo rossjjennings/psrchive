@@ -117,6 +117,13 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
   {
     const_cast<ComponentModel*>(this)->align (observation);
     const_cast<ComponentModel*>(this)->fit (observation);
+
+    if (retain_memory)
+      for (unsigned i=0; i<components.size(); i++)
+      {
+	backup[i]->set_height( components[i]->get_height() );
+	backup[i]->set_concentration( components[i]->get_concentration() );
+      }
   }
   catch (Error& error)
   {
@@ -402,8 +409,7 @@ void Pulsar::ComponentModel::build () const
     if (verbose)
       cerr << "Pulsar::ComponentModel::build single phase" << endl;
 
-    if (retain_memory)
-      backup.resize (components.size());
+    backup.resize (components.size());
 
     ChainRule<Univariate<Scalar> >* chain = new ChainRule<Univariate<Scalar> >;
     chain->set_model (sum);
@@ -426,8 +432,7 @@ void Pulsar::ComponentModel::build () const
       if (fix_widths)
 	sum->set_infit(icomp*3+1, false);
 
-      if (retain_memory)
-	backup[icomp] = components[icomp]->clone();
+      backup[icomp] = components[icomp]->clone();
 
       SumRule<Scalar>* psum = new SumRule<Scalar>;
       psum->add_model (phase);
