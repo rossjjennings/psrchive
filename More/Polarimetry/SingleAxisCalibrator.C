@@ -86,7 +86,7 @@ string Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
   case 1:
     return "\\gg (%)";
   case 2:
-    return "\\gf (deg.)";
+    return "\\gf (\\(2729))";
   default:
     return "";
   }
