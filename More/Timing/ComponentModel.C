@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009 - 2017 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -35,6 +35,9 @@ void Pulsar::ComponentModel::init ()
 {
   fit_derivative = false;
   log_height = false;
+  retain_memory = false;
+  fix_widths = false;
+  
   zap_height_ratio = 0.0;
   zap_concentration_ratio = 0.0;
 
@@ -57,17 +60,39 @@ void Pulsar::ComponentModel::fix_relative_phases ()
   if (phase)
     return;
 
+  if (model)
+    throw Error (InvalidState, "Pulsar::ComponentModel::set_retain_memory",
+		 "cannot fix relative phases after model is built");
+
   phase = new ScalarParameter (0.0);
   phase->set_value_name ("phase");
 }
 
 void Pulsar::ComponentModel::set_log_height (bool flag)
 {
-    if (components.size() != 0)
-	throw Error (InvalidState, "Pulsar::ComponentModel::set_log_height",
-		     "cannot change interpretation of height after components have been added");
+  if (components.size() != 0)
+    throw Error (InvalidState, "Pulsar::ComponentModel::set_log_height",
+		 "cannot change interpretation of height after components have been added");
 
-    log_height = flag;
+  log_height = flag;
+}
+
+void Pulsar::ComponentModel::set_retain_memory (bool flag)
+{
+  if (model)
+    throw Error (InvalidState, "Pulsar::ComponentModel::set_retain_memory",
+		 "cannot change flag to retain memory after model is built");
+
+  retain_memory = flag;
+}
+
+void Pulsar::ComponentModel::set_fix_widths (bool flag)
+{
+  if (model)
+    throw Error (InvalidState, "Pulsar::ComponentModel::set_retain_memory",
+		 "cannot change flag to fix widths after model is built");
+
+  fix_widths = flag;
 }
 
 //! Return the shift estimate
@@ -75,8 +100,6 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
 {
   if (verbose)
     cerr << "Pulsar::ComponentModel::get_shift" << endl;
-
-  const_cast<ComponentModel*>(this)->fix_relative_phases ();
 
   if (backup.size() == components.size())
   {
@@ -138,8 +161,23 @@ void Pulsar::ComponentModel::load (const char *fname)
 	comments[iline] = line;
       else if (line == string("log height\n"))
       {
-	  cerr << "Pulsar::ComponentModel::load logarithm of height" << endl;
-	  set_log_height (true);
+	cerr << "Pulsar::ComponentModel::load logarithm of height" << endl;
+	set_log_height (true);
+      }
+      else if (line == string ("fix relative phases\n"))
+      {
+	cerr << "Pulsar::ComponentModel::load fix relative phases" << endl;
+	fix_relative_phases ();
+      }
+      else if (line == string ("fix widths\n"))
+      {
+	cerr << "Pulsar::ComponentModel::load fix widths" << endl;
+	set_fix_widths (true);
+      }
+      else if (line == string ("retain memory\n"))
+      {
+	cerr << "Pulsar::ComponentModel::load retain memory" << endl;
+	set_retain_memory (true);
       }
       else
       {
@@ -364,7 +402,8 @@ void Pulsar::ComponentModel::build () const
     if (verbose)
       cerr << "Pulsar::ComponentModel::build single phase" << endl;
 
-    backup.resize (components.size());
+    if (retain_memory)
+      backup.resize (components.size());
 
     ChainRule<Univariate<Scalar> >* chain = new ChainRule<Univariate<Scalar> >;
     chain->set_model (sum);
@@ -384,9 +423,11 @@ void Pulsar::ComponentModel::build () const
 		     sum->get_param_name(icomp*3).c_str());
 
       // don't allow the widths to vary
-      sum->set_infit(icomp*3+1, false);
+      if (fix_widths)
+	sum->set_infit(icomp*3+1, false);
 
-      backup[icomp] = components[icomp]->clone();
+      if (retain_memory)
+	backup[icomp] = components[icomp]->clone();
 
       SumRule<Scalar>* psum = new SumRule<Scalar>;
       psum->add_model (phase);

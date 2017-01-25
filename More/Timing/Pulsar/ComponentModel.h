@@ -60,7 +60,14 @@ namespace Pulsar
     //! All heights will be treated as log(height)
     void set_log_height (bool flag=true);
     bool get_log_height () const { return log_height; }
-    
+
+    //! Previous best fit model will be first guess on next call to get_shift
+    void set_retain_memory (bool flag=true);
+    bool get_retain_memory () const { return retain_memory; }
+
+    void set_fix_widths (bool flag=true);
+    bool get_fix_widths () const { return fix_widths; }
+
     // Manipulation
     /*! \param centre the centre of the component in turns of pulse phase
      *  \param concentration the concentration of the component equal 1 / variance in radians
@@ -125,6 +132,9 @@ namespace Pulsar
     float threshold;
 
     bool log_height;
+    bool retain_memory;
+    bool fix_widths;
+    
     float zap_height_ratio;
     float zap_concentration_ratio;
 
