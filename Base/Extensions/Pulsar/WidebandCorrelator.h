@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.13 $
-   $Date: 2010/05/24 07:21:01 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h
 
 #ifndef __Pulsar_WideBandCorrelator_h
 #define __Pulsar_WideBandCorrelator_h

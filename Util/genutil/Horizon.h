@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Horizon.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/07/07 00:27:02 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Horizon.h
 
 #ifndef __Horizon_H
 #define __Horizon_H

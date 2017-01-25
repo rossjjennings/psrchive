@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/MaskSmooth.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/07/12 05:59:08 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/MaskSmooth.h
 
 #ifndef __Pulsar_MaskSmooth_h
 #define __Pulsar_MaskSmooth_h

@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/05/24 14:13:51 $
-   $Author: straten $ */
+// psrchive/Util/genutil/coord.h
 
 #ifndef __COORD_H
 #define __COORD_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/11/29 12:13:50 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Predict.h
 
 #ifndef __Tempo_Predict_h
 #define __Tempo_Predict_h

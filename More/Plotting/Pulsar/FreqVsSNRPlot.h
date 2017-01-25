@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FreqVsSNRPlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/08/29 05:34:45 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/FreqVsSNRPlot.h
 
 #ifndef Freq_Vs_SNR_Plot_h_
 #define Freq_Vs_SNR_Plot_h_

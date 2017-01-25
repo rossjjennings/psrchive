@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.34 $
-   $Date: 2009/11/30 01:31:33 $
-   $Author: straten $ */
+// psrchive/Util/units/Quaternion.h
 
 #ifndef __Quaternion_H
 #define __Quaternion_H

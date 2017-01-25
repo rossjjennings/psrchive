@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ArchiveSort.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/04/27 03:23:00 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ArchiveSort.h
 
 #ifndef __Pulsar_ArchiveSort_h
 #define __Pulsar_ArchiveSort_h

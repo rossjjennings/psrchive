@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapModulation.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ChannelZapModulation.h
 
 #ifndef _Pulsar_ChannelZapModulation_H
 #define _Pulsar_ChannelZapModulation_H

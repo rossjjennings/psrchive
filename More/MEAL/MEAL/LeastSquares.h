@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LeastSquares.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/08/20 04:51:00 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/LeastSquares.h
 
 #ifndef __MEAL_LeastSquares_H
 #define __MEAL_LeastSquares_H

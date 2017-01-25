@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/InstrumentInfo.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/03/03 11:48:29 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/InstrumentInfo.h
 
 #ifndef __Pulsar_InstrumentInfo_H
 #define __Pulsar_InstrumentInfo_H

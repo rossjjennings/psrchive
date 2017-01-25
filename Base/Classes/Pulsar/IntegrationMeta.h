@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationMeta.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/IntegrationMeta.h
 
 #ifndef __Pulsar_Integration_Meta_h
 #define __Pulsar_Integration_Meta_h

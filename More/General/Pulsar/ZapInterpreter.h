@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ZapInterpreter.h,v $
-   $Revision: 1.6 $
-   $Date: 2011/02/12 23:48:54 $
-   $Author: sixbynine $ */
+// psrchive/More/General/Pulsar/ZapInterpreter.h
 
 #ifndef __Pulsar_ZapInterpreter_h
 #define __Pulsar_ZapInterpreter_h

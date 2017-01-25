@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/tempo/residual.h
 
 #ifndef __RESIDUAL_H
 #define __RESIDUAL_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.40 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/BasicArchive.h
 
 #ifndef __BasicArchive_h
 #define __BasicArchive_h

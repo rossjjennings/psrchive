@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileWeightFunction.h,v $
-   $Revision: 1.7 $
-   $Date: 2011/03/04 06:02:10 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ProfileWeightFunction.h
 
 #ifndef __Pulsar_ProfileWeightFunction_h
 #define __Pulsar_ProfileWeightFunction_h

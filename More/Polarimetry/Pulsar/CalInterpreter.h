@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalInterpreter.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/06/25 05:28:25 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/CalInterpreter.h
 
 #ifndef __Pulsar_CalInterpreter_h
 #define __Pulsar_CalInterpreter_h

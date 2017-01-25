@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/LinePhasePlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+// psrchive/More/Plotting/Pulsar/LinePhasePlot.h
 
 
 

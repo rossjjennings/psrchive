@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/fft/median_smooth.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/10/31 01:14:20 $
-   $Author: straten $*/
+// psrchive/Util/fft/median_smooth.h
 
 #ifndef __fft_smooth_h
 #define __fft_smooth_h

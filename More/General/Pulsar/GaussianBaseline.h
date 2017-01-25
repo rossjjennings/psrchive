@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/GaussianBaseline.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/08/25 05:45:21 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/GaussianBaseline.h
 
 #ifndef __Pulsar_GaussianBaseline_h
 #define __Pulsar_GaussianBaseline_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveInterface.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/24 05:01:39 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/ArchiveInterface.h
 
 #ifndef __Pulsar_ArchiveTI_h
 #define __Pulsar_ArchiveTI_h

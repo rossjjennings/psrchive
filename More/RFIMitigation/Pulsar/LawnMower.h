@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/RFIMitigation/Pulsar/LawnMower.h,v $
-   $Revision: 1.5 $
-   $Date: 2010/07/13 09:36:38 $
-   $Author: straten $ */
+// psrchive/More/RFIMitigation/Pulsar/LawnMower.h
 
 #ifndef __Pulsar_LawnMower_h
 #define __Pulsar_LawnMower_h

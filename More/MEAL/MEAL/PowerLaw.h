@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/PowerLaw.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/11/09 02:56:48 $
-   $Author: ahotan $ */
+// psrchive/More/MEAL/MEAL/PowerLaw.h
 
 #ifndef __PowerLaw_H
 #define __PowerLaw_H

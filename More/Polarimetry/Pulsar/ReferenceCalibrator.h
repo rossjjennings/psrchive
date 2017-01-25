@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/10/02 05:19:33 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h
 
 #ifndef __Pulsar_ReferenceCalibrator_H
 #define __Pulsar_ReferenceCalibrator_H

@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/third/star/slalib.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/12/01 14:49:32 $
-   $Author: straten $ */
+// psrchive/Util/third/star/slalib.h
 
 #ifndef __SLA_DECL_H
 #define __SLA_DECL_H

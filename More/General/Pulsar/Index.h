@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Index.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/12 07:45:10 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Index.h
 
 #ifndef __Pulsar_Index_h
 #define __Pulsar_Index_h

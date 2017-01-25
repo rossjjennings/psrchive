@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/ColourMap.h,v $
-   $Revision: 1.6 $
-   $Date: 2010/01/05 05:41:57 $
-   $Author: jonathan_khoo $ */
+// psrchive/Util/pgutil/ColourMap.h
 
 #ifndef __ColourMap_H
 #define __ColourMap_H

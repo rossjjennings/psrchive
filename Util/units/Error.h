@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Error.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/01/02 22:38:05 $
-   $Author: straten $ */
+// psrchive/Util/units/Error.h
 
 #ifndef __Error_h
 #define __Error_h

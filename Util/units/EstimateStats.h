@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimateStats.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/units/EstimateStats.h
 
 #ifndef __EstimateStats_h
 #define __EstimateStats_h

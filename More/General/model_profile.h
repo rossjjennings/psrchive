@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/09/19 13:06:36 $
-   $Author: straten $ */
+// psrchive/More/General/model_profile.h
 
 #ifndef __model_profile_h
 #define __model_profile_h

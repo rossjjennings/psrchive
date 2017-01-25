@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeasurementEquation.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/MeasurementEquation.h
 
 #ifndef __Calibration_MeasurementEquation_H
 #define __Calibration_MeasurementEquation_H

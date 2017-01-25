@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Observatory.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/03/03 05:03:49 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Observatory.h
 
 #ifndef __Tempo_Observatory_h
 #define __Tempo_Observatory_h

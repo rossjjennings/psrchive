@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FramedPlot.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/01/14 04:55:38 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/FramedPlot.h
 
 #ifndef __Pulsar_FramedPlot_h
 #define __Pulsar_FramedPlot_h

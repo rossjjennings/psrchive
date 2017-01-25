@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesSpherical.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/09/15 14:03:42 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/StokesSpherical.h
 
 #ifndef __Pulsar_StokesSpherical_h
 #define __Pulsar_StokesSpherical_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.31 $
-   $Date: 2010/11/01 07:04:38 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
 #define __Pulsar_PolnProfileFitAnalysis_h

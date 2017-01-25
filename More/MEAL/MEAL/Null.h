@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Null.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/02/06 22:09:43 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Null.h
 
 #ifndef __MEAL_Null_H
 #define __MEAL_Null_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PolnStatistics.h,v $
-   $Revision: 1.10 $
-   $Date: 2011/02/12 21:06:49 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PolnStatistics.h
 
 #ifndef __Pulsar_PolnStatistics_h
 #define __Pulsar_PolnStatistics_h

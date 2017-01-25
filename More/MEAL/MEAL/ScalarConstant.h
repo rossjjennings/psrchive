@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarConstant.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScalarConstant.h
 
 #ifndef __ScalarConstant_H
 #define __ScalarConstant_H

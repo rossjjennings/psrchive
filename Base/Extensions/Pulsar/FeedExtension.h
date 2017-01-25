@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FeedExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/FeedExtension.h
 
 #ifndef __FeedExtension_h
 #define __FeedExtension_h

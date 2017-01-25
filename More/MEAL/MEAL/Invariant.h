@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Invariant.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/12/24 20:01:58 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Invariant.h
 
 #ifndef __MEAL_Invariant_h
 #define __MEAL_Invariant_h

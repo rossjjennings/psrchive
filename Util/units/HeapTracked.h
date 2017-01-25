@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/HeapTracked.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/02/24 23:06:13 $
-   $Author: straten $ */
+// psrchive/Util/units/HeapTracked.h
 
 #ifndef __ReferenceHeapTracked_h
 #define __ReferenceHeapTracked_h

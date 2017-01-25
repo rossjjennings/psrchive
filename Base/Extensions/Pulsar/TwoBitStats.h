@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/TwoBitStats.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/TwoBitStats.h
 
 #ifndef __TwoBitStats_h
 #define __TwoBitStats_h

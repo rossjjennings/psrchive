@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2010/08/06 03:00:07 $
-   $Author: demorest $ */
+// psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h
 
 #ifndef __ASPArchive_h
 #define __ASPArchive_h

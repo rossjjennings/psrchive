@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CyclicParameter.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/03/16 12:57:31 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/CyclicParameter.h
 
 #ifndef __CyclicParameter_H
 #define __CyclicParameter_H

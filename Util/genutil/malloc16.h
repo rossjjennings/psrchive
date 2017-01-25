@@ -5,10 +5,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/malloc16.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/11 18:38:37 $
-   $Author: straten $ */
+// psrchive/Util/genutil/malloc16.h
 
 #ifndef __Utils_genutil_malloc16_h
 #define __Utils_genutil_malloc16_h

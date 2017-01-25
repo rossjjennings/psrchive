@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ComplexCartesian.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/05/24 06:33:56 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ComplexCartesian.h
 
 #ifndef __MEAL_ComplexCartesian_H
 #define __MEAL_ComplexCartesian_H

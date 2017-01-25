@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/Faraday.h
 
 #ifndef __Calibration_Faraday_H
 #define __Calibration_Faraday_H

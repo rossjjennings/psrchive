@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalInfoExtension.h,v $
-   $Revision: 1.8 $
-   $Date: 2010/11/05 19:08:55 $
-   $Author: demorest $ */
+// psrchive/Base/Extensions/Pulsar/CalInfoExtension.h
 
 #ifndef __CalInfoExtension_h
 #define __CalInfoExtension_h

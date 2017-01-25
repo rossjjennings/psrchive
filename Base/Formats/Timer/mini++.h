@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/mini++.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/mini++.h
 
 #ifndef __MINI_PLUSPLUS_H
 #define __MINI_PLUSPLUS_H

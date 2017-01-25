@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReflectStokes.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/27 04:22:13 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ReflectStokes.h
 
 #ifndef __Pulsar_ReflectStokes_h
 #define __Pulsar_ReflectStokes_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SmoothSinc.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/12 02:45:44 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/SmoothSinc.h
 
 #ifndef __Pulsar_SmoothSinc_h
 #define __Pulsar_SmoothSinc_h

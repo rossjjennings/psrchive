@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ScatteredPowerCorrection.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/02/17 13:25:36 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ScatteredPowerCorrection.h
 
 #ifndef __Pulsar_ScatteredPowerCorrection_h
 #define __Pulsar_ScatteredPowerCorrection_h

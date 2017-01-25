@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.12 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/FaradayRotation.h
 
 #ifndef __Pulsar_FaradayRotation_h
 #define __Pulsar_FaradayRotation_h

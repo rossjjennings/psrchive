@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ExponentialBaseline.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/06/24 05:02:23 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ExponentialBaseline.h
 
 #ifndef __Pulsar_ExponentialBaseline_h
 #define __Pulsar_ExponentialBaseline_h

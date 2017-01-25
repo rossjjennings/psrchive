@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/FluxCentroid.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/10/02 03:40:45 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/FluxCentroid.h
 
 #ifndef __Pulsar_RotatingVectorModelShift_h
 #define __Pulsar_RotatingVectorModelShift_h

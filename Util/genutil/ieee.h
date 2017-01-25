@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ieee.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/genutil/ieee.h
 
 #ifndef IEEE_H
 #define IEEE_H

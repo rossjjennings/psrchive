@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisPolynomial.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/06/13 05:11:05 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SingleAxisPolynomial.h
 
 #ifndef __SingleAxisPolynomial_H
 #define __SingleAxisPolynomial_H

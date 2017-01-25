@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Fourier.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/08/04 09:43:27 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Fourier.h
 
 #ifndef __Pulsar_Fourier_h
 #define __Pulsar_Fourier_h

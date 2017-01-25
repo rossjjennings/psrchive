@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyIntegrate.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/31 05:59:19 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/FrequencyIntegrate.h
 
 #ifndef __Pulsar_FrequencyIntegrate_h
 #define __Pulsar_FrequencyIntegrate_h

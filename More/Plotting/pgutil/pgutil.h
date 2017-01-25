@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/pgutil.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/01/29 08:12:09 $
-   $Author: straten $ */
+// psrchive/Util/pgutil/pgutil.h
 
 #ifndef __pgutil_H
 #define __pgutil_H

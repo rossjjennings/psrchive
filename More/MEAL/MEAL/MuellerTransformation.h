@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/MuellerTransformation.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/MuellerTransformation.h
 
 #ifndef __MEAL_MuellerTransformation_H
 #define __MEAL_MuellerTransformation_H

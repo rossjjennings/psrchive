@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Differentiate.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/24 09:38:30 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Differentiate.h
 
 #ifndef __Pulsar_Differentiate_h
 #define __Pulsar_Differentiate_h

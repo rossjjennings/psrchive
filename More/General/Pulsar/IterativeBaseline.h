@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/11/02 04:25:11 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/IterativeBaseline.h
 
 #ifndef __Pulsar_IterativeBaseline_h
 #define __Pulsar_IterativeBaseline_h

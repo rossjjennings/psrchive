@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/LogFile.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/02/17 11:29:15 $
-   $Author: straten $ */
+// psrchive/Util/genutil/LogFile.h
 
 #ifndef __LogFile_h
 #define __LogFile_h

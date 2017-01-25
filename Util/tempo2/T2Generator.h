@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Generator.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/05/31 04:44:05 $
-   $Author: straten $ */
+// psrchive/Util/tempo2/T2Generator.h
 
 #ifndef __Tempo2Generator_h
 #define __Tempo2Generator_h

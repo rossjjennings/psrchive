@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ProjectionCorrection.h,v $
-   $Revision: 1.3 $
-   $Date: 2011/02/17 07:43:54 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ProjectionCorrection.h
 
 #ifndef __Pulsar_ProjectionCorrection_H
 #define __Pulsar_ProjectionCorrection_H

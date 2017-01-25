@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PosAngPlot.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/12/21 15:07:51 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PosAngPlot.h
 
 #ifndef __Pulsar_PosAngPlot_h
 #define __Pulsar_PosAngPlot_h

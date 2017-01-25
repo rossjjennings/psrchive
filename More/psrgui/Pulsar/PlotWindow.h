@@ -5,10 +5,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/psrgui/Pulsar/PlotWindow.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/07/16 02:27:53 $
-   $Author: straten $ */
+// psrchive/More/psrgui/Pulsar/PlotWindow.h
 
 #ifndef __Pulsar_PlotWindow_h
 #define __Pulsar_PlotWindow_h

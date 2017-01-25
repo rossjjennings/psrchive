@@ -5,10 +5,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.11 $
-   $Date: 2010/07/05 11:58:29 $
-   $Author: straten $ */
+// psrchive/Util/genutil/strutil.h
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H

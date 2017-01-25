@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
                                                                                 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/11/07 22:15:17 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/IntegrationOrder.h
                                                                                 
 #ifndef __IntegrationOrder_h
 #define __IntegrationOrder_h

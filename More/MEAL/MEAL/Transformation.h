@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Transformation.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/06/15 14:36:46 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Transformation.h
 
 #ifndef __MEAL_Transformation_H
 #define __MEAL_Transformation_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Cloude.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/01/20 00:54:42 $
-   $Author: straten $ */
+// psrchive/Util/units/Cloude.h
 
 #ifndef __Cloude_H
 #define __Cloude_H

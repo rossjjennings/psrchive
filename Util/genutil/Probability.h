@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Probability.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/26 11:43:20 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Probability.h
 
 #ifndef __Probability_h
 #define __Probability_h

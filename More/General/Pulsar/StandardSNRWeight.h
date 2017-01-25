@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardSNRWeight.h,v $
-   $Revision: 1.1 $
-   $Date: 2011/01/11 12:43:28 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/StandardSNRWeight.h
 
 #ifndef _Pulsar_StandardSNRWeight_H
 #define _Pulsar_StandardSNRWeight_H

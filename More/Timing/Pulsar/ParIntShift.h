@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ParIntShift.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/30 02:17:24 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/ParIntShift.h
 
 #ifndef __Pulsar_ParIntShift_h
 #define __Pulsar_ParIntShift_h

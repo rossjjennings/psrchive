@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RandomPolar.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/RandomPolar.h
 
 #ifndef __MEAL_RandomPolar_H
 #define __MEAL_RandomPolar_H

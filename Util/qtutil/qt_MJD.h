@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_MJD.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/qtutil/qt_MJD.h
 
 #ifndef __QT_MJD_H
 #define __QT_MJD_H

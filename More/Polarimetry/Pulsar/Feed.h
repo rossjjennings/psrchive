@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Feed.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/30 02:31:27 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/Feed.h
 
 #ifndef __Calibration_Feed_H
 #define __Calibration_Feed_H

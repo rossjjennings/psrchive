@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/inverse_phase.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/20 03:59:17 $
-   $Author: straten $ */
+// psrchive/Util/tempo/inverse_phase.h
 
 #ifndef __P_inverse_phase_h
 #define __P_inverse_phase_h

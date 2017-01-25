@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Mean.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Mean.h
 
 #ifndef __MEAL_Mean_H
 #define __MEAL_Mean_H

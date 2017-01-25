@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiData.h,v $
-   $Revision: 1.3 $
-   $Date: 2010/09/19 08:26:14 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/MultiData.h
 
 #ifndef __Pulsar_MultiData_h
 #define __Pulsar_MultiData_h

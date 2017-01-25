@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Integrate.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/21 17:32:17 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Integrate.h
 
 #ifndef __Pulsar_Integrate_h
 #define __Pulsar_Integrate_h
