@@ -113,6 +113,7 @@ MEAL::PhaseGradients<T>::PhaseGradients (unsigned ncoef)
   : parameters (this)
 {
   resize (ncoef);
+  igradient = 0;
 }
 
 //! Copy constructor
@@ -177,14 +178,14 @@ void MEAL::PhaseGradients<T>::set_offset (unsigned igradient, double offset)
   cerr << "MEAL::PhaseGradients<T>::set_offset"
     " i=" << igradient << " offset=" << offset << endl;
 #endif
-  offsets[igradient] = offset;
+  offsets.at(igradient) = offset;
 }
 
 //! Get the current phase gradient index
 template<typename T>
 double MEAL::PhaseGradients<T>::get_offset (unsigned igradient) const
 {
-  return offsets[igradient];
+  return offsets.at(igradient);
 }
 
 //! Set the number of gradients
