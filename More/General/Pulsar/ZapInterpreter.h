@@ -51,6 +51,9 @@ namespace Pulsar {
 
     std::string zerodm (const std::string& args);
 
+    //! toggle the flag to zap channels in calibrator
+    std::string cal (const std::string& args);
+
     //! no empty commands
     std::string empty ();
 
@@ -64,6 +67,9 @@ namespace Pulsar {
 
     //! Store specified set of subints to apply channel/freq zapping
     std::vector<unsigned> set_subints;
+
+    //! Apply channel/freq zapping to any calibrator extension
+    bool zap_calibrator;
   };
 
 }

@@ -10,6 +10,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/CalibratorExtension.h"
 
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
@@ -84,6 +85,15 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "usage: zerodm \n"
       "  Use the 'ZeroDM' RFI removal scheme. \n");
 
+  add_command
+    ( &ZapInterpreter::cal,
+      "cal", "apply 'freq' and 'chan' commands to calibrator",
+      "usage: cal \n"
+      "  calling this command toggles the flag on/off \n");
+      
+
+  // by default zap freq/chan commands are applied to sub-integration data
+  zap_calibrator = false;
 }
 
 Pulsar::ZapInterpreter::~ZapInterpreter ()
@@ -162,6 +172,11 @@ catch (Error& error)
   return response (Fail, error.get_message());
 }
 
+string Pulsar::ZapInterpreter::cal (const string& args)
+{
+  zap_calibrator = !zap_calibrator;
+  return response (Good);
+}
 
 string Pulsar::ZapInterpreter::empty ()
 {
@@ -180,6 +195,20 @@ string Pulsar::ZapInterpreter::chan (const string& args) try
 {
   vector<string> arguments = setup (args);
 
+  if (zap_calibrator)
+  {
+    Reference::To<CalibratorExtension> ext = get()->get<CalibratorExtension>();
+    if (!ext)
+      return response (Fail, "archive does not contain CalibratorExtension");
+
+    vector<unsigned> channels;
+    parse_indeces (channels, arguments, ext->get_nchan());
+    for (unsigned ichan=0; ichan<channels.size(); ichan++)
+      ext->set_weight (ichan, 0.0);
+
+    return response (Good);
+  }
+  
   vector<unsigned> channels;
   parse_indeces (channels, arguments, get()->get_nchan());
 
@@ -340,6 +369,26 @@ catch (Error& error)
 string Pulsar::ZapInterpreter::freq (const string& args) try
 {
   vector<string> arguments = setup (args);
+
+  if (zap_calibrator)
+  {
+    Reference::To<CalibratorExtension> ext = get()->get<CalibratorExtension>();
+    if (!ext)
+      return response (Fail, "archive does not contain CalibratorExtension");
+
+    unsigned nchan = ext->get_nchan();
+    
+    for (unsigned iarg=0; iarg < arguments.size(); iarg++)
+    {
+      Range r = fromstring<Range> (arguments[iarg]);
+      
+      for (unsigned ichan=0; ichan<nchan; ichan++)
+	if (r.within( ext->get_centre_frequency(ichan) ))
+            ext->set_weight (ichan, 0.0);
+    }
+    
+    return response (Good);
+  }
 
   for (unsigned iarg=0; iarg < arguments.size(); iarg++)
   {
