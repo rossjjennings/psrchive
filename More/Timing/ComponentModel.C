@@ -192,6 +192,8 @@ void Pulsar::ComponentModel::load (const char *fname)
   char line[1024];
   unsigned iline=0;
 
+  filename = fname;
+  
   while (fgets(line, 1023, f)!=NULL)
   {
     if (line[0]=='#') // # .. comment

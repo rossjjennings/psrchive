@@ -44,6 +44,9 @@ namespace Pulsar
     //! Return the shift estimate
     Estimate<double> get_shift () const;
 
+    //! Return the name of the file from which the component model was loaded
+    std::string get_name () const { return filename; }
+    
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 
@@ -158,6 +161,7 @@ namespace Pulsar
 
     float chisq;
     unsigned nfree;
+    std::string filename;
   };
 }
 

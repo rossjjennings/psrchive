@@ -43,6 +43,9 @@ namespace Pulsar {
     //! Return a copy constructed instance of self
     virtual ShiftEstimator* clone () const = 0;
 
+    //! Return a name that can be subsituted for the template/standard
+    virtual std::string get_name () const { return "N/A"; }
+    
     //! Prepare the data for use
     virtual void preprocess (Archive*);
 
