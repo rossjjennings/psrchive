@@ -125,12 +125,34 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
 
     if (fit_primary_first)
     {
+#if _DEBUG
       cerr << "Pulsar::ComponentModel::get_shift fitting primary first" << endl;
+#endif
+      if (backup.size() == components.size())
       for (unsigned i=1; i<components.size(); i++)
+      {
 	freeze (i);
+#if _DEBUG
+        cerr << "after freeze fits:";
+        unsigned nparam = components[i]->get_nparam ();
+        for (unsigned ip=0; ip < nparam; ip++)
+          cerr << " " << components[i]->get_infit(ip);
+        cerr << endl;
+#endif
+      }
+
       const_cast<ComponentModel*>(this)->fit (observation);
       for (unsigned i=1; i<components.size(); i++)
+      {
 	unfreeze (i);
+#if _DEBUG
+        cerr << "after unfreeze fits:";
+        unsigned nparam = components[i]->get_nparam ();
+        for (unsigned ip=0; ip < nparam; ip++)
+          cerr << " " << components[i]->get_infit(ip);
+        cerr << endl;
+#endif
+      } 
     }
     
     const_cast<ComponentModel*>(this)->fit (observation);
@@ -360,6 +382,10 @@ void Pulsar::ComponentModel::freeze (unsigned icomponent) const
 {
   check ("freeze", icomponent);
 
+  if (backup.size() != components.size())
+    throw Error (InvalidState, "Pulsar::ComponentModel::unfreeze",
+                 "should not freeze without backup");
+
   unsigned nparam = components[icomponent]->get_nparam();
   for (unsigned iparam=0; iparam<nparam; iparam++)
     components[icomponent]->set_infit (iparam, false);
@@ -473,9 +499,25 @@ void Pulsar::ComponentModel::build () const
 
       // don't allow the widths to vary
       if (fix_widths)
-	sum->set_infit(icomp*3+1, false);
+	components[icomp]->set_infit(1, false);
+
+#if _DEBUG
+        cerr << "BEFORE CLONE fits:";
+        unsigned nparam = components[icomp]->get_nparam ();
+        for (unsigned ip=0; ip < nparam; ip++)
+          cerr << " " << components[icomp]->get_infit(ip);
+        cerr << endl;
+#endif
 
       backup[icomp] = components[icomp]->clone();
+
+#if _DEBUG
+        cerr << "AFTER CLONE fits:";
+        nparam = components[icomp]->get_nparam ();
+        for (unsigned ip=0; ip < nparam; ip++)
+          cerr << " " << backup[icomp]->get_infit(ip);
+        cerr << endl;
+#endif
 
       SumRule<Scalar>* psum = new SumRule<Scalar>;
       psum->add_model (phase);
