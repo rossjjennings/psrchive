@@ -8,6 +8,7 @@
 #include "Pulsar/ArrivalTime.h"
 #include "Pulsar/Archive.h"
 
+#include "Pulsar/ShiftEstimator.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/Receiver.h"
@@ -107,8 +108,11 @@ std::string Pulsar::ArrivalTime::get_ipta_aux_txt (const Tempo::toa& toa)
   // -proc processing version id : Can't get from the file
 
   // -tmplt template profile name
-  args += " -tmplt " + standard->get_filename();
-
+  if (standard)
+    args += " -tmplt " + standard->get_filename();
+  else
+    args += " -model " + shift_estimator->get_name();
+      
   // -gof reduced chi2 of template fit
   if (toa.get_reduced_chisq() != 0)
     args += " -gof " + tostring(toa.get_reduced_chisq(),3);
