@@ -157,7 +157,7 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
     
     const_cast<ComponentModel*>(this)->fit (observation);
 
-    if (retain_memory)
+    if (retain_memory && get_reduced_chisq() < 2.0)
       for (unsigned i=0; i<components.size(); i++)
       {
 	backup[i]->set_height( components[i]->get_height() );
