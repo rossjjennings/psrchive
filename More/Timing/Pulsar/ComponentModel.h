@@ -68,6 +68,9 @@ namespace Pulsar
     void set_fix_widths (bool flag=true);
     bool get_fix_widths () const { return fix_widths; }
 
+    void set_fit_primary_first (bool flag=true);
+    bool get_fit_primary_first () const { return fit_primary_first; }
+
     // Manipulation
     /*! \param centre the centre of the component in turns of pulse phase
      *  \param concentration the concentration of the component equal 1 / variance in radians
@@ -118,6 +121,12 @@ namespace Pulsar
 
     mutable std::vector< Reference::To<MEAL::ScaledVonMises> > backup;
 
+    // set all infit flags of the specified component to false
+    void freeze (unsigned icomponent) const;
+
+    // restore all infit flags of the specified component from backup
+    void unfreeze (unsigned icomponent) const;
+
     std::vector<std::string> component_names;
 
     mutable std::vector< Reference::To<MEAL::ScaledVonMisesDeriv> > derivative;
@@ -134,6 +143,7 @@ namespace Pulsar
     bool log_height;
     bool retain_memory;
     bool fix_widths;
+    bool fit_primary_first;
     
     float zap_height_ratio;
     float zap_concentration_ratio;

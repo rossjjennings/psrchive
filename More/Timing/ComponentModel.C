@@ -37,6 +37,7 @@ void Pulsar::ComponentModel::init ()
   log_height = false;
   retain_memory = false;
   fix_widths = false;
+  fit_primary_first = false;
   
   zap_height_ratio = 0.0;
   zap_concentration_ratio = 0.0;
@@ -95,6 +96,11 @@ void Pulsar::ComponentModel::set_fix_widths (bool flag)
   fix_widths = flag;
 }
 
+void Pulsar::ComponentModel::set_fit_primary_first (bool flag)
+{
+  fit_primary_first = flag;
+}
+
 //! Return the shift estimate
 Estimate<double> Pulsar::ComponentModel::get_shift () const try
 {
@@ -116,6 +122,17 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
   try
   {
     const_cast<ComponentModel*>(this)->align (observation);
+
+    if (fit_primary_first)
+    {
+      cerr << "Pulsar::ComponentModel::get_shift fitting primary first" << endl;
+      for (unsigned i=1; i<components.size(); i++)
+	freeze (i);
+      const_cast<ComponentModel*>(this)->fit (observation);
+      for (unsigned i=1; i<components.size(); i++)
+	unfreeze (i);
+    }
+    
     const_cast<ComponentModel*>(this)->fit (observation);
 
     if (retain_memory)
@@ -180,6 +197,11 @@ void Pulsar::ComponentModel::load (const char *fname)
       {
 	cerr << "Pulsar::ComponentModel::load fix widths" << endl;
 	set_fix_widths (true);
+      }
+      else if (line == string ("fit primary first\n"))
+      {
+	cerr << "Pulsar::ComponentModel::load fit primary first" << endl;
+	set_fit_primary_first (true);
       }
       else if (line == string ("retain memory\n"))
       {
@@ -300,18 +322,18 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   Estimate<double> shift = profile->shift (modelprof);
 
   if (verbose)
-      cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
+    cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
 
   float normalization = profile->sum() / modelprof.sum();
     
   if (verbose)
-      cerr << "Pulsar::ComponentModel::align normalization="
-	   << normalization << endl;
+    cerr << "Pulsar::ComponentModel::align normalization="
+	 << normalization << endl;
 
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
-      Estimate<double> height = components[icomp]->get_height();
-      components[icomp]->set_height ( height * normalization );
+    Estimate<double> height = components[icomp]->get_height();
+    components[icomp]->set_height ( height * normalization );
   }
 
   if (phase)
@@ -334,6 +356,27 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   }
 }
 
+void Pulsar::ComponentModel::freeze (unsigned icomponent) const
+{
+  check ("freeze", icomponent);
+
+  unsigned nparam = components[icomponent]->get_nparam();
+  for (unsigned iparam=0; iparam<nparam; iparam++)
+    components[icomponent]->set_infit (iparam, false);
+}
+
+void Pulsar::ComponentModel::unfreeze (unsigned icomponent) const
+{
+  check ("unfreeze", icomponent);
+
+  if (backup.size() != components.size())
+    throw Error (InvalidState, "Pulsar::ComponentModel::unfreeze",
+		 "cannot unfreeze without backup");
+
+  unsigned nparam = components[icomponent]->get_nparam();
+  for (unsigned ip=0; ip<nparam; ip++)
+    components[icomponent]->set_infit (ip, backup[icomponent]->get_infit(ip));
+}
 
 void Pulsar::ComponentModel::set_infit (unsigned icomponent,
 					unsigned iparam,
