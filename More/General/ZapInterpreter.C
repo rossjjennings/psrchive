@@ -204,7 +204,7 @@ string Pulsar::ZapInterpreter::chan (const string& args) try
     vector<unsigned> channels;
     parse_indeces (channels, arguments, ext->get_nchan());
     for (unsigned ichan=0; ichan<channels.size(); ichan++)
-      ext->set_weight (ichan, 0.0);
+      ext->set_weight( channels[ichan], 0.0 );
 
     return response (Good);
   }
