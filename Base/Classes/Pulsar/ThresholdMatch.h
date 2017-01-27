@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ThresholdMatch.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/11/07 01:20:12 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/ThresholdMatch.h
 
 #ifndef __Pulsar_ThresholdMatch_h
 #define __Pulsar_ThresholdMatch_h

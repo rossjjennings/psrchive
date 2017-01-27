@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.9 $
-   $Date: 2010/05/28 21:57:21 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h
 
 #ifndef __Pulsar_ComplexRVMFit_h
 #define __Pulsar_ComplexRVMFit_h

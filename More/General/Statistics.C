@@ -10,7 +10,9 @@
 
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ProfileShiftFit.h"
+
 #include "Pulsar/SNRatioEstimator.h"
+#include "Pulsar/PhaseWidth.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
@@ -18,6 +20,7 @@
 #include "Pulsar/SquareWave.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
+#include "Physical.h"
 
 using namespace std;
 
@@ -25,6 +28,7 @@ using namespace std;
 //! Default constructor
 Pulsar::Statistics::Statistics (const Archive* data)
 {
+  pulse_width_estimator = new PhaseWidth;
   set_Archive (data);
 }
 
@@ -117,6 +121,31 @@ TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
     return Profile::snr_strategy.get_value()->get_interface();
 }
 
+//! Set the pulse width estimator
+void Pulsar::Statistics::set_pulse_width_estimator (const std::string& name)
+{
+  pulse_width_estimator = WidthEstimator::factory (name);
+}
+
+void Pulsar::Statistics::set_period (Phase::HasUnit& value) const
+{
+  // set the period in milliseconds
+  value.set_period( get_Integration()->get_folding_period() * 1e3 );
+}
+
+//! Get the pulse width
+Phase::Value Pulsar::Statistics::get_pulse_width () const
+{
+  Phase::Value width = pulse_width_estimator->get_width( get_Profile() );
+  set_period (width);
+  return width;
+}
+
+TextInterface::Parser* Pulsar::Statistics::get_pulse_width_interface ()
+{
+  return pulse_width_estimator->get_interface();
+}
+
 //! Get the Fourier-noise-to-noise ratio
 double Pulsar::Statistics::get_nfnr () const
 {
@@ -188,6 +217,31 @@ double Pulsar::Statistics::get_weighted_frequency () const
 {
   integration = Pulsar::get_Integration (archive, 0);
   return integration->weighted_frequency (0, archive->get_nchan());
+}
+
+double Pulsar::Statistics::get_bin_width () const
+{
+  integration = Pulsar::get_Integration (archive, 0);
+  return integration->get_folding_period() / integration->get_nbin();
+}
+
+double Pulsar::Statistics::get_dispersive_smearing () const
+{
+  double dm        = archive->get_dispersion_measure();
+  double freq      = archive->get_centre_frequency();
+  double bw        = fabs(archive->get_bandwidth());
+  double chan_bw   = bw / archive->get_nchan();
+
+  freq -= 0.5 * (bw - chan_bw);
+
+  /*
+    cerr << "Frequency = " << freq << endl;
+    cerr << "Channel bandwidth = " << chan_bw << endl;
+    cerr << "DM = " << dm << endl;
+  */
+
+  // DM smearing in seconds
+  return dispersion_smear (dm, freq, chan_bw);
 }
 
 void Pulsar::Statistics::setup_stats ()

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RemoveVariableBaseline.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/02/10 11:23:25 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/RemoveVariableBaseline.h
 
 #ifndef _Pulsar_RemoveVariableBaseline_H
 #define _Pulsar_RemoveVariableBaseline_H

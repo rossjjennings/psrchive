@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Warning.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/04/26 20:03:34 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Warning.h
 
 #ifndef __Warning_h
 #define __Warning_h

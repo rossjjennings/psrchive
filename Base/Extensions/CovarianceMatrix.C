@@ -1,7 +1,8 @@
 /***************************************************************************
  *
- * // CovarianceMatrix.C :: The Extension Class for the COV_MAT PSRFITS Binary Table
- * 
+ *   Copyright (C) 2016 by Aditya Parthasarathy & Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
  ***************************************************************************/
 
 #include "Pulsar/CovarianceMatrix.h"
@@ -13,7 +14,7 @@ using Pulsar::CovarianceMatrix;
 //! Default Constructor 
 CovarianceMatrix::CovarianceMatrix () : Extension ("CovarianceMatrix")
 {
-  nbin = 0;
+  nbin = npol = 0;
 }
 
 //! Copy constructor
@@ -28,6 +29,7 @@ const CovarianceMatrix&
 CovarianceMatrix::operator= (const CovarianceMatrix& extension)
 {
   nbin = extension.nbin;
+  npol = extension.npol;
   covariance = extension.covariance;
 
   return *this;
@@ -42,12 +44,28 @@ CovarianceMatrix::~CovarianceMatrix ()
 void CovarianceMatrix::set_nbin(unsigned _nbin)
 {
   nbin = _nbin;
-  covariance.resize (nbin*(nbin+1)/2);  
 }
 
-//! Returns the number of phase bins from TDC Class
-unsigned CovarianceMatrix::get_nbin() const // Write a method in TDC!
+//! Returns the number of phase bins
+unsigned CovarianceMatrix::get_nbin() const
 {
   return nbin;
 }
 
+//! Sets the number of phase bins
+void CovarianceMatrix::set_npol(unsigned _npol)
+{
+  npol = _npol;
+}
+
+//! Returns the number of phase bins
+unsigned CovarianceMatrix::get_npol() const
+{
+  return npol;
+}
+
+void CovarianceMatrix::resize ()
+{
+  unsigned M = npol * nbin;
+  covariance.resize (M*(M+1)/2);  
+}

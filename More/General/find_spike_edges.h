@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/find_spike_edges.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/11/06 20:25:01 $
-   $Author: straten $ */
+// psrchive/More/General/find_spike_edges.h
 
 #ifndef __find_spike_edges_h
 #define __find_spike_edges_h

@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.13 $
-   $Date: 2010/11/04 14:17:05 $
-   $Author: demorest $ */
+// psrchive/Util/genutil/sky_coord.h
 
 #ifndef __SKY_COORD_H
 #define __SKY_COORD_H

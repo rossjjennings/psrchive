@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ProfileStandardShift.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/10/02 03:38:55 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/ProfileStandardShift.h
 
 #ifndef __Pulsar_ProfileStandardShift_h
 #define __Pulsar_ProfileStandardShift_h

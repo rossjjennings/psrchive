@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.66 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h

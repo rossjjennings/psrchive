@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.29 $
-   $Date: 2010/11/04 14:17:04 $
-   $Author: demorest $ */
+// psrchive/Util/genutil/Angle.h
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions

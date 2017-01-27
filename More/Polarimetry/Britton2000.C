@@ -46,7 +46,7 @@ class Calibration::Britton2000::Feed
       add_model( rotation );
     }
     
-    // b_{\hat v} (\sigma_\theta/2)
+    // r_{\hat v} (\sigma_\theta/2)
     add_model( rotation = new MEAL::Rotation1 (Vector<3, double>::basis(2)) );
     rotation->set_param_name ("r_2");
   }
@@ -133,6 +133,11 @@ void Calibration::Britton2000::set_constant_orientation (bool flag)
     cerr << "Calibration::Britton2000::set_constant_orientation name="
 	 << feed->get_param_name (3) << endl;
   feed->set_infit (3, !flag);
+}
+
+bool Calibration::Britton2000::get_constant_orientation () const
+{
+  return !feed->get_infit (3);
 }
 
 const MEAL::Complex2* Calibration::Britton2000::get_frontend () const

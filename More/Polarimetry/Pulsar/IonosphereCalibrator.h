@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/IonosphereCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/03/01 18:04:42 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/IonosphereCalibrator.h
 
 #ifndef __Pulsar_IonosphereCalibrator_H
 #define __Pulsar_IonosphereCalibrator_H

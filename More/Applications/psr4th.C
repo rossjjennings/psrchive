@@ -13,6 +13,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FourthMoments.h"
+#include "Pulsar/CovarianceMatrix.h"
 #include "Pulsar/PhaseResolvedHistogram.h"
 
 #include "Matrix.h"
@@ -169,13 +170,16 @@ void psr4th::process (Pulsar::Archive* archive)
 
   archive->convert_state( Signal::Stokes );
 
+  if (histogram_pa || histogram_el)
+    archive->remove_baseline();
+  
   if (!output)
   {
     string output_format = "PSRFITS";
     output = Pulsar::Archive::new_Archive (output_format);  
     output->copy (*archive);
-    output->resize(1);
-
+    output->tscrunch();
+    
     results.resize (nchan);
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     {
@@ -249,15 +253,71 @@ void psr4th::process (Pulsar::Archive* archive)
   }
 }
 
+
+void dump (Pulsar::MoreProfiles* hist)
+{
+  unsigned nprof = hist->get_size();
+  unsigned nbin = hist->get_nbin();
+  for (unsigned iprof=0; iprof < nprof; iprof++)
+  {
+    cerr << iprof;
+    float* prof = hist->get_Profile(iprof)->get_amps();
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+      cerr << " " << prof[ibin];
+    cerr << endl;
+  }
+}
+
 void psr4th::finalize()
 {
   unsigned nbin = output->get_nbin();
   unsigned nchan = output->get_nchan();
+  unsigned npol = 4;
   unsigned nmoment = 10;
 
+  std::string filename = "psr4th.ar";
+  
   Pulsar::Integration* subint = output->get_Integration (0);
   subint->set_duration( integration_length );
 
+  if (cross_covariance && nchan == 1)
+  {
+    cerr << "psr4th: cross covariance" << endl;
+    
+    unsigned ichan = 0;
+    
+    Pulsar::CovarianceMatrix* matrix = new Pulsar::CovarianceMatrix;
+    matrix->set_nbin(nbin);
+    matrix->set_npol(npol);
+    matrix->resize();
+
+    vector<double>& data = matrix->get_data();
+    unsigned idat=0;
+    
+    for (unsigned ibin = 0; ibin < nbin ; ibin ++)
+    {
+      for (unsigned jbin = ibin; jbin < nbin ; jbin ++)
+      {
+	Matrix<4,4,double> covar;
+ 	covar = results[ichan].get_cross_covariance (ibin, jbin);
+
+	for (unsigned ipol=0; ipol < npol; ipol++)
+	  for (unsigned jpol = (ibin == jbin) ? ipol : 0; jpol < npol ; jpol++)
+	  {
+	    data.at(idat) = covar[ipol][jpol];
+	    idat ++;
+	  }
+      }
+    }
+
+    assert (idat == data.size());
+
+    cerr << "add CovarianceMatrix extension" << endl;
+    output->add_extension( matrix );
+
+    filename = "psr4th_covar.ar";
+  }
+      
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
     Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
@@ -269,13 +329,14 @@ void psr4th::finalize()
     {
       cerr << "psr4th: adding position angle histogram extension" << endl;
       subint->get_Profile(0,ichan)->add_extension(results[ichan].hist_pa);
+      // dump (results[ichan].hist_pa);
     }
     else if (histogram_el)
     {
       cerr << "psr4th: adding elipticity histogram extension" << endl;
       subint->get_Profile(0,ichan)->add_extension(results[ichan].hist_el);
     }
-    else
+    else if (!cross_covariance)
       subint->get_Profile(0,ichan)->add_extension(more);
 
     if (results[ichan].count == 0)
@@ -287,10 +348,7 @@ void psr4th::finalize()
     for (unsigned ibin = 0; ibin < nbin ; ibin ++)
     {
       Matrix<4,4,double> covar;
-      if (cross_covariance)
-	covar = results[ichan].get_cross_covariance (ibin, (ibin+1)%nbin);
-      else
-	covar = results[ichan].get_covariance (ibin);
+      covar = results[ichan].get_covariance (ibin);
       
       Stokes<double> mean = results[ichan].get_mean (ibin);
 
@@ -317,7 +375,7 @@ void psr4th::finalize()
     }
   }
 
-  output->unload ("psr4th.ar");
+  output->unload (filename);
 }
 
 void psr4th::result::set_cross_covariance (bool flag)
@@ -350,18 +408,20 @@ void psr4th::result::resize (unsigned nbin)
   count = 0;
 }
 
-void psr4th::result::set_histogram_pa (unsigned nbin)
+void psr4th::result::set_histogram_pa (unsigned nhist)
 {
   hist_pa = new Pulsar::PhaseResolvedHistogram;
   hist_pa->set_range (-90, 90);
-  hist_pa->resize (nbin, stokes.size());
+  hist_pa->resize (nhist, stokes.size());
+
+  // dump (hist_pa);
 }
 
-void psr4th::result::set_histogram_el (unsigned nbin)
+void psr4th::result::set_histogram_el (unsigned nhist)
 {
   hist_el = new Pulsar::PhaseResolvedHistogram;
   hist_el->set_range (-1,1);
-  hist_el->resize (nbin, stokes.size());
+  hist_el->resize (nhist, stokes.size());
 }
 
 
@@ -413,8 +473,6 @@ Stokes<double> psr4th::result::get_mean (unsigned ibin)
 
 void psr4th::result::histogram_pa (const Pulsar::PolnProfile* profile)
 {
-  cerr << "psr4th::result::histogram_pa called" << endl;
-
   unsigned negative_count = 0;
 
   std::vector< Estimate<double> > PA;
@@ -438,13 +496,11 @@ void psr4th::result::histogram_pa (const Pulsar::PolnProfile* profile)
     if (L[ibin] < 0.0)
       negative_count ++;
   }
-  cerr << "psr4th::result::histogram_pa negatives=" << negative_count << endl;
+  //cerr << "psr4th::result::histogram_pa negatives=" << negative_count << endl;
 }
 
 void psr4th::result::histogram_el (const Pulsar::PolnProfile* profile)
 {
-  cerr << "psr4th::result::histogram_el called" << endl;
-
   std::vector< Estimate<double> > epsilon;
   profile->get_ellipticity (epsilon, histogram_threshold);
 
@@ -473,7 +529,6 @@ void psr4th::result::histogram_el (const Pulsar::PolnProfile* profile)
 
 int main (int argc, char** argv)
 {
-  cerr << "this is the program that we are currently editing" << endl;
   psr4th program;
   return program.main (argc, argv);
 }

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.16 $
-   $Date: 2009/08/16 21:16:47 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Function.h
 
 /*! \mainpage 
  

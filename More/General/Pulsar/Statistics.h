@@ -1,21 +1,19 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.10 $
-   $Date: 2011/02/12 21:06:49 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Statistics.h
 
 #ifndef __Pulsar_Statistics_h
 #define __Pulsar_Statistics_h
 
 #include "Pulsar/Index.h"
 #include "TextInterface.h"
+#include "PhaseRange.h"
 
 namespace Pulsar {
 
@@ -25,7 +23,8 @@ namespace Pulsar {
   class ProfileStats;
   class PhaseWeight;
   class SNRatioEstimator;
-
+  class WidthEstimator;
+  
   //! Interface to a variety of useful statistics
   class Statistics : public Reference::Able
   {
@@ -61,6 +60,15 @@ namespace Pulsar {
     //! Get the text interface of the signal-to-noise ratio estimator
     TextInterface::Parser* get_snr_interface ();
 
+    //! Set the pulse width estimator
+    void set_pulse_width_estimator (const std::string& name);
+
+    //! Get the pulse width
+    Phase::Value get_pulse_width () const;
+
+    //! Get the text interface of the pulse width estimator   
+    TextInterface::Parser* get_pulse_width_interface ();
+    
     //! Get the effective duty cycle
     double get_effective_duty_cycle () const;
 
@@ -87,6 +95,12 @@ namespace Pulsar {
 
     //! Get the weighted frequency from the Pulsar::Archive
     double get_weighted_frequency () const;
+
+    //! Get the width of a phase bin in seconds
+    double get_bin_width () const;
+
+    //! Get the dispersive smearing in the worst channel in seconds
+    double get_dispersive_smearing () const;
 
     //! Text interface to statistics
     class Interface;
@@ -120,7 +134,11 @@ namespace Pulsar {
     mutable std::vector< Reference::To<Plugin> > plugins;
 
     Reference::To<SNRatioEstimator> snr_estimator;
-    
+    Reference::To<WidthEstimator> pulse_width_estimator;
+
+    //! Set the period attribute of the Phase::Value/Range/Ranges argument
+    void set_period (Phase::HasUnit&) const;
+
   };
 
   class Statistics::Plugin : public Reference::Able

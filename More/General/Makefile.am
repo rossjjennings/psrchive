@@ -43,6 +43,7 @@ nobase_include_HEADERS = \
 	Pulsar/FixFluxCal.h \
 	Pulsar/FixInterpreter.h \
 	Pulsar/Flux.h \
+	Pulsar/ForEachProfile.h \
 	Pulsar/FortranSNR.h \
         Pulsar/Fourier.h \
         Pulsar/FourierSNR.h \
@@ -76,6 +77,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
+	Pulsar/PhaseWidth.h \
 	Pulsar/ProfileCovariance.h \
 	Pulsar/ProfileInterpreter.h \
 	Pulsar/ProfilePCA.h \
@@ -116,6 +118,7 @@ nobase_include_HEADERS = \
         Pulsar/Weight.h \
 	Pulsar/WeightedFrequency.h \
 	Pulsar/WeightInterpreter.h \
+	Pulsar/WidthEstimator.h \
         Pulsar/ZapInterpreter.h
 
 libGeneral_la_SOURCES = \
@@ -174,6 +177,7 @@ libGeneral_la_SOURCES = \
 	Extract.C \
 	FixFluxCal.C \
 	FixInterpreter.C \
+	ForEachProfile.C \
 	FortranSNR.C \
         Fourier.C \
         FourierSNR.C \
@@ -215,6 +219,7 @@ libGeneral_la_SOURCES = \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
         PhaseWeight.C \
+	PhaseWidth.C \
 	ProfileInterpreter.C \
 	ProfileShiftFit.C \
 	ProfileStats.C \
@@ -260,6 +265,8 @@ libGeneral_la_SOURCES = \
         Weight.C \
 	WeightedFrequency.C \
 	WeightInterpreter.C \
+	width.C \
+	WidthEstimator.C \
 	ZapInterpreter.C
 
 

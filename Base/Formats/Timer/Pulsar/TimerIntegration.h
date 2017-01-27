@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/06/08 19:12:58 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h
 
 /*
   

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Boost.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Boost.h
 
 #ifndef __MEAL_Boost_H
 #define __MEAL_Boost_H

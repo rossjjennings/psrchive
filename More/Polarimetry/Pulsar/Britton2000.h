@@ -57,6 +57,7 @@ namespace Calibration {
 
     //! Fix the orientation of the frontend
     void set_constant_orientation (bool);
+    bool get_constant_orientation () const;
     
     const MEAL::Complex2* get_frontend () const;
 

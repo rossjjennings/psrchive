@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ArchiveTemplates.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/12 02:45:24 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ArchiveTemplates.h
 
 #ifndef __Pulsar_ArchiveTemplates_h
 #define __Pulsar_ArchiveTemplates_h

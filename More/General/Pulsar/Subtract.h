@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Subtract.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/04/07 00:38:18 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Subtract.h
 
 #ifndef __Pulsar_Subtract_h
 #define __Pulsar_Subtract_h

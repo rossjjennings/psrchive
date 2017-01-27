@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarParameter.h,v $
-   $Revision: 1.6 $
-   $Date: 2010/05/25 09:44:36 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScalarParameter.h
 
 #ifndef __ScalarParameter_H
 #define __ScalarParameter_H

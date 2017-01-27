@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.15 $
-   $Date: 2008/09/15 06:26:52 $
-   $Author: straten $ */
+// psrchive/Util/tempo2/T2Predictor.h
 
 #ifndef __Tempo2Predictor_h
 #define __Tempo2Predictor_h

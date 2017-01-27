@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/AuxColdPlasmaMeasures.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/AuxColdPlasmaMeasures.h
 
 #ifndef __Pulsar_AuxColdPlasmaMeasures_h
 #define __Pulsar_AuxColdPlasmaMeasures_h

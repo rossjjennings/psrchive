@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005 - 2017 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -139,8 +139,10 @@ void Pulsar::DeltaRM::refine ()
   delta_pa.set_threshold (threshold);
   delta_pa.set_include (include_bins);
   delta_pa.set_exclude (exclude_bins);
-
-  Estimate<double> delta_PA = delta_pa.get (profile0, profile1);
+  if (onpulse_weights)
+    delta_pa.set_onpulse (onpulse_weights);
+  
+  Estimate<double> delta_PA = delta_pa.get (profile0, profile1);  
   Estimate<double> delta_RM = delta_PA/(lambda_1*lambda_1-lambda_0*lambda_0);
 
   rotation_measure = delta_RM + data->get_rotation_measure();

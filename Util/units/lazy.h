@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/lazy.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/11/29 12:13:50 $
-   $Author: straten $ */
+// psrchive/Util/units/lazy.h
 
 #ifndef __lazy_h
 #define __lazy_h

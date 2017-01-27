@@ -278,6 +278,10 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     natural_covariance[i] = new Profile (nbin);
   }
 
+  sin_theta = new Profile (nbin);
+  cos_theta = new Profile (nbin);
+  norm_theta = new Profile (nbin);
+
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
     Matrix<4,4,double> C = covariance->get_covariance (ibin);
@@ -335,6 +339,15 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
       natural_covariance[i]->get_amps()[ibin] = fabs(natural[order[i]]);
       regression_coefficient[i]->get_amps()[ibin] = regression[i];
     }
+
+    Vector<3,double> primary = peigen[ order[0] ];
+    primary *= pvar[ order[0] ];
+    sin_theta->get_amps()[ibin] = norm(cross(primary,mean.get_vector()));
+    cos_theta->get_amps()[ibin] = fabs(primary * mean.get_vector());
+    norm_theta->get_amps()[ibin] = norm(primary) * norm(mean.get_vector());
+
+    // double denominator = norm(primary) * norm(mean.get_vector());
+    // nonorthogonality->get_amps()[ibin] = asin( numerator/denominator );
 
     double Rvar = regression * Icovar;
     regression /= norm(regression);
@@ -407,6 +420,36 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
 
   }
+
+  double off_pulse_mean;
+  double off_pulse_var;
+  
+  baseline->stats (norm_theta, &off_pulse_mean, &off_pulse_var);
+
+  double sigma = sqrt(off_pulse_var);
+
+  // if (Profile::verbose)
+    cerr << "Pulsar::FourthMomentStats::eigen denominator sigma="
+	 << sigma << endl;
+
+  nonorthogonality = new Profile (nbin);
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    double nt = norm_theta->get_amps()[ibin];
+    double ct = cos_theta->get_amps()[ibin];
+    double st = sin_theta->get_amps()[ibin];
+
+    double theta = 0;
+    if (nt > 20 * sigma + off_pulse_mean)
+      theta = atan2( st, ct );
+
+    if (theta > M_PI*0.5)
+      theta = M_PI - theta;
+
+    nonorthogonality->get_amps()[ibin] = theta;
+  }
+
 }
 
 

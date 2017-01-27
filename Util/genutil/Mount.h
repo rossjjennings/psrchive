@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Mount.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/10/17 07:55:54 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Mount.h
 
 #ifndef __Mount_H
 #define __Mount_H

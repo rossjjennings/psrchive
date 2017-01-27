@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/TextInterfaceName.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/04/07 06:38:46 $
-   $Author: straten $ */
+// psrchive/Util/units/TextInterfaceName.h
 
 #ifndef __TextInterfaceName_h
 #define __TextInterfaceName_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Factory.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/02/18 05:22:17 $
-   $Author: straten $ */
+// psrchive/Util/units/Factory.h
 
 #ifndef __MEAL_Factory_H
 #define __MEAL_Factory_H

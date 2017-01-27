@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/StraightLine.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/01/18 04:11:58 $
-   $Author: straten $ */
+// psrchive/Util/genutil/StraightLine.h
 
 #ifndef __StraightLine_h
 #define __StraightLine_h

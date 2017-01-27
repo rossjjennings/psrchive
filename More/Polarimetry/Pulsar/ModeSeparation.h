@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ModeSeparation.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/05/28 08:32:34 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ModeSeparation.h
 
 #ifndef __Pulsar_ModeSeparation_H
 #define __Pulsar_ModeSeparation_H

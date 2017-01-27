@@ -5,10 +5,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/file_cast.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/06/03 00:25:35 $
-   $Author: straten $ */
+// psrchive/Util/units/file_cast.h
 
 #ifndef __UTILS_UNITS_FILE_CAST_H
 #define __UTILS_UNITS_FILE_CAST_H

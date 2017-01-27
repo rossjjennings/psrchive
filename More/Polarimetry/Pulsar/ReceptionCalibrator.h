@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.91 $
-   $Date: 2009/06/24 05:11:32 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h
 
 #ifndef __Pulsar_ReceptionCalibrator_H
 #define __Pulsar_ReceptionCalibrator_H

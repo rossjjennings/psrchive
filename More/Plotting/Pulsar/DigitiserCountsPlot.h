@@ -33,6 +33,9 @@ namespace Pulsar
 
     TextInterface::Parser *get_interface();
 
+    //! disable default pre-processing of Plot base class
+    void preprocess (Archive* archive);
+  
   class Interface : public TextInterface::To<DigitiserCountsPlot>
     {
     public:
@@ -54,7 +57,17 @@ namespace Pulsar
     int get_subint( void ) const { return subint; }
     void set_subint( int s_subint ) { subint = s_subint; }
 
+    bool get_logscale () const { return logscale; }
+    void set_logscale (bool f) { logscale = f; }
+
+    // fraction of the maximum below which data are considered zero
+    double get_zero_threshold () const { return zero_threshold; }
+    void set_zero_threshold (double f) { zero_threshold = f; }
+    
   private:
+    double zero_threshold;
+    bool logscale;
+    
     float min_count;
     float max_count;
     float y_jump;

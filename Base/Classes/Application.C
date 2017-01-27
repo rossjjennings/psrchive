@@ -197,10 +197,7 @@ void Pulsar::Application::run ()
   catch (Error& error)
   {
     cerr << name << ": error while processing " << filenames[ifile] << ":";
-    if (verbose)
-      cerr << error << endl;
-    else
-      cerr << "\n" << error.get_message() << endl;
+    cerr << error << endl;
   }
 }
 

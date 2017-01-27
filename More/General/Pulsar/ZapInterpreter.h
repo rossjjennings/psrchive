@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ZapInterpreter.h,v $
-   $Revision: 1.6 $
-   $Date: 2011/02/12 23:48:54 $
-   $Author: sixbynine $ */
+// psrchive/More/General/Pulsar/ZapInterpreter.h
 
 #ifndef __Pulsar_ZapInterpreter_h
 #define __Pulsar_ZapInterpreter_h
@@ -54,6 +51,9 @@ namespace Pulsar {
 
     std::string zerodm (const std::string& args);
 
+    //! toggle the flag to zap channels in calibrator
+    std::string cal (const std::string& args);
+
     //! no empty commands
     std::string empty ();
 
@@ -67,6 +67,9 @@ namespace Pulsar {
 
     //! Store specified set of subints to apply channel/freq zapping
     std::vector<unsigned> set_subints;
+
+    //! Apply channel/freq zapping to any calibrator extension
+    bool zap_calibrator;
   };
 
 }

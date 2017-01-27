@@ -62,16 +62,24 @@ void Pulsar::ProfileVectorPlotter::setup_pen (unsigned iprof)
 
   if (plot_sci.size() == profiles.size())
     cpgsci (plot_sci[iprof]);
+  else if (plot_sci.size() == 1) // allow specification of one ci for all
+    cpgsci (plot_sci[0]);
   else
     cpgsci (iprof+1);
   
   if (plot_sls.size() == profiles.size())
     cpgsls (plot_sls[iprof]);
+  else if (plot_sls.size() == 1) // allow specification of one ls for all
+    cpgsls (plot_sls[0]);
   else
     cpgsls (iprof+1);
   
   if (plot_slw.size() == profiles.size())
     cpgslw (plot_slw[iprof]);
+  else if (plot_slw.size() == 1) // allow specification of one lw for all
+    cpgslw (plot_slw[0]);
+  else
+    cpgslw (1);
 }
 
 //! draw the profile in the current viewport and window

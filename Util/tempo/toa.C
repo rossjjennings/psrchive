@@ -176,7 +176,7 @@ int Tempo::toa::parkes_parse (const char* instring)
 
 string Tempo::toa::Psrclock_unload () const
 {
-  sizebuf (128);
+  sizebuf (1024);
   Parkes_unload (buffer);
   return string(buffer);
 }
@@ -226,7 +226,7 @@ int Tempo::toa::parkes_out (char* outstring) const
 
 int Tempo::toa::Parkes_unload (FILE* outstream) const
 {
-  sizebuf (128);
+  sizebuf (1024);
   Parkes_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -293,7 +293,7 @@ int Tempo::toa::Princeton_unload (char* outstring) const
 
 int Tempo::toa::Princeton_unload (FILE* outstream) const
 {
-  sizebuf (128);
+  sizebuf (1024);
   Princeton_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -357,7 +357,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
     
 int Tempo::toa::Tempo2_unload (FILE* outstream) const
 {
-  sizebuf (128 + auxinfo.length());
+  sizebuf (1024 + auxinfo.length());
   Tempo2_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
 
@@ -443,7 +443,7 @@ int Tempo::toa::Psrclock_unload (char* outstring) const
 
 int Tempo::toa::Psrclock_unload (FILE* outstream) const
 {
-  sizebuf (82 + auxinfo.length());
+  sizebuf (1024 + auxinfo.length());
   Psrclock_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -476,7 +476,7 @@ int Tempo::toa::Command_unload (char* outstring) const
 
 int Tempo::toa::Command_unload (FILE* outstream) const
 {
-  sizebuf (81 + auxinfo.length());
+  sizebuf (1024 + auxinfo.length());
   Command_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -535,7 +535,7 @@ int Tempo::toa::load (const char* instring)
 int Tempo::toa::load (FILE * instream)
 {
   // start with a length of line
-  size_t chunk = 128;
+  size_t chunk = 1024;
   sizebuf (chunk);
 
   buffer[0] = '\0';

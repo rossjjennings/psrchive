@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RegularExpression.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/genutil/RegularExpression.h
 
 #ifndef __RegularExpression_h
 #define __RegularExpression_h

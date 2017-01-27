@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.8 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Dispersion.h
 
 #ifndef __Pulsar_Dispersion_h
 #define __Pulsar_Dispersion_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
                                                                                 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PeriastronOrder.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/PeriastronOrder.h
                                                                                 
 #ifndef __PeriastronOrder_h
 #define __PeriastronOrder_h

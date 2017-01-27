@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/load_text.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/15 06:55:52 $
-   $Author: straten $ */
+// psrchive/Base/Formats/PSRFITS/load_text.h
 
 #ifndef __load_text_h
 #define __load_text_h

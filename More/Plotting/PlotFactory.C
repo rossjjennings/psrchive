@@ -16,6 +16,7 @@
 #include "Pulsar/PosAngPlot.h"
 #include "Pulsar/EllAngPlot.h"
 #include "Pulsar/StokesCovariancePlot.h"
+#include "Pulsar/StokesCrossCovariancePlot.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/StokesCylindricalPlus.h"
 #include "Pulsar/StokesSpherical.h"
@@ -146,6 +147,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<StokesCovariancePlot>
 	( '4', "fourth", "4x4 covariance of Stokes parameters") );
+
+  add ( new PlotFactory::Advocate<StokesCrossCovariancePlot>
+	( 'x', "cross", "cross covariances between Stokes parameters") );
 
   add ( new PlotFactory::Advocate<PhaseVsMore>
 	( 'a', "alt", "Greyscale of auxiliary profiles") );

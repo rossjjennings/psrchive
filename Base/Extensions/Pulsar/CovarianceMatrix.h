@@ -44,15 +44,26 @@ namespace Pulsar {
     //! Get the number of phase bins
     unsigned get_nbin() const;
 
-    //! Set the covariance matrix
-    void set_matrix(double *dest);
+    //! Set the number of polarizations
+    void set_npol(unsigned npol);
     
-    //! Get the covariance matrix
-    void get_matrix(double *dest) const;   
+    //! Get the number of polarizations
+    unsigned get_npol() const;
 
+    //! Set the size of the data array according to nbin and npol
+    void resize ();
+    
+    //! Get the covariance matrix data
+    std::vector<double>& get_data () { return covariance; }
+    
+    //! Get the covariance matrix data
+    const std::vector<double>& get_data () const { return covariance; }
+    
     protected:
 
-    unsigned nbin;      
+    unsigned nbin;
+    unsigned npol;
+    
     std::vector<double> covariance;
             
   };

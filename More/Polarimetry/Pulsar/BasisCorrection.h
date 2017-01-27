@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BasisCorrection.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/06/05 05:27:04 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/BasisCorrection.h
 
 #ifndef __Pulsar_BasisCorrection_H
 #define __Pulsar_BasisCorrection_H

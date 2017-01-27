@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ExponentialDistribution.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/26 12:02:32 $
-   $Author: straten $ */
+// psrchive/Util/genutil/ExponentialDistribution.h
 
 #ifndef __ExponentialDistribution_h
 #define __ExponentialDistribution_h

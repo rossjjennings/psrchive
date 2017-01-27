@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineStatic.h,v $
-   $Revision: 1.1 $
-   $Date: 2011/03/03 20:47:26 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/BaselineStatic.h
 
 #ifndef __Pulsar_BaselineStatic_h
 #define __Pulsar_BaselineStatic_h

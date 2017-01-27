@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/04/21 06:27:31 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PlotLabel.h
 
 #ifndef __Pulsar_PlotLabel_h
 #define __Pulsar_PlotLabel_h

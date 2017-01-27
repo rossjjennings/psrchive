@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SyntheticPolnProfile.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/Simulation/Pulsar/SyntheticPolnProfile.h
 
 #ifndef __Pulsar_SyntheticPolnProfile_h
 #define __Pulsar_SyntheticPolnProfile_h
@@ -48,6 +45,15 @@ namespace Pulsar {
     //! Set the standard deviation of the noise
     void set_noise (float);
 
+    //! Set the peak variance of the simulated SWIMS/jitter noise
+    void set_swims_variance (float);
+
+    //! Set the peak standard deviation of the simulated SWIMS/jitter noise
+    void set_swims (float);
+
+    //! The the off-pulse baseline mean
+    void set_baseline (float);
+    
     //! Set the functional form of the position angle
     void set_position_angle (MEAL::Univariate<MEAL::Scalar>*);
 
@@ -74,6 +80,12 @@ namespace Pulsar {
     //! The variance of the noise
     float noise_variance;
 
+    //! The peak variance of the SWIMS noise
+    float swims_variance;
+
+    //! The off-pulse baseline mean intensity
+    float baseline;
+    
     //! The functional form of the degree of polarization
     Reference::To< MEAL::Univariate<MEAL::Scalar> > degree;
 

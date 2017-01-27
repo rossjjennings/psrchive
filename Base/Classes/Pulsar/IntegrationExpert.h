@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.15 $
-   $Date: 2011/02/12 21:06:28 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/IntegrationExpert.h
 
 #ifndef __Pulsar_IntegrationExpert_h
 #define __Pulsar_IntegrationExpert_h

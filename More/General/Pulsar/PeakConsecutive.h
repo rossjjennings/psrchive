@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakConsecutive.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/06/24 05:02:23 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PeakConsecutive.h
 
 #ifndef __Pulsar_PeakConsecutive_h
 #define __Pulsar_PeakConsecutive_h

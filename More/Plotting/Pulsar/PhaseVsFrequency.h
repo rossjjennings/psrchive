@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequency.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/09 11:58:40 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PhaseVsFrequency.h
 
 #ifndef __Pulsar_PhaseVsFrequency_h
 #define __Pulsar_PhaseVsFrequency_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarInverseTangent2.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScalarInverseTangent2.h
 
 #ifndef __MEAL_ScalarInverseTangent2_H
 #define __MEAL_ScalarInverseTangent2_H

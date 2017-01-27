@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanPolar.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/04/30 15:32:33 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/MeanPolar.h
 
 #ifndef __Calibration_MeanPolar_H
 #define __Calibration_MeanPolar_H

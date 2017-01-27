@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesFluctPhase.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/02/21 20:42:22 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/StokesFluctPhase.h
 
 #ifndef __Pulsar_StokesFluctPhase_h
 #define __Pulsar_StokesFluctPhase_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.54 $
-   $Date: 2009/03/17 06:43:37 $
-   $Author: straten $ */
+// psrchive/Util/tempo/polyco.h
 
 #ifndef __POLY_H
 #define __POLY_H

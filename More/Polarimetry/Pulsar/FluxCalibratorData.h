@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibratorData.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/05/01 06:44:59 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/FluxCalibratorData.h
 
 #ifndef __Pulsar_FluxCalibratorData_H
 #define __Pulsar_FluxCalibratorData_H

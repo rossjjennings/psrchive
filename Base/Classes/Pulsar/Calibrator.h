@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/03/01 18:04:41 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/Calibrator.h
 
 #ifndef __Calibrator_H
 #define __Calibrator_H

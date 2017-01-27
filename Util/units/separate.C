@@ -15,6 +15,9 @@ using namespace std;
 
 bool braced (const std::string& txt)
 {
+  if (txt.length() < 2)
+    return false;
+
   char first = *(txt.begin());
   char last = *(txt.end()-1);
 

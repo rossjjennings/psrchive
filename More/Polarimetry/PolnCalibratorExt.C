@@ -140,8 +140,15 @@ try
   if (Calibrator::verbose)
     cerr << "Pulsar::new_transformation name=" << xform->get_name() << endl;
 
-  copy( xform, ext->get_transformation(ichan) );
+  const PolnCalibratorExtension::Transformation* info;
+  info = ext->get_transformation(ichan);
+  
+  copy( xform, info );
 
+  for (unsigned iparam=0; iparam < xform->get_nparam(); iparam++)
+    if (info->get_variance(iparam) == 0)
+      xform->set_infit (iparam, false);
+  
   return xform;
 }
 catch (Error& error)

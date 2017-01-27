@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.13 $
-   $Date: 2009/08/11 06:08:04 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/dspReduction.h
 
 #ifndef __dspReduction_h
 #define __dspReduction_h

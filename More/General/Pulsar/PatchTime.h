@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PatchTime.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/11/19 11:17:22 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PatchTime.h
 
 #ifndef _Pulsar_PatchTime_H
 #define _Pulsar_PatchTime_H

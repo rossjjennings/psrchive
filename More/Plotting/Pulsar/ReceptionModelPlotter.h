@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelPlotter.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/08/14 01:53:39 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ReceptionModelPlotter.h
 
 #ifndef __Calibration_ReceptionModelPlotter_H
 #define __Calibration_ReceptionModelPlotter_H

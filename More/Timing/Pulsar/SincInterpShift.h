@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/SincInterpShift.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/09/30 08:40:21 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/SincInterpShift.h
 
 #ifndef __Pulsar_SincInterpShift_h
 #define __Pulsar_SincInterpShift_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/fitsutil.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/11/30 11:39:01 $
-   $Author: straten $ */
+// psrchive/Util/fitsutil/fitsutil.h
 
 #ifndef __FITS_UTIL_H
 #define __FITS_UTIL_H

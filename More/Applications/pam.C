@@ -688,7 +688,7 @@ int main (int argc, char *argv[]) try {
       case DD: dededisperse = true; break;
 
       case RM:
-        aux_rm = fromstring<double>(optarg);
+        rm = fromstring<double>(optarg);
         newrm = true;
         command += " --RM ";
         command += optarg;

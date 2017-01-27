@@ -5,10 +5,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/pad.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/units/pad.h
 
 #ifndef __UTILS_UNITS_PAD_H
 #define __UTILS_UNITS_PAD_H

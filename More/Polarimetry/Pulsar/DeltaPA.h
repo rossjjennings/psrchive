@@ -1,20 +1,19 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005 - 2017 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaPA.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/01/27 07:42:35 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/DeltaPA.h
 
 #ifndef __Pulsar_DeltaPA_h
 #define __Pulsar_DeltaPA_h
 
 #include "Estimate.h"
+#include "Pulsar/PhaseWeight.h"
+
 #include <vector>
 
 namespace Pulsar {
@@ -42,6 +41,9 @@ namespace Pulsar {
     void set_threshold (float t) { threshold = t; }
     float get_threshold () const { return threshold; }
 
+    //! Set the on-pulse mask
+    void set_onpulse (PhaseWeight* w) { onpulse_weights = w; }
+    
     //! Set the phase bins to be included in the mean
     void set_include (const std::vector<unsigned>& bins);
 
@@ -58,6 +60,10 @@ namespace Pulsar {
 
     //! Exclude the specified phase bins
     std::vector<unsigned> exclude_bins;
+
+    //! Weights applied to each phase bin (defines on-pulse region)
+    Reference::To<PhaseWeight> onpulse_weights;
+    
   };
 
 }

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/10/21 19:57:35 $
-   $Author: demorest $ */
+// psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h
 
 #ifndef __ASCIIArchive_h
 #define __ASCIIArchive_h

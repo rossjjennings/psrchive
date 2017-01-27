@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/AuxColdPlasma.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/AuxColdPlasma.h
 
 #ifndef __AuxColdPlasma_h
 #define __AuxColdPlasma_h

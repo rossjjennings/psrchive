@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/morphological_difference.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/General/morphological_difference.h
 
 #ifndef __morphological_difference_h
 #define __morphological_difference_h

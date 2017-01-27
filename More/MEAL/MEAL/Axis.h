@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Axis.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/08 20:55:07 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Axis.h
 
 #ifndef __MEAL_Axis_Header
 #define __MEAL_Axis_Header

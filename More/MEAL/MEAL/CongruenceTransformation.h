@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CongruenceTransformation.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/CongruenceTransformation.h
 
 #ifndef __MEAL_CongruenceTransformation_H
 #define __MEAL_CongruenceTransformation_H

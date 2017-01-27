@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Spinor.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/06/06 11:07:20 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Spinor.h
 
 #ifndef __MEAL_Spinor_H
 #define __MEAL_Spinor_H

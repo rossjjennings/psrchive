@@ -84,6 +84,11 @@ static int default_aliases ()
   // Sardinia Radio Telescope
   add_alias ("SR", "srt");
 
+  // MeerKAT
+  add_alias ("MK", "meerkat");
+  add_alias ("MK", "MeerKAT");
+  add_alias ("MK", "MEERKAT");
+
   return 1;
 }
 

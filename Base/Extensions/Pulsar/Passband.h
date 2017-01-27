@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/04/24 02:35:53 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/Passband.h
 
 #ifndef __Pulsar_Passband_h
 #define __Pulsar_Passband_h

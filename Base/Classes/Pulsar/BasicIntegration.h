@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/12/06 20:03:35 $
-   $Author: demorest $ */
+// psrchive/Base/Classes/Pulsar/BasicIntegration.h
 
 #ifndef __BasicIntegration_h
 #define __BasicIntegration_h

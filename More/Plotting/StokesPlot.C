@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Archive.h"
@@ -16,7 +17,7 @@ Pulsar::StokesPlot::StokesPlot ()
   plot_values  = "IQUV";
   plot_colours = "1234";
   plot_lines   = "1111";
-  plot_widths = "3111";
+  plot_widths = "2222";
 }
 
 TextInterface::Parser* Pulsar::StokesPlot::get_interface ()
@@ -52,6 +53,7 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
       cerr << "Pulsar::StokesPlot::get_profiles"
 	      " new_Profile[" << plot_values[ipol] << "]" << endl;
 
+    // new_Profile is defined in More/Polarimetry/Polarization.C
     plotter.profiles[ipol] = new_Profile (profile, plot_values[ipol]);
     plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
     plotter.plot_sls[ipol] = plot_lines[ipol] - '0';

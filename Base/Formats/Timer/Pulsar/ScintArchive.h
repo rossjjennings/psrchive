@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/ScintArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/Pulsar/ScintArchive.h
 
 #ifndef __Scint_Archive_h
 #define __Scint_Archive_h

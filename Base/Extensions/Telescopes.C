@@ -31,6 +31,13 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             t->set_name("JB_42ft");
             oldcode=0;
         }
+        if (newcode.compare("JB_MKII")==0){
+            Telescopes::Jodrell(t);
+            t->set_name("JB_MKII");
+            oldcode=0;
+        }
+
+
 
         if(oldcode != -1) oldcode = Tempo2::observatory (a->get_telescope())->get_code();
     }
@@ -67,6 +74,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             break;
 
         case '6':
+        case 'c':
             Telescopes::VLA(t);
             break;
 
@@ -96,6 +104,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 
         case 't':
             Telescopes::LOFAR(t);
+            break;
+
+        case 'm':
+            Telescopes::MeerKAT(t);
             break;
 
         case 'i':
@@ -186,6 +198,14 @@ void Pulsar::Telescopes::LOFAR(Telescope *t)
 {
     t->set_name ("LOFAR");
     // XXX what about other settings? mount, focus,...
+}
+
+void Pulsar::Telescopes::MeerKAT(Telescope *t)
+{
+    t->set_name ("MeerKAT");
+    t->set_mount (Telescope::Horizon);
+    t->set_primary (Telescope::Parabolic);
+    t->set_focus(Telescope::Gregorian);
 }
 
 void Pulsar::Telescopes::MtPleasant26(Telescope *t)

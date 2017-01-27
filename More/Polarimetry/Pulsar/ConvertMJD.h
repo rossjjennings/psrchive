@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ConvertMJD.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/11/09 04:48:14 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ConvertMJD.h
 
 #ifndef __Calibration_ConvertMJD_Header
 #define __Calibration_ConvertMJD_Header

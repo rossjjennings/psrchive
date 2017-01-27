@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation1.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/05/07 02:33:38 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Rotation1.h
 
 #ifndef __MEAL_Rotation1_H
 #define __MEAL_Rotation1_H

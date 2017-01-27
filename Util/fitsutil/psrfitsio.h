@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.23 $
-   $Date: 2010/04/07 03:24:49 $
-   $Author: straten $ */
+// psrchive/Util/fitsutil/psrfitsio.h
 
 #ifndef __psrfitsio_h
 #define __psrfitsio_h

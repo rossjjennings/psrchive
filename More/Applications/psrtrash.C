@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009-2011 by Willem van Straten
+ *   Copyright (C) 2009 - 2017 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -69,7 +69,7 @@ protected:
   Pulsar::StandardOptions standard_options;
 
   // List of archives plotted
-  vector<string> files;
+  vector< pair<bool,string> > files;
 
   void select ();
 };
@@ -83,7 +83,7 @@ trash::trash ()
   plot_options.set_device ("/xs");
 
   // by default, pscrunch, tscrunch, and fscrunch
-  standard_options.add_default_job ("pTFC");
+  //standard_options.add_default_job ("pTFC");
 
   // by default, plot the total intensity
   plot_name = "flux";
@@ -169,7 +169,8 @@ void trash::process (Pulsar::Archive* archive)
   if (files.size() == 0)
     files.resize( plot_options.get_x_npanel() * plot_options.get_y_npanel() );
 
-  files[plotted] = archive->get_filename();
+  files[plotted].first = false;
+  files[plotted].second = archive->get_filename();
 
   plotted ++;
 
@@ -221,25 +222,35 @@ void trash::select ()
       if (index >= plotted)
 	continue;
 
-      cout << "trash: " << files[index] << endl;
-
-      // draw a big red x
+      files[index].first = !files[index].first;
+      
       cpgpanl (xip+1, yip+1);
-      cpgsci (2);
+
+      if (files[index].first)
+	cpgsci (2);
+      else
+	cpgsci (0); // lines may be "erased" by overwriting them
+                    // with color index 0 (if the device permits this).
+      
       cpgmove (0,0);
       cpgdraw (1,1);
       cpgmove (0,1);
       cpgdraw (1,0);
+
     }
     else if (ans == 'a' || ans == 'e')
     {
       cerr << "psrtrash: trashing all plotted" << endl;
       for (unsigned i=0; i<plotted; i++)
-        cout << "trash: " << files[i] << endl;
+        cout << "trash: " << files[i].second << endl;
 
       break;
     }
   }
+
+  for (unsigned ifile=0; ifile<files.size(); ifile++)
+    if (files[ifile].first)
+      cout << "trash: " << files[ifile].second << endl;
 
   cpgpanl (xpanel,ypanel);
 }

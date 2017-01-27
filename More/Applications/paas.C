@@ -45,6 +45,7 @@ void usage ()
     "  -w filename   Write model to file         [Default: paas.m] \n"
     "  -c \"a b c\"    Add component (a=centre, b=concentration, d=height)\n"
     "  -f            Fit model to pulse profile  \n"
+    "  -L            log(height) -> force all component heights to be > 0 \n"
     "  -F flags      Set parameters in/out of fit, e.g. -F 011101 fits only\n"
     "                   for concentration_1, height_1, centre_2 and height_2\n"
     "                   [Default: fit all parameters]\n"
@@ -99,10 +100,10 @@ int main (int argc, char** argv) try
   bool centre_model = false, rotate_peak=false;
   float rotate_amount = 0.0;
   bool align = false;
-
+  
   float xmin=0.0, xmax=1.0;
 
-  const char* args = "hb:r:w:c:fF:it:d:Dlj:Ws:CpR:az:PV";
+  const char* args = "hb:r:w:c:fF:it:d:DlLj:Ws:CpR:az:PV";
   int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
@@ -158,6 +159,10 @@ int main (int argc, char** argv) try
       
     case 'l':
       line_plot = true;
+      break;
+
+    case 'L':
+      model.set_log_height(true);
       break;
 
     case 's':
@@ -346,7 +351,7 @@ int main (int argc, char** argv) try
 	  "r          - reset phase zoom (0 -> 1) \n"
 	  "left click - add a component at cursor position\n"
 	  "f key      - fit current set of components\n"
-	  "q key      - quit\n"
+	  "q key      - save model and quit\n"
 	  "\n"
 	  "After left click:\n"
 	  "   1) any key - select width of new component, then \n"
@@ -418,6 +423,18 @@ int main (int argc, char** argv) try
 	  continue;
 	
 	double height = curs_y;
+
+	if (width == 0)
+	{
+	  cerr << "ignoring new component with zero width" << endl;
+	  break;
+	}
+	
+	if (model.get_log_height() && height <=0)
+	{
+	  cerr << "ignoring new component with -ve height" << endl;
+	  break;
+	}
 	
 	model.add_component (centre, 0.25/(width*width), height, "");
 	

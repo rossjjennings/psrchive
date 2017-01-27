@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/ParametersLookup.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/06/05 08:55:55 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Pulsar/ParametersLookup.h
 
 #ifndef __PulsarParametersLookup_h
 #define __PulsarParametersLookup_h
