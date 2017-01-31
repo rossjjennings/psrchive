@@ -5,8 +5,6 @@
  *
  ***************************************************************************/
 //
-// $Id:
-//
 // paas -- Pulsar archive analytic standard  maker
 //  (Deze programma heeft niks te maken met het christelijke feest, Pasen! :)
 
@@ -151,8 +149,6 @@ int main (int argc, char** argv) try
 
     case 'i':
       interactive = true;
-      break;
-
     case 'D':
       pgdev = "/xs";
       break;
@@ -212,6 +208,12 @@ int main (int argc, char** argv) try
    default:
       cerr << "invalid param '" << c << "'" << endl;
     }
+
+  if (optind != argc-1)
+  {
+    cerr << "paas: please specify one filename" << endl;
+    return -1;
+  }
 
   if (!pgdev.empty())
   {
