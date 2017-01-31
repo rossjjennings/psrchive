@@ -36,6 +36,9 @@ float Pulsar::SquareWave::get_snr (const Profile* profile)
 		  hightolow + buffer,
 		  lowtohigh - buffer);
 
+  if (hi_var <= 0.0 || lo_var <= 0.0)
+    return 0;
+
   return (hi_mean - lo_mean) / sqrt(hi_var + lo_var);
 }    
 
