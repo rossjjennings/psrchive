@@ -25,20 +25,18 @@ float Pulsar::SquareWave::get_snr (const Profile* profile)
   int hightolow, lowtohigh, buffer;
   profile->find_transitions (hightolow, lowtohigh, buffer);
 
+  // the third argument is the variance of the mean
   double hi_mean, hi_var;
-  profile->stats (&hi_mean, &hi_var, 0,
+  profile->stats (&hi_mean, 0, &hi_var,
 		  lowtohigh + buffer,
 		  hightolow - buffer);
 
   double lo_mean, lo_var;
-  profile->stats (&lo_mean, &lo_var, 0,
+  profile->stats (&lo_mean, 0, &lo_var,
 		  hightolow + buffer,
 		  lowtohigh - buffer);
 
-  // two unique estimates of the variance -> take the average
-  double var = (lo_var + hi_var) * 0.5;
-
-  return (hi_mean - lo_mean) / sqrt(var);
+  return (hi_mean - lo_mean) / sqrt(hi_var + lo_var);
 }    
 
 Pulsar::Profile* differentiate (const Pulsar::Profile* profile, unsigned off=1)
