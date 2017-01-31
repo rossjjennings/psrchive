@@ -374,8 +374,19 @@ unsigned Pulsar::ComponentModel::get_ncomponents() const
   return components.size();
 }
 
+/*! rotates the profile to match the phase of the model */
+void Pulsar::ComponentModel::align_to_model (Profile *profile)
+{
+  double phase = 0;
+  double scale = 0;
+  get_best_alignment (profile, phase, scale);
 
-void Pulsar::ComponentModel::align (const Profile *profile)
+  profile->rotate_phase (phase);
+  profile->scale (1/scale);
+}
+
+/* returns the phase shift and scale that aligns the profile with the model */
+void Pulsar::ComponentModel::get_best_alignment (const Profile* profile, double& phase, double& scale)
 {
   Profile modelprof(*profile);
 
@@ -384,32 +395,40 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   Estimate<double> shift = profile->shift (modelprof);
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
+    cerr << "Pulsar::ComponentModel::get_best_alignment shift=" << shift << endl;
 
-  float normalization = profile->sum() / modelprof.sum();
-    
+  phase = shift.get_value();
+
+  scale = profile->sum() / modelprof.sum();
+
   if (verbose)
-    cerr << "Pulsar::ComponentModel::align normalization="
-	 << normalization << endl;
+    cerr << "Pulsar::ComponentModel::get_best_alignment scale=" << scale << endl;
+}
+
+void Pulsar::ComponentModel::align (const Profile *profile)
+{
+  double phase = 0;
+  double scale = 0;
+  get_best_alignment (profile, phase, scale);
 
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
     Estimate<double> height = components[icomp]->get_height();
-    components[icomp]->set_height ( height * normalization );
+    components[icomp]->set_height ( height * scale );
   }
 
   if (phase)
   {
-    phase->set_value (phase->get_value() + shift.get_value() * 2*M_PI);
+    this->phase->set_value (this->phase->get_value() + phase * 2*M_PI);
     return;
   }
 
   // Dick requires this
-  cout << setprecision(6) << fixed << "Shift= " << shift.val << endl;
+  cout << setprecision(6) << fixed << "Shift= " << phase << endl;
 
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
-    Estimate<double> centre = components[icomp]->get_centre() + shift * 2*M_PI;
+    Estimate<double> centre = components[icomp]->get_centre() + phase * 2*M_PI;
     if (centre.val >= M_PI)
       centre -= 2*M_PI;
     if (centre.val < -M_PI)
