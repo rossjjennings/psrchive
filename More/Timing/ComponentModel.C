@@ -285,12 +285,9 @@ void Pulsar::ComponentModel::unload (const char *fname) const
     throw Error (FailedSys, "Pulsar::ComponentModel::unload",
 		 "fopen (%s)", fname);
 
-  Estimate<double> phase_backup = 0;
+  double phase_offset = 0;
   if (report_absolute_phases)
-  {
-    phase_backup = phase->get_value();
-    phase->set_value (0);
-  }
+    phase_offset = phase->get_value().val;
   
   // add lines here to match ComponentModel::load
   if (log_height)
@@ -321,7 +318,7 @@ void Pulsar::ComponentModel::unload (const char *fname) const
     else if (icomp < components.size())
     {
       fprintf(f, "%12lg %12lg %12lg %s\n", 
-	      components[icomp]->get_centre().val / (2*M_PI),
+	      (components[icomp]->get_centre().val - phase_offset) / (2*M_PI),
 	      components[icomp]->get_concentration().val,
 	      components[icomp]->get_height().val,
 	      component_names[icomp].c_str());
@@ -330,9 +327,6 @@ void Pulsar::ComponentModel::unload (const char *fname) const
     else
       done = true;
   }
-
-  if (report_absolute_phases)
-    phase->set_value (phase_backup);
 
   fclose(f);
 }
