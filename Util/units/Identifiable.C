@@ -9,13 +9,29 @@
 #include "Error.h"
 #include "stringcase.h"
 
+#define _DEBUG 0
+using namespace std;
+
 //! Returns true if name matches identity (or aliases)
 bool Identifiable::identify (const std::string& name)
 {
   for (unsigned i=0; i<identities.size(); i++)
+  {
+#if _DEBUG
+    cerr << "Identifiable::identify testing"
+      	" id='" << identities[i] << "'" << endl;
+#endif
+    
     if (casecmp (identities[i], name))
+    {
+#if _DEBUG
+      cerr << "Identifiable::identify name='" << name << "' matches"
+	" id='" << identities[i] << "'" << endl;
+#endif
       return true;
-
+    }
+  }
+  
   return false;
 }
 
