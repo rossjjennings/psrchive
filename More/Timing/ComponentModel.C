@@ -38,6 +38,7 @@ void Pulsar::ComponentModel::init ()
   retain_memory = false;
   fix_widths = false;
   fit_primary_first = false;
+  report_absolute_phases = false;
   
   zap_height_ratio = 0.0;
   zap_concentration_ratio = 0.0;
@@ -67,6 +68,18 @@ void Pulsar::ComponentModel::fix_relative_phases ()
 
   phase = new ScalarParameter (0.0);
   phase->set_value_name ("phase");
+}
+
+void Pulsar::ComponentModel::set_report_absolute_phases (bool flag)
+{
+  if (flag)
+    fix_relative_phases ();
+
+  if (!flag && phase)
+    throw Error (InvalidState, "Pulsar::ComponentModel::set_report_absolute_phases",
+		 "cannot unfix absolute phases after model is built");
+
+  report_absolute_phases = flag;
 }
 
 void Pulsar::ComponentModel::set_log_height (bool flag)
@@ -232,6 +245,12 @@ void Pulsar::ComponentModel::load (const char *fname)
 	cerr << "Pulsar::ComponentModel::load retain memory" << endl;
 	set_retain_memory (true);
       }
+      else if (line == string ("report absolute phases\n"))
+      {
+	cerr << "Pulsar::ComponentModel::load report absolute phases" << endl;
+	set_report_absolute_phases (true);
+      }
+      // don't forget to add a matching line to ComponentModel::unload
       else
       {
 	if (line[len-1]=='\n')
@@ -265,9 +284,31 @@ void Pulsar::ComponentModel::unload (const char *fname) const
   if (!f)
     throw Error (FailedSys, "Pulsar::ComponentModel::unload",
 		 "fopen (%s)", fname);
+
+  Estimate<double> phase_backup = 0;
+  if (report_absolute_phases)
+  {
+    phase_backup = phase->get_value();
+    phase->set_value (0);
+  }
   
+  // add lines here to match ComponentModel::load
   if (log_height)
-      fprintf (f, "log height\n");
+    fprintf (f, "log height\n");
+
+  if (report_absolute_phases)
+    fprintf (f, "report absolute phases\n");
+  else if (phase)
+    fprintf (f, "fix relative phases\n");
+
+  if (fix_widths)
+    fprintf (f, "fix widths\n");
+
+  if (fit_primary_first)
+    fprintf (f, "fit primary first\n");
+
+  if (retain_memory)
+    fprintf (f, "retain memory\n");
 
   unsigned iline, icomp = 0;
   bool done=false;
@@ -289,6 +330,9 @@ void Pulsar::ComponentModel::unload (const char *fname) const
     else
       done = true;
   }
+
+  if (report_absolute_phases)
+    phase->set_value (phase_backup);
 
   fclose(f);
 }
@@ -783,6 +827,13 @@ catch (Error& error)
 void Pulsar::ComponentModel::evaluate (float *vals,
 				       unsigned nvals, int icomp_selected) 
 {
+  Estimate<double> phase_backup = 0;
+  if (report_absolute_phases)
+  {
+    phase_backup = phase->get_value();
+    phase->set_value (0);
+  }
+  
   //Construct the summed model
   SumRule< Univariate<Scalar> > m; 
   if (icomp_selected >= 0)
@@ -805,6 +856,9 @@ void Pulsar::ComponentModel::evaluate (float *vals,
     argument.set_value( (i+0.5)/nvals * 2*M_PI );
     vals[i] = m.evaluate();
   }
+
+  if (report_absolute_phases)
+    phase->set_value (phase_backup);
 }
 
 void Pulsar::ComponentModel::clear()

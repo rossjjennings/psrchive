@@ -74,6 +74,9 @@ namespace Pulsar
     void set_fit_primary_first (bool flag=true);
     bool get_fit_primary_first () const { return fit_primary_first; }
 
+    void set_report_absolute_phases (bool flag=true);
+    bool get_report_absolute_phases () const { return report_absolute_phases; }
+
     // Manipulation
     /*! \param centre the centre of the component in turns of pulse phase
      *  \param concentration the concentration of the component equal 1 / variance in radians
@@ -147,6 +150,7 @@ namespace Pulsar
     bool retain_memory;
     bool fix_widths;
     bool fit_primary_first;
+    bool report_absolute_phases;
     
     float zap_height_ratio;
     float zap_concentration_ratio;
