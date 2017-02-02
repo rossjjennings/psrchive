@@ -91,8 +91,14 @@ namespace Pulsar
 
     unsigned get_ncomponents() const;
 
-    //! Roughtly align the phases and heights of the components to match the Profile
+    //! Roughly align the phases and heights of the components to match the Profile
     void align (const Profile *profile);
+
+    //! Roughly align the Profile to match the phases and heights of the components
+    void align_to_model (Profile* profile);
+
+    //! Returns the best fit phase and scale that aligns the model to the Profile
+    void get_best_alignment (const Profile* profile, double& phase, double& scale);
 
     //! Fix the relative phases of the components
     void fix_relative_phases ();

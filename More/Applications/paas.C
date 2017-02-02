@@ -274,6 +274,9 @@ int main (int argc, char** argv) try
 
   bool iterate = true;
 
+  if (model.get_report_absolute_phases ())
+    model.align_to_model (archive->get_Integration(0)->get_Profile(0,0));
+
   while (iterate)
   {
     iterate = false;
