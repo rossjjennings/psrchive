@@ -510,7 +510,12 @@ void Pulsar::ComponentModel::build () const
   else
   {
     for (unsigned icomp=0; icomp < components.size(); icomp++)
+    {
       sum->add_model( components[icomp] );
+      // don't allow the widths to vary
+      if (fix_widths)
+	components[icomp]->set_infit(1, false);
+    }
   }
 
   if (phase)
@@ -527,41 +532,33 @@ void Pulsar::ComponentModel::build () const
 
     for (unsigned icomp=0; icomp < components.size(); icomp++)
     {
-      if (sum->get_param_name(icomp*3) != "centre")
-	throw Error (InvalidState, "Pulsar::ComponentModel::build",
-		     "iparam=%u name='%s'", icomp*3,
-		     sum->get_param_name(icomp*3).c_str());
-
-      if (sum->get_param_name(icomp*3+1) != "concentration")
-	throw Error (InvalidState, "Pulsar::ComponentModel::build",
-		     "iparam=%u name='%s'", icomp*3,
-		     sum->get_param_name(icomp*3).c_str());
-
-      // don't allow the widths to vary
-      if (fix_widths)
-	components[icomp]->set_infit(1, false);
-
 #if _DEBUG
-        cerr << "BEFORE CLONE fits:";
-        unsigned nparam = components[icomp]->get_nparam ();
-        for (unsigned ip=0; ip < nparam; ip++)
-          cerr << " " << components[icomp]->get_infit(ip);
-        cerr << endl;
+      cerr << "BEFORE CLONE fits:";
+      unsigned nparam = components[icomp]->get_nparam ();
+      for (unsigned ip=0; ip < nparam; ip++)
+	cerr << " " << components[icomp]->get_infit(ip);
+      cerr << endl;
 #endif
 
       backup[icomp] = components[icomp]->clone();
 
 #if _DEBUG
-        cerr << "AFTER CLONE fits:";
-        nparam = components[icomp]->get_nparam ();
-        for (unsigned ip=0; ip < nparam; ip++)
-          cerr << " " << backup[icomp]->get_infit(ip);
-        cerr << endl;
+      cerr << "AFTER CLONE fits:";
+      nparam = components[icomp]->get_nparam ();
+      for (unsigned ip=0; ip < nparam; ip++)
+	cerr << " " << backup[icomp]->get_infit(ip);
+      cerr << endl;
 #endif
 
       SumRule<Scalar>* psum = new SumRule<Scalar>;
       psum->add_model (phase);
       psum->add_model (new ScalarConstant (sum->get_param(icomp*3)));
+
+      // verify that iparam=icomp*3 corresponds to component centre
+      if (chain->get_param_name(icomp*3) != "centre")
+	throw Error (InvalidState, "Pulsar::ComponentModel::build",
+		     "iparam=%u name='%s'", icomp*3,
+		     sum->get_param_name(icomp*3).c_str());
 
       chain->set_constraint (icomp*3, psum);
     }
@@ -821,12 +818,9 @@ catch (Error& error)
 void Pulsar::ComponentModel::evaluate (float *vals,
 				       unsigned nvals, int icomp_selected) 
 {
-  Estimate<double> phase_backup = 0;
+  double phase_offset = 0;
   if (report_absolute_phases)
-  {
-    phase_backup = phase->get_value();
-    phase->set_value (0);
-  }
+    phase_offset = phase->get_value().val;
   
   //Construct the summed model
   SumRule< Univariate<Scalar> > m; 
@@ -847,12 +841,9 @@ void Pulsar::ComponentModel::evaluate (float *vals,
 
   for (unsigned i=0; i < nvals; i++)
   { 
-    argument.set_value( (i+0.5)/nvals * 2*M_PI );
+    argument.set_value( (phase_offset + (i+0.5)/nvals) * 2*M_PI );
     vals[i] = m.evaluate();
   }
-
-  if (report_absolute_phases)
-    phase->set_value (phase_backup);
 }
 
 void Pulsar::ComponentModel::clear()
