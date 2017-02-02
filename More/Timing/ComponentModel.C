@@ -377,19 +377,26 @@ unsigned Pulsar::ComponentModel::get_ncomponents() const
 /*! rotates the profile to match the phase of the model */
 void Pulsar::ComponentModel::align_to_model (Profile *profile)
 {
-  double phase = 0;
-  double scale = 0;
-  get_best_alignment (profile, phase, scale);
+  double the_phase = 0;
+  double the_scale = 0;
+  get_best_alignment (profile, the_phase, the_scale);
 
-  profile->rotate_phase (phase);
-  profile->scale (1/scale);
+  if (verbose)
+    cerr << "Pulsar::ComponentModel::align_to_model"
+      " phase=" << the_phase << endl;
+  
+  profile->rotate_phase (the_phase);
+  profile->scale (1/the_scale);
 }
 
 /* returns the phase shift and scale that aligns the profile with the model */
-void Pulsar::ComponentModel::get_best_alignment (const Profile* profile, double& phase, double& scale)
+void Pulsar::ComponentModel::get_best_alignment (const Profile* profile, double& the_phase, double& the_scale)
 {
-  Profile modelprof(*profile);
+  Profile modelprof (profile->get_nbin());
 
+  if (verbose)
+    cerr << "Pulsar::ComponentModel::get_best_alignment calling evaluate" << endl;
+  
   evaluate (modelprof.get_amps(), modelprof.get_nbin());
 
   Estimate<double> shift = profile->shift (modelprof);
@@ -397,38 +404,44 @@ void Pulsar::ComponentModel::get_best_alignment (const Profile* profile, double&
   if (verbose)
     cerr << "Pulsar::ComponentModel::get_best_alignment shift=" << shift << endl;
 
-  phase = shift.get_value();
+  the_phase = shift.get_value();
 
-  scale = profile->sum() / modelprof.sum();
+  the_scale = profile->sum() / modelprof.sum();
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::get_best_alignment scale=" << scale << endl;
+    cerr << "Pulsar::ComponentModel::get_best_alignment scale=" << the_scale << endl;
 }
 
 void Pulsar::ComponentModel::align (const Profile *profile)
 {
-  double phase = 0;
-  double scale = 0;
-  get_best_alignment (profile, phase, scale);
+  if (verbose)
+    cerr << "Pulsar::ComponentModel::align (model to data)" << endl;
+
+  double the_phase = 0;
+  double the_scale = 0;
+  get_best_alignment (profile, the_phase, the_scale);
 
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
     Estimate<double> height = components[icomp]->get_height();
-    components[icomp]->set_height ( height * scale );
+    components[icomp]->set_height ( height * the_scale );
   }
 
   if (phase)
   {
-    this->phase->set_value (this->phase->get_value() + phase * 2*M_PI);
+    if (verbose)
+      cerr << "Pulsar::ComponentModel::align increment phase by "
+	   << the_phase << " turns" << endl;
+    phase->set_value (phase->get_value() + the_phase * 2*M_PI);
     return;
   }
 
   // Dick requires this
-  cout << setprecision(6) << fixed << "Shift= " << phase << endl;
+  cout << setprecision(6) << fixed << "Shift= " << the_phase << endl;
 
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
-    Estimate<double> centre = components[icomp]->get_centre() + phase * 2*M_PI;
+    Estimate<double> centre = components[icomp]->get_centre() + the_phase*2*M_PI;
     if (centre.val >= M_PI)
       centre -= 2*M_PI;
     if (centre.val < -M_PI)
@@ -774,6 +787,9 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
     
     iter ++;
   }
+
+  if (phase && verbose)
+    cerr << "ComponentModel::fit phase=" << phase->get_value() << endl;
   
   std::vector<std::vector<double> > covar;
   fit.result (*model, covar);
@@ -840,6 +856,10 @@ void Pulsar::ComponentModel::evaluate (float *vals,
   double phase_offset = 0;
   if (report_absolute_phases)
     phase_offset = phase->get_value().val;
+
+  if (verbose)
+    cerr << "Pulsar::ComponentModel::evaluate"
+      " phase_offset=" << phase_offset/(2*M_PI) << " turns" << endl;
   
   //Construct the summed model
   SumRule< Univariate<Scalar> > m; 
@@ -860,7 +880,7 @@ void Pulsar::ComponentModel::evaluate (float *vals,
 
   for (unsigned i=0; i < nvals; i++)
   { 
-    argument.set_value( (phase_offset + (i+0.5)/nvals) * 2*M_PI );
+    argument.set_value( (i+0.5)/nvals * 2*M_PI + phase_offset );
     vals[i] = m.evaluate();
   }
 }
