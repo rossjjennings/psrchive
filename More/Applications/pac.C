@@ -126,7 +126,8 @@ int main (int argc, char *argv[]) try
   bool do_polncal = true;
   bool use_fluxcal_stokes = false;
   bool enable_frontend = true;
-
+  bool fscrunch_data_to_cal = false;
+  
   // Flag for only displaying the system-equivalent flux density.
   bool only_display_sefd = false;
 
@@ -774,6 +775,15 @@ int main (int argc, char *argv[]) try
       pcal_file = pcal_engine->get_filenames();
 
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
+
+      const unsigned cal_nchan = pcal_engine->get_nchan();
+
+      if (fscrunch_data_to_cal && cal_nchan != arch->get_nchan())
+      {
+	cout << "pac: Frequency integrating data to match calibrator" << endl;
+	arch->fscrunch_to_nchan (cal_nchan);
+      }
+      
       pcal_engine->calibrate (arch);
 
       if (arch->get_npol() == 4)
