@@ -776,12 +776,12 @@ int main (int argc, char *argv[]) try
 
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
 
-      const unsigned cal_nchan = pcal_engine->get_nchan();
-
-      if (fscrunch_data_to_cal && cal_nchan != arch->get_nchan())
+      if (fscrunch_data_to_cal && pcal_engine->get_nchan() != arch->get_nchan())
       {
-	cout << "pac: Frequency integrating data to match calibrator" << endl;
-	arch->fscrunch_to_nchan (cal_nchan);
+	cout << "pac: Frequency integrating data (nchan=" << arch->get_nchan()
+	     << ") to match calibrator (nchan=" << pcal_engine->get_nchan()
+	     << ")" << endl;
+	arch->fscrunch_to_nchan (pcal_engine->get_nchan());
       }
       
       pcal_engine->calibrate (arch);
