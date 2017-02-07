@@ -275,8 +275,11 @@ int main (int argc, char** argv) try
   bool iterate = true;
 
   if (model.get_report_absolute_phases ())
+  {
+    cerr << "paas: align profile to model (report absolute phases)" << endl;    
     model.align_to_model (archive->get_Integration(0)->get_Profile(0,0));
-
+  }
+  
   while (iterate)
   {
     iterate = false;
@@ -491,6 +494,14 @@ void write_details_to_file (ComponentModel& m, Archive* input_archive,
     throw Error (FailedSys, "ComponentModel::write_details_to_file",
 		 "Unable to open file=" + filename);
 
+  Profile* input_profile = input_archive->get_Integration(0)->get_Profile(0,0);
+  
+  if (m.get_report_absolute_phases())
+  {
+    double shift_in_rad = m.get_absolute_phase();
+    input_profile->rotate_phase (shift_in_rad);
+  }
+  
   const unsigned nbin = input_archive->get_nbin();
   const unsigned ncomp = m.get_ncomponents();
 
@@ -499,7 +510,7 @@ void write_details_to_file (ComponentModel& m, Archive* input_archive,
     input_archive->get_centre_frequency() << " " << nbin << " " <<
     ncomp << endl;
 
-  float* in_bin = input_archive->get_Profile(0,0,0)->get_amps();
+  float* in_bin = input_profile->get_amps();
   float* model_bin = model->get_Profile(0,0,0)->get_amps();
   
   vector<vector<float> > values(ncomp);
