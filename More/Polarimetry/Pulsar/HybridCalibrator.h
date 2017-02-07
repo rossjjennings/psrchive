@@ -58,7 +58,7 @@ namespace Pulsar {
     bool get_valid (unsigned ichan) const;
 
     //! Return the number of channels in the PolnCalibrator
-    unsigned get_maximum_nchan ();
+    unsigned get_maximum_nchan () const;
 
     //! The Stokes parameters of the input reference signal
     Reference::To<const CalibratorStokes> reference_input;

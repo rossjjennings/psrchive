@@ -44,6 +44,9 @@ namespace Pulsar {
     //! Destructor
     virtual ~PolnCalibrator ();
 
+    //! Set the calibrator archive used to define basic attributes
+    void set_calibrator (const Archive* archive);
+
     // ///////////////////////////////////////////////////////////////////
     //
     // useful for calibrating
@@ -156,7 +159,7 @@ namespace Pulsar {
     virtual bool get_valid (unsigned ichan) const;
 
     //! Derived classes may be able to shrink the transformation array
-    virtual unsigned get_maximum_nchan ();
+    virtual unsigned get_maximum_nchan () const;
 
   private:
 
