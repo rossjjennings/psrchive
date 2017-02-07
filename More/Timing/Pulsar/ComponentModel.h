@@ -56,6 +56,9 @@ namespace Pulsar
     //! Return the statistical goodness-of-fit
     double get_reduced_chisq () const { return chisq / nfree; }
 
+    //! Return the absolute phase
+    double get_absolute_phase () const;
+    
     // I/O
     void load (const char *fname);
     void unload (const char *fname) const;

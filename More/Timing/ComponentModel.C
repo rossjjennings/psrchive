@@ -193,6 +193,15 @@ catch (Error& error)
   throw error += "Pulsar::ComponentModel::get_shift";
 }
 
+double Pulsar::ComponentModel::get_absolute_phase () const
+{
+  if (!phase)
+    throw Error (InvalidState, "Pulsar::ComponentModel::get_absolute_phase",
+		 "absolute phase not initialized");
+  
+  return phase->get_value().val;
+}
+
 void Pulsar::ComponentModel::load (const char *fname)
 {
   clear();
