@@ -50,7 +50,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -83,6 +83,7 @@ void usage ()
     "  -I             Correct ionospheric Faraday rotation using IRI\n"
     "  -x             Derive calibrator Stokes parameters from fluxcal data\n"
     "  -y             Always trust the Pointing::feed_angle attribute \n"
+    "  -g             Fscrunch the data to match the number of channels of the calibrator"   
     "\n"
     "Rough Alignment options [not recommended]: \n"
     "  -B             Fix the off-pulse baseline statistics \n"
@@ -286,6 +287,10 @@ int main (int argc, char *argv[]) try
     case 'f':
       check_flags = false;
       command += " -f";
+      break;
+    
+    case 'g':
+      fscrunch_data_to_cal = true;
       break;
 
     case 'G':

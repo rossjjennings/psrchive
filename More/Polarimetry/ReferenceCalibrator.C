@@ -172,6 +172,11 @@ void Pulsar::ReferenceCalibrator::get_levels
     cerr << "Pulsar::ReferenceCalibrator::get_levels Integration"
       " nchan=" << nchan << " required nchan=" << request_nchan << endl;
 
+  if (request_nchan == 0)
+    throw Error (InvalidParam,
+                 "Pulsar::ReferenceCalibrator::get_levels",
+                 "requested number of frequency channels == 0");
+
   Reference::To<Integration> clone;
 
   if (nchan > request_nchan)
