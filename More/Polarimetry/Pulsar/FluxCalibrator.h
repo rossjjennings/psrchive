@@ -57,6 +57,12 @@ namespace Pulsar {
     //! Set the database containing flux calibrator information
     void set_database (const StandardCandles* database);
 
+    //! Set the threshold used to reject outliers when computing levels
+    void set_outlier_threshold (float f) { outlier_threshold = f; }
+
+    //! Get the threshold used to reject outliers when computing levels
+    float get_outlier_threshold () const { return outlier_threshold; }
+
     //! Calibrate the flux in the given archive
     void calibrate (Archive* archive);
 
@@ -119,6 +125,9 @@ namespace Pulsar {
 
     //! Information stored about the standard candle
     std::string standard_candle_info;
+
+    //! Threshold used to reject outliers when computing levels
+    double outlier_threshold;
 
     //! Initialize attributes
     void init ();

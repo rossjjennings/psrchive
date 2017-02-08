@@ -62,6 +62,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   report_initial_state = false;
   report_input_data = false;
 
+  outlier_threshold = 0.0;
+  
   if (archive)
     set_calibrator (archive);
 }
@@ -605,7 +607,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
     // add_epoch( epoch );
 
-    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
+    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
+				     outlier_threshold);
 
     string identifier = cal->get_filename() + " " + tostring(isub);
 

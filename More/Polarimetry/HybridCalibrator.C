@@ -73,7 +73,13 @@ void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
   filenames.resize (2);
   filenames[1] = observation->get_filenames();
 }
-    
+
+Pulsar::ReferenceCalibrator*
+Pulsar::HybridCalibrator::get_reference_observation ()
+{
+  return reference_observation;
+}
+
 //! Set the PolnCalibrator to be supplemented by the SingleAxis model
 void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 {

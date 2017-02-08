@@ -31,4 +31,8 @@ Pulsar::CalibratorSpectrum::Interface::Interface (CalibratorSpectrum* instance)
   add( &CalibratorSpectrum::get_norm_inv,
        &CalibratorSpectrum::set_norm_inv,
        "norm", "Normalize Stokes parameters by invariant" );
+
+  add( &CalibratorSpectrum::get_outlier_threshold,
+       &CalibratorSpectrum::set_outlier_threshold,
+       "cut", "Threshold (rms) used to reject outliers" );
 }

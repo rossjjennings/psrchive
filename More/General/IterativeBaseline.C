@@ -28,6 +28,7 @@ Pulsar::IterativeBaseline::IterativeBaseline ()
 
   threshold = 1.0;
   max_iterations = 100;
+  run_postprocessing = true;
 }
 
 Pulsar::IterativeBaseline::~IterativeBaseline ()
@@ -169,9 +170,12 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 
     for (unsigned ibin=0; ibin<nbin; ibin++)
     {
+      if (include && !(*include)[ibin])
+	continue;
+      
       if ( amps[ibin] > lower && amps[ibin] < upper )
       {
-	if ((*weight)[ibin] == 0.0 && (!include || (*include)[ibin]))
+	if ((*weight)[ibin] == 0.0)
         {
 	  added ++;
 #ifdef _DEBUG
@@ -183,7 +187,7 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
       }
       else
       {
-	if ((*weight)[ibin] == 1.0 && (!include || (*include)[ibin]))
+	if ((*weight)[ibin] == 1.0)
         {
 	  subtracted ++;
 #ifdef _DEBUG
@@ -220,6 +224,9 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
       initial_baseline->get_weight (weight);
     }
   }
+
+  if (!run_postprocessing)
+    return;
 
   if (iter < max_iterations) try
   {

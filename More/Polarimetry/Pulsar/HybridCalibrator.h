@@ -45,6 +45,7 @@ namespace Pulsar {
 
     //! Set the ReferenceCalibrator data from which to derive a SingleAxis
     void set_reference_observation (ReferenceCalibrator* observation);
+    ReferenceCalibrator* get_reference_observation ();
     
     //! Set the PolnCalibrator to be supplemented
     void set_precalibrator (PolnCalibrator* calibrator);
