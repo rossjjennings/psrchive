@@ -79,6 +79,7 @@ void usage ()
     "  -M meta    filename with list of pulsar files \n"
     "  -j job     preprocessing job \n"
     "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
+    "  -K sigma       Reject outliers when computing CAL levels \n"
     "\n"
     "MEM: Measurement Equation Modeling \n"
     "  -- observations of an unknown source as in van Straten (2004)\n"
@@ -589,6 +590,9 @@ bool check_coordinates = true;
 
 bool must_have_cals = true;
 
+// threshold used to reject outliers while computing CAL levels
+float outlier_threshold = 0.0;
+ 
 // name of file containing list of calibrator Archive filenames
 char* calfile = NULL;
 
@@ -619,7 +623,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:kL:l:"
+    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:K:kL:l:"
     "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
@@ -729,7 +733,11 @@ int actual_main (int argc, char *argv[]) try
     case 'k':
       equal_ellipticities = true;
       break;
-
+      
+    case 'K':
+      outlier_threshold = atof(optarg);
+      break;
+      
     case 'L':
       polncal_hours = atof (optarg);
       break;
@@ -962,7 +970,8 @@ int actual_main (int argc, char *argv[]) try
 
       model->set_nthread (nthread);
       model->set_report_projection (true);
-
+      model->set_outlier_threshold (outlier_threshold);
+      
       model->set_report_initial_state (prefit_report);
       model->set_report_input_data (input_data);
 
