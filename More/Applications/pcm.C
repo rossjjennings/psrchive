@@ -1532,7 +1532,17 @@ void load_calibrator_database () try
     return;
     
   Reference::To<Pulsar::Archive> archive;
-  archive = Pulsar::Archive::load( filenames.front() );
+  while (filenames.size()) try
+  {
+    archive = Pulsar::Archive::load( filenames.front() );
+    break;
+  }
+  catch (Error& error)
+  {
+    cerr << "load_calibrator_database: error loading " << filenames.front()
+         << endl << error << endl;
+    filenames.erase( filenames.begin() );
+  }
 
   get_span ();
 
