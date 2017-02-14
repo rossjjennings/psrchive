@@ -83,7 +83,7 @@ void usage ()
     "  -I             Correct ionospheric Faraday rotation using IRI\n"
     "  -x             Derive calibrator Stokes parameters from fluxcal data\n"
     "  -y             Always trust the Pointing::feed_angle attribute \n"
-    "  -g             Fscrunch the data to match the number of channels of the calibrator"
+    "  -g             Fscrunch data to match number of channels of calibrator\n"
     "  -K sigma       Reject outliers when computing CAL levels \n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
