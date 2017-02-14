@@ -123,6 +123,7 @@ void usage ()
     "  -- observations of a known source as in van Straten (2013) \n"
     "\n"
     "  -S fname   filename of calibrated standard \n"
+    "  -G         Fscrunch data to match number of channels of standard \n"
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
     "  -1         solve independently for each observation \n"
@@ -619,11 +620,12 @@ int actual_main (int argc, char *argv[]) try
   vector<string> equation_configuration;
 
   bool unload_each_calibrated = true;
+  bool fscrunch_data_to_template = false;
 
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:K:kL:l:"
+    "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
     "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
@@ -686,6 +688,10 @@ int actual_main (int argc, char *argv[]) try
       multiple_flux_calibrators = true;
       break;
 
+    case 'G':
+      fscrunch_data_to_template = true;
+      break;
+      
     case 'g':
       independent_gains = true;
       break;
@@ -1089,7 +1095,16 @@ int actual_main (int argc, char *argv[]) try
 
 #endif
 
+    if (fscrunch_data_to_template && model->get_nchan() != archive->get_nchan())
+    {
+      cerr << "pcm: frequency integrating data (nchan=" << archive->get_nchan()
+	   << ") to match calibrator (nchan=" << model->get_nchan()
+	   << ")" << endl;
+      archive->fscrunch_to_nchan (model->get_nchan());
+    }
+	 
     cerr << "pcm: adding observation" << endl;
+
     model->preprocess( archive );
     model->add_observation( archive );
 
