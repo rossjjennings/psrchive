@@ -128,12 +128,15 @@ namespace Pulsar
     //! Return true if least squares minimization solvers are available
     virtual bool has_solver () const;
 
-    //! Return the transformation for the specified channel
+    //! Return the solver for the specified channel
     virtual const Solver* get_solver (unsigned ichan) const;
 
     //! Set the algorithm used to solve the measurement equation
     virtual void set_solver (Solver*);
 
+    //! Get the algorithm used to solve the measurement equation
+    virtual Solver* get_solver ();
+    
     //! Set the reduced chisq above which the solution will be retried
     virtual void set_retry_reduced_chisq (float);
 

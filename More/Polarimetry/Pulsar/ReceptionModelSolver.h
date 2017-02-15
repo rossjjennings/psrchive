@@ -23,6 +23,8 @@ namespace Calibration
 
   public:
 
+    Solver () { verbose = 0; }
+    
     //! report the reduced chisq on completion
     static bool report_chisq;
 
@@ -41,6 +43,10 @@ namespace Calibration
     //! Solve the measurement equations by least squares minimization
     virtual void solve ();
 
+    //! Set the verbosity level (0 = quiet, 3 = most verbose)
+    void set_verbosity (unsigned level) { verbose = level; }
+    unsigned get_verbosity () const { return verbose; }
+    
   protected:
 
     //! The fit is performed by derived classes
@@ -71,6 +77,9 @@ namespace Calibration
     //! The observations used to constrain the measurement equations
     std::vector<CoherencyMeasurementSet>& get_data ();
 
+    //! Verbosity level
+    unsigned verbose;
+    
  private:
 
     //! Flags set true if state has been observed

@@ -107,6 +107,14 @@ Pulsar::SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
   solver = s;
 }
 
+Calibration::ReceptionModel::Solver* Pulsar::SystemCalibrator::get_solver ()
+{
+  if (!solver)
+    solver = Calibration::ReceptionModel::new_default_Solver ();
+  
+  return solver;
+}
+
 //! Copy constructor
 Pulsar::SystemCalibrator::SystemCalibrator (const SystemCalibrator& calibrator)
 {

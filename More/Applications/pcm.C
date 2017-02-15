@@ -541,6 +541,8 @@ static bool plot_total = false;
 static bool plot_result = false;
 static bool publication_plots = false;
 
+static unsigned solver_verbosity = 0;
+
 void enable_diagnostic (const string& name)
 {
   if (name == "prefit")
@@ -564,6 +566,9 @@ void enable_diagnostic (const string& name)
   else if (name == "result")
     plot_result = true;
 
+  else if (name == "solver")
+    solver_verbosity = 1;
+  
   else
   {
     cerr << "pcm: unrecognized diagnostic name '" << name << "'" << endl;
@@ -1016,6 +1021,8 @@ int actual_main (int argc, char *argv[]) try
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );
 
+      model->get_solver()->set_verbosity( solver_verbosity );
+      
       if (retry_chisq)
         model->set_retry_reduced_chisq( retry_chisq );
 
