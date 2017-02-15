@@ -54,9 +54,6 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a,
 	    << " ncol=" << ncol << std::endl;
 #endif
 
-  int irow = 0;
-  int icol = 0;
-
   for (int i=0; i < nrow; i++)
     if (a[i].size() < unsigned(nrow))
       throw Error (InvalidState, "MEAL::GaussJordan",
@@ -65,7 +62,7 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a,
   // pivot book-keeping arrays
   std::vector<int> indxc (nrow);
   std::vector<int> indxr (nrow);
-  std::vector<int> ipiv (nrow, 0);
+  std::vector<bool> ipiv (nrow, false);
 
 #ifdef _DEBUG
   std::cerr << "MEAL::GaussJordan start loop" << std::endl;
@@ -76,31 +73,41 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a,
   {
     // search for the pivot element
 
+    int irow = -1;
+    int icol = -1;
+
 #ifdef _DEBUG
     std::cerr << "MEAL::GaussJordan search for pivot" << std::endl;
 #endif
 
     double big = 0.0;
     for (j=0; j<nrow; j++)
-      if (ipiv[j] == 0)
-	for (k=0; k<nrow; k++)
+    {
+      if (ipiv[j])
+	continue;
+      
+      for (k=0; k<nrow; k++)
+      {
+	if (ipiv[k])
+	  continue;
+
+	if (fabs(a[j][k]) >= big)
 	{
-	  if (ipiv[k] == 0)
-	  {
-	    if (fabs(a[j][k]) >= big)
-	    {
-	      big=fabs(a[j][k]);
-	      irow=j;
-	      icol=k;
-	    }
-	  }
+	  big=fabs(a[j][k]);
+	  irow=j;
+	  icol=k;
 	}
-
-    ipiv[icol]++;
-
-    if (fabs(a[icol][icol]) <= singular_threshold)
+      }
+    }
+    
+    if (big <= singular_threshold)
       throw Error (InvalidState, "MEAL::GaussJordan",
-		   "Singular Matrix.  irow=%d nrow=%d", irow, nrow);
+		   "Singular Matrix.  icol=%d nrow=%d pivot=%lf",
+		   i, nrow, big);
+
+    assert (irow != -1 && icol != -1);
+
+    ipiv[icol] = true;
 
 #ifdef _DEBUG
     std::cerr << "MEAL::GaussJordan pivot found" << std::endl;
