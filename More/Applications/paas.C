@@ -224,7 +224,7 @@ int main (int argc, char** argv) try
   
   Reference::To<Archive> archive = Archive::load (argv[optind]);
 
-  // preprocess
+  // preprocess0
   archive->fscrunch();
   archive->tscrunch();
   archive->pscrunch();
@@ -499,7 +499,7 @@ void write_details_to_file (ComponentModel& m, Archive* input_archive,
   if (m.get_report_absolute_phases())
   {
     double shift_in_rad = m.get_absolute_phase();
-    input_profile->rotate_phase (shift_in_rad);
+    input_profile->rotate_phase (shift_in_rad/ (2*M_PI));
   }
   
   const unsigned nbin = input_archive->get_nbin();
@@ -508,7 +508,7 @@ void write_details_to_file (ComponentModel& m, Archive* input_archive,
   out << "# " << input_archive->get_filename() << " " <<
     input_archive->get_source() << " " << 
     input_archive->get_centre_frequency() << " " << nbin << " " <<
-    ncomp << endl;
+    ncomp << " " << ( m.get_chisq() / m.get_nfree() ) << endl;
 
   float* in_bin = input_profile->get_amps();
   float* model_bin = model->get_Profile(0,0,0)->get_amps();
