@@ -18,7 +18,13 @@ using namespace std;
 
 Calibration::ReceptionModel::ReceptionModel ()
 {
-  set_solver( new SolveMEAL );
+  set_solver( new_default_Solver() );
+}
+
+Calibration::ReceptionModel::Solver*
+Calibration::ReceptionModel::new_default_Solver ()
+{
+  return new SolveMEAL;
 }
 
 Calibration::ReceptionModel::~ReceptionModel ()

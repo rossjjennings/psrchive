@@ -79,6 +79,7 @@ void usage ()
     "  -M meta    filename with list of pulsar files \n"
     "  -j job     preprocessing job \n"
     "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
+    "  -K sigma       Reject outliers when computing CAL levels \n"
     "\n"
     "MEM: Measurement Equation Modeling \n"
     "  -- observations of an unknown source as in van Straten (2004)\n"
@@ -122,6 +123,7 @@ void usage ()
     "  -- observations of a known source as in van Straten (2013) \n"
     "\n"
     "  -S fname   filename of calibrated standard \n"
+    "  -G         Fscrunch data to match number of channels of standard \n"
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
     "  -1         solve independently for each observation \n"
@@ -539,6 +541,8 @@ static bool plot_total = false;
 static bool plot_result = false;
 static bool publication_plots = false;
 
+static unsigned solver_verbosity = 0;
+
 void enable_diagnostic (const string& name)
 {
   if (name == "prefit")
@@ -562,6 +566,9 @@ void enable_diagnostic (const string& name)
   else if (name == "result")
     plot_result = true;
 
+  else if (name == "solver")
+    solver_verbosity = 1;
+  
   else
   {
     cerr << "pcm: unrecognized diagnostic name '" << name << "'" << endl;
@@ -589,6 +596,9 @@ bool check_coordinates = true;
 
 bool must_have_cals = true;
 
+// threshold used to reject outliers while computing CAL levels
+float outlier_threshold = 0.0;
+ 
 // name of file containing list of calibrator Archive filenames
 char* calfile = NULL;
 
@@ -615,11 +625,12 @@ int actual_main (int argc, char *argv[]) try
   vector<string> equation_configuration;
 
   bool unload_each_calibrated = true;
+  bool fscrunch_data_to_template = false;
 
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:kL:l:"
+    "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
     "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
@@ -682,6 +693,10 @@ int actual_main (int argc, char *argv[]) try
       multiple_flux_calibrators = true;
       break;
 
+    case 'G':
+      fscrunch_data_to_template = true;
+      break;
+      
     case 'g':
       independent_gains = true;
       break;
@@ -729,7 +744,11 @@ int actual_main (int argc, char *argv[]) try
     case 'k':
       equal_ellipticities = true;
       break;
-
+      
+    case 'K':
+      outlier_threshold = atof(optarg);
+      break;
+      
     case 'L':
       polncal_hours = atof (optarg);
       break;
@@ -962,7 +981,8 @@ int actual_main (int argc, char *argv[]) try
 
       model->set_nthread (nthread);
       model->set_report_projection (true);
-
+      model->set_outlier_threshold (outlier_threshold);
+      
       model->set_report_initial_state (prefit_report);
       model->set_report_input_data (input_data);
 
@@ -1001,6 +1021,8 @@ int actual_main (int argc, char *argv[]) try
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );
 
+      model->get_solver()->set_verbosity( solver_verbosity );
+      
       if (retry_chisq)
         model->set_retry_reduced_chisq( retry_chisq );
 
@@ -1080,7 +1102,16 @@ int actual_main (int argc, char *argv[]) try
 
 #endif
 
+    if (fscrunch_data_to_template && model->get_nchan() != archive->get_nchan())
+    {
+      cerr << "pcm: frequency integrating data (nchan=" << archive->get_nchan()
+	   << ") to match calibrator (nchan=" << model->get_nchan()
+	   << ")" << endl;
+      archive->fscrunch_to_nchan (model->get_nchan());
+    }
+	 
     cerr << "pcm: adding observation" << endl;
+
     model->preprocess( archive );
     model->add_observation( archive );
 
@@ -1523,7 +1554,17 @@ void load_calibrator_database () try
     return;
     
   Reference::To<Pulsar::Archive> archive;
-  archive = Pulsar::Archive::load( filenames.front() );
+  while (filenames.size()) try
+  {
+    archive = Pulsar::Archive::load( filenames.front() );
+    break;
+  }
+  catch (Error& error)
+  {
+    cerr << "load_calibrator_database: error loading " << filenames.front()
+         << endl << error << endl;
+    filenames.erase( filenames.begin() );
+  }
 
   get_span ();
 

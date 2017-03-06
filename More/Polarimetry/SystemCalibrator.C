@@ -62,6 +62,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   report_initial_state = false;
   report_input_data = false;
 
+  outlier_threshold = 0.0;
+  
   if (archive)
     set_calibrator (archive);
 }
@@ -103,6 +105,14 @@ void
 Pulsar::SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
 {
   solver = s;
+}
+
+Calibration::ReceptionModel::Solver* Pulsar::SystemCalibrator::get_solver ()
+{
+  if (!solver)
+    solver = Calibration::ReceptionModel::new_default_Solver ();
+  
+  return solver;
 }
 
 //! Copy constructor
@@ -533,7 +543,8 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
     }
 
     polncal->set_nchan( get_calibrator()->get_nchan() );
-
+    polncal->set_outlier_threshold( outlier_threshold );
+    
     add_calibrator (polncal);
   }
   catch (Error& error)
@@ -605,8 +616,13 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
     // add_epoch( epoch );
 
-    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
-
+    if (verbose)
+      cerr << "Pulsar::SystemCalibrator::add_calibrator"
+	" outlier_threshold=" << outlier_threshold << endl;
+    
+    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
+				     outlier_threshold);
+    
     string identifier = cal->get_filename() + " " + tostring(isub);
 
     for (unsigned ichan=0; ichan<nchan; ichan++)

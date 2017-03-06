@@ -491,9 +491,7 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 		  "alpha.size=%d != model.nparam=%d", 
 		 alpha.size(), model.get_nparam());
 
-#ifndef _DEBUG
   if (verbose > 2)
-#endif
     std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta lamda="
 	 << lamda << " nparam=" << model.get_nparam() << std::endl;
 
@@ -533,7 +531,7 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
   }
   catch (Error& error)
   {
-    if (verbose > 2)
+    if (verbose > 0)
       verify_orthogonal (temp_copy, model);
     throw error += "MEAL::LevenbergMarquardt<Grad>::solve_delta";
   }
@@ -839,7 +837,7 @@ float MEAL::lmcoff1 (
   // Equation 15.5.5
   float chisq = weight.get_weighted_norm (delta_y);
 
-  if (LevenbergMarquardt<Grad>::verbose > 2)
+  if (LevenbergMarquardt<Grad>::verbose > 1)
     std::cerr << "MEAL::lmcoff1 chisq=" << chisq << std::endl;
 
   return chisq;

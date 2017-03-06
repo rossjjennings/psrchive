@@ -128,12 +128,15 @@ namespace Pulsar
     //! Return true if least squares minimization solvers are available
     virtual bool has_solver () const;
 
-    //! Return the transformation for the specified channel
+    //! Return the solver for the specified channel
     virtual const Solver* get_solver (unsigned ichan) const;
 
     //! Set the algorithm used to solve the measurement equation
     virtual void set_solver (Solver*);
 
+    //! Get the algorithm used to solve the measurement equation
+    virtual Solver* get_solver ();
+    
     //! Set the reduced chisq above which the solution will be retried
     virtual void set_retry_reduced_chisq (float);
 
@@ -148,6 +151,12 @@ namespace Pulsar
 
     //! Report on the data included as constraints before fitting
     virtual void set_report_input_data (bool flag = true);
+
+    //! Set the threshold used to reject outliers when computing levels
+    void set_outlier_threshold (float f) { outlier_threshold = f; }
+
+    //! Get the threshold used to reject outliers when computing levels
+    float get_outlier_threshold () const { return outlier_threshold; }
 
     //! Solve equation for each frequency
     virtual void solve ();
@@ -291,6 +300,9 @@ namespace Pulsar
     //! Report on the data included as constraints
     bool report_input_data;
 
+    //! Threshold used to reject outliers when computing levels
+    double outlier_threshold;
+    
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
 

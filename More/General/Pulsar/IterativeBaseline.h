@@ -41,6 +41,9 @@ namespace Pulsar {
     //! Set the maximum number of iterations
     void set_max_iterations (unsigned iterations);
 
+    void set_run_postprocessing (bool f) { run_postprocessing = false; }
+    bool get_run_postprocessing () const { return run_postprocessing; }
+    
   protected:
 
     //! Calculate the PhaseWeight
@@ -57,6 +60,9 @@ namespace Pulsar {
     //! The maximum number of iterations
     unsigned max_iterations;
 
+    //! Run the postprocessing algorithm
+    bool run_postprocessing;
+    
     //! The BaselineEstimator used to find the initial baseline
     Reference::To<BaselineEstimator> initial_baseline;
 

@@ -75,6 +75,9 @@ namespace Calibration {
 
     class Solver;
 
+    //! Returns a new instance of the default Solver algorithm
+    static Solver* new_default_Solver ();
+    
     //! Set the algorithm used to solve the measurement equation
     void set_solver (Solver*);
 

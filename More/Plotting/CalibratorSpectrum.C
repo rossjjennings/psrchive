@@ -24,7 +24,8 @@ Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
   plot_low = false;
   plot_Ip = false;
   norm_inv = false;
-
+  outlier_threshold = 0.0;
+  
   get_frame()->get_y_scale()->set_buf_norm(0.05);
   get_frame()->get_x_scale()->set_buf_norm(0.05);
 
@@ -69,7 +70,7 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
   unsigned npol = data->get_npol();
 
   Reference::To<const Integration> subint = get_Integration(data, isubint);
-  ReferenceCalibrator::get_levels (subint, nchan, hi, lo);
+  ReferenceCalibrator::get_levels (subint, nchan, hi, lo, outlier_threshold);
 
   assert (hi.size() == npol);
 

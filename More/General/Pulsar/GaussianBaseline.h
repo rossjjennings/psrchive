@@ -79,6 +79,9 @@ namespace Pulsar {
     //! Get the variance correction factor
     float get_variance_correction () const { return moment_correction; }
 
+    //! Static worker function for use by other classes
+    static double get_variance_correction (double sigma);
+
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 

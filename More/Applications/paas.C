@@ -5,8 +5,6 @@
  *
  ***************************************************************************/
 //
-// $Id:
-//
 // paas -- Pulsar archive analytic standard  maker
 //  (Deze programma heeft niks te maken met het christelijke feest, Pasen! :)
 
@@ -151,8 +149,6 @@ int main (int argc, char** argv) try
 
     case 'i':
       interactive = true;
-      break;
-
     case 'D':
       pgdev = "/xs";
       break;
@@ -213,6 +209,12 @@ int main (int argc, char** argv) try
       cerr << "invalid param '" << c << "'" << endl;
     }
 
+  if (optind != argc-1)
+  {
+    cerr << "paas: please specify one filename" << endl;
+    return -1;
+  }
+
   if (!pgdev.empty())
   {
     cpgopen(pgdev.c_str());
@@ -222,7 +224,7 @@ int main (int argc, char** argv) try
   
   Reference::To<Archive> archive = Archive::load (argv[optind]);
 
-  // preprocess
+  // preprocess0
   archive->fscrunch();
   archive->tscrunch();
   archive->pscrunch();
@@ -272,6 +274,12 @@ int main (int argc, char** argv) try
 
   bool iterate = true;
 
+  if (model.get_report_absolute_phases ())
+  {
+    cerr << "paas: align profile to model (report absolute phases)" << endl;    
+    model.align_to_model (archive->get_Integration(0)->get_Profile(0,0));
+  }
+  
   while (iterate)
   {
     iterate = false;
@@ -486,15 +494,23 @@ void write_details_to_file (ComponentModel& m, Archive* input_archive,
     throw Error (FailedSys, "ComponentModel::write_details_to_file",
 		 "Unable to open file=" + filename);
 
+  Profile* input_profile = input_archive->get_Integration(0)->get_Profile(0,0);
+  
+  if (m.get_report_absolute_phases())
+  {
+    double shift_in_rad = m.get_absolute_phase();
+    input_profile->rotate_phase (shift_in_rad/ (2*M_PI));
+  }
+  
   const unsigned nbin = input_archive->get_nbin();
   const unsigned ncomp = m.get_ncomponents();
 
   out << "# " << input_archive->get_filename() << " " <<
     input_archive->get_source() << " " << 
     input_archive->get_centre_frequency() << " " << nbin << " " <<
-    ncomp << endl;
+    ncomp << " " << ( m.get_chisq() / m.get_nfree() ) << endl;
 
-  float* in_bin = input_archive->get_Profile(0,0,0)->get_amps();
+  float* in_bin = input_profile->get_amps();
   float* model_bin = model->get_Profile(0,0,0)->get_amps();
   
   vector<vector<float> > values(ncomp);

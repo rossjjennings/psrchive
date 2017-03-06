@@ -167,7 +167,7 @@ namespace TextInterface
 
     //! Get the description of the attribute
     std::string get_description () const
-    { return "attribute names depend on vector element"; }
+    { return prefix + ":help for attribute list"; }
 
     //! Get the value of the attribute
     std::string get_value (const V* ptr) const;
@@ -254,7 +254,7 @@ namespace TextInterface
 
     //! Get the description of the attribute
     std::string get_description () const
-    { return "attribute names depend on map element"; }
+    { return prefix + ":help for attribute list"; }
 
     //! Get the value of the attribute
     std::string get_value (const M* ptr) const;

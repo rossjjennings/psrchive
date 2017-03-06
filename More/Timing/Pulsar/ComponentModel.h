@@ -56,6 +56,9 @@ namespace Pulsar
     //! Return the statistical goodness-of-fit
     double get_reduced_chisq () const { return chisq / nfree; }
 
+    //! Return the absolute phase
+    double get_absolute_phase () const;
+    
     // I/O
     void load (const char *fname);
     void unload (const char *fname) const;
@@ -74,6 +77,9 @@ namespace Pulsar
     void set_fit_primary_first (bool flag=true);
     bool get_fit_primary_first () const { return fit_primary_first; }
 
+    void set_report_absolute_phases (bool flag=true);
+    bool get_report_absolute_phases () const { return report_absolute_phases; }
+
     // Manipulation
     /*! \param centre the centre of the component in turns of pulse phase
      *  \param concentration the concentration of the component equal 1 / variance in radians
@@ -88,8 +94,14 @@ namespace Pulsar
 
     unsigned get_ncomponents() const;
 
-    //! Roughtly align the phases and heights of the components to match the Profile
+    //! Roughly align the phases and heights of the components to match the Profile
     void align (const Profile *profile);
+
+    //! Roughly align the Profile to match the phases and heights of the components
+    void align_to_model (Profile* profile);
+
+    //! Returns the best fit phase and scale that aligns the model to the Profile
+    void get_best_alignment (const Profile* profile, double& phase, double& scale);
 
     //! Fix the relative phases of the components
     void fix_relative_phases ();
@@ -147,6 +159,7 @@ namespace Pulsar
     bool retain_memory;
     bool fix_widths;
     bool fit_primary_first;
+    bool report_absolute_phases;
     
     float zap_height_ratio;
     float zap_concentration_ratio;
