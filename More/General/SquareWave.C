@@ -14,6 +14,9 @@
 
 #include "Pulsar/Smooth.h"
 
+#include "Pulsar/Archive.h"
+#include "Pulsar/CalInfoExtension.h"
+
 #include <fstream>
 
 using namespace std;
@@ -215,6 +218,24 @@ void Pulsar::SquareWave::levels (const Pulsar::Integration* subint,
 				 vector<vector<Estimate<double> > >& high,
 				 vector<vector<Estimate<double> > >& low)
 {
+  try {
+    // Get CalInfo extension to see what cal type is
+    Reference::To<const CalInfoExtension> ext;
+
+    const Archive* parent = subint->get_parent();
+    if (parent)
+      ext = parent->get<CalInfoExtension>();
+
+    if (ext)
+    {
+      if (verbose)
+	cerr << "Pulsar::SquareWave::levels CalInfoExtension::cal_nstate="
+	     << ext->cal_nstate << endl;
+      set_nstate( ext->cal_nstate );
+    }
+  }
+  catch (...) { }
+
   if (nstate<2 || nstate>3) 
     throw Error (InvalidState, "Pulsar::SquareWave::levels", 
         "unexpected nstate = %d", nstate);

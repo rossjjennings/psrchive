@@ -6,9 +6,6 @@
  ***************************************************************************/
 
 #include "Pulsar/Integration.h"
-
-#include "Pulsar/Archive.h"
-#include "Pulsar/CalInfoExtension.h"
 #include "Pulsar/SquareWave.h"
 
 using namespace std;
@@ -19,16 +16,10 @@ void
 Pulsar::Integration::cal_levels (vector<vector<Estimate<double> > >& high,
 				 vector<vector<Estimate<double> > >& low) const
 {
+  if (verbose)
+    cerr << "Pulsar::Integration::cal_levels using SquareWave::levels" << endl;
+  
   SquareWave estimator;
   estimator.verbose = verbose;
-  
-  // Get CalInfo extension to see what cal type is
-  Reference::To<const CalInfoExtension> ext;
-  if (parent)
-    ext = parent->get<CalInfoExtension>();
-
-  if (ext) 
-    estimator.set_nstate( ext->cal_nstate );
-
   estimator.levels (this, high, low);
 }
