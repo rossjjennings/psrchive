@@ -144,6 +144,9 @@ namespace Pulsar {
     //! Connect to a new parent archive (also useful after cloning)
     void adopt (const Archive*);
 
+    //! Return pointer to the parent Archive
+    const Archive* get_parent () const;
+    
     //! Return an orphaned pscrunched dedispersed fscrunched clone of self
     Integration* total () const;
     

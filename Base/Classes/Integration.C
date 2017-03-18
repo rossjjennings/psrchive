@@ -242,6 +242,11 @@ void Pulsar::Integration::adopt (const Archive* archive)
   parent = archive;
 }
 
+const Pulsar::Archive* Pulsar::Integration::get_parent () const
+{
+  return parent;
+}
+
 void Pulsar::Integration::range_check (unsigned ipol, unsigned ichan) const
 {
   if (ipol >= get_npol())
