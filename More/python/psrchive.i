@@ -352,6 +352,15 @@ double get_tobs(const char* filename) {
         if (p==NULL) return 0.0;
         return p->get_telescope_azimuth().getDegrees();
     }
+    double get_parallactic_angle() {
+        Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+        if (p==NULL) return 0.0;
+        p->update(self);
+        return p->get_parallactic_angle().getDegrees();
+    }
+    void set_verbose() {
+        self->verbose = 1;
+    }
 
     // Interface to Barycentre
     double get_doppler_factor() {
