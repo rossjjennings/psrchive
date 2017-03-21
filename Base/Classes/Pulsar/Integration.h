@@ -144,9 +144,6 @@ namespace Pulsar {
     //! Connect to a new parent archive (also useful after cloning)
     void adopt (const Archive*);
 
-    //! Return pointer to the parent Archive
-    const Archive* get_parent () const;
-    
     //! Return an orphaned pscrunched dedispersed fscrunched clone of self
     Integration* total () const;
     
@@ -362,7 +359,8 @@ namespace Pulsar {
 
     //! Provide access to the expert interface
     Expert* expert ();
-
+    const Expert* expert () const;
+    
   protected:
 
     // //////////////////////////////////////////////////////////////////

@@ -116,6 +116,12 @@ Pulsar::Integration::Expert* Pulsar::Integration::expert ()
   return expert_interface; 
 }
 
+//! Provide access to the expert interface
+const Pulsar::Integration::Expert* Pulsar::Integration::expert () const
+{
+  return expert_interface; 
+}
+
 Pulsar::Integration::Integration (const Integration& subint)
 {
   throw Error (Undefined, "Integration copy constructor",
@@ -240,11 +246,6 @@ void Pulsar::Integration::adopt (const Archive* archive)
 
   orphaned = 0;
   parent = archive;
-}
-
-const Pulsar::Archive* Pulsar::Integration::get_parent () const
-{
-  return parent;
 }
 
 void Pulsar::Integration::range_check (unsigned ipol, unsigned ichan) const
