@@ -15,6 +15,7 @@
 #include "Pulsar/Smooth.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/CalInfoExtension.h"
 
 #include <fstream>
@@ -26,7 +27,6 @@ Pulsar::SquareWave::SquareWave ()
   risetime = 0.03;
   threshold = 6.0;
   use_nbin = 256;
-  nstate = 2;      // Default to normal 2-state square wave
   verbose = false;
   outlier_threshold = 3.0;
 }
@@ -218,23 +218,24 @@ void Pulsar::SquareWave::levels (const Pulsar::Integration* subint,
 				 vector<vector<Estimate<double> > >& high,
 				 vector<vector<Estimate<double> > >& low)
 {
-  try {
+  unsigned nstate = 2;      // Default to normal 2-state square wave
+
+  if (subint->expert()->has_parent())
+  {  
     // Get CalInfo extension to see what cal type is
     Reference::To<const CalInfoExtension> ext;
 
-    const Archive* parent = subint->get_parent();
-    if (parent)
-      ext = parent->get<CalInfoExtension>();
+    const Archive* parent = subint->expert()->get_parent();
+    ext = parent->get<CalInfoExtension>();
 
     if (ext)
     {
       if (verbose)
 	cerr << "Pulsar::SquareWave::levels CalInfoExtension::cal_nstate="
 	     << ext->cal_nstate << endl;
-      set_nstate( ext->cal_nstate );
+      nstate = ext->cal_nstate;
     }
   }
-  catch (...) { }
 
   if (nstate<2 || nstate>3) 
     throw Error (InvalidState, "Pulsar::SquareWave::levels", 

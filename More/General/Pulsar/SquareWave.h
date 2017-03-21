@@ -68,12 +68,6 @@ namespace Pulsar {
     //! Get the threshold for square wave detection
     float get_threshold () const { return threshold; }
 
-    //! Set the number of square wave states
-    void set_nstate (unsigned s) { nstate = s; }
-
-    //! Get the number of square wave states
-    unsigned get_nstate () const { return nstate; }
-
     //! Set the threshold used to reject outliers when computing levels
     void set_outlier_threshold (float f) { outlier_threshold = f; }
 
@@ -87,7 +81,6 @@ namespace Pulsar {
     float risetime;
     float threshold;
     unsigned use_nbin;
-    unsigned nstate;
     float outlier_threshold;
   };
 
