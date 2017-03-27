@@ -102,7 +102,7 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a,
     
     if (big <= singular_threshold)
       throw Error (InvalidState, "MEAL::GaussJordan",
-		   "Singular Matrix.  icol=%d nrow=%d pivot=%lf",
+		   "Singular Matrix.  icol=%d nrow=%d pivot=%le",
 		   i, nrow, big);
 
     assert (irow != -1 && icol != -1);
