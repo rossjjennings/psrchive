@@ -66,6 +66,11 @@ namespace Pulsar {
     //! Return the Receiver
     const Receiver* get_Receiver () const;
 
+    //! Set the Receiver extension to that of the input Archive
+    void set_Receiver (const Archive*);
+    std::string get_receiver_basis_filename () const;
+
+
     // ///////////////////////////////////////////////////////////////////
     //
     // useful for unloading
@@ -140,9 +145,6 @@ namespace Pulsar {
     //! The PolnCalibratorExtension of the Archive passed during construction
     Reference::To<const PolnCalibratorExtension> poln_extension;
 
-    //! The Receiver Extension of the Archive passed during construction
-    Reference::To<const Receiver> receiver;
-
     //! The FeedExtension of the Archive passed during construction
     Reference::To<const FeedExtension> feed;
 
@@ -175,6 +177,10 @@ namespace Pulsar {
 
     void build_response();
     void patch_response();
+
+    //! The Receiver Extension used as the basis for corrections
+    Reference::To<const Receiver> receiver;
+    std::string receiver_basis_filename;
   };
 
   //! Create a new transformation instance described by the extension
