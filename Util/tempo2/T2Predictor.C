@@ -318,8 +318,14 @@ public:
   void construct (ChebyModel*, long double obs_freq);
 
   MJD get_reftime() const { return t0; }
+  
   Pulsar::Phase get_refphase() const { return p0; }
-  bool is_valid_phase(Pulsar::Phase p) const { return ((p-pstart).in_turns() > 0) && ((pend-p).in_turns() > 0); }
+  
+  bool is_valid_phase(Pulsar::Phase p) const
+  {
+    return ((p-pstart).in_turns() > 0) && ((pend-p).in_turns() > 0);
+  }
+  
   long double get_reffrequency() const { return f0; }
 
   Pulsar::Phase phase (const MJD&) const;
@@ -351,9 +357,16 @@ void cheby_interface::construct (ChebyModel* _model, long double _obs_freq)
   long double tmid = 0.5 * (model->mjd_start + model->mjd_end);
   t0 = to_MJD( tmid );
   p0 = to_Phase( ChebyModel_GetPhase (model, tmid, obs_freq) );
+  f0 = ChebyModel_GetFrequency (model, tmid, obs_freq);
+
   pstart = to_Phase( ChebyModel_GetPhase (model, model->mjd_start, obs_freq) );
   pend = to_Phase( ChebyModel_GetPhase (model, model->mjd_end, obs_freq) );
-  f0 = ChebyModel_GetFrequency (model, tmid, obs_freq);
+
+  // hard-coded 1% buffer could be parameterized if needed
+  double buffer = (pend - pstart).in_turns() * 0.01;
+  pstart -= buffer;
+  pend += buffer;
+  
   // cerr << "t0=" << t0 << " p0=" << p0 << " f0=" << f0 << endl;
 }
 
@@ -397,14 +410,15 @@ MJD Tempo2::Predictor::iphase (const Pulsar::Phase& phase, const MJD* guess) con
     chebys[icheby].construct( predictor.modelset.cheby.segments + icheby,
 			      observing_frequency );
 
-    if(chebys[icheby].is_valid_phase(phase)){
-	    float dist = fabs ( (chebys[icheby].get_refphase() - phase).in_turns() );
-	    if (notset || dist < min_dist)
-	    {
-		    imin = icheby;
-		    min_dist = dist;
-		    notset=false;
-	    }
+    if(chebys[icheby].is_valid_phase(phase))
+    {
+      float dist = fabs ( (chebys[icheby].get_refphase() - phase).in_turns() );
+      if (notset || dist < min_dist)
+      {
+	imin = icheby;
+	min_dist = dist;
+	notset=false;
+      }
     }
   }
 
