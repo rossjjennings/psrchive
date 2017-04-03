@@ -94,10 +94,10 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
 
   outlier_threshold = 0.0;
   
-  if (receiver)
+  if (has_Receiver())
   {
-    Pauli::basis().set_basis( receiver->get_basis() );    
-    Stokes<double> cal = receiver->get_reference_source ();
+    Pauli::basis().set_basis( get_Receiver()->get_basis() );    
+    Stokes<double> cal = get_Receiver()->get_reference_source ();
     if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
     set_reference_source (cal);
