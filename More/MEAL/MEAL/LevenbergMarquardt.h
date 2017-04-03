@@ -491,14 +491,22 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 		  "alpha.size=%d != model.nparam=%d", 
 		 alpha.size(), model.get_nparam());
 
-  if (verbose > 2)
+  if (verbose > 0)
     std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta lamda="
 	 << lamda << " nparam=" << model.get_nparam() << std::endl;
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++)
+  {
+    if (verbose > 0)
+      std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta i=" << ifit
+		<< " " << model.get_param_name(ifit);
+ 
     if (model.get_infit(ifit))
     {
+      if (verbose > 0)
+	std::cerr << " in fit" << std::endl;
+      
       unsigned jinfit = 0;
       for (unsigned jfit=0; jfit<model.get_nparam(); jfit++)
 	if (model.get_infit(jfit)) {
@@ -510,7 +518,9 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
       delta[iinfit][0]=best_beta[ifit];
       iinfit ++;
     }
-
+    else if (verbose > 0)
+      std::cerr << " fixed" << std::endl;
+  }
 
   if (iinfit == 0)
     throw Error (InvalidState,
