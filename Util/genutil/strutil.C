@@ -92,3 +92,16 @@ void string_split ( string source, string &before, string &after, string delimit
   }
 }
 
+void string_split_on_any ( string source, string &before, string &after, string delim_chars )
+{
+  string::size_type pos = source.find_first_of( delim_chars );
+
+  before = "";
+  after = "";
+
+  if( pos != string::npos )
+    {
+      before = source.substr( 0, pos );
+      after = source.substr( pos + 1 );
+    }
+}
