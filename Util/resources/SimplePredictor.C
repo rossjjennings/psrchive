@@ -144,7 +144,8 @@ Pulsar::Phase Pulsar::SimplePredictor::dispersion (const MJD &t, long double MHz
 
 void Pulsar::SimplePredictor::load (FILE* fptr)
 {
-  vector<char> buffer (256);
+  rewind(fptr);
+  vector<char> buffer (512);
   char* buf = &buffer[0];
 
   if (verbose)
@@ -153,6 +154,9 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
   while ( fgets (buf, buffer.size(), fptr) == buf )
   {
     string line = buf;
+
+    if (verbose)
+      cerr << "Pulsar::SimplePredictor::load line ='" << buf << "'" << endl;
 
     line = stringtok (line, "#\n", false);  // get rid of comments
 
@@ -165,8 +169,11 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
     if (verbose)
       cerr << "Pulsar::SimplePredictor::load key ='" << key << "'" << endl;
 
-    if (!line.length())
+    if(!key.length()) {
+      if(verbose)
+	cerr<< "Pulsar::SimplePredictor::load Ignoring empty key = '" << key << "'" <<endl;
       continue;
+    }
 
     string val = stringtok (line, " \t");
 
@@ -181,10 +188,16 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
 void Pulsar::SimplePredictor::parse(string key, string val) {
 
   if (verbose)
-    cerr << "Pulsar::SimplePredictor::parse key='" << key << "' val ='" << val << "'" << endl;
+    cerr << "Pulsar::SimplePredictor::parse key = '" << key << "' val = '" << val << "'" << endl;
 
-  
-  if (key == "SOURCE:")
+  if(key == "SNR:"){
+    if(verbose)
+      cerr << "Pulsar::SimplePredictor::parse ignoring key = '" << key <<"'"<< endl;
+    return;
+  }
+    
+
+  else if (key == "SOURCE:")
     name = val;
 
   else if (key == "DM:")
