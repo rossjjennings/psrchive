@@ -10,11 +10,13 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/CalibratorExtension.h"
+
+#include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
 #include "Pulsar/RobustMower.h"
+#include "Pulsar/Statistics.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"
@@ -174,9 +176,49 @@ catch (Error& error)
 
 string Pulsar::ZapInterpreter::cal (const string& args)
 {
-  zap_calibrator = !zap_calibrator;
+  /*
+    Passing false as the second argument disables the default variable
+    substitution and expression evaluation using the Archive::Interpreter.
+    
+    This is done because any variables will be interpreted using the
+    PolnCalibratorExtension::Transformation::Interface class.
+  */
+  vector<string> arguments = setup (args, false);
+
+  if (arguments.size() == 0)
+  {
+    zap_calibrator = !zap_calibrator;
+    return response (Good);
+  }
+
+  /* If arguments are specified, each is interpreted as an expression
+    to be evaluated using the
+    PolnCalibratorExtension::Transformation::Interface class.  This
+    could also be extended to FluxCalibratorExtension */
+
+  Reference::To<PolnCalibratorExtension> ext;
+  ext = get()->get<PolnCalibratorExtension>();
+  if (!ext)
+    return response (Fail, "archive does not contain PolnCalibratorExtension");
+
+  for (unsigned ichan=0; ichan<ext->get_nchan(); ichan++)
+  {
+    PolnCalibratorExtension::Transformation::Interface parser;
+    parser.set_instance( ext->get_transformation(ichan) );
+    
+    for (unsigned iarg=0; iarg < arguments.size(); iarg++)
+    {
+      string expression = arguments[iarg];
+      string value = process( &parser, expression );
+
+      if (fromstring<bool>( value ))
+	ext->set_weight( ichan, 0.0 );
+    }
+  }
+  
   return response (Good);
 }
+
 
 string Pulsar::ZapInterpreter::empty ()
 {
