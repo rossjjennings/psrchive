@@ -90,7 +90,13 @@ std::string stringprintf (const char *fmt ...);
 
 void string_split( std::string source, std::string &before, std::string &after, std::string delimiter );
 
+// //////////////////////////////////////////////////////////
+// string_split splits a string setting parameters before and after
+// to the contents before and after the ANY characters in the delim_chars string
+// before and after will be empty if NONE of delim_chars exist
+// //////////////////////////////////////////////////////////
 
+void string_split_on_any ( std::string source, std::string &before, std::string &after, std::string delim_chars );
 
 #endif
 

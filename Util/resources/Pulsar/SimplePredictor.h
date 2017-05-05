@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+
 namespace Pulsar {
 
   //! Simple pulse phase model
@@ -113,6 +114,8 @@ namespace Pulsar {
 
     //! Telescope name
     std::string telescope;
+
+    void parse(std::string key, std::string value);
 
   };
 
