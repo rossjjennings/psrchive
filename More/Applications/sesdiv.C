@@ -38,6 +38,7 @@ void usage ()
     "\n"
     " -T hours               time between sessions \n"
     " -S secs                seconds between sessions \n"
+    " -L                     read and write session lengths \n"
     " -v                     verbose output \n"
     " -V                     very verbose output \n"
        << endl;
@@ -87,13 +88,14 @@ int main (int argc, char** argv)
 
   float between_sessions = 10.0;
   bool include_minutes = false;
+  bool use_length = false;
 
   bool verbose = false;
   bool vverbose = false;
-
+  
   double frequency = 0.0;
   
-  const char* args = "hb:f:S:T:vV";
+  const char* args = "hb:f:LS:T:vV";
   int c = 0;
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -109,7 +111,12 @@ int main (int argc, char** argv)
     case 'f':
       frequency = atof(optarg);
       break;
-      
+     
+    case 'L':
+      use_length = true;
+      Pulsar::ArchiveSort::read_length = true;
+      break;
+ 
     case 'h':
       usage ();
       return 0;
@@ -265,7 +272,10 @@ int main (int argc, char** argv)
 	cerr << "Adding " << entry->filename
 	     << " to session " << session_count << endl;
 
-      fprintf (session, "%s %f\n", entry->filename.c_str(), entry->length);
+      if (use_length)
+        fprintf (session, "%s %f\n", entry->filename.c_str(), entry->length);
+      else
+        fprintf (session, "%s\n", entry->filename.c_str());
     }
 
     last = entry;

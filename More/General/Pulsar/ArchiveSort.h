@@ -51,6 +51,8 @@ namespace Pulsar {
     //! Load a list of ArchiveSort instances and sort them
     static void load (std::istream& input, std::list<ArchiveSort>& entries);
 
+    //! Enable the new ArchiveSort behaviour (in new psrpl pipelines)
+    static bool read_length;
   };
 
   //! Comparison operator
