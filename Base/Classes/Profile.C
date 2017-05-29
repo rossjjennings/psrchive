@@ -57,6 +57,13 @@ void nbinify (int& istart, int& iend, int nbin)
     iend += ( (istart-iend)/nbin + 1 ) * nbin;
 }
 
+static unsigned instance_count = 0;
+
+unsigned Pulsar::Profile::get_instance_count ()
+{
+  return instance_count;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::init
@@ -65,6 +72,7 @@ void Pulsar::Profile::init()
 {
   weight = 1.0;
   centrefreq = -1.0;
+  instance_count ++;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -78,6 +86,10 @@ Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
     zero ();
 }
 
+Pulsar::Profile::~Profile()
+{
+  instance_count --;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //

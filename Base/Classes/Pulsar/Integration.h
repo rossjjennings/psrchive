@@ -56,6 +56,9 @@ namespace Pulsar {
     //! Destructor
     virtual ~Integration ();
 
+    //! returns the number of Integration instances
+    static unsigned get_instance_count ();
+
     //! Textual interface to Archive attributes
     class Interface;
 
