@@ -126,10 +126,10 @@ namespace Pulsar {
     mutable Reference::To<ProfileStats> stats;
 
     const Profile* get_Profile () const;
-    mutable Reference::To<const Profile> profile;
+    mutable Reference::To<const Profile, false> profile;
 
     const Integration* get_Integration () const;
-    mutable Reference::To<const Integration> integration;
+    mutable Reference::To<const Integration, false> integration;
 
     mutable std::vector< Reference::To<Plugin> > plugins;
 
