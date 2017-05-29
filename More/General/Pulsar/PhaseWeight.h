@@ -147,7 +147,7 @@ namespace Pulsar {
     std::vector<float> weight;
 
     //! The Profile to which the weights apply
-    mutable Reference::To<const Profile> profile;
+    mutable Reference::To<const Profile, false> profile;
 
     //! Flag set when the statistics have been calculated
     mutable bool built;

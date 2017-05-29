@@ -38,7 +38,7 @@ namespace Pulsar
   protected:
 
     mutable Reference::To<PolnProfileStats> stats;
-    mutable Reference::To<const PolnProfile> profile;
+    mutable Reference::To<const PolnProfile, false> profile;
   };
 }
 

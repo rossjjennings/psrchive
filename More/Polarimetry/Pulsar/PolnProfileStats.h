@@ -90,7 +90,7 @@ namespace Pulsar {
   protected:
 
     //! The PolnProfile from which statistics will be derived
-    Reference::To<const PolnProfile> profile;
+    Reference::To<const PolnProfile, false> profile;
 
     //! Computes the statistics of a single pulse profile
     Reference::To<ProfileStats> stats;
