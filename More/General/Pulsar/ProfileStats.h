@@ -96,7 +96,7 @@ namespace Pulsar
   protected:
 
     //! The Profile from which statistics will be derived
-    Reference::To<const Profile> profile;
+    Reference::To<const Profile, false> profile;
 
     //! The algorithm used to find the on-pulse phase bins
     Reference::To<ProfileWeightFunction> onpulse_estimator;
