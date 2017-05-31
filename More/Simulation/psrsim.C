@@ -152,18 +152,20 @@ void psrsim::process (Pulsar::Archive* data)
 
     Calibration::Feed receiver;
     receiver.set_orientation (0, receptor_angles.first * M_PI/180);
-    receiver.set_ellipticity (0, receptor_angles.second * M_PI/180);
+    receiver.set_orientation (1, receptor_angles.first * M_PI/180);
 
-    receiver.set_orientation (1, receptor_angles.first * M_PI/180 + M_PI/2);
-    receiver.set_ellipticity (1, -receptor_angles.second * M_PI/180);
+    receiver.set_ellipticity (0, receptor_angles.second * M_PI/180);
+    receiver.set_ellipticity (1, receptor_angles.second * M_PI/180);
 
     Jones<double> J = receiver.evaluate();
+
+    cerr << "psrsim: simulated response = " << J << endl;
+
+    data->convert_state (Signal::Coherence);    
 
     for (unsigned isub=0; isub < nsubint; isub++)
       data->get_Integration(isub)->expert()->transform (J);
 
-    data->convert_state (Signal::Coherence);
-    
     string unload = "psrsim_reception.ar";
     data->unload (unload);
 
