@@ -17,6 +17,7 @@
 #include "Pulsar/LawnMower.h"
 #include "Pulsar/RobustMower.h"
 #include "Pulsar/Statistics.h"
+#include "Pulsar/InterQuartileRange.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"
@@ -51,6 +52,12 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "mow", "median smooth the profile and clean spikes",
       "usage: mow <TI> \n"
       "  type 'zap mow help' for text interface help" );
+
+  add_command 
+    ( &ZapInterpreter::iqr, 
+      "iqr", "zap subint/chan outliers using inter-quartile range",
+      "usage: iqr <TI> \n"
+      "  type 'zap iqr help' for text interface help" );
 
   add_command
     ( &ZapInterpreter::chan,
@@ -171,6 +178,37 @@ string Pulsar::ZapInterpreter::mow (const string& args) try
 }
 catch (Error& error)
 {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ZapInterpreter::iqr (const string& args) try
+{
+  bool expand = false;
+  vector<string> arguments = setup (args, expand);
+
+  if (!iq_range)
+    iq_range = new InterQuartileRange;
+
+  if (!arguments.size())
+  {
+    (*iq_range)( get() );
+    return response (Good);
+  }
+
+  //! Zap median interface
+  Reference::To<TextInterface::Parser> interface = iq_range->get_interface();
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+  {
+    if (icmd)
+      retval += " ";
+    retval += interface->process (arguments[icmd]);
+  }
+
+  return retval;
+}
+catch (Error& error) {
   return response (Fail, error.get_message());
 }
 

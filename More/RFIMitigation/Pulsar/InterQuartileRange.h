@@ -29,7 +29,7 @@ namespace Pulsar {
     std::string expression;
 
     //! Fraction of IQR
-    float threshold;
+    float cutoff_threshold;
     
   public:
 
@@ -38,7 +38,28 @@ namespace Pulsar {
     
     //! Flag bad sub-integrations and frequency channels using IQR
     void transform (Archive*);
-    
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Parser* get_interface ();
+
+    // Text interface to the InterQuartileRange class
+    class Interface : public TextInterface::To<InterQuartileRange> {
+    public:
+      Interface (InterQuartileRange* = 0);
+    };
+
+    //! Set the statistical expression
+    void set_expression (const std::string& exp) { expression = exp; }
+
+    //! Get the statistical expression
+    std::string get_expression () const { return expression; }
+
+    //! Set the cut-off threshold
+    void set_cutoff_threshold (float t) { cutoff_threshold = t; }
+
+    //! Get the cut-off threshold
+    float get_cutoff_threshold () const { return cutoff_threshold; }
+
   };
 
 }

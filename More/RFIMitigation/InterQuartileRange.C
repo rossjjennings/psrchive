@@ -21,7 +21,7 @@ std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::InterQuartileRange::InterQuartileRange ()
 {
-  threshold = 1.5;
+  cutoff_threshold = 1.5;
 }
 
 void Pulsar::InterQuartileRange::transform (Archive* archive)
@@ -95,10 +95,10 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
       if (subint->get_weight(ichan) == 0)
 	continue;
 
-      if (values[revisit] < Q1 - threshold * IQR)
+      if (values[revisit] < Q1 - cutoff_threshold * IQR)
 	subint->set_weight(ichan, 0);
 
-      if (values[revisit] > Q3 + threshold * IQR)
+      if (values[revisit] > Q3 + cutoff_threshold * IQR)
 	subint->set_weight(ichan, 0);
 
       revisit ++;
@@ -108,3 +108,23 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
   assert (revisit == valid);
 }
 
+
+//! Get the text interface to the configuration attributes
+TextInterface::Parser* Pulsar::InterQuartileRange::get_interface ()
+{
+  return new Interface (this);
+}
+
+Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &InterQuartileRange::get_expression,
+       &InterQuartileRange::set_expression,
+       "exp", "Statistical expression" );
+
+  add( &InterQuartileRange::get_cutoff_threshold,
+       &InterQuartileRange::set_cutoff_threshold,
+       "cutoff", "Outlier threshold: Q1-cutoff*IQR - Q3+cutoff*IQR" );
+}
