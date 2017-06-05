@@ -65,27 +65,38 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
 	double mean = 0;
 	double var = 0;
 	profile->stats (&mean, &var);
-	values[valid] = var;
+	values[valid] = sqrt(var)/mean; // i.e. the modulation index
       }
       valid ++;
     }
   }
-  
+
+#ifdef _DEBUG
+  cerr << "nchan=" << nchan << " nsub=" << nsubint << " nchan*nsub=" << nchan*nsubint << " valid=" << valid << endl;
+#endif
+
   std::vector<float> val (values.begin(), values.begin()+ valid);
     
   unsigned iq1 = valid/4;
   unsigned iq3 = (valid*3)/4;
-    
-  std::nth_element (val.begin(), val.begin()+iq1, val.begin()+valid);
-  double Q1 = values[ iq1 ];
-  
-  std::nth_element (val.begin()+iq1, val.begin()+iq3, val.begin()+valid);
-  double Q3 = values[ iq3 ];
-  
+
+#ifdef _DEBUG
+  cerr << "iQ1=" << iq1 << " iQ3=" << iq3 << endl;
+#endif
+
+  std::sort (val.begin(), val.begin()+valid);
+  double Q1 = val[ iq1 ];
+  double Q3 = val[ iq3 ];
+
   double IQR = Q3 - Q1;
 
+#ifdef _DEBUG
+  cerr << "Q1=" << Q1 << " Q3=" << Q3 << " IQR=" << IQR << endl;
+#endif
+
   unsigned revisit = 0;
-  
+  unsigned too_high = 0;
+  unsigned too_low = 0; 
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
     Integration* subint = archive->get_Integration( isubint );
@@ -96,14 +107,24 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
 	continue;
 
       if (values[revisit] < Q1 - cutoff_threshold * IQR)
+      {
 	subint->set_weight(ichan, 0);
+        too_low ++;
+      }
 
       if (values[revisit] > Q3 + cutoff_threshold * IQR)
+      {
 	subint->set_weight(ichan, 0);
+        too_high ++;
+      }
 
       revisit ++;
     }
   }
+
+#ifdef _DEBUG
+  cerr << "too high=" << too_high << " too low=" << too_low << endl;
+#endif
 
   assert (revisit == valid);
 }
