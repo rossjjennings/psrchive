@@ -17,11 +17,23 @@
 namespace Pulsar {
 
   //! Uses the inter-quartile range to find bad channels and sub-integrations
-  /*! By default, this algorithm uses the off-pulse variance as the statistic
-    derived from each pulse profile and used to find outliers.  This behaviour
-    can be changed by setting the expression attribute. */
+  /*! By default, this algorithm uses the modulation index as the
+    statistic derived from each pulse profile and used to find
+    outliers.  This behaviour can be changed by setting the expression
+    attribute. */
   class InterQuartileRange : public Transformation<Archive>
   {
+
+  private:
+    //! Count of subint/freq that were excised for being a high outlier
+    unsigned too_high;
+    //! Count of subint/freq that were excised for being a low outlier
+    unsigned too_low;
+    //! Count of subint/freq that were evaluated
+    unsigned valid;
+
+    //! Flag bad sub-integrations and frequency channels using IQR
+    void once (Archive*);
 
   protected:
 
@@ -30,13 +42,16 @@ namespace Pulsar {
 
     //! Fraction of IQR
     float cutoff_threshold;
+
+    //! Maximum number of iterations before aborting
+    unsigned max_iterations;
     
   public:
 
     //! Default construction
     InterQuartileRange ();
     
-    //! Flag bad sub-integrations and frequency channels using IQR
+    //! Iteratively flag bad sub-integrations and frequency channels using IQR
     void transform (Archive*);
 
     //! Get the text interface to the configuration attributes

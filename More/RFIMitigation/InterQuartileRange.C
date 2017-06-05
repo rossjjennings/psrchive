@@ -22,10 +22,42 @@ std::string process (TextInterface::Parser* interface, const std::string& txt);
 Pulsar::InterQuartileRange::InterQuartileRange ()
 {
   cutoff_threshold = 1.5;
+  max_iterations = 15;
 }
 
 void Pulsar::InterQuartileRange::transform (Archive* archive)
 {
+  unsigned tot_valid = 0;
+  unsigned tot_high = 0;
+  unsigned tot_low = 0;
+  unsigned iter = 0;
+  
+  while (iter < max_iterations)
+  {
+    once (archive);
+
+    if (iter == 0)
+      tot_valid = valid;
+
+    tot_high += too_high;
+    tot_low += too_low;
+    iter ++;
+    
+    if (too_high + too_low == 0)
+      break;
+  }
+
+  cerr << "Pulsar::InterQuartileRange::transform tested=" << tot_valid
+       << " iter=" << iter << " high=" << tot_high << " low=" << tot_low
+       << " %=" << (tot_high+tot_low)*100.0/tot_valid << endl;
+}
+
+void Pulsar::InterQuartileRange::once (Archive* archive)
+{
+  too_high = 0;
+  too_low = 0; 
+  valid = 0;
+
   Reference::To<ProfileStats> stats;
   Reference::To<TextInterface::Parser> parser;
 
@@ -39,7 +71,6 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
   unsigned nsubint = archive->get_nsubint();
   
   std::vector<float> values (nchan * nsubint);
-  unsigned valid = 0;
   
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
@@ -95,8 +126,6 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
 #endif
 
   unsigned revisit = 0;
-  unsigned too_high = 0;
-  unsigned too_low = 0; 
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
     Integration* subint = archive->get_Integration( isubint );
