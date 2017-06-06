@@ -49,8 +49,13 @@ namespace Pulsar {
     //! Get the class index
     unsigned get_class () const { return iclass; }
 
+    //! Set the outlier threshold
+    void set_outlier_threshold (float t) { outlier_threshold = t; }
+    //! Get the outlier threshold
+    float get_outlier_threshold () const { return outlier_threshold; }
+
     //! Return the Calibrator::Info from the Archive
-    static Calibrator::Info* get_Info (const Archive*);
+    static Calibrator::Info* get_Info (const Archive*, float outlier_threshold);
 
   protected:
 
@@ -67,6 +72,9 @@ namespace Pulsar {
 
     // Flag set to true when data are managed externally (disables prepare)
     bool managed;
+
+    // Threshold used to detect outliers when creating a SingleAxis calibrator
+    float outlier_threshold;
   };
 
 }

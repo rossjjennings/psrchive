@@ -54,6 +54,9 @@ namespace Pulsar {
     void set_reduced_chisq (bool x) { reduced_chisq = x; }
     bool get_reduced_chisq () const { return reduced_chisq; }
 
+    void set_outlier_threshold (float t) { outlier_threshold = t; }
+    float get_outlier_threshold () const { return outlier_threshold; }
+
   protected:
 
     //! Separate panels for each class of calibrator parameters
@@ -73,6 +76,9 @@ namespace Pulsar {
     
     //! plot the goodness-of-fit statistic
     bool reduced_chisq;
+
+    //! threshold used to detect outliers when creating SingleAxis calibrator
+    float outlier_threshold;
   };
 
 }

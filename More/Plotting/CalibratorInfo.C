@@ -22,6 +22,8 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
   calibrator_stokes = false;
   calibrator_stokes_degree = false;
   reduced_chisq = false;
+
+  outlier_threshold = 0.0;
 }
 
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
@@ -43,7 +45,7 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     info = new SolverInfo (new PolnCalibrator(data));
 
   else
-    info = CalibratorParameter::get_Info (data);
+    info = CalibratorParameter::get_Info (data, outlier_threshold);
 
   get_frame()->get_label_above()->set_centre("$file\n"+info->get_title());
 
@@ -128,6 +130,10 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
 {
   if (instance)
     set_instance (instance);
+
+  add( &CalibratorInfo::get_outlier_threshold,
+       &CalibratorInfo::set_outlier_threshold,
+       "cutoff", "Outlier threshold (as in pac -K)" );
 
   add( &CalibratorInfo::get_between_panels,
        &CalibratorInfo::set_between_panels,
