@@ -73,7 +73,10 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
 
   psrfits_read_col (fptr, "CHAN_BW", &(hrow->chan_bw), row);
 
-  psrfits_read_col (fptr, "REF_FREQ", &(hrow->ref_freq), row);
+  if (hdr_version < 6.0)
+    hrow->ref_freq = 0.0;
+  else
+    psrfits_read_col (fptr, "REF_FREQ", &(hrow->ref_freq), row);
 
   psrfits_read_col (fptr, "DM", &(hrow->dispersion_measure), row,
 		    zero, zero, Pulsar::Archive::verbose > 2);
