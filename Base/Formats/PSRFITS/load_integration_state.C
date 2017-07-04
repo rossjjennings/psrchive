@@ -280,6 +280,12 @@ void Pulsar::FITSArchive::load_state (fitsfile* fptr)
   if (chan_bw != zero)
     set_bandwidth (chan_bw * nchan);
 
+  double reffreq = 0.0;
+  psrfits_read_key (fptr, "REFFREQ", &reffreq, zero, verbose > 2);
+
+  if (reffreq != zero)
+    set_centre_frequency (reffreq);
+  
   double dm = 0.0;
   psrfits_read_key (fptr, "DM", &dm, zero, verbose > 2);
   if (dm != zero)

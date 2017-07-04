@@ -31,6 +31,7 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow) try
   psrfits_write_col (fptr, "CTR_FREQ", row, hrow->ctr_freq);
   psrfits_write_col (fptr, "NCHAN",    row, hrow->nchan);
   psrfits_write_col (fptr, "CHAN_BW",  row, hrow->chan_bw);
+  psrfits_write_col (fptr, "REF_FREQ", row, hrow->ref_freq);
   psrfits_write_col (fptr, "DM",       row, hrow->dispersion_measure);
   psrfits_write_col (fptr, "RM",       row, hrow->rotation_measure);
 

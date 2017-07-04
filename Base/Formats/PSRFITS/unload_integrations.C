@@ -42,7 +42,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   fits_get_colnum(ffptr, CASEINSEN, "PERIOD", &percolnum, &perstatus);
 
   // Write folding period if predictor model does not exist
-  if (has_model() || calfreq_set)
+  if (perstatus == 0 && (has_model() || calfreq_set))
   {
     if (verbose > 2) 
       cerr << "Pulsar::FITSArchive::unload_integrations delete PERIOD column"
@@ -103,7 +103,8 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   psrfits_update_key (ffptr, "NCHAN", (int) get_nchan());
 
   psrfits_update_key (ffptr, "CHAN_BW", get_bandwidth() / get_nchan());
-
+  psrfits_update_key (ffptr, "REFFREQ", get_centre_frequency());
+  
   psrfits_update_key (ffptr, "DM", get_dispersion_measure ());
   psrfits_update_key (ffptr, "RM", get_rotation_measure ());
 
