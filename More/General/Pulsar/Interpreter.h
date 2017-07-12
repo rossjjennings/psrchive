@@ -20,7 +20,8 @@ namespace Pulsar {
   
   class Archive;
   class Weight;
-
+  class ScatteredPowerCorrection;
+  
   //! Pulsar data processing command language interpreter
   /*!
     The Interpreter class is a command language interpreter that
@@ -238,7 +239,7 @@ namespace Pulsar {
     std::string unload_path;
 
     //! All methods should call this method to parse the arguments
-    std::vector<std::string> setup (const std::string& args, bool expand = true);
+    std::vector<std::string> setup (const std::string& args, bool expand=true);
 
     //! All methods should return via the response methods
     std::string response (Status status, const std::string& text = "");
@@ -261,6 +262,10 @@ namespace Pulsar {
 
     //! the current archive interface
     Reference::To<TextInterface::Parser> current_interface;
+
+    //! The Scattered Power Correction algorithm
+    Reference::To<ScatteredPowerCorrection> spc_algorithm;
+    
   };
   
 }

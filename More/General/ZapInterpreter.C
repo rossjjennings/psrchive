@@ -421,6 +421,23 @@ try {
 
   Archive* archive = get();
 
+  if (zap_calibrator)
+  {
+    Reference::To<CalibratorExtension> ext = get()->get<CalibratorExtension>();
+    if (!ext)
+      return response (Fail, "archive does not contain CalibratorExtension");
+
+    unsigned nchan = ext->get_nchan();
+    unsigned nedge = unsigned( nchan * fraction );
+
+    for (unsigned ichan=0; ichan<nedge; ichan++)
+      ext->set_weight( ichan, 0.0 );
+    for (unsigned ichan=nchan-nedge; ichan<nchan; ichan++)
+      ext->set_weight( ichan, 0.0 );
+
+    return response (Good);
+  }
+
   unsigned isub,  nsub = archive->get_nsubint();
   unsigned ichan, nchan = archive->get_nchan();
 

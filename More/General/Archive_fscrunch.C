@@ -28,6 +28,10 @@ void Pulsar::Archive::fscrunch (unsigned nscrunch)
 */
 void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 {
+  if (new_chan == 0)
+    thorw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
+                             "requested nchan=0");
+
   if (get_nchan() % new_chan)
     throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
 		             "requested nchan=%u modulo current nchan=%u is non-zero",
