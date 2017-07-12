@@ -917,11 +917,17 @@ int actual_main (int argc, char *argv[]) try
 
   if (!template_filename && phmin == phmax && !binfile)
   {
-    cerr << "pcm: In mode A, at least one of the following options"
+    cerr << "pcm: In MEM mode, at least one of the following options"
       " must be specified:\n"
       " -p min,max  Choose constraints from the specified pulse phase range \n"
       " -c archive  Choose optimal constraints from the specified archive \n"
 	 << endl;
+    return -1;
+  }
+
+  if (!template_filename && fscrunch_data_to_template)
+  {
+    cerr << "pcm: In MEM mode, the -G option is not supported" << endl;
     return -1;
   }
 
@@ -1102,7 +1108,8 @@ int actual_main (int argc, char *argv[]) try
 
 #endif
 
-    if (fscrunch_data_to_template && model->get_nchan() != archive->get_nchan())
+    if (fscrunch_data_to_template &&
+	model->get_nchan() != archive->get_nchan())
     {
       cerr << "pcm: frequency integrating data (nchan=" << archive->get_nchan()
 	   << ") to match calibrator (nchan=" << model->get_nchan()
