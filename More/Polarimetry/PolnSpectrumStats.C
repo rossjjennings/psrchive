@@ -217,8 +217,8 @@ void Pulsar::PolnSpectrumStats::build () try
     imag->set_regions (on_temp, off_temp);
   }
 
-  real->set_profile (re);
-  imag->set_profile (im);
+  real->set_profile (re.release());
+  imag->set_profile (im.release());
 
 }
 catch (Error& error)

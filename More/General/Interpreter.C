@@ -1146,15 +1146,23 @@ catch (Error& error)
 //
 string Pulsar::Interpreter::scattered_power_correct (const string& args) try
 {
-  if (args.length())
-    return response (Fail, "accepts no arguments");
+  vector<string> arguments = setup (args);
 
+  if (!spc_algorithm)
+    spc_algorithm = new ScatteredPowerCorrection;
+
+  if (arguments.size())
+  {
+    Reference::To<TextInterface::Parser> parser;
+    parser = spc_algorithm->get_interface();
+    return response (Good, parser->process (arguments));
+  }
+  
   Archive* arch = get();
   if (arch->get_state() == Signal::Stokes)
-    arch->convert_state(Signal::Coherence);
+    arch->convert_state (Signal::Coherence);
   
-  Pulsar::ScatteredPowerCorrection spc;
-  spc.correct (arch);
+  spc_algorithm->correct (arch);
 
   return response (Good);
 }
