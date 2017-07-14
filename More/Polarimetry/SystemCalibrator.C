@@ -185,10 +185,19 @@ unsigned Pulsar::SystemCalibrator::get_nchan () const
   unsigned nchan = 0;
 
   if (has_calibrator())
+  {
     nchan = get_calibrator()->get_nchan ();
+    if (verbose > 2)
+      cerr << "SystemCalibrator::get_nchan using calibrator nchan=" << nchan << endl;
+  }
 
   if (model.size())
+  {
     nchan = model.size ();
+    if (verbose > 2)
+      cerr << "SystemCalibrator::get_nchan using model nchan=" << nchan << endl;
+  }
+
 
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::get_nchan " << nchan << endl;
@@ -730,7 +739,10 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 	state.set_stokes( data.observation );
         measurements.push_back( state );
 
-	submit_calibrator_data (measurements, data);
+	submit_calibrator_data( measurements, data );
+
+        integrate_calibrator_data( p->get_response(ichan), data );
+
       }
       catch (Error& error)
       {
@@ -741,8 +753,6 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
 	continue;
       }
-
-      integrate_calibrator_data( p->get_response(ichan), data );
 
       if (p->get_nchan() == nchan && p->get_transformation_valid (ichan))
 	integrate_calibrator_solution( p->get_Archive()->get_type(), ichan,
