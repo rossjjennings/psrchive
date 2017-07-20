@@ -12,6 +12,7 @@
 #include "Pulsar/ZapInterpreter.h"
 #include "Pulsar/CalInterpreter.h"
 #include "Pulsar/InstallInterpreter.h"
+#include "Pulsar/ExtensionInterpreter.h"
 
 Pulsar::Interpreter* standard_shell ()
 {
@@ -31,6 +32,9 @@ Pulsar::Interpreter* standard_shell ()
 
   interpreter->import( new Pulsar::ProfileInterpreter,
 		       "profile", "profile transformations" );
+
+  interpreter->import( new Pulsar::ExtensionInterpreter,
+                       "ext", "extension operations" );
 
   interpreter->import( new Pulsar::FixInterpreter,
 		       "fix", "fix a variety of problems" );

@@ -39,6 +39,7 @@ nobase_include_HEADERS = \
 	Pulsar/EvenlySpaced.h \
 	Pulsar/EvenlyWeighted.h \
         Pulsar/ExponentialBaseline.h \
+	Pulsar/ExtensionInterpreter.h \
 	Pulsar/Extract.h \
 	Pulsar/FixFluxCal.h \
 	Pulsar/FixInterpreter.h \
@@ -173,6 +174,7 @@ libGeneral_la_SOURCES = \
         DispersionDelay.C \
         DurationWeight.C \
         DynamicSpectrum.C \
+	ExtensionInterpreter.C \
         ExponentialBaseline.C \
 	Extract.C \
 	FixFluxCal.C \
