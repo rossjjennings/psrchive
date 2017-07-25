@@ -15,8 +15,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
 {
   int status = 0;
 
-  verbose = 3;
-  
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband entered" << endl;
   
