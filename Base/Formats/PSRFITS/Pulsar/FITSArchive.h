@@ -261,6 +261,9 @@ namespace Pulsar
     void load_ObsDescription (fitsfile*);
     void load_CovarianceMatrix (fitsfile*);
 
+    template<class Ext>
+    void unload (fitsfile*, const char* hdu_name) const;
+    
     void load_integration_state ( fitsfile * );
     void load_state ( fitsfile * );
 
