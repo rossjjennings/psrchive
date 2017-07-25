@@ -15,6 +15,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
 {
   int status = 0;
 
+  verbose = 3;
+  
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband entered" << endl;
   
@@ -53,9 +55,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   float max = 0;
   float max_int = pow(2.0,15.0)-1.0;
   
-  float* data_offsets = new float [npol];
-  float* data_scales = new float [npol];
-
+  vector<float> data_offsets (npol);
+  vector<float> data_scales (npol);
+  
   // Calculate the quantities
   
   for (int i = 0; i < npol; i++) {
@@ -68,28 +70,23 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
     cerr << "FITSArchive::unload_passband scales & offsets calculated" << endl;
   
   // Write the data offsets
+  int row = 1;
+  vector<unsigned> dims;
+
+  psrfits_write_col (fptr, "DAT_OFFS", row, data_offsets, dims);
   
-  int colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, npol, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, npol,
-		  data_offsets, &status);
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband offsets written" << endl;
 
   // Write the data scale factors
+  psrfits_write_col (fptr, "DAT_SCL", row, data_scales, dims);
   
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_SCL", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, npol, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, npol, 
-		  data_scales, &status);
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband scales written" << endl;
   
   // Calculate the scaled numbers
   
-  int* data = new int [nch_orig*npol];
+  vector<int> data( nch_orig*npol );
   int count = 0;
   vector<float> temp;
   
@@ -101,23 +98,18 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
     }
   }
 
+  assert( count == data.size() );
+
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband points calculated" << endl;
 
   // Write the data itself
+  dims.resize(2);
+  dims[0] = nch_orig;
+  dims[1] = npol;
+    
+  psrfits_write_col (fptr, "DATA", row, data, dims);
   
-  long dimension = nch_orig * npol;
-
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, dimension, &status);
-  psrfits_update_tdim (fptr, colnum, nch_orig, npol);
-  fits_write_col (fptr, TINT, colnum, 1, 1, dimension, data, &status);
-
-  delete [] data;
-  delete [] data_scales;
-  delete [] data_offsets;
-
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband exiting" << endl;
 }
