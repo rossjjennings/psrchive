@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polynomial.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/11/09 04:47:59 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Polynomial.h
 
 #ifndef __Polynomial_H
 #define __Polynomial_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Steps.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/08/19 21:06:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Steps.h
 
 #ifndef __Steps_H
 #define __Steps_H

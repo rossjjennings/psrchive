@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/08/07 14:05:40 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SingleAxis.h
 
 #ifndef __Calibration_SingleAxis_H
 #define __Calibration_SingleAxis_H

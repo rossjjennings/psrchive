@@ -28,6 +28,10 @@ DigitiserCountsPlot::Interface::Interface( DigitiserCountsPlot *s_instance )
   add( &DigitiserCountsPlot::get_subint,
 	&DigitiserCountsPlot::set_subint,
 	"subint", "sub integration to plot" );
+
+  add( &DigitiserCountsPlot::get_logscale,
+	&DigitiserCountsPlot::set_logscale,
+	"log", "plot data on logarithmic y-axis" );
 }
 
 

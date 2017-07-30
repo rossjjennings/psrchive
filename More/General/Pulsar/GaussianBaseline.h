@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/GaussianBaseline.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/08/25 05:45:21 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/GaussianBaseline.h
 
 #ifndef __Pulsar_GaussianBaseline_h
 #define __Pulsar_GaussianBaseline_h
@@ -81,6 +78,9 @@ namespace Pulsar {
 
     //! Get the variance correction factor
     float get_variance_correction () const { return moment_correction; }
+
+    //! Static worker function for use by other classes
+    static double get_variance_correction (double sigma);
 
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();

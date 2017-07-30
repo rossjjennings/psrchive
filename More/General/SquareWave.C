@@ -6,9 +6,19 @@
  ***************************************************************************/
 
 #include "Pulsar/SquareWave.h"
-#include "Pulsar/BaselineWindow.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
+
+#include "Pulsar/BaselineWindow.h"
+#include "Pulsar/GaussianBaseline.h"
+
 #include "Pulsar/Smooth.h"
+
+#include "Pulsar/Archive.h"
+#include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/CalInfoExtension.h"
+
+#include <fstream>
 
 using namespace std;
 
@@ -17,6 +27,8 @@ Pulsar::SquareWave::SquareWave ()
   risetime = 0.03;
   threshold = 6.0;
   use_nbin = 256;
+  verbose = false;
+  outlier_threshold = 3.0;
 }
 
 //! Return the signal to noise ratio
@@ -25,20 +37,21 @@ float Pulsar::SquareWave::get_snr (const Profile* profile)
   int hightolow, lowtohigh, buffer;
   profile->find_transitions (hightolow, lowtohigh, buffer);
 
+  // the third argument is the variance of the mean
   double hi_mean, hi_var;
-  profile->stats (&hi_mean, &hi_var, 0,
+  profile->stats (&hi_mean, 0, &hi_var,
 		  lowtohigh + buffer,
 		  hightolow - buffer);
 
   double lo_mean, lo_var;
-  profile->stats (&lo_mean, &lo_var, 0,
+  profile->stats (&lo_mean, 0, &lo_var,
 		  hightolow + buffer,
 		  lowtohigh - buffer);
 
-  // two unique estimates of the variance -> take the average
-  double var = (lo_var + hi_var) * 0.5;
+  if (hi_var <= 0.0 || lo_var <= 0.0)
+    return 0;
 
-  return (hi_mean - lo_mean) / sqrt(var);
+  return (hi_mean - lo_mean) / sqrt(hi_var + lo_var);
 }    
 
 Pulsar::Profile* differentiate (const Pulsar::Profile* profile, unsigned off=1)
@@ -91,6 +104,13 @@ void find_transitions (unsigned nbin, float* amps, vector<unsigned>& t,
 
 }
 
+/*!  
+  This method identifies significant transitions between high and
+  low states using the differences in fluxes between phase bins
+  separated by risetime turns.  Significant transitions occur where
+  the absolute value of the difference in flux exceeds a threshold
+  times the standard deviation of the baseline noise.
+*/
 void Pulsar::SquareWave::get_transitions (const Profile* profile,
 					  vector<unsigned>& up,
 					  vector<unsigned>& down)
@@ -156,6 +176,195 @@ unsigned Pulsar::SquareWave::count_transitions (const Profile* profile)
 
   return std::min( up.size(), down.size() );
 }
+
+
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
+#include "Estimate.h"
+#include "Error.h"
+
+void init (Pulsar::PhaseWeight& array, int start, int end)
+{
+  int nbin = array.get_nbin();
+  
+  if (end < start)
+    end += nbin;
+
+  array.set_all (0);
+  
+  for (int i=start; i<end; i++)
+    array[i%nbin] = 1.0;
+}
+
+Pulsar::PhaseWeight* Pulsar::SquareWave::get_mask (const Pulsar::Profile* prof,
+						   bool on, int start, int end)
+{
+  GaussianBaseline baseline;
+  baseline.set_threshold (outlier_threshold);
+  baseline.set_run_postprocessing (false);
+  
+  PhaseWeight mask (prof->get_nbin());
+  init (mask, start, end);
+  baseline.set_include (&mask);
+  
+  BaselineWindow first;
+  first.set_find_maximum (on);
+  baseline.set_initial_baseline (&first);
+
+  return baseline.operate (prof);
+}
+
+void Pulsar::SquareWave::levels (const Pulsar::Integration* subint,
+				 vector<vector<Estimate<double> > >& high,
+				 vector<vector<Estimate<double> > >& low)
+{
+  unsigned nstate = 2;      // Default to normal 2-state square wave
+
+  if (subint->expert()->has_parent())
+  {  
+    // Get CalInfo extension to see what cal type is
+    Reference::To<const CalInfoExtension> ext;
+
+    const Archive* parent = subint->expert()->get_parent();
+    ext = parent->get<CalInfoExtension>();
+
+    if (ext)
+    {
+      if (verbose)
+	cerr << "Pulsar::SquareWave::levels CalInfoExtension::cal_nstate="
+	     << ext->cal_nstate << endl;
+      nstate = ext->cal_nstate;
+    }
+  }
+
+  if (nstate<2 || nstate>3) 
+    throw Error (InvalidState, "Pulsar::SquareWave::levels", 
+        "unexpected nstate = %d", nstate);
+
+  unsigned nbin = subint->get_nbin ();
+  if (nbin==0)
+    throw Error (InvalidState, "Pulsar::SquareWave::levels", "nbin = 0");
+
+  unsigned npol = subint->get_npol ();
+  if (npol==0)
+    throw Error (InvalidState, "Pulsar::SquareWave::levels", "npol = 0");
+
+  unsigned nchan = subint->get_nchan ();
+  if (nchan==0)
+    throw Error (InvalidState, "Pulsar::SquareWave::levels", "nchan = 0");
+
+  Reference::To<Integration> copy = subint->total ();
+  Reference::To<Profile> total = copy->get_Profile(0,0);
+
+  if (verbose)
+    cerr << "Pulsar::SquareWave::levels"
+      " call Profile::find_transitions" << endl;
+
+  int hightolow, lowtohigh, buffer;
+  total->find_transitions (hightolow, lowtohigh, buffer);
+  
+  high.resize (npol);
+  low.resize (npol);
+  
+  // Standard bin ranges for 2-state cal pulse
+  int high_start = lowtohigh + buffer;
+  int high_end = hightolow - buffer;
+  int low_start = hightolow + buffer;
+  int low_end = lowtohigh - buffer;
+
+  // For a "3-state" cal (eg Nancay), we want to ignore the 2nd half
+  // of the high state.  This could be generalized/improved to do
+  // something more intelligent at some point.
+  if (nstate==3)
+  { 
+    int high_mid = (hightolow > lowtohigh) 
+      ? (lowtohigh + hightolow) / 2
+      : (lowtohigh + nbin + hightolow) / 2;
+    if (high_mid > nbin) 
+      high_mid -= nbin;
+    high_end = high_mid - buffer;
+    if (verbose) 
+      cerr << "Pulsar::SquareWave::levels using 3-state cal" << endl;
+  }
+
+  Reference::To<PhaseWeight> high_mask;
+  Reference::To<PhaseWeight> low_mask;
+  double variance_correction = 1.0;
+  
+  if (verbose)
+    cerr << "SquareWave::levels threshold=" << outlier_threshold << endl;
+  
+  if (outlier_threshold)
+  {
+    high_mask = get_mask (total, true, high_start, high_end);
+    low_mask = get_mask (total, false, low_start, low_end);
+
+    variance_correction
+      = GaussianBaseline::get_variance_correction (outlier_threshold);
+    
+#if _DEBUG  
+    ofstream out ("squarewave.txt");
+    for (unsigned i=0; i < nbin; i++)
+      out << i
+	  << " " << high_mask->get_weights()[i]
+	  << " " << low_mask->get_weights()[i]
+	  << endl;
+#endif
+  }	
+  
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    high[ipol].resize(nchan);
+    low[ipol].resize(nchan);
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      high[ipol][ichan] = low[ipol][ichan] = 0.0;
+
+      if (subint->get_weight(ichan) == 0)
+	continue;
+
+      const Profile* profile = subint->get_Profile (ipol, ichan);
+
+      if (outlier_threshold)
+      {
+	high_mask->stats (profile, &(high[ipol][ichan].val), 0,
+			  &(high[ipol][ichan].var));
+	
+	low_mask->stats (profile, &(low[ipol][ichan].val), 0,
+			 &(low[ipol][ichan].var));
+
+	// after clipping at some threshold, the variance is underestimated
+	high[ipol][ichan].var *= variance_correction;
+	low[ipol][ichan].var *= variance_correction;
+      }
+      else
+      {
+	profile->stats (&(high[ipol][ichan].val), 0,
+			&(high[ipol][ichan].var),
+			high_start, high_end);
+	
+	profile->stats (&(low[ipol][ichan].val), 0,
+			&(low[ipol][ichan].var),
+			low_start, low_end);
+      }
+      
+      // for linear X and Y: if on cal is lower than off cal, flag bad data
+      if (npol <= 2
+	  && (high[ipol][ichan].val < 0 || low[ipol][ichan].val < 0
+	      || high[ipol][ichan].val < low[ipol][ichan].val))
+      {
+	if (verbose) cerr << "Pulsar::SquareWave::levels"
+		       " - bad levels for channel " << ichan 
+			  << " poln " << ipol 
+			  << " mean high " << high[ipol][ichan].val
+			  << " mean low " << low[ipol][ichan].val << endl;
+	high[ipol][ichan] = low[ipol][ichan] = 0.0;
+      }
+    }
+  }
+}
+
 
 class Pulsar::SquareWave::Interface
   : public TextInterface::To<SquareWave>

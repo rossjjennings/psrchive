@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.30 $
-   $Date: 2010/01/16 07:41:57 $
-   $Author: straten $ */
+// psrchive/Util/tempo/toa.h
 
 #ifndef __TOA_H
 #define __TOA_H

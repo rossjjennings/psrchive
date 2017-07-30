@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/10/02 05:08:15 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/ProfilePlot.h
 
 #ifndef __Pulsar_ProfilePlot_h
 #define __Pulsar_ProfilePlot_h
@@ -47,13 +44,18 @@ namespace Pulsar {
     void set_plot_cal_transitions (bool flag) { plot_cal_transitions = flag; }
     bool get_plot_cal_transitions () const { return plot_cal_transitions; }
 
+    //! Set the threshold used to reject outliers when computing cal levels
+    void set_outlier_threshold (float f) { outlier_threshold = f; }
+    float get_outlier_threshold () const { return outlier_threshold; }
+
     //! Draw the profile transitions in the current viewport and window
     void draw_transitions (const Profile* profile);
 
   protected:
 
     bool plot_cal_transitions;
-
+    double outlier_threshold;
+ 
   };
 
 }

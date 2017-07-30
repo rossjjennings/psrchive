@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RadiometerWeight.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/08/05 13:02:43 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/RadiometerWeight.h
 
 #ifndef _Pulsar_RadiometerWeight_H
 #define _Pulsar_RadiometerWeight_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo_impl.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/05/24 04:00:58 $
-   $Author: straten $ */
+// psrchive/Util/tempo/tempo_impl.h
 
 #ifndef __TEMPO_IMPLEMENTATION_H
 #define __TEMPO_IMPLEMENTATION_H

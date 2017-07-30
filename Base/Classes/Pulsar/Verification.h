@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Verification.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/17 23:04:45 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/Verification.h
 
 #ifndef __Pulsar_ArchiveVerification_h
 #define __Pulsar_ArchiveVerification_h

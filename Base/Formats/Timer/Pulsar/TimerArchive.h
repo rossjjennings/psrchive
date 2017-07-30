@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h
 
 #ifndef __Timer_Archive_h
 #define __Timer_Archive_h

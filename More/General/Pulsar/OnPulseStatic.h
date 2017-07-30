@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseStatic.h,v $
-   $Revision: 1.1 $
-   $Date: 2011/03/03 20:47:31 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/OnPulseStatic.h
 
 #ifndef __Pulsar_OnPulseStatic_h
 #define __Pulsar_OnPulseStatic_h

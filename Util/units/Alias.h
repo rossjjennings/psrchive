@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Alias.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/11/29 05:37:49 $
-   $Author: straten $ */
+// psrchive/Util/units/Alias.h
 
 #ifndef __Alias_h
 #define __Alias_h

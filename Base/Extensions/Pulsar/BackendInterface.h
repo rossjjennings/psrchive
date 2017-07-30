@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/BackendInterface.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/05/12 02:00:26 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/BackendInterface.h
 
 #ifndef __Pulsar_BackendInterface_h
 #define __Pulsar_BackendInterface_h

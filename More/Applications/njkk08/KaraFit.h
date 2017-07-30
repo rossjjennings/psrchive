@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Applications/njkk08/KaraFit.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/08/22 13:42:31 $
-   $Author: straten $ */
+// psrchive/More/Applications/njkk08/KaraFit.h
 
 #ifndef _KaraFit_h
 #define _KaraFit_h

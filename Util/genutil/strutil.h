@@ -5,10 +5,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.11 $
-   $Date: 2010/07/05 11:58:29 $
-   $Author: straten $ */
+// psrchive/Util/genutil/strutil.h
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -93,7 +90,13 @@ std::string stringprintf (const char *fmt ...);
 
 void string_split( std::string source, std::string &before, std::string &after, std::string delimiter );
 
+// //////////////////////////////////////////////////////////
+// string_split splits a string setting parameters before and after
+// to the contents before and after the ANY characters in the delim_chars string
+// before and after will be empty if NONE of delim_chars exist
+// //////////////////////////////////////////////////////////
 
+void string_split_on_any ( std::string source, std::string &before, std::string &after, std::string delim_chars );
 
 #endif
 

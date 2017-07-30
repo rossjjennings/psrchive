@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/fsleep.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/genutil/fsleep.h
 
 #ifndef __FSLEEP_H
 #define __FSLEEP_H

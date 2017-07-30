@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Checks/Pulsar/Dedispersed.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/12/01 22:40:17 $
-   $Author: straten $ */
+// psrchive/Base/Checks/Pulsar/Dedispersed.h
 
 #ifndef __Pulsar_Dedispersed_h
 #define __Pulsar_Dedispersed_h

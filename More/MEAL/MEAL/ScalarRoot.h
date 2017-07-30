@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarRoot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScalarRoot.h
 
 #ifndef __MEAL_ScalarRoot_H
 #define __MEAL_ScalarRoot_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurementSet.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/12/09 19:06:05 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/CoherencyMeasurementSet.h
 
 #ifndef __Calibration_CoherencyMeasurementSet_H
 #define __Calibration_CoherencyMeasurementSet_H

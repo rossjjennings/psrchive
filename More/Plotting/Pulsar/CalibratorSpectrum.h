@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/07/15 10:14:48 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h
 
 #ifndef __Pulsar_CalibratorSpectrum_h
 #define __Pulsar_CalibratorSpectrum_h
@@ -62,6 +59,10 @@ namespace Pulsar {
     void set_norm_inv (bool flag = true) { norm_inv = flag; }
     bool get_norm_inv () const { return norm_inv; }
 
+    //! Set the threshold used to reject outliers when computing levels
+    void set_outlier_threshold (float f) { outlier_threshold = f; }
+    float get_outlier_threshold () const { return outlier_threshold; }
+
     //! Prepare to plot
     void prepare (const Archive*);
 
@@ -76,6 +77,9 @@ namespace Pulsar {
     bool plot_Ip;
     bool norm_inv;
 
+    //! Threshold used to reject outliers when computing levels
+    double outlier_threshold;
+    
     EstimatePlotter plotter;
 
   };

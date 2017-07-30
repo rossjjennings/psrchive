@@ -23,9 +23,10 @@ int main (int argc, char* argv[])
   char printhere[40];
   bool verbose = false;
   bool mjdgiven = false;
-
+  string use_strptime;
+  
   int c;
-  while ((c = getopt(argc, argv, "f:hm:v")) != -1)
+  while ((c = getopt(argc, argv, "d:f:hm:v")) != -1)
   {
     switch (c)
     {
@@ -36,10 +37,18 @@ int main (int argc, char* argv[])
 	"       date is optional. [default: now] \n"
 	"ALSO:  getMJD -m mjd [-f format] \n"
 	"       prints the date of given MJD. \n"
-	"       format is an optional strftime format string \n"
+	"ALSO:  getMJD -d date [-f format] \n"
+	"       prints the MJD of date of the form specified by format \n"
+	"\n"
+	"format is an optional strftime format string"
+	" [default:" << format << "] \n"
 	   << endl;
       return 0;
 
+    case 'd':
+      use_strptime = optarg;
+      break;
+      
     case 'f':
       format = optarg;
       break;
@@ -67,7 +76,23 @@ int main (int argc, char* argv[])
     return 0;
   }
 
-  if (optind < argc)
+  if (!use_strptime.empty())
+  {
+    if (verbose)
+      cerr << "Converting '" << use_strptime << "' to date" << endl;
+
+    struct tm time;
+    if ( strptime (use_strptime.c_str(), format, &time) == NULL )
+    {
+      cerr << "Error parsing '" << use_strptime
+	   << "' using '" << format << "'" << endl;
+      return -1;
+    }
+
+    mjd = MJD (time);
+  }
+  
+  else if (optind < argc)
   {
     if (verbose)
       cerr << "Converting '" << argv[optind] << "' to UTC and using as date"

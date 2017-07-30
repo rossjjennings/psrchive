@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Checks/Pulsar/DeFaradayed.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/12/01 22:40:49 $
-   $Author: straten $ */
+// psrchive/Base/Checks/Pulsar/DeFaradayed.h
 
 #ifndef __Pulsar_DeFaradayed_h
 #define __Pulsar_DeFaradayed_h

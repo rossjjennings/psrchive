@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/VariationInfo.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/04/07 00:38:18 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/VariationInfo.h
 
 #ifndef __Pulsar_VariationInfo_H
 #define __Pulsar_VariationInfo_H

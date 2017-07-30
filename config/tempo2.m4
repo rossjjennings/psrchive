@@ -34,7 +34,7 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
   CXXFLAGS="$ac_save_CXXFLAGS $TEMPO2_CFLAGS"
 
   AC_TRY_LINK([#include "tempo2pred.h"],
-              [T2Predictor p; T2Predictor_Read (&p, 0);],
+              [T2Predictor p; T2Predictor_Keep (&p, 0, 0);],
               have_tempo2=yes, have_tempo2=no)
 
   AC_MSG_RESULT($have_tempo2)

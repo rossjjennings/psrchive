@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/05/20 10:52:55 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Transposer.h
 
 #ifndef __Pulsar_Transposer_h
 #define __Pulsar_Transposer_h

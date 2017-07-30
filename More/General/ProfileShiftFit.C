@@ -417,14 +417,13 @@ double Pulsar::ProfileShiftFit::mcmc_sample()
 Tempo::toa Pulsar::ProfileShiftFit::toa(const Integration* subint)
 {
   if (!computed) compute();
-  Integration::Expert expert (subint);
   Tempo::toa result(Tempo::toa::Parkes);
 
   double per = subint->get_folding_period();
   result.set_frequency(prof->get_centre_frequency());
   result.set_arrival(subint->get_epoch() + per * shift);
   result.set_error(eshift * per * 1e6);
-  result.set_telescope(expert.get_parent()->get_telescope());
+  result.set_telescope(subint->expert()->get_parent()->get_telescope());
 
   return(result);
 }

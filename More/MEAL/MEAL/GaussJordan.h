@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include <math.h>
+#include <assert.h>
 
 #include <vector>
 #include <algorithm>
@@ -12,7 +13,7 @@
 
 #include "Error.h"
 
-//#define __DEBUG
+// #define _DEBUG 1
 
 namespace MEAL {
   template <class T, class U>
@@ -53,51 +54,82 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a,
 	    << " ncol=" << ncol << std::endl;
 #endif
 
-  int irow = 0;
-  int icol = 0;
-
-  for (irow=0; irow < nrow; irow++)
-    if (a[irow].size() < unsigned(nrow))
+  for (int i=0; i < nrow; i++)
+    if (a[i].size() < unsigned(nrow))
       throw Error (InvalidState, "MEAL::GaussJordan",
-		   "a[%d].size()=%d < nrow=%d", irow, a[irow].size(), nrow);
+		   "a[%d].size()=%d < nrow=%d", i, a[i].size(), nrow);
 
   // pivot book-keeping arrays
   std::vector<int> indxc (nrow);
   std::vector<int> indxr (nrow);
-  std::vector<int> ipiv (nrow, 0);
+  std::vector<bool> ipiv (nrow, false);
+
+#ifdef _DEBUG
+  std::cerr << "MEAL::GaussJordan start loop" << std::endl;
+#endif
 
   int i, j, k;
   for (i=0; i<nrow; i++)
   {
     // search for the pivot element
 
+    int irow = -1;
+    int icol = -1;
+
+#ifdef _DEBUG
+    std::cerr << "MEAL::GaussJordan search for pivot" << std::endl;
+#endif
+
     double big = 0.0;
     for (j=0; j<nrow; j++)
-      if (ipiv[j] != 1)
-	for (k=0; k<nrow; k++)
+    {
+      if (ipiv[j])
+	continue;
+      
+      for (k=0; k<nrow; k++)
+      {
+	if (ipiv[k])
+	  continue;
+
+	if (fabs(a[j][k]) >= big)
 	{
-	  if (ipiv[k] == 0)
-	  {
-	    if (fabs(a[j][k]) >= big)
-	    {
-	      big=fabs(a[j][k]);
-	      irow=j;
-	      icol=k;
-	    }
-	  }
+	  big=fabs(a[j][k]);
+	  irow=j;
+	  icol=k;
 	}
-
-    ipiv[icol]++;
-
-    if (fabs(a[icol][icol]) <= singular_threshold)
+      }
+    }
+    
+    if (big <= singular_threshold)
       throw Error (InvalidState, "MEAL::GaussJordan",
-		   "Singular Matrix.  irow=%d nrow=%d", irow, nrow);
+		   "Singular Matrix.  icol=%d nrow=%d pivot=%le",
+		   i, nrow, big);
+
+    assert (irow != -1 && icol != -1);
+
+    ipiv[icol] = true;
+
+#ifdef _DEBUG
+    std::cerr << "MEAL::GaussJordan pivot found" << std::endl;
+#endif
 
     if (irow != icol)
     {
+      assert (irow < nrow);
+      assert (icol < nrow);
+#ifdef _DEBUG
+    std::cerr << "MEAL::GaussJordan swap a irow=" << irow << " icol=" << icol << std::endl;
+#endif
       for (j=0; j<nrow; j++) std::swap (a[irow][j], a[icol][j]);
+#ifdef _DEBUG
+    std::cerr << "MEAL::GaussJordan swap b" << std::endl;
+#endif
       for (j=0; j<ncol; j++) std::swap (b[irow][j], b[icol][j]);
     }
+
+#ifdef _DEBUG
+    std::cerr << "MEAL::GaussJordan swap done" << std::endl;
+#endif
 
     indxr[i]=irow;
     indxc[i]=icol;

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/unload_text.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/15 06:55:52 $
-   $Author: straten $ */
+// psrchive/Base/Formats/PSRFITS/unload_text.h
 
 #ifndef __unload_text_h
 #define __unload_text_h

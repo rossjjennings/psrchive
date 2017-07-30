@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Univariate.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/06/12 09:10:26 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Univariate.h
 
 #ifndef __MEAL_Univariate_H
 #define __MEAL_Univariate_H

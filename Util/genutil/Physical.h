@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Physical.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Physical.h
 
 #ifndef __Pulsar_Physical_h
 #define __Pulsar_Physical_h

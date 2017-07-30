@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex4.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/01/20 00:52:22 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Complex4.h
 
 #ifndef __MEAL_Complex4_H
 #define __MEAL_Complex4_H

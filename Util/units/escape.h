@@ -7,10 +7,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/escape.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/08/28 04:23:22 $
-   $Author: straten $ */
+// psrchive/Util/units/escape.h
 
 #ifndef __UTILS_UNITS_ESCAPE_H
 #define __UTILS_UNITS_ESCAPE_H

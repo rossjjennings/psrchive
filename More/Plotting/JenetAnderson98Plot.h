@@ -1,9 +1,6 @@
 //-*-C++-*-
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98Plot.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/genutil/JenetAnderson98Plot.h
 
 #ifndef __JenetAnderson98_Plot_h
 #define __JenetAnderson98_Plot_h

@@ -64,7 +64,7 @@ extern "C" {
     float sigmaI;
     float abbm3lo;
     float abbm4lo;
-    float asynfreq;
+    float baseval; // asynfreq;
     int anrecscn;
     float rm;
     float erm;
@@ -122,7 +122,7 @@ extern "C" {
     int* newscan,  /* not yet sure what this does */
     uvm_header*);
 
-  int uvm_getdata ( int program, uvm_data* );
+  int uvm_getdata ( int program, uvm_header*, uvm_data* );
 
   void uvm_dump (const uvm_header*);
 

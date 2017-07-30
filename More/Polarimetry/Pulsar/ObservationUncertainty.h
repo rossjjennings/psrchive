@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ObservationUncertainty.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/08/14 07:35:30 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ObservationUncertainty.h
 
 #ifndef __Calibration_ObservationUncertainty_H
 #define __Calibration_ObservationUncertainty_H

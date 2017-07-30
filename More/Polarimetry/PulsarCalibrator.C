@@ -127,7 +127,11 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 	    << data->get_filename() << "' has not been calibrated" << endl;
 
   set_calibrator( standard = data->clone() );
-  
+
+  // set_calibrator sets the Receiver extension, but this should come
+  // from the uncalibrated data; therefore, reset the receiver to NULL
+  set_Receiver (0);
+
   FrontendCorrection correct;
   if (correct.required(data))
   {
@@ -321,8 +325,8 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
                  + get_calibrator()->get_filename() +
                  " and\n\t" + data->get_filename() + match.get_reason());
 
-  if (!receiver)
-    receiver = data->get<Receiver>();
+  if (!has_Receiver())
+    set_Receiver (data);
 
   if (one_channel)
     PolnCalibrator::set_calibrator (data);

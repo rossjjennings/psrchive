@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GimbalLockMonitor.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/11/05 00:26:09 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/GimbalLockMonitor.h
 
 #ifndef __Pulsar_GimbalLockMonitor_h
 #define __Pulsar_GimbalLockMonitor_h

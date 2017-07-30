@@ -16,11 +16,12 @@ bin_PROGRAMS = pts psrsim
 pts_SOURCES = pts.C
 psrsim_SOURCES = psrsim.C
 
-if HAVE_PGPLOT
-
-LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 pts_LDADD = $(LDPLOT)
 
+if HAVE_PGPLOT
+LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
+else
+LDPLOT = $(LDADD)
 endif
 
 #############################################################################

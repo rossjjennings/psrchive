@@ -52,6 +52,10 @@ void TemporaryDirectory::build () const
   if (!userid)
     userid = unknown;
 
+  const char *tmp_userid = getenv ("TMP_USER");
+  if (tmp_userid)
+    userid = tmp_userid;
+
   const char *t2userid = getenv ("T2USER");
   if (t2userid)
     userid = t2userid;

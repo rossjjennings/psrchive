@@ -5,10 +5,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarBesselI0.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author $ */
+
+// psrchive/More/MEAL/MEAL/ScalarBesselI0.h
+
 #ifndef __MEAL_ScalarBesselI0_H
 #define __MEAL_ScalarBesselI0_H
 

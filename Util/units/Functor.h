@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Functor.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/02 05:19:41 $
-   $Author: straten $ */
+// psrchive/Util/units/Functor.h
 
 #ifndef __Swinburne_Functor_h
 #define __Swinburne_Functor_h

@@ -1,0 +1,148 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2016 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+#include "Pulsar/StokesCrossCovariancePlot.h"
+#include "Pulsar/StokesCrossCovariance.h"
+
+#include "Pulsar/Archive.h"
+#include "Pulsar/CovarianceMatrix.h"
+
+#include "pairutil.h"
+#include "Matrix.h"
+
+#include <assert.h>
+
+using namespace std;
+
+Pulsar::StokesCrossCovariancePlot::StokesCrossCovariancePlot ()
+{
+  covar.first = covar.second = 0;
+  lags = 4;
+  bin = -1;
+  max_bin = false;
+}
+
+TextInterface::Parser* Pulsar::StokesCrossCovariancePlot::get_interface ()
+{
+  return new Interface (this);
+}
+
+
+
+void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
+{
+  if (verbose)
+    cerr << "Pulsar::StokesCrossCovariancePlot::get_profiles" << endl;
+
+  const CovarianceMatrix* matrix = archive->get<CovarianceMatrix>();
+  if (!matrix)
+    throw Error (InvalidState,
+		 "Pulsar::StokesCrossCovariancePlot::get_profiles",
+		 "archive does not contain a CovarianceMatrix extension");
+
+  stokes_crossed = new StokesCrossCovariance (matrix);
+  
+  if (max_bin)
+    bin = archive->get_Profile(0,0,0)->find_max_bin();
+
+  if (bin >= 0)
+    plot_bin ();
+  else
+    plot_lags ();
+}
+
+void Pulsar::StokesCrossCovariancePlot::plot_bin ()
+{
+  unsigned ndim = 10;
+  ndim = 4;
+  plotter.profiles.resize( ndim );
+  plotter.plot_sls.resize( ndim );
+  plotter.plot_slw.resize( ndim );
+
+  unsigned nbin = stokes_crossed->get_nbin();
+  
+  unsigned jbin = bin;
+  assert (jbin < nbin);
+
+  unsigned idim=0;
+  unsigned npol=4;
+
+  for (unsigned ipol=0; ipol < npol; ipol++)
+    //    for (unsigned jpol=ipol; jpol < npol; jpol++)
+    {
+      unsigned jpol=ipol;
+      
+      Profile* profile = new Profile(nbin);
+      plotter.profiles[idim] = profile;
+      plotter.plot_sls[idim] = 1;
+      plotter.plot_slw[idim] = 2;
+      idim ++;
+    
+      float* amps = profile->get_amps();
+
+      for (unsigned ibin=0; ibin < nbin; ibin++)
+      {
+	Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
+	amps[ibin] = c[ipol][jpol];
+      }
+    }
+
+  assert (idim == ndim);
+}
+
+void Pulsar::StokesCrossCovariancePlot::plot_lags ()
+{
+  plotter.profiles.resize( lags+1 );
+  plotter.plot_sls.resize( lags+1 );
+  plotter.plot_slw.resize( lags+1 );
+
+  unsigned nbin = stokes_crossed->get_nbin();
+  
+  for (unsigned ilag=0; ilag < lags+1; ilag++)
+  {
+    Profile* profile = new Profile(nbin);
+    plotter.profiles[ilag] = profile;
+    plotter.plot_sls[ilag] = 1;
+    plotter.plot_slw[ilag] = 2;
+
+    float* amps = profile->get_amps();
+
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+    {
+      unsigned jbin = (ibin + ilag) % nbin;
+      Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
+      amps[(ibin+ilag/2)%nbin] = c[covar.first][covar.second];
+    }
+  }
+}
+
+
+Pulsar::StokesCrossCovariancePlot::Interface::Interface (StokesCrossCovariancePlot* obj)
+{
+  if (obj)
+    set_instance (obj);
+
+  import ( FluxPlot::Interface() );
+
+  add( &StokesCrossCovariancePlot::get_covar,
+       &StokesCrossCovariancePlot::set_covar,
+       "covar", "indeces of covariance matrix to plot");
+
+  add( &StokesCrossCovariancePlot::get_lags,
+       &StokesCrossCovariancePlot::set_lags,
+       "lags", "number of lags >0 to plot");
+
+  add( &StokesCrossCovariancePlot::get_bin,
+       &StokesCrossCovariancePlot::set_bin,
+       "bin", "phase bin to plot (if >0)");
+
+  add( &StokesCrossCovariancePlot::get_max_bin,
+       &StokesCrossCovariancePlot::set_max_bin,
+       "max", "find phase bin to plot");
+}
+
+

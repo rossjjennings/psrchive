@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.42 $
-   $Date: 2010/07/23 05:59:33 $
-   $Author: sosl $ */
+// psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h
 
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
@@ -28,7 +25,7 @@
 namespace MEAL
 {
   class Complex2;
-  class PhaseGradients;
+  template<typename T> class PhaseGradients;
 }
 
 namespace Calibration
@@ -198,7 +195,7 @@ namespace Pulsar
     std::vector< Reference::To<Calibration::TemplateUncertainty> > uncertainty;
 
     //! The phase gradient model for each observation added
-    Reference::To<MEAL::PhaseGradients> phases;
+    Reference::To< MEAL::PhaseGradients<MEAL::Complex2> > phases;
 
     //! The phase axis
     MEAL::Axis<double> phase_axis;

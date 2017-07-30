@@ -11,6 +11,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/ForEachProfile.h"
 
 #include "Pulsar/Config.h"
 #include "Pulsar/Statistics.h"
@@ -239,8 +240,9 @@ void Pulsar::Interpreter::init()
   add_command 
     ( &Interpreter::scale, 's',
       "scale", "scale each profile by the specified value",
-      "usage: scale <factor> \n"
-      "  float factor      value by which all data will be scaled \n" );
+      "usage: scale <factor> [indeces]\n"
+      "  float factor      value by which all data will be scaled \n"
+      "  indeces           specify pol[ind] chan[ind] and/or subint[ind] \n");
 
   add_command 
     ( &Interpreter::offset, 'o',
@@ -1144,15 +1146,23 @@ catch (Error& error)
 //
 string Pulsar::Interpreter::scattered_power_correct (const string& args) try
 {
-  if (args.length())
-    return response (Fail, "accepts no arguments");
+  vector<string> arguments = setup (args);
 
+  if (!spc_algorithm)
+    spc_algorithm = new ScatteredPowerCorrection;
+
+  if (arguments.size())
+  {
+    Reference::To<TextInterface::Parser> parser;
+    parser = spc_algorithm->get_interface();
+    return response (Good, parser->process (arguments));
+  }
+  
   Archive* arch = get();
   if (arch->get_state() == Signal::Stokes)
-    arch->convert_state(Signal::Coherence);
+    arch->convert_state (Signal::Coherence);
   
-  Pulsar::ScatteredPowerCorrection spc;
-  spc.correct (arch);
+  spc_algorithm->correct (arch);
 
   return response (Good);
 }
@@ -1195,19 +1205,16 @@ catch (Error& error)
 //
 string Pulsar::Interpreter::scale (const string& args) try
 {
-  float factor = setup<float> (args);
+  vector<string> arguments = setup (args);
+  Pulsar::ForEachProfile foreach (arguments);
+
+  if (arguments.size() > 1)
+    return response (Fail, "invalid number of parameters");
   
-  Archive* archive = get();
+  float factor = fromstring<float> (arguments[0]);
 
-  unsigned nsub = archive->get_nsubint();
-  unsigned nchan = archive->get_nchan();
-  unsigned npol = archive->get_npol();
-
-  for (unsigned isub=0; isub < nsub; isub++)
-    for (unsigned ipol=0; ipol < npol; ipol++)
-      for (unsigned ichan=0; ichan < nchan; ichan++)
-	archive->get_Profile (isub, ipol, ichan)->scale(factor);
-
+  foreach (get(), &Profile::scale, factor);
+  
   return response (Good);
 }
 catch (Error& error)

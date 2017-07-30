@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ArrivalTime.h,v $
-   $Revision: 1.6 $
-   $Date: 2010/05/31 22:25:39 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/ArrivalTime.h
 
 #ifndef __Pulsar_ArrivalTime_h
 #define __Pulsar_ArrivalTime_h

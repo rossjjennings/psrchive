@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/13 05:09:24 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/GroupRule.h
 
 #ifndef __GroupRule_H
 #define __GroupRule_H

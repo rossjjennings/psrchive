@@ -20,7 +20,7 @@ std::string Calibration::SolveMEAL::get_name () const
 
 Calibration::SolveMEAL* Calibration::SolveMEAL::clone () const
 {
-  return new SolveMEAL;
+  return new SolveMEAL (*this);
 }
 
 // ///////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ void Calibration::SolveMEAL::fit ()
   // MEAL::Function::verbose = 1;
 
   // get info from the LevenbergMarquardt algorithm
-  // fit.verbose = 3;
+  fit.verbose = verbose;
 
   // get info from this method
   // debug = true;

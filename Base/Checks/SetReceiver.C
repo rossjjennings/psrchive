@@ -7,6 +7,7 @@
 
 #include "Pulsar/SetReceiver.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Pulsar.h"
 
 using namespace std;
 
@@ -44,8 +45,23 @@ void Pulsar::SetReceiver::apply (Archive* archive) try
   char datebuf [64];
 
   string utc = epoch.datestr (datebuf, 64, date_format);
+  string name;
 
-  string name = receiver_log->get_message (utc);
+  name = receiver_log->get_message (utc);
+
+  if (name == "end-of-log")
+  {
+    if (!archive->get<Receiver>())
+    {
+      warning << "Pulsar::SetReceiver::apply end of receiver.log and no Receiver extension - abort" << endl;
+      return;
+    }
+
+    name = archive->get<Receiver>()->get_name();
+    if (name == "MULTI") name = "MULT_1";
+
+    warning << "Pulsar::SetReceiver::apply end of receiver.log - using receiver name=" << name << endl;
+  }
 
   string filename = Config::get_runtime()
     + "/" + directory + "/" + name + ".rcvr";

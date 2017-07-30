@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gain.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/10 10:53:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Gain.h
 
 #ifndef __MEAL_Gain_H
 #define __MEAL_Gain_H

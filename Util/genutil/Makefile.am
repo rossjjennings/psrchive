@@ -20,7 +20,6 @@ include_HEADERS = \
 	ExponentialDistribution.h \
 	extutil.h \
 	f77util.h \
-        fcomp.h \
 	format_it.h \
         fsleep.h \
 	Horizon.h \
@@ -28,6 +27,7 @@ include_HEADERS = \
         ierf.h \
         JenetAnderson98A5.h \
         JenetAnderson98.h \
+	KrausType.h \
 	load_factory.h \
 	LogFile.h \
         machine_endian.h \
@@ -93,7 +93,6 @@ libgenutil_la_SOURCES = \
 	evaluate.C \
 	ExponentialDistribution.C \
 	f77util.c \
-        fcomp.C \
 	filesize.c \
 	format_it.C \
         fsleep.c \
@@ -102,6 +101,7 @@ libgenutil_la_SOURCES = \
         ierf.c \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
+	KrausType.C \
 	LogFile.C \
 	malloc16.c \
 	Meridian.C \

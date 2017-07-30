@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $*/
+// psrchive/Util/fft/interpolate.h
 
 #ifndef __fft_interpolate_h
 #define __fft_interpolate_h

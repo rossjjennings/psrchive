@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.10 $
-   $Date: 2010/09/14 05:24:44 $
-   $Author: jonathan_khoo $ */
+// psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
 #define __Pulsar_FITSSUBHdrExtension_h

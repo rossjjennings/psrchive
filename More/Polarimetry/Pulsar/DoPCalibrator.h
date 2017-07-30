@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DoPCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/03/01 18:04:41 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/DoPCalibrator.h
 
 #ifndef __Pulsar_DoPCalibrator_H
 #define __Pulsar_DoPCalibrator_H

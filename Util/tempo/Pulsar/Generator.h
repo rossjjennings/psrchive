@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Generator.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/12/21 03:02:05 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Pulsar/Generator.h
 
 #ifndef __PulsarGenerator_h
 #define __PulsarGenerator_h

@@ -21,7 +21,7 @@
 using namespace std;
 
 Pulsar::Calibrator::Info* 
-Pulsar::CalibratorParameter::get_Info (const Archive* data)
+Pulsar::CalibratorParameter::get_Info (const Archive* data, float threshold)
 {
   Reference::To<Calibrator> calibrator;
 
@@ -43,7 +43,12 @@ Pulsar::CalibratorParameter::get_Info (const Archive* data)
   {
     if (verbose)
       cerr << "Pulsar::CalibratorParameter::prepare create calibrator" << endl;
-    calibrator = new Pulsar::SingleAxisCalibrator (data);
+
+    ReferenceCalibrator* ref = new Pulsar::SingleAxisCalibrator (data);
+    if (threshold)
+      ref->set_outlier_threshold (threshold);
+	
+    calibrator = ref;
   }
 
   return calibrator->get_Info();
@@ -62,13 +67,15 @@ Pulsar::CalibratorParameter::CalibratorParameter ()
 
   iclass = 0;
   managed = false;
+
+  outlier_threshold = 0.0;
 }
 
 
 void Pulsar::CalibratorParameter::prepare (const Archive* data)
 {
   if (!managed)
-    prepare ( get_Info(data), data );
+    prepare ( get_Info(data, outlier_threshold), data );
 }
 
 void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,

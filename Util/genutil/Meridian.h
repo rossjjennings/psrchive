@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Meridian.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/07/07 00:27:02 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Meridian.h
 
 #ifndef __Meridian_H
 #define __Meridian_H

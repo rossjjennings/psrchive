@@ -41,6 +41,9 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with LOFAR info
     void LOFAR (Telescope* t);
 
+    //! Initialize the Telescope Extension with MeerKAT info
+    void MeerKAT (Telescope* t);
+
     //! Initialize the Telescope Extension with Parkes info
     void Parkes (Telescope* t);
 

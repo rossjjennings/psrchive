@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/07/27 03:56:13 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Append.h
 
 #ifndef _Pulsar_Append_H
 #define _Pulsar_Append_H

@@ -1,20 +1,17 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005 - 2017 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaRM.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/01/27 07:42:35 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/DeltaRM.h
 
 #ifndef __Pulsar_DeltaRM_h
 #define __Pulsar_DeltaRM_h
 
-#include "Reference.h"
+#include "Pulsar/PhaseWeight.h"
 #include "Estimate.h"
 
 namespace Pulsar {
@@ -53,7 +50,10 @@ namespace Pulsar {
     void set_threshold (float t) { threshold = t; }
     float get_threshold () const { return threshold; }
 
-    //! Set the phase bins to be included in the computation
+     //! Set the on-pulse mask
+    void set_onpulse (PhaseWeight* w) { onpulse_weights = w; }
+    
+   //! Set the phase bins to be included in the computation
     void set_include (const std::vector<unsigned>& bins);
 
     //! Set the phase bins to be excluded from the computation
@@ -76,6 +76,8 @@ namespace Pulsar {
     //! The archive from which the rotation measure will be refined
     Reference::To<Archive> data;
 
+    //! Weights applied to each phase bin (defines on-pulse region)
+    Reference::To<PhaseWeight> onpulse_weights;
   };
 
 }

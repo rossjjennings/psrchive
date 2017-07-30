@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/UnloadOptions.h,v $
-   $Revision: 1.4 $
-   $Date: 2010/05/02 16:08:46 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/UnloadOptions.h
 
 #ifndef __Pulsar_UnloadOptions_h
 #define __Pulsar_UnloadOptions_h

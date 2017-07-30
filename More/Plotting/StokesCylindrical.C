@@ -33,7 +33,7 @@ Pulsar::StokesCylindrical::StokesCylindrical ()
 
 }
 
-    //! Get the text interface to the configuration attributes
+//! Get the text interface to the configuration attributes
 TextInterface::Parser* Pulsar::StokesCylindrical::get_interface ()
 {
   return new Interface (this);

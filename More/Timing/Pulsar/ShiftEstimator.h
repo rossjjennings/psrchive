@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ShiftEstimator.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/10/22 17:37:27 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/ShiftEstimator.h
 
 #ifndef __Pulsar_ShiftEstimator_h
 #define __Pulsar_ShiftEstimator_h
@@ -46,6 +43,9 @@ namespace Pulsar {
     //! Return a copy constructed instance of self
     virtual ShiftEstimator* clone () const = 0;
 
+    //! Return a name that can be subsituted for the template/standard
+    virtual std::string get_name () const { return "N/A"; }
+    
     //! Prepare the data for use
     virtual void preprocess (Archive*);
 

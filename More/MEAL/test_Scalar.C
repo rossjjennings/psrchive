@@ -11,6 +11,22 @@ using namespace std;
 
 #include "complex_public.h"
 
+namespace MEAL
+{
+bool isnan (const ScalarMath& x)
+{
+  return false;
+}
+bool isinf (const ScalarMath& x)
+{
+  return false;
+}
+const ScalarMath& copysign(const ScalarMath& x, const ScalarMath& y)
+{
+  return x;
+}
+}
+
 int main (int argc, char** argv) try {
 
   std::complex<MEAL::ScalarMath> w (1.2, 3.4);

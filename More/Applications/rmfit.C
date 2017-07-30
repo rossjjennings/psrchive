@@ -14,6 +14,7 @@
 #include "Pulsar/DeltaRM.h"
 #include "Pulsar/PolnProfileStats.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/ComponentModel.h"
 
 #include "MEAL/LevenbergMarquardt.h"
 #include "MEAL/Gaussian.h"
@@ -45,6 +46,7 @@
 #include <sys/stat.h>
 
 using namespace std;
+using namespace Pulsar;
 using TextInterface::parse_indeces;
 
 #include "njkk08/njkk08.h"
@@ -59,6 +61,9 @@ void cpg_next ();
 
 // make an estimate of the rotation measure using matrix template matching
 void mtm_estimate (Pulsar::Archive* std, Pulsar::Archive* obs);
+
+// fit the component model to the obs and report the RM of each component
+void component_estimate (Pulsar::ComponentModel* std, Pulsar::Archive* obs);
 
 void
 do_singlebin(Reference::To<Pulsar::Archive> data,
@@ -97,7 +102,9 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 	 bool display,Reference::To<Pulsar::Archive> data,vector<int> good_chans);
 
 
-void do_refine(Reference::To<Pulsar::Archive> data,bool log_results);
+void do_refine(Reference::To<Pulsar::Archive> data,
+	       bool log_results,
+	       PhaseWeight* onpulse_weights=NULL);
 
 Reference::To<Pulsar::Archive> get_data (string archive_filename);
 
@@ -119,22 +126,31 @@ void usage ()
     "A program for finding rotation measures\n"
     "Usage: rmfit [options] filenames\n"
     "\n"
-    "Fourier method search options: \n"
-    "  -m min,max,steps  Specify the bounds and number of steps \n"
-    "  -t                Use the default bounds and resolution \n"
-    "  -a radians        Set RM step size according to delta-Psi across band \n"
-    "  -A radians        Set maximum RM according to delta-Psi across channel \n"
-    "  -i nchannels      Subdivide the band (fscrunch-x2) until \"nchannels\" channels are left (incorporates systematics) \n"
-    "  -j ntimes         Subdivide the pulse profile (bscrunch-x2) ntimes (incorporates systematics) \n"
-    "  -u max            Set the upper bound on the default maximum RM \n"
-    "  -U rm/dm          Set upper bound on default maximum RM = DM * rm/dm \n"
+    "Brute force search for peak linear polarization options: \n"
     "\n"
-    "Fit options: \n"
-    "  -r                Refine the RM using two halves of band \n"
-    "  -T threshold      Adjust the threshold used to select bins \n"
+    "  -m min,max,steps  Specify the bounds and number of steps \n"
+    "  -t            Use the default bounds and resolution \n"
+    "  -a rad        Compute RM step size so that delta-Psi<rad across band \n"
+    "  -A rad        Compute maximum RM so that delta-Psi<rad across channel \n"
+    "  -i nchan      Subdivide the band (fscrunch-x2) until \"nchan\" channels are left (incorporates systematics) \n"
+    "  -j ntimes     Subdivide the pulse profile (bscrunch-x2) ntimes (incorporates systematics) \n"
+    "  -u max        Set the upper bound on the default maximum RM \n"
+    "  -U rm/dm      Set upper bound on default maximum RM = DM * rm/dm \n"
+    "\n"
+    "Iterative differential position angle refinement options: \n"
+    "\n"
+    "  -r            Refine the RM using two halves of band (enables this mode)\n"
+    "  -T sigma_L    Set the threshold used to select bins (default: 3 sigma)\n"
+    "  -P paas.m     Perform RM refinement for each profile component in model\n"
+    "  -b [+/-][i-k] Include/exclude phase bins i through k (inclusive)\n"
+    "\n"
+    "Quadratic fitting algorithm (Noutsos et al. 2008) otpions: \n"
+    "\n"
+    "  -p [x1,x2]        Fit for every phase bin in window \n"
+    "  -w [x1,x2]        Average over phase window \n"
+    "  -Y                Produce a postscript plot of V against frequency\n"
     "\n"
     "Preprocessing options: \n"
-    "  -b [+/-][range]   Include/exclude phase bins \n"
     "  -B [factor]       Scrunch in phase bins \n"
     "  -F [factor]       Scrunch in frequency \n"
     "  -R RM             Set the input rotation measure \n"
@@ -143,9 +159,6 @@ void usage ()
     "Plotting options: \n"
     "  -D                Display results \n"
     "  -K dev            Specify pgplot device\n"
-    "  -p [x1,x2]        Fit for every phase bin in window \n"
-    "  -w [x1,x2]        Average over phase window \n"
-    "  -Y                Produce a postscript plot of V against frequency\n"
     "\n"
     "Standard options:\n"
     "  -h                This help page \n"
@@ -228,7 +241,10 @@ int main (int argc, char** argv)
   // estimate the RM using MTM
   Reference::To<Pulsar::Archive> mtm_std;
 
-  const char* args = "a:A:b:B:c:C:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  // estimate an unique RM for each component in the model
+  Reference::To<Pulsar::ComponentModel> component_model;
+  
+  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Lm:M:p:P:rR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
@@ -286,7 +302,10 @@ int main (int argc, char** argv)
 
       break;
 
-
+    case 'P':
+      component_model = new Pulsar::ComponentModel(optarg);
+      break;
+    
     case 'D':
       display = true;
       break;
@@ -610,6 +629,13 @@ int main (int argc, char** argv)
 	  if( verbose )
 	    fprintf(stderr,"Continuing with specialist methods\n");
 
+
+	  if (component_model)
+	  {
+	    component_estimate (component_model, data);
+	    continue;
+	  }
+    
 	  // This must be done after maxmthd because it re-labels
 	  // all the channel frequencies.
 
@@ -1164,6 +1190,10 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     }
 
 
+  ofstream os ("rm_spectrum.txt");
+  for (unsigned step=0; step < rmsteps; step++)
+    os << rms[step] << " " << fluxes[step] << " " << err[step] << endl;
+    
 #if HAVE_PGPLOT
 
   float ymin = fluxes[0];
@@ -1354,7 +1384,9 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
   return bestrm;
 }
 
-void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
+void do_refine (Reference::To<Pulsar::Archive> data,
+		bool log_results,
+		PhaseWeight* onpulse_weights)
 {
   Pulsar::DeltaRM delta_rm;
 
@@ -1366,7 +1398,8 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
 
   delta_rm.set_include (include_bins);
   delta_rm.set_exclude (exclude_bins);
-
+  delta_rm.set_onpulse (onpulse_weights);
+  
   bool converged = false;
   unsigned iterations = 0;
 
@@ -1405,7 +1438,7 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
       delta_rm.refine ();
     }
     catch (Error& error) {
-      cerr << "\nrmfit: DeltaRM::refine failed \n\t" << error.get_message() << endl;
+      cerr << "\nrmfit: DeltaRM::refine failed \n\t" << error << endl;
       cerr << "rmfit: using best search RM=" << best_search_rm << endl;
       if (log_results)
 	rmresult (data, best_search_rm, data->get_nbin());
@@ -1496,6 +1529,34 @@ void mtm_estimate (Pulsar::Archive* std, Pulsar::Archive* obs) try
 catch (Error& error)
 {
   cerr << "rmfit: Error MTM " << obs->get_filename() << error << endl;
+}
+
+
+void component_estimate (Pulsar::ComponentModel* std, Pulsar::Archive* obs) try
+{
+  // fit the component model to the observation
+  Reference::To<Archive> clone = obs->clone();
+  clone->fscrunch();
+  clone->tscrunch();
+  clone->pscrunch();
+  
+  std->set_observation (obs->get_Profile(0,0,0));
+  std->get_shift ();
+
+  const unsigned nbin = obs->get_nbin();
+
+  for (unsigned ic=0; ic < std->get_ncomponents(); ic++)
+  {
+    PhaseWeight component_weights (nbin);
+    std->evaluate( component_weights.get_weights(), nbin, ic );
+
+    do_refine (obs, false, &component_weights);
+  }
+  
+}
+catch (Error& error)
+{
+  cerr << "rmfit: Error ComponentModel " << obs->get_filename() << error << endl;
 }
 
 

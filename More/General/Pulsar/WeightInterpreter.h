@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/WeightInterpreter.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/08/05 13:06:44 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/WeightInterpreter.h
 
 #ifndef __Pulsar_WeightInterpreter_h
 #define __Pulsar_WeightInterpreter_h

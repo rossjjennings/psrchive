@@ -100,18 +100,31 @@ void Pulsar::Integration::add_extension (Extension* ext)
   }
 }
 
+static unsigned instance_count = 0;
+
+unsigned Pulsar::Integration::get_instance_count ()
+{
+  return instance_count;
+}
+
 Pulsar::Integration::Integration ()
 {
   if (verbose)
     cerr << "Pulsar::Integration ctor this=" << this << endl;
 
   zero_phase_aligned = false;
-
+  instance_count ++;
   expert_interface = new Expert (this);
 }
 
 //! Provide access to the expert interface
 Pulsar::Integration::Expert* Pulsar::Integration::expert ()
+{
+  return expert_interface; 
+}
+
+//! Provide access to the expert interface
+const Pulsar::Integration::Expert* Pulsar::Integration::expert () const
 {
   return expert_interface; 
 }
@@ -139,6 +152,8 @@ Pulsar::Integration::~Integration ()
 {
   if (verbose)
     cerr << "Pulsar::Integration dtor this=" << this << endl;
+
+  instance_count --;
 }
 
 

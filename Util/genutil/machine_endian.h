@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/machine_endian.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/11/11 19:04:58 $
-   $Author: straten $ */
+// psrchive/Util/genutil/machine_endian.h
 
 #ifndef __M_ENDIAN_H
 #define __M_ENDIAN_H

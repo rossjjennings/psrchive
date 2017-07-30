@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardOptions.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/09/02 02:54:31 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/StandardOptions.h
 
 #ifndef __Pulsar_StandardOptions_h
 #define __Pulsar_StandardOptions_h

@@ -57,8 +57,11 @@ namespace TextInterface {
       return name == get_name();
     }
 
-    virtual void set_modifiers (const std::string&) const;
-    virtual void reset_modifiers () const;
+    //! Parse any modifiers that will alter the behaviour of the output stream
+    virtual void set_modifiers (const std::string&) const = 0;
+
+    //! Reset any output stream modifiers
+    virtual void reset_modifiers () const = 0;
 
     virtual void set_parent (Parser* p) { parent = p; }
 

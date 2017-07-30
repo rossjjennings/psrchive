@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/ExampleArchive.h
 
 #ifndef __ExampleArchive_h
 #define __ExampleArchive_h

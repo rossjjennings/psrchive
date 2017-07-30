@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/08/06 17:55:56 $
-   $Author: demorest $ */
+// psrchive/More/General/Pulsar/StandardCandles.h
 
 #ifndef __Pulsar_StandardCandles_h
 #define __Pulsar_StandardCandles_h

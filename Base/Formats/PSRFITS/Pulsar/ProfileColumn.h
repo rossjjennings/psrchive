@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/ProfileColumn.h,v $
-   $Revision: 1.3 $
-   $Date: 2010/05/31 05:50:48 $
-   $Author: straten $ */
+// psrchive/Base/Formats/PSRFITS/Pulsar/ProfileColumn.h
 
 #ifndef __Pulsar_ProfileColumn_h
 #define __Pulsar_ProfileColumn_h

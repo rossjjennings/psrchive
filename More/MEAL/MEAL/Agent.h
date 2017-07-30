@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Agent.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/28 05:18:24 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Agent.h
 
 #ifndef __MEAL_Agent_H
 #define __MEAL_Agent_H

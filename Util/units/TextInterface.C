@@ -237,8 +237,16 @@ string TextInterface::Parser::get_name_value (string& name) const
 
 void TextInterface::Value::set_modifiers (const std::string& modifiers) const
 {
+#ifdef _DEBUG
   cerr << "TextInterface::Value::set_modifiers " << modifiers << endl;
+#endif
+  
   tostring_precision = fromstring<unsigned> (modifiers);
+
+#ifdef _DEBUG
+  cerr << "TextInterface::Value::set_modifiers precision="
+       << tostring_precision << endl;
+#endif
 }
 
 void TextInterface::Value::reset_modifiers () const

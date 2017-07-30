@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Container.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:05:49 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/Container.h
 
 #ifndef __Pulsar_Container_h
 #define __Pulsar_Container_h

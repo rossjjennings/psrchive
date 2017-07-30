@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polar.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/10 10:53:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Polar.h
 
 #ifndef __MEAL_Polar_H
 #define __MEAL_Polar_H

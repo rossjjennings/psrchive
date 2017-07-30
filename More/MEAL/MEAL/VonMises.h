@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VonMises.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/11/10 04:38:59 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/VonMises.h
 
 #ifndef __VonMises_H
 #define __VonMises_H

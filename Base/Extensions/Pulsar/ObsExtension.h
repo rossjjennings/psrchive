@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.14 $
-   $Date: 2010/05/25 08:21:42 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/ObsExtension.h
 
 #ifndef __ObsExtension_h
 #define __ObsExtension_h

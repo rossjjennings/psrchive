@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightInterface.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/12 07:45:26 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PhaseWeightInterface.h
 
 #ifndef __Pulsar_PhaseWeightTI_h
 #define __Pulsar_PhaseWeightTI_h

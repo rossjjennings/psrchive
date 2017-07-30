@@ -1,14 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Site.h"
 #include "Directional.h"
 #include "Horizon.h"
 #include "Meridian.h"
+#include "KrausType.h"
 
 //! Default constructor
 Pulsar::Telescope::Telescope ()
@@ -66,11 +68,18 @@ Directional*
 Pulsar::Telescope::get_Directional() const
 {
   Reference::To<Directional> dir;
-  if (mount==Horizon) { dir = new ::Horizon; }
-  else if (mount==Meridian) { dir = new ::Meridian; }
-  else
+  switch (mount)
+  {
+  case Horizon:
+    dir = new ::Horizon; break;
+  case Meridian:
+    dir = new ::Meridian; break;
+  case KrausType:
+    dir = new ::KrausType; break;
+  default:
     throw Error(InvalidState, "Pulsar::Telescope:get_Directional", 
-        "Mount type currently unsupported");
+		"Mount type currently unsupported");
+  }
 
   dir->set_observatory_latitude(latitude.getRadians());
   dir->set_observatory_longitude(longitude.getRadians());

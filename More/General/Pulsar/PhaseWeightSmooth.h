@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightSmooth.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/07/12 05:59:18 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PhaseWeightSmooth.h
 
 #ifndef __Pulsar_PhaseWeightSmooth_h
 #define __Pulsar_PhaseWeightSmooth_h

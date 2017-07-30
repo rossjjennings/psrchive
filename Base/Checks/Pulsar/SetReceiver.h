@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Checks/Pulsar/SetReceiver.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/02/18 02:57:09 $
-   $Author: straten $ */
+// psrchive/Base/Checks/Pulsar/SetReceiver.h
 
 #ifndef __Pulsar_SetReceiver_h
 #define __Pulsar_SetReceiver_h

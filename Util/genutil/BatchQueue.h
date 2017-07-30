@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/BatchQueue.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/11/14 23:55:17 $
-   $Author: straten $ */
+// psrchive/Util/genutil/BatchQueue.h
 
 #ifndef __BatchQueue_h
 #define __BatchQueue_h

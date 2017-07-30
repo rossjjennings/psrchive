@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/27 06:16:15 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/Pointing.h
 
 #ifndef __Pulsar_Pointing_h
 #define __Pulsar_Pointing_h

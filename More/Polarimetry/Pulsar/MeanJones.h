@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanJones.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/01/20 05:11:44 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/MeanJones.h
 
 #ifndef __Calibration_MeanJones_H
 #define __Calibration_MeanJones_H

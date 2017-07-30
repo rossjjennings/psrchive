@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/DataExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/06/08 19:23:37 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/DataExtension.h
 
 #ifndef __Pulsar_Data_Extension_h
 #define __Pulsar_Data_Extension_h

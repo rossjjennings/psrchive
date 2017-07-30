@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/SpectralKurtosis.h,v $
-   $Revision:  $
-   $Date:  $
-   $Author: $ */
+// psrchive/Base/Extensions/Pulsar/SpectralKurtosis.h
 
 #ifndef __Pulsar_SpectralKurtosis_h
 #define __Pulsar_SpectralKurtosis_h

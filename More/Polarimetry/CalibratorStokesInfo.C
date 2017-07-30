@@ -14,6 +14,7 @@ Pulsar::CalibratorStokesInfo::CalibratorStokesInfo (const CalibratorStokes* cs)
 {
   calibrator_stokes = cs;
   together = false;
+  degree = false;
 }
 
 //! Return the number of frequency channels
@@ -33,7 +34,7 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
   if (together)
     return 1;
   else
-    return 3;
+    return 3 + unsigned(degree);
 }
 
 //! Return the name of the specified class
@@ -42,6 +43,10 @@ std::string Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
   static char label [64] = "\\fiC\\fr\\dk\\u (\%\\fiC\\fr\\d0\\u)";
   static char* replace = strchr (label, 'k');
 
+  // degree of polarization
+  if (degree && iclass == 3)
+    return "|\\fiC\\fr| (\%\\fiC\\fr\\d0\\u)";
+  
   if (together)
     *replace = 'k';
   else
@@ -75,7 +80,19 @@ Pulsar::CalibratorStokesInfo::get_param (unsigned ichan, unsigned iclass,
   else
     index = iclass;
 
-  return 100.0 * calibrator_stokes->get_stokes(ichan)[index+1];
+  Estimate<double> value = 0;
+  Stokes< Estimate<double> > stokes = calibrator_stokes->get_stokes(ichan);
+  
+  // degree of polarization
+  if (degree && iclass == 3)
+  {
+    for (unsigned i=1; i<4; i++)
+      value += stokes[i] * stokes[i];
+    value = sqrt(value);
+  }
+  else
+    value = stokes[index+1];
 
+  return 100.0 * value;
 }
 

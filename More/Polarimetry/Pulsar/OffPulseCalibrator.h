@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/OffPulseCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/OffPulseCalibrator.h
 
 #ifndef __Pulsar_OffPulseCalibrator_H
 #define __Pulsar_OffPulseCalibrator_H

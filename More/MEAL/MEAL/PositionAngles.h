@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/PositionAngles.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/PositionAngles.h
 
 #ifndef __PositionAngles_H
 #define __PositionAngles_H

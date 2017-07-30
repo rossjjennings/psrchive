@@ -34,6 +34,10 @@ void Pulsar::ASPArchive::init ()
   //   - per-channel timestamps?
   asp_file_version=0;
   have_asp_stokes=false;
+
+  // Make sure these exist
+  add_extension(new Receiver);
+  add_extension(new Backend);
 }
 
 Pulsar::ASPArchive::ASPArchive()

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/TapeInfo.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/TapeInfo.h
 
 #ifndef __Pulsar_TapeInfo_h
 #define __Pulsar_TapeInfo_h

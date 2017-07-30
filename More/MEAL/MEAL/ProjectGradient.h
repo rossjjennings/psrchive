@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProjectGradient.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ProjectGradient.h
 
 #ifndef __ProjectProductGradient_H
 #define __ProjectProductGradient_H

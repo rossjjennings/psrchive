@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/JonesCloude.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/01/20 00:51:52 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/JonesCloude.h
 
 #ifndef __MEAL_JonesCloude_H
 #define __MEAL_JonesCloude_H

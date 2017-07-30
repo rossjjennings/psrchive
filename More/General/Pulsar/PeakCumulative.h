@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakCumulative.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/24 05:02:23 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PeakCumulative.h
 
 #ifndef __Pulsar_PeakCumulative_h
 #define __Pulsar_PeakCumulative_h

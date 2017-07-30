@@ -39,8 +39,8 @@ Pulsar::SimplePredictor::SimplePredictor (const char* filename)
   fclose (fptr);
 }
 
-Pulsar::SimplePredictor::~SimplePredictor ()
-{
+
+Pulsar::SimplePredictor::~SimplePredictor () {
 }
 
 //! Return a new, copy constructed instance of self
@@ -141,9 +141,11 @@ Pulsar::Phase Pulsar::SimplePredictor::dispersion (const MJD &t, long double MHz
 	       "Pulsar::SimplePredictor dispersion not implemented"); 
 }
 
+
 void Pulsar::SimplePredictor::load (FILE* fptr)
 {
-  vector<char> buffer (256);
+  rewind(fptr);
+  vector<char> buffer (512);
   char* buf = &buffer[0];
 
   if (verbose)
@@ -152,6 +154,9 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
   while ( fgets (buf, buffer.size(), fptr) == buf )
   {
     string line = buf;
+
+    if (verbose)
+      cerr << "Pulsar::SimplePredictor::load line ='" << buf << "'" << endl;
 
     line = stringtok (line, "#\n", false);  // get rid of comments
 
@@ -164,71 +169,90 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
     if (verbose)
       cerr << "Pulsar::SimplePredictor::load key ='" << key << "'" << endl;
 
-    if (!line.length())
+    if(!key.length()) {
+      if(verbose)
+	cerr<< "Pulsar::SimplePredictor::load Ignoring empty key = '" << key << "'" <<endl;
       continue;
+    }
 
     string val = stringtok (line, " \t");
 
     if (verbose)
       cerr << "Pulsar::SimplePredictor::load val ='" << val << "'" << endl;
 
-    if (key == "SOURCE:")
-      name = val;
+    parse(key,val);
+  }
+}
 
-    else if (key == "DM:")
-      dispersion_measure = fromstring<double>(val);
 
-    else if (key == "RA:")
-      coordinates.ra().setHMS (val.c_str());
+void Pulsar::SimplePredictor::parse(string key, string val) {
 
-    else if (key == "DEC:")
-      coordinates.dec().setDMS (val.c_str());
+  if (verbose)
+    cerr << "Pulsar::SimplePredictor::parse key = '" << key << "' val = '" << val << "'" << endl;
 
-    else if (key == "PERIOD:")
+  if(key == "SNR:"){
+    if(verbose)
+      cerr << "Pulsar::SimplePredictor::parse ignoring key = '" << key <<"'"<< endl;
+    return;
+  }
+    
+
+  else if (key == "SOURCE:")
+    name = val;
+
+  else if (key == "DM:")
+    dispersion_measure = fromstring<double>(val);
+
+  else if (key == "RA:")
+    coordinates.ra().setHMS (val.c_str());
+
+  else if (key == "DEC:")
+    coordinates.dec().setDMS (val.c_str());
+
+  else if (key == "PERIOD:")
     {
       long double period = fromstring<long double>(val);
       if (coefs.size() == 0)
-	coefs.resize(1);
+        coefs.resize(1);
       coefs[0] = 1/period;
     }
 
-    else if (key == "PDOT:")
+  else if (key == "PDOT:")
     {
       if (coefs.size() == 0)
-        throw Error (InvalidState, "Pulsar::SimplePredictor::load",
+        throw Error (InvalidState, "Pulsar::SimplePredictor::parse",
                      "PERIOD not specified before PDOT");
       long double pdot = fromstring<long double>(val);
       if (coefs.size() < 2)
-	coefs.resize(2);
+        coefs.resize(2);
       coefs[1] = -0.5 * pdot / (coefs[0] * coefs[0]);
     }
-
-    else if (key == "ACC:")
+  else if (key == "ACC:")
     {
       if (coefs.size() == 0)
-        throw Error (InvalidState, "Pulsar::SimplePredictor::load",
+        throw Error (InvalidState, "Pulsar::SimplePredictor::parse",
                      "PERIOD not specified before ACC");
       long double acc = fromstring<long double>(val);
       if (coefs.size() < 2)
-	coefs.resize(2);
+        coefs.resize(2);
       coefs[1] = -0.5 * coefs[0] * acc / Pulsar::speed_of_light;
     }
 
-    else if (key == "EPOCH:")
+  else if (key == "EPOCH:")
     {
       reference_epoch = MJD(val);
     }
 
-    else if (key == "TELESCOPE:")
+  else if (key == "TELESCOPE:")
     {
       telescope = val;
     }
 
-    else if (key == "BARYPERIOD:")
+  else if (key == "BARYPERIOD:")
     {
       long double period = fromstring<long double>(val);
       if (coefs.size() == 0)
-	coefs.resize(1);
+        coefs.resize(1);
 
       Barycentre barry;
       barry.set_epoch( reference_epoch );
@@ -240,25 +264,23 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
       double x=0, y=0, z=0;
 
       if (site)
-	site->get_xyz (x, y, z);
+        site->get_xyz (x, y, z);
       else
-      {
-	cerr << "Pulsar::SimplePredictor::load"
-	  " cannot determine coordinates of antenna"
-	  "\n\t" "defaulting to geocenter" << endl;
-	x = y = z = 0.0;
-      }
+	{
+	  cerr << "Pulsar::SimplePredictor::parse"
+          " cannot determine coordinates of antenna"
+	    "\n\t" "defaulting to geocenter" << endl;
+	  x = y = z = 0.0;
+	}
 
       barry.set_observatory_xyz (x, y, z);
 
       period *= barry.get_Doppler();
       coefs[0] = 1/period;
     }
-
-    else
-      throw Error (InvalidParam, "Pulsar::SimplePredictor::load",
-		   "unrecognized key='" + key + "'");
-  }
+  else
+    throw Error (InvalidParam, "Pulsar::SimplePredictor::parse",
+		 "unrecognized key='" + key + "'");
 }
 
 void Pulsar::SimplePredictor::unload (FILE* fptr) const

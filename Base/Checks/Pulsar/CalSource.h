@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Checks/Pulsar/CalSource.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/11/29 12:13:49 $
-   $Author: straten $ */
+// psrchive/Base/Checks/Pulsar/CalSource.h
 
 #ifndef __Pulsar_CalSource_h
 #define __Pulsar_CalSource_h

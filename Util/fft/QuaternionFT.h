@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/fft/QuaternionFT.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/Util/fft/QuaternionFT.h
 
 #ifndef __QuaternionFT_H
 #define __QuaternionFT_H

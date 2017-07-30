@@ -16,6 +16,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/SquareWave.h"
+
 #include "Pulsar/Receiver.h"
 
 #include "Error.h"
@@ -71,6 +73,7 @@ void Pulsar::FluxCalibrator::init ()
 {
   type = new CalibratorTypes::Flux;
   calculated = have_on = have_off = false;
+  outlier_threshold = 0.0;
 }
 
 string Pulsar::FluxCalibrator::get_standard_candle_info () const
@@ -306,6 +309,9 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   unsigned nsub = archive->get_nsubint();
 
+  SquareWave estimator;
+  estimator.set_outlier_threshold (outlier_threshold);
+  
   for (unsigned isub=0; isub < nsub; isub++) {
 
     const Pulsar::Integration* integration = archive->get_Integration (isub);
@@ -313,7 +319,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     if (verbose > 2) 
       cerr << "Pulsar::FluxCalibrator call Integration::cal_levels" << endl;
 
-    integration->cal_levels (cal_hi, cal_lo);
+    estimator.levels( integration, cal_hi, cal_lo );
     Estimate<double> unity(1.0);
 
     for (unsigned ichan=0; ichan<nchan; ++ichan) {

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.53 $
-   $Date: 2009/03/01 18:04:42 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h
 
 #ifndef __Pulsar_PolnCalibrator_H
 #define __Pulsar_PolnCalibrator_H
@@ -47,6 +44,9 @@ namespace Pulsar {
     //! Destructor
     virtual ~PolnCalibrator ();
 
+    //! Set the calibrator archive used to define basic attributes
+    void set_calibrator (const Archive* archive);
+
     // ///////////////////////////////////////////////////////////////////
     //
     // useful for calibrating
@@ -65,6 +65,11 @@ namespace Pulsar {
 
     //! Return the Receiver
     const Receiver* get_Receiver () const;
+
+    //! Set the Receiver extension to that of the input Archive
+    void set_Receiver (const Archive*);
+    std::string get_receiver_basis_filename () const;
+
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -140,9 +145,6 @@ namespace Pulsar {
     //! The PolnCalibratorExtension of the Archive passed during construction
     Reference::To<const PolnCalibratorExtension> poln_extension;
 
-    //! The Receiver Extension of the Archive passed during construction
-    Reference::To<const Receiver> receiver;
-
     //! The FeedExtension of the Archive passed during construction
     Reference::To<const FeedExtension> feed;
 
@@ -159,7 +161,7 @@ namespace Pulsar {
     virtual bool get_valid (unsigned ichan) const;
 
     //! Derived classes may be able to shrink the transformation array
-    virtual unsigned get_maximum_nchan ();
+    virtual unsigned get_maximum_nchan () const;
 
   private:
 
@@ -175,6 +177,10 @@ namespace Pulsar {
 
     void build_response();
     void patch_response();
+
+    //! The Receiver Extension used as the basis for corrections
+    Reference::To<const Receiver> receiver;
+    std::string receiver_basis_filename;
   };
 
   //! Create a new transformation instance described by the extension

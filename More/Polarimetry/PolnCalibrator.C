@@ -50,17 +50,46 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
   if (poln_extension)
     extension = poln_extension;
 
+  set_calibrator (archive);
+
+  filenames.push_back( archive->get_filename() );
+}
+
+void Pulsar::PolnCalibrator::set_Receiver (const Archive* archive)
+{
+  if (!archive)
+  {
+    receiver = 0;
+    receiver_basis_filename = "";
+  }
+  else
+  {
+    receiver = archive->get<Receiver>();
+    receiver_basis_filename = archive->get_filename();
+    if (verbose)
+      cerr << "PolnCalibrator::set_Receiver filename=" 
+           << archive->get_filename() << endl;
+  }
+}
+
+std::string Pulsar::PolnCalibrator::get_receiver_basis_filename () const
+{
+  return receiver_basis_filename;
+}
+
+void Pulsar::PolnCalibrator::set_calibrator (const Archive* archive)
+{
   // store the Receiver Extension, if any
-  receiver = archive->get<Receiver>();
+  if (!has_Receiver())
+    set_Receiver (archive);
 
   // store the Feed Extension, if any
   feed = archive->get<FeedExtension>();
 
-  filenames.push_back( archive->get_filename() );
-
   built = false;
-
   observation_nchan = 0;
+
+  Calibrator::set_calibrator (archive);
 }
 
 //! Copy constructor
@@ -142,7 +171,7 @@ const Pulsar::Receiver* Pulsar::PolnCalibrator::get_Receiver () const
   supported.
 
 */
-unsigned Pulsar::PolnCalibrator::get_maximum_nchan ()
+unsigned Pulsar::PolnCalibrator::get_maximum_nchan () const
 {
   return 0;
 }

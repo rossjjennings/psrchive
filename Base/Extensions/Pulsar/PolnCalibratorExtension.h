@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.35 $
-   $Date: 2009/03/24 03:00:36 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h

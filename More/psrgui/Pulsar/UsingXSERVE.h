@@ -5,10 +5,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/psrgui/Pulsar/UsingXSERVE.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/13 10:21:51 $
-   $Author: straten $ */
+// psrchive/More/psrgui/Pulsar/UsingXSERVE.h
 
 #ifndef __Pulsar_UsingXSERVE_h
 #define __Pulsar_UsingXSERVE_h

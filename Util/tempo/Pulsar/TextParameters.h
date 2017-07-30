@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/TextParameters.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/11/30 03:12:37 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Pulsar/TextParameters.h
 
 #ifndef __TextParameters_h
 #define __TextParameters_h

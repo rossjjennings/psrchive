@@ -82,6 +82,9 @@ namespace Pulsar
     //! Factory returns a new instance loaded from filename
     static Archive* load (const std::string& name);
 
+    //! Returns the number of Archive instances currently in existence
+    static unsigned get_instance_count ();
+
     //@}
 
     /** @name File I/O

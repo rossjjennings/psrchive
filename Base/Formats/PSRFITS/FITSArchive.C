@@ -32,6 +32,7 @@
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/CoherentDedispersion.h"
 #include "Pulsar/SpectralKurtosis.h"
+#include "Pulsar/CovarianceMatrix.h" 
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
@@ -313,7 +314,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   Backend* backend = get<Backend>();
   if (backend && strstr (backend->get_name().c_str(), "BPP"))
   {
-    if (verbose > 3)
+    if (verbose > 2)
       cerr << "FITSArchive::load_header using BPP matching policy" << endl;
     ThresholdMatch::set_BPP (this);
   }
@@ -729,6 +730,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the parameters from the SUBINT HDU
   load_FITSSUBHdrExtension( read_fptr );
 
+  // Load the Covariance Matrix Data from COV_MAT
+  load_CovarianceMatrix (read_fptr);
+
   // Load the pulsar parameters
   if (get_type() == Signal::Pulsar)
     load_Parameters (read_fptr);
@@ -1066,69 +1070,21 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   unload_Predictor (fptr);
 
   // Unload some of the other HDU's
+  unload <ObsDescription> (fptr, "OBSDESCR");
+  
+  unload <DigitiserStatistics> (fptr, "DIG_STAT");
 
-  try
-  {
-    const ObsDescription* description = get<ObsDescription>();
-    if (description)
-      unload (fptr, description);
-    else
-      delete_hdu (fptr, "OBSDESCR");
-  }
-  catch( Error& e )
-  {
-    cerr << e << endl;
-  }
+  unload <DigitiserCounts> (fptr, "DIG_CNTS");
 
-  try
-  {
-    const DigitiserStatistics* digistats = get<DigitiserStatistics>();
-    if (digistats)
-      unload (fptr, digistats);
-    else
-      delete_hdu (fptr, "DIG_STAT");
-  }
-  catch( Error& e )
-  {
-    cerr << e << endl;
-  }
+  unload <Passband> (fptr, "BANDPASS");
 
-  const DigitiserCounts *dig_counts = get<DigitiserCounts>();
-  if( dig_counts )
-    unload( fptr, dig_counts );
-  else
-    delete_hdu( fptr, "DIG_CNTS" );
+  unload <CoherentDedispersion> (fptr, "COHDDISP");
 
-  const Passband* passband = get<Passband>();
-  if (passband)
-    unload (fptr, passband);
-  else
-    delete_hdu (fptr, "BANDPASS");
+  unload <FluxCalibratorExtension> (fptr, "FLUX_CAL");
 
-  const CoherentDedispersion* cdedisp = get<CoherentDedispersion>();
-  if (cdedisp)
-    unload (fptr, cdedisp);
-  else
-    delete_hdu (fptr, "COHDDISP");
+  unload <CalibratorStokes> (fptr, "CAL_POLN");
 
-  const FluxCalibratorExtension* fce = get<FluxCalibratorExtension>();
-  if (fce)
-    unload (fptr, fce);
-  else
-    delete_hdu (fptr, "FLUX_CAL");
-
-  const CalibratorStokes* stokes = get<CalibratorStokes>();
-  if (stokes)
-    unload (fptr, stokes);
-  else
-    delete_hdu (fptr, "CAL_POLN");
-
-  const PolnCalibratorExtension* pce = get<PolnCalibratorExtension>();
-  if (pce)
-    unload (fptr, pce);
-  else
-    delete_hdu (fptr, "FEEDPAR");
-
+  unload <PolnCalibratorExtension> (fptr, "FEEDPAR");
 
   // Unload extra subint parameters.
 
@@ -1149,6 +1105,13 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     unload_integrations (fptr);
   else
     delete_hdu (fptr, "SUBINT");
+
+  // Unload the Covariance Matrix Data values
+  const CovarianceMatrix* covar = get<CovarianceMatrix>();
+  if(covar)
+    unload (fptr,covar);
+  else
+    delete_hdu (fptr,"COV_MAT");
 
   // Write the Spectral Kurtosis integrations to file
 
@@ -1182,7 +1145,21 @@ catch (Error& error)
 // //////////////////////////////////////////
 // //////////////////////////////////////////
 
-
+template<class Ext>
+void Pulsar::FITSArchive::unload (fitsfile* fptr,
+				  const char* hdu_name) const try
+{
+  const Ext* extension = get<Ext>();
+  if (extension)
+    unload (fptr, extension);
+  else
+    delete_hdu (fptr, hdu_name);
+}
+catch( Error& e )
+{
+  cerr << e << endl;
+  delete_hdu (fptr, hdu_name);
+}
 
 // !retreive the offs_sub
 

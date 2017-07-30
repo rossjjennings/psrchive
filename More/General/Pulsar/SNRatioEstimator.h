@@ -18,10 +18,7 @@ namespace Pulsar {
 
   class Profile;
 
-  //! Algorithms that produce PhaseWeight objects
-  /*! This pure virtual base class of PhaseWeight algorithms defines the
-      interface by which various routines, such as baseline estimators
-      can be accessed */
+  //! Algorithms that estimate the signal-to-noise ratio of pulse profiles
   class SNRatioEstimator : public Algorithm
   {
 

@@ -1,18 +1,17 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Registry.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/11/28 05:18:24 $
-   $Author: straten $ */
+// psrchive/Util/units/Registry.h
 
 #ifndef __Registry_h
 #define __Registry_h
+
+#include "ReferenceTo.h"
 
 #include <vector>
 #include <iostream>
@@ -23,7 +22,7 @@ namespace Registry {
 
   //! Pure virtual template base class of Registry::List<Parent>::Enter<Child>
   template<class Parent>
-  class Entry
+  class Entry : public Reference::Able
   {
     public:
 
@@ -35,6 +34,9 @@ namespace Registry {
     //! Null constructor
     Entry () { instance = 0; }
 
+    //! Destructor deletes instance of Parent
+    virtual ~Entry () { if (instance) delete instance; }
+    
   protected:
 
     //! Adds this instance to the Parent::Registry::List<Parent>
@@ -51,9 +53,6 @@ namespace Registry {
       registry.add (this);
     }
 
-    //! Destructor deletes instance of Parent
-    virtual ~Entry () { if (instance) delete instance; }
-    
     //! Return a pointer to a new instance of a Parent (or its children)
     virtual Parent* create () const = 0;
 
@@ -63,7 +62,7 @@ namespace Registry {
 
   //! List of Registry::Entry
   template<class Parent>
-  class List
+  class List : public Reference::Able
   {
 
     friend class Entry<Parent>;
@@ -96,7 +95,7 @@ namespace Registry {
 
     //! provide access to the single registry instance
     static List& get_registry()
-    { if (!registry) registry = new List; return *registry; }
+    { if (!registry) { auto_delete = registry = new List; } return *registry; }
 
   protected:
 
@@ -104,10 +103,13 @@ namespace Registry {
     void add (Entry<Parent>* entry) { entries.push_back (entry); }
 
     //! The vector of registry entries
-    std::vector< Entry<Parent>* > entries;
+    std::vector< Reference::To< Entry<Parent> > > entries;
 
     //! The single registry instance for the Parent class
     static List* registry;
+
+    //! Clean up the registry when the program exits
+    static Reference::To<List> auto_delete;
   };
 
   template<class Parent>
@@ -174,5 +176,8 @@ bool Registry::List<Parent>::verbose = false;
 
 template<class Parent>
 Registry::List<Parent>* Registry::List<Parent>::registry = 0;
+
+template<class Parent>
+Reference::To< Registry::List<Parent> > Registry::List<Parent>::auto_delete;
 
 #endif

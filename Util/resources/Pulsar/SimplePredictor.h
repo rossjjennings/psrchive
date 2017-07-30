@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/resources/Pulsar/SimplePredictor.h,v $
-   $Revision: 1.4 $
-   $Date: 2010/09/24 01:53:21 $
-   $Author: straten $ */
+// psrchive/Util/resources/Pulsar/SimplePredictor.h
 
 #ifndef __SimplePredictor_h
 #define __SimplePredictor_h
@@ -19,6 +16,7 @@
 
 #include <string>
 #include <vector>
+
 
 namespace Pulsar {
 
@@ -116,6 +114,8 @@ namespace Pulsar {
 
     //! Telescope name
     std::string telescope;
+
+    void parse(std::string key, std::string value);
 
   };
 

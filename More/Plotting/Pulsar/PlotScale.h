@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.16 $
-   $Date: 2010/09/19 04:33:33 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PlotScale.h
 
 #ifndef __Pulsar_PlotScale_h
 #define __Pulsar_PlotScale_h

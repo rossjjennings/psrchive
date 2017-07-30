@@ -35,10 +35,19 @@
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/ArrivalTime.h"
 #include "Pulsar/PhaseGradShift.h"
+#include "Pulsar/SincInterpShift.h"
+#include "Pulsar/GaussianShift.h"
+#include "Pulsar/ParIntShift.h"
+#include "Pulsar/ZeroPadShift.h"
+#include "Pulsar/FourierDomainFit.h"
+#include "Pulsar/FluxCentroid.h"
+
 #include "Pulsar/MatrixTemplateMatching.h"
 #include "toa.h"
 
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/CovarianceMatrix.h"
+
 #include<gsl/gsl_blas.h>
 #include<gsl/gsl_eigen.h>
 #include<gsl/gsl_linalg.h>
@@ -120,6 +129,8 @@ protected:
   //! Total archive
   Reference::To<Archive> total;
   unsigned total_count;
+  //! Auxilliary archive for storing template-matched archives
+  Reference::To<Archive> total_matched;
 
   Reference::To<Archive> evecs_archive;
   //! Covariance calculations
@@ -129,9 +140,11 @@ protected:
   //! Output control
   string prefix;
   bool save_diffs;
+  bool save_matched;
   bool save_evecs;
   bool save_evals;
   bool save_covariance_matrix;
+  bool save_covariance_matrix_extension;
   bool save_decomps;
   bool save_proj;
   bool save_res_decomp_corel;
@@ -141,6 +154,8 @@ protected:
   bool apply_offset;
   bool apply_scale;
   bool prof_to_std;
+  bool uniform_weighting;
+  string algorithm;
 
   //! Regression
   bool unweighted_regr;
@@ -162,6 +177,9 @@ protected:
   //! Polarisation extension
   unsigned which_pol;
   bool full_stokes_pca;
+
+  //! Covariance Matrix extension
+  Reference::To<CovarianceMatrix> covar;
 
   struct CastToDouble
   {
@@ -187,11 +205,15 @@ psrpca::psrpca ()
 
   t_cov = new TimeDomainCovariance;
   covariance = NULL;
-  save_diffs = save_evecs = save_evals = save_covariance_matrix = save_decomps = save_proj = save_res_decomp_corel = true;
+  save_diffs = save_matched = save_evecs = save_evals = save_covariance_matrix = save_decomps = save_proj = save_res_decomp_corel = true;
+
+  save_covariance_matrix_extension = false;
   prefix = "psrpca";
   load_prefix = "";
 
   prof_to_std = apply_shift = apply_offset = apply_scale = true ;
+
+  uniform_weighting = false;
 
   remove_arch_baseline = remove_std_baseline = true;
 
@@ -218,7 +240,12 @@ void psrpca::setup ()
     full_poln->set_choose_maximum_harmonic( true );
   }
   else
-    arrival->set_shift_estimator ( new PhaseGradShift );
+  {
+    if ( algorithm.size() == 0 )
+      arrival->set_shift_estimator ( new PhaseGradShift );
+    else
+      arrival->set_shift_estimator ( ShiftEstimator::factory(algorithm) );
+  }
   try
   {
     std_archive->fscrunch();
@@ -252,6 +279,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   menu.add ("");
   menu.add ("Fitting options");
 
+  arg = menu.add(algorithm, 'A', "timing algorithm");
+  arg->set_help ("Set timing algorithm as in pat's -A. By default use PGS.");
+  
   arg = menu.add (this, &psrpca::set_standard, 's', "stdfile");
   arg->set_help ("Location of standard profile");
 
@@ -266,6 +296,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 
   arg = menu.add ( prof_to_std, "ts" );
   arg->set_help ( "Apply scaling, offset and shift to standard instead of profile");
+
+  arg = menu.add ( uniform_weighting, "w" );
+  arg->set_help ("Apply uniform weighting instead of S/N");
 
   menu.add ("");
   menu.add ("Regression and Predictor Options");
@@ -306,6 +339,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   arg = menu.add (save_diffs, "sd");
   arg->set_help ("Don't save the difference profiles");
 
+  arg = menu.add (save_matched, "sa");
+  arg->set_help ("Don't save the template-matched profiles");
+
   arg = menu.add (save_evecs, "se");
   arg->set_help ("Don't save the eigenvectors");
 
@@ -334,7 +370,8 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 void psrpca::process (Archive* archive)
 {
   if ( verbose )
-    cerr << "psrpca::process () entered" << endl;
+    cerr << "psrpca::process () entered and processing " << archive->get_filename() << endl;
+
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
   {
@@ -362,9 +399,11 @@ void psrpca::process (Archive* archive)
 
 void psrpca::finalize ()
 {
-  evecs_archive = total->clone();
   if ( verbose )
     cerr << "psrpca::finalize () entered" << endl;
+
+  evecs_archive = total->clone();
+
   arrival->set_observation( total );
   arrival->get_toas( toas );
 
@@ -389,14 +428,19 @@ void psrpca::finalize ()
 
   FILE *out;
   
+  if ( save_matched )
+    total_matched = total->clone();
   fit_data( std_prof );
+  if ( save_matched )
+    total_matched->unload ( prefix+"_rotated_scaled.ar" );
+
   out = fopen( (prefix+"_profiles.dat").c_str(), "w" );
   gsl_matrix_fprintf( out, profiles, "%g" );
   fclose( out );
-
+  
   if ( full_stokes_pca )
     nbin = 4 * nbin;
-  get_covariance_matrix();
+  get_covariance_matrix(); // assuming that this calls the function in TimeDomainCovariance.C - row vector
 
   // write the covariance matrix and difference profiles
   if ( save_covariance_matrix )
@@ -409,6 +453,14 @@ void psrpca::finalize ()
   if ( save_diffs ) 
     total->unload ( prefix+"_diffs.ar" );
 
+  if ( save_covariance_matrix_extension )
+  {
+    Reference::To<Archive> psrfits = Archive::new_Archive("PSRFITS");
+    psrfits-> copy(evecs_archive);
+    psrfits-> add_extension(covar);
+    psrfits-> unload("covariance.rf");
+  }
+  
 #ifdef HAVE_CULA
   status = culaInitialize();
   checkStatus(status);
@@ -566,6 +618,22 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       //cerr << "offset applied" << endl;
       if ( apply_scale )
 	prof->scale ( 1.0/scale );
+
+      if ( save_matched )
+      {
+	if ( full_stokes_pca )
+	{
+	  for ( unsigned i_pol = 0; i_pol < 4; i_pol++ )
+	  {
+	    total_matched->get_Profile( i_subint, i_pol, 0 )->set_amps( prof->get_amps() + i_pol * (unsigned)(nbin / 4 ) );
+	  }
+	}
+	else
+	{
+	  total_matched->get_Profile( i_subint, which_pol, 0 )->set_amps( prof->get_amps() );
+	}
+      }
+
       //cerr << "scale applied " << scale << endl;
       prof->diff ( std_prof );
       //cerr << "std_prof subtracted" << endl;
@@ -588,7 +656,10 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
       gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
-      t_cov->add_Profile ( prof, snr );
+      if ( uniform_weighting )
+        t_cov->add_Profile ( prof, 1.0 );
+      else
+        t_cov->add_Profile ( prof, snr );
     }
     else
     {// prof_to_std is false
@@ -622,7 +693,10 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
       gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
-      t_cov->add_Profile ( diff, snr );
+      if ( uniform_weighting )
+        t_cov->add_Profile ( diff, 1.0 );
+      else
+        t_cov->add_Profile ( diff, snr );
       prof->set_amps ( diff->get_amps() );
     }
     if ( full_stokes_pca )
