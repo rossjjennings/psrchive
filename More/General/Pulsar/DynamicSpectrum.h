@@ -35,6 +35,9 @@ namespace Pulsar
     //! Set the flux computation method
     void set_flux_method(Flux *flux);
 
+    //! Provide access to the flux method
+    Reference::To<Flux> get_flux_method() { return flux; }
+
     //! Compute dynamic spectrum
     void compute();
 
