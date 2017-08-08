@@ -138,6 +138,7 @@ void psrflux::process (Pulsar::Archive* archive)
   // If shifts not fit, need to dedisperse and possibly align total
   // with standard.
   if (noalign) {
+    archive->dedisperse();
     flux->set_fit_shift(false);
   } else if (align==false && single_profile==false) {
     archive->dedisperse();
