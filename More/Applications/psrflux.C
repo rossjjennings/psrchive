@@ -54,6 +54,9 @@ public:
   //! Align w/ each input profile separately
   bool align;
 
+  //! Disable fits for alignment
+  bool noalign;
+
 protected:
 
   //! Add command line options
@@ -68,6 +71,7 @@ psrflux::psrflux ()
   ext = "ds";
   stdfile = "";
   align = false;
+  noalign = false;
 }
 
 void psrflux::add_options (CommandLine::Menu& menu)
@@ -82,6 +86,9 @@ void psrflux::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (align, 'a', "align");
   arg->set_help ("Align standard with each profile separately");
+
+  arg = menu.add (noalign, 'A', "noalign");
+  arg->set_help ("No fit for profile alignment at all");
 
 }
 
@@ -130,7 +137,9 @@ void psrflux::process (Pulsar::Archive* archive)
 
   // If shifts not fit, need to dedisperse and possibly align total
   // with standard.
-  if (align==false && single_profile==false) {
+  if (noalign) {
+    flux->set_fit_shift(false);
+  } else if (align==false && single_profile==false) {
     archive->dedisperse();
     Reference::To<Archive> arch_tot = archive->total();
     Estimate<double> shift = 
