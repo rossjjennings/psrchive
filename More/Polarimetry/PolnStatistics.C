@@ -98,7 +98,7 @@ void Pulsar::PolnStatistics::setup () try
     baseline->set_Profile(s);
     s->offset( -baseline->get_mean().get_value() );
   }
-  profile = p;
+  profile = p.release();
 
   get_stats()->select_profile( profile );
 }
