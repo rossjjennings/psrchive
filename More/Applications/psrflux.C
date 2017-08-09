@@ -54,6 +54,9 @@ public:
   //! Align w/ each input profile separately
   bool align;
 
+  //! Disable fits for alignment
+  bool noalign;
+
 protected:
 
   //! Add command line options
@@ -68,6 +71,7 @@ psrflux::psrflux ()
   ext = "ds";
   stdfile = "";
   align = false;
+  noalign = false;
 }
 
 void psrflux::add_options (CommandLine::Menu& menu)
@@ -83,6 +87,9 @@ void psrflux::add_options (CommandLine::Menu& menu)
   arg = menu.add (align, 'a', "align");
   arg->set_help ("Align standard with each profile separately");
 
+  arg = menu.add (noalign, 'A', "noalign");
+  arg->set_help ("No fit for profile alignment at all");
+
 }
 
 void psrflux::set_standard(Archive *arch)
@@ -93,7 +100,7 @@ void psrflux::set_standard(Archive *arch)
 
   // Set up DS calculation
   Reference::To<StandardFlux> flux = new StandardFlux;
-  flux->set_fit_shift(align);
+  flux->set_fit_shift(true); // always init with true, choose later
   flux->set_standard(stdarch->get_Profile(0,0,0));
   ds.set_flux_method(flux);
 }
@@ -122,14 +129,26 @@ void psrflux::process (Pulsar::Archive* archive)
   // Set self-standard if needed
   if (stdfile=="") set_standard(archive);
 
+  // Test for single-profile data
+  bool single_profile = archive->get_nsubint()==1 && archive->get_nchan()==1;
+
+  // Access to the flux computation
+  StandardFlux *flux = dynamic_cast<StandardFlux*>(ds.get_flux_method().get());
+
   // If shifts not fit, need to dedisperse and possibly align total
   // with standard.
-  if (!align) {
+  if (noalign) {
+    archive->dedisperse();
+    flux->set_fit_shift(false);
+  } else if (align==false && single_profile==false) {
     archive->dedisperse();
     Reference::To<Archive> arch_tot = archive->total();
     Estimate<double> shift = 
       arch_tot->get_Profile(0,0,0)->shift(stdarch->get_Profile(0,0,0));
     stdarch->get_Profile(0,0,0)->rotate_phase(-1.0*shift.get_value());
+    flux->set_fit_shift(false);
+  } else {
+    flux->set_fit_shift(true);
   }
 
   // Compute DS

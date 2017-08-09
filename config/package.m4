@@ -150,7 +150,7 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
   if test x"$swin_cv_[$1]_include_dir" != x; then
     swin_base=`dirname $swin_cv_[$1]_include_dir`
     if test x"$swin_base" != x. -a -d $swin_base/lib; then
-      swin_search_path="$swin_search_path $swin_base/lib"
+      swin_search_path="$swin_search_path $swin_base/lib $swinbase/lib64"
     fi
   fi
 
