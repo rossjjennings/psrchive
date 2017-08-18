@@ -66,7 +66,7 @@ namespace Pulsar
     const double get_freq(unsigned ichan, unsigned isub=0);
 
     //! Unload the results to a file.
-    void unload(const std::string& filename);
+    void unload(const std::string& filename, const std::string& command="");
 
     //! Load results from a file.
     static DynamicSpectrum *load(const std::string& filename);
