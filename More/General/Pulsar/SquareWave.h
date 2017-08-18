@@ -11,6 +11,7 @@
 #ifndef __Pulsar_SquareWave_h
 #define __Pulsar_SquareWave_h
 
+#include "Pulsar/Config.h"
 #include "Pulsar/SNRatioEstimator.h"
 #include "Estimate.h"
 
@@ -25,6 +26,9 @@ namespace Pulsar {
   class SquareWave : public SNRatioEstimator {
 
   public:
+
+    //! If set, use the specified pulse phase for lo->hi transition
+    static Option<float> transition_phase;
 
     //! Default constructor
     SquareWave ();

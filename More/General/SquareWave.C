@@ -22,6 +22,19 @@
 
 using namespace std;
 
+Pulsar::Option<float>
+Pulsar::SquareWave::transition_phase
+(
+ "SquareWave::transition_phase", -1.0,
+
+ "Pulse phase of cal transition [turns]",
+
+ "If this option is set to a non-negative value, calibration signals\n"
+ "will be assumed to transition from the low to high state at the specified\n"
+ "phase, and back to low 0.5 turns later.  Otherwise, the default behavior\n"
+ "is for psrchive to attempt to automatically determine the transition phase."
+);
+
 Pulsar::SquareWave::SquareWave ()
 {
   risetime = 0.03;
@@ -262,6 +275,14 @@ void Pulsar::SquareWave::levels (const Pulsar::Integration* subint,
 
   int hightolow, lowtohigh, buffer;
   total->find_transitions (hightolow, lowtohigh, buffer);
+
+  // Profile::find_transitions returns values in bins.  If transition_phase
+  // is set, we will override that here.
+  if (transition_phase>=0.0)
+  {
+    lowtohigh = int(transition_phase * nbin) % nbin;
+    hightolow = (lowtohigh + nbin/2) % nbin;
+  }
   
   high.resize (npol);
   low.resize (npol);
