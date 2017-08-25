@@ -132,7 +132,8 @@ void Pulsar::DynamicSpectrum::compute()
 }
 
 // Unload to a file in some format...
-void Pulsar::DynamicSpectrum::unload(const std::string& filename)
+void Pulsar::DynamicSpectrum::unload(const std::string& filename,
+    const std::string& command)
 {
   if (!computed) compute();
 
@@ -144,6 +145,8 @@ void Pulsar::DynamicSpectrum::unload(const std::string& filename)
 
   // Write some header info
   fprintf(fout, "# Dynamic spectrum computed by psrflux\n");
+  if (command != "") 
+    fprintf(fout, "# Command line: %s\n", command.c_str());
   fprintf(fout, "# Data file: %s\n", arch->get_filename().c_str());
   fprintf(fout, "# Flux method: %s\n", flux->get_method().c_str());
   fprintf(fout, "# Flux units: %s\n", Scale2string(arch->get_scale()).c_str());

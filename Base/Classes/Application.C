@@ -135,16 +135,11 @@ void Pulsar::Application::parse (int argc, char** argv)
       sort (filenames.begin(), filenames.end());
   }
 
-  if (update_history)
-  {
-    string separator = " ";
+  string separator = " ";
+  command += name + separator;
+  for (int i=1; i<optind; i++)
+    command += argv[i] + separator;
 
-    command += name + separator;
-
-    for (int i=1; i<optind; i++)
-      command += argv[i] + separator;
-
-  }
 }
 
 Pulsar::Archive * Pulsar::Application::load (const string& filename)

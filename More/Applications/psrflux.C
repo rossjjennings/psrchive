@@ -62,6 +62,9 @@ protected:
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
+  //! Standard preprocessing options
+  Pulsar::StandardOptions standard_options;
+
 };
 
 
@@ -72,11 +75,15 @@ psrflux::psrflux ()
   stdfile = "";
   align = false;
   noalign = false;
+
+  add( &standard_options );
 }
 
 void psrflux::add_options (CommandLine::Menu& menu)
 {
   CommandLine::Argument* arg;
+
+  menu.add("\n" "Dynamic spectrum options:");
 
   arg = menu.add (ext, 'e', "ext");
   arg->set_help ("Append extention to output (default .ds)");
@@ -158,7 +165,7 @@ void psrflux::process (Pulsar::Archive* archive)
   // Unload archive with .sm extension
   std::string outf = archive->get_filename() + "." + ext;
   cerr << "psrflux: unloading " << outf << endl;
-  ds.unload(outf);
+  ds.unload(outf, command);
 
 }
 
