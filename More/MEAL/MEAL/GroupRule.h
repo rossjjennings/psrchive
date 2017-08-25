@@ -144,8 +144,9 @@ void MEAL::GroupRule<T>::print_parameters (std::string& text,
 template<class T>
 void MEAL::GroupRule<T>::parse (const std::string& line)
 {
-  if (model.size()) try {
-    model.back()->parse(line);
+  if (model.size()) try
+  {
+    Function::parse(line);
     return;
   }
   catch (Error& error) {
