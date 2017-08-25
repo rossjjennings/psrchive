@@ -77,6 +77,9 @@ namespace Pulsar
     //! Set the calibrator
     virtual void set_calibrator (const Archive*);
 
+    //! Set the response (pure Jones) transformation
+    virtual void set_response( MEAL::Complex2* );
+
     //! Set the impurity transformation
     virtual void set_impurity( MEAL::Real4* );
 
@@ -214,6 +217,9 @@ namespace Pulsar
 
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
+
+    //! Response transformation
+    Reference::To< MEAL::Complex2 > response;
 
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;

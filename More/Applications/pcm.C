@@ -378,6 +378,8 @@ int main (int argc, char *argv[])
 }
 
 Reference::To< MEAL::Real4 > impurity;
+Reference::To< MEAL::Complex2 > response;
+
 Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
@@ -758,6 +760,17 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'm':
+
+      try {
+	response = Pulsar::load_transformation (optarg);
+	cerr << "pcm: response model loaded from " << optarg << endl;
+	break;
+      }
+      catch (Error& error)
+	{
+	  cerr << "pcm: error" << error << endl;
+	}
+      
       model_type = Pulsar::Calibrator::Type::factory (optarg);
       break;
       
@@ -991,6 +1004,9 @@ int actual_main (int argc, char *argv[]) try
       
       model->set_report_initial_state (prefit_report);
       model->set_report_input_data (input_data);
+
+      if (response)
+	model->set_response( response );
 
       if (impurity)
 	model->set_impurity( impurity );

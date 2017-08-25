@@ -45,6 +45,9 @@ namespace Calibration
     //! Default constructor
     SignalPath (Pulsar::Calibrator::Type*);
 
+    //! Set the response transformation
+    void set_response (MEAL::Complex2*);
+
     //! Include an impurity transformation
     void set_impurity (MEAL::Real4*);
 

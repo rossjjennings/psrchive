@@ -64,6 +64,11 @@ void Calibration::SignalPath::set_valid (bool f, const char* reason)
     cerr << "Calibration::SignalPath::set_valid reason: " << reason << endl;
 }
 
+void Calibration::SignalPath::set_response (MEAL::Complex2* x)
+{
+  response = x;
+}
+
 void Calibration::SignalPath::set_impurity (MEAL::Real4* x)
 {
   impurity = x;
@@ -73,7 +78,7 @@ void Calibration::SignalPath::set_basis (MEAL::Complex2* x)
 {
   if (response)
     throw Error (InvalidState, "Calibration::SignalPath::set_basis"
-		 "cannot set basis after reponse is constructed");
+		 "cannot set basis after response is constructed");
   
   basis = x;
 
@@ -212,11 +217,14 @@ void Calibration::SignalPath::build ()
   if (built)
     return;
 
-  if (verbose)
-    cerr << "Calibration::SignalPath using " << type->get_name() << endl;
+  if (!response)
+  {
+    if (verbose)
+      cerr << "Calibration::SignalPath using " << type->get_name() << endl;
 
-  response = Pulsar::new_transformation (type);
-
+    response = Pulsar::new_transformation (type);
+  }
+  
   //
   // construct the instrumental response share by pulsar and calibrator
   //
@@ -317,7 +325,7 @@ void Calibration::SignalPath::fix_orientation ()
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     throw Error (InvalidState, "Calibration::SignalPath::fix_orientation",
-		 "cannot fix orientation when type=" + type->get_name());
+		 "cannot fix orientation when response=" + response->get_name());
 
   // fix the orientation of the first receptor
   physical->set_constant_orientation (true);

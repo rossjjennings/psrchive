@@ -212,6 +212,16 @@ unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
 
 using namespace MEAL;
 
+void Pulsar::SystemCalibrator::set_response( MEAL::Complex2* f )
+{
+  response = f;
+  type = new_CalibratorType (response);
+
+  if (verbose)
+    cerr << "Pulsar::SystemCalibrator::set_response name="
+	 << response->get_name() << " type=" << type->get_name() << endl;
+}
+
 void Pulsar::SystemCalibrator::set_impurity( MEAL::Real4* f )
 {
   impurity = f;
@@ -1002,7 +1012,8 @@ void Pulsar::SystemCalibrator::create_model ()
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan << endl;
+      cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan
+	   << " type=" << type->get_name() << endl;
 
     model[ichan] = new Calibration::SignalPath (type);
 
@@ -1020,6 +1031,14 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
 {
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::init_model ichan=" << ichan << endl;
+
+  if (response)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::SystemCalibrator::init_model response name="
+	   << response->get_name() << endl;
+    model[ichan]->set_response( response->clone() );
+  }
 
   if (impurity)
   {

@@ -190,6 +190,15 @@ namespace Pulsar {
   //! Create a new transformation instance described by the type
   MEAL::Complex2* new_transformation( const Calibrator::Type* type );
 
+  //! Create a new transformation instance based on the Calibrator::Type name
+  MEAL::Complex2* transformation_factory (const std::string& name);
+
+  //! Load a new transformation instance from file
+  MEAL::Complex2* load_transformation (const std::string& filename);
+
+  //! Create a new Calibrator::Type instance according to the transformation
+  Calibrator::Type* new_CalibratorType( const MEAL::Complex2* xform ); 
+
 
   class PolnCalibrator::Info : public Calibrator::Info
   {

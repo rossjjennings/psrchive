@@ -7,13 +7,6 @@
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/CalibratorTypes.h"
-
-#include "Pulsar/Britton2000.h"
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/Instrument.h"
-#include "Pulsar/ManualPolnCalibrator.h"
-#include "MEAL/Polar.h"
 
 using namespace std;
 
@@ -154,33 +147,5 @@ try
 catch (Error& error)
 {
   throw error += "Pulsar::new_transformation";
-}
-
-MEAL::Complex2* Pulsar::new_transformation( const Calibrator::Type* type )
-{
-  if (type->is_a<CalibratorTypes::SingleAxis>())
-    return new Calibration::SingleAxis;
-
-  if (type->is_a<CalibratorTypes::van02_EqA1>())
-    return new MEAL::Polar;
-
-  if (type->is_a<CalibratorTypes::van09_Eq>())
-    return new MEAL::Polar;
-
-  if (type->is_a<CalibratorTypes::van04_Eq18>())
-    return new Calibration::Instrument;
-
-  if (type->is_a<CalibratorTypes::bri00_Eq19>())
-    return new Calibration::Britton2000;
-
-  if (type->is_a<CalibratorTypes::bri00_Eq19_iso>())
-    return new Calibration::Britton2000 (true);
-  
-  //if (type->is_a<CalibratorTypes::ManualPoln>())
-  //  return new Pulsar::ManualPolnCalibrator;
-
-  throw Error (InvalidState,
-               "Pulsar::PolnCalibrator::new_transformation",
-               "unrecognized Calibrator::Type=" + type->get_name());
 }
 
