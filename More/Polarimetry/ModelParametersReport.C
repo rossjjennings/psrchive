@@ -28,4 +28,6 @@ void Calibration::ModelParametersReport::report (ostream& os)
   }
 
   os << nparam_infit << " free parameters" << endl;
+  os << model->get_num_input() << " input states" << endl;
+  os << model->get_num_transformation() << " signal paths" << endl;
 }
