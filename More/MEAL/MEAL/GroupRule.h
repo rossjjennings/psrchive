@@ -51,6 +51,13 @@ namespace MEAL {
     //! Remove an element from the result
     void remove_model (T* model);
 
+    //! Get the specified component
+    T* get_model (unsigned i) { return model.at(i); }
+    const T* get_model (unsigned i) const { return model.at(i); }
+
+    //! Get the number of components
+    unsigned get_nmodel () const { return model.size(); }
+    
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation
