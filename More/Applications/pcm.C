@@ -14,6 +14,7 @@
 
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
+#include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/SystemCalibratorUnloader.h"
 
 #include "Pulsar/Database.h"
@@ -71,6 +72,7 @@ void usage ()
     "  -m model   receiver model name: e.g. bri00e19 or van04e18 [default]\n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
+    "  -x         estimate calibrator Stokes parameter using fluxcal solution \n"
     "  -y         always trust the Pointing::feed_angle attribute \n"
     "  -Z         ignore the sky coordinates of PolnCal observations \n"
     "\n"
@@ -346,6 +348,9 @@ vector<string> calibrator_filenames;
 // Each flux calibrator observation may have unique values of I, Q & U
 bool multiple_flux_calibrators = false;
 
+// Derive first guess of calibrator Stokes parameters from fluxcal solution
+bool use_fluxcal_stokes = false;
+
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
 bool equal_ellipticities = false;
@@ -604,6 +609,10 @@ float outlier_threshold = 0.0;
 // name of file containing list of calibrator Archive filenames
 char* calfile = NULL;
 
+/* Flux calibrator solution from which first guess of calibrator Stokes
+   parameters will be derived */
+Reference::To<Pulsar::FluxCalibrator> flux_cal;
+
 void load_calibrator_database ();
 
 int actual_main (int argc, char *argv[]) try
@@ -633,7 +642,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
-    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
+    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:xX:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -881,6 +890,10 @@ int actual_main (int argc, char *argv[]) try
       measure_cal_V = false;
       break;
 
+    case 'x':
+      use_fluxcal_stokes = true;
+      break;
+      
     case 'X':
       invalid_chisq = atof (optarg);
       break;
@@ -1428,6 +1441,9 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
 
   model->multiple_flux_calibrators = multiple_flux_calibrators;
 
+  if (flux_cal)
+    model->set_flux_calibrator (flux_cal);
+  
   cerr << "pcm: set calibrators" << endl;
   model->set_calibrators (calibrator_filenames);
 
@@ -1641,20 +1657,31 @@ void load_calibrator_database () try
     }
   }
 
+  if (use_fluxcal_stokes) try
+  {
+    flux_cal = database->generateFluxCalibrator (archive);
+  }
+  catch (Error& error)
+  {
+    cerr << "pcm: failed to generate FluxCalibrator solution"
+	 << error << endl;
+    exit (-1);
+  }
+  
   if (template_filename)
-    cerr << "pcm: no need for flux calibrator observations" << endl;
+    cerr << "pcm: no need for on-source flux calibrator observations" << endl;
   else
   {
     double span_days = (end_time - start_time).in_days();
     double search_days = 0.5*span_days + fluxcal_days;
 
-    cerr << "pcm: searching for flux calibrator observations"
-      " within " << search_days << " days of midtime" << endl;
-
-    criteria.entry.obsType = Signal::FluxCalOn;
     criteria.check_coordinates = false;
     criteria.minutes_apart = search_days * 24.0 * 60.0;
+    criteria.entry.obsType = Signal::FluxCalOn;
     
+    cerr << "pcm: searching for on-source flux calibrator observations"
+      " within " << search_days << " days of midtime" << endl;
+
     database->all_matching (criteria, oncals);
   
     if (oncals.size() == poln_cals)

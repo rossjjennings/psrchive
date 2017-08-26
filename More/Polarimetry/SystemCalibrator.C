@@ -16,6 +16,8 @@
 #include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include "Pulsar/CalibratorTypes.h"
+#include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/PolarCalibrator.h"
@@ -523,6 +525,11 @@ void Pulsar::SystemCalibrator::set_calibrators (const vector<string>& n)
   calibrator_filenames = n;
 }
 
+void Pulsar::SystemCalibrator::set_flux_calibrator (const FluxCalibrator* fluxcal)
+{
+  flux_calibrator = fluxcal;
+}
+
 void Pulsar::SystemCalibrator::load_calibrators ()
 {
   if (calibrator_filenames.size() == 0)
@@ -708,6 +715,21 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
   // ensure that model array is large enough
   check_ichan ("add_calibrator", nchan - 1);
 
+  Reference::To<const PolnCalibrator> solution = p;
+
+  if (flux_calibrator)
+  {
+    /* Combine ReferenceCalibrator with CalibratorStokes estimate from
+       FluxCalibrator stokes into a new HybridCalibrator */
+    Reference::To<HybridCalibrator> hybrid_cal = new HybridCalibrator;
+    hybrid_cal->set_reference_input( flux_calibrator->get_CalibratorStokes(),
+				     flux_calibrator->get_filenames() );
+        
+    hybrid_cal->set_reference_observation( p );
+
+    solution = hybrid_cal;
+  }
+  
   for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = cal->get_Integration (isub);
@@ -773,7 +795,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
 	submit_calibrator_data( measurements, data );
 
-        integrate_calibrator_data( p->get_response(ichan), data );
+        integrate_calibrator_data( solution->get_response(ichan), data );
 
       }
       catch (Error& error)
@@ -786,9 +808,12 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 	continue;
       }
 
-      if (p->get_nchan() == nchan && p->get_transformation_valid (ichan))
-	integrate_calibrator_solution( p->get_Archive()->get_type(), ichan,
-				       p->get_transformation(ichan) );
+      if ( solution->get_nchan() == nchan
+	   && solution->get_transformation_valid (ichan) )
+      {
+	integrate_calibrator_solution( solution->get_Archive()->get_type(), ichan,
+				       solution->get_transformation(ichan) );
+      }
     }
   }
 }

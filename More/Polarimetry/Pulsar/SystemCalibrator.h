@@ -24,6 +24,7 @@
 namespace Pulsar
 {
   class ReferenceCalibrator;
+  class FluxCalibrator;
   class CalibratorStokes;
 
   //! PolnCalibrator with estimated calibrator Stokes parameters
@@ -70,6 +71,9 @@ namespace Pulsar
 
     //! Retern a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
+
+    //! Set the flux calibrator solution used to estimate calibrator Stokes
+    void set_flux_calibrator (const FluxCalibrator* fluxcal);
 
     //! Set the calibrator observations to be loaded after first pulsar
     void set_calibrators (const std::vector<std::string>& filenames);
@@ -215,6 +219,9 @@ namespace Pulsar
     //! The algorithm used to solve the measurement equation
     Reference::To<Solver> solver;
 
+    //! The FluxCalibrator solution
+    Reference::To<const FluxCalibrator> flux_calibrator;
+    
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 
