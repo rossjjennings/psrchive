@@ -768,7 +768,8 @@ int actual_main (int argc, char *argv[]) try
       }
       catch (Error& error)
 	{
-	  cerr << "pcm: error" << error << endl;
+	  if (verbose)
+	    cerr << "pcm: error" << error << endl;
 	}
       
       model_type = Pulsar::Calibrator::Type::factory (optarg);
