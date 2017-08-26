@@ -49,7 +49,7 @@ namespace Pulsar {
     double Tsys (unsigned ichan);
 
     //! Return an estimate of the artificial cal Stokes parameters
-    CalibratorStokes* get_CalibratorStokes ();
+    CalibratorStokes* get_CalibratorStokes () const;
     
     //! Add a FluxCal Pulsar::Archive to the set of constraints
     void add_observation (const Archive* archive);

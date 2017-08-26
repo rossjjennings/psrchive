@@ -130,7 +130,7 @@ void Pulsar::FluxCalibrator::print (std::ostream& os)
  * source signal is 100% correlated in each receptor with zero phase,
  * but may have unequal power in the two sides.
  */
-Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
+Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes () const
 {
   // Check that we have both polns
   if (get_nreceptor() != 2) 
