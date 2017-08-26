@@ -491,7 +491,9 @@ void ReceptionCalibrator::setup_flux_calibrator (Calibration::FluxCalManager*)
   // TODO: tell FluxCalManager to allow Stokes V to vary
 
   if (basis == Signal::Circular || measure_cal_V)
-    cerr << "ReceptionCalibrator::setup_flux_calibrator ok" << endl;
+  {
+    // cerr << "ReceptionCalibrator::setup_flux_calibrator ok" << endl;
+  }
   else
     throw Error (InvalidState, "ReceptionCalibrator::setup_flux_calibrator",
 		 "NOT IMPLEMENTED");
