@@ -63,8 +63,9 @@ Pulsar::HybridCalibrator::set_reference_input (const CalibratorStokes* input,
 }
 
 //! Set the ReferenceCalibrator data from which to derive a SingleAxis model
-void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
-							  observation)
+void
+Pulsar::HybridCalibrator::set_reference_observation (const ReferenceCalibrator*
+						     observation)
 {
   reference_observation = observation;
 
@@ -74,7 +75,7 @@ void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
   filenames[1] = observation->get_filenames();
 }
 
-Pulsar::ReferenceCalibrator*
+const Pulsar::ReferenceCalibrator*
 Pulsar::HybridCalibrator::get_reference_observation ()
 {
   return reference_observation;

@@ -752,6 +752,12 @@ int main (int argc, char *argv[]) try
         if (verbose)
           cout << "pac: Calculating fluxcal Stokes params" << endl;
 
+	Pulsar::ReferenceCalibrator* refcal = 0;
+	refcal = dynamic_cast<Pulsar::ReferenceCalibrator*> (pcal_engine.get());
+	if (!refcal)
+	  throw Error (InvalidState, "pcm",
+		       "PolnCalibrator is not a ReferenceCalibrator");
+
         // Find appropriate fluxcal from DB 
         Reference::To<Pulsar::FluxCalibrator> flux_cal;
 	try
@@ -769,10 +775,10 @@ int main (int argc, char *argv[]) try
         // into a new HybridCalibrator
         Reference::To<Pulsar::HybridCalibrator> hybrid_cal;
         hybrid_cal = new Pulsar::HybridCalibrator;
-        hybrid_cal->set_reference_input(flux_cal->get_CalibratorStokes(),
-            flux_cal->get_filenames());
-        hybrid_cal->set_reference_observation(
-            static_cast<Pulsar::ReferenceCalibrator*>(pcal_engine.get()));
+        hybrid_cal->set_reference_input( flux_cal->get_CalibratorStokes(),
+					 flux_cal->get_filenames() );
+	
+        hybrid_cal->set_reference_observation( refcal );
 
         pcal_engine = hybrid_cal;
       }
@@ -806,7 +812,7 @@ int main (int argc, char *argv[]) try
 	hyb = dynamic_cast<HybridCalibrator*> (pcal_engine.get());
 	if (hyb)
 	{
-	  ref = hyb->get_reference_observation ();
+	  ref = const_cast<ReferenceCalibrator*>(hyb->get_reference_observation ());
 	  ref->set_outlier_threshold (outlier_threshold);
 	}
       }

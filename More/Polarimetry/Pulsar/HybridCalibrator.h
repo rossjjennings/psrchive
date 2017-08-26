@@ -44,8 +44,8 @@ namespace Pulsar {
         std::string filename = "");
 
     //! Set the ReferenceCalibrator data from which to derive a SingleAxis
-    void set_reference_observation (ReferenceCalibrator* observation);
-    ReferenceCalibrator* get_reference_observation ();
+    void set_reference_observation (const ReferenceCalibrator* observation);
+    const ReferenceCalibrator* get_reference_observation ();
     
     //! Set the PolnCalibrator to be supplemented
     void set_precalibrator (PolnCalibrator* calibrator);
@@ -65,7 +65,7 @@ namespace Pulsar {
     Reference::To<const CalibratorStokes> reference_input;
 
     //! The Stokes parameters of the observed reference signal
-    Reference::To<ReferenceCalibrator> reference_observation;
+    Reference::To<const ReferenceCalibrator> reference_observation;
 
     //! The PolnCalibrator to be supplemented
     Reference::To<PolnCalibrator> precalibrator;
