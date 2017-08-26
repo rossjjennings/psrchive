@@ -27,11 +27,12 @@ namespace Pulsar
   class ReferenceCalibrator;
   class FluxCalibrator;
   
-  //! Models the variation of Stokes parameters with parallactic angle
-  /*! The ReceptionCalibrator implements a technique of single dish
-    polarimetric self-calibration.  This class requires a number of
-    constraints, which are provided in through the add_observation,
-    add_ReferenceCalibrator, and add_FluxCalibrator methods.
+  //! Implements Measurement Equation Modeling (van Straten 2004)
+  /*! This class determines the instrumental response by modeling the
+    variation with parallactic angle of the Stokes parameters of an
+    unknown source.  A number of constraints may be incorporated using
+    the add_observation, add_ReferenceCalibrator, and
+    add_FluxCalibrator methods.
   */
   class ReceptionCalibrator : public SystemCalibrator
   {
