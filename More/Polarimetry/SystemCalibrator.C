@@ -47,6 +47,7 @@ using namespace Calibration;
 Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
   set_initial_guess = true;
+  correct_interstellar_Faraday_rotation = false;
 
   is_prepared = false;
   is_solved = false;
@@ -386,7 +387,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
          << "\n\t projection=" << projection << endl;
 
   // correct ionospheric Faraday rotation
-  Reference::To<Faraday> faraday;
+  Reference::To<Faraday> iono_faraday;
   if (! integration->get_auxiliary_birefringence_corrected ())
   {
     const AuxColdPlasmaMeasures* aux
@@ -394,17 +395,32 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
     if (aux && aux->get_rotation_measure() != 0.0)
     {
-      cerr << " using Auxiliary::rotation_measure " 
+      cerr << " correcting auxiliary Faraday rotation - RM=" 
 	   << aux->get_rotation_measure () << endl;
 
-      faraday = new Faraday;
-      faraday->set_rotation_measure( aux->get_rotation_measure () );
+      iono_faraday = new Faraday;
+      iono_faraday->set_rotation_measure( aux->get_rotation_measure () );
 
       // correct ionospheric Faraday rotation wrt infinite frequency
-      faraday->set_reference_wavelength( 0.0 );
+      iono_faraday->set_reference_wavelength( 0.0 );
     }
   }
 
+  Reference::To<Faraday> ism_faraday;
+  if ( correct_interstellar_Faraday_rotation &&
+       ( data->get_rotation_measure() != 0.0 ) )
+  {
+    cerr << " correcting interstellar Faraday rotation - RM=" 
+	   << data->get_rotation_measure () << endl;
+    
+    ism_faraday = new Faraday;
+    ism_faraday->set_rotation_measure( data->get_rotation_measure() );
+
+    // correct interstellar Faraday rotation wrt centre frequency
+    ism_faraday->set_reference_frequency( data->get_centre_frequency() );
+  }
+  
+  
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
 
@@ -432,10 +448,17 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     Argument::Value* time = model[mchan]->time.new_Value( epoch );
     
     Jones<double> known = projection;
-    if (faraday)
+
+    if (iono_faraday)
     {
-      faraday->set_frequency( integration->get_centre_frequency(ichan) );
-      known *= faraday->evaluate();
+      iono_faraday->set_frequency( integration->get_centre_frequency(ichan) );
+      known *= iono_faraday->evaluate();
+    }
+
+    if (ism_faraday)
+    {
+      ism_faraday->set_frequency( integration->get_centre_frequency(ichan) );
+      known *= ism_faraday->evaluate();
     }
 
     // projection transformation

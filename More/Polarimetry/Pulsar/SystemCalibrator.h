@@ -288,6 +288,9 @@ namespace Pulsar
     //! Epoch of the last observation
     MJD end_epoch;
 
+    //! Include a correction for Faraday rotation in the ISM
+    bool correct_interstellar_Faraday_rotation;
+    
     //! Set the initial guess in solve_prepare
     bool set_initial_guess;
 

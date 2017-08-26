@@ -136,11 +136,12 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   if (correct.required(data))
   {
     if (verbose)
-      cerr << "Pulsar::PulsarCalibrator::set_standard correcting frontend" << endl;
+      cerr << "PulsarCalibrator::set_standard correcting frontend" << endl;
     correct.calibrate( standard );
   }
   else if (verbose)
-    cerr << "Pulsar::PulsarCalibrator::set_standard frontend correction not required" << endl;
+    cerr << "PulsarCalibrator::set_standard frontend correction not required"
+	 << endl;
 
   /*
     Select the on-pulse and baseline regions
@@ -197,6 +198,10 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
   if (model_nchan != 1 && model_nchan != nchan)
     throw Error (InvalidState, "Pulsar::PulsarCalibrator::build",
 		 "template nchan=%d != required nchan=%d", model_nchan, nchan);
+
+  correct_interstellar_Faraday_rotation =
+    standard->get_faraday_corrected() ||
+    (model_nchan == 1 && nchan > model_nchan);
 
   mtm.resize (nchan);
 
