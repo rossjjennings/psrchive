@@ -44,6 +44,9 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with MeerKAT info
     void MeerKAT (Telescope* t);
 
+    //! Initialize the Telescope Extension with MOST info
+    void MOST (Telescope* t);
+
     //! Initialize the Telescope Extension with Parkes info
     void Parkes (Telescope* t);
 
