@@ -82,6 +82,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             Telescopes::Parkes(t);
             break;
 
+        case 'e':
+            Telescopes::MOST(t);
+            break;
+
         case '8':
             Telescopes::Jodrell(t);
             break;
@@ -206,6 +210,12 @@ void Pulsar::Telescopes::MeerKAT(Telescope *t)
     t->set_mount (Telescope::Horizon);
     t->set_primary (Telescope::Parabolic);
     t->set_focus(Telescope::Gregorian);
+}
+
+void Pulsar::Telescopes::MOST(Telescope *t)
+{
+  t->set_name("MOST");
+    // XXX what about other settings? mount, focus,...
 }
 
 void Pulsar::Telescopes::MtPleasant26(Telescope *t)
