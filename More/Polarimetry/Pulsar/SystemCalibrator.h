@@ -301,6 +301,9 @@ namespace Pulsar
     //! Set the initial guess in solve_prepare
     bool set_initial_guess;
 
+    //! Ensure that first guess of calibrator Stokes parameters is physical
+    bool guess_physical_calibrator_stokes;
+    
     //! The maximum reduced chisq before another fit will be attempted
     float retry_chisq;
 
