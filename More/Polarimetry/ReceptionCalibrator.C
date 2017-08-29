@@ -477,7 +477,8 @@ void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate& es
   
   if (measure_cal_V && (equal_ellipticities || has_fluxcal()))
   {
-    cerr << "Stokes V of the calibrator may vary" << endl;
+    if (verbose)
+      cerr << "Stokes V of the calibrator may vary" << endl;
     est.source->set_infit (3, true);
   }
 
@@ -492,7 +493,8 @@ void ReceptionCalibrator::setup_flux_calibrator (Calibration::FluxCalManager*)
 
   if (basis == Signal::Circular || measure_cal_V)
   {
-    // cerr << "ReceptionCalibrator::setup_flux_calibrator ok" << endl;
+    if (verbose)
+      cerr << "ReceptionCalibrator::setup_flux_calibrator ok" << endl;
   }
   else
     throw Error (InvalidState, "ReceptionCalibrator::setup_flux_calibrator",
