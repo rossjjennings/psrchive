@@ -663,8 +663,13 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
     }
     else
     {// prof_to_std is false
+      # TODO ugly, first rotate above, and now rotate back
+      total->get_Integration( i_subint )->expert()->rotate_phase( -toas[i_subint].get_phase_shift() );
       Reference::To<Profile> diff = prof->clone ();
-      diff->set_amps ( std_prof->get_amps () );
+      Reference::To<Profile> std_prof_clone = std_prof->clone();
+      Reference::To<Archive> std_archive_clone = std_archive->clone();
+      std_archive_clone->get_Integration( 0 )->expert()->rotate_phase( -toas[i_subint].get_phase_shift() );
+      diff->set_amps ( std_archive_clone->get_Profile(0, 0, 0)->get_amps () );
       if ( apply_offset ) 
       {
 	if ( !full_stokes_pca )
