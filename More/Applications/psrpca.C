@@ -663,7 +663,7 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
     }
     else
     {// prof_to_std is false
-      # TODO ugly, first rotate above, and now rotate back
+      // TODO ugly, first rotate above, and now rotate back
       total->get_Integration( i_subint )->expert()->rotate_phase( -toas[i_subint].get_phase_shift() );
       Reference::To<Profile> diff = prof->clone ();
       Reference::To<Profile> std_prof_clone = std_prof->clone();
