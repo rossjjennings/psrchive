@@ -8,6 +8,7 @@
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/Integration.h"
 
+#include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/TapeInfo.h"
@@ -31,6 +32,7 @@ void Pulsar::TimerArchive::unpack_extensions () try
   try
   {
     telescope->set_coordinates (get_telescope());
+    Telescopes::set_telescope_info (telescope, this);
   }
   catch (Error& error)
   {
