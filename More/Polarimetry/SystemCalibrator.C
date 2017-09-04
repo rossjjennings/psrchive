@@ -48,9 +48,11 @@ using namespace Calibration;
 */
 Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
-  set_initial_guess = true;
   correct_interstellar_Faraday_rotation = false;
 
+  set_initial_guess = true;
+  guess_physical_calibrator_stokes = false;
+  
   is_prepared = false;
   is_solved = false;
   has_pulsar = false;
@@ -943,14 +945,38 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
             "\n\tinvert_basis=" << invert_basis << 
             "\n\tcorrect=" << correct << endl;
 
-  Stokes< Estimate<double> > result = transform( data.observation, apply );
+  Stokes< Estimate<double> > observed = data.observation;
+  
+  if (guess_physical_calibrator_stokes)
+  {
+    Estimate<double> p = observed.abs_vect();
+    Estimate<double> I = observed[0];
+    
+    if (p > I)
+    {
+      cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
+	   << " correcting over polarization=" << (p-I)/I << endl;
+
+      // 99% polarized is assumed to be close enough to a good guess
+      double scale = 0.99 * I.val / p.val;
+      for (unsigned i=1; i<4; i++)
+	observed[i] *= scale;
+    }
+  }
+  
+  Stokes< Estimate<double> > result = transform( observed, apply );
 
   if (verbose)
     cerr << "SystemCalibrator::integrate_calibrator_data"
             "\n\tapply=" << apply <<
-            "\n\tobs=" << data.observation <<
+            "\n\tobs=" << observed <<
             "\n\tresult=" << result << endl;
 
+  Estimate<double> p = result.abs_vect();
+  if (p > 1)
+    cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
+	 << " output p-1=" << p-1 << endl;
+  
   calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
 

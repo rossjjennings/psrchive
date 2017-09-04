@@ -130,15 +130,19 @@ void Pulsar::FluxCalibrator::print (std::ostream& os)
  * source signal is 100% correlated in each receptor with zero phase,
  * but may have unequal power in the two sides.
  */
-Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes () const
+const Pulsar::CalibratorStokes*
+Pulsar::FluxCalibrator::get_CalibratorStokes () const
 {
+  if (calibrator_stokes)
+    return calibrator_stokes;
+  
   // Check that we have both polns
   if (get_nreceptor() != 2) 
     throw Error (InvalidState, "Pulsar::FluxCalibrator::get_CalibratorStokes",
         "nreceptor=%d != 2", get_nreceptor());
 
-  Reference::To<CalibratorStokes> calstokes = new CalibratorStokes;
-  calstokes->set_nchan(get_nchan());
+  calibrator_stokes = new CalibratorStokes;
+  calibrator_stokes->set_nchan(get_nchan());
 
   const Receiver* receiver = get_Archive()->get<Receiver>();
   
@@ -156,8 +160,8 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes () const
       stokes[1] = Estimate<double> (0.0, 0.0);
       stokes[2] = Estimate<double> (0.0, 0.0);
       stokes[3] = Estimate<double> (0.0, 0.0);
-      calstokes->set_stokes(ichan, stokes);
-      calstokes->set_valid(ichan,false);
+      calibrator_stokes->set_stokes(ichan, stokes);
+      calibrator_stokes->set_valid(ichan,false);
       continue;
     }
 
@@ -221,10 +225,10 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes () const
 
     }
 
-    calstokes->set_stokes(ichan, stokes);
+    calibrator_stokes->set_stokes(ichan, stokes);
   }
 
-  return calstokes.release();
+  return calibrator_stokes;
 }
 
 //! Return true if the flux scale for the specified channel is valid
@@ -290,17 +294,18 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   assert (data.size() == nchan);
 
+  Reference::To<Pulsar::Archive> clone;
+  
   if (archive->get_state () == Signal::Stokes) {
 
     if (verbose > 2)
       cerr << "Pulsar::FluxCalibrator::add_observation clone Stokes->Coherence"
            << endl;
 
-    Pulsar::Archive* clone = archive->clone();
+    clone = archive->clone();
     clone->convert_state (Signal::Coherence);
 
     archive = clone;
-
   }
 
 
@@ -356,6 +361,8 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     filenames.push_back (filename);
 
   calculated = false;
+  calibrator_stokes = 0;
+  
   if (archive->get_type() == Signal::FluxCalOn)
     have_on = true;
   if (archive->get_type() == Signal::FluxCalOff)
