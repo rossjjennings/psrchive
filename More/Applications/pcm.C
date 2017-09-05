@@ -642,7 +642,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
-    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:xX:yzZ";
+    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:wxX:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -888,6 +888,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'v':
       measure_cal_V = false;
+      break;
+
+    case 'w':
+      must_have_cals = false;
       break;
 
     case 'x':
@@ -1266,7 +1270,7 @@ int actual_main (int argc, char *argv[]) try
 
 #if HAVE_PGPLOT
 
-  if (plot_result)
+  if (plot_result) try
   {
     plot_state (model, "result");
 
@@ -1285,13 +1289,21 @@ int actual_main (int argc, char *argv[]) try
       cpgend ();
     }
   }
+  catch (Error& error)
+  {
+    cerr << "pcm: error while plotting results" << error << endl;
+  }
 
-  if (plot_residual && model->get_nstate_pulsar())
+  if (plot_residual && model->get_nstate_pulsar()) try
   {
     plotter.set_plot_residual (true);
     
     cerr << "pcm: plotting pulsar constraints with model" << endl;
     plot_constraints (plotter, model->get_nchan());
+  }
+  catch (Error& error)
+  {
+    cerr << "pcm: error while plotting residual" << error << endl;
   }
 
 #endif // HAVE_PGPLOT
@@ -1652,7 +1664,7 @@ void load_calibrator_database () try
     
     if (must_have_cals && !calfile)
     {
-      cerr << "pcm: cannot continue" << endl;
+      cerr << "pcm: cannot continue (disable this check with -)" << endl;
       exit (-1);
     }
   }
