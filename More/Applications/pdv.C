@@ -1349,8 +1349,11 @@ int main( int argc, char *argv[] ) try
 
    vector< string > filenames = GetFilenames( argc, argv );
 
-   if( bandpass_text || cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max ||
-		 show_pol_frac )
+   if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max ||
+#ifdef HAVE_PGPLOT
+	bandpass_text || 
+#endif
+	show_pol_frac )
    {
 	  for_each( filenames.begin(), filenames.end(), ProcessArchive );
    }
