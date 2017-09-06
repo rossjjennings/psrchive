@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/03/01 18:04:42 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h
 
 #ifndef __HybridCalibrator_H
 #define __HybridCalibrator_H
@@ -47,7 +44,8 @@ namespace Pulsar {
         std::string filename = "");
 
     //! Set the ReferenceCalibrator data from which to derive a SingleAxis
-    void set_reference_observation (ReferenceCalibrator* observation);
+    void set_reference_observation (const ReferenceCalibrator* observation);
+    const ReferenceCalibrator* get_reference_observation ();
     
     //! Set the PolnCalibrator to be supplemented
     void set_precalibrator (PolnCalibrator* calibrator);
@@ -61,13 +59,13 @@ namespace Pulsar {
     bool get_valid (unsigned ichan) const;
 
     //! Return the number of channels in the PolnCalibrator
-    unsigned get_maximum_nchan ();
+    unsigned get_maximum_nchan () const;
 
     //! The Stokes parameters of the input reference signal
     Reference::To<const CalibratorStokes> reference_input;
 
     //! The Stokes parameters of the observed reference signal
-    Reference::To<ReferenceCalibrator> reference_observation;
+    Reference::To<const ReferenceCalibrator> reference_observation;
 
     //! The PolnCalibrator to be supplemented
     Reference::To<PolnCalibrator> precalibrator;

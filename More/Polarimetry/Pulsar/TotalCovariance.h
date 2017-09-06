@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TotalCovariance.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/TotalCovariance.h
 
 #ifndef __Calibration_TotalCovariance_H
 #define __Calibration_TotalCovariance_H

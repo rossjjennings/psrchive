@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/06/24 05:11:32 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h
 
 #ifndef __Pulsar_PolnSpectrumStats_h
 #define __Pulsar_PolnSpectrumStats_h

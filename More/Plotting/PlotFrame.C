@@ -131,24 +131,35 @@ void Pulsar::PlotFrame::label_axes (const string& default_x,
     3) get_?_scale()->get_label() - set by the scale object (default)
   */
 
+#ifdef _DEBUG
+  cerr << "Pulsar::PlotFrame::label_axes"
+    " x_axis::label='" << get_x_axis()->get_label() << "'" << endl;
+
+  cerr << "Pulsar::PlotFrame::label_axes"
+    " default_x='" << default_x << "'" << endl;
+    
+  cerr << "Pulsar::PlotFrame::label_axes"
+    " x_scale::label='" << get_x_scale()->get_label() << "'" << endl;
+#endif
+
   string xlabel = get_x_axis()->get_label();
   if ( unset(xlabel) )
     xlabel = default_x;
   if ( unset(xlabel) )
-    xlabel =  get_x_scale()->get_label();
+    xlabel = get_x_scale()->get_label();
 
   string ylabel = get_y_axis()->get_label();
   if ( unset(ylabel) )
     ylabel = default_y;    
   if ( unset(ylabel) )
-    ylabel =  get_y_scale()->get_label();
+    ylabel = get_y_scale()->get_label();
 
   if (transpose)
     swap (xlabel, ylabel);
 
 #ifdef _DEBUG
-  cerr << "x label='" << xlabel << "'" << endl;
-  cerr << "y label='" << ylabel << "'" << endl;
+  cerr << "Pulsar::PlotFrame::label_axes "
+    "x='" << xlabel << "' y='" << ylabel << "'" << endl;
 #endif
 
   if (xlabel.empty())

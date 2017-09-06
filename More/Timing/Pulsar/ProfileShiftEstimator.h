@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ProfileShiftEstimator.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/30 02:16:19 $
-   $Author: straten $ */
+// psrchive/More/Timing/Pulsar/ProfileShiftEstimator.h
 
 #ifndef __Pulsar_ProfileShiftEstimator_h
 #define __Pulsar_ProfileShiftEstimator_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BackendFeedInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/03/03 11:47:52 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/BackendFeedInfo.h
 
 #ifndef __Pulsar_BackendFeedInfo_H
 #define __Pulsar_BackendFeedInfo_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/EvenlySpaced.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/16 23:21:22 $
-   $Author: nopeer $ */
+// psrchive/More/General/Pulsar/EvenlySpaced.h
 
 #ifndef __Pulsar_EvenlySpaced_h
 #define __Pulsar_EvenlySpaced_h

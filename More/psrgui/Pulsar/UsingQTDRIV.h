@@ -5,10 +5,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/psrgui/Pulsar/UsingQTDRIV.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/13 10:21:08 $
-   $Author: straten $ */
+// psrchive/More/psrgui/Pulsar/UsingQTDRIV.h
 
 #ifndef __Pulsar_UsingQTDRIV_h
 #define __Pulsar_UsingQTDRIV_h

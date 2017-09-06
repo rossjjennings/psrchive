@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/11/29 12:23:25 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/FrequencyAppend.h
 
 #ifndef _Pulsar_FrequencyAppend_H
 #define _Pulsar_FrequencyAppend_H

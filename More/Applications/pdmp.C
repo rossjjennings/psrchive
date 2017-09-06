@@ -2773,7 +2773,7 @@ void readsum (string & filename, int * ndat, float*dms, float*snrs){
   // now read in data
 
   *ndat=0;
-  while (fgets(st,200,f)!='\0'){
+  while (fgets(st,200,f)!=NULL){
     int count; float dm,ss;
     sscanf(st,"%d %f %f",&count,&dm,&ss);  
     d.push_back(dm);

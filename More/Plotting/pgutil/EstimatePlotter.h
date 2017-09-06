@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.20 $
-   $Date: 2009/08/14 06:21:40 $
-   $Author: straten $ */
+// psrchive/Util/units/EstimatePlotter.h
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h
@@ -104,6 +101,9 @@ class EstimatePlotter {
 	       const std::vector<float>& y,
 	       const std::vector<float>& yerr);
 
+  void set_plot_error_bars (bool flag)
+  { plot_error_bars = flag; }
+  
  protected:
 
   //! Set the viewport and/or world coordinates before plotting
@@ -137,6 +137,9 @@ class EstimatePlotter {
   //! PGPLOT Standard Graph Marker
   int graph_marker;
 
+  //! Plot error bars
+  bool plot_error_bars;
+  
   std::vector< std::vector<float> > xval;
   std::vector< std::vector<float> > yval;
   std::vector< std::vector<float> > yerr;

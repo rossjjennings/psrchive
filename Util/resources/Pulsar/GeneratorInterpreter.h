@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/resources/Pulsar/GeneratorInterpreter.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/11/29 12:13:50 $
-   $Author: straten $ */
+// psrchive/Util/resources/Pulsar/GeneratorInterpreter.h
 
 #ifndef __Pulsar_GeneratorInterpreter_h
 #define __Pulsar_GeneratorInterpreter_h

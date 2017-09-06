@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Composite.h
 
 #ifndef __Composite_H
 #define __Composite_H

@@ -94,6 +94,41 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data)
     }
   }
 
+  else if (what == NonOrthogonality)
+  {
+    get_frame()->get_y_axis()->set_label("cos/sin(\\gh)");
+    plotter.profiles.resize( 3 );
+    stats->eigen();
+
+    plotter.plot_sci.resize(3);
+    plotter.plot_sls.resize(3);
+    plotter.plot_slw.resize(3);
+
+    plotter.profiles.resize( 3 );
+    
+    stats->eigen();
+
+    for (unsigned i=0; i<3; i++)
+    {
+      plotter.plot_sci[i] = i+1;
+      plotter.plot_sls[i] = 1;
+      plotter.plot_slw[i] = 3;
+    }
+
+    plotter.profiles[0] = stats->get_norm_theta();
+    plotter.profiles[1] = stats->get_cos_theta();
+    plotter.profiles[2] = stats->get_sin_theta();
+  }
+
+  else if (what == Theta)
+  {
+    get_frame()->get_y_axis()->set_label("\\gh (rad)");
+    plotter.profiles.resize( 1 );
+    stats->eigen();
+    plotter.profiles[0] = stats->get_nonorthogonality();
+  }
+
+
   else if (what == RegressionCoefficients)
   {
     plotter.profiles.resize( 3 );
@@ -149,6 +184,10 @@ std::ostream& Pulsar::operator << (std::ostream& os,
     return os << "eigen";
   case StokesCovariancePlot::NaturalCovariances:
     return os << "covar";
+  case StokesCovariancePlot::NonOrthogonality:
+    return os << "nonortho";
+  case StokesCovariancePlot::Theta:
+    return os << "theta";
   case StokesCovariancePlot::RegressionCoefficients:
     return os << "reg";
   case StokesCovariancePlot::ModulationIndex:
@@ -171,6 +210,10 @@ std::istream& Pulsar::operator >> (std::istream& is,
     what = StokesCovariancePlot::EigenValues;
   else if (unit == "covar")
     what = StokesCovariancePlot::NaturalCovariances;
+  else if (unit == "nonortho")
+    what = StokesCovariancePlot::NonOrthogonality;
+  else if (unit == "theta")
+    what = StokesCovariancePlot::Theta;
   else if (unit == "reg")
     what = StokesCovariancePlot::RegressionCoefficients;
   else if (unit == "beta")

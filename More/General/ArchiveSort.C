@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/ArchiveSort.h"
 #include "Error.h"
 
 using namespace std;
+
+bool Pulsar::ArchiveSort::read_length = false;
 
 Pulsar::ArchiveSort::ArchiveSort ()
 {
@@ -18,6 +20,8 @@ Pulsar::ArchiveSort::ArchiveSort ()
 Pulsar::ArchiveSort::ArchiveSort (istream& input)
 {
   input >> filename >> source >> centre_frequency >> epoch;
+  if (read_length)
+    input >> length;
   if (input.fail())
     throw Error (InvalidState, "Pulsar::ArchiveSort", "error on stream");
 }
@@ -63,8 +67,10 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 void Pulsar::ArchiveSort::load (istream& input, list<ArchiveSort>& entries)
 try {
 
-  string filename, name, freq, mjd;
+  string filename, name, freq, mjd, length;
   input >> filename >> name >> freq >> mjd;
+  if (read_length)
+    input >> length;
 
   if (filename != "FILE" && filename != "filename")
     throw Error (InvalidState, "Pulsar::ArchiveSort::load",

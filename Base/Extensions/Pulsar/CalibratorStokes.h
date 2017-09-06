@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorStokes.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/03/24 03:00:36 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/CalibratorStokes.h
 
 #ifndef __CalibratorStokes_h
 #define __CalibratorStokes_h

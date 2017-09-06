@@ -50,7 +50,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:K:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -83,6 +83,8 @@ void usage ()
     "  -I             Correct ionospheric Faraday rotation using IRI\n"
     "  -x             Derive calibrator Stokes parameters from fluxcal data\n"
     "  -y             Always trust the Pointing::feed_angle attribute \n"
+    "  -g             Fscrunch data to match number of channels of calibrator\n"
+    "  -K sigma       Reject outliers when computing CAL levels \n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
     "  -B             Fix the off-pulse baseline statistics \n"
@@ -126,7 +128,9 @@ int main (int argc, char *argv[]) try
   bool do_polncal = true;
   bool use_fluxcal_stokes = false;
   bool enable_frontend = true;
-
+  bool fscrunch_data_to_cal = false;
+  float outlier_threshold = 0.0;
+  
   // Flag for only displaying the system-equivalent flux density.
   bool only_display_sefd = false;
 
@@ -218,6 +222,10 @@ int main (int argc, char *argv[]) try
       database_filename = optarg;
       break;
 
+    case 'K':
+      outlier_threshold = atof(optarg);
+      break;
+      
     case 'A':
       model_file = optarg;
       command += " -A ";
@@ -285,6 +293,10 @@ int main (int argc, char *argv[]) try
     case 'f':
       check_flags = false;
       command += " -f";
+      break;
+    
+    case 'g':
+      fscrunch_data_to_cal = true;
       break;
 
     case 'G':
@@ -740,6 +752,12 @@ int main (int argc, char *argv[]) try
         if (verbose)
           cout << "pac: Calculating fluxcal Stokes params" << endl;
 
+	Pulsar::ReferenceCalibrator* refcal = 0;
+	refcal = dynamic_cast<Pulsar::ReferenceCalibrator*> (pcal_engine.get());
+	if (!refcal)
+	  throw Error (InvalidState, "pcm",
+		       "PolnCalibrator is not a ReferenceCalibrator");
+
         // Find appropriate fluxcal from DB 
         Reference::To<Pulsar::FluxCalibrator> flux_cal;
 	try
@@ -757,10 +775,10 @@ int main (int argc, char *argv[]) try
         // into a new HybridCalibrator
         Reference::To<Pulsar::HybridCalibrator> hybrid_cal;
         hybrid_cal = new Pulsar::HybridCalibrator;
-        hybrid_cal->set_reference_input(flux_cal->get_CalibratorStokes(),
-            flux_cal->get_filenames());
-        hybrid_cal->set_reference_observation(
-            static_cast<Pulsar::ReferenceCalibrator*>(pcal_engine.get()));
+        hybrid_cal->set_reference_input( flux_cal->get_CalibratorStokes(),
+					 flux_cal->get_filenames() );
+	
+        hybrid_cal->set_reference_observation( refcal );
 
         pcal_engine = hybrid_cal;
       }
@@ -774,6 +792,31 @@ int main (int argc, char *argv[]) try
       pcal_file = pcal_engine->get_filenames();
 
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
+
+      if (fscrunch_data_to_cal && pcal_engine->get_nchan() != arch->get_nchan())
+      {
+	cout << "pac: Frequency integrating data (nchan=" << arch->get_nchan()
+	     << ") to match calibrator (nchan=" << pcal_engine->get_nchan()
+	     << ")" << endl;
+	arch->fscrunch_to_nchan (pcal_engine->get_nchan());
+      }
+
+      if (outlier_threshold)
+      {
+	ReferenceCalibrator* ref = 0;
+	ref = dynamic_cast<ReferenceCalibrator*> (pcal_engine.get());
+	if (ref)
+	  ref->set_outlier_threshold (outlier_threshold);
+
+      	HybridCalibrator* hyb = 0;
+	hyb = dynamic_cast<HybridCalibrator*> (pcal_engine.get());
+	if (hyb)
+	{
+	  ref = const_cast<ReferenceCalibrator*>(hyb->get_reference_observation ());
+	  ref->set_outlier_threshold (outlier_threshold);
+	}
+      }
+      
       pcal_engine->calibrate (arch);
 
       if (arch->get_npol() == 4)
@@ -842,20 +885,20 @@ int main (int argc, char *argv[]) try
         // of a new file.
         continue;
       }
-      else
-      {
-        cout << "pac: FluxCalibrator constructed from:\n\t"
-          << fcal_engine->get_filenames() << endl;
 
-        if (verbose) 
-          cerr << "pac: Calibrating Archive fluxes" << endl;
+      cout << "pac: FluxCalibrator constructed from:\n\t"
+	   << fcal_engine->get_filenames() << endl;
 
-        fcal_engine->calibrate(arch);
+      fcal_engine->set_outlier_threshold (outlier_threshold);
+      
+      if (verbose) 
+	cerr << "pac: Calibrating Archive fluxes" << endl;
 
-        cout << "pac: Flux calibration complete" << endl;
-
-        successful_fluxcal = true;
-      }
+      fcal_engine->calibrate(arch);
+      
+      cout << "pac: Flux calibration complete" << endl;
+      
+      successful_fluxcal = true;
     }
     catch (Error& error)
     {

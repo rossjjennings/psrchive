@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.37 $
-   $Date: 2009/10/02 03:37:57 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h
 
 #ifndef __Pulsar_PulsarCalibrator_H
 #define __Pulsar_PulsarCalibrator_H
@@ -30,10 +27,14 @@ namespace Pulsar {
   class PolnProfileFit;
   class ReferenceCalibrator;
 
-  //! Uses PolnProfileFit to determine the system response
-  /*! The PulsarCalibrator implements a technique of polarimetric
-    calibration using a well-determined source.  This class requires a
-    polarimetric standard and another observation of the same source.  */
+  //! Implements Measurement Equation Template Matching (van Straten 2013)
+  /*! This class determines the instrumental response using a pulsar
+    as a polarized reference source.  The inputs are a well-calibrated
+    observation of a pulsar (ideally with high signal-to-noise ratio)
+    to be used as the reference source and at least one observation of
+    the same source. The output is an estimate of the instrumental
+    response at the epoch of the observation(s) that are fit to the
+    reference source. */
   class PulsarCalibrator : public SystemCalibrator {
     
   public:

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibratorUnloader.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/25 23:30:01 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SystemCalibratorUnloader.h
 
 #ifndef __SystemCalibratorUnloader_H
 #define __SystemCalibratorUnloader_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Cached.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/06/15 16:12:34 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Cached.h
 
 #ifndef __Cached_H
 #define __Cached_H

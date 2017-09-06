@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FrequencyPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/FrequencyPlot.h
 
 #ifndef __Pulsar_FrequencyPlot_h
 #define __Pulsar_FrequencyPlot_h

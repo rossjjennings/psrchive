@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transformation.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/31 05:59:35 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Transformation.h
 
 #ifndef __Pulsar_Transformation_h
 #define __Pulsar_Transformation_h

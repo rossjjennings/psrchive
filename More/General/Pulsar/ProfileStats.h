@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.14 $
-   $Date: 2011/03/04 06:02:04 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ProfileStats.h
 
 #ifndef __Pulsar_ProfileStats_h
 #define __Pulsar_ProfileStats_h
@@ -99,7 +96,7 @@ namespace Pulsar
   protected:
 
     //! The Profile from which statistics will be derived
-    Reference::To<const Profile> profile;
+    Reference::To<const Profile, false> profile;
 
     //! The algorithm used to find the on-pulse phase bins
     Reference::To<ProfileWeightFunction> onpulse_estimator;

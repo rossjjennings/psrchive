@@ -85,7 +85,7 @@ nobase_include_HEADERS = \
 	Pulsar/StandardPrepare.h \
 	Pulsar/StandardSpectra.h \
 	Pulsar/StepsInfo.h \
-	Pulsar/StokesCovariance.h \
+	Pulsar/StokesCovariance.h Pulsar/StokesCrossCovariance.h \
         Pulsar/SystemCalibrator.h \
 	Pulsar/SystemCalibratorUnloader.h \
         Pulsar/TemplateUncertainty.h \
@@ -183,7 +183,7 @@ libPolarimetry_la_SOURCES = \
 	StandardPrepare.C \
 	StandardSpectra.C \
 	StepsInfo.C \
-	StokesCovariance.C \
+	StokesCovariance.C StokesCrossCovariance.C \
         SystemCalibrator.C \
 	SystemCalibratorUnloader.C \
         TemplateUncertainty.C \
@@ -202,7 +202,6 @@ bin_PROGRAMS = rmrot simpol
 
 rmrot_SOURCES = rmrot.C
 simpol_SOURCES = simpol.C
-
 
 # ######################################################################
 #

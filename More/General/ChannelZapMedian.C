@@ -37,11 +37,12 @@ void Pulsar::ChannelZapMedian::operator () (Archive* archive)
   }
   else
   {
-    if (!stats)
-      stats = new Statistics;
+    stats = new Statistics;
 
     stats->set_Archive( archive );
-    stats->set_pol( Index (0,true) );
+
+    bool integrate = true;  // integrate over polarizations
+    stats->set_pol( Index (0,integrate) );
 
     parser = stats->get_interface ();
   }

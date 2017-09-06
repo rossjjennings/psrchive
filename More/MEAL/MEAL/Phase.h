@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Phase.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/13 05:09:24 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Phase.h
 
 #ifndef __MEAL_Phase_H
 #define __MEAL_Phase_H

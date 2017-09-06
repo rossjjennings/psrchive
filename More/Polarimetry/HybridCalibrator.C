@@ -63,8 +63,9 @@ Pulsar::HybridCalibrator::set_reference_input (const CalibratorStokes* input,
 }
 
 //! Set the ReferenceCalibrator data from which to derive a SingleAxis model
-void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
-							  observation)
+void
+Pulsar::HybridCalibrator::set_reference_observation (const ReferenceCalibrator*
+						     observation)
 {
   reference_observation = observation;
 
@@ -73,7 +74,13 @@ void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
   filenames.resize (2);
   filenames[1] = observation->get_filenames();
 }
-    
+
+const Pulsar::ReferenceCalibrator*
+Pulsar::HybridCalibrator::get_reference_observation ()
+{
+  return reference_observation;
+}
+
 //! Set the PolnCalibrator to be supplemented by the SingleAxis model
 void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 {
@@ -83,15 +90,12 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 
   set_calibrator( precalibrator->get_Archive() );
 
-  // store the Receiver Extension, if any
-  receiver = get_calibrator()->get<Receiver>();
-
   filenames.resize (2);
   filenames[0] = precalibrator->get_filenames();
 }
 
 
-unsigned Pulsar::HybridCalibrator::get_maximum_nchan ()
+unsigned Pulsar::HybridCalibrator::get_maximum_nchan () const
 {
   if (precalibrator)
     return precalibrator->get_nchan();
@@ -289,9 +293,10 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "Pulsar::HybridCalibrator::calculate_transformation",
 		 "no reference observation ReferenceCalibrator");
 
-  const unsigned target_nchan 
-    = std::min (observation_nchan, get_maximum_nchan());
-
+  unsigned target_nchan = get_maximum_nchan();
+  if (observation_nchan && observation_nchan < target_nchan)
+    target_nchan = observation_nchan;
+  
   if (verbose > 2)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation"
       " target_nchan=" << target_nchan << endl;

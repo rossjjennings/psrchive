@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SignalPath.h,v $
-   $Revision: 1.30 $
-   $Date: 2011/02/13 15:33:04 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SignalPath.h
 
 #ifndef __Calibration_SignalPath_H
 #define __Calibration_SignalPath_H
@@ -47,6 +44,9 @@ namespace Calibration
 
     //! Default constructor
     SignalPath (Pulsar::Calibrator::Type*);
+
+    //! Set the response transformation
+    void set_response (MEAL::Complex2*);
 
     //! Include an impurity transformation
     void set_impurity (MEAL::Real4*);

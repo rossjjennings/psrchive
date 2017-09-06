@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseThreshold.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/06/24 05:02:23 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/OnPulseThreshold.h
 
 #ifndef __Pulsar_OnPulseThreshold_h
 #define __Pulsar_OnPulseThreshold_h

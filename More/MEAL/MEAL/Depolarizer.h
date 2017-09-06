@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Depolarizer.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/03/16 12:57:36 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Depolarizer.h
 
 #ifndef __MEAL_Depolarizer_H
 #define __MEAL_Depolarizer_H

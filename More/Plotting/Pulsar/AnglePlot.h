@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/06/12 09:10:31 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/AnglePlot.h
 
 #ifndef __Pulsar_AnglePlot_h
 #define __Pulsar_AnglePlot_h

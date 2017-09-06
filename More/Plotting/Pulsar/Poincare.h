@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/10/16 17:35:47 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/Poincare.h
 
 #ifndef __Pulsar_Poincare_h
 #define __Pulsar_Poincare_h

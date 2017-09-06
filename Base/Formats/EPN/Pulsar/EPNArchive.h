@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+// psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h
 
 #ifndef __EPN_Archive_h
 #define __EPN_Archive_h

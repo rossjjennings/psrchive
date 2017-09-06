@@ -57,8 +57,10 @@ std::istream& Phase::operator >> (std::istream& is, Phase::Unit& units)
     units = Phase::Milliseconds;
   else if (unit == "bin")
     units = Phase::Bins;
-  else
+  else {
     is.setstate(std::istream::failbit);
+    is.seekg (pos);
+  }
 
   return is;
 }

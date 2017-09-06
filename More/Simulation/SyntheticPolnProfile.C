@@ -10,11 +10,17 @@
 #include "BoxMuller.h"
 #include "random.h"
 
+#include <vector>
+#include <algorithm>
+
 using namespace MEAL;
 
 Pulsar::SyntheticPolnProfile::SyntheticPolnProfile ()
 {
   noise_variance = 0;
+  swims_variance = 0;
+  baseline = 0;
+  
   constant_degree = 0;
   constant_position_angle = 0;
 }
@@ -50,6 +56,23 @@ void Pulsar::SyntheticPolnProfile::set_noise (float rms)
   noise_variance = rms * rms;
 }
 
+void Pulsar::SyntheticPolnProfile::set_swims_variance (float c)
+{
+  swims_variance = c;
+}
+
+void Pulsar::SyntheticPolnProfile::set_swims (float rms)
+{
+  swims_variance = rms * rms;
+}
+
+
+void Pulsar::SyntheticPolnProfile::set_baseline (float c)
+{
+  baseline = c;
+}
+
+
 void
 Pulsar::SyntheticPolnProfile::set_position_angle (Univariate<Scalar>* f)
 {
@@ -76,7 +99,8 @@ void Pulsar::SyntheticPolnProfile::set_circular (Univariate<Scalar>* f)
 void set_Profile (Pulsar::Profile* profile, Univariate<Scalar>* function)
 {
   unsigned nbin = profile->get_nbin();
-  for (unsigned ibin=0; ibin<nbin; ibin++) {
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+  {
     function->set_abscissa ( (2*M_PI*ibin)/nbin );
     profile->get_amps()[ibin] = function->evaluate();
   }
@@ -113,14 +137,17 @@ void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
 
   U->zero ();
 
-  if (total_intensity) {
+  if (total_intensity)
+  {
     set_Profile (I, total_intensity);
 
-    if (!linear && (degree || constant_degree)) {
-
+    if (!linear && (degree || constant_degree))
+    {
       float poln_deg = 0.0;
-      for (unsigned ibin=0; ibin<nbin; ibin++) {
-	if (degree) {
+      for (unsigned ibin=0; ibin<nbin; ibin++)
+      {
+	if (degree)
+	{
 	  degree->set_abscissa ( (2*M_PI*ibin)/nbin );
 	  poln_deg = degree->evaluate();
 	}
@@ -136,10 +163,13 @@ void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
 
   } // if total_intensity
 
-  else if (degree || constant_degree) {
+  else if (degree || constant_degree)
+  {
     float poln_deg = 0.0;
-    for (unsigned ibin=0; ibin<nbin; ibin++) {
-      if (degree) {
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+    {
+      if (degree)
+      {
 	degree->set_abscissa ( (2*M_PI*ibin)/nbin );
 	poln_deg = degree->evaluate();
       }
@@ -153,10 +183,13 @@ void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
     throw Error (InvalidState, "Pulsar::SyntheticPolnProfile::get_Profile",
 		 "no means of calculating the total intensity profile");
 
-  if (position_angle || constant_position_angle) {
+  if (position_angle || constant_position_angle)
+  {
     float PA = 0.0;
-    for (unsigned ibin=0; ibin<nbin; ibin++) {
-      if (position_angle) {
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+    {
+      if (position_angle)
+      {
 	position_angle->set_abscissa ( (2*M_PI*ibin)/nbin );
 	PA = position_angle->evaluate();
       }
@@ -170,20 +203,49 @@ void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
     }
   }
 
-  if (noise_variance) {
+  if (swims_variance)
+  {
+    static BoxMuller gasdev( usec_seed() );
+    float rms = sqrt(swims_variance) / nbin;
+    
+    for (unsigned ipol=0; ipol<4; ipol++)
+    {
+      std::vector<float> noise (nbin);
+      std::generate (noise.begin(), noise.end(), gasdev);
 
-    // static long idum = -1;
+      float* amps = result->get_Profile(ipol)->get_amps();
+
+      std::vector<float> correlated_noise (nbin, 0.0);
+
+      for (unsigned ibin=0; ibin<nbin; ibin++)
+	for (unsigned jbin=0; jbin<nbin; jbin++)
+	  correlated_noise[ibin] += rms * amps[ibin] * amps[jbin] * noise[jbin];
+
+      for (unsigned ibin=0; ibin<nbin; ibin++)
+      {
+	amps[ibin] += correlated_noise[ibin];
+      }
+    }
+  }
+
+  if (noise_variance)
+  {
     static BoxMuller gasdev( usec_seed() );
 
     float rms = sqrt(noise_variance);
 
-    for (unsigned ipol=0; ipol<4; ipol++) {
-
+    for (unsigned ipol=0; ipol<4; ipol++)
+    {
       Profile* p = result->get_Profile (ipol);
       for (unsigned ibin=0; ibin<nbin; ibin++)
 	p->get_amps()[ibin] += rms * gasdev ();
-
     }
+  }
 
+  if (baseline)
+  {
+    float* amps = result->get_Profile(0)->get_amps();
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+      amps[ibin] += baseline;
   }
 }

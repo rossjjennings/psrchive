@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/13 06:44:25 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ChainRule.h
 
 #ifndef __MEAL_ChainRule_H
 #define __MEAL_ChainRule_H

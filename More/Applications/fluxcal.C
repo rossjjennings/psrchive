@@ -53,6 +53,7 @@ void usage ()
     "  -f           fix the type and name attributes, based on coordinates\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "  -I freq_mhz  Print all cal sources fluxes at the given frequency\n"
+    "  -K sigma     Reject outliers when computing CAL levels \n"
     "\n"
     "By default, standard candle information is read from \n" 
        << Pulsar::StandardCandles::default_filename << "\n"
@@ -132,9 +133,10 @@ int main (int argc, char** argv) try {
 
   bool print_flux = false;
   double print_ref_freq = 0.0;
+  float outlier_threshold = 0.0;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:O:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:K:O:")) != -1) 
 
     switch (c)  {
 
@@ -195,6 +197,10 @@ int main (int argc, char** argv) try {
     case 'I':
       print_flux = true;
       print_ref_freq = atof(optarg);
+      break;
+
+    case 'K':
+      outlier_threshold = atof(optarg);
       break;
 
     case 'O':
@@ -335,7 +341,7 @@ int main (int argc, char** argv) try {
       fluxcal = new Pulsar::FluxCalibrator (archive);
       if (standards)
 	fluxcal->set_database (standards);
-
+      fluxcal->set_outlier_threshold (outlier_threshold);
     }
 
     last = archive;

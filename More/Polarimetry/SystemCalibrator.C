@@ -16,6 +16,8 @@
 #include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include "Pulsar/CalibratorTypes.h"
+#include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/PolarCalibrator.h"
@@ -46,8 +48,11 @@ using namespace Calibration;
 */
 Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
-  set_initial_guess = true;
+  correct_interstellar_Faraday_rotation = false;
 
+  set_initial_guess = true;
+  guess_physical_calibrator_stokes = false;
+  
   is_prepared = false;
   is_solved = false;
   has_pulsar = false;
@@ -62,19 +67,21 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   report_initial_state = false;
   report_input_data = false;
 
+  outlier_threshold = 0.0;
+  
   if (archive)
     set_calibrator (archive);
 }
 
-void Pulsar::SystemCalibrator::set_calibrator (Archive* archive)
+void Pulsar::SystemCalibrator::set_calibrator (const Archive* archive)
 {
   if (!archive)
     return;
 
   PolnCalibrator::set_calibrator(archive);
 
-  extension = archive->get<PolnCalibratorExtension>();
-  calibrator_stokes = archive->get<CalibratorStokes>();
+  extension = archive->get<const PolnCalibratorExtension>();
+  calibrator_stokes = archive->get<const CalibratorStokes>();
 }
 
 //! Return true if least squares minimization solvers are available
@@ -103,6 +110,14 @@ void
 Pulsar::SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
 {
   solver = s;
+}
+
+Calibration::ReceptionModel::Solver* Pulsar::SystemCalibrator::get_solver ()
+{
+  if (!solver)
+    solver = Calibration::ReceptionModel::new_default_Solver ();
+  
+  return solver;
 }
 
 //! Copy constructor
@@ -175,10 +190,18 @@ unsigned Pulsar::SystemCalibrator::get_nchan () const
   unsigned nchan = 0;
 
   if (has_calibrator())
+  {
     nchan = get_calibrator()->get_nchan ();
+    if (verbose > 2)
+      cerr << "SystemCalibrator::get_nchan using calibrator nchan=" << nchan << endl;
+  }
 
   if (model.size())
+  {
     nchan = model.size ();
+    if (verbose > 2)
+      cerr << "SystemCalibrator::get_nchan using model nchan=" << nchan << endl;
+  }
 
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::get_nchan " << nchan << endl;
@@ -193,6 +216,16 @@ unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
 }
 
 using namespace MEAL;
+
+void Pulsar::SystemCalibrator::set_response( MEAL::Complex2* f )
+{
+  response = f;
+  type = new_CalibratorType (response);
+
+  if (verbose)
+    cerr << "Pulsar::SystemCalibrator::set_response name="
+	 << response->get_name() << " type=" << type->get_name() << endl;
+}
 
 void Pulsar::SystemCalibrator::set_impurity( MEAL::Real4* f )
 {
@@ -236,17 +269,25 @@ void Pulsar::SystemCalibrator::add_diff_phase_step (const MJD& mjd)
 
 void Pulsar::SystemCalibrator::preprocess (Archive* data)
 {
+  if (!data)
+    return;
+
   if (data->get_type() == Signal::Pulsar)
   {
+    if (!has_Receiver())
+      set_Receiver(data);
+
     BackendCorrection correct_backend;
     if( correct_backend.required (data) )
     {
       if (verbose)
-	cerr << "Pulsar::SystemCalibrator::preprocess correct backend" << endl;
+	cerr << "Pulsar::SystemCalibrator::preprocess"
+                " correct backend" << endl;
       correct_backend (data);
     }
     else if (verbose)
-      cerr << "Pulsar::SystemCalibrator::preprocess backend correction not required" << endl;
+      cerr << "Pulsar::SystemCalibrator::preprocess"
+              " backend correction not required" << endl;
   }
 }
 
@@ -273,6 +314,9 @@ void Pulsar::SystemCalibrator::add_pulsar (const Archive* data) try
     cerr << "Pulsar::SystemCalibrator::add_pulsar"
       " data->nchan=" << data->get_nchan() << endl;
 
+  if (!has_Receiver())
+    set_Receiver (data);
+
   prepare (data);
 
   unsigned nsub = data->get_nsubint ();
@@ -294,12 +338,24 @@ catch (Error& error)
 
 void Pulsar::SystemCalibrator::prepare (const Archive* data) try
 {
+  if (verbose)
+    cerr << "SystemCalibrator::prepare"
+            " filename=" << data->get_filename() << endl;
+
   match (data);
 
   if (model.size() == 0)
+  {
+    if (verbose)
+      cerr << "SystemCalibrator::prepare create_model" << endl;
+
     create_model ();
+  }
 
   has_pulsar = true;
+
+  if (verbose)
+    cerr << "SystemCalibrator::prepare load_calibrators" << endl;
 
   load_calibrators ();
 }
@@ -335,7 +391,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
          << "\n\t projection=" << projection << endl;
 
   // correct ionospheric Faraday rotation
-  Reference::To<Faraday> faraday;
+  Reference::To<Faraday> iono_faraday;
   if (! integration->get_auxiliary_birefringence_corrected ())
   {
     const AuxColdPlasmaMeasures* aux
@@ -343,17 +399,32 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
     if (aux && aux->get_rotation_measure() != 0.0)
     {
-      cerr << " using Auxiliary::rotation_measure " 
+      cerr << " correcting auxiliary Faraday rotation - RM=" 
 	   << aux->get_rotation_measure () << endl;
 
-      faraday = new Faraday;
-      faraday->set_rotation_measure( aux->get_rotation_measure () );
+      iono_faraday = new Faraday;
+      iono_faraday->set_rotation_measure( aux->get_rotation_measure () );
 
       // correct ionospheric Faraday rotation wrt infinite frequency
-      faraday->set_reference_wavelength( 0.0 );
+      iono_faraday->set_reference_wavelength( 0.0 );
     }
   }
 
+  Reference::To<Faraday> ism_faraday;
+  if ( correct_interstellar_Faraday_rotation &&
+       ( data->get_rotation_measure() != 0.0 ) )
+  {
+    cerr << " correcting interstellar Faraday rotation - RM=" 
+	   << data->get_rotation_measure () << endl;
+    
+    ism_faraday = new Faraday;
+    ism_faraday->set_rotation_measure( data->get_rotation_measure() );
+
+    // correct interstellar Faraday rotation wrt centre frequency
+    ism_faraday->set_reference_frequency( data->get_centre_frequency() );
+  }
+  
+  
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
 
@@ -381,10 +452,17 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     Argument::Value* time = model[mchan]->time.new_Value( epoch );
     
     Jones<double> known = projection;
-    if (faraday)
+
+    if (iono_faraday)
     {
-      faraday->set_frequency( integration->get_centre_frequency(ichan) );
-      known *= faraday->evaluate();
+      iono_faraday->set_frequency( integration->get_centre_frequency(ichan) );
+      known *= iono_faraday->evaluate();
+    }
+
+    if (ism_faraday)
+    {
+      ism_faraday->set_frequency( integration->get_centre_frequency(ichan) );
+      known *= ism_faraday->evaluate();
     }
 
     // projection transformation
@@ -449,6 +527,11 @@ void Pulsar::SystemCalibrator::set_calibrators (const vector<string>& n)
   calibrator_filenames = n;
 }
 
+void Pulsar::SystemCalibrator::set_flux_calibrator (const FluxCalibrator* fluxcal)
+{
+  flux_calibrator = fluxcal;
+}
+
 void Pulsar::SystemCalibrator::load_calibrators ()
 {
   if (calibrator_filenames.size() == 0)
@@ -456,8 +539,9 @@ void Pulsar::SystemCalibrator::load_calibrators ()
 
   for (unsigned ifile = 0; ifile < calibrator_filenames.size(); ifile++) try
   {
-    cerr << "Pulsar::SystemCalibrator::load_calibrators loading\n\t"
-	 << calibrator_filenames[ifile] << endl;
+    if (verbose)
+      cerr << "Pulsar::SystemCalibrator::load_calibrators loading\n\t"
+	   << calibrator_filenames[ifile] << endl;
 
     Reference::To<Archive> archive;
     archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
@@ -484,6 +568,41 @@ void Pulsar::SystemCalibrator::load_calibrators ()
     model[ichan]->set_valid( false, "update failed" );
   }
 
+  for (unsigned ichan=0; ichan<nchan; ichan++) try
+  {
+    if (!model[ichan]->get_valid())
+      continue;
+
+    Estimate<double> I = calibrator_estimate[ichan].source->get_stokes()[0];
+    if (I.get_value() == 0)
+    {
+      cerr << "Pulsar::SystemCalibrator::load_calibrators"
+       " reference flux equals zero \n"
+       "\t attempts=" << calibrator_estimate[ichan].add_data_attempts <<
+       "\t failures=" << calibrator_estimate[ichan].add_data_failures << endl;
+
+      throw Error (InvalidState, "Pulsar::SystemCalibrator::load_calibrators",
+                   "reference flux equals zero");
+    }
+
+    if (fabs(I.get_value()-1.0) > I.get_error() && verbose)
+      cerr << "Pulsar::SystemCalibrator::load_calibrators warning"
+        " ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
+  }
+  catch (Error& error)
+  {
+    model[ichan]->set_valid( false, error.get_message().c_str() );
+  }
+
+  unsigned ok = 0;
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (model[ichan]->get_valid())
+      ok ++;
+
+  if (ok == 0)
+    throw Error (InvalidState, "Pulsar::SystemCalibrator::load_calibrators",
+                 "zero valid models");
+
   if (previous && previous->get_nchan() == nchan)
   {
     cerr << "Using previous solution" << endl;
@@ -508,8 +627,8 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
     return;
   }
 
-  if (!receiver)
-    receiver = data->get<Receiver>();
+  if (!has_Receiver())
+    set_Receiver (data);
 
   try
   {
@@ -533,7 +652,8 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
     }
 
     polncal->set_nchan( get_calibrator()->get_nchan() );
-
+    polncal->set_outlier_threshold( outlier_threshold );
+    
     add_calibrator (polncal);
   }
   catch (Error& error)
@@ -597,6 +717,21 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
   // ensure that model array is large enough
   check_ichan ("add_calibrator", nchan - 1);
 
+  Reference::To<const PolnCalibrator> solution = p;
+
+  if (flux_calibrator)
+  {
+    /* Combine ReferenceCalibrator with CalibratorStokes estimate from
+       FluxCalibrator stokes into a new HybridCalibrator */
+    Reference::To<HybridCalibrator> hybrid_cal = new HybridCalibrator;
+    hybrid_cal->set_reference_input( flux_calibrator->get_CalibratorStokes(),
+				     flux_calibrator->get_filenames() );
+        
+    hybrid_cal->set_reference_observation( p );
+
+    solution = hybrid_cal;
+  }
+  
   for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = cal->get_Integration (isub);
@@ -605,8 +740,13 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
     // add_epoch( epoch );
 
-    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
-
+    if (verbose)
+      cerr << "Pulsar::SystemCalibrator::add_calibrator"
+	" outlier_threshold=" << outlier_threshold << endl;
+    
+    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
+				     outlier_threshold);
+    
     string identifier = cal->get_filename() + " " + tostring(isub);
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -655,7 +795,10 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 	state.set_stokes( data.observation );
         measurements.push_back( state );
 
-	submit_calibrator_data (measurements, data);
+	submit_calibrator_data( measurements, data );
+
+        integrate_calibrator_data( solution->get_response(ichan), data );
+
       }
       catch (Error& error)
       {
@@ -667,11 +810,12 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 	continue;
       }
 
-      integrate_calibrator_data( p->get_response(ichan), data );
-
-      if (p->get_nchan() == nchan && p->get_transformation_valid (ichan))
-	integrate_calibrator_solution( p->get_Archive()->get_type(), ichan,
-				       p->get_transformation(ichan) );
+      if ( solution->get_nchan() == nchan
+	   && solution->get_transformation_valid (ichan) )
+      {
+	integrate_calibrator_solution( solution->get_Archive()->get_type(), ichan,
+				       solution->get_transformation(ichan) );
+      }
     }
   }
 }
@@ -709,9 +853,7 @@ void Pulsar::SystemCalibrator::init_estimates
     estimate[ichan].phase_bin = ibin;
 
     string name_prefix = "psr";
-    if (ibin >= 0)
-      name_prefix += "_" + tostring(ibin);
-    name_prefix += "_";
+    name_prefix += "_" + tostring(ibin) + "_";
 
     estimate[ichan].source->set_param_name_prefix( name_prefix );
   }
@@ -790,10 +932,51 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
  const SourceObservation& data
  )
 {
+  Jones< Estimate<double> > zero (0.0);
+  if (correct == zero)
+    throw Error (InvalidState,
+                 "Pulsar::SystemCalibrator::integrate_calibrator_data",
+                 "Jones matrix equals zero");
+
   Jones< Estimate<double> > apply = invert_basis * correct;
 
-  Stokes< Estimate<double> > result = transform( data.observation, apply );
+  if (verbose)
+    cerr << "SystemCalibrator::integrate_calibrator_data"
+            "\n\tinvert_basis=" << invert_basis << 
+            "\n\tcorrect=" << correct << endl;
 
+  Stokes< Estimate<double> > observed = data.observation;
+  
+  if (guess_physical_calibrator_stokes)
+  {
+    Estimate<double> p = observed.abs_vect();
+    Estimate<double> I = observed[0];
+    
+    if (p > I)
+    {
+      cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
+	   << " correcting over polarization=" << (p-I)/I << endl;
+
+      // 99% polarized is assumed to be close enough to a good guess
+      double scale = 0.99 * I.val / p.val;
+      for (unsigned i=1; i<4; i++)
+	observed[i] *= scale;
+    }
+  }
+  
+  Stokes< Estimate<double> > result = transform( observed, apply );
+
+  if (verbose)
+    cerr << "SystemCalibrator::integrate_calibrator_data"
+            "\n\tapply=" << apply <<
+            "\n\tobs=" << observed <<
+            "\n\tresult=" << result << endl;
+
+  Estimate<double> p = result.abs_vect();
+  if (p > 1)
+    cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
+	 << " output p-1=" << p-1 << endl;
+  
   calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
 
@@ -807,7 +990,7 @@ void Pulsar::SystemCalibrator::integrate_calibrator_solution
     model[ichan]->integrate_calibrator (transformation);
 }
 
-Pulsar::CalibratorStokes*
+const Pulsar::CalibratorStokes*
 Pulsar::SystemCalibrator::get_CalibratorStokes () const
 {
   if (calibrator_stokes)
@@ -845,27 +1028,39 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
     ext->set_valid (ichan, false);
   }
 
+  
   calibrator_stokes = ext;
   
   return calibrator_stokes;
-
 }
 
 void Pulsar::SystemCalibrator::create_model ()
 {
-  if (!receiver)
-    receiver = get_calibrator()->get<Receiver>();
+  // this requirement could be made optional if necessary
+  if (!has_Receiver())
+    throw Error (InvalidState, "SystemCalibrator::create_model",
+                 "receiver not set");
+
+  if (verbose)
+    cerr << "SystemCalibrator::create_model receiver basis from"
+            "\n\t filename = " << get_receiver_basis_filename() << endl;
 
   MEAL::Complex2* basis = 0;
 
-  if (receiver)
+  // if not basis correction is required, then default to identity matrix
+  invert_basis = 1.0;
+
+  if (has_Receiver())
   {
-    Pauli::basis().set_basis( receiver->get_basis() );
+    if (verbose)
+      cerr << "SystemCalibrator::create_model receiver set" << endl;
+
+    Pauli::basis().set_basis( get_Receiver()->get_basis() );
     
-    if (!receiver->get_basis_corrected())
+    if (!get_Receiver()->get_basis_corrected())
     {
       BasisCorrection basis_correction;
-      basis = new MEAL::Complex2Constant( basis_correction(receiver) );
+      basis = new MEAL::Complex2Constant( basis_correction(get_Receiver()) );
 
       invert_basis = inv( basis->evaluate() );
 
@@ -875,9 +1070,12 @@ void Pulsar::SystemCalibrator::create_model ()
 	     << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
 	     << basis->evaluate() << endl;
     }
-    else if (verbose)
-      cerr << "Pulsar::SystemCalibrator::create_model basis correction not required" << endl;
+    else
+      cerr << "SystemCalibrator::create_model basis correction not required"
+           << endl;
   }
+  else if (verbose)
+    cerr << "SystemCalibrator::create_model receiver not set" << endl;
 
   unsigned nchan = get_nchan ();
   model.resize (nchan);
@@ -888,7 +1086,8 @@ void Pulsar::SystemCalibrator::create_model ()
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan << endl;
+      cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan
+	   << " type=" << type->get_name() << endl;
 
     model[ichan] = new Calibration::SignalPath (type);
 
@@ -906,6 +1105,14 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
 {
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::init_model ichan=" << ichan << endl;
+
+  if (response)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::SystemCalibrator::init_model response name="
+	   << response->get_name() << endl;
+    model[ichan]->set_response( response->clone() );
+  }
 
   if (impurity)
   {
@@ -1025,6 +1232,16 @@ void Pulsar::SystemCalibrator::solve_prepare ()
     {
       // sanity check
       Estimate<double> I = calibrator_estimate[ichan].source->get_stokes()[0];
+      if (I.get_value() == 0)
+      {
+        cerr << "Pulsar::SystemCalibrator::solve_prepare"
+         " reference flux equals zero \n"
+         "\t attempts=" << calibrator_estimate[ichan].add_data_attempts <<
+         "\t failures=" << calibrator_estimate[ichan].add_data_failures << endl;
+
+        model[ichan]->set_valid( false, "reference flux equals zero" );
+      }
+
       if (fabs(I.get_value()-1.0) > I.get_error() && verbose)
 	cerr << "Pulsar::SystemCalibrator::solve_prepare warning"
 	  " ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
@@ -1251,6 +1468,17 @@ bool Pulsar::SystemCalibrator::get_solved () const
   return is_solved;
 }
 
+bool Pulsar::SystemCalibrator::has_valid () const
+{
+  unsigned nchan = model.size();
+  
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (model[ichan]->get_valid())
+      return true;
+
+  return false;
+}
+
 /*! Retrieves the transformation from the standard model in each channel */
 void Pulsar::SystemCalibrator::calculate_transformation ()
 {
@@ -1468,14 +1696,11 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
   output->set_model (0);
 
   if (calibrator_estimate.size())
-  {
-    Reference::To<CalibratorStokes> stokes = get_CalibratorStokes();
-    output -> add_extension (stokes);
-  }
+    output -> add_extension (get_CalibratorStokes()->clone());
 
-  if (receiver)
+  if (has_Receiver())
   {
-    Pulsar::Receiver* rcvr = receiver->clone();
+    Pulsar::Receiver* rcvr = get_Receiver()->clone();
 
     /*
       WvS - 14 May 2012
@@ -1487,11 +1712,12 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
       fact, before today, the PolnCalibrator would add an incorrectly
       computed basis transformation if the basis_corrected flag was
       set in the calibrator archive, leading to bug #3526460.
+
+      WvS - 26 March 2017
+      The PulsarCalibrator class now removes the Receiver extesion that
+      gets taken from the well-calibrator pulsar template
     */
     
-    rcvr->set_basis_corrected( false );
-    rcvr->set_projection_corrected( false );
-
     output -> add_extension (rcvr);
   }
 

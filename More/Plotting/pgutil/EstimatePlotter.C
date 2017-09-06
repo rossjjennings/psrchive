@@ -26,6 +26,8 @@ EstimatePlotter::EstimatePlotter ()
 
   minimum_error = maximum_error = -1.0;
 
+  plot_error_bars = true;
+  
   graph_marker = -1;
 
   xrange_set = yrange_set = false;
@@ -313,7 +315,8 @@ unsigned EstimatePlotter::plot (unsigned index)
       if (maximum_error >= 0.0 && yerr[yndex][ipt] >= maximum_error)
 	continue;
 
-      cpgerr1 (6, xval[index][ipt], yval[yndex][ipt], yerr[yndex][ipt], 1.0);
+      if (plot_error_bars)
+	cpgerr1 (6, xval[index][ipt], yval[yndex][ipt], yerr[yndex][ipt], 1.0);
       cpgpt1 (xval[index][ipt], yval[yndex][ipt], graph_marker);
 
       plotted ++;
@@ -340,7 +343,9 @@ void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
   unsigned npt = x.size();
 
   assert (y.size() == npt);
-  assert (ye.size() == npt);
+
+  if (plot_error_bars)
+    assert (ye.size() == npt);
 
   unsigned i_start = 0;
   unsigned i_end = npt;
@@ -359,10 +364,18 @@ void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
     if (maximum_error >= 0.0 && ye[ipt] >= maximum_error)
       continue;
 
+    float yval_lower = y[ipt];
+    float yval_upper = y[ipt];
+    if (plot_error_bars)
+    {
+      yval_lower -= ye[ipt];
+      yval_upper += ye[ipt];
+    }
+    
     if (!yrange)
     {
-      ymin = y[ipt] - ye[ipt];
-      ymax = y[ipt] + ye[ipt];
+      ymin = yval_lower;
+      ymax = yval_upper;
       yrange = true;
     }
 
@@ -373,13 +386,11 @@ void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
       xrange = true;
     }
 
-    float yval = y[ipt] - ye[ipt];
-    if (yval < ymin)
-      ymin = yval;
+    if (yval_lower < ymin)
+      ymin = yval_lower;
 
-    yval = y[ipt] + ye[ipt];
-    if (yval > ymax)
-      ymax = yval;
+    if (yval_upper > ymax)
+      ymax = yval_upper;
     
     if (x[ipt] < xmin)
       xmin = x[ipt];

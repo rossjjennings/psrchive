@@ -10,6 +10,7 @@
 #include "Pulsar/Profile.h"
 
 #include "uvmio.h"
+#include "utc.h"
 
 #include <fstream>
 
@@ -98,6 +99,7 @@ void Pulsar::UVMArchive::load_header (const char* filename)
 
   uvm_get_observatory (header, buffer);
   telescope = buffer;
+  telescope = "Arecibo";
 
   uvm_get_windows (header, buffer);
   cerr << "Pulsar::UVMArchive::load_header windows=" << buffer
@@ -107,6 +109,8 @@ void Pulsar::UVMArchive::load_header (const char* filename)
   bandwidth = header->abandwd;
 
   npol = header->anumsbc;
+  if (npol == 4)
+    set_state (Signal::Stokes);
 
   cerr << "anumsbc=" << header->anumsbc << endl;
 
@@ -136,30 +140,55 @@ void Pulsar::UVMArchive::load_header (const char* filename)
   nchan = 1;
   
   if (Profile::no_amps)
+  {
+    cerr << "no amps" << endl;
     return;
+  }
+
+  cerr << "date (dddyy)=" << header->date << endl;
+  cerr << "start sec=" << header->startime << endl;
+
+  utc_t utc;
+  utc.tm_yday = header->date / 100;
+  utc.tm_year = 1900 + header->date % 100;
+  utc.tm_min = header->scantime / 60;
+  utc.tm_sec = header->scantime - utc.tm_min * 60;
+  utc.tm_hour = utc.tm_min / 60;
+  utc.tm_min -= utc.tm_hour * 60;
+
+  MJD mjd_start (utc);
 
   // load all BasicIntegration attributes and data from filename
   uvm_data data;
   unsigned loaded_subints = 0;
 
-  while (uvm_getdata (program, &data) >= 0)
+  while (uvm_getdata (program, header, &data) >= 0)
   {
     loaded_subints ++;
     resize (loaded_subints);
 
     Integration* integration = get_Integration(loaded_subints-1);
 
-    integration->set_folding_period (period);
+    // cerr << "start usec=" << header->scantime << endl;
+    epoch = mjd_start + header->scantime * 1e-6;
+    
+    integration->set_folding_period (header->period);
+    integration->set_duration (header->period);
     integration->set_epoch (epoch);
     integration->set_centre_frequency(0, centre_frequency);
+    
 
+    // scaleI is the scale to convert to microJy
+    double scale = header->scaleI * 1e-3;
+    double offset = header->baseval;
+  
     for (unsigned ipol=0; ipol < get_npol(); ipol++)
     {
       float* amps = integration->get_Profile(ipol, 0) -> get_amps();
 
       for (unsigned ibin=0; ibin < get_nbin(); ibin++)
       {
-	amps[ibin] = data.data[ipol][ibin];
+	amps[ibin] = (data.data[ipol][ibin] + offset) * scale;
       }
     }
   }

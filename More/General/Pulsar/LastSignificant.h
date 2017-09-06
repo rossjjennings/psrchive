@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/LastSignificant.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/03/03 07:21:41 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/LastSignificant.h
 
 #ifndef __Pulsar_LastSignificant_h
 #define __Pulsar_LastSignificant_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExpert.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/03/11 05:24:17 $
-   $Author: nopeer $ */
+// psrchive/Base/Classes/Pulsar/ArchiveExpert.h
 
 #ifndef __Pulsar_ArchiveExpert_h
 #define __Pulsar_ArchiveExpert_h

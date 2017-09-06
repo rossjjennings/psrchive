@@ -109,9 +109,7 @@ using Pulsar::WidebandCorrelator;
 using Pulsar::AuxColdPlasmaMeasures;
 
 
-#ifdef HAVE_PGPLOT
 bool bandpass_text = false;
-#endif
 bool cmd_text = false;
 bool cmd_flux = false;
 bool cmd_flux2 = false;

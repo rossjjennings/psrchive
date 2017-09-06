@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Parallactic.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/07/04 12:18:56 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/Parallactic.h
 
 #ifndef __Calibration_Parallactic_H
 #define __Calibration_Parallactic_H

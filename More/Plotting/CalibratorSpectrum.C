@@ -24,7 +24,8 @@ Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
   plot_low = false;
   plot_Ip = false;
   norm_inv = false;
-
+  outlier_threshold = 0.0;
+  
   get_frame()->get_y_scale()->set_buf_norm(0.05);
   get_frame()->get_x_scale()->set_buf_norm(0.05);
 
@@ -69,11 +70,15 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
   unsigned npol = data->get_npol();
 
   Reference::To<const Integration> subint = get_Integration(data, isubint);
-  ReferenceCalibrator::get_levels (subint, nchan, hi, lo);
+  ReferenceCalibrator::get_levels (subint, nchan, hi, lo, outlier_threshold);
 
   assert (hi.size() == npol);
 
   unsigned ipol, ipt, npt = hi[0].size();
+
+  vector<double> freqs (nchan);
+  for (unsigned ichan=0; ichan<nchan; ichan++) 
+    freqs[ichan] = subint->get_centre_frequency(ichan);
 
   if (!plot_total)
     for (ipol=0; ipol<npol; ipol++)
@@ -110,14 +115,10 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
     npol = 2;
   }
 
-  double cfreq = data->get_centre_frequency();
-  double bw = data->get_bandwidth();
-
   plotter.clear ();
-  plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
 
   for (ipol=0; ipol<npol; ipol++)
-    plotter.add_plot (hi[ipol]);
+    plotter.add_plot (freqs, hi[ipol]);
 
   get_frame()->get_x_scale()->set_minmax (plotter.get_x_min(), 
 					  plotter.get_x_max());

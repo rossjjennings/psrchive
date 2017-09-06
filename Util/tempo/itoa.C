@@ -79,8 +79,15 @@ static int default_aliases ()
   add_alias ("LW", "lwa");
   add_alias ("LW", "lwa1");
 
+  add_alias ("PV", "pico veleta");
+
   // Sardinia Radio Telescope
   add_alias ("SR", "srt");
+
+  // MeerKAT
+  add_alias ("MK", "meerkat");
+  add_alias ("MK", "MeerKAT");
+  add_alias ("MK", "MEERKAT");
 
   return 1;
 }

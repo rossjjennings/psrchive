@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Types/Pulsar/CalibratorTypeInterface.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/02/20 06:11:26 $
-   $Author: straten $ */
+// psrchive/Base/Types/Pulsar/CalibratorTypeInterface.h
 
 #ifndef __Pulsar_CalibratorTypeInterface_h
 #define __Pulsar_CalibratorTypeInterface_h

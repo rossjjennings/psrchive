@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.29 $
-   $Date: 2009/01/07 20:58:37 $
-   $Author: straten $ */
+// psrchive/Util/units/Pauli.h
 
 #ifndef __Pauli_H
 #define __Pauli_H

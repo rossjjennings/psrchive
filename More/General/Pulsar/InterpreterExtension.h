@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/InterpreterExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/12 02:46:08 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/InterpreterExtension.h
 
 #ifndef __Pulsar_Interpreter_Extension_h
 #define __Pulsar_Interpreter_Extension_h

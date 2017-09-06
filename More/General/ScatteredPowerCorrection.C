@@ -16,6 +16,7 @@ using namespace std;
 //! Default constructor
 Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
 {
+  check_smearing = true;
 }
 
 void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
@@ -51,15 +52,16 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
   double DM = data->get_dispersion_measure();
   double time_resolution = data->get_folding_period() / nbin;
 
-  for (unsigned ichan = 0; ichan < nchan; ichan++)
-  {
-    double c_freq= data->get_centre_frequency(ichan);
-    double time_smear = dispersion_smear (DM, c_freq, chan_bw);
-    if (time_smear > time_resolution)
-      throw Error (InvalidParam, "Pulsar::ScatteredPowerCorrection::transform",
-		   "smearing in ichan=%u = %lf > time resolution = %lf",
-		   ichan, time_smear, time_resolution);
-  }
+  if (check_smearing)
+    for (unsigned ichan = 0; ichan < nchan; ichan++)
+    {
+      double c_freq= data->get_centre_frequency(ichan);
+      double time_smear = dispersion_smear (DM, c_freq, chan_bw);
+      if (time_smear > time_resolution)
+	throw Error (InvalidParam, "ScatteredPowerCorrection::transform",
+		     "smearing in ichan=%u = %lf > time resolution = %lf",
+		     ichan, time_smear, time_resolution);
+    }
 
   if (Profile::verbose)
     cerr << "Pulsar::ScatteredPowerCorrection::transform results" << endl;
@@ -103,4 +105,27 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 	data->get_Profile(ipol,ichan)->get_amps()[ibin] -= scattered_power;
     }
   }
+}
+
+class Pulsar::ScatteredPowerCorrection::Interface
+  : public TextInterface::To<ScatteredPowerCorrection>
+{
+public:
+  Interface (ScatteredPowerCorrection* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &ScatteredPowerCorrection::get_check_smearing,
+	 &ScatteredPowerCorrection::set_check_smearing,
+	 "check_smear", "fail if dispersive smearing > time resolution" ); 
+  }
+
+  std::string get_interface_name () const { return "spc"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::ScatteredPowerCorrection::get_interface ()
+{
+  return new Interface (this);
 }

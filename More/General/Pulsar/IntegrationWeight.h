@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IntegrationWeight.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/08/05 13:30:58 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/IntegrationWeight.h
 
 #ifndef _Pulsar_IntegrationWeight_H
 #define _Pulsar_IntegrationWeight_H

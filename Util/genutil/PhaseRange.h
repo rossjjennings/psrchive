@@ -44,7 +44,9 @@ namespace Phase
     Unit get_unit () const { return unit; }
 
     void set_nbin( unsigned N ) { nbin = N; }
-    void set_period( double P ) { period = P; }    
+
+    //! Set the period in milliseconds
+    void set_period( double P_ms ) { period = P_ms; }    
   };
 
   //! A value with a Phase::Unit
@@ -165,6 +167,27 @@ namespace TextInterface
     : public Phase::ToStringPolicy<Phase::Ranges>
   {
   };
+}
+
+// Specialize the std C++ numeric_limits traits for Phase::* classes
+namespace std {
+  template<>
+  class numeric_limits<Phase::Value> {
+    public:
+    static const int digits10 = numeric_limits<double>::digits10;
+  };
+
+  template<>
+  class numeric_limits<Phase::Range> {
+    public:
+    static const int digits10 = numeric_limits<double>::digits10;
+  };
+  
+  template<>
+  class numeric_limits<Phase::Ranges> {
+    public:
+    static const int digits10 = numeric_limits<double>::digits10;
+  };  
 }
 
 #endif // !__PhaseRanges_H

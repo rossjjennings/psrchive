@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ColdPlasmaHistory.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/11/27 06:16:15 $
-   $Author: straten $ */
+// psrchive/Base/Extensions/Pulsar/ColdPlasmaHistory.h
 
 #ifndef __Pulsar_ColdPlasmaHistory_h
 #define __Pulsar_ColdPlasmaHistory_h

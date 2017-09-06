@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileStats.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/24 05:11:32 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/PolnProfileStats.h
 
 #ifndef __Pulsar_PolnProfileStats_h
 #define __Pulsar_PolnProfileStats_h
@@ -93,7 +90,7 @@ namespace Pulsar {
   protected:
 
     //! The PolnProfile from which statistics will be derived
-    Reference::To<const PolnProfile> profile;
+    Reference::To<const PolnProfile, false> profile;
 
     //! Computes the statistics of a single pulse profile
     Reference::To<ProfileStats> stats;

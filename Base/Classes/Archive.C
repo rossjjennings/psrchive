@@ -57,6 +57,11 @@ Pulsar::Archive::Interface* Pulsar::Archive::get_interface ()
 
 static unsigned instance_count = 0;
 
+unsigned Pulsar::Archive::get_instance_count ()
+{
+  return instance_count;
+}
+
 Pulsar::Archive::Archive ()
 {
   instance_count ++;

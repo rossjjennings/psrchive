@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/NormalDistribution.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/01/18 21:43:46 $
-   $Author: demorest $ */
+// psrchive/Util/genutil/NormalDistribution.h
 
 #ifndef __NormalDistribution_h
 #define __NormalDistribution_h

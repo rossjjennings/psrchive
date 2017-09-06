@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileInterpreter.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/12/24 20:02:08 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ProfileInterpreter.h
 
 #ifndef __Pulsar_ProfileInterpreter_h
 #define __Pulsar_ProfileInterpreter_h

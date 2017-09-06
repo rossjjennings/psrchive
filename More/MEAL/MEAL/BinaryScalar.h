@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryScalar.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/BinaryScalar.h
 
 #ifndef __MEAL_BinaryScalar_H
 #define __MEAL_BinaryScalar_H

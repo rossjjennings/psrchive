@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.49 $
-   $Date: 2009/06/06 11:24:31 $
-   $Author: straten $ */
+// psrchive/Util/tempo/psrephem.h
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H

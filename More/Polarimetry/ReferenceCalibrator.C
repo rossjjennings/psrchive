@@ -10,6 +10,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/SquareWave.h"
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
@@ -91,10 +92,12 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   set_calibrator (archive);
   requested_nchan = get_calibrator()->get_nchan();
 
-  if (receiver)
+  outlier_threshold = 0.0;
+  
+  if (has_Receiver())
   {
-    Pauli::basis().set_basis( receiver->get_basis() );    
-    Stokes<double> cal = receiver->get_reference_source ();
+    Pauli::basis().set_basis( get_Receiver()->get_basis() );    
+    Stokes<double> cal = get_Receiver()->get_reference_source ();
     if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
     set_reference_source (cal);
@@ -159,7 +162,8 @@ void distribute_variance (vector<Estimate<double> >& to,
 void Pulsar::ReferenceCalibrator::get_levels
 (const Integration* integration, unsigned request_nchan,
  vector<vector<Estimate<double> > >& cal_hi,
- vector<vector<Estimate<double> > >& cal_lo) try 
+ vector<vector<Estimate<double> > >& cal_lo,
+ double outlier_threshold) try 
 {
   if (!integration)
     throw Error (InvalidState,
@@ -172,6 +176,11 @@ void Pulsar::ReferenceCalibrator::get_levels
     cerr << "Pulsar::ReferenceCalibrator::get_levels Integration"
       " nchan=" << nchan << " required nchan=" << request_nchan << endl;
 
+  if (request_nchan == 0)
+    throw Error (InvalidParam,
+                 "Pulsar::ReferenceCalibrator::get_levels",
+                 "requested number of frequency channels == 0");
+
   Reference::To<Integration> clone;
 
   if (nchan > request_nchan)
@@ -181,8 +190,10 @@ void Pulsar::ReferenceCalibrator::get_levels
     nchan = clone->get_nchan();
     integration = clone;
   }
- 
-  integration->cal_levels (cal_hi, cal_lo);
+
+  SquareWave estimator;
+  estimator.set_outlier_threshold( outlier_threshold );
+  estimator.levels( integration, cal_hi, cal_lo );
 
   unsigned ipol, npol = integration->get_npol();
 
@@ -247,7 +258,8 @@ catch (Error& error)
 void Pulsar::ReferenceCalibrator::get_levels
 (const Archive* archive, unsigned request_nchan,
  vector<vector<Estimate<double> > >& cal_hi,
- vector<vector<Estimate<double> > >& cal_lo)
+ vector<vector<Estimate<double> > >& cal_lo,
+ double outlier_threshold)
 {
   if (!archive)
     throw Error (InvalidState,
@@ -272,7 +284,7 @@ void Pulsar::ReferenceCalibrator::get_levels
   {
     const Integration* integration = archive->get_Integration(isub);
 
-    get_levels (integration, nchan, cal_hi, cal_lo);
+    get_levels (integration, nchan, cal_hi, cal_lo, outlier_threshold);
 
     if (nsub > 1)
     {
@@ -316,7 +328,7 @@ void Pulsar::ReferenceCalibrator::get_levels
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo) const
 {
-  get_levels (get_calibrator(), nchan, cal_hi, cal_lo);
+  get_levels (get_calibrator(), nchan, cal_hi, cal_lo, outlier_threshold);
 }
 
 
@@ -326,7 +338,8 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
-  get_levels (get_calibrator(), requested_nchan, cal_hi, cal_lo);
+  get_levels (get_calibrator(), requested_nchan, cal_hi, cal_lo,
+	      outlier_threshold);
 
   unsigned npol = get_calibrator()->get_npol();
   unsigned nchan = requested_nchan;

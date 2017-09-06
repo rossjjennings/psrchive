@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelWeight.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ChannelWeight.h
 
 #ifndef _Pulsar_ChannelWeight_H
 #define _Pulsar_ChannelWeight_H

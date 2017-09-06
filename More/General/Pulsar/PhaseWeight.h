@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/11/15 18:20:59 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/PhaseWeight.h
 
 #ifndef __Pulsar_PhaseWeight_h
 #define __Pulsar_PhaseWeight_h
@@ -150,7 +147,7 @@ namespace Pulsar {
     std::vector<float> weight;
 
     //! The Profile to which the weights apply
-    mutable Reference::To<const Profile> profile;
+    mutable Reference::To<const Profile, false> profile;
 
     //! Flag set when the statistics have been calculated
     mutable bool built;

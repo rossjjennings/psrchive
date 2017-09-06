@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/VirtualMemory.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/09/01 06:29:02 $
-   $Author: straten $ */
+// psrchive/Util/genutil/VirtualMemory.h
 
 #ifndef __VirtualMemory_h
 #define __VirtualMemory_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ScatteredPowerCorrection.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/02/17 13:25:36 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ScatteredPowerCorrection.h
 
 #ifndef __Pulsar_ScatteredPowerCorrection_h
 #define __Pulsar_ScatteredPowerCorrection_h
@@ -18,6 +15,7 @@
 #include "Pulsar/TwoBitStats.h"
 
 #include "JenetAnderson98A5.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
 
@@ -40,6 +38,18 @@ namespace Pulsar {
     //! The scattered power correction operation
     void transform (Integration*);
 
+    //! Return a text interface that can be used to configure this instance
+    virtual TextInterface::Parser* get_interface ();
+
+    //! Text-based interface to Smooth class properties
+    class Interface;
+
+    //! Fail if dedispersion has overly smeared the scattered power
+    void set_check_smearing (bool flag) { check_smearing = flag; }
+
+    //! Fail if dedispersion has overly smeared the scattered power
+    bool get_check_smearing () const { return check_smearing; }
+
   protected:
 
     //! Theoretical treatment of quantization effects
@@ -54,6 +64,8 @@ namespace Pulsar {
     //! Two-bit statistics
     Reference::To<TwoBitStats> twobit_stats;
 
+    //! Fail if dedispersion has overly smeared the scattered power
+    bool check_smearing;
   };
 
 }

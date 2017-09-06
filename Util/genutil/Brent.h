@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Brent.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/11/07 22:14:59 $
-   $Author: straten $ */
+// psrchive/Util/genutil/Brent.h
 
 #ifndef __BrentMethod
 #define __BrentMethod

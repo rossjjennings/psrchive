@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceVector.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/25 23:31:12 $
-   $Author: straten $ */
+// psrchive/Util/units/ReferenceVector.h
 
 #ifndef __ReferenceVector_h
 #define __ReferenceVector_h

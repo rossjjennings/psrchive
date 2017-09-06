@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ArchiveSort.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/04/27 03:23:00 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ArchiveSort.h
 
 #ifndef __Pulsar_ArchiveSort_h
 #define __Pulsar_ArchiveSort_h
@@ -48,10 +45,14 @@ namespace Pulsar {
 
     //! The epoch of the observation
     MJD epoch;
+    //! The length of the observation
+    double length;
 
     //! Load a list of ArchiveSort instances and sort them
     static void load (std::istream& input, std::list<ArchiveSort>& entries);
 
+    //! Enable the new ArchiveSort behaviour (in new psrpl pipelines)
+    static bool read_length;
   };
 
   //! Comparison operator

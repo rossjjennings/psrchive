@@ -5,14 +5,13 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/DigitiserCountsPlot.h"
-#include <Pulsar/DigitiserCounts.h>
+#include "Pulsar/DigitiserCounts.h"
+#include "templates.h"
+
 #include <float.h>
 #include <cpgplot.h>
-#include <templates.h>
-
+#include <algorithm>
 
 
 using Pulsar::DigitiserCounts;
@@ -39,6 +38,9 @@ DigitiserCountsPlot::DigitiserCountsPlot()
   srange.first = -1;
   srange.second = -1;
   valid_data = false;
+
+  zero_threshold = 1e-3;
+  logscale = false;
 }
 
 
@@ -58,6 +60,11 @@ TextInterface::Parser *DigitiserCountsPlot::get_interface()
   return new Interface( this );
 }
 
+
+void DigitiserCountsPlot::preprocess (Archive* archive)
+{
+  // do nothing
+}
 
 
 /**
@@ -110,7 +117,7 @@ void DigitiserCountsPlot::CheckCounts( const Archive *const_data )
  *  TODO     - Nothing
  **/
 
-void DigitiserCountsPlot::prepare( const Archive *const_data )
+void DigitiserCountsPlot::prepare( const Archive *const_data ) try
 {
   CheckCounts( const_data );
 
@@ -157,19 +164,41 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
 //     }
 //   }
 
-  // Determine the first and last indices with non zero data in all channels/subints
-  // Some files have data values close to zero but negligible, treat anything under
-  // 10 as effectively zero.
+  /*
+    Determine the first and last indices with non zero data in all
+    channels/subints.
+  */
+  
   first_nz = npthist;
   last_nz = 0;
+  
+  float minimum_value = 10;
+
+  if (logscale)
+    minimum_value = 1;
+  else
+  {
+
+    /* If not plotting on a log scale, treat anything smaller than
+       zero_threshold * the maximum histogram value as zero. */
+    
+    long maxval = 0;
+    for( int s = srange.first; s <= srange.second; s ++ )
+      for( int c = 0; c < ndigr; c ++ )
+	for( int v = 0; v < npthist; v ++ )
+	  maxval = std::max( maxval, counts->subints.at(s).data[c*npthist + v] );
+    minimum_value = zero_threshold * maxval;
+
+  }
+   
   for( int s = srange.first; s <= srange.second; s ++ )
   {
     for( int c = 0; c < ndigr; c ++ )
     {
       for( int v = 0; v < npthist; v ++ )
       {
-        float ncounts_value = counts->subints[s].data[c*npthist + v];
-        if( ncounts_value > 10 )
+        float ncounts_value = counts->subints.at(s).data[c*npthist + v];
+        if( ncounts_value >= minimum_value )
         {
           if( v < first_nz )
             first_nz = v;
@@ -178,8 +207,8 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
       }
       for( int v = npthist - 1; v >= 0; v -- )
       {
-        float ncounts_value = counts->subints[s].data[c*npthist + v];
-        if( ncounts_value > 10 )
+        float ncounts_value = counts->subints.at(s).data[c*npthist + v];
+        if( ncounts_value >= minimum_value )
         {
           if( v > last_nz )
             last_nz = v;
@@ -188,8 +217,10 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
       }
     }
   }
+
   // sanity check, if first_nz >= last_nz, then we have all zeroes, just plot the whole thing
-  if( first_nz >= last_nz )
+  bool all_zero = first_nz >= last_nz;
+  if (all_zero)
   {
     first_nz = 0;
     last_nz = npthist;
@@ -199,9 +230,15 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
   min_count = FLT_MAX;
   max_count = -FLT_MAX;
   for( int s = srange.first ; s <= srange.second; s ++ )
-    cyclic_minmax( counts->subints[s].data, first_nz, last_nz, 
+    cyclic_minmax( counts->subints.at(s).data, first_nz, last_nz, 
                    min_count, max_count );
 
+  if (logscale && !all_zero)
+  {
+    min_count = 0;
+    max_count = log10(max_count);
+  }
+  
   // y_range is how far up the y axis each subint goes
   float y_range = max_count - min_count;
 
@@ -218,8 +255,10 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
   get_frame()->get_x_scale()->set_minmax( 0, counts->get_ndigr() );
   get_frame()->hide_axes();
 }
-
-
+ catch (std::exception& e)
+   {
+     throw Error (FailedCall, "DigitiserCountsPlot::prepare", e.what());
+   }
 
 /**
  * draw
@@ -231,7 +270,7 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
  *  TODO     - Nothing
  **/
 
-void DigitiserCountsPlot::draw( const Archive *const_data )
+void DigitiserCountsPlot::draw( const Archive *const_data ) try
 {
   Reference::To<Archive> data = const_cast<Archive*>( const_data );
 
@@ -270,7 +309,16 @@ void DigitiserCountsPlot::draw( const Archive *const_data )
       for( int j = 0; j < nz_range; j ++ )
       {
         xs[j] = j * xstep + c;
-        ys[j] = counts->subints[s].data[(first_nz+j) + c * npthist] + y_jump * (s-srange.first);
+        ys[j] = counts->subints.at(s).data[(first_nz+j) + c * npthist] + y_jump * (s-srange.first);
+
+	cerr << "y[" << j << "]=" << ys[j] << endl;
+	if (logscale)
+	{
+	  if (ys[j] < 1)
+	    ys[j] = -40; // effectively zero
+	  else
+	    ys[j] = log10(ys[j]);
+	}
       }
       cpgsci( ncounts_col++ );
       cpgbin( nz_range, xs, ys, 1 );
@@ -288,18 +336,25 @@ void DigitiserCountsPlot::draw( const Archive *const_data )
 
   // For each digitiser channel
   //   set the viewport to cover that channel
-  //   set the window to have x ranging from -256 to 255
+  //   set the window to have x ranging from -npthist/2 to npthist/2
   //   draw a box around the viewport
   float nx = tx_min;
   float xw = (tx_max-tx_min) * (1.0/ndigr);
   for( int c = 0; c < ndigr; c ++ )
   {
     cpgsvp( nx, nx + xw, ty_min, ty_max );
-    cpgswin( first_nz - 256, last_nz - 256, vp_y1, vp_y2 );
+
+    // subtracting npthist/2 assumes offset binary encoding - WvS 23 Jan 2017
+    cpgswin( first_nz - npthist/2, last_nz - npthist/2, vp_y1, vp_y2 );
+    
+    string yopt = "bct";
     if( nx == tx_min )
-      cpgbox("bcnt", 0.0, 0, "bcnt", 0.0, 0);
-    else
-      cpgbox("bcnt", 0.0, 0, "bct", 0.0, 0 );
+      yopt += "n";
+    if (logscale)
+      yopt += "l";
+    
+    cpgbox("bcnt", 0.0, 0, yopt.c_str(), 0.0, 0);
+
     char pol = char( int('A') + c );
     string dig_label = string("Pol ") + tostring(pol);
     cpgmtxt( "T", -1, 0.01, 0, dig_label.c_str() );
@@ -309,6 +364,11 @@ void DigitiserCountsPlot::draw( const Archive *const_data )
   // Restore the original viewport
   cpgsvp( tx_min, tx_max, ty_min, ty_max );
 }
+ catch (std::exception& e)
+   {
+     throw Error (FailedCall, "DigitiserCountsPlot::prepare", e.what());
+   }
+
 
 
 
@@ -341,7 +401,7 @@ string DigitiserCountsPlot::get_xlabel( const Archive *data )
 
 string DigitiserCountsPlot::get_ylabel( const Archive *data )
 {
-  return "Occurances";
+  return "Occurrences";
 }
 
 

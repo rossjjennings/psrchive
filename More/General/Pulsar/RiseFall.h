@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RiseFall.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/11/02 04:25:39 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/RiseFall.h
 
 #ifndef __Pulsar_RiseFall_h
 #define __Pulsar_RiseFall_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsTime.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/21 19:04:51 $
-   $Author: demorest $ */
+// psrchive/More/Plotting/Pulsar/PhaseVsTime.h
 
 #ifndef __Pulsar_PhaseVsTime_h
 #define __Pulsar_PhaseVsTime_h

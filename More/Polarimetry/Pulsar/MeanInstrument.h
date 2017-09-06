@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanInstrument.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/MeanInstrument.h
 
 #ifndef __Calibration_MeanInstrument_H
 #define __Calibration_MeanInstrument_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StatisticsInterface.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/12 07:53:13 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/StatisticsInterface.h
 
 #ifndef __Pulsar_StatisticsInterface_h
 #define __Pulsar_StatisticsInterface_h

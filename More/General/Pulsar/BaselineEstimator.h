@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineEstimator.h,v $
-   $Revision: 1.10 $
-   $Date: 2011/03/04 06:01:51 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/BaselineEstimator.h
 
 #ifndef __Pulsar_BaselineFunction_h
 #define __Pulsar_BaselineFunction_h

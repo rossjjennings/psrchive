@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.54 $
-   $Date: 2009/03/15 07:13:21 $
-   $Author: straten $ */
+// psrchive/More/rhythm/rhythm.h
 
 // //////////////////////////////////////////////////////////////////////////
 //

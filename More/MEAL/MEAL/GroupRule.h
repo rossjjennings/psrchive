@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/13 05:09:24 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/GroupRule.h
 
 #ifndef __GroupRule_H
 #define __GroupRule_H
@@ -54,6 +51,13 @@ namespace MEAL {
     //! Remove an element from the result
     void remove_model (T* model);
 
+    //! Get the specified component
+    T* get_model (unsigned i) { return model.at(i); }
+    const T* get_model (unsigned i) const { return model.at(i); }
+
+    //! Get the number of components
+    unsigned get_nmodel () const { return model.size(); }
+    
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation
@@ -147,8 +151,9 @@ void MEAL::GroupRule<T>::print_parameters (std::string& text,
 template<class T>
 void MEAL::GroupRule<T>::parse (const std::string& line)
 {
-  if (model.size()) try {
-    model.back()->parse(line);
+  if (model.size()) try
+  {
+    Function::parse(line);
     return;
   }
   catch (Error& error) {

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/FourthMoments.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/06/08 19:23:32 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/FourthMoments.h
 
 #ifndef __Pulsar_FourthMoments_h
 #define __Pulsar_FourthMoments_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Site.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/03 05:03:49 $
-   $Author: straten $ */
+// psrchive/Util/tempo/Pulsar/Site.h
 
 #ifndef __Pulsar_Site_h
 #define __Pulsar_Site_h

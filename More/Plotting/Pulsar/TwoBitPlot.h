@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/TwoBitPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/02 05:08:15 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/TwoBitPlot.h
 
 #ifndef __Pulsar_TwoBitPlot_h
 #define __Pulsar_TwoBitPlot_h

@@ -18,6 +18,7 @@ public:
     return A;
   };
 
+  string get_interface_name () const { return "tester"; }
 };
 
 int main ()

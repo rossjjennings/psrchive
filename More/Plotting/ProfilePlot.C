@@ -9,12 +9,18 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
+#include "Pulsar/SquareWave.h"
 
 #include <cpgplot.h>
+
+#include <fstream>
+using namespace std;
 
 Pulsar::ProfilePlot::ProfilePlot ()
 {
   plot_cal_transitions = true;
+  outlier_threshold = 0.0;
   plotter.set_pen( get_pen() );
 }
 
@@ -46,15 +52,47 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
   profile->find_transitions (hightolow, lowtohigh, buffer);
 
   double mean_hi, var_hi;
-  profile->stats (&mean_hi, &var_hi, 0,
-                  lowtohigh + buffer,
-                  hightolow - buffer);
-
   double mean_lo, var_lo;
-  profile->stats (&mean_lo, &var_lo, 0,
-                  hightolow + buffer,
-                  lowtohigh - buffer);
 
+  if (outlier_threshold)
+  {
+    SquareWave estimator;
+    estimator.set_outlier_threshold (outlier_threshold);
+    
+    Reference::To<PhaseWeight> high_mask;
+    high_mask = estimator.get_mask (profile, true,
+				    lowtohigh + buffer,
+				    hightolow - buffer);
+
+    high_mask->stats (profile, &mean_hi, &var_hi);
+    	
+    Reference::To<PhaseWeight> low_mask;    
+    low_mask = estimator.get_mask (profile, false,
+				   hightolow + buffer,
+				   lowtohigh - buffer);
+
+    low_mask->stats (profile, &mean_lo, &var_lo);
+
+#if _DEBUG
+    ofstream out ("transitions.txt");
+    for (unsigned i=0; i < high_mask->get_nbin(); i++)
+      out << i
+	  << " " << high_mask->get_weights()[i]
+	  << " " << low_mask->get_weights()[i]
+	  << endl;
+#endif
+  }    
+  else
+  {
+    profile->stats (&mean_hi, &var_hi, 0,
+		    lowtohigh + buffer,
+		    hightolow - buffer);
+
+    profile->stats (&mean_lo, &var_lo, 0,
+		    hightolow + buffer,
+		    lowtohigh - buffer);
+  }
+  
   int st_low = 0;
   if (lowtohigh < hightolow)
     st_low = 1;
@@ -82,7 +120,6 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
   cp[!st_low] = 2;
 
   float space = float(buffer)/nbin;
-
 
   // Added by DS, add xoff(set) to repeat if we are zooming outside 0 to 1
 

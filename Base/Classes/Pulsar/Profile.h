@@ -65,6 +65,12 @@ namespace Pulsar {
     //! copy constructor
     Profile (const Profile* profile) { init(); copy (profile); }
 
+    //! destructor
+    ~Profile ();
+
+    //! returns the number of Profile instances
+    static unsigned get_instance_count ();
+
     //! returns a pointer to a new copy of self
     virtual Profile* clone () const;
 

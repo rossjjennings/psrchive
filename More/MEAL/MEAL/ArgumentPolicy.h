@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ArgumentPolicy.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ArgumentPolicy.h
 
 #ifndef __MEAL_ArgumentPolicy_H
 #define __MEAL_ArgumentPolicy_H

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BasisRule.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/04/07 00:38:12 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/BasisRule.h
 
 #ifndef __MEAL_BasisRule_H
 #define __MEAL_BasisRule_H

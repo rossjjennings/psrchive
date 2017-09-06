@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/TextLoop.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/02/26 08:38:25 $
-   $Author: straten $ */
+// psrchive/Util/units/TextLoop.h
 
 #ifndef __Pulsar_TextLoop_h
 #define __Pulsar_TextLoop_h

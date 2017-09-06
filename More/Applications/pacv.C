@@ -618,11 +618,12 @@ int main (int argc, char** argv)
   return 0;
 }
 
-void plot_cal_stokes (CalibratorStokes* calibrator_stokes,
+void plot_cal_stokes (const CalibratorStokes* calibrator_stokes,
 		      Calibrator* calibrator)
 {
   for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-    calibrator_stokes->set_valid (zapchan[ichan], false);
+    const_cast<CalibratorStokes*>(calibrator_stokes)
+      ->set_valid (zapchan[ichan], false);
 
   cpgpage ();
   plotter.plot( new CalibratorStokesInfo (calibrator_stokes),
@@ -632,7 +633,7 @@ void plot_cal_stokes (CalibratorStokes* calibrator_stokes,
 }
 
 
-void print_cal_stokes (CalibratorStokes* calibrator_stokes,
+void print_cal_stokes (const CalibratorStokes* calibrator_stokes,
 		       CalibratorExtension* ext)
 {
   if (ext->get_nchan() != calibrator_stokes->get_nchan())
@@ -728,7 +729,7 @@ void handle_flux_calibrator (Archive* input)
     {
       cerr << "pacv: Plotting fluxcal-derived CalibratorStokes" << endl;
 
-      Reference::To<CalibratorStokes> calibrator_stokes;  
+      Reference::To<const CalibratorStokes> calibrator_stokes;  
       calibrator_stokes = fluxcal->get_CalibratorStokes();
      
       plot_cal_stokes (calibrator_stokes, fluxcal);

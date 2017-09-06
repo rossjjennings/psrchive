@@ -889,6 +889,8 @@ void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_pl
   *arch = *old_arch;
   if (!dedispersed)
     arch->set_dispersion_measure(0);
+  else
+    arch->dedisperse();
 
   arch->pscrunch();
   arch->remove_baseline();

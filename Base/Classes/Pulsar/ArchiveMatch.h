@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveMatch.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/11/07 01:46:52 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/ArchiveMatch.h
 
 #ifndef __Pulsar_ArchiveMatch_h
 #define __Pulsar_ArchiveMatch_h

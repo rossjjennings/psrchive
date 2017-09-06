@@ -48,8 +48,14 @@ namespace Pulsar {
     void set_calibrator_stokes (bool x) { calibrator_stokes = x; }
     bool get_calibrator_stokes () const { return calibrator_stokes; }
 
+    void set_calibrator_stokes_degree (bool x);
+    bool get_calibrator_stokes_degree () const;
+
     void set_reduced_chisq (bool x) { reduced_chisq = x; }
     bool get_reduced_chisq () const { return reduced_chisq; }
+
+    void set_outlier_threshold (float t) { outlier_threshold = t; }
+    float get_outlier_threshold () const { return outlier_threshold; }
 
   protected:
 
@@ -65,8 +71,14 @@ namespace Pulsar {
     //! plot the calibrator Stokes parameters
     bool calibrator_stokes;
 
+    //! plot the calibrator Stokes parameters w/ degree of polarization
+    bool calibrator_stokes_degree;
+    
     //! plot the goodness-of-fit statistic
     bool reduced_chisq;
+
+    //! threshold used to detect outliers when creating SingleAxis calibrator
+    float outlier_threshold;
   };
 
 }

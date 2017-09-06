@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.19 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h
 
 #ifndef __Baseband_Archive_h
 #define __Baseband_Archive_h

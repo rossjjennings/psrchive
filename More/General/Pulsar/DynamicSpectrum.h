@@ -35,6 +35,9 @@ namespace Pulsar
     //! Set the flux computation method
     void set_flux_method(Flux *flux);
 
+    //! Provide access to the flux method
+    Reference::To<Flux> get_flux_method() { return flux; }
+
     //! Compute dynamic spectrum
     void compute();
 
@@ -63,7 +66,7 @@ namespace Pulsar
     const double get_freq(unsigned ichan, unsigned isub=0);
 
     //! Unload the results to a file.
-    void unload(const std::string& filename);
+    void unload(const std::string& filename, const std::string& command="");
 
     //! Load results from a file.
     static DynamicSpectrum *load(const std::string& filename);

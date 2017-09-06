@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2009/03/01 18:04:42 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h
 
 #ifndef __PolarCalibrator_H
 #define __PolarCalibrator_H

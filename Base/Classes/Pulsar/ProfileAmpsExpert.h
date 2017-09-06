@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ProfileAmpsExpert.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/09/19 13:56:42 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/ProfileAmpsExpert.h
 
 #ifndef __Pulsar_ProfileAmpsExpert_h
 #define __Pulsar_ProfileAmpsExpert_h

@@ -7,10 +7,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/extutil.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/09/02 21:28:55 $
-   $Author: straten $ */
+// psrchive/Util/genutil/extutil.h
 
 #ifndef __Pulsar_get_extension_h
 #define __Pulsar_get_extension_h

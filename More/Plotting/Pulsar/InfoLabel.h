@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/InfoLabel.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/07 13:50:19 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/InfoLabel.h
 
 #ifndef __Pulsar_InfoLabel_h
 #define __Pulsar_InfoLabel_h

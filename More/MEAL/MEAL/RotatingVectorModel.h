@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RotatingVectorModel.h,v $
-   $Revision: 1.7 $
-   $Date: 2010/05/24 06:38:07 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/RotatingVectorModel.h
 
 #ifndef __RotatingVectorModel_H
 #define __RotatingVectorModel_H

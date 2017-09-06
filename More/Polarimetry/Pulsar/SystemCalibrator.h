@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2009/10/02 03:38:29 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h
 
 #ifndef __Pulsar_SystemCalibrator_H
 #define __Pulsar_SystemCalibrator_H
@@ -27,6 +24,7 @@
 namespace Pulsar
 {
   class ReferenceCalibrator;
+  class FluxCalibrator;
   class CalibratorStokes;
 
   //! PolnCalibrator with estimated calibrator Stokes parameters
@@ -74,11 +72,17 @@ namespace Pulsar
     //! Retern a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
+    //! Set the flux calibrator solution used to estimate calibrator Stokes
+    void set_flux_calibrator (const FluxCalibrator* fluxcal);
+
     //! Set the calibrator observations to be loaded after first pulsar
     void set_calibrators (const std::vector<std::string>& filenames);
     
     //! Set the calibrator
-    virtual void set_calibrator (Archive*);
+    virtual void set_calibrator (const Archive*);
+
+    //! Set the response (pure Jones) transformation
+    virtual void set_response( MEAL::Complex2* );
 
     //! Set the impurity transformation
     virtual void set_impurity( MEAL::Real4* );
@@ -131,12 +135,15 @@ namespace Pulsar
     //! Return true if least squares minimization solvers are available
     virtual bool has_solver () const;
 
-    //! Return the transformation for the specified channel
+    //! Return the solver for the specified channel
     virtual const Solver* get_solver (unsigned ichan) const;
 
     //! Set the algorithm used to solve the measurement equation
     virtual void set_solver (Solver*);
 
+    //! Get the algorithm used to solve the measurement equation
+    virtual Solver* get_solver ();
+    
     //! Set the reduced chisq above which the solution will be retried
     virtual void set_retry_reduced_chisq (float);
 
@@ -152,11 +159,20 @@ namespace Pulsar
     //! Report on the data included as constraints before fitting
     virtual void set_report_input_data (bool flag = true);
 
+    //! Set the threshold used to reject outliers when computing levels
+    void set_outlier_threshold (float f) { outlier_threshold = f; }
+
+    //! Get the threshold used to reject outliers when computing levels
+    float get_outlier_threshold () const { return outlier_threshold; }
+
     //! Solve equation for each frequency
     virtual void solve ();
     
     //! Get the status of the model
     virtual bool get_solved () const;
+
+    //! Returns true if at least one channel returns get_valid == true
+    virtual bool has_valid () const;
 
     //! Get the reduced chisq of the best fit in the specified channel
     float get_reduced_chisq (unsigned ichan) const;
@@ -172,7 +188,7 @@ namespace Pulsar
     virtual Archive* new_solution (const std::string& archive_class) const;
 
     //! Return the CalibratorStokesExtension
-    virtual CalibratorStokes* get_CalibratorStokes () const;
+    virtual const CalibratorStokes* get_CalibratorStokes () const;
 
     //! Return the SignalPath for the specified channel
     virtual const Calibration::SignalPath* get_model (unsigned ichan) const;
@@ -203,8 +219,14 @@ namespace Pulsar
     //! The algorithm used to solve the measurement equation
     Reference::To<Solver> solver;
 
+    //! The FluxCalibrator solution
+    Reference::To<const FluxCalibrator> flux_calibrator;
+    
     //! The CalibratorStokesExtension of the Archive passed during construction
-    mutable Reference::To<CalibratorStokes> calibrator_stokes;
+    mutable Reference::To<const CalibratorStokes> calibrator_stokes;
+
+    //! Response transformation
+    Reference::To< MEAL::Complex2 > response;
 
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;
@@ -273,9 +295,15 @@ namespace Pulsar
     //! Epoch of the last observation
     MJD end_epoch;
 
+    //! Include a correction for Faraday rotation in the ISM
+    bool correct_interstellar_Faraday_rotation;
+    
     //! Set the initial guess in solve_prepare
     bool set_initial_guess;
 
+    //! Ensure that first guess of calibrator Stokes parameters is physical
+    bool guess_physical_calibrator_stokes;
+    
     //! The maximum reduced chisq before another fit will be attempted
     float retry_chisq;
 
@@ -291,6 +319,9 @@ namespace Pulsar
     //! Report on the data included as constraints
     bool report_input_data;
 
+    //! Threshold used to reject outliers when computing levels
+    double outlier_threshold;
+    
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
 

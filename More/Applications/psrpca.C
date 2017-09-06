@@ -46,6 +46,8 @@
 #include "toa.h"
 
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/CovarianceMatrix.h"
+
 #include<gsl/gsl_blas.h>
 #include<gsl/gsl_eigen.h>
 #include<gsl/gsl_linalg.h>
@@ -142,6 +144,7 @@ protected:
   bool save_evecs;
   bool save_evals;
   bool save_covariance_matrix;
+  bool save_covariance_matrix_extension;
   bool save_decomps;
   bool save_proj;
   bool save_res_decomp_corel;
@@ -151,6 +154,7 @@ protected:
   bool apply_offset;
   bool apply_scale;
   bool prof_to_std;
+  bool uniform_weighting;
   string algorithm;
 
   //! Regression
@@ -173,6 +177,9 @@ protected:
   //! Polarisation extension
   unsigned which_pol;
   bool full_stokes_pca;
+
+  //! Covariance Matrix extension
+  Reference::To<CovarianceMatrix> covar;
 
   struct CastToDouble
   {
@@ -199,10 +206,14 @@ psrpca::psrpca ()
   t_cov = new TimeDomainCovariance;
   covariance = NULL;
   save_diffs = save_matched = save_evecs = save_evals = save_covariance_matrix = save_decomps = save_proj = save_res_decomp_corel = true;
+
+  save_covariance_matrix_extension = false;
   prefix = "psrpca";
   load_prefix = "";
 
   prof_to_std = apply_shift = apply_offset = apply_scale = true ;
+
+  uniform_weighting = false;
 
   remove_arch_baseline = remove_std_baseline = true;
 
@@ -286,6 +297,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   arg = menu.add ( prof_to_std, "ts" );
   arg->set_help ( "Apply scaling, offset and shift to standard instead of profile");
 
+  arg = menu.add ( uniform_weighting, "w" );
+  arg->set_help ("Apply uniform weighting instead of S/N");
+
   menu.add ("");
   menu.add ("Regression and Predictor Options");
 
@@ -357,6 +371,7 @@ void psrpca::process (Archive* archive)
 {
   if ( verbose )
     cerr << "psrpca::process () entered and processing " << archive->get_filename() << endl;
+
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
   {
@@ -384,9 +399,11 @@ void psrpca::process (Archive* archive)
 
 void psrpca::finalize ()
 {
-  evecs_archive = total->clone();
   if ( verbose )
     cerr << "psrpca::finalize () entered" << endl;
+
+  evecs_archive = total->clone();
+
   arrival->set_observation( total );
   arrival->get_toas( toas );
 
@@ -420,10 +437,10 @@ void psrpca::finalize ()
   out = fopen( (prefix+"_profiles.dat").c_str(), "w" );
   gsl_matrix_fprintf( out, profiles, "%g" );
   fclose( out );
-
+  
   if ( full_stokes_pca )
     nbin = 4 * nbin;
-  get_covariance_matrix();
+  get_covariance_matrix(); // assuming that this calls the function in TimeDomainCovariance.C - row vector
 
   // write the covariance matrix and difference profiles
   if ( save_covariance_matrix )
@@ -436,6 +453,14 @@ void psrpca::finalize ()
   if ( save_diffs ) 
     total->unload ( prefix+"_diffs.ar" );
 
+  if ( save_covariance_matrix_extension )
+  {
+    Reference::To<Archive> psrfits = Archive::new_Archive("PSRFITS");
+    psrfits-> copy(evecs_archive);
+    psrfits-> add_extension(covar);
+    psrfits-> unload("covariance.rf");
+  }
+  
 #ifdef HAVE_CULA
   status = culaInitialize();
   checkStatus(status);
@@ -631,12 +656,20 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
       gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
-      t_cov->add_Profile ( prof, snr );
+      if ( uniform_weighting )
+        t_cov->add_Profile ( prof, 1.0 );
+      else
+        t_cov->add_Profile ( prof, snr );
     }
     else
     {// prof_to_std is false
+      // TODO ugly, first rotate above, and now rotate back
+      total->get_Integration( i_subint )->expert()->rotate_phase( -toas[i_subint].get_phase_shift() );
       Reference::To<Profile> diff = prof->clone ();
-      diff->set_amps ( std_prof->get_amps () );
+      Reference::To<Profile> std_prof_clone = std_prof->clone();
+      Reference::To<Archive> std_archive_clone = std_archive->clone();
+      std_archive_clone->get_Integration( 0 )->expert()->rotate_phase( -toas[i_subint].get_phase_shift() );
+      diff->set_amps ( std_archive_clone->get_Profile(0, 0, 0)->get_amps () );
       if ( apply_offset ) 
       {
 	if ( !full_stokes_pca )
@@ -665,7 +698,10 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
       gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
-      t_cov->add_Profile ( diff, snr );
+      if ( uniform_weighting )
+        t_cov->add_Profile ( diff, 1.0 );
+      else
+        t_cov->add_Profile ( diff, snr );
       prof->set_amps ( diff->get_amps() );
     }
     if ( full_stokes_pca )

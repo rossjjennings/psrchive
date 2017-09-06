@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.29 $
-   $Date: 2009/03/15 15:12:40 $
-   $Author: straten $ */
+// psrchive/Util/tempo/tempo++.h
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H

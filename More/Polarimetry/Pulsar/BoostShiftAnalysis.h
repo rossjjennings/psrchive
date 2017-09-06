@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BoostShiftAnalysis.h,v $
-   $Revision: 1.3 $
-   $Date: 2011/02/24 05:31:08 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/BoostShiftAnalysis.h
 
 #ifndef __Pulsar_BoostShiftAnalysis_h
 #define __Pulsar_BoostShiftAnalysis_h

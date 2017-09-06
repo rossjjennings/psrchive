@@ -59,6 +59,12 @@ namespace Pulsar {
     //! Return the phase-resolved modulation index
     Reference::To<Profile> get_modulation_index();
 
+    Reference::To<Profile> get_nonorthogonality() { return nonorthogonality; }
+
+    Reference::To<Profile> get_sin_theta() { return sin_theta; }
+    Reference::To<Profile> get_cos_theta() { return cos_theta; }
+    Reference::To<Profile> get_norm_theta() { return norm_theta; }
+
     //! Returns the variance of the baseline for the specified moment
     Estimate<double> get_moment_variance (unsigned) const;
 
@@ -78,7 +84,12 @@ namespace Pulsar {
     std::vector< Reference::To<Profile> > eigen_value;
     std::vector< Reference::To<Profile> > regression_coefficient;
     std::vector< Reference::To<Profile> > natural_covariance;
-    
+    Reference::To<Profile> nonorthogonality;
+
+    Reference::To<Profile> sin_theta;
+    Reference::To<Profile> cos_theta;
+    Reference::To<Profile> norm_theta;
+
     //! The variance of the baseline for each moment
     mutable std::vector< Estimate<double> > moment_variance;
 

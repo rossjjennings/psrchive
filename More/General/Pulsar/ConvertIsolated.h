@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ConvertIsolated.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/06/24 05:02:08 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/ConvertIsolated.h
 
 #ifndef __Pulsar_ConvertIsolated_h
 #define __Pulsar_ConvertIsolated_h

@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Contemporaneity.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/11/24 01:09:52 $
-   $Author: straten $ */
+// psrchive/More/General/Pulsar/Contemporaneity.h
 
 #ifndef _Pulsar_Contemporaneity_H
 #define _Pulsar_Contemporaneity_H

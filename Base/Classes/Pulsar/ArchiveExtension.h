@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/ArchiveExtension.h
 
 #ifndef __Pulsar_Archive_Extension_h
 #define __Pulsar_Archive_Extension_h

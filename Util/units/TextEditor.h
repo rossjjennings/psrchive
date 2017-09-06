@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/TextEditor.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/11/18 11:56:53 $
-   $Author: straten $ */
+// psrchive/Util/units/TextEditor.h
 
 #ifndef __TextEditor_h
 #define __TextEditor_h

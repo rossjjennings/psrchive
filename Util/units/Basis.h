@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Basis.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/units/Basis.h
 
 #ifndef __Basis_H
 #define __Basis_H

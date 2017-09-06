@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAttributes.h,v $
-   $Revision: 1.9 $
-   $Date: 2010/07/15 08:20:27 $
-   $Author: straten $ */
+// psrchive/More/Plotting/Pulsar/PlotAttributes.h
 
 #ifndef __Pulsar_PlotAttributes_h
 #define __Pulsar_PlotAttributes_h

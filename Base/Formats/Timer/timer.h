@@ -4,10 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.20 $
-   $Date: 2009/12/22 14:25:02 $
-   $Author: straten $ */
+// psrchive/Base/Formats/Timer/timer.h
 
 /* include file for the main timer structure                            */
 

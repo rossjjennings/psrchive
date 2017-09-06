@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.33 $
-   $Date: 2010/07/05 13:27:26 $
-   $Author: straten $ */
+// psrchive/Util/genutil/MJD.h
 
 #ifndef __GENUTIL_MJD_H
 #define __GENUTIL_MJD_H

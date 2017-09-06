@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BrittonInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/03/03 11:48:14 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/BrittonInfo.h
 
 #ifndef __Pulsar_BrittonInfo_H
 #define __Pulsar_BrittonInfo_H
@@ -21,6 +18,10 @@ namespace Pulsar {
   //! Communicates Britton (2000) parameters to plotting routines
   class BrittonInfo : public BackendFeedInfo {
 
+    //! When true, b_v and r_u are swapped in Equation 19
+    bool degeneracy_isolated;
+    bool constant_orientation;
+    
   public:
 
     //! Constructor

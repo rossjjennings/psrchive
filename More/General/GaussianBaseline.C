@@ -39,15 +39,18 @@ void Pulsar::GaussianBaseline::set_smoothing (unsigned nbins)
 void Pulsar::GaussianBaseline::set_threshold (float sigma)
 {
   IterativeBaseline::set_threshold (sigma);
-
-  NormalDistribution normal;
-
-  moment_correction = 1.0 / normal.moment2 (-threshold, threshold);
+  moment_correction = get_variance_correction (sigma);
 #ifndef _DEBUG
   if (Profile::verbose)
 #endif
     cerr << "Pulsar::GaussianBaseline::set_threshold sigma=" << sigma
 	 << " correction=" << moment_correction << endl;
+}
+
+double Pulsar::GaussianBaseline::get_variance_correction (double sigma)
+{
+  NormalDistribution normal;
+  return 1.0 / normal.moment2 (-sigma, sigma);
 }
 
 void Pulsar::GaussianBaseline::get_bounds (PhaseWeight* weight, 
