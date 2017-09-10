@@ -285,7 +285,13 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
     else
       cpgsvp (.25,.75,.15,.95);
 
-    plotter.plot_cal_constraints (ichan);
+    bool page = false;
+
+    if (plotter.get_calibrator()->has_cal())
+    {
+      plotter.plot_cal_constraints (ichan);
+      page = true;
+    }
 
     // cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++)
@@ -293,10 +299,12 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
       if (!plotter.get_calibrator()->get_state_is_pulsar (istate))
 	continue;
 
-      cpgpage();
+      if (page)
+        cpgpage();
 
       // cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
       plotter.plot_psr_constraints (ichan, istate);
+      page = true;
     }
 
     cpgend ();
