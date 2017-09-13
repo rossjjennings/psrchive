@@ -761,7 +761,7 @@ string Pulsar::Interpreter::edit (const string& args) try
   {
     if (icmd)
       retval += " ";
-    retval += get_interface()->process (arguments[icmd]);
+    retval += ::process (get_interface(), arguments[icmd]);
   }
 
   return retval;
