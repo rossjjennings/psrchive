@@ -50,14 +50,15 @@ using namespace std;
 
 void Pulsar::Interpreter::init()
 {
-  clobber = true;  // names in map can be reassigned
-  inplace = true;  // operations affect current top of stack
+  clobber = true;   // names in map can be reassigned
+  inplace = true;   // operations affect current top of stack
+  evaluation_enabled = true;  // commands that request expansion will be evaluated 
 
   stopwatch = false;
   reply = false;
   
   allow_infinite_frequency = false;
-
+  
   prompt = "psrsh> ";
   
   add_command
@@ -69,6 +70,11 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::toggle_clobber,
       "clobber", "toggle overwrite permission",
       "usage: clobber \n");
+
+  add_command 
+    ( &Interpreter::toggle_evaluate,
+      "evaluate", "toggle expression evaluation",
+      "usage: evaluate \n");
 
   add_command 
     ( &Interpreter::load,
@@ -327,7 +333,7 @@ vector<string> Pulsar::Interpreter::setup (const string& text, bool expand)
   vector<string> arguments;
   separate (text, arguments);
 
-  if (expand && has())
+  if (evaluation_enabled && expand && has())
     for (unsigned i=0; i<arguments.size(); i++)
       arguments[i] = ::evaluate( substitute (arguments[i], get_interface()) );
 
@@ -1348,6 +1354,24 @@ string Pulsar::Interpreter::toggle_clobber (const string& args)
     return "will clobber named archives";
   else
     return "will not clobber named archives";
+}
+
+// //////////////////////////////////////////////////////////////////////
+//
+// evaluate
+//
+
+string Pulsar::Interpreter::toggle_evaluate (const string& args)
+{
+  evaluation_enabled = !evaluation_enabled;
+  
+  if (!reply)
+    return "";
+
+  if (evaluation_enabled)
+    return "will evaluate expressions";
+  else
+    return "will not evaluate expressions";
 }
 
 // //////////////////////////////////////////////////////////////////////

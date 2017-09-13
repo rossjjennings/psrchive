@@ -192,6 +192,9 @@ namespace Pulsar {
     //! toggle the clober flag
     std::string toggle_clobber (const std::string& args);
 
+    //! toggle the evaluate flag
+    std::string toggle_evaluate (const std::string& args);
+
     //! Extensions to the Interpreter
     class Extension;
 
@@ -222,6 +225,9 @@ namespace Pulsar {
     
     //! allow the user to overwrite existing named archive
     bool clobber;
+
+    // commands that request expansion will have arguments evaluated
+    bool evaluation_enabled;
     
     //! time various operations
     bool stopwatch;
