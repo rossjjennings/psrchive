@@ -7,7 +7,7 @@
 #ifndef __CommandParser_h
 #define __CommandParser_h
 
-#include "Reference.h"
+#include "TextInterfaceParser.h"
 #include "Error.h"
 
 #include <vector>
@@ -60,6 +60,9 @@ class CommandParser : public Reference::Able {
   //! implements 'while (condition) command'
   std::string while_command (const std::string& condition_command);
 
+  //! implements 'loop (indeces) command'
+  std::string loop (const std::string& indeces_command);
+  
   //! evaluate a boolean expression
   virtual bool evaluate (const std::string& expression);
 
@@ -132,6 +135,8 @@ class CommandParser : public Reference::Able {
 		    std::string& condition,
 		    std::string& command);
 
+  virtual TextInterface::Parser* get_interface () { return 0; }
+
  private:
 
   //! Available commands
@@ -149,6 +154,12 @@ class CommandParser : public Reference::Able {
   // readline interface
   static char* command_generator (const char* text, int state);
 
+  //! the loop command
+  std::string loop_command;
+  //! the loop result
+  std::string loop_result;
+  //! the inner loop
+  void loop_parse ();
 };
 
 //! Pure virtual base class of the template class Command

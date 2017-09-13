@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "CommandParser.h"
+#include "TextLoop.h"
 #include "strutil.h"
 
 #include <fstream>
@@ -155,6 +156,9 @@ string CommandParser::parse2 (const string& command, const string& arguments)
 
   if (command == "while")
     return while_command (arguments);
+
+  if (command == "loop")
+    return loop (arguments);
 
   if (debug)
     cerr << "CommandParser::parse command not help" << endl;
@@ -314,6 +318,34 @@ string CommandParser::while_command (const string& text) try
 catch (Error& error)
 {
   return "while: " + error.get_message() + "\n";
+}
+
+string CommandParser::loop (const string& text) try
+{
+  string condition;
+  conditional (text, condition, loop_command);
+
+  vector<string> indeces;
+  standard_separation (indeces, condition);
+  
+  TextLoop loop;
+  loop.job.set( this, &CommandParser::loop_parse );
+  loop.set_container( get_interface() );
+  for (unsigned i=0; i<indeces.size(); i++)
+    loop.add_index( new TextIndex(indeces[i]) );
+
+  loop_result = "";
+  loop.loop ();
+  return loop_result;
+}
+catch (Error& error)
+{
+  return "while: " + error.get_message() + "\n";
+}
+
+void CommandParser::loop_parse ()
+{
+  loop_result += parse (loop_command);
 }
 
 string CommandParser::help (const string& command)
