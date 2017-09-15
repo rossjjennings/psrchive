@@ -34,6 +34,9 @@ class TextIndex : public Reference::Able
   //! Get the index command for the specified index
   std::string get_index (unsigned i);
 
+  //! Get the index command for the current index
+  std::string get_current_index () { return current_index; }
+  
  protected:
 
   //! The name of the index
@@ -45,6 +48,9 @@ class TextIndex : public Reference::Able
   //! The range of the index set
   std::string range;
 
+  //! The value of the index when set_container is called
+  std::string current_index;
+  
   //! The indeces
   std::vector<unsigned> indeces;
 

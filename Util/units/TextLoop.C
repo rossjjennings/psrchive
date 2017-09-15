@@ -47,7 +47,8 @@ void TextLoop::loop( std::stack< Reference::To<TextIndex> >& indeces )
   index->set_container( container );
 
   const string backup_state = index_state;
-
+  const string restore_index_command = index->get_current_index();
+  
   for (unsigned i=0; i<index->size(); i++) try
   {
     string index_command = index->get_index(i);
@@ -64,6 +65,8 @@ void TextLoop::loop( std::stack< Reference::To<TextIndex> >& indeces )
     index_state = backup_state;
   }
 
+  container->process( restore_index_command );
+  
   indeces.push( index );
 }
 

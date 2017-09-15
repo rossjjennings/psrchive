@@ -33,8 +33,9 @@ TextIndex::TextIndex (const std::string& named_range)
 //! Set the interface from which the maximum index will be determined
 void TextIndex::set_container (TextInterface::Parser* parser)
 {
+  current_index = name + "=" + parser->get_value( name );
   string number = parser->get_value( size_name );
-
+ 
   indeces.resize(0);
 
   TextInterface::parse_indeces( indeces, range, fromstring<unsigned>(number) );
