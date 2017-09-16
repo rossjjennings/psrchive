@@ -79,6 +79,7 @@ void usage ()
     "  -C meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration Database \n"
     "  -M meta    filename with list of pulsar files \n"
+    "  -W meta2   filename with list of other data files to be calibrated \n"
     "  -j job     preprocessing job \n"
     "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
     "  -K sigma       Reject outliers when computing CAL levels \n"
@@ -634,6 +635,9 @@ int actual_main (int argc, char *argv[]) try
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
+  // name of file containing list of filenames to be calibrated
+  char* calibrate_these = NULL;
+  
   // name of file from which phase bins will be chosen
   char* binfile = NULL;
 
@@ -650,7 +654,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
-    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:wxX:yzZ";
+    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:wW:xX:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -902,6 +906,10 @@ int actual_main (int argc, char *argv[]) try
       must_have_cals = false;
       break;
 
+    case 'W':
+      calibrate_these = optarg;
+      break;
+      
     case 'x':
       use_fluxcal_stokes = true;
       break;
@@ -1316,11 +1324,21 @@ int actual_main (int argc, char *argv[]) try
 
 #endif // HAVE_PGPLOT
 
-  for (unsigned ical=0; ical < calibrator_filenames.size(); ical++)
-    dirglob (&filenames, calibrator_filenames[ical]);
+  if (calibrate_these)
+  {
+    filenames.clear();
+    stringfload (&filenames, calibrate_these);
+    cerr << "pcm: calibrating " << filenames.size() << " files listed in "
+	 << calibrate_these << endl;
+  }
+  else
+  {
+    for (unsigned ical=0; ical < calibrator_filenames.size(); ical++)
+      dirglob (&filenames, calibrator_filenames[ical]);
   
-  cerr << "pcm: calibrating archives (PSR and CAL)" << endl;
-
+    cerr << "pcm: calibrating archives (PSR and CAL)" << endl;
+  }
+    
   for (unsigned i = 0; i < filenames.size(); i++) try
   {
     if (verbose)
@@ -1344,7 +1362,7 @@ int actual_main (int argc, char *argv[]) try
       cout << "New file " << newname << " unloaded" << endl;
     }
 
-    if (archive->get_type() == Signal::Pulsar)
+    if (!calibrate_these && archive->get_type() == Signal::Pulsar)
     {
       if (verbose)
 	cerr << "pcm: correct and add to calibrated total" << endl;
