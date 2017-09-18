@@ -33,7 +33,7 @@ TextIndex::TextIndex (const std::string& named_range)
 //! Set the interface from which the maximum index will be determined
 void TextIndex::set_container (TextInterface::Parser* parser)
 {
-  current_index = name + "=" + parser->get_value( name );
+  container = parser;
   string number = parser->get_value( size_name );
  
   indeces.resize(0);
@@ -54,6 +54,11 @@ std::string TextIndex::get_index (unsigned i)
   unsigned index = indeces[i];
 
   return name + "=" + tostring(index);
+}
+
+std::string TextIndex::get_current_index ()
+{
+  return name + "=" + container->get_value( name );
 }
 
 unsigned TextIndex::size () const
