@@ -9,7 +9,9 @@
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pointing.h"
+#ifdef HAVE_CFITSIO
 #include "Pulsar/FITSArchive.h"
+#endif
 #include "TextInterface.h"
 
 using namespace std;
@@ -42,9 +44,11 @@ Pulsar::FixInterpreter::FixInterpreter ()
     ( &FixInterpreter::pointing,
       "pointing", "fix the Pointing extension info\n");
 
+#ifdef HAVE_CFITSIO
   add_command
     ( &FixInterpreter::psrfits_refmjd,
       "refmjd", "fix epoch error due to polyco REF_MJD precision in PSRFITS\n");
+#endif
 }
 
 Pulsar::FixInterpreter::~FixInterpreter ()
@@ -204,6 +208,7 @@ catch (Error& error)
   return response (Fail, error.get_message());
 }
 
+#ifdef HAVE_CFITSIO
 string Pulsar::FixInterpreter::psrfits_refmjd (const string& args) try
 {
   FITSArchive* archive = dynamic_cast<FITSArchive*>(get());
@@ -217,3 +222,4 @@ catch (Error &error)
 {
   return response (Fail, error.get_message());
 }
+#endif
