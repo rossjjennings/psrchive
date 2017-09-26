@@ -37,9 +37,9 @@ void Tempo::fit (const Pulsar::Parameters* model, vector<toa>& toas,
 		 bool track,
 		 Tempo::toa::State min_state)
 {
-  char* tempo_tim = "arrival.tim";
-  char* tempo_par = "arrival.par";
-  char* tempo_res = "resid2.tmp";
+  const char* tempo_tim = "arrival.tim";
+  const char* tempo_par = "arrival.par";
+  const char* tempo_res = "resid2.tmp";
   
   int   r2flun = 32;
 
@@ -135,7 +135,7 @@ void Tempo::fit (const Pulsar::Parameters* model, vector<toa>& toas,
     postfit->load( (model->get_name() + ".par").c_str() );
 
   // load the residuals from resid2.tmp
-  fortopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));
+  fortopen_ (&r2flun, const_cast<char*>(tempo_res), (int) strlen(tempo_res));
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
     
