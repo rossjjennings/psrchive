@@ -154,17 +154,31 @@ int main (int argc, char* argv[])
   cout << "\n*** Inputs:" << endl;
   cout << "MJD: " << mjd.printdays(4) << endl;
   cout << "Coordinates: " << coord.getHMSDMS() << endl;
-  cout << "Latitude: " << latitude.getDegrees() << " degrees" << endl;
-  cout << "Longitude: " << longitude.getDegrees() << " degrees (East)" << endl;
+  cout << "  R.A.=" << coord.ra().getRadians() << endl;
+  cout << "  Dec.=" << coord.dec().getRadians() << endl;
+  cout << "Latitude: " << latitude.getDegrees() << " degrees "
+       << latitude.getRadians() << " radians" << endl;
+  cout << "Longitude: " << longitude.getDegrees() << " degrees (East) "
+       << longitude.getRadians() << " radians" << endl;
 
   cout << "\n*** Outputs:\n"
-    "LST: " << directional->get_local_sidereal_time() * rad2hr << " hours \n";
+    "GMST: " << mjd.GMST()*rad2hr << " hours "
+       << mjd.GMST() << " radians\n"
+    "LST: " << directional->get_local_sidereal_time()*rad2hr << " hours "
+       << directional->get_local_sidereal_time() << " radians\n"
+    "HA: " << directional->get_hour_angle()*rad2hr << " hours "
+       << directional->get_hour_angle() << " radians "
+       << directional->get_hour_angle()*rad2deg << " deg" <<endl;
 
   if (directional == &horizon)
   {
     cout <<
-      "Azimuth: " << horizon.get_azimuth() * rad2deg << " degrees \n"
-      "Zenith: " << horizon.get_zenith() * rad2deg << " degrees \n";
+      "Azimuth: " << horizon.get_azimuth() * rad2deg << " degrees "
+       << horizon.get_azimuth() << " radians\n"
+      "Zenith: " << horizon.get_zenith() * rad2deg << " degrees  "
+       << horizon.get_zenith() << " radians\n"
+      "Altitude: " << 90 - (horizon.get_zenith() * rad2deg) << " degrees  "
+       << M_PI/2 - horizon.get_zenith() << " radians\n";
   }
   else
   {
