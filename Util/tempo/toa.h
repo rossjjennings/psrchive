@@ -233,6 +233,9 @@ namespace Tempo {
     static char   datestr [25];
   };
 
+  std::ostream& operator << (std::ostream&, toa::Format format);
+  std::istream& operator >> (std::istream&, toa::Format& format);
+
 }
 
 #endif

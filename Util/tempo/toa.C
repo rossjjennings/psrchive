@@ -747,6 +747,44 @@ int Tempo::toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
   return 0;
 }
 
+std::ostream& Tempo::operator << (std::ostream& os, toa::Format format)
+{
+  switch (format)
+  {
+  case toa::Unspecified: os << "Unspecified"; break;
+  case toa::Comment : os << "Comment"; break;
+  case toa::Princeton : os << "Princeton"; break; 
+  case toa::Parkes : os << "Parkes"; break; 
+  case toa::ITOA : os << "ITOA"; break; 
+  case toa::Psrclock : os << "Psrclock"; break; 
+  case toa::Command : os << "Command"; break;
+  case toa::Tempo2 : os << "Tempo2"; break;
+  default:
+    os.setstate(std::ios::failbit);
+  };
+  
+  return os;
+}
+
+std::istream& Tempo::operator >> (std::istream& is, toa::Format& format)
+{
+  std::string text;
+  is >> text;
+  
+  if (text == "Unspecified") format = toa::Unspecified;
+  else if (text == "Comment") format = toa::Comment;    
+  else if (text == "Princeton") format = toa::Princeton;
+  else if (text == "Parkes") format = toa::Parkes;
+  else if (text == "ITOA") format = toa::ITOA;
+  else if (text == "Psrclock") format = toa::Psrclock;
+  else if (text == "Command") format = toa::Command;
+  else if (text == "Tempo2") format = toa::Tempo2;
+  else
+    is.setstate(std::ios::failbit);
+  
+  return is;
+}
+
 // ////////////////////////////////////////////////////////////////////////
 //
 // low-level toa stuff
