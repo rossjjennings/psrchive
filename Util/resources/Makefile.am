@@ -7,9 +7,10 @@ libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
 	Parameters_children.C Predictor_children.C Site_location.C \
 	GeneratorInterpreter.C Generator_factory.C
 
-bin_PROGRAMS = getHorizon
+bin_PROGRAMS = getHorizon toaio
 
 getHorizon_SOURCES = getHorizon.C
+toaio_SOURCES = toaio.C
 
 check_PROGRAMS = test_Parameters_factory test_Predictor_factory
 
