@@ -15,6 +15,7 @@ gunzip -c ${cfitsio}.tar.gz | tar xvf -
 cd cfitsio
 
 if ( ! -f editcol.patch ) then
+  echo "patching editcol.c"
   cp @abs_srcdir@/editcol.patch .
   patch < editcol.patch
 endif
