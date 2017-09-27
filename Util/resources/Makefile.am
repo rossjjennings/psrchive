@@ -30,8 +30,13 @@ if HAVE_TEMPO2
   LDADD += $(top_builddir)/Util/tempo2/libtempo_2.la
 endif
 
-LDADD += $(top_builddir)/Util/tempo/libtempo.la \
-	$(top_builddir)/Util/genutil/libgenutil.la \
+LDADD += $(top_builddir)/Util/tempo/libtempo.la
+
+if HAVE_TEMPO2
+  LDADD += $(top_builddir)/Util/tempo2/libtempo_2.la
+endif
+
+LDADD += $(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la @FLIBS@
 
