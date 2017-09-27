@@ -1,0 +1,13 @@
+--- editcol.c	2017-09-21 07:40:41.000000000 +1200
++++ editcol_new.c	2017-09-27 19:41:15.000000000 +1300
+@@ -1378,6 +1378,10 @@
+         nblock = (long) ((nadd - freespace + 2879) / 2880);    /* number of blocks  */
+         if (ffiblk(fptr, nblock, 1, status) > 0)      /* insert the blocks */
+           return(*status);
++
++        /* ffiblk can lead to reallocation of tableptr */
++        colptr = (fptr->Fptr)->tableptr;
++        colptr += (colnum - 1);
+       }
+ 
+       /* shift heap down (if it exists) */
