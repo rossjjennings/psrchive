@@ -11,6 +11,7 @@
 #include "ieee.h"
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -439,10 +440,12 @@ void MJD::settle()
 
   // sanity check
   if (fabs(fracsec) > 1.0)
-    throw Error (InvalidState, "MJD::settle", "|fracsec=%lf| > 1.0", fracsec);
+    throw Error (InvalidState, "MJD::settle", "|fracsec=%lf| > 1.0"
+                 " -- secs=%i days=%i", fracsec, secs, days);
 
   if (abs(secs) >= 86400)
-    throw Error (InvalidState, "MJD::settle", "|secs=%d| > 86400", secs);
+    throw Error (InvalidState, "MJD::settle", "|secs=%d| > 86400"
+                 " -- days=%i", secs, days);
 
 }
 
@@ -479,7 +482,7 @@ MJD::MJD (int intday, double fracday)
 
 int MJD::UTC (utc_t* utc, double* fsec) const
 {
-  struct tm  greg;
+  struct tm greg;
 
   gregorian (&greg, fsec);
   return tm2utc (utc, greg);
@@ -513,7 +516,9 @@ int MJD::gregorian (struct tm* gregdate, double* fsec) const
 MJD::MJD (const utc_t& utc)
 {
   if (Construct (utc) < 0)
-    throw ("MJD::MJD(utc_t) construct error");
+    throw Error (InvalidParam, "MJD::MJD(utc_t)",
+		 "failed to construct from yy-dd-hh:mm:ss = %d-%d-%d:%d:%d",
+		 utc.tm_year, utc.tm_yday, utc.tm_hour, utc.tm_min, utc.tm_sec);
 }
 
 
@@ -597,6 +602,21 @@ int MJD::Construct (const struct tm& greg)
 
   // Work out seconds, fracsecs always zero.
   secs = 3600 * greg.tm_hour + 60 * greg.tm_min + greg.tm_sec;
+
+#if _DEBUG
+  double secs_in_day = 3600 * 24;
+  cerr << "HOURS=" << secs / 3600.0 << " DAYS=" << secs/secs_in_day << endl;
+  
+  cerr << "MJD::Contruct (struct tm)"
+    " year=" << year <<
+    " month=" << month <<
+    " mday=" << greg.tm_mday <<
+    " hour=" << greg.tm_hour <<
+    " min=" << greg.tm_min <<
+    " sec=" << greg.tm_sec <<
+    " -> days=" << setprecision(15) << days + secs/secs_in_day << endl;
+#endif
+  
   fracsec = 0.0;
   return 0;
 }
