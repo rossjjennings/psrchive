@@ -130,6 +130,9 @@ class MJD {
   // return LST in hours (longitude given in degrees East of Greenwich)
   double LST (double longitude) const;
 
+  // return Greenwich Mean Sidereal Time
+  double GMST () const;
+  
   std::string printdays (unsigned precision) const;
 
   int print (FILE *stream);
