@@ -76,7 +76,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   23 / number of fields per row
+TFIELDS =                    * / number of fields per row
 #
 EXTNAME = HISTORY             / name of this binary table extension
 #
@@ -156,7 +156,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = OBSDESCR             / Name of this binary table extension
 #
@@ -177,7 +177,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = PSRPARAM             / Name of this binary table extension
 #
@@ -198,7 +198,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   13 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = POLYCO               / name of this binary table extension
 #
@@ -245,7 +245,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = T2PREDICT            / Name of this binary table extension
 #
@@ -266,7 +266,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table (NCHAN)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    3 / number of fields per row
+TFIELDS =                    * / number of fields per row
 #
 EXTNAME = COHDDISP             / name of this binary table extension
 #
@@ -312,7 +312,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    2 / number of fields per row
+TFIELDS =                    * / number of fields per row
 #
 NCH_ORIG=                    * / Number of channels in original bandpass
 BP_NPOL =                    * / Number of polarizations in bandpass
@@ -341,7 +341,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    6 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = FLUX_CAL             / name of this binary table extension
 CAL_MTHD=                      / Flux cal method
@@ -386,7 +386,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    3 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = CAL_POLN             / name of this binary table extension
 NCHAN   =                    * / Nr of channels in flux cal file
@@ -414,7 +414,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    3 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = FEEDPAR              / Name of this binary table extension
 CAL_MTHD= '                  ' / Cross-coupling method
@@ -492,7 +492,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   18 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 # 
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
@@ -589,7 +589,7 @@ NAXIS1  =                    * / Width of table in bytes
 NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 DIG_MODE= '                '   / Digitiser mode
 NDIGR   =                    * / Number of digitised channels (I)
@@ -619,7 +619,7 @@ NAXIS1  =                    * / Width of table in bytes
 NAXIS2  =                    * / Number of rows in table
 PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
-TFIELDS =                    3 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 DIG_MODE= '                '   / Digitiser mode
 DYN_LEVT=                    * / Timescale for dynamic leveling
@@ -652,7 +652,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
+TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = COV_MAT              / name of this binary table extension
 NBIN    =                    * / Number of phase bins
