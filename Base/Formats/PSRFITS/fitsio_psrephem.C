@@ -70,9 +70,10 @@ void fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
 
   string parstr;
 
-  char keyword [FLEN_KEYWORD+1];
-  char value   [FLEN_VALUE+1];
-  char comment [FLEN_COMMENT+1];
+  // double the length just to be sure to avoid stack overflow
+  char keyword [FLEN_KEYWORD*2];
+  char value   [FLEN_VALUE*2];
+  char comment [FLEN_COMMENT*2];
 
   maxstrlen = 0;
 
@@ -279,7 +280,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
       }
     case 2:  // h:m:s
       {
-	char* nul = " ";
+	static char* nul = strdup(" ");
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
@@ -304,7 +305,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
       }
     case 3:  // d:m:s
       {
-	char* nul = " ";
+	static char* nul = strdup(" ");
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
@@ -477,7 +478,8 @@ void unload (fitsfile* fptr, const psrephem* ephem, long row)
     cerr << "psrephem::unload PSRFITS nrows=" << nrows << " ncols=" 
 	 << ephind.size() << " unload to row=" << row << endl;
 
-  char* strval = new char [maxstrlen+1];
+  // double the length just to be sure to avoid stack overflow
+  char* strval = new char [maxstrlen*2];
 
   for (unsigned icol=0; icol<ephind.size() && status==0; icol++) {
 
@@ -509,7 +511,7 @@ void unload (fitsfile* fptr, const psrephem* ephem, long row)
 
     case 0:  // string
       {
-	strcpy (strval, ephem->value_str[ieph].c_str());
+	strncpy (strval, ephem->value_str[ieph].c_str(), maxstrlen);
 
 	if (psrephem::verbose)
 	  cerr << "psrephem::unload string:'" << strval << "' in column "

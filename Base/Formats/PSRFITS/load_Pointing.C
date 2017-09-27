@@ -12,8 +12,9 @@ using namespace std;
 
 Angle angle_units (fitsfile* fptr, int colnum, double angle, const char* name)
 {
-  char keyword [FLEN_KEYWORD+1];
-  char value   [FLEN_VALUE+1];
+  // double the length just to be sure to avoid stack overflow
+  char keyword [FLEN_KEYWORD*2];
+  char value   [FLEN_VALUE*2];
  
   char* comment = 0;
   int status = 0;

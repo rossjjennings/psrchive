@@ -32,8 +32,10 @@ static string get_version ()
   fitsfile* fptr = 0;
 
   fits_create_template (&fptr, clobber.c_str(), name.c_str(), &status);
-  if (status) {
-    char error[FLEN_ERRMSG];
+  if (status)
+  {
+    // double the length just to be sure to avoid stack overflow
+    char error[FLEN_ERRMSG*2];
     fits_get_errstatus (status, error);
     cerr << "FITSArchive::Agent::get_description fits_open_file: " 
 	 << error << endl;

@@ -21,8 +21,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   // no comment
   char* comment = 0;
 
-  // temporary string
-  char* tempstr = new char[FLEN_VALUE];
+  // double the length just to be sure to avoid stack overflow
+  char* tempstr = new char[FLEN_VALUE*2];
 
   strncpy (tempstr, ext->get_name().c_str(), FLEN_VALUE);
   fits_update_key (fptr, TSTRING, "FRONTEND", tempstr, comment, &status);

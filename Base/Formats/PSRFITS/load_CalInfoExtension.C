@@ -48,13 +48,14 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
   // Read the CAL mode
   status = 0;
 
-  char* tempstr = new char [FLEN_VALUE];
+  // double the length just to be sure to avoid stack overflow
+  char* tempstr = new char [FLEN_VALUE*2];
   fits_read_key (fptr, TSTRING, "CAL_MODE", tempstr, comment, &status);
 
   if (status == 0)
     ext->cal_mode = tempstr;
 
-  delete tempstr;
+  delete [] tempstr;
 
   if (status != 0 && verbose == 3)
     cerr << FITSError (status, "FITSArchive::load_CalInfoExtension",
