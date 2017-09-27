@@ -4,11 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 // psrchive/Util/genutil/utc.h
 
 /* ************************************************************************
+
    UTC time structure - a subset of 'struct tm' used when you don't know
    or want to calculate neither the day of month nor month of year.
+
    ************************************************************************ */
 
 #ifndef UTC_H
