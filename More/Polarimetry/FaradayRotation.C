@@ -21,6 +21,7 @@ Pulsar::FaradayRotation::FaradayRotation ()
 {
   name = "FaradayRotation";
   val = "RM";
+  delta = get_identity();
 }
 
 double 

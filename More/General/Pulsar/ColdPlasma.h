@@ -331,6 +331,7 @@ void Pulsar::ColdPlasma<C,History>::revert1 (Integration* data) try
 
   set_measure( -corrected->get_measure() );
   set_reference_wavelength( corrected->get_reference_wavelength() );
+  set_delta( get_identity() );
 
   if (Integration::verbose)
     std::cerr << "Pulsar::"+name+"::revert1"

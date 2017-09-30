@@ -36,6 +36,7 @@ Pulsar::Dispersion::Dispersion ()
   name = "Dispersion";
   val = "DM";
   earth_doppler = 1.0;
+  delta = get_identity ();
 }
 
 double Pulsar::Dispersion::get_correction_measure (const Integration* data)
