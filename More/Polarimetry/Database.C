@@ -134,6 +134,7 @@ void Pulsar::Database::Entry::init ()
   receiver = "unset";
   instrument = "unset";
   filename = "unset";
+  path = "unset";
 }
 
 Pulsar::Database::Entry::Entry ()
@@ -293,6 +294,15 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval += stringprintf (" %lf %lf %d", bandwidth, frequency, nchan);
 
   retval += " " + instrument + " " + receiver;
+}
+
+//! Returns the full pathname of the Entry filename
+string Pulsar::Database::Entry::get_filename () const
+{
+  if (filename[0] == '/' or path == "unset")
+    return filename;
+  else
+    return path + "/" + filename;
 }
 
 namespace Pulsar
@@ -808,6 +818,8 @@ void Pulsar::Database::shorten_filename (Entry& entry)
 
   if (entry.filename.substr(0, path.length()) == path)
     entry.filename.erase (0, path.length()+1);
+
+    entry.path = path;
 }
 
 //! Add the given Archive to the database

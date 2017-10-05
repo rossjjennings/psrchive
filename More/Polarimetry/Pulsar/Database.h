@@ -140,6 +140,7 @@ namespace Pulsar {
       std::string      instrument;   // name of backend
       std::string      receiver;     // name of receiver
       std::string      filename;     // relative path of file
+      std::string      path;         // path to filename
       
       //! Null constructor
       Entry ();
@@ -158,6 +159,9 @@ namespace Pulsar {
 
       // unload ascii string
       void unload (std::string& str);
+
+      // return full path to filename
+      std::string get_filename () const;
       
     protected:
       
