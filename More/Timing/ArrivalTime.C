@@ -10,7 +10,7 @@
 #include "Pulsar/PolnProfileShiftEstimator.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Statistics.h"
@@ -163,7 +163,8 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
 
     const Profile* profile = subint->get_Profile (0, ichan);
 
-    if (skip_bad && (profile->get_weight() == 0) || (shift && standard->get_Profile (0,0,ichan)->get_weight() == 0))
+    if ((skip_bad && (profile->get_weight() == 0))
+	|| (shift && standard->get_Profile (0,0,ichan)->get_weight() == 0))
       continue;
     
     try
@@ -183,6 +184,15 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
         arrival_time.set_arrival(arrival_time.get_arrival() + be->get_delay());
 
       toas.push_back( arrival_time );
+
+      if (residual)
+      {
+	Integration* rsubint = residual->get_Integration (isub);
+	rsubint->expert()->rotate_phase( shift.get_value() );
+
+	const Integration* std = standard->get_Integration (0);
+	foreach (rsubint, std, &Profile::diff);
+      }
     }
     catch (Error& error)
     {

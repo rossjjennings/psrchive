@@ -77,10 +77,23 @@ namespace Pulsar {
     //! Get auxilliary information
     std::string get_value (const std::string& key, const Tempo::toa&);
 
+    //! Set the archive that will store residual profiles
+    void set_residual (Archive* res) { residual = res; }
+
+    //! Get the archive of residual profiles
+    Archive* get_residual () { return residual; }
+
   protected:
 
+    //! The observation to be fit to the standard
     Reference::To<const Archive> observation;
+
+    //! The standard to which observations are fit
     Reference::To<const Archive> standard;
+
+    //! The residual pulse profiles (transformed observation minus standard)
+    Reference::To<Archive> residual;
+    
     Reference::To<ShiftEstimator> shift_estimator;
 
     //! default TOA output format

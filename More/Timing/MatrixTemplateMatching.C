@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009 - 2017 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,6 +11,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/PolnProfile.h"
 
 using namespace std;
 
@@ -64,7 +65,7 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub,
 					       std::vector<Tempo::toa>& toas)
 {
   engine->add_pulsar (observation, isub);
-  
+
   const Integration* integration = observation->get_Integration (isub);
   unsigned nchan = integration->get_nchan();
 
@@ -73,12 +74,28 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub,
     if (!engine->get_transformation_valid(ichan))
       continue;
 
-    Estimate<double> shift = engine->get_mtm(ichan) -> get_phase();
+    const PolnProfileFit* mtm = engine->get_mtm(ichan);
+    
+    Estimate<double> shift = mtm -> get_phase();
 
     Tempo::toa TOA = get_toa (shift, integration, ichan);
-    TOA.set_reduced_chisq( engine->get_mtm(ichan)->get_reduced_chisq () );
+    TOA.set_reduced_chisq( mtm->get_reduced_chisq () );
 
     toas.push_back( TOA );
+
+    if (residual)
+    {
+      Jones<double> xform = mtm->get_transformation()->evaluate();
+
+      Integration* rsubint = residual->get_Integration (isub);
+      Reference::To<PolnProfile> rprof = rsubint->new_PolnProfile (ichan);
+      rprof->transform( inv(xform) );
+      rprof->rotate_phase( shift.get_value() );
+
+      const Integration* std = standard->get_Integration (0);
+      Reference::To<const PolnProfile> stdprof = std->new_PolnProfile (ichan);
+      rprof->diff (stdprof);
+    }
   }
 
 #if 0

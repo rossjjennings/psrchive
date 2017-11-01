@@ -84,7 +84,7 @@ double get_cal_freq(Archive* archive);
 #if HAVE_PGPLOT
 void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
     vector<Tempo::toa>& toas, const double min_phase, const double max_phase,
-    const bool output_plot_difference);
+    const bool output_profile_residuals);
 
 void set_phase_zoom(vector<Reference::To<Plot> >& plots,
         const double min, const double max);
@@ -191,6 +191,7 @@ void usage ()
     "  -r               Print reference phase and dt \n"
     "  -R               Print only the phase shift and error in turns \n"
     "  -u               Print as pat-like format smjd + dt \n"
+    "  -b               Output profile residuals \n"
     "\n"
     "Plotting options (if compiled with pgplot):\n"
     "  -K               Specify plot device\n"
@@ -227,10 +228,10 @@ int main (int argc, char** argv) try
   bool skip_bad = false;
   bool phase_info = false;
   bool tempo2_output = false;
+  bool output_profile_residuals = false;
 
 #if HAVE_PGPLOT
   bool plot_difference = false;
-  bool output_plot_difference = false;
   bool centre_template_peak = false;
 #endif
 
@@ -302,11 +303,9 @@ int main (int argc, char** argv) try
       break;
     }
 
-#if HAVE_PGPLOT
     case 'b':
-      output_plot_difference = true;
+      output_profile_residuals = true;
       break;
-#endif
 
     case 'c':
       choose_maximum_harmonic = true;
@@ -625,6 +624,9 @@ int main (int argc, char** argv) try
 
     arrival->set_observation (arch);
 
+    if (output_profile_residuals)
+      arrival->set_residual( arch->clone() );
+    
     if (verbose)
       cerr << "pat: calling ArrivalTime::get_toas" << endl;
 
@@ -639,10 +641,17 @@ int main (int argc, char** argv) try
       arch->remove_baseline();
       rotate_archive(arch, toas);
       plotDifferences(arch, stdarch, toas, min_phase, max_phase,
-          output_plot_difference);
+          output_profile_residuals);
     }
 #endif
 
+    if (output_profile_residuals)
+    {
+      Archive* residual = arrival->get_residual ();
+      string filename = arch->get_filename() + ".resid";
+      residual->unload (filename);
+    }
+    
     if (phase_only)
     {
       for (unsigned i = 0; i < toas.size(); i++)
@@ -786,14 +795,14 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
  * @param stdarch Template archive.
  * @param min_phase min x-value when zooming
  * @param max_phase max x-value when zooming
- * @param output_plot_difference whether or not the difference profile
+ * @param output_profile_residuals whether or not the difference profile
  *        should be written out to <filename>.diff
  */
 
 #if HAVE_PGPLOT
 void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
     vector<Tempo::toa>& toas, const double min_phase, const double max_phase,
-    const bool output_plot_difference)
+    const bool output_profile_residuals)
 
 {
   // remove baseline for all templates (except caldelay)
@@ -814,7 +823,7 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
     plotter->configure("x:range=" + get_xrange(min_phase, max_phase));
 
   ofstream f;
-  if (output_plot_difference) {
+  if (output_profile_residuals) {
     string output_filename =
       replace_extension(arch->get_filename(), plot_difference_extension);
 
@@ -877,7 +886,7 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
 
       profile_plot(plotter, profile_archive, profile, arch, centre_frequency);
 
-      if (output_plot_difference) {
+      if (output_profile_residuals) {
         // Output (to <filename>.diff):
         //      <subint> <channel> <bin> <bin value>
         float* bins = profile_diff->get_Profile(0,0,0)->get_amps();
