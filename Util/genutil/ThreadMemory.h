@@ -40,6 +40,8 @@ protected:
 
 #ifdef HAVE_PTHREAD
   pthread_key_t key;
+#else
+  void* memory;
 #endif
 
 };

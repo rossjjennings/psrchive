@@ -6,7 +6,9 @@
  ***************************************************************************/
 
 #include "f77util.h"
+
 #include <string.h>
+#include <ctype.h>
 
 void f2cstr (const char* f_str, char* c_str, unsigned length)
 {

@@ -62,7 +62,7 @@ namespace Pulsar {
 
       dt = (predictor.phase(guess) - p) / predictor.frequency(guess);
 
-      if (!finite(dt.in_seconds()))
+      if (!isfinite(dt.in_seconds()))
         throw Error (InvalidState, "inverse_phase",
                      "dt not finite; freq=%lf", predictor.frequency(guess));
  

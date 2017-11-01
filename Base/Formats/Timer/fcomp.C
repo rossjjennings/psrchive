@@ -55,7 +55,7 @@ int fcompread (unsigned nvals, float * vals, FILE * fptr, bool big_endian)
     N_FromLittleEndian (nvals, packed_buf);
   }
 
-  if (scale==0 || !finite(scale))
+  if (scale==0 || !isfinite(scale))
   {
     cerr << "fcompread: invalid scale=" << scale << endl;
     return -1;

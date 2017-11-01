@@ -48,6 +48,8 @@ private:
 
 #ifdef HAVE_PTHREAD
   pthread_key_t key;
+#else
+  std::ostream* stream;
 #endif
 
 };

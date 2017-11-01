@@ -254,7 +254,7 @@ Pulsar::Phase Tempo2::Predictor::phase (const MJD& t) const
 		 "epoch %s not spanned by ChebyModelSet",
 		 t.printdays(20).c_str());
 
-  if (!finite(p)) {
+  if (!isfinite(p)) {
     Error error (InvalidState, "Tempo2::Predictor::phase",
 		 "T2Predictor_GetPhase result = ");
     error << p;

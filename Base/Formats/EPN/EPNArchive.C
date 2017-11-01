@@ -368,8 +368,8 @@ void Pulsar::EPNArchive::read_record (const char* filename, unsigned record)
 		 "error calling crwpen");
       
   if (verbose == 3)  {
-    cerr << "Pulsar::EPNArchive::read_record rwepn called" << endl;
-    epn_dump (&line1, &line2, &line3, &line4, &line5);
+    cerr << "Pulsar::EPNArchive::read_record crwepn called" << endl;
+    // epn_dump (&line1, &line2, &line3, &line4, &line5);
   }
 
   current_record = record;

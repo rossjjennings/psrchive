@@ -21,25 +21,39 @@ static void destructor (void* memory)
 
 ThreadMemory::ThreadMemory ()
 {
+#ifdef HAVE_PTHREAD
   pthread_key_create (&key, &destructor);
+#else
+  memory = 0;
+#endif
 }
 
 ThreadMemory::~ThreadMemory ()
 {
+#ifdef HAVE_PTHREAD
   pthread_key_delete (key);
+#else
+  destructor (memory);
+#endif
 }
 
 void * ThreadMemory::get ()
 {
-  
+#ifdef HAVE_PTHREAD
   void * memory= pthread_getspecific (key);
   if (!memory)
     throw Error (InvalidState, "ThreadMemory::get",
 		 "key ptr not set for this thread");
+#endif
   return memory;
 }
 
-void ThreadMemory::set (void * memory)
+void ThreadMemory::set (void* _memory)
 {
-  pthread_setspecific (key, memory);
+#ifdef HAVE_PTHREAD
+  pthread_setspecific (key, _memory);
+#else
+  memory = _memory;
+#endif
 }
+

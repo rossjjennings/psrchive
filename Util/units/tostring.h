@@ -23,6 +23,8 @@ class ToString
 {
   typedef std::ios_base::fmtflags fmtflags;
 
+#define fmtzero fmtflags(0)
+
   unsigned precision;
   bool precision_set;
 
@@ -36,7 +38,12 @@ public:
 
   ToString () { reset_modifiers(); }
 
-  void reset_modifiers () { precision_set = setf_set = unsetf_set = false; }
+  void reset_modifiers () 
+  { 
+    precision_set = setf_set = unsetf_set = false;
+    precision = 0;
+    setf = unsetf = fmtzero;
+  }
 
   void set_precision (unsigned p) { precision = p; precision_set = true; }
   void set_setf (fmtflags f) { setf = f; setf_set = true; }

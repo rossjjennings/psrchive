@@ -83,7 +83,7 @@ string Phase::strprint (int precision) const
   string s = tostring (turns);
   string f = tostring (fturns, precision, std::ios::fixed);
 
-  if (!finite(fturns))
+  if (!isfinite(fturns))
     s += ".NaN";
   else
   {

@@ -239,7 +239,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       if (hdr.corrected == 1)
         hdr.corrected = NINT_CORRECTED;
 
-      if (hdr.corrected & NINT_CORRECTED == 0)
+      if ((hdr.corrected & NINT_CORRECTED) == 0)
       {
         /* nint() correction  jss */
         double difftime,tcorr;
@@ -272,7 +272,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       if (hdr.corrected == 1)
         hdr.corrected = S2ROS_CORRECTED;
 
-      if (hdr.corrected & S2ROS_CORRECTED == 0)
+      if ((hdr.corrected & S2ROS_CORRECTED) == 0)
       {
         /* get the year data was processed */
         char comment[64];

@@ -207,20 +207,6 @@ int crwepn ( const char* filename, int readwri, int recno, int padout,
   return 0;
 }
 
-void epn_dump (const epn_header_line1* line1,
-               const epn_header_line2* line2,
-               const epn_header_line3* line3,
-               const epn_header_line4* line4,
-               const epn_header_line5* line5)
-{
-  fprintf (stderr, "line 5: npol=%d\n", line5->npol);
-  fprintf (stderr, "line 5: nfreq=%d\n", line5->nfreq);
-  fprintf (stderr, "line 5: nbin=%d\n", line5->nbin);
-  fprintf (stderr, "line 5: tbin=%lf\n", line5->tbin);
-  fprintf (stderr, "line 5: nint=%d\n", line5->nint);
-  fprintf (stderr, "line 5: ncal=%d\n", line5->ncal);
-}
-
 int cnepnrec (const char* filename)
 {
   /* for dealing with filename string */

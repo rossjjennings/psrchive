@@ -137,38 +137,6 @@ void rad2dms ( double * radval, char * sign, int * deg,
   *sec = radt < 0.0 ? 0.0 : (radt * 60) ;
 }
 
-void makebname( double * ra, double * raerr, double * dec, double * decerr, char * name)
-{
-  double sec, tmp = *ra/15;
-  int deg, min;
-  char isign;
-
-  name[0]='B';
-  rad2dms(&tmp, &isign, &deg, &min, &sec);
-  sprintf(name+1,"%02d%02d",deg,min);
-  rad2dms(dec, &isign, &deg, &min, &sec);
-  sprintf(name+5,"%c%02d",isign,deg);
-  name[8]='\0';
-}
- 
-
-void makejname( double * ra, double * raerr, double * dec, double * decerr, char * name)
-{
-  double sec, tmp = *ra/15;
-  int deg, min;
-  char isign;
-
-  name[0]='J';
-  rad2dms(&tmp, &isign, &deg, &min, &sec);
-  sprintf(name+1,"%02d%02d",deg,min);
-  rad2dms(dec, &isign, &deg, &min, &sec);
-  sprintf(name+5,"%c%02d%02d",isign,deg,min);
-  if(*decerr > 0.0 && (*decerr / M_PI * 180.0 * 60) > 1.0 ) /* truncate */
-    fprintf(stderr,"Recommend renaming to %s\n",name);						       /* name if necessary */
-    /*    name[8]='\0'; */
-    name[10]='\0';
-}
- 
 char * crad2dms( double pos, int ra, char * name )
 {
   double sec, tmp;

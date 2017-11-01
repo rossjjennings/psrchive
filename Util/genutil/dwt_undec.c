@@ -31,7 +31,7 @@
 void udwt_forward_step(double *in, double *outl, double *outh, size_t n, 
         const double h[], const double g[], size_t nc, int s) {
 
-    int i,j,idx;
+    size_t i,j,idx;
 
     /* Zero output array */
     for (i=0; i<n; i++) { outl[i]=0.0; outh[i]=0.0; }
@@ -53,7 +53,7 @@ void udwt_forward_step(double *in, double *outl, double *outh, size_t n,
 void udwt_inverse_step(double *inl, double *inh, double *out, size_t n,
         const double h[], const double g[], size_t nc, int s) {
 
-    int i,j,idx;
+    size_t i,j,idx;
 
     /* Zero output */
     for (i=0; i<n; i++) { out[i]=0.0; }
@@ -143,7 +143,7 @@ int _dwt_undec_inverse(double *in, double *out, size_t n,
     /* maybe do some value checks on n, nl .. */
 
     /* Temporary low-pass outputs */
-    int i;
+    size_t i;
     double *tmp1 = (double *)malloc(sizeof(double)*n);
     double *tmp2 = (double *)malloc(sizeof(double)*n);
     for (i=0; i<n; i++) { tmp1[i]=0.0; }
@@ -153,7 +153,7 @@ int _dwt_undec_inverse(double *in, double *out, size_t n,
     curil = tmp1;
     curih = &in[(nl-1)*n];
     curo = tmp2;
-    for (i=nl-1; i>=0; i--) {
+    for (int i=nl-1; i>=0; i--) {
         udwt_inverse_step(curil, curih, curo, n, h, g, nc, i);
         swp = curil;
         curil = curo;

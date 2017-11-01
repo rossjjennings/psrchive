@@ -231,10 +231,10 @@ void QuaternionFT::fft (unsigned npts, const float* input, float* output)
     out += 4;
   }
 
-  delete H_a;
-  delete H_b;
-  delete h_a;
-  delete h_b;
+  delete [] H_a;
+  delete [] H_b;
+  delete [] h_a;
+  delete [] h_b;
 }
 
 Quaternion<float> exp (const Quaternion<float>& axis, float phi)

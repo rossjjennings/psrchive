@@ -20,26 +20,40 @@ static void destructor (void* value)
 
 ThreadStream::ThreadStream ()
 {
+#ifdef HAVE_PTHREAD
   pthread_key_create (&key, &destructor);
+#else
+  stream = 0;
+#endif
 }
 
 ThreadStream::~ThreadStream ()
 {
+#ifdef HAVE_PTHREAD
   pthread_key_delete (key);
+#else
+  if (stream) delete stream;
+#endif
 }
 
 ostream& ThreadStream::get ()
 {
-  ostream* value = reinterpret_cast<ostream*>( pthread_getspecific (key) );
+#ifdef HAVE_PTHREAD
+  ostream* stream = reinterpret_cast<ostream*>( pthread_getspecific (key) );
 
-  if (!value)
+  if (!stream)
     throw Error (InvalidState, "ThreadStream::get",
 		 "std::ostream not set for this thread");
 
-  return *value;
+#endif
+  return *stream;
 }
 
-void ThreadStream::set (std::ostream* stream)
+void ThreadStream::set (std::ostream* _stream)
 {
-  pthread_setspecific (key, stream);
+#ifdef HAVE_PTHREAD
+  pthread_setspecific (key, _stream);
+#else
+  stream = _stream;
+#endif
 }

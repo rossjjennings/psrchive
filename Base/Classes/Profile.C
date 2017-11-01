@@ -377,7 +377,7 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   
   float log_threshold = log(threshold)/log(base);
 
-  if (!finite(log_threshold))
+  if (!isfinite(log_threshold))
     throw Error (InvalidParam, "Pulsar::Profile::logarithm",
 		 "logarithm of threshold=%lf is not finite", threshold);
 
@@ -390,7 +390,7 @@ void Pulsar::Profile::logarithm (double base, double threshold)
       amps[ibin] = log(amps[ibin])/log(base);
     else
       amps[ibin] = log_threshold;
-    if (!finite(amps[ibin]))
+    if (!isfinite(amps[ibin]))
       throw Error (InvalidParam, "Pulsar::Profile::logarithm",
 		   "logarithm of amps[%u]=%lf is not finite",
 		   ibin, amps[ibin]);

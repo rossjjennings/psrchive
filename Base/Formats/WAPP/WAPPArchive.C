@@ -203,11 +203,12 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
     throw Error (FailedSys, "Pulsar::WAPPArchive::load_header",
         "fseek(EOF)");
   }
+
+  if (ftell(f) < 0)
+    throw Error (FailedSys, "Pulsar::WAPPArchive::load_header", "ftell");
+
   wapp_file_size = ftell(f);
   fclose(f);
-  if (wapp_file_size<0) 
-    throw Error (FailedSys, "Pulsar::WAPPArchive::load_header",
-        "ftell()");
 
   // Check that this is a folding-mode file.
   if (strncmp(hdr->obs_type, "PULSAR_FOLDING", 15)!=0) 
