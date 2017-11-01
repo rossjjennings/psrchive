@@ -13,6 +13,8 @@
 
 using namespace std;
 
+bool psrfits_verbose = false;
+
 static void update_tdim (fitsfile* ffptr, int column, unsigned ndim, ...)
 {
   vector<unsigned> dims (ndim);

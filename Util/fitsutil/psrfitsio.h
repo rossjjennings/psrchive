@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+extern bool psrfits_verbose;
+
 //! Empty template class requires specialization 
 template<typename T> struct FITS_traits { };
   
@@ -197,12 +199,20 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
   int colnum = 0;
   int status = 0;
 
+  if (psrfits_verbose)
+    std::cerr << "psrfits_write_col calling fits_get_colnum"
+      " name='" << name << "'" << std::endl;
+  
   fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
 
   if (status)
     throw FITSError (status, "psrfits_write_col(vector<T>)",
                      "fits_get_colnum (name=%s)", name);
 
+  if (psrfits_verbose)
+    std::cerr << "psrfits_write_col calling fits_modify_vector_len"
+      " colnum=" << colnum << " size=" << data.size() << std::endl;
+  
   fits_modify_vector_len (fptr, colnum, data.size(), &status);
 
   if (status)
@@ -210,9 +220,15 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
                      "fits_modify_vector_len (name=%s col=%d size=%u)",
 		     name, colnum, data.size());
 
+  if (psrfits_verbose)
+    std::cerr << "psrfits_write_col calling psrfits_update_tdim" << std::endl;  
+
   if (dims.size() > 1)
     psrfits_update_tdim (fptr, colnum, dims);
 
+  if (psrfits_verbose)
+    std::cerr << "psrfits_write_col calling fits_write_col" << std::endl;
+  
   fits_write_col (fptr, FITS_traits<T>::datatype(),
 		  colnum, row,
 		  1, data.size(),
