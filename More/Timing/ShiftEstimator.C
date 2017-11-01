@@ -44,5 +44,8 @@ Pulsar::ShiftEstimator::factory (const std::string& name_parse)
 /*! Most estimators work with total intensity */
 void Pulsar::ShiftEstimator::preprocess (Archive* archive)
 {
-  archive->pscrunch ();
+  if (archive->get_npol() == 4)
+    archive->convert_state( Signal::Stokes );
+  else
+    archive->pscrunch ();
 }
