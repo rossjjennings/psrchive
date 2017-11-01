@@ -375,7 +375,6 @@ void paz::setup ()
     char *buffer = new char[4096];
     while (fgets (buffer, 4096, fptr))
     {
-      if (buffer[0] == '#') continue;
       char* key = strtok (buffer, whitespace);
       // parse tokens until a comment is started
       while (key && key[0] != '#')
