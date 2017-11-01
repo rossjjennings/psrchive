@@ -221,7 +221,7 @@ Jones<T> val (const Jones< Estimate<T> >& J)
 /*!
 
   If the reference observation and the pulsar observation have more
-  frequnency channels than the precalibrator, then the reference
+  frequency channels than the precalibrator, then the reference
   observation will be integrated down to the resolution of the
   precalibrator and the final solution will be interpolated back up to
   the resolution of the pulsar observation.  In this case, it is
@@ -372,7 +372,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     {
       response = ::get_response (precalibrator, ichan, target_nchan);
       if (verbose > 2)
-	cerr << "HybridCalibrator response=" << response << endl;
+	cerr << "HybridCalibrator pre-calibrator response=" << response << endl;
     }
 
     // pass the reference Stokes parameters through the instrument
@@ -389,15 +389,22 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     solver->set_output (output_stokes);
     solver->solve (correction);
 
-    // produce the supplemented transformation, 
+    MEAL::Complex2* result = correction;
 
-    MEAL::ProductRule<MEAL::Complex2>* result;
-    result = new MEAL::ProductRule<MEAL::Complex2>;
+    if (precalibrator)
+    {
+      /* the result is the product of the correction
+	 and the precalibrator response */
 
-    result->add_model( correction );
-    if (precalibrator) 
-      result->add_model( new MEAL::Value<MEAL::Complex2>(response) );
+      MEAL::ProductRule<MEAL::Complex2>* product;
+      product = new MEAL::ProductRule<MEAL::Complex2>;
 
+      product->add_model( correction );
+      product->add_model( new MEAL::Value<MEAL::Complex2>(response) );
+
+      result = product;
+    }
+    
     transformation[ichan] = result;
 
   }
