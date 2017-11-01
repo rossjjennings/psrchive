@@ -185,32 +185,48 @@ double Pulsar::Statistics::get_2bit_dist () const
 }
 
 //! Get the off-pulse baseline
-Pulsar::PhaseWeight* Pulsar::Statistics::get_baseline ()
+Pulsar::PhaseWeight* Pulsar::Statistics::get_baseline () try
 {
   setup_stats ();
   return stats->get_baseline();
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::get_baseline";
+   }
 
 //! Get the on-pulse phase bins
-Pulsar::PhaseWeight* Pulsar::Statistics::get_onpulse ()
+Pulsar::PhaseWeight* Pulsar::Statistics::get_onpulse () try
 {
   setup_stats ();
   return stats->get_onpulse();
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::get_onpulse";
+   }
 
 //! Get all phase bins
-Pulsar::PhaseWeight* Pulsar::Statistics::get_all ()
+Pulsar::PhaseWeight* Pulsar::Statistics::get_all () try
 {
   setup_stats ();
   return stats->get_all();
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::get_all";
+   }
 
 //! Get the statistics calculator
-Pulsar::ProfileStats* Pulsar::Statistics::get_stats ()
+Pulsar::ProfileStats* Pulsar::Statistics::get_stats () try
 {
   setup_stats ();
   return stats;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::get_stats";
+   }
 
 //! Get the weighted frequency of the Pulsar::Archive
 double Pulsar::Statistics::get_weighted_frequency () const
@@ -244,7 +260,7 @@ double Pulsar::Statistics::get_dispersive_smearing () const
   return dispersion_smear (dm, freq, chan_bw);
 }
 
-void Pulsar::Statistics::setup_stats ()
+void Pulsar::Statistics::setup_stats () try
 {
   if (!stats)
   {
@@ -252,6 +268,8 @@ void Pulsar::Statistics::setup_stats ()
     stats_setup = false;
   }
 
+  // avoid recursion - part 2
+  // (Plugin::setup might call a function that calls setup_stats)
   if (stats_setup)
     return;
 
@@ -263,7 +281,8 @@ void Pulsar::Statistics::setup_stats ()
   if (Profile::verbose)
     cerr << "Pulsar::Statistics::setup_stats profile=" << profile.ptr() << endl;
 
-  // avoid recursion (Plugin::setup might call a function that calls setup_stats)
+  // avoid recursion - part 1
+  // (Plugin::setup might call a function that calls setup_stats)
   stats_setup = true;
 
   for (unsigned i=0; i<plugins.size(); i++)
@@ -272,6 +291,10 @@ void Pulsar::Statistics::setup_stats ()
   if (Profile::verbose)
     cerr << "Pulsar::Statistics::setup_stats done" << endl;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::setup_stats";
+   }
 
 void Pulsar::Statistics::add_plugin (Plugin* plugin)
 {
