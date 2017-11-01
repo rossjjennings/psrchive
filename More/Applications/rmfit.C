@@ -1091,9 +1091,9 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     {
       double dm = data->get_dispersion_measure();
       float dm_auto_maxrm = auto_maxrm_dm * dm;
-	cerr << "rmfit: maximum RM = (" << auto_maxrm_dm << " * DM=" << dm
-	     << ") = " << dm_auto_maxrm << endl;
-	auto_maxrm = std::min (auto_maxrm, dm_auto_maxrm);
+      cerr << "rmfit: maximum RM = (" << auto_maxrm_dm << " * DM=" << dm
+	   << ") = " << dm_auto_maxrm << endl;
+      auto_maxrm = std::min (auto_maxrm, dm_auto_maxrm);
     }
 
     bool override = false;
@@ -1110,8 +1110,8 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     {
       cerr << "rmfit: default auto maximum RM under limit = " << auto_minrm 
 	     << endl;
-	RM_max = auto_minrm;
-	override = true;
+      RM_max = auto_minrm;
+      override = true;
     }
 
     if (auto_step_rad > 0)
@@ -1133,23 +1133,23 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
       override = true;
     }
 
-      if (override)
-	{
-	  rmsteps = unsigned( 2 * RM_max / step_size );
-	  cerr << "rmfit: override maximum RM=" << RM_max
-	       << " steps=" << rmsteps << endl;
-	}
-
-      if (auto_minsteps > 0 && rmsteps < auto_minsteps)
-	{
-	  rmsteps = auto_minsteps;
-	  cerr << "rmfit: override steps=" << auto_minsteps 
-	       << " (step size=" << 2*RM_max/rmsteps << ")" << endl;
-	}
-
-      minrm = -RM_max;
-      maxrm = RM_max;
+    if (override)
+    {
+      rmsteps = unsigned( 2 * RM_max / step_size );
+      cerr << "rmfit: override maximum RM=" << RM_max
+	   << " steps=" << rmsteps << endl;
     }
+
+    if (auto_minsteps > 0 && rmsteps < auto_minsteps)
+    {
+      rmsteps = auto_minsteps;
+      cerr << "rmfit: override steps=" << auto_minsteps 
+	   << " (step size=" << 2*RM_max/rmsteps << ")" << endl;
+    }
+    
+    minrm = -RM_max;
+    maxrm = RM_max;
+  }
 
   vector<float> fluxes (rmsteps);
   vector<float> rms (rmsteps);
@@ -1159,37 +1159,51 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
 
   Reference::To<Pulsar::Archive> backup = data->clone();
 
+  double max_snr = 0.0;
+  double max_L = 0.0;
+  
   for (unsigned step=0; step < rmsteps; step++)
+  {
+    double rm = minrm + step * rmstepsize;
+
+    /*
+      WvS, 12 July 2006: Note that Archive::defaraday can handle the
+      case that the data have already been corrected for a certain
+      rotation measure.
+      
+      Wvs, 26 September 2007: Then again, perhaps round-off error
+      can build up over many iterations.
+    */
+    
+    data->set_rotation_measure( rm );
+    data->defaraday ();
+
+    Reference::To<Pulsar::Archive> useful = data->clone();
+    useful->fscrunch();
+    useful->remove_baseline();
+    
+    Reference::To<Pulsar::PolnProfile> profile;
+    profile = useful->get_Integration(0)->new_PolnProfile(0);
+    
+    poln_stats.set_profile( profile );
+    Estimate<float> rval = poln_stats.get_total_linear ();
+    
+    fluxes[step] = rval.get_value();
+    err[step] = rval.get_error();
+    rms[step] = rm;
+
+    if (fluxes[step] > max_L)
     {
-      double rm = minrm + step * rmstepsize;
+      max_L = fluxes[step];
 
-      /*
-	WvS, 12 July 2006: Note that Archive::defaraday can handle the
-	case that the data have already been corrected for a certain
-	rotation measure.
-
-	Wvs, 26 September 2007: Then again, perhaps round-off error
-	can build up over many iterations.
-      */
-
-      data->set_rotation_measure( rm );
-      data->defaraday ();
-
-      Reference::To<Pulsar::Archive> useful = data->clone();
-      useful->fscrunch();
-      useful->remove_baseline();
-
-      poln_stats.set_profile( useful->get_Integration(0)->new_PolnProfile(0) );
-      Estimate<float> rval = poln_stats.get_total_linear ();
-
-      fluxes[step] = rval.get_value();
-      err[step] = rval.get_error();
-      rms[step] = rm;
-
-      data = backup->clone();
+      Pulsar::Profile linear;
+      profile->get_linear (&linear);
+      max_snr = linear.snr();
     }
-
-
+    
+    data = backup->clone();
+  }
+  
   ofstream os ("rm_spectrum.txt");
   for (unsigned step=0; step < rmsteps; step++)
     os << rms[step] << " " << fluxes[step] << " " << err[step] << endl;
@@ -1325,8 +1339,14 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
 
     cerr << "Width="<< gm.get_width() <<" Height="<< gm.get_height() << endl;
 
+    double FWHM = 2.0 * sqrt ( 2.0 * log (2.0) ) * gm.get_width();
+    cerr << "rmfit: FWHM/SNR uncertainty=" << 0.5 * FWHM / max_snr << endl;
+    
     bestrm = gm.get_centre();
 
+    Estimate<double> estimatedRM = gm.get_Estimate (0);
+    cerr << "rmfit: estimated RM = " << estimatedRM << endl;
+    
     // Compute the error based on how far you have to move the
     // centre of the Gaussian before the two-sigma
 
