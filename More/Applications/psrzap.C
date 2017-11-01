@@ -193,9 +193,10 @@ void usage_interactive() {
        << endl
        << "Mouse:" << endl
        << "  Left-click selects the start of a range" << endl
-       << "    then left-click again to zoom, or right-click to zap." << endl
-       << "  Right-click zaps current cursor location." << endl
-       << "  Middle-click (or 'd') updates the diagnostic plots." << endl
+       << "    then left-click again to zoom, or right-click (or 'X') to zap."
+       << endl
+       << "  Right-click (or 'X') zaps current cursor location." << endl
+       << "  Middle-click (or 'D') updates the diagnostic plots." << endl
     << "Keyboard:" << endl
     << "  " << CMD_HELP     << "  Show this help" << endl
     << "  " << CMD_FREQMODE << "  Use frequency select mode" << endl
