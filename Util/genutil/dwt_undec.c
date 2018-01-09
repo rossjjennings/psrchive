@@ -153,12 +153,13 @@ int _dwt_undec_inverse(double *in, double *out, size_t n,
     curil = tmp1;
     curih = &in[(nl-1)*n];
     curo = tmp2;
-    for (int i=nl-1; i>=0; i--) {
-        udwt_inverse_step(curil, curih, curo, n, h, g, nc, i);
+    ssize_t j=0;
+    for (j=nl-1; j>=0; j--) {
+        udwt_inverse_step(curil, curih, curo, n, h, g, nc, j);
         swp = curil;
         curil = curo;
         curo = swp;
-        curih = &in[(i-1)*n];
+        curih = &in[(j-1)*n];
     }
 
     /* We end up with final output in curil */
