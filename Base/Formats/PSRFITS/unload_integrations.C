@@ -14,6 +14,7 @@
 
 #include "FITSError.h"
 #include "psrfitsio.h"
+#include "RealTimer.h"
 
 using namespace std;
 
@@ -69,13 +70,6 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 			"Spin period in seconds");
   }
 
-  // Insert nsubint rows
-
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
-
-  psrfits_set_rows (ffptr, nsubint);
-
   // Update the header information
   
   string order_name = "TIME";
@@ -116,13 +110,32 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     psrfits_update_key (ffptr, "NAUX", (int) naux_profile);
   }
 
+  // Insert nsubint rows
+
+  //if (verbose > 2)
+    cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
+
+  RealTimer clock;
+  clock.start();
+
+  psrfits_set_rows (ffptr, nsubint);
+
+  clock.stop();
+  cerr << "FITSArchive::unload_integrations psrfits_set_rows took "
+       << clock.get_elapsed() << " sec" << endl;
+
   // Set the sizes of the columns which may have changed
   
   int colnum = 0;
   
   fits_get_colnum (ffptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
+
+  clock.start();
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
-  
+  clock.stop();
+  cerr << "FITSArchive::unload_integrations fits_modify_vector_len"
+    " (DAT_FREQ) took " << clock.get_elapsed() << " sec" << endl;
+
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
                      "error resizing DAT_FREQ");
@@ -132,7 +145,11 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
          << nchan << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+  clock.start();
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
+  clock.stop();
+  cerr << "FITSArchive::unload_integrations fits_modify_vector_len"
+    " (DAT_WTS) took " << clock.get_elapsed() << " sec" << endl;
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
