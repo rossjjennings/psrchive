@@ -445,6 +445,29 @@ END
 #
 ###############################################################################
 #
+# Covariance Matrix Test PSRFITS File
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Covariance Matrix Data *****
+BITPIX  =                    8 / N/A 
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    * / Number of fields per row
+#
+EXTNAME = COV_MAT              / name of this binary table extension
+NBIN    =                    * / Number of phase bins
+NPOL    =                    * / Number of polarisations
+#
+TTYPE#  = DATA                 / Elements of the covariance matrix
+TFORM#  = E                    / M*(M+1)/2 floats, where M=NBIN*NPOL
+END
+#
+###############################################################################
+#
 # Spectral Kurtosis Binary Table Extension
 #
 ###############################################################################
@@ -637,27 +660,4 @@ TFORM#  = E                    / NDIGR floats
 TTYPE#  = DATA                 / Digitiser count data
 TDIM#   = (*,*)                / Data table dimensions (NPTHIST,NDIGR)         
 TFORM#  = I                    / NPTHIST*NDIGR integers
-END
-#
-###############################################################################
-#
-# Covariance Matrix Test PSRFITS File
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Covariance Matrix Data *****
-BITPIX  =                    8 / N/A 
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    * / number of rows in table
-PCOUNT  =                    0 / size of special data area
-GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    * / Number of fields per row
-#
-EXTNAME = COV_MAT              / name of this binary table extension
-NBIN    =                    * / Number of phase bins
-NPOL    =                    * / Number of polarisations
-#
-TTYPE#  = DATA                 / Elements of the covariance matrix
-TFORM#  = E                    / M*(M+1)/2 floats, where M=NBIN*NPOL
 END
