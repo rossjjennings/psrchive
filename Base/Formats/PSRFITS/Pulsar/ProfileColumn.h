@@ -61,6 +61,9 @@ namespace Pulsar {
     //! Resize the columns
     void resize ();
 
+    //! Get the number of rows required to unload data (after resize)
+    unsigned get_nrow () const { return nrow; }
+    
     //! Insert the columns and resize
     void create (unsigned start_column);
 
@@ -85,7 +88,8 @@ namespace Pulsar {
     int scale_colnum;
 
     unsigned nbin, nchan, nprof;
-
+    unsigned nrow;
+    
     //! reset the column indeces
     void reset ();
 
