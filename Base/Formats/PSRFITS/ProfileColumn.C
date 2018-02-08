@@ -201,23 +201,38 @@ void Pulsar::ProfileColumn::resize ()
     cerr << "Pulsar::ProfileColumn::resize " << scale_colname 
 	 << " resized to " << nchan*nprof << endl;
 
-  const unsigned block_size = 2880;
-  const unsigned total_size = block_size * NIOBUF;
-  const double bytes = nbin*nchan*nprof*2;    
-  cerr << "NIOBUF=" << NIOBUF << " total=" << total_size << endl;
-  cerr << "bytes=" << bytes << " blocks=" << bytes/block_size << endl;
+  // number of values to be written
+  uint64_t nvalue = nbin*nchan*nprof;
+  // assuming 16-bit word per value
+  const uint64_t bytes_per_value = 2;
+  
+  const uint64_t nbyte = nvalue * bytes_per_value;
+  nrow = 1;
 
-  for (unsigned jbin=nbin/128; jbin<=nbin; jbin*=2)
+#if 0 // try resizing a larger number of rows of some maximum size
+
+  // experimentally determined limit, beyond which CFITSIO becomes inefficient
+  const uint64_t maximum_bytes = 1 << 19;
+
+  if (nbyte > maximum_bytes)
   {
-    cerr << "Pulsar::ProfileColumn::resize calling fits_modify_vector_len ("
-	 << data_colname << "," << jbin*nchan*nprof <<")" << endl;
-
-    clock.start();
-    fits_modify_vector_len (fptr, get_data_colnum(), jbin*nchan*nprof, &status);
-    clock.stop();
-    cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
-	 << data_colname << "," << jbin*nchan*nprof << ") took " << clock.get_elapsed() << " sec" << endl;
+    nrow = nbyte / maximum_bytes;
+    if (nbyte % maximum_bytes)
+      nrow ++;
+    nvalue = maximum_bytes / bytes_per_value;
   }
+
+#endif
+  
+  cerr << "Pulsar::ProfileColumn::resize calling fits_modify_vector_len ("
+       << data_colname << "," << nvalue <<")" << endl;
+
+  clock.start();
+  fits_modify_vector_len (fptr, get_data_colnum(), nvalue, &status);
+  clock.stop();
+  cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
+       << data_colname << "," << nvalue << ") took "
+       << clock.get_elapsed() << " sec" << endl;
   
   psrfits_update_tdim (fptr, get_data_colnum(), nbin, nchan, nprof);
 
