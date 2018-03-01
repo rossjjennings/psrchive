@@ -61,7 +61,7 @@ namespace Pulsar {
     { return birefringence_corrected; }
 
     //! Text interface to a AuxColdPlasma instance
-    class Interface : public TextInterface::To<AuxColdPlasma>
+    class Interface : public Extension::Interface<AuxColdPlasma>
     {
     public:
       Interface (AuxColdPlasma* = NULL);
