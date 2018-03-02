@@ -40,7 +40,8 @@ namespace Pulsar {
     double get_rotation_measure () const;
 
     //! Text interface to a AuxColdPlasmaMeasures instance
-    class Interface : public TextInterface::To<AuxColdPlasmaMeasures>
+    class Interface :
+      public Integration::Extension::Interface<AuxColdPlasmaMeasures>
     {
     public:
       Interface (AuxColdPlasmaMeasures* = NULL);
