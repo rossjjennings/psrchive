@@ -355,6 +355,12 @@ namespace Pulsar {
     */
     virtual void add_extension (Extension* extension);
 
+    //! Return a comma-separated list of the short names of all extensions
+    virtual std::string list_extensions () const;
+
+    //! Add or remove extensions with the specified short name
+    virtual void edit_extensions (const std::string& name);
+    
     //@}
 
     //! Provides access to certain protected and private methods
