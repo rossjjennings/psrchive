@@ -28,7 +28,10 @@ namespace Pulsar {
 
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
-    
+
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "aux"; }
+
     //! Set the auxiliary dispersion measure
     void set_dispersion_measure (double measure);
     //! Get the auxiliary dispersion measure
