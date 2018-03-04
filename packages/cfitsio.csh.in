@@ -5,7 +5,7 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-set cfitsio=cfitsio3420
+set cfitsio=cfitsio3430
 
 if ( ! -f ${cfitsio}.tar.gz ) then
   @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/${cfitsio}.tar.gz
@@ -13,8 +13,6 @@ endif
 
 gunzip -c ${cfitsio}.tar.gz | tar xvf -
 cd cfitsio
-
-patch < @abs_srcdir@/editcol.patch
 
 ./configure --prefix=@prefix@
 
