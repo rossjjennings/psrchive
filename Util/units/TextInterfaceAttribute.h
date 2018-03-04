@@ -165,7 +165,7 @@ namespace TextInterface
     { return tostring (ptr,get); }
 
     //! Set the value of the attribute
-    void set_value (C* ptr, const std::string& value)
+    void set_value (C*, const std::string&)
     { throw Error (InvalidState, "AttributeGet::set_value", 
 		   name + " cannot be set"); }
 

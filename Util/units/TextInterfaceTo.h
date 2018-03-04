@@ -59,7 +59,7 @@ namespace TextInterface
       { if (!ptr) return ""; return tostring( get(ptr) ); }
 
     //! Set the value of the attribute
-    void set_value (C* ptr, const std::string& value)
+    void set_value (C*, const std::string&)
       { throw Error (InvalidState, "UnaryGet::set_value", 
 		     name + " cannot be set"); }
 
@@ -182,7 +182,7 @@ namespace TextInterface
       function of C that accepts key K and returns pointer to data element E. 
     */
     template<class K, class E, class G>
-      void import (const std::string& name, K k, const To<E>* member, G g)
+      void import (const std::string& name, K, const To<E>* member, G g)
       {
 	for (unsigned i=0; i < member->size(); i++)
 	  if (!import_filter || !found(name, member->get(i)->get_name()))

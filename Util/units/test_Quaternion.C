@@ -9,14 +9,7 @@
 
 using namespace std;
 
-// This must be defined for the MatrixTest
-float norm (float x)
-{
-  return x*x;
-}
-
 #include "MatrixTest.h"
-
 
 int main () 
 {

@@ -26,7 +26,7 @@ class Vector {
 
   //! overloaded template fixes Vector<M,Vector<M,T>> default constructor 
   template<unsigned M, typename U> 
-  static void zero (Vector<N, Vector<M, U> >& v)
+  static void zero (Vector<N, Vector<M, U> >&)
   { /* do nothing */ }
 
 public:
