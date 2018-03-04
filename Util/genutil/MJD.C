@@ -62,7 +62,9 @@ string MJD::printdays (unsigned prec) const
 
   const unsigned size = prec + 80;
 
-  char temp [size];
+  vector<char> buf (size);
+  char* temp = &(buf[0]);
+
   snprintf (temp, size, "%d", days);
   string output = temp;
 
@@ -569,10 +571,10 @@ int MJD::Construct (const struct timeval& tp)
 }
 
 // long long to get a 64-bit unsigned
-int MJD::Construct(unsigned long long bat)
+int MJD::Construct(uint64_t bat)
 {
   // Not sure how to do 64-bit constants so let's construct it
-  unsigned long long microsecPerDay;
+  uint64_t microsecPerDay;
 
   microsecPerDay = 86400; microsecPerDay *= 1000000;
 

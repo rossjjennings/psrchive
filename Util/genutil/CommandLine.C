@@ -187,7 +187,7 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   }
 }
 
-int CommandLine::Menu::process_error (int code, char* const *argv)
+int CommandLine::Menu::process_error (int, char* const *argv)
 {
   throw Error (InvalidParam, "CommandLine::Menu::parse",
 	       "invalid option '%s'", argv[optind-1]);

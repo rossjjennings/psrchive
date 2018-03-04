@@ -43,7 +43,7 @@ void VanVleck::set_uniform_threshold()
   for (unsigned i=idx+1; i<thresh.size(); i++) { thresh[i] = thresh[i-1]+1.0; }
 }
 
-void VanVleck::set_threshold(float *thr) 
+void VanVleck::set_threshold(float*) 
 {
 }
 
@@ -82,7 +82,7 @@ void VanVleck::set_canonical_levels()
   }
 }
 
-void VanVleck::set_levels(float *lev) 
+void VanVleck::set_levels(float*) 
 {
 }
 
@@ -197,11 +197,11 @@ void VanVleck::set_in_power(double px, double py)
   //compute_coeffs();
 }
 
-void VanVleck::correct_acf(std::vector<float> data)
+void VanVleck::correct_acf(std::vector<float>)
 {
 }
 
-void VanVleck::correct_ccf(std::vector<float> data)
+void VanVleck::correct_ccf(std::vector<float>)
 {
 }
 

@@ -82,7 +82,7 @@ class MJD {
 
   // constructs from a BAT (binary atomic time), ie MJD in microseconds
   // stored in two 32 bit unsigned integers --- as returned by the AT clock
-  int Construct (unsigned long long bat);
+  int Construct (uint64_t bat);
 
   double in_seconds() const;
   double in_days()    const;

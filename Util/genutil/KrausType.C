@@ -21,7 +21,7 @@ double KrausType::get_vertical () const
 }
 
 //! Get the receptor basis in the reference frame of the observatory
-Matrix<3,3,double> KrausType::get_basis (const Vector<3,double>& from) const
+Matrix<3,3,double> KrausType::get_basis (const Vector<3,double>&) const
 {
   return Matrix<3,3,double>(0.0);
 }

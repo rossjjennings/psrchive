@@ -26,7 +26,7 @@ void copy (FILE* from, FILE* to, ssize_t nbytes)
     // cerr << "to read=" << to_read << endl;
 
     size_t did_read = fread (&buffer[0], 1, to_read, from);
-    if (did_read < 0)
+    if (did_read == 0)
       throw Error (FailedSys, "copy" "fread");
 
     nbytes -= did_read;
