@@ -387,11 +387,11 @@ void interpolate( std::vector< Jones<T> >& to,
 
   fft::interpolate (to, copy);
   
-  unsigned factor = nchan_to / nchan_from;
+  double factor = nchan_from / double(nchan_to);
   
   for (ichan=0; ichan<nchan_to; ichan++)
   {
-    unsigned orig_ichan = ichan / factor;
+    unsigned orig_ichan = ichan * factor;
 
     if (orig_ichan >= nchan_from || (bad && (*bad)[orig_ichan]))
     {
