@@ -1051,6 +1051,7 @@ void remove_channels (const Pulsar::Archive* arch,
 	 << "BW mismatch, trying channel truncation... " << endl;
 
   unsigned nremoved = 0;
+  double chbw = fabs(arch->get_bandwidth() / arch->get_nchan());
 
   // Loop over polcal channels
   for (unsigned ichan=0; ichan<super->get_nchan(); ichan++)
@@ -1062,7 +1063,7 @@ void remove_channels (const Pulsar::Archive* arch,
     // Try to match them to archive channels
     try
     {
-      chan_match.match_channel (arch->get_Integration(0), freq);
+      chan_match.match_channel (arch->get_Integration(0), freq, 0.01*chbw);
     }
     catch (...)
     {

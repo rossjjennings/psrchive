@@ -45,7 +45,8 @@ namespace Pulsar {
     std::string get_reason() const { return reason; }
 
     template<class Container>
-    unsigned match_channel (const Container* container, double frequency);
+    unsigned match_channel (const Container* container, double frequency,
+        double tolerance=0.0);
 
   protected:
 
@@ -63,12 +64,18 @@ namespace Pulsar {
 
 template<class Container>
 unsigned Pulsar::ChannelSubsetMatch::match_channel (const Container* container,
-						    double frequency)
+						    double frequency,
+                                                    double tolerance)
 {
+  if (tolerance==0.0)
+  {
+    // Use default value for class
+    tolerance = freq_tol * frequency;
+  }
   for (unsigned j=0; j<container->get_nchan(); j++)
   {
     double cfreq = container->get_centre_frequency(j);
-    if (fabs((frequency-cfreq)/frequency) < freq_tol)
+    if (fabs(frequency-cfreq) < tolerance)
       return j;
   }
 
