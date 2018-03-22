@@ -20,9 +20,8 @@ using namespace std;
 //! Default constructor
 Pulsar::ImageCorrection::ImageCorrection ()
 {
-  f_samp = 0.0;
-  f_cent = 0.0;
-  nyzone = 0;
+  f_cent_sky = 0.0;
+  f_cent_adc = 0.0;
   dir = 1;
   strict = false;
   coherent = true;
@@ -46,8 +45,10 @@ static void smear_profile(Pulsar::Profile *prof, double width)
   float *fprof = new float[nbin+2];
   complex<float> *cprof = (complex<float> *)fprof;
   FTransform::frc1d(nbin, fprof, prof->get_amps());
-  float norm = FTransform::get_scale(nbin,FTransform::frc) 
-    * FTransform::get_scale(nbin,FTransform::bcr);
+  // TODO fix up get_scale?
+  //float norm = FTransform::get_scale(nbin,FTransform::frc) 
+  //  * FTransform::get_scale(nbin,FTransform::bcr);
+  float norm = (float)nbin;
   cprof[0] /= norm;
   for (unsigned i=1; i<nbin/2+1; i++)
     cprof[i] *= sin(M_PI*((float)i)*width) / (M_PI*((float)i)*width) / norm;
@@ -95,11 +96,15 @@ void Pulsar::ImageCorrection::transform (Integration* data)
     for (unsigned ichan=0; ichan<smoothed->get_nchan(); ichan++) 
     {
       const double f_chan = smoothed->get_centre_frequency(ichan);
-      const double f_img = f_cent - (f_chan - f_cent);
+      const double f_img = f_cent_sky - (f_chan - f_cent_sky);
       const double dt = dispersion_smear(DM, f_chan, chan_bw) 
         + dispersion_smear(DM, f_img, chan_bw);
       for (unsigned ipol=0; ipol<smoothed->get_npol(); ipol++)
+      {
         smear_profile(smoothed->get_Profile(ipol, ichan), dt/period);
+        //for (unsigned ibin=0; ibin<smoothed->get_nbin(); ibin++)
+        //  cerr << ichan << " " << ipol << " " << ibin << " " << smoothed->get_Profile(ipol, ichan)->get_amps()[ibin] << " " << data->get_Profile(ipol, ichan)->get_amps()[ibin] << endl;
+      }
     }
   }
   
@@ -107,25 +112,33 @@ void Pulsar::ImageCorrection::transform (Integration* data)
   {
     // Channel and image frequencies
     const double f_chan = data->get_centre_frequency(ichan);
-    const double f_img = f_cent - (f_chan - f_cent);
+    const double f_img = f_cent_sky - (f_chan - f_cent_sky);
     const double f_bb = f_adc(f_chan);
-    const int iimg = match_channel(data, f_chan);
+    const int iimg = match_channel(data, f_img);
+
+    //cerr << ichan << " " << f_chan << " " << iimg << " " << f_img << 
+    //  " " << f_bb;
 
     // If image channel data is not present or is zapped, can't do the correction
     if ((iimg<0) || (data->get_weight(iimg)==0.0))
     {
       if (strict) data->set_weight(ichan,0.0);
+      //cerr << endl;
       continue;
     }
 
     for (unsigned ipol=0; ipol<npol; ipol++)
     {
       // Calculate image ratio
-      double r = ratio(f_bb,ipol);
+      double r = ratio(f_adc(f_img),ipol);
+
+      //cerr << " " << r;
 
       // Subtract from input data
       sumdiff(data->get_Profile(ipol,ichan), smoothed->get_Profile(ipol,iimg), -r);
     }
+
+    //cerr << endl;
   }
 
 }
@@ -134,7 +147,7 @@ void Pulsar::ImageCorrection::transform (Integration* data)
 // http://ieeexplore.ieee.org/document/915383/
 double Pulsar::ImageCorrection::ratio(double f, unsigned ipol) const
 {
-  if (f_samp==0.0 || f_cent==0.0)
+  if (f_cent_sky==0.0 || f_cent_adc==0.0)
     throw Error (InvalidState, "Pulsar::ImageCorrection::ratio",
         "f_samp and/or f_cent are not set");
 
@@ -142,9 +155,7 @@ double Pulsar::ImageCorrection::ratio(double f, unsigned ipol) const
     throw Error (InvalidState, "Pulsar:ImageCorrection::ratio",
         "ipol>2 not handled");
   
-  const double f_in = f_samp - f;
-
-  const double s = sin(M_PI*f_in*dt[ipol]);
+  const double s = sin(M_PI*f*dt[ipol]);
   const double s2 = s*s;
   const double c2 = 1.0 - s2;
   const double a2 = alpha[ipol]*alpha[ipol];
@@ -159,7 +170,7 @@ int Pulsar::ImageCorrection::match_channel(const Integration *subint,
   const double chbw = fabs(subint->get_bandwidth()/(double)nchan);
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    if (fabs(subint->get_centre_frequency() - f_sky) < (0.1*chbw))
+    if (fabs(subint->get_centre_frequency(ichan) - f_sky) < (0.1*chbw))
       return ichan;
   }
   return -1;
@@ -182,9 +193,9 @@ public:
 	 &ImageCorrection::set_coherent,
 	 "coherent", "set true if coherent dedispersion was done" ); 
 
-    add( &ImageCorrection::get_fsamp,
-	 &ImageCorrection::set_fsamp,
-	 "fsamp", "set sampler frequency (MHz); equal to BW for interleaved ADC" ); 
+    add( &ImageCorrection::get_fadc,
+	 &ImageCorrection::set_fadc,
+	 "fadc", "set band center frequency at samplers (MHz)");
 
     add( &ImageCorrection::get_fcenter,
 	 &ImageCorrection::set_fcenter,
@@ -193,10 +204,6 @@ public:
     add( &ImageCorrection::get_band_dir,
 	 &ImageCorrection::set_band_dir,
 	 "dir", "set band direction at sampler (+/-1)" ); 
-
-    add( &ImageCorrection::get_nyquist_zone,
-	 &ImageCorrection::set_nyquist_zone,
-	 "zone", "set Nyquist zone at sampler (0-based)" ); 
 
   }
   std::string get_interface_name () const { return "img"; }

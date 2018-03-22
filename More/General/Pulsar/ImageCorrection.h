@@ -52,17 +52,17 @@ namespace Pulsar {
     //! Get coherent dedisp flag
     bool get_coherent() const { return coherent; }
 
-    //! Set sampler freq
-    void set_fsamp(double f) { f_samp = f; }
+    //! Set center freq at sampler
+    void set_fadc(double f) { f_cent_adc = f; }
 
-    //! Get sampler freq
-    double get_fsamp() const { return f_samp; }
+    //! Set center freq at sampler
+    double get_fadc() const { return f_cent_adc; }
 
-    //! Set center freq
-    void set_fcenter(double f) { f_cent = f; }
+    //! Set sky center freq
+    void set_fcenter(double f) { f_cent_sky = f; }
 
-    //! Get center freq
-    double get_fcenter() const { return f_cent; }
+    //! Get sky center freq
+    double get_fcenter() const { return f_cent_sky; }
 
     //! Set band direction at sampler
     void set_band_dir(int d) { dir = d; }
@@ -70,32 +70,29 @@ namespace Pulsar {
     //! Get band direction
     int get_band_dir() const { return dir; }
 
-    //! Set Nyquist zone (0-based) 
-    void set_nyquist_zone(int z) { nyzone = z; }
+    //! Set dt per poln
+    void set_dt(double dt0, double dt1) { dt[0]=dt0; dt[1]=dt1; }
 
-    //! Get Nyquist zone
-    int get_nyquist_zone() const { return nyzone; }
+    //! Set gain per poln
+    void set_gain(double a0, double a1) { alpha[0]=a0; alpha[1]=a1; }
 
   protected:
 
-    //! The sampling frequency (equal to BW for interleaved samplers)
-    double f_samp;
+    //! The center frequency of the band at the ADC (MHz)
+    double f_cent_adc;
 
-    //! The center sky frequency of the sampled band
-    double f_cent;
-
-    //! The Nyquist zone in which the band is sampled (0-based)
-    int nyzone;
+    //! The center sky frequency of the sampled band (MHz)
+    double f_cent_sky;
 
     //! Band direction at the sampler
     int dir;
 
     // Note, all of the above imply that the conversion between
     // sky freq (f_sky) and sampled freq (f_adc) are:
-    //   f_adc = dir*(f_sky-f_cent) + (nyzone+0.5)*f_samp
+    //   f_adc = dir*(f_sky-f_cent_sky) + f_cent_adc
     double f_adc(double f_sky) const 
     { 
-      return (double)dir*(f_sky-f_cent) + ((double)nyzone+0.5)*f_samp; 
+      return (double)dir*(f_sky-f_cent_sky) + f_cent_adc;
     }
 
     //! strict==true means uncorrectable channels will be zero-weighted
@@ -110,8 +107,8 @@ namespace Pulsar {
     //! The gain mismatch between samplers, per-poln
     double alpha[2];
 
-    //! The ratio of image power observed at sampler freq f
-    //  to original power at freq f_samp - f
+    //! The ratio of image power from input sampler freq f
+    //  into channel at 2*f_center - f
     double ratio(double f, unsigned ipol) const;
 
     //! Find channel matching given sky freq, returns -1 for no match
