@@ -44,6 +44,10 @@ Pulsar::Integration::Interface::Interface (Integration* _instance)
 			&Integration::set_weight,
 			&Integration::get_nchan ));
 
+  add( &Integration::list_extensions,
+       &Integration::edit_extensions,
+       "ext", "list all extensions, or add/remove extension" );
+    
   if (_instance)
     set_instance( _instance );
 }

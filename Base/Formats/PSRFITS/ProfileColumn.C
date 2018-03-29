@@ -435,26 +435,26 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
   int status = 0;  
   int counter = 1;
 
+  unsigned namp = nprof * nchan * nbin;
+  vector<T> temparray (namp);
+
+  fits_read_col (fptr, FITS_traits<T>::datatype(),
+		 get_data_colnum(), row, counter, namp, 
+		 &null, &(temparray[0]), &initflag, &status);
+
+  if (status != 0)
+    throw FITSError( status, "ProfileColumn::load_amps",
+		     "Error reading subint data"
+		     " nprof=%u nchan=%u nbin=%u \n\t"
+		     "colnum=%d firstrow=%d firstelem=%d nelements=%d",
+		     nprof, nchan, nbin,
+		     data_colnum, row, counter, namp );
+  
   unsigned index = 0;
-
-  vector<T> temparray (nbin);
-
   for (unsigned iprof = 0; iprof < nprof; iprof++)
   {
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     {
-      fits_read_col (fptr, FITS_traits<T>::datatype(),
-		     get_data_colnum(), row, counter, nbin, 
-		     &null, &(temparray[0]), &initflag, &status);
-
-      if (status != 0)
-	throw FITSError( status, "ProfileColumn::load_amps",
-			 "Error reading subint data"
-			 " iprof=%d/%d ichan=%d/%d\n\t"
-			 "colnum=%d firstrow=%d firstelem=%d nelements=%d",
-			 iprof, nprof, ichan, nchan, 
-			 data_colnum, row, counter, nbin );
-      
       counter += nbin;
 
       float scale = scales[ichan];
@@ -483,19 +483,20 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
 
       prof[index]->resize (nbin);
       float* amps = prof[index]->get_amps();
-      index ++;
 
       unsigned nans = 0;
 
       for (unsigned ibin = 0; ibin < nbin; ibin++)
       {
-	amps[ibin] = temparray[ibin] * scale + offset;
+	amps[ibin] = temparray[index*nbin+ibin] * scale + offset;
 	if (!isfinite(amps[ibin]))
 	{
 	  nans ++;
 	  amps[ibin] = 0.0;
 	}
       }
+
+      index ++;
 
       if (nans)
 	warning << "Pulsar::ProfileColumn::load_amps"

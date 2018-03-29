@@ -191,7 +191,7 @@ namespace CommandLine {
     Value (bool& _value) : value (_value) { }
 
     //! Handle the argument
-    void handle (const std::string& arg) { value = !value; }
+    void handle (const std::string&) { value = !value; }
   };
 
   //! A command line corresponding to a class attribute
@@ -275,7 +275,7 @@ namespace CommandLine {
     bool matches (int) const { return false; }
 
     //! Handle the argument
-    void handle (const std::string& arg) { }
+    void handle (const std::string&) { }
 
     //! Return two columns of help text
     Help get_help () const { return Help(text,""); }

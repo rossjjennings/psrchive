@@ -162,7 +162,7 @@ void Pulsar::ProfileAmps::remove (const std::vector<unsigned>& indeces)
     if (indeces[i] >= nbin)
       throw Error (InvalidParam, "Pulsar::ProfileAmps::remove",
 		   "index[%u]=%u >= nbin=%u", i, indeces[i], nbin);
-    amps[i] = FLT_MAX;
+    amps[indeces[i]] = FLT_MAX;
   }
 
   // remove flagged bins

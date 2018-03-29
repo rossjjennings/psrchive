@@ -71,7 +71,7 @@ string CommandParser::readline ()
 
 #define STDIN_FILEDES 0
 
-void CommandParser::standard_input (const std::string& prompt)
+void CommandParser::standard_input (const std::string& /* prompt */)
 {
   // check if stdin/cin is attached to a terminal (not a pipe or file)
   interactive = isatty (STDIN_FILEDES);
@@ -113,7 +113,7 @@ void CommandParser::initialize_readline (const char* prog_name)
    complete.  TEXT is the word to complete.  We can use the entire
    contents of rl_line_buffer in case we want to do some simple
    parsing.  Returnthe array of matches, or NULL if there aren't any. */
-char** CommandParser::completion (const char *text, int start, int end)
+char** CommandParser::completion (const char *text, int start, int /* end */)
 {
   /* If this word is at the start of the line, then it is a command
      to complete.  Otherwise it is the name of a file in the current

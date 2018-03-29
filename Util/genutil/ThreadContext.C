@@ -25,15 +25,17 @@ ThreadContext::ThreadContext ()
 
 #else
 
-  // pthreads aren't available; throw an exception
-  throw Error (InvalidState, "ThreadContext ctor",
-	       "pthread support is not available");
+  cond = mutex = 0;
 
 #endif
 }
 
 ThreadContext::~ThreadContext ()
 {
+#if HAVE_PTHREAD
+  delete cond;
+  delete mutex;
+#endif
 }
 
 void ThreadContext::lock ()

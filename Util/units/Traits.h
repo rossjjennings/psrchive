@@ -76,8 +76,8 @@ template< class T, class E = ElementTraits<T> > struct DatumTraits
   typedef T element_type;
 
   static inline unsigned ndim () { return 1; }
-  static inline T& element (T& t, unsigned idim) { return t; }
-  static inline const T& element (const T& t, unsigned idim) { return t; }
+  static inline T& element (T& t, unsigned) { return t; }
+  static inline const T& element (const T& t, unsigned) { return t; }
 };
 
 //! Partial specialization for complex data
@@ -112,12 +112,12 @@ std::complex<T> ci (const T& real)
 
 //! Return the conjugate of a real number
 template<typename T>
-T myconj (const T& x) { return ElementTraits<T>::conjugate(x); };
+T myconj (const T& x) { return ElementTraits<T>::conjugate(x); }
 
 //! Return the real part of a real number
 template<typename T>
 typename ElementTraits<T>::real
-myreal (const T& x) { return ElementTraits<T>::to_real(x); };
+myreal (const T& x) { return ElementTraits<T>::to_real(x); }
 
 #endif
 

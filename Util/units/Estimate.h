@@ -81,10 +81,10 @@ class Estimate
   U get_error () const { return sqrt(var); }
 
   //! Array access to value
-  T& operator [] (unsigned n) { return val; }
+  T& operator [] (unsigned) { return val; }
 
   //! Array access to value
-  T operator [] (unsigned n) const { return val; }
+  T operator [] (unsigned) const { return val; }
 
   //! Addition operator
   const Estimate& operator+= (const Estimate& d)
@@ -97,7 +97,7 @@ class Estimate
   //! Multiplication operator
   /*! Where \f$ r=x*y \f$, \f$\sigma^2_r = y^2\sigma^2_x + x^2\sigma^2_y\f$ */
   const Estimate& operator*= (const Estimate& d)
-  { T v=val; val*=d.val; var=v*v*d.var+d.val*d.val*var; return *this; }
+  { var=val*val*d.var+d.val*d.val*var; val*=d.val; return *this; }
 
   //! Division operator
   const Estimate& operator/= (const Estimate& d)
@@ -183,13 +183,13 @@ class Estimate
   { T val = ::atanh (u.val); T del=1/(1-u.val*u.val);
     return Estimate (val, del*del*u.var); }
 
-  friend const int isfinite (const Estimate& u)
+  friend int isfinite (const Estimate& u)
   { return isfinite (u.val); }
 
-  friend const int isinf (const Estimate& u)
+  friend int isinf (const Estimate& u)
   { return isinf (u.val); }
 
-  friend const int isnan (const Estimate& u)
+  friend int isnan (const Estimate& u)
   { return isnan (u.val); }
 
   friend const T abs (const Estimate& u)
@@ -205,9 +205,9 @@ template <class T, class U> struct DatumTraits< Estimate<T,U> >
 {
   ElementTraits<T> element_traits;
   static inline unsigned ndim () { return 1; }
-  static inline T& element (Estimate<T,U>& t, unsigned idim) 
+  static inline T& element (Estimate<T,U>& t, unsigned) 
   { return t.val; }
-  static inline const T& element (const Estimate<T,U>& t, unsigned idim)
+  static inline const T& element (const Estimate<T,U>& t, unsigned)
   { return t.val; }
 };
 

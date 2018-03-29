@@ -202,7 +202,9 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
   /*
     Write an empty page at the end of the file
   */
-  char temp [page_size];
+  vector<char> buf (page_size);
+  char* temp = &(buf[0]);
+
   result = write( get_fd(), temp, page_size );
   if (result != page_size)
   {

@@ -176,10 +176,10 @@ namespace TextInterface
     void set_value (V* ptr, const std::string& value);
 
     //! Set the description of the attribute
-    void set_description (const std::string& description) {}
+    void set_description (const std::string&) {}
 
     //! Set the detailed description of the attribute
-    void set_detailed_description (const std::string& description) {}
+    void set_detailed_description (const std::string&) {}
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
@@ -263,10 +263,10 @@ namespace TextInterface
     void set_value (M* ptr, const std::string& value);
 
     //! Set the description of the attribute
-    void set_description (const std::string& description) {}
+    void set_description (const std::string&) {}
 
     //! Set the detailed description of the attribute
-    void set_detailed_description (const std::string& description) {}
+    void set_detailed_description (const std::string&) {}
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;

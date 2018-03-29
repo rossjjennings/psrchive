@@ -51,6 +51,7 @@ namespace Pulsar
     //! Derived type factory
     static Extension* factory (const std::string& name);
 
+    //! Convenience class implements TextInterface::To<T>::get_interface_name
     template<typename T>
       class Interface : public TextInterface::To<T>
     {

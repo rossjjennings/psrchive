@@ -100,6 +100,34 @@ void Pulsar::Integration::add_extension (Extension* ext)
   }
 }
 
+//! Return a comma-separated list of the short names of all extensions
+std::string Pulsar::Integration::list_extensions () const
+{
+  return "not implemented";
+}
+
+//! Add or remove extensions with the specified short name
+void Pulsar::Integration::edit_extensions (const std::string& name)
+{
+  string ext = name.substr(1);
+
+  if (name[0] == '+')
+    add_extension( Integration::Extension::factory(ext) );
+  
+  else if (name[0] == '-')
+  {
+    unsigned next = get_nextension();
+
+    for (unsigned i=0; i<next; i++)
+    if (get_extension(i)->get_extension_name() == ext
+	|| get_extension(i)->get_short_name() == ext)
+      delete get_extension(i);
+  }
+  else
+    throw Error (InvalidParam, "Pulsar::Integration::edit_extensions",
+		 "command starts with neither '+' nor '-'");
+}
+
 static unsigned instance_count = 0;
 
 unsigned Pulsar::Integration::get_instance_count ()

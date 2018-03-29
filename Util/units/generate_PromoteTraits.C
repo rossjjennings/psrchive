@@ -30,11 +30,11 @@
 
 using namespace std;
 
-int main (int argc, char** argv) {
-
+int main (int argc, char** argv)
+{
   bool verbose = false;
 
-  if (argc > 1)
+  if (argc > 1 && string(argv[1]) == "-v")
     verbose = true;
 
   // it is assumed that header_PromoteTraits.h is copied to PromoteTraits.h
@@ -74,4 +74,5 @@ int main (int argc, char** argv) {
 
   return 0;
 
-};
+}
+

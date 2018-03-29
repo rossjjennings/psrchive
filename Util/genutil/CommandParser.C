@@ -243,7 +243,7 @@ string CommandParser::parse2 (const string& command, const string& arguments)
   return total_reply;
 }
 
-bool CommandParser::evaluate (const string& expression)
+bool CommandParser::evaluate (const string&)
 {
   throw Error (InvalidState, "CommandParser::evaluate",
 	       "expression evaluation not implemented");

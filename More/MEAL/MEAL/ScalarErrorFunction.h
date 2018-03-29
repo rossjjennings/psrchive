@@ -15,7 +15,7 @@
 
 namespace MEAL {
 
-  //! The error function \f$ \erf(x) \f$ of a Scalar function
+  //! The error function \f$ \mathrm{erf}(x) \f$ of a Scalar function
   class ScalarErrorFunction : public UnaryScalar
   {
 

@@ -89,7 +89,7 @@ namespace TextInterface {
       { return tostring (*value_ptr); }
 
     //! Set the value as text
-    void set_value (const std::string& text)
+    void set_value (const std::string&)
       { throw Error (InvalidState, "ValueGet::set_value", 
 		     name + " cannot be set"); }
 

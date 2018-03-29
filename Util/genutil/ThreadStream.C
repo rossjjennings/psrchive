@@ -12,11 +12,13 @@
 
 using namespace std;
 
+#ifdef HAVE_PTHREAD
 static void destructor (void* value)
 {
   ostream* stream = reinterpret_cast<ostream*> (value);
   delete stream;
 }
+#endif
 
 ThreadStream::ThreadStream ()
 {
