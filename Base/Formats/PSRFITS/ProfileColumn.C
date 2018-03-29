@@ -202,14 +202,16 @@ void Pulsar::ProfileColumn::resize ()
 	 << " resized to " << nchan*nprof << endl;
 
   // number of values to be written
-  uint64_t nvalue = nbin*nchan*nprof;
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+
+  nrow = 1;
+
+#if 0 // try resizing a larger number of rows of some maximum size
+
   // assuming 16-bit word per value
   const uint64_t bytes_per_value = 2;
   
   const uint64_t nbyte = nvalue * bytes_per_value;
-  nrow = 1;
-
-#if 0 // try resizing a larger number of rows of some maximum size
 
   // experimentally determined limit, beyond which CFITSIO becomes inefficient
   const uint64_t maximum_bytes = 1 << 19;
@@ -268,8 +270,6 @@ void Pulsar::ProfileColumn::unload (int row,
   
   //= pow(2.0,16.0)-1.0;
 
-  unsigned bins_written = 0;
-
   vector<float> offsets (prof.size());
   vector<float> scales (prof.size());
 
@@ -317,39 +317,42 @@ void Pulsar::ProfileColumn::unload (int row,
     cerr << "Pulsar::ProfileColumn::unload writing scales" << endl;
   psrfits_write_col (fptr, scale_colnum, row, scales, dims);
 
+  // number of values to be written
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+
+  // 16 bit representation of profile amplitudes
+  vector<int16_t> compressed (nvalue);
+   
   for (unsigned iprof=0; iprof < prof.size(); iprof++)
   {
     const unsigned nbin = prof[iprof]->get_nbin();
     const float* amps = prof[iprof]->get_amps();
 
-    // 16 bit representation of profile amplitudes
-    vector<int16_t> compressed (nbin);
-   
     // Apply the offset and scale factor 
     for (unsigned ibin = 0; ibin < nbin; ibin++)
-      compressed[ibin] = int16_t ((amps[ibin]-offsets[iprof]) / scales[iprof]);
-
-    // Write the data
-    
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload writing data"
-	" iprof=" << iprof << endl;
-
-    int status = 0;
-    
-    fits_write_col (fptr, TSHORT, data_colnum, row, bins_written + 1, nbin, 
-		    &(compressed[0]), &status);
-
-    if (status != 0)
-      throw FITSError (status, "Pulsar::ProfileColumn::unload",
-		       "fits_write_col DATA");
-
-    bins_written += nbin;
+    {
+      int16_t value = (amps[ibin]-offsets[iprof]) / scales[iprof];
+      compressed[iprof*nbin+ibin] = value;
+    }
 
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof << "written" 
 	   << endl;
   }
+
+  // Write the data
+    
+  if (verbose)
+    cerr << "Pulsar::ProfileColumn::unload writing data" << endl;
+
+  int status = 0;
+  int offset = 1;
+  fits_write_col (fptr, TSHORT, data_colnum, row, offset, nvalue, 
+		  &(compressed[0]), &status);
+
+  if (status != 0)
+    throw FITSError (status, "Pulsar::ProfileColumn::unload",
+		     "fits_write_col DATA");
 }
 
 //! Load the given vector of profiles
@@ -435,11 +438,11 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
   int status = 0;  
   int counter = 1;
 
-  unsigned namp = nprof * nchan * nbin;
-  vector<T> temparray (namp);
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+  vector<T> temparray (nvalue);
 
   fits_read_col (fptr, FITS_traits<T>::datatype(),
-		 get_data_colnum(), row, counter, namp, 
+		 get_data_colnum(), row, counter, nvalue, 
 		 &null, &(temparray[0]), &initflag, &status);
 
   if (status != 0)
@@ -448,7 +451,7 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
 		     " nprof=%u nchan=%u nbin=%u \n\t"
 		     "colnum=%d firstrow=%d firstelem=%d nelements=%d",
 		     nprof, nchan, nbin,
-		     data_colnum, row, counter, namp );
+		     data_colnum, row, counter, nvalue );
   
   unsigned index = 0;
   for (unsigned iprof = 0; iprof < nprof; iprof++)
