@@ -17,6 +17,7 @@
 #include "Pulsar/Backend.h"
 
 #include "Pulsar/Parameters.h"
+#include "Pulsar/TextParameters.h"
 #include "load_factory.h"
 
 #include "Pulsar/Dispersion.h"
@@ -219,6 +220,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
 %include "Pulsar/Parameters.h"
+%include "Pulsar/TextParameters.h"
 %include "Pulsar/ProfileShiftFit.h"
 %include "Pulsar/WaveletSmooth.h"
 %include "Pulsar/Append.h"
