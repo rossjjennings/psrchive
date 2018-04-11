@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/FixInterpreter.h"
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Integration.h"
