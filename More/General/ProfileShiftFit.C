@@ -46,6 +46,8 @@ void Pulsar::ProfileShiftFit::init ()
 
   err_meth = Traditional_Chi2;
 
+  mcmc_it = 1000;
+
   computed=false;
   shift=0.0;
   eshift=0.0;
@@ -352,7 +354,6 @@ void Pulsar::ProfileShiftFit::error_mcmc_pdf_var()
   // Run for some number of samples, calc variance relative to
   // best-fit position.  We'll try w/ no "burn-in" since we're
   // starting from a known high probability state.
-  int mcmc_it = 1000;
   double sum=0.0; 
   for (int i=0; i<mcmc_it; i++) {
     // "Standard" variance

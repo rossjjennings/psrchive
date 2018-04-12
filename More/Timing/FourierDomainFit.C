@@ -17,20 +17,18 @@ Pulsar::FourierDomainFit::FourierDomainFit ()
   snr = 0.0;
 }
 
+void Pulsar::FourierDomainFit::set_standard (const Profile* p)
+{
+  standard = p;
+  fit.set_standard(standard);
+  fit.set_nharm(standard->get_nbin()/4);  // Use half the harmonics
+}
+
 Estimate<double> Pulsar::FourierDomainFit::get_shift () const
 {
-  // TODO: figure out a way to reliably cache a standard profile
-  // Do we really need to make copies here?
-  Profile stdcopy = *standard;
   Profile prfcopy = *observation;
 
-  Reference::To<Profile> std_p = &stdcopy;
   Reference::To<Profile> obs_p = &prfcopy;
-
-  ProfileShiftFit fit;
-
-  fit.set_standard(std_p);
-  fit.set_nharm(std_p->get_nbin()/4);  // Use half the harmonics
 
   if (use_mcmc)
     fit.set_error_method(ProfileShiftFit::MCMC_Variance);
@@ -84,6 +82,10 @@ FourierDomainFit::Interface::Interface (FourierDomainFit* instance)
   add( &FourierDomainFit::get_mcmc,
        &FourierDomainFit::set_mcmc,
        "mcmc", "Use Markov chain Monte Carlo to estimate uncertainty");
+
+  add( &FourierDomainFit::get_iterations,
+       &FourierDomainFit::set_iterations,
+       "iter", "Number of iterations for MCMC uncertainty calculation");
 }
 
 TextInterface::Parser* FourierDomainFit::get_interface ()

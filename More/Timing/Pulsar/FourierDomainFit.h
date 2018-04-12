@@ -12,6 +12,7 @@
 #define __Pulsar_FourierDomainFit_h
 
 #include "Pulsar/ProfileStandardShift.h"
+#include "Pulsar/ProfileShiftFit.h"
 
 namespace Pulsar {
 
@@ -22,6 +23,9 @@ namespace Pulsar {
   public:
 
     FourierDomainFit ();
+
+    //! Set the template profile
+    void set_standard (const Profile* p);
 
     //! Return the shift estimate
     Estimate<double> get_shift () const;
@@ -42,6 +46,10 @@ namespace Pulsar {
     void set_mcmc (bool flag = true) { use_mcmc = flag; }
     bool get_mcmc () const { return use_mcmc; }
 
+    //! Set number of iterations for MCMC
+    void set_iterations (int nit) { fit.set_mcmc_iterations(nit); }
+    int get_iterations () const { return fit.get_mcmc_iterations(); }
+
   protected:
 
     class Interface;
@@ -54,6 +62,9 @@ namespace Pulsar {
 
     //! S/N ratio of last profile fit
     mutable double snr;
+
+    //! The class that does the actual fit
+    mutable ProfileShiftFit fit;
 
   };
 

@@ -68,6 +68,12 @@ namespace Pulsar
     //! Set the error method
     void set_error_method(Error_Method e) { err_meth = e; }
 
+    //! Set number of iterations for MCMC errors
+    void set_mcmc_iterations(int nit) { mcmc_it = nit; }
+
+    //! Get number of iterations
+    int get_mcmc_iterations() const { return mcmc_it; }
+
     //! Set the standard or template profile to use
     void set_standard (const Profile* p);
 
@@ -180,6 +186,9 @@ namespace Pulsar
 
     //! Calculate shift uncertainty as posterior PDF variance using MCMC
     void error_mcmc_pdf_var();
+
+    //! Number of iterations to use for MCMC
+    int mcmc_it;
 
     //! Have valid results been computed
     bool computed;
