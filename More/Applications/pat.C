@@ -188,6 +188,7 @@ void usage ()
     "  -G char          Format/flag separator char for -f [default: space]\n"   
     "  -C \"<options>\"   Select vap-like options to be displayed on output \n"
     "  -C \"<subint> <chan>\" Print subint and/or channel                    \n"
+    "  -X \"text\"        Extra TOA-line text to add (if using tempo2 format)\n"
     "  -r               Print reference phase and dt \n"
     "  -R               Print only the phase shift and error in turns \n"
     "  -u               Print as pat-like format smjd + dt \n"
@@ -265,7 +266,7 @@ int main (int argc, char** argv) try
 #define PLOT_ARGS
 #endif
 
-  const char* args = "a:A:bcC:Dde:E:f:Fg:G:hij:J:K:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
+  const char* args = "a:A:bcC:Dde:E:f:Fg:G:hij:J:K:m:M:n:pPqRrS:s:TuvVxX:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -452,6 +453,10 @@ int main (int argc, char** argv) try
 
     case 'x':
       preprocess = false;
+      break;
+
+    case 'X':
+      arrival->set_extra_text(optarg);
       break;
 
     case 'z':

@@ -71,6 +71,11 @@ std::string Pulsar::ArrivalTime::get_tempo2_aux_txt (const Tempo::toa& toa)
     }
   }
 
+  // Any extra user-specified text (not checked for conformance with proper
+  // flag formatting):
+  if (extra_text.length())
+    args += " " + extra_text;
+
   return args;
 }
 

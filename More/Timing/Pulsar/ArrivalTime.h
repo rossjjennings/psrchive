@@ -68,6 +68,9 @@ namespace Pulsar {
     //! Set additional attributes
     void set_attributes (const std::vector< std::string >&);
 
+    //! Set additional TOA text (only used in tempo2 format)
+    void set_extra_text (const std::string&);
+
     //! Skip data with zero weight
     void set_skip_bad (bool flag) { skip_bad = flag; }
 
@@ -104,6 +107,9 @@ namespace Pulsar {
 
     //! additional format-specific flags
     std::string format_flags;
+
+    //! additional TOA line text
+    std::string extra_text;
 
     //! for formats that support it, a list of attributes to add
     std::vector<std::string> attributes;
