@@ -361,16 +361,9 @@ void Pulsar::ProfileShiftFit::error_mcmc_pdf_var()
     x = fabs(x);
     if (x>0.5) x = 1.0 - x;
     sum += x*x;
-    // Circular variance
-    //double z = 2.0*M_PI*mcmc_sample();
-    //rsum += cos(z);
-    //isum += sin(z);
   }
   sum /= (double)mcmc_it;
   eshift = sqrt(sum);
-  //rsum /= (double)mcmc_it;
-  //isum /= (double)mcmc_it;
-  //eshift = sqrt(1.0 - rsum*rsum - isum*isum)/(2.0*M_PI);
 }
 
 void Pulsar::ProfileShiftFit::mcmc_init()
