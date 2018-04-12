@@ -323,14 +323,14 @@ void Pulsar::ProfileShiftFit::compute()
 double Pulsar::ProfileShiftFit::log_shift_pdf(double phi)
 {
   double c = ccf(phi);
-  c = (c*c)/(2.0*sigma2*std_pow);
+  c = (c*c)/(2.0*mse*std_pow);
   return(c);
 }
 
 double Pulsar::ProfileShiftFit::log_shift_pdf_pos(double phi)
 {
   double c = ccf(phi);
-  c /= sqrt(2.0*sigma2*std_pow);
+  c /= sqrt(2.0*mse*std_pow);
   return(c*c + log(1.0 + erf(c)));
 }
 
