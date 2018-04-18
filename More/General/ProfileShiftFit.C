@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/ProfileShiftFit.h"
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/Profile.h"
@@ -24,9 +28,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO include config.h, test for GSL
+#if HAVE_GSL
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_errno.h>
+#endif
 
 using namespace std;
 
@@ -60,7 +65,10 @@ void Pulsar::ProfileShiftFit::init ()
   sigma2=0.0;
   mse=0.0;
 
+#if HAVE_GSL
   gsl_set_error_handler_off();
+#endif
+
 }
 
 Pulsar::ProfileShiftFit::ProfileShiftFit()
@@ -353,12 +361,13 @@ void Pulsar::ProfileShiftFit::error_traditional()
   escale = sqrt(mse / std_pow);
 }
 
+#if HAVE_GSL
+
 // Wrapper for GSL integators
 double Pulsar::ProfileShiftFit::f_pdf(double phi, void *_psf)
 {
   Pulsar::ProfileShiftFit *psf = (Pulsar::ProfileShiftFit *)_psf;
   double ll = psf->log_shift_pdf_pos(phi) - psf->max_log_pdf;
-  //cerr << phi << " " << psf->shift << " " << ll << " " << exp(ll) <<endl;
   return exp(ll);
 }
 
@@ -368,12 +377,6 @@ double Pulsar::ProfileShiftFit::f_pdf_x2(double phi, void *_psf)
   Pulsar::ProfileShiftFit *psf = (Pulsar::ProfileShiftFit *)_psf;
   double ll = psf->log_shift_pdf_pos(phi) - psf->max_log_pdf;
   return exp(ll + 2.0*log(abs(phi-psf->shift)));
-}
-
-static double foo (double phi, void *_psf)
-{
-  Pulsar::ProfileShiftFit *psf = (Pulsar::ProfileShiftFit *)_psf;
-  return (double)psf->get_mcmc_iterations();
 }
 
 static void integration_error_check(int rv)
@@ -465,6 +468,16 @@ void Pulsar::ProfileShiftFit::error_numerical()
 
   gsl_integration_workspace_free(w);
 }
+
+#else // no GSL
+
+void Pulsar::ProfileShiftFit::error_numerical()
+{
+  throw Error (InvalidParam, "Pulsar::ProfileShiftFit::error_numerical",
+      "Numerical PDF integration requires GSL");
+}
+
+#endif
 
 void Pulsar::ProfileShiftFit::error_mcmc_pdf_var() 
 {

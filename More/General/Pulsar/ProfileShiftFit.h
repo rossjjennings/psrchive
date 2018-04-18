@@ -37,7 +37,7 @@ namespace Pulsar
    * <li> Additional information (fitted amplitude, profile sigma, etc) is
    *      returned in a cleaner, more extensible object oriented way.
    * <li> Supports multiple/alternate phase shift error calculation 
-   *      algorithms (not implemented yet).
+   *      algorithms.
    * </ol>
    */
   class ProfileShiftFit : public Algorithm
@@ -228,9 +228,6 @@ namespace Pulsar
     //! Current profile SNR
     double snr;
 
-    static double f_pdf(double phi, void *_psf);
-    static double f_pdf_x2(double phi, void *_psf);
-
   private:
 
     //! Normal random number generator
@@ -251,6 +248,9 @@ namespace Pulsar
     //! Peak log PDF (to help avoid numerical issues)
     double max_log_pdf;
 
+    //! Wrappers for PDF evaluation when numerically integrating
+    static double f_pdf(double phi, void *_psf);
+    static double f_pdf_x2(double phi, void *_psf);
 
   };
 
