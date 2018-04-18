@@ -391,7 +391,7 @@ static double do_integration(gsl_function *func, double shift, double eshift,
 {
   int rv;
   double ftmp, etmp, result=0.0;
-  const double ftol = 1e-5;
+  const double ftol = 1e-4;
   double cutoff = 5.0*eshift;
 
   if (cutoff > 0.5) { cutoff = 0.25; }
