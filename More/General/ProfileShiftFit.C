@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO include config.h, test for GSL
+#include <gsl/gsl_integration.h>
+
 using namespace std;
 
 static Warning warn;
@@ -297,8 +300,9 @@ void Pulsar::ProfileShiftFit::compute()
   // Put params/etc in correct place
 
   // Correct shift for different FFT length phase offset, if any
-  double correction = 0.5/nbins_prof - 0.5/nbins_std;
-  shift = phi + correction;
+  correction = 0.5/nbins_prof - 0.5/nbins_std;
+  //shift = phi + correction;
+  shift = phi;
 
   scale = max_ccf / std_pow;
   dof = 2*effective_nharm - 2;
@@ -312,6 +316,9 @@ void Pulsar::ProfileShiftFit::compute()
   switch (err_meth) {
     case MCMC_Variance:
       error_mcmc_pdf_var();
+      break;
+    case Numerical:
+      error_numerical();
       break;
     case Traditional_Chi2:
     default:
@@ -341,6 +348,110 @@ void Pulsar::ProfileShiftFit::error_traditional()
   // "Traditional" uncertainty calc based on Chi^2 2nd derivs
   eshift = sqrt(mse / (-1.0 * scale * d2ccf(shift)));
   escale = sqrt(mse / std_pow);
+}
+
+// Wrapper for GSL integators
+double Pulsar::ProfileShiftFit::f_pdf(double phi, void *_psf)
+{
+  Pulsar::ProfileShiftFit *psf = (Pulsar::ProfileShiftFit *)_psf;
+  double ll = psf->log_shift_pdf_pos(phi) - psf->max_log_pdf;
+  //cerr << phi << " " << psf->shift << " " << ll << " " << exp(ll) <<endl;
+  return exp(ll);
+}
+
+// Wrapper for GSL integators
+double Pulsar::ProfileShiftFit::f_pdf_x2(double phi, void *_psf)
+{
+  Pulsar::ProfileShiftFit *psf = (Pulsar::ProfileShiftFit *)_psf;
+  double ll = psf->log_shift_pdf_pos(phi) - psf->max_log_pdf;
+  return exp(ll + 2.0*log(abs(phi-psf->shift)));
+}
+
+static double foo (double phi, void *_psf)
+{
+  Pulsar::ProfileShiftFit *psf = (Pulsar::ProfileShiftFit *)_psf;
+  return (double)psf->get_mcmc_iterations();
+}
+
+static double do_integration(gsl_function *func, double shift, double eshift,
+    gsl_integration_workspace *w)
+{
+  int rv;
+  double ftmp, etmp, result=0.0;
+  const double ftol = 1e-5;
+  double cutoff = 5.0*eshift;
+
+  if (cutoff > 0.5) { cutoff = 0.25; }
+
+  rv = gsl_integration_qag(func, 
+      shift-0.5, 
+      shift-cutoff,
+      0.0, ftol, 
+      w->limit, GSL_INTEG_GAUSS15, w,
+      &ftmp, &etmp);
+  result += ftmp;
+  //cerr << "left=" << ftmp;
+
+  rv = gsl_integration_qag(func, 
+      shift-cutoff,
+      shift+cutoff,
+      0.0, ftol, 
+      w->limit, GSL_INTEG_GAUSS21, w,
+      &ftmp, &etmp);
+  result += ftmp;
+  //cerr << " middle=" << ftmp;
+
+  rv = gsl_integration_qag(func, 
+      shift+cutoff,
+      shift+0.5,
+      0.0, ftol, 
+      w->limit, GSL_INTEG_GAUSS15, w,
+      &ftmp, &etmp);
+  result += ftmp;
+  //cerr << " right=" << ftmp << endl;
+
+  return result;
+}
+
+void Pulsar::ProfileShiftFit::error_numerical()
+{
+  // Numerically integrate the PDF using GSL routines to get 
+  // the uncertainty.
+
+  // Init with usual errors
+  error_traditional();
+
+  // Use to rescale PDF; should make area~1.0 if normal approx is valid
+  max_log_pdf = log_shift_pdf_pos(shift) + 0.5*log(2.0*M_PI*eshift*eshift);
+  
+  // Set up workspace
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(2*nbins_ccf); // ?
+
+  //cerr << "nb=" << nbins_ccf << " w->size=" << w->size << " w->limit=" << w->limit << endl;
+
+  double top=0.0, bot=0.0, etop, ebot;
+
+  // Integrate PDF
+  gsl_function F;
+  F.function = &Pulsar::ProfileShiftFit::f_pdf;
+  F.params = this;
+  bot = do_integration(&F, shift, eshift, w);
+  //cerr << "bot=" << bot << endl;
+
+  // TODO check for errors
+  
+  // Integrate PDF*x^2
+  F.function = &f_pdf_x2;
+  top = do_integration(&F, shift, eshift, w);
+  //cerr << "top=" << top << endl;
+
+  //cerr << "II " << top << " " << bot << endl;
+
+  // TODO check for errors
+
+  eshift = sqrt(top/bot);
+
+  gsl_integration_workspace_free(w);
 }
 
 void Pulsar::ProfileShiftFit::error_mcmc_pdf_var() 
@@ -425,7 +536,7 @@ Tempo::toa Pulsar::ProfileShiftFit::toa(const Integration* subint)
 Estimate<double> Pulsar::ProfileShiftFit::get_shift()
 {
   if (!computed) compute();
-  return(Estimate<double>(shift, eshift*eshift));
+  return(Estimate<double>(shift + correction, eshift*eshift));
 }
 
 Estimate<double> Pulsar::ProfileShiftFit::get_scale()

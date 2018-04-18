@@ -12,7 +12,7 @@ using namespace std;
 
 Pulsar::FourierDomainFit::FourierDomainFit ()
 {
-  use_mcmc = true;
+  error_method = "mcmc";
   reduced_chisq = 0;
   snr = 0.0;
 }
@@ -30,10 +30,15 @@ Estimate<double> Pulsar::FourierDomainFit::get_shift () const
 
   Reference::To<Profile> obs_p = &prfcopy;
 
-  if (use_mcmc)
+  if (error_method=="mcmc")
     fit.set_error_method(ProfileShiftFit::MCMC_Variance);
-  else
+  else if (error_method=="trad")
     fit.set_error_method(ProfileShiftFit::Traditional_Chi2);
+  else if (error_method=="num")
+    fit.set_error_method(ProfileShiftFit::Numerical);
+  else
+    throw Error (InvalidParam, "Pulsar::FourierDomainFit::get_shift",
+        "Uncertainty method '" + error_method + "' not known");
 
   fit.set_Profile(obs_p);
 
@@ -86,6 +91,10 @@ FourierDomainFit::Interface::Interface (FourierDomainFit* instance)
   add( &FourierDomainFit::get_iterations,
        &FourierDomainFit::set_iterations,
        "iter", "Number of iterations for MCMC uncertainty calculation");
+
+  add( &FourierDomainFit::get_error_method,
+       &FourierDomainFit::set_error_method,
+       "err", "Unceratinty calculation method");
 }
 
 TextInterface::Parser* FourierDomainFit::get_interface ()

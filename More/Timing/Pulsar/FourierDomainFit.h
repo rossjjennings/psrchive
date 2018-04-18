@@ -43,19 +43,23 @@ namespace Pulsar {
     FourierDomainFit* clone () const { return new FourierDomainFit(*this); }
 
     //! Use Markov Chain Monte Carlo method to determine TOA uncertainty
-    void set_mcmc (bool flag = true) { use_mcmc = flag; }
-    bool get_mcmc () const { return use_mcmc; }
+    void set_mcmc (bool flag = true) { error_method = flag ? "mcmc" : "trad"; }
+    bool get_mcmc () const { return error_method=="mcmc"; }
 
     //! Set number of iterations for MCMC
     void set_iterations (int nit) { fit.set_mcmc_iterations(nit); }
     int get_iterations () const { return fit.get_mcmc_iterations(); }
 
+    //! Set uncertainty calculation method
+    void set_error_method (std::string m) { error_method=m; }
+    std::string get_error_method () const { return error_method; }
+
   protected:
 
     class Interface;
 
-    //! Use Markov Chain Monte Carlo method to determine TOA uncertainty
-    bool use_mcmc;
+    //! The uncertainty calculation method
+    std::string error_method;
 
     //! Reduced chisq of last call to get_shift
     mutable double reduced_chisq;
