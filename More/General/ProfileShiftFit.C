@@ -26,6 +26,7 @@
 
 // TODO include config.h, test for GSL
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_errno.h>
 
 using namespace std;
 
@@ -58,6 +59,8 @@ void Pulsar::ProfileShiftFit::init ()
   escale=0.0;
   sigma2=0.0;
   mse=0.0;
+
+  gsl_set_error_handler_off();
 }
 
 Pulsar::ProfileShiftFit::ProfileShiftFit()
@@ -373,6 +376,16 @@ static double foo (double phi, void *_psf)
   return (double)psf->get_mcmc_iterations();
 }
 
+static void integration_error_check(int rv)
+{
+  if (rv==0) return;
+  if (rv==GSL_EROUND)
+    warn << "ProfileShiftFit: roundoff error in uncertainty integration" << endl;
+  else 
+    throw Error (FailedCall, "Pulsar::ProfileShiftFit::do_integration",
+        "GSL error: '%s'", gsl_strerror(rv));
+}
+
 static double do_integration(gsl_function *func, double shift, double eshift,
     gsl_integration_workspace *w)
 {
@@ -391,6 +404,7 @@ static double do_integration(gsl_function *func, double shift, double eshift,
       &ftmp, &etmp);
   result += ftmp;
   //cerr << "left=" << ftmp;
+  integration_error_check(rv);
 
   rv = gsl_integration_qag(func, 
       shift-cutoff,
@@ -400,6 +414,7 @@ static double do_integration(gsl_function *func, double shift, double eshift,
       &ftmp, &etmp);
   result += ftmp;
   //cerr << " middle=" << ftmp;
+  integration_error_check(rv);
 
   rv = gsl_integration_qag(func, 
       shift+cutoff,
@@ -409,6 +424,7 @@ static double do_integration(gsl_function *func, double shift, double eshift,
       &ftmp, &etmp);
   result += ftmp;
   //cerr << " right=" << ftmp << endl;
+  integration_error_check(rv);
 
   return result;
 }
@@ -438,16 +454,12 @@ void Pulsar::ProfileShiftFit::error_numerical()
   bot = do_integration(&F, shift, eshift, w);
   //cerr << "bot=" << bot << endl;
 
-  // TODO check for errors
-  
   // Integrate PDF*x^2
   F.function = &f_pdf_x2;
   top = do_integration(&F, shift, eshift, w);
   //cerr << "top=" << top << endl;
 
   //cerr << "II " << top << " " << bot << endl;
-
-  // TODO check for errors
 
   eshift = sqrt(top/bot);
 
