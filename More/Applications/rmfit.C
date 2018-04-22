@@ -149,6 +149,8 @@ void usage ()
     "  -p [x1,x2]        Fit for every phase bin in window \n"
     "  -w [x1,x2]        Average over phase window \n"
     "  -Y                Produce a postscript plot of V against frequency\n"
+    "  -T sigma_L        Set threshold used to select bins (default: all)\n"
+    "  -C weight         Set threshold used to select channels (default: all)\n"
     "\n"
     "Preprocessing options: \n"
     "  -B [factor]       Scrunch in phase bins \n"
@@ -179,7 +181,7 @@ static float auto_step_rad = 0.0;
 static float auto_max_rad = 1.0;
 
 static unsigned auto_minsteps = 10;
-static float refine_threshold = -1;
+static float selection_threshold = -1;
 static unsigned max_iterations = 10;
 
 Estimate<double> best_search_rm;
@@ -222,7 +224,7 @@ int main (int argc, char** argv)
   float x1 = 0.0;
   float x2 = 0.0;
 
-  float threshold = 0.01;
+  float channel_weight_threshold = 0.01;
 
   bool log_results = false;
 
@@ -387,7 +389,10 @@ int main (int argc, char** argv)
       break;
 
     case 'C':
-      refine_threshold = atof (optarg);
+      if (sscanf(optarg, "%f", &channel_weight_threshold) != 1) {
+	cerr << "That is not a valid channel weight threshold!" << endl;
+	return -1;
+      }
       break;
 
     case 'R':
@@ -403,11 +408,7 @@ int main (int argc, char** argv)
       break;
 
     case 'T':
-      if (sscanf(optarg, "%f", &threshold) != 1) {
-	cerr << "That is not a valid cut-off!" << endl;
-	return -1;
-      }
-      refine_threshold = threshold;
+      selection_threshold = atof (optarg);
       break;
 
     case 'J':
@@ -494,8 +495,6 @@ int main (int argc, char** argv)
       cpgsubp(nx,ny);
     }
 #endif
-
-  lthresh = -3.5;// threshold for good phase bins (if negative, allow all bins)
 
   Reference::To<Pulsar::Archive> data;
 
@@ -663,7 +662,7 @@ int main (int argc, char** argv)
           ofstream test_goodchans;
 
 	  for (unsigned i = 0; i < data->get_nchan(); i++) {
-	    if (data->get_Integration(0)->get_weight(i) > threshold){ 
+	    if (data->get_Integration(0)->get_weight(i) > channel_weight_threshold){ 
 	      goodchans.push_back(i);
 
 	      }
@@ -1410,10 +1409,10 @@ void do_refine (Reference::To<Pulsar::Archive> data,
 {
   Pulsar::DeltaRM delta_rm;
 
-  if (refine_threshold != -1)
+  if (selection_threshold != -1)
   {
-    cerr << "rmfit: do_refine set threshold = " << refine_threshold << endl;
-    delta_rm.set_threshold (refine_threshold);
+    cerr << "rmfit: do_refine set threshold = " << selection_threshold << endl;
+    delta_rm.set_threshold (selection_threshold);
   }
 
   delta_rm.set_include (include_bins);
@@ -1713,7 +1712,7 @@ pa_plot( int rise_bin, int fall_bin,
 
 	float snr = lchan[ibin]/lrms;
 	
-	if(snr > lthresh){      
+	if(snr > selection_threshold){      
 
 
 	  tot_q += qchan[ibin];
@@ -1734,7 +1733,7 @@ pa_plot( int rise_bin, int fall_bin,
 
 	float snr = lchan[ibin]/lrms;
 
-	if(snr > lthresh){      
+	if(snr > selection_threshold){      
 
 
 	  tot_q += qchan[ibin];
@@ -1753,7 +1752,7 @@ pa_plot( int rise_bin, int fall_bin,
 
 	float snr = lchan[ibin]/lrms;
 
-	if(snr > lthresh){      
+	if(snr > selection_threshold){      
 
 
 	  tot_q += qchan[ibin];
@@ -1854,7 +1853,7 @@ pa_plot( int rise_bin, int fall_bin,
 
   good_fbscrunch = true;
 
-  if(lthresh>0.) 
+  if(selection_threshold>0.) 
       cerr <<endl<<endl<<endl<< "  ***  Got "<<vgoodchans.size()<<" channels above threshold! *** " <<endl<<
                             "Proceeding with fit ..." <<endl<<endl;  
   else
