@@ -9,6 +9,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Database.h"
+#include "Pulsar/PolnCalibratorExtension.h"
 
 #include "strutil.h"
 
@@ -24,6 +25,18 @@ Pulsar::ChannelSubsetMatch::ChannelSubsetMatch()
 
 Pulsar::ChannelSubsetMatch::~ChannelSubsetMatch()
 {
+}
+
+double get_channel_frequency (const Pulsar::Archive* archive, unsigned ichan)
+{
+  // Use a CalExtension if it is present (for stored calibration solutions)
+  // otherwise use subint 0
+  const Pulsar::CalibratorExtension* ext = 
+    archive->get<Pulsar::CalibratorExtension>();
+  if (ext)
+    return ext->get_centre_frequency (ichan);
+  else
+    return archive->get_Integration(0)->get_centre_frequency (ichan);
 }
 
 bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Archive* super,
@@ -48,13 +61,18 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Archive* super,
     return false;
   }
 
+  // Set fractional freq tolerance to either 1% of channel BW
+  // or the default, whichever is larger.
+  double freq_tol_match = fabs(1e-2*sub_chbw/get_channel_frequency(sub,0));
+  if (freq_tol > freq_tol_match) { freq_tol_match = freq_tol; }
+
   // Loop over "sub" chans, make sure they all exist in super
   unsigned n_matched=0;
   for (unsigned i=0; i<sub->get_nchan(); i++) {
     double sub_freq = sub->get_Integration(0)->get_centre_frequency(i);
     for (unsigned j=0; j<super->get_nchan(); j++) {
       double super_freq = super->get_Integration(0)->get_centre_frequency(j);
-      if (fabs((sub_freq-super_freq)/super_freq) < freq_tol) {
+      if (fabs((sub_freq-super_freq)/super_freq) < freq_tol_match) {
         n_matched++;
         break;
       }
@@ -64,8 +82,8 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Archive* super,
   if (n_matched==sub->get_nchan())
     return true;
   else {
-    reason = stringprintf("Only matched %u/%u channels", 
-        sub->get_nchan(), n_matched);
+    reason = stringprintf("Only matched %u/%u channels (archives)", 
+        n_matched, sub->get_nchan());
     return false;
   }
 }
@@ -92,26 +110,38 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Database::Entry& super,
     return false;
   }
 
+  // Determining channel frequencies from freq and BW is not
+  // reliable so we need to load the archives to check the 
+  // actual freq arrays.  In future may be better to pass an
+  // array via the database Entry class
+  Reference::To<Pulsar::Archive> super_arch, sub_arch;
+  super_arch = Pulsar::Archive::load(super.get_filename());
+  sub_arch = Pulsar::Archive::load(sub.get_filename());
+  
+  // Set fractional freq tolerance to either 1% of channel BW
+  // or the default, whichever is larger.
+  double freq_tol_match = fabs(1e-2*sub_chbw/get_channel_frequency(sub_arch,0));
+  if (freq_tol > freq_tol_match) { freq_tol_match = freq_tol; }
+
   // Loop over "sub" chans, make sure they all exist in super
   unsigned n_matched=0;
   for (unsigned i=0; i<sub.nchan; i++) {
-    double sub_freq = sub.frequency - sub.bandwidth/2.0 + 
-      (double)i * sub_chbw;
+    double sub_freq = get_channel_frequency(sub_arch, i);
     for (unsigned j=0; j<super.nchan; j++) {
-      double super_freq = super.frequency - super.bandwidth/2.0 + 
-        (double)j * super_chbw;
-      if (fabs((sub_freq-super_freq)/super_freq) < freq_tol) {
+      double super_freq = get_channel_frequency(super_arch, j);
+      if (fabs((sub_freq-super_freq)/super_freq) < freq_tol_match) {
         n_matched++;
         break;
-      }
+      } 
     }
   }
 
   if (n_matched==sub.nchan)
     return true;
   else {
-    reason = stringprintf("Only matched %u/%u channels", 
-        sub.nchan, n_matched);
+    reason = stringprintf("Only matched %u/%u channels (database n1=%s n2=%s)", 
+        n_matched, sub.nchan, super.get_filename().c_str(), 
+        sub.get_filename().c_str());
     return false;
   }
 }

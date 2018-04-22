@@ -15,6 +15,8 @@
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/OffPulseCalibrator.h"
 
+#include "Pulsar/SquareWave.h"
+
 #include "Pulsar/Database.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Config.h"
@@ -136,7 +138,7 @@ int main (int argc, char** argv) try {
   float outlier_threshold = 0.0;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:K:O:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:K:O:P:")) != -1) 
 
     switch (c)  {
 
@@ -205,6 +207,12 @@ int main (int argc, char** argv) try {
 
     case 'O':
       unload_path = optarg;
+      break;
+
+    case 'P':
+      Pulsar::SquareWave::transition_phase = atof(optarg);
+      cerr << "fluxcal: assuming cal transitions at phase=" <<
+        Pulsar::SquareWave::transition_phase << endl;
       break;
 
     default:

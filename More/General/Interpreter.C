@@ -17,6 +17,7 @@
 #include "Pulsar/Statistics.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/ImageCorrection.h"
 #include "Pulsar/Dispersion.h"
 #include "Pulsar/FaradayRotation.h"
 
@@ -266,6 +267,16 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::scattered_power_correct,
       "spc", "apply scattered power correction",
       "usage: spc \n");
+
+  add_command 
+    ( &Interpreter::image_correct,
+      "img", "apply image pulse correction",
+      "usage: img correct dt0 dt1 [g0 g1]\n"
+      "  double dt0, dt1   timing skew (us) for poln 0, 1\n" 
+      "  double g0, g1     ADC gain mismatch for poln 0, 1\n"
+      "\n"
+      "run 'img help' to see additional settings for this correction\n"
+      );
 
   add_command 
     ( &Interpreter::dynspec,
@@ -1170,6 +1181,45 @@ string Pulsar::Interpreter::scattered_power_correct (const string& args) try
   
   spc_algorithm->correct (arch);
 
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::Interpreter::image_correct (const string& args) try
+{
+  vector<string> arguments = setup (args);
+
+  if (!img_algorithm)
+    img_algorithm = new ImageCorrection;
+
+  if (!arguments.size())
+    return response (Fail, "see 'img help' for usage infomation");
+
+  if (arguments[0] != "correct")
+  {
+    Reference::To<TextInterface::Parser> parser;
+    parser = img_algorithm->get_interface();
+    return response (Good, parser->process (arguments));
+  }
+
+  if (arguments.size()!=5 && arguments.size()!=3)
+    return response (Fail, "see 'img help' for usage infomation");
+
+  img_algorithm->set_dt(fromstring<double>(arguments[1]), 
+      fromstring<double>(arguments[2]));
+
+  if (arguments.size()==5)
+    img_algorithm->set_gain(fromstring<double>(arguments[3]), 
+        fromstring<double>(arguments[4]));
+  else
+    img_algorithm->set_gain(0.0, 0.0);
+
+  Archive *arch = get();
+  img_algorithm->correct (arch);
+  
   return response (Good);
 }
 catch (Error& error)

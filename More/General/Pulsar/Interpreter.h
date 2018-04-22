@@ -21,6 +21,7 @@ namespace Pulsar {
   class Archive;
   class Weight;
   class ScatteredPowerCorrection;
+  class ImageCorrection;
   
   //! Pulsar data processing command language interpreter
   /*!
@@ -186,6 +187,9 @@ namespace Pulsar {
     //! apply scattered power corrections
     std::string scattered_power_correct (const std::string& args);
 
+    //! apply image pulse correction
+    std::string image_correct (const std::string& args);
+
     //! dump the raw data points to the screen
     std::string screen_dump (const std::string& args);
 
@@ -271,6 +275,9 @@ namespace Pulsar {
 
     //! The Scattered Power Correction algorithm
     Reference::To<ScatteredPowerCorrection> spc_algorithm;
+
+    //! The Image Correction algorithm
+    Reference::To<ImageCorrection> img_algorithm;
     
   };
   

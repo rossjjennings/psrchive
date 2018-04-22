@@ -103,6 +103,12 @@ void Pulsar::ArrivalTime::set_attributes (const std::vector<std::string>& attr)
   attributes = attr;
 }
 
+//! Set additional TOA line text
+void Pulsar::ArrivalTime::set_extra_text (const std::string& text)
+{
+  extra_text = text;
+}
+
 //! Add to the vector of time-of-arrival estimates
 void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
 {

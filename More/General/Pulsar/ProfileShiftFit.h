@@ -37,17 +37,19 @@ namespace Pulsar
    * <li> Additional information (fitted amplitude, profile sigma, etc) is
    *      returned in a cleaner, more extensible object oriented way.
    * <li> Supports multiple/alternate phase shift error calculation 
-   *      algorithms (not implemented yet).
+   *      algorithms.
    * </ol>
    */
   class ProfileShiftFit : public Algorithm
   {   
+
   public:
 
     //! Method to use for calculating shift error
     enum Error_Method {
       Traditional_Chi2,     // Chi-squared 2nd derivatives
-      MCMC_Variance         // Shift variance from MCMC
+      MCMC_Variance,        // Shift variance from MCMC
+      Numerical,            // Shift variance from numerical integration
     };
 
     //! Default constructor
@@ -67,6 +69,12 @@ namespace Pulsar
 
     //! Set the error method
     void set_error_method(Error_Method e) { err_meth = e; }
+
+    //! Set number of iterations for MCMC errors
+    void set_mcmc_iterations(int nit) { mcmc_it = nit; }
+
+    //! Get number of iterations
+    int get_mcmc_iterations() const { return mcmc_it; }
 
     //! Set the standard or template profile to use
     void set_standard (const Profile* p);
@@ -178,8 +186,14 @@ namespace Pulsar
     //! Calculate "traditional" parameter uncertainties
     void error_traditional();
 
+    //! Calculate "traditional" parameter uncertainties
+    void error_numerical();
+
     //! Calculate shift uncertainty as posterior PDF variance using MCMC
     void error_mcmc_pdf_var();
+
+    //! Number of iterations to use for MCMC
+    int mcmc_it;
 
     //! Have valid results been computed
     bool computed;
@@ -189,6 +203,9 @@ namespace Pulsar
 
     //! Current shift error
     double eshift;
+
+    //! Correction for profile nbins != template nbins
+    double correction;
 
     //! Current scale result
     double scale;
@@ -227,6 +244,13 @@ namespace Pulsar
 
     //! Return next sample from MCMC sequence
     double mcmc_sample();
+
+    //! Peak log PDF (to help avoid numerical issues)
+    double max_log_pdf;
+
+    //! Wrappers for PDF evaluation when numerically integrating
+    static double f_pdf(double phi, void *_psf);
+    static double f_pdf_x2(double phi, void *_psf);
 
   };
 
