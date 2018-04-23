@@ -59,7 +59,7 @@ template<> struct FITS_traits<long> {
 };
 
 //! Template specialization for long
-template<> struct FITS_traits<int64_t> {
+template<> struct FITS_traits<long long> {
   static inline int datatype() { return TLONGLONG; }
   static inline long null () { return -1; }
 };
