@@ -16,6 +16,7 @@
 
 #include "residual.h"
 #include "MJD.h"
+#include "Estimate.h"
 
 namespace Tempo {
 
@@ -97,6 +98,7 @@ namespace Tempo {
     float bw;
     float dur;
     float dm;
+    Estimate<float> flux;
 
     bool phase_info;
 
@@ -143,6 +145,7 @@ namespace Tempo {
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
     void set_reduced_chisq (float x) { reduced_chisq = x; }
+    void set_flux      (Estimate<float> x) { flux = x; }
 
     void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
@@ -163,6 +166,7 @@ namespace Tempo {
     MJD    get_arrival   () const { return arrival; };
     float  get_error     () const { return error; };
     float  get_reduced_chisq () const { return reduced_chisq; }
+    Estimate<float> get_flux () const { return flux; }
 
     std::string get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
