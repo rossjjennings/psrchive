@@ -74,6 +74,8 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   dur = in_toa.dur;
   dm = in_toa.dm;
 
+  flux = in_toa.flux;
+
   ci = in_toa.ci;
   di = in_toa.di;
   

@@ -23,6 +23,7 @@ namespace Pulsar {
   class Archive;
   class Integration;
   class Profile;
+  class Flux;
 
   //! Manages arrival time estimation
   /*! 
@@ -85,6 +86,12 @@ namespace Pulsar {
 
     //! Get the archive of residual profiles
     Archive* get_residual () { return residual; }
+    
+    //! Set method for computing flux density of profiles
+    void set_flux_estimator (Flux *);
+
+    //! Get flux density esimtaor
+    Flux* get_flux_estimator () const;
 
   protected:
 
@@ -98,6 +105,8 @@ namespace Pulsar {
     Reference::To<Archive> residual;
     
     Reference::To<ShiftEstimator> shift_estimator;
+
+    Reference::To<Flux> flux_estimator;
 
     //! default TOA output format
     static Option<std::string> default_format;
@@ -139,7 +148,7 @@ namespace Pulsar {
 
   private:
 
-    void standard_update ();
+    void standard_update (unsigned ichan=0);
     void setup (const Integration* subint, unsigned ichan);
 
   };
