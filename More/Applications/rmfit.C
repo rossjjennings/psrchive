@@ -1336,9 +1336,10 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
 	 << chisq / free_parms << endl;
 
-    cerr << "Width="<< gm.get_width() <<" Height="<< gm.get_height() << endl;
+    double width = fabs(gm.get_width());
+    cerr << "Width="<< width <<" Height="<< gm.get_height() << endl;
 
-    double FWHM = 2.0 * sqrt ( 2.0 * log (2.0) ) * gm.get_width();
+    double FWHM = 2.0 * sqrt ( 2.0 * log (2.0) ) * width;
     cerr << "rmfit: FWHM/SNR uncertainty=" << 0.5 * FWHM / max_snr << endl;
     
     bestrm = gm.get_centre();
@@ -1356,7 +1357,7 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     double itr = 0.0;
 
     //  fprintf(stderr,"Got raw=%f cst=%f chisq=%f aim=%f\n",raw,cst,chisq,aim);
-    double maxitr = gm.get_width() / 2.0;
+    double maxitr = width / 2.0;
     while (cst < aim && itr < maxitr) {
       gm.set_centre(raw + itr);
       cst = fit.init(data_x, data_y, gm);
