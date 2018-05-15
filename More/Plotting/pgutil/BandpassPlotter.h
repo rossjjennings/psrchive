@@ -248,8 +248,11 @@ void fft::BandpassPlotter<Data,Info>::plot (std::vector< std::vector<T> >& data,
   float fstep = bw/nchan;
   float tstep = timespan/ntime;
   float tmin  = 0.0;
-  float trf[6] = {fmin-0.5*fstep, fstep, 0.0,
-		  tmin-0.5*tstep, 0.0, tstep};
+
+  float offset_fmin = fmin - 0.5*fstep;
+  float offset_tmin = tmin - 0.5*tstep;
+  float trf[6] = {offset_fmin, fstep, 0.0,
+		  offset_tmin, 0.0, tstep};
 
   cpgimag(&plotarray[0], nchan, ntime, 1, nchan, 1, ntime, min, max, trf);
 
