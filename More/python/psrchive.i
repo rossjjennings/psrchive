@@ -13,6 +13,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/Pointing.h"
+#include "Pulsar/ITRFExtension.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
 
@@ -229,6 +230,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/PatchTime.h"
 %include "Pulsar/PeakCumulative.h"
 %include "Pulsar/PeakConsecutive.h"
+%include "Pulsar/ITRFExtension.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
@@ -507,6 +509,28 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         if (b==NULL) { return 0.0; }
         return b->get_delay();
     }
+
+    // Return telescope ITRF position as tuple.
+    // If ITRF coordinates are not present in the data then the position
+    // will be defaulted to 0.0, 0.0, 0.0.
+    PyObject *get_ant_xyz() {
+    double itrf_x, itrf_y, itrf_z;
+    Pulsar::ITRFExtension *p = self->get<Pulsar::ITRFExtension>();
+    if (p==NULL) {
+        itrf_x = 0.0;
+        itrf_y = 0.0;
+        itrf_z = 0.0;
+    } else {
+        itrf_x = p->get_ant_x();
+        itrf_y = p->get_ant_y();
+        itrf_z = p->get_ant_z();
+    }
+    PyTupleObject *result = (PyTupleObject *)PyTuple_New(3);
+    PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyFloat_FromDouble(itrf_x));
+    PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyFloat_FromDouble(itrf_y));
+    PyTuple_SetItem((PyObject *)result, 2, (PyObject *)PyFloat_FromDouble(itrf_z));
+    return (PyObject *)result;
+}
 
     // Allow timing model to be updated via eph filename
     void set_ephemeris(std::string eph_file)
