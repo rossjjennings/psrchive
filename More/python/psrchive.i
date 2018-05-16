@@ -512,24 +512,23 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
     // Return telescope ITRF position as tuple.
     // If ITRF coordinates are not present in the data then the position
-    // will be defaulted to 0.0, 0.0, 0.0.
+    // will be returned as "undefined".
     PyObject *get_ant_xyz() {
     double itrf_x, itrf_y, itrf_z;
     Pulsar::ITRFExtension *p = self->get<Pulsar::ITRFExtension>();
     if (p==NULL) {
-        itrf_x = 0.0;
-        itrf_y = 0.0;
-        itrf_z = 0.0;
+        PyObject *result = (PyObject *)PyString_FromString("undefined");
+        return (PyObject *)result;
     } else {
         itrf_x = p->get_ant_x();
         itrf_y = p->get_ant_y();
         itrf_z = p->get_ant_z();
+        PyTupleObject *result = (PyTupleObject *)PyTuple_New(3);
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyFloat_FromDouble(itrf_x));
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyFloat_FromDouble(itrf_y));
+        PyTuple_SetItem((PyObject *)result, 2, (PyObject *)PyFloat_FromDouble(itrf_z));
+        return (PyObject *)result;
     }
-    PyTupleObject *result = (PyTupleObject *)PyTuple_New(3);
-    PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyFloat_FromDouble(itrf_x));
-    PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyFloat_FromDouble(itrf_y));
-    PyTuple_SetItem((PyObject *)result, 2, (PyObject *)PyFloat_FromDouble(itrf_z));
-    return (PyObject *)result;
 }
 
     // Allow timing model to be updated via eph filename
