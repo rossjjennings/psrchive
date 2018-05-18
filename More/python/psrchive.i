@@ -351,24 +351,48 @@ double get_tobs(const char* filename) {
 
 %extend Pulsar::Integration
 {
-
     // Interface to Pointing
     double get_telescope_zenith() {
         Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
         if (p==NULL) return 0.0;
         return p->get_telescope_zenith().getDegrees();
     }
+
     double get_telescope_azimuth() {
         Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
         if (p==NULL) return 0.0;
         return p->get_telescope_azimuth().getDegrees();
     }
+
     double get_parallactic_angle() {
         Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
         if (p==NULL) return 0.0;
         p->update(self);
         return p->get_parallactic_angle().getDegrees();
     }
+
+    // Return Galactic latidude and longitude. Pulsar::Pointing is
+    // inherited by Pulsar::Integration, hence we cannot call it
+    // while in archive object.
+    double get_galactic_latitude() {
+        Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+        if (p==NULL) return 0.0;
+        return p->get_galactic_latitude().getDegrees();
+    }
+
+    double get_galactic_longitude() {
+        Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+        if (p==NULL) return 0.0;
+        return p->get_galactic_longitude().getDegrees();
+    }
+
+    // Return LST in decimal hours.
+    double get_local_sidereal_time() {
+        Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+        if (p==NULL) return 0.0;
+        return p->get_local_sidereal_time() / 3600.0;
+    }
+
     void set_verbose() {
         self->verbose = 1;
     }
@@ -469,12 +493,12 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
 %extend Pulsar::Archive
 {
-
     // Allow indexing of Archive objects
     Pulsar::Integration *__getitem__(int i)
     {
         return self->get_Integration(i);
     }
+
     int __len__()
     {
         return self->get_nsubint();
