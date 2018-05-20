@@ -23,7 +23,7 @@ SUBDIRS += .
 #############################################################################
 #
 
-INCLUDES = -I$(top_builddir)/local_include \
+AM_CPPFLAGS = -I$(top_builddir)/local_include \
 	-I$(top_srcdir)/Base/Formats/Timer \
 	-I$(top_srcdir)/Base/Formats/EPN \
 	-I$(top_srcdir)/Base/Formats/ASCII \
@@ -35,5 +35,5 @@ INCLUDES = -I$(top_builddir)/local_include \
 
 include $(top_srcdir)/config/Makefile.local
 
-AM_CPPFLAGS = @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @FFT_CFLAGS@
+AM_CPPFLAGS += @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @FFT_CFLAGS@
 

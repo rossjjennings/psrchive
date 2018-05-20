@@ -106,7 +106,7 @@ test_CalibratorType_SOURCES = test_CalibratorType.C
 LDADD = libClasses.la \
 	$(top_builddir)/Util/libpsrutil.la
 
-INCLUDES = -I$(top_srcdir)/Base/Extensions
-
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += -I$(top_srcdir)/Base/Extensions
 
