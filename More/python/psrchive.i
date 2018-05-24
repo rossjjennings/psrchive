@@ -371,7 +371,7 @@ double get_tobs(const char* filename) {
         return p->get_parallactic_angle().getDegrees();
     }
 
-    // Return Galactic latidude and longitude. Pulsar::Pointing is
+    // Return Galactic latitude and longitude. Pulsar::Pointing is
     // inherited by Pulsar::Integration, hence we cannot call it
     // while in archive object.
     double get_galactic_latitude() {
@@ -487,6 +487,20 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         PyTuple_SetItem((PyObject *)result, 2, (PyObject *)sig_hi_arr);
         PyTuple_SetItem((PyObject *)result, 3, (PyObject *)sig_lo_arr);
         return (PyObject *)result;
+    }
+
+    // Return frequency table of the integration as numpy array
+    PyObject *get_frequencies()
+    {
+        int ii;
+        PyArrayObject *arr;
+        npy_intp ndim[1];
+        ndim[0] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        for (ii = 0; ii < ndim[0]; ii++) {
+            ((double *)arr->data)[ii] = self->get_Profile(0, ii)->get_centre_frequency();
+        }
+        return (PyObject *)arr;
     }
 
 }
