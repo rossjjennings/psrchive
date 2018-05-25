@@ -341,8 +341,8 @@ double get_tobs(const char* filename) {
         
         n = self->get_nbin();
         ptr = self->get_amps();
-        arr = (PyArrayObject *)                                         \
-            PyArray_SimpleNewFromData(1, &n, PyArray_FLOAT, (char *)ptr);
+        arr = (PyArrayObject *) \
+              PyArray_SimpleNewFromData(1, &n, PyArray_FLOAT, (char *)ptr);
         if (arr == NULL) return NULL;
         PyArray_INCREF(arr);
         return (PyObject *)arr;
@@ -371,7 +371,7 @@ double get_tobs(const char* filename) {
         return p->get_parallactic_angle().getDegrees();
     }
 
-    // Return Galactic latidude and longitude. Pulsar::Pointing is
+    // Return Galactic latitude and longitude. Pulsar::Pointing is
     // inherited by Pulsar::Integration, hence we cannot call it
     // while in archive object.
     double get_galactic_latitude() {
@@ -463,19 +463,19 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         PyArrayObject *hi_arr, *lo_arr, *sig_hi_arr, *sig_lo_arr;
         hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
         lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
-        sig_hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, 
+        sig_hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims,
             PyArray_DOUBLE);
-        sig_lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, 
+        sig_lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims,
             PyArray_DOUBLE);
         for (int ii=0; ii<dims[0]; ii++) {
             for (int jj=0; jj<dims[1]; jj++) {
-                ((double *)hi_arr->data)[ii*dims[1]+jj] = 
+                ((double *)hi_arr->data)[ii*dims[1]+jj] =
                     hi[ii][jj].get_value();
-                ((double *)lo_arr->data)[ii*dims[1]+jj] = 
+                ((double *)lo_arr->data)[ii*dims[1]+jj] =
                     lo[ii][jj].get_value();
-                ((double *)sig_hi_arr->data)[ii*dims[1]+jj] = 
+                ((double *)sig_hi_arr->data)[ii*dims[1]+jj] =
                     sqrt(hi[ii][jj].get_variance());
-                ((double *)sig_lo_arr->data)[ii*dims[1]+jj] = 
+                ((double *)sig_lo_arr->data)[ii*dims[1]+jj] =
                     sqrt(lo[ii][jj].get_variance());
             }
         }
@@ -487,6 +487,20 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         PyTuple_SetItem((PyObject *)result, 2, (PyObject *)sig_hi_arr);
         PyTuple_SetItem((PyObject *)result, 3, (PyObject *)sig_lo_arr);
         return (PyObject *)result;
+    }
+
+    // Return frequency table of the integration as numpy array
+    PyObject *get_frequencies()
+    {
+        int ii;
+        PyArrayObject *arr;
+        npy_intp ndim[1];
+        ndim[0] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        for (ii = 0; ii < ndim[0]; ii++) {
+            ((double *)arr->data)[ii] = self->get_Profile(0, ii)->get_centre_frequency();
+        }
+        return (PyObject *)arr;
     }
 
 }
@@ -561,7 +575,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         Pulsar::Parameters *new_eph;
         new_eph = factory<Pulsar::Parameters> (eph_file);
         self->set_ephemeris(new_eph);
-        // TODO: update DM.. 
+        // TODO: update DM...
     }
 
     void dededisperse()
@@ -579,13 +593,27 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return psrsh->parse(command);
     }
 
+    // Return frequency table of the archive as numpy array
+    PyObject *get_frequencies()
+    {
+        int ii;
+        PyArrayObject *arr;
+        npy_intp ndim[1];
+        ndim[0] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        for (ii = 0; ii < ndim[0]; ii++) {
+            ((double *)arr->data)[ii] = self->get_Profile(0, 0, ii)->get_centre_frequency();
+        }
+        return (PyObject *)arr;
+    }
+
     // Return a copy of all the data as a numpy array
     PyObject *get_data()
     {
         PyArrayObject *arr;
         npy_intp ndims[4];  // nsubint, npol, nchan, nbin
         int ii, jj, kk;
-        
+
         ndims[0] = self->get_nsubint();
         ndims[1] = self->get_npol();
         ndims[2] = self->get_nchan();
@@ -607,7 +635,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         PyArrayObject *arr;
         npy_intp ndims[2];  // nsubint, nchan
         int ii, jj;
-        
+
         ndims[0] = self->get_nsubint();
         ndims[1] = self->get_nchan();
         arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, PyArray_FLOAT);
