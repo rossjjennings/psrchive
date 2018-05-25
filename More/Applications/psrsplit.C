@@ -172,8 +172,8 @@ B) after deleting these sub-integrations, the Archive tries to reload them
 	  sub_chan_archive->remove_chan (0, ichan - nchannel - 1 );
 	if ( was_dedispersed )
 	  sub_chan_archive->dedisperse ();
-
-	sub_chan_archive->update_model ();
+	if (sub_chan_archive->has_model())
+	    sub_chan_archive->update_model ();
       }
 
       string ext;
