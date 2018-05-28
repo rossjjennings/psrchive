@@ -38,6 +38,8 @@
 #include "Pulsar/Predictor.h"
 #include "polyco.h"
 
+#include "Pulsar/ManualPolnCalibrator.h"
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -231,6 +233,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/PeakCumulative.h"
 %include "Pulsar/PeakConsecutive.h"
 %include "Pulsar/ITRFExtension.h"
+%include "Pulsar/ManualPolnCalibrator.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
