@@ -147,6 +147,7 @@ Pulsar::ProcHistory::row::row ()
   ctr_freq = 0.0;
   nchan    = 0;
   chan_bw  = 0.0;
+  ref_freq = 0.0;
   dispersion_measure = 0.0;
   rotation_measure = 0.0;
   pr_corr  = 0;

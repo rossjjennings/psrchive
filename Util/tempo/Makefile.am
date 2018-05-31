@@ -70,12 +70,9 @@ LDADD = libtempo.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la @FLIBS@
 
-
-INCLUDES = -I$(top_srcdir)/Util/tempo2
-
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @CFITSIO_CFLAGS@
+AM_CPPFLAGS += -I$(top_srcdir)/Util/tempo2 @CFITSIO_CFLAGS@
 
 #
 # builddir != srcdir fix: g77 version 3 looks for header files

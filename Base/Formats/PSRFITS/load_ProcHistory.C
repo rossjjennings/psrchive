@@ -73,6 +73,11 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
 
   psrfits_read_col (fptr, "CHAN_BW", &(hrow->chan_bw), row);
 
+  if (hdr_version < 6.0)
+    hrow->ref_freq = 0.0;
+  else
+    psrfits_read_col (fptr, "REF_FREQ", &(hrow->ref_freq), row);
+
   psrfits_read_col (fptr, "DM", &(hrow->dispersion_measure), row,
 		    zero, zero, Pulsar::Archive::verbose > 2);
 
@@ -260,13 +265,26 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     when the primary header is loaded, so here we only use the centre
     frequency if it was not present, in which case the centre_frequency
     class member should be 0.
+
+    WvS - 04 Jul 2017
+    Beginning with PSRFITS version 6, the centre frequency and bandwidth
+    are defined by the REFFREQ and CHAN_BW*NCHAN attributes of the SUBINT HDU.
   */
 
-  if (!(get_centre_frequency() > 0)) {
-    set_centre_frequency ( last.ctr_freq );
+  if (psrfits_version < 6.0)
+  {
+    /* 
+       The re-interpretation of CTR_FREQ was implemented only by the
+       Parkes digital filter bank (PDFB)
+    */
+    bool ignore_ctr_freq =
+      backend->get_name() == "PDFB3" || backend->get_name() == "PDFB4";
+    
+    if (!( ignore_ctr_freq && (get_centre_frequency() > 0.0) ))
+      set_centre_frequency ( last.ctr_freq );
+    
+    set_bandwidth (last.nchan * last.chan_bw);
   }
-  set_bandwidth (last.nchan * last.chan_bw);
-
 
   /*
     WvS - 07 Feb 2008

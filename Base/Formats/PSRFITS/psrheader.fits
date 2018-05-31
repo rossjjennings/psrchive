@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '5.4             '   / Header version 
+HDRVER  = '6.0             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -105,6 +105,9 @@ TFORM#  = 1D                  / Double
 TTYPE#  = NCHAN               / Number of frequency channels
 TFORM#  = 1J                  / Long integer
 TTYPE#  = CHAN_BW             / Channel bandwidth
+TFORM#  = 1D                  / Double
+TUNIT#  = MHz                 / units of field
+TTYPE#  = REF_FREQ            / Reference frequency
 TFORM#  = 1D                  / Double
 TUNIT#  = MHz                 / units of field
 TTYPE#  = DM                  / DM used for dedispersion
@@ -509,6 +512,7 @@ SIGNINT =                    * / 1 for signed ints in SEARCH-mode data, else 0
 NSUBOFFS=                    * / Subint offset (Contiguous SEARCH-mode files)
 NCHAN   =                    * / Number of channels/sub-bands in this file
 CHAN_BW =                    * / [MHz] Channel/sub-band width
+REFFREQ =                    * / [MHz] Reference frequency
 DM      =                    * / [cm-3 pc] DM for post-detection dedisperion
 RM      =                    * / [rad m-2] RM for post-detection deFaraday
 NCHNOFFS=                    * / Channel/sub-band offset for split files

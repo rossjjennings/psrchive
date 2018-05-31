@@ -77,6 +77,7 @@ namespace Pulsar {
       double ctr_freq;
       int nchan;
       double chan_bw;
+      double ref_freq;
       double dispersion_measure;
       double rotation_measure;
       int pr_corr;
