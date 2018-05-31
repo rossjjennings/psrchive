@@ -193,7 +193,7 @@ class Estimate
   { return isnan (u.val); }
 
   friend const T abs (const Estimate& u)
-  { return abs (u.val); }
+  { return std::abs (u.val); }
 
   friend const Estimate copysign (const Estimate& u, const Estimate& v)
   { return Estimate (::copysign (u.val, v.val), u.var); }
