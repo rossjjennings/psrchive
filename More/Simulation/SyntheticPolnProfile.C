@@ -7,6 +7,7 @@
 
 #include "Pulsar/SyntheticPolnProfile.h"
 #include "Pulsar/PolnProfile.h"
+#include "MEAL/Axis.h"
 #include "BoxMuller.h"
 #include "random.h"
 
@@ -99,9 +100,14 @@ void Pulsar::SyntheticPolnProfile::set_circular (Univariate<Scalar>* f)
 void set_Profile (Pulsar::Profile* profile, Univariate<Scalar>* function)
 {
   unsigned nbin = profile->get_nbin();
+
+  Axis<double> argument;  
+  function->set_argument (0, &argument);
+
   for (unsigned ibin=0; ibin<nbin; ibin++)
   {
-    function->set_abscissa ( (2*M_PI*ibin)/nbin );
+    argument.set_value( (2*M_PI*ibin)/nbin );
+    //    function->set_abscissa ( (2*M_PI*ibin)/nbin );
     profile->get_amps()[ibin] = function->evaluate();
   }
 }
