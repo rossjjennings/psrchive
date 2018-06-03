@@ -57,6 +57,13 @@ Pulsar::ComponentModel::ComponentModel (const std::string& filename)
   load (filename.c_str());
 }
 
+MEAL::Univariate<MEAL::Scalar>* Pulsar::ComponentModel::get_model ()
+{
+  if (!model)
+    build ();
+  return model;
+}
+
 void Pulsar::ComponentModel::fix_relative_phases ()
 {
   if (phase)
