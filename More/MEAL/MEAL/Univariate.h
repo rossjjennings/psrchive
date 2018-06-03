@@ -50,6 +50,9 @@ namespace MEAL {
 
   protected:
 
+    template <class U>
+    friend class FunctionPolicyTraits;
+    
     void set_univariate_policy (UnivariatePolicy* policy)
     { this->argument_policy = univariate_policy = policy; }
 
@@ -67,6 +70,16 @@ namespace MEAL {
 
   };
 
+  template<class T>
+  class FunctionPolicyTraits< Univariate<T> >
+  {
+  public:
+    static void composite_component (Univariate<T>* composite,
+				     Univariate<T>* component)
+    {
+      component->copy_univariate_policy (composite);
+    }
+  };
 }
 
 template<class T>
