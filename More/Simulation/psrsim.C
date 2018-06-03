@@ -17,6 +17,7 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FaradayRotation.h"
 
+#include "Pulsar/ComponentModel.h"
 #include "Pulsar/SimplePolnProfile.h"
 #include "Pulsar/RotatingVectorModelOptions.h"
 #include "Pulsar/Feed.h"
@@ -49,7 +50,7 @@ protected:
   void add_options (CommandLine::Menu&);
 
   //! Polarization profile simulator
-  Reference::To<SimplePolnProfile> sim;
+  Reference::To<SimplePolnProfile> simulator;
 
   //! Faraday rotation measure
   double rotation_measure;
@@ -68,6 +69,9 @@ protected:
     receptor_angles = val;
     simulate_reception = true;
   }
+
+  //! Set the total intensity profile to the ComponentModel
+  void load_component_model (const std::string& filename);
 };
 
 int main (int argc, char** argv)
@@ -83,7 +87,7 @@ psrsim::psrsim () :
   has_manual = false;
   add( new Pulsar::StandardOptions );
 
-  sim = new SimplePolnProfile;
+  simulator = new SimplePolnProfile;
   rotation_measure = 0;
 
   profile_number = 1;
@@ -106,23 +110,26 @@ void psrsim::add_options (CommandLine::Menu& menu)
 
   menu.add ("\n" "Pulse shape and statistics:");
 
-  MEAL::ScaledVonMises* svm = sim->get_Intensity();
+  MEAL::ScaledVonMises* svm = simulator->get_Intensity();
 
   arg = menu.add (svm, &MEAL::ScaledVonMises::set_width,
 		  deg_to_rad, 'w', "degrees");
   arg->set_help ("width of pulse in degrees");
 
-  arg = menu.add (sim.get(), &SyntheticPolnProfile::set_noise, 'n');
+  arg = menu.add (this, &psrsim::load_component_model, 'P', "paas.m");
+  arg->set_help ("load component model as output by paas");
+  
+  arg = menu.add (simulator.get(), &SyntheticPolnProfile::set_noise, 'n');
   arg->set_help ("standard deviation of noise");
 
-  arg = menu.add (sim.get(), &SyntheticPolnProfile::set_swims, 's');
+  arg = menu.add (simulator.get(), &SyntheticPolnProfile::set_swims, 's');
   arg->set_help ("peak standard deviation of simulated SWIMS");
 
-  arg = menu.add (sim.get(), &SyntheticPolnProfile::set_baseline, 'b');
+  arg = menu.add (simulator.get(), &SyntheticPolnProfile::set_baseline, 'B');
   arg->set_help ("off-pulse baseline mean");
 
   RotatingVectorModelOptions rvm_options;
-  rvm_options.set_model (sim->get_RVM());
+  rvm_options.set_model (simulator->get_RVM());
   rvm_options.add_options (menu);
 
   menu.add ("\n" "Simulation Options");
@@ -194,7 +201,7 @@ void psrsim::process (Pulsar::Archive* data)
 
       for (unsigned ichan=0; ichan < nchan; ichan++)
       {
-	sim->get_PolnProfile(subint->new_PolnProfile(ichan));
+	simulator->get_PolnProfile(subint->new_PolnProfile(ichan));
 	subint->set_weight(ichan, 1.0);
       }
     }
@@ -219,3 +226,15 @@ void psrsim::process (Pulsar::Archive* data)
 }
 
 
+void psrsim::load_component_model (const std::string& filename) try
+{
+  Reference::To<Pulsar::ComponentModel> component_model
+    = new Pulsar::ComponentModel(filename);
+
+  simulator->set_total_intensity (component_model->get_model());
+}
+catch (Error& error)
+{
+  cerr << error << endl;
+  throw error += "psrsim::load_component_model";
+}
