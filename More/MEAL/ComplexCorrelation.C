@@ -22,13 +22,13 @@ static double c[] = { -1.0/3.0, 2.0/15.0, -17.0/315.0, 62.0/2835.0 };
 double tanh_on_x (double x)
 {
   double X=x*x;
-  return 1.0 + c[0]*X + c[1]*X*X + c[2]*X*X*X + c[4]*(X*X)*(X*X);
+  return 1.0 + c[0]*X + c[1]*X*X + c[2]*X*X*X + c[3]*(X*X)*(X*X);
 }
 
 double dtanch_on_x (double x)
 {
   double X=x*x;
-  return 2*c[0] + 4*c[1]*X + 6*c[2]*X*X + 8*c[4]*X*(X*X);
+  return 2*c[0] + 4*c[1]*X + 6*c[2]*X*X + 8*c[3]*X*(X*X);
 }
 
 //! Calculate the Jones matrix and its gradient
