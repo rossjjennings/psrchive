@@ -89,6 +89,11 @@ template
 Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
 Archive::Advocate<ASCIIArchive>::entry;
 
+#include "Pulsar/pdv_KtZ_Archive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<pdv_KtZ_Archive::Agent>
+Archive::Advocate<pdv_KtZ_Archive>::entry;
 
 Pulsar::Option<string> Pulsar::Archive::unload_class
 (

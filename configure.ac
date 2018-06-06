@@ -285,6 +285,7 @@ AC_CONFIG_FILES([
                 Base/Formats/ASP/Makefile
 		Base/Formats/UVM/Makefile
 		Base/Formats/UVM/uvmlib/Makefile
+		Base/Formats/pdv_KtZ/Makefile
 		Base/Applications/Makefile
 		More/Makefile
 		More/General/Makefile
