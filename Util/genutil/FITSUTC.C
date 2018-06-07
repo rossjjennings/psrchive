@@ -54,7 +54,7 @@ void FITSUTC::FromString( const std::string &src )
 std::string FITSUTC::ToString( void ) const
 {
   char dstr[31];
-  datestr( dstr, 30, "%Y-%m-%eT%H:%M:%S" );
+  datestr( dstr, 30, "%Y-%m-%dT%H:%M:%S" );
   return dstr;
 }
 
