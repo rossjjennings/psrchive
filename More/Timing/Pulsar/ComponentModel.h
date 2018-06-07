@@ -53,6 +53,9 @@ namespace Pulsar
     //! Return a copy constructed instance of self
     ComponentModel* clone () const { return new ComponentModel(*this); }
 
+    //! Get the component model
+    MEAL::Univariate<MEAL::Scalar>* get_model ();
+    
     //! Return the statistical goodness-of-fit
     double get_reduced_chisq () const { return chisq / nfree; }
 

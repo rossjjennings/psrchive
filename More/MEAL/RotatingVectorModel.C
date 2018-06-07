@@ -43,8 +43,6 @@ void MEAL::RotatingVectorModel::init ()
   /*
     The original RVM sign convention for PA is opposite to that of the IAU.
     See Everett & Weisberg (2001; ApJ 553:341) for more details.
-
-    Note that (x,-y) = (-x,y) for all atan cares
   */
 
   ScalarMath y = sin(*magnetic_axis) * sin(longitude);
@@ -52,7 +50,7 @@ void MEAL::RotatingVectorModel::init ()
   ScalarMath x = sin(*magnetic_axis) * cos(*zeta_sum) * cos(longitude)
     - cos(*magnetic_axis) * sin(*zeta_sum);
 
-  ScalarMath result = atan(y/x) + *reference_position_angle;
+  ScalarMath result = atan2(y,x) + *reference_position_angle;
 
   expression = result.get_expression();
 
@@ -60,13 +58,8 @@ void MEAL::RotatingVectorModel::init ()
   copy_evaluation_policy (expression);
   copy_univariate_policy (argument);
 
-  // ... to avoid division by zero:
-
-  ScalarMath cos_psi0 = cos(*reference_position_angle);
-  ScalarMath sin_psi0 = sin(*reference_position_angle);
-
-  ScalarMath N = x*cos_psi0 - y*sin_psi0;
-  ScalarMath E = x*sin_psi0 + y*cos_psi0;
+  ScalarMath N = cos(result);
+  ScalarMath E = sin(result);
 
   north = N.get_expression ();
   east = E.get_expression ();
@@ -83,11 +76,11 @@ void MEAL::RotatingVectorModel::use_impact (bool flag)
     Estimate<double> beta 
       = line_of_sight->get_value() - magnetic_axis->get_value();
 
-    impact = line_of_sight;
+    impact = line_of_sight;  // transfer line_of_sight to impact
     impact->set_value( beta );
     impact->set_value_name( "beta" );
 
-    line_of_sight = 0;
+    line_of_sight = 0; // pointer set to zero
 
     zeta_sum->add_model( magnetic_axis );
   }

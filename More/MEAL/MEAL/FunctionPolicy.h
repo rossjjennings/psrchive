@@ -40,6 +40,16 @@ namespace MEAL {
 
   };
 
+  template<class T>
+  class FunctionPolicyTraits
+  {
+  public:
+    static void composite_component (T* composite, T* component)
+    {
+      // do nothing
+    }
+  };
+  
 }
 
 #endif

@@ -32,7 +32,7 @@ Pulsar::ComplexRVMFit::ComplexRVMFit()
 {
   threshold = 3.0;
   chisq_map = false;
-
+  
   range_alpha = range_beta = range_zeta = range (0,0);
 
   // favour impact angle smaller than colatitude of magnetic axis
@@ -268,11 +268,11 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
 
-    double angle = atan2 (im[ibin], re[ibin]);
+    double angle = fabs( atan2 (im[ibin], re[ibin]) );
     
 #if _DEBUG
-    cerr << "angle: " << ibin << " " << angle
-	 << " " << im[ibin] << " " << re[ibin] << " " << mask[ibin] << endl;
+      cerr << "angle: " << ibin << " " << angle
+	   << " " << im[ibin] << " " << re[ibin] << " " << mask[ibin] << endl;
 #endif
     
     if ( (max_bin < 0 || angle > max_angle) && mask[ibin] > 0 )
@@ -371,25 +371,12 @@ double chisq (const Estimate<T,U>& e)
 //! Fit data to the model
 void Pulsar::ComplexRVMFit::solve ()
 {
+  
   if (!model)
     model = new MEAL::ComplexRVM;
 
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
-
-#if FIX_THIS_LATER
-  /*
-    I can't remember why it was necessary to normalize the data, but
-    this is a bad idea when performing a global fit (e.g. chi-squared map)
-  */
-
-  double renorm = 1/max_L;
-
-  for (unsigned i=0; i < data_y.size(); i++)
-    data_y[i] *= renorm;
-
-  model->renormalize( renorm );
-#endif
 
   chisq = fit.init (data_x, data_y, *model);
 
@@ -689,7 +676,15 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 	 zeta += step_zeta) try
     {
       if (alpha == zeta)
+      {
+        if (chisq_map)
+        {
+          assert (chisq_index < chisq_surface.size());
+          chisq_surface[chisq_index] = 0.0;
+          chisq_index ++;
+        }
 	continue;
+      }
 
       cerr << "alpha=" << alpha;
       RVM->magnetic_axis->set_value (alpha);
@@ -725,6 +720,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
       {
 	assert (chisq_index < chisq_surface.size());
 	chisq_surface[chisq_index] = chisq;
+        chisq_index ++;
       }
 
       if (best_chisq == 0 || chisq < best_chisq)
@@ -739,8 +735,6 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 	for (unsigned i=0; i<nstate; i++)
 	  best_linear[i] = cRVM->get_linear(i).get_value();
       }
-
-      chisq_index ++;
     }
     catch (Error& error)
     {
