@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.0             '   / Header version 
+HDRVER  = '6.1             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -496,7 +496,8 @@ NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    * / Number of fields per row
-# 
+#
+EPOCHS  = '                  ' / Epoch convention (VALID, MIDTIME, STT_MJD)
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
 SCALE   = '                  ' / Intensity units (FluxDen/RefFlux/Jansky)
