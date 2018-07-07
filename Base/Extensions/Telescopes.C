@@ -126,6 +126,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             Telescopes::LWA(t);
             break;
 
+        case 'z':
+            Telescopes::SRT(t);
+            break;
+
         default: 
             // Unknown code, throw error after calling Telecope::set_coordinates
             emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
@@ -274,3 +278,10 @@ void Pulsar::Telescopes::LWA(Telescope *t)
     t->set_focus(Telescope::PrimeFocus);
 }
 
+void Pulsar::Telescopes::SRT(Telescope *t)
+{
+    t->set_name ("SRT");
+    t->set_mount (Telescope::Horizon);
+    t->set_primary (Telescope::Parabolic);
+    t->set_focus (Telescope::PrimeFocus);
+}
