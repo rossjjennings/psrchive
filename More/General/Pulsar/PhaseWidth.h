@@ -20,8 +20,8 @@ namespace Pulsar {
   /*! This default implementation of the width estimator is taken from pdv. */
   class PhaseWidth : public WidthEstimator
   {
-    float error;
-    float baseline_duty_cycle;
+    Phase::Value error;
+    Phase::Value baseline_duty_cycle;
     float fraction_of_maximum;
     
   public:
@@ -32,9 +32,16 @@ namespace Pulsar {
     //! Return the width of the pulse profile in turns
     double get_width_turns (const Profile* profile);
 
-    float get_error () const { return error; }
-    float get_baseline_duty_cycle () const { return baseline_duty_cycle; }
-    void set_baseline_duty_cycle (float);
+    Phase::Value get_error () const { return error; }
+
+    //! Set the duty cycle used to search for the off-pulse baseline
+    void set_baseline_duty_cycle (const Phase::Value& w)
+    { baseline_duty_cycle = w; }
+
+    //! Get the baseline_duty_cycle of the smoothing function
+    Phase::Value get_baseline_duty_cycle () const
+    { return baseline_duty_cycle; }
+
     float get_fraction_of_maximum () const { return fraction_of_maximum; }
     void set_fraction_of_maximum (float);
     
