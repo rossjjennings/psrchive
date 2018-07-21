@@ -42,6 +42,7 @@
 
 using namespace std;
 using Pulsar::ReceptionCalibrator;
+using Calibration::FluxCalManager;
 
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
@@ -383,7 +384,6 @@ ReceptionCalibrator::add_data
   }
 }
 
-
 void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
 {
   SystemCalibrator::prepare_calibrator_estimate (source);
@@ -485,20 +485,17 @@ void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate& es
   set_fixed_QUV (est, 0.0);
 }
 
-void ReceptionCalibrator::setup_flux_calibrator (Calibration::FluxCalManager*)
+void ReceptionCalibrator::setup_flux_calibrator (FluxCalManager* mgr)
 {
   Signal::Basis basis = get_calibrator()->get_basis ();
   
-  // TODO: tell FluxCalManager to allow Stokes V to vary
-
   if (basis == Signal::Circular || measure_cal_V)
   {
     if (verbose)
       cerr << "ReceptionCalibrator::setup_flux_calibrator ok" << endl;
   }
   else
-    throw Error (InvalidState, "ReceptionCalibrator::setup_flux_calibrator",
-		 "NOT IMPLEMENTED");
+    mgr->allow_StokesV_to_vary ();
 }
 
 bool ReceptionCalibrator::has_fluxcal () const

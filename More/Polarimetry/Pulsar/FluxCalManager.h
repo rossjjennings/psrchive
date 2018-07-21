@@ -71,12 +71,23 @@ namespace Calibration
 
     void submit (CoherencyMeasurementSet&, const SourceObservation&);
 
+    //! Get the number of independent FluxCalOn source states
+    unsigned get_nstate_on () const;
+
+    //! Return the Source estimate for the ith state
+    const SourceEstimate* get_source_on (unsigned istate) const;
+    
+    //! Get the number of independent FluxCalOff source states
+    unsigned get_nstate_off () const;
+    
     //! Update all backend models with current best estimate
     void update ();
 
     //! Return true if at least one complete flux calibrator observation
     bool is_constrained () const;
 
+    void allow_StokesV_to_vary (bool flag = true);
+    
     bool multiple_source_states;
     bool subtract_off_from_on;
 
@@ -105,6 +116,13 @@ namespace Calibration
 
     //! Returns a reference to on_observations or off_observations
     FluxCalObsVector& get_observations (Signal::Source source_type);
+
+    //! Set the fit flag for Stokes V in each source state
+    void set_StokesV_infit (FluxCalObsVector&);
+    
+  private:
+
+    bool StokesV_may_vary;
   };
 
 }

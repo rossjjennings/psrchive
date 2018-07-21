@@ -21,7 +21,8 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 {
   multiple_source_states = false;
   subtract_off_from_on = false;
-
+  StokesV_may_vary = false;
+  
   MEAL::Complex2* response = path->get_transformation();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
@@ -128,13 +129,15 @@ void Calibration::FluxCalManager::add_source (FluxCalObservation* obs)
   
     source->source->set_stokes ( flux_cal_state );
 
-    // parameter index of Stokes V
-    const unsigned int StokesV = 3;
+    if (!StokesV_may_vary)
+    {
+      // parameter index of Stokes V
+      const unsigned int StokesV = 3;
 
-    // TODO: on or off? ... does the user want to assume PolnCal[V] = 0?
-    source->source->set_infit ( StokesV, false );
-    source->source->set_Estimate ( StokesV, 0.0);
-
+      source->source->set_infit ( StokesV, false );
+      source->source->set_Estimate ( StokesV, 0.0);
+    }
+    
     string name_prefix = "flux_" + tostring(observations.size()) + "_";
     source->source->set_param_name_prefix( name_prefix );
   }
@@ -142,6 +145,26 @@ void Calibration::FluxCalManager::add_source (FluxCalObservation* obs)
     source = observations.at(0)->source;
 
   obs->source = source;
+}
+
+void Calibration::FluxCalManager::allow_StokesV_to_vary (bool flag)
+{
+  StokesV_may_vary = flag;
+
+  set_StokesV_infit (on_observations);
+  set_StokesV_infit (off_observations);
+}
+
+void FluxCalManager::set_StokesV_infit (FluxCalObsVector& observations)
+{
+  // parameter index of Stokes V
+  const unsigned int StokesV = 3;
+
+  for (unsigned i=0; i<observations.size(); i++)
+  {
+    Reference::To< SourceEstimate > source = observations.at(i)->source;
+    source->source->set_infit ( StokesV, StokesV_may_vary );
+  }  
 }
 
 //! Integrate an estimate of the backend
@@ -211,6 +234,30 @@ void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
       obs->source->add_data_failures ++;
       throw error += "Calibration::FluxCalManager::submit";
     }
+}
+
+unsigned Calibration::FluxCalManager::get_nstate_on () const
+{
+  if (multiple_source_states)
+    return off_observations.size();
+  else
+    return 1;
+}
+
+const Calibration::SourceEstimate*
+FluxCalManager::get_source_on (unsigned istate) const
+{
+  return on_observations.at(istate)->source;
+}
+
+
+//! Get the number of independent FluxCalOff source states
+unsigned Calibration::FluxCalManager::get_nstate_off () const
+{
+  if (multiple_source_states)
+    return off_observations.size();
+  else
+    return 1;
 }
 
 void Calibration::FluxCalManager::update ()
