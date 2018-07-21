@@ -525,7 +525,7 @@ void ReceptionCalibrator::submit_calibrator_data
   }
 
   if (fluxcal[data.ichan])
-    fluxcal[data.ichan]->submit (measurements, data.baseline);
+    fluxcal[data.ichan]->submit (measurements, data);
 }
 
 
@@ -623,6 +623,7 @@ void ReceptionCalibrator::initialize ()
     function before the model parameters are plotted; therefore, this
     method re-engages the time variations.
   */
+
   for (unsigned ichan=0; ichan<model.size(); ichan++)
     model[ichan]->engage_time_variations ();
 

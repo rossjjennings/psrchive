@@ -17,34 +17,28 @@
 
 namespace Calibration
 {
-  //! Manages flux calibrator source state, signal path, and initial estimates
+  //! Manages flux calibrator source state and backend transformation
+  /*! Both model and initial estimate for each of source and backend */
   class FluxCalObservation : public Reference::Able
   {
   public:
 
     void update ();
 
+    //! Source code (FluxCalOn or FluxCalOff)
+    Signal::Source source_type; 
+
     //! Backend transformation for this observation
+    /*! The absolute gain, differential gain, and differential phase may
+      vary for each observation of the flux calibrator*/
     Reference::To<BackendEstimate> backend;
 
     //! Model of source and its first guess/best estimate
     Reference::To<SourceEstimate> source;
   };
 
-  //! Manages a pair of on-source and off-source flux calibrator observations
-  class FluxCalPair : public Reference::Able
-  {
-  public:
-
-    void update ();
-
-    //! On-source observation
-    Reference::To<FluxCalObservation> on;
-
-    //! Off-source observation
-    Reference::To<FluxCalObservation> off;
-  };
-
+  typedef std::vector< Reference::To<FluxCalObservation> > FluxCalObsVector;
+    
   //! Manages multiple flux calibrator observations
 
   /*!
@@ -75,7 +69,7 @@ namespace Calibration
     void integrate (const Jones< Estimate<double> >& correct,
 		    const SourceObservation& data);
 
-    void submit (CoherencyMeasurementSet&, const Stokes< Estimate<double> >&);
+    void submit (CoherencyMeasurementSet&, const SourceObservation&);
 
     //! Update all backend models with current best estimate
     void update ();
@@ -103,9 +97,14 @@ namespace Calibration
     //! The SignalPath manager into which signal paths are added
     Reference::To< SignalPath > composite;
 
-    //! The set of flux calibrator observations
-    std::vector< Reference::To<FluxCalPair> > observations;
+    //! The set of on-source flux calibrator observations
+    FluxCalObsVector on_observations;
 
+    //! The set of off-source flux calibrator observations
+    FluxCalObsVector off_observations;
+
+    //! Returns a reference to on_observations or off_observations
+    FluxCalObsVector& get_observations (Signal::Source source_type);
   };
 
 }
