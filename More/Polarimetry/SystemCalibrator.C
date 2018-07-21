@@ -975,7 +975,7 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
   Estimate<double> p = result.abs_vect();
   if (p > 1)
     cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
-	 << " output p-1=" << p-1 << endl;
+	 << " input overpolarization=" << p-1 << endl;
   
   calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
@@ -1564,6 +1564,10 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
       try
       {
 	response[ichan] = get_transformation(data, isub, ichan)->evaluate();
+
+	if (verbose > 2)
+	  cerr << "SystemCalibrator::precalibrate chan=" << ichan
+	       << " response=" << response[ichan] << endl;
       }
       catch (Error& error)
       {
@@ -1677,6 +1681,10 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
     throw Error (InvalidState, "Pulsar::SystemCalibrator::get_transformation",
 		 "measurement equation is not a congruence transformation");
 
+  if (verbose > 2)
+    cerr << "SystemCalibrator::get_transformation set epoch="
+	 << integration->get_epoch() << endl;
+  
   model[ichan]->time.set_value( integration->get_epoch() );
   return congruence->get_transformation();
 }
