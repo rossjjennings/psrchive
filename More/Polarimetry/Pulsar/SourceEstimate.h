@@ -35,7 +35,7 @@ namespace Calibration
     //! Update source with the estimate
     void update ();
 
-    //! Model of Stokes parameters as a function of frequency
+    //! Model of Stokes parameters 
     Reference::To<MEAL::Coherency> source;
 
     //! Best estimate (first guess) of Stokes parameters
