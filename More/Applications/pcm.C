@@ -1792,6 +1792,7 @@ void plot_state (SystemCalibrator* model, const std::string& state) try
   {
     rplotter = new ReceptionCalibratorPlotter (rmodel);
     rplotter->use_colour = !publication_plots;
+    rplotter->npanel = 4;
   }
 
   //
