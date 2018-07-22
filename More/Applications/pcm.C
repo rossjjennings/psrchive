@@ -118,6 +118,7 @@ void usage ()
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
     "  -k         assume that the receptors have equal ellipticities \n"
+    "  -Y         model the difference between FluxCal-On and FluxCal-Off \n"
     "\n"
     "  -F days    use flux calibrators within days of pulsar data mid-time\n"
     "  -L hours   use reference sources within hours of pulsar data mid-time\n"
@@ -356,6 +357,9 @@ vector<string> calibrator_filenames;
 
 // Each flux calibrator observation may have unique values of I, Q & U
 bool multiple_flux_calibrators = false;
+
+// Model the difference between FluxCalOn and FluxCalOff observations
+bool model_fluxcal_on_minus_off = false;
 
 // Derive first guess of calibrator Stokes parameters from fluxcal solution
 bool use_fluxcal_stokes = false;
@@ -653,8 +657,8 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
-    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:wW:xX:yzZ";
+    "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
+    "M:m:Nn:O:o:Pp:qR:rS:sT:t:U:u:V:vW:wX:xYyZz";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -922,6 +926,10 @@ int actual_main (int argc, char *argv[]) try
       ProjectionCorrection::trust_pointing_feed_angle = true;
       break;
 
+    case 'Y':
+      model_fluxcal_on_minus_off = true;
+      break;
+      
     case 'h':
       usage ();
       return 0;
@@ -1479,6 +1487,12 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
 
   model->multiple_flux_calibrators = multiple_flux_calibrators;
 
+  if (model_fluxcal_on_minus_off)
+    cerr <<
+      "pcm: modeling the different between FluxCalOn and FluxCalOff" << endl;
+
+  model->model_fluxcal_on_minus_off = model_fluxcal_on_minus_off;
+  
   if (flux_cal)
     model->set_flux_calibrator (flux_cal);
   
@@ -1707,7 +1721,7 @@ void load_calibrator_database () try
   }
   
   if (template_filename)
-    cerr << "pcm: no need for on-source flux calibrator observations" << endl;
+    cerr << "pcm: no need for flux calibrator observations" << endl;
   else
   {
     double span_days = (end_time - start_time).in_days();
@@ -1725,6 +1739,22 @@ void load_calibrator_database () try
     if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"
 	   << database->get_closest_match_report () << endl;
+
+    if (model_fluxcal_on_minus_off)
+    {
+      unsigned ncals = oncals.size();
+      
+      criteria.entry.obsType = Signal::FluxCalOff;
+    
+      cerr << "pcm: searching for off-source flux calibrator observations"
+	" within " << search_days << " days of midtime" << endl;
+
+      database->all_matching (criteria, oncals);
+  
+      if (oncals.size() == ncals)
+	cerr << "pcm: no FluxCalOff observations found; closest match was \n\n"
+	     << database->get_closest_match_report () << endl;
+    }
   }
 
   for (unsigned i = 0; i < oncals.size(); i++)
@@ -1739,17 +1769,6 @@ catch (Error& error)
   cerr << "pcm: error loading CAL database" << error << endl;
   exit (-1);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

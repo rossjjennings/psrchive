@@ -30,7 +30,7 @@ namespace Calibration
     SourceEstimate (int ibin = -1);
 
     //! Create the source and add it to the measurement equation
-    void create_source (ReceptionModel* equation);
+    virtual void create_source (ReceptionModel* equation);
 
     //! Update source with the estimate
     void update ();
@@ -60,6 +60,11 @@ namespace Calibration
 
     //! Return true if the last/top source estimate has data to constrain it
     bool is_constrained () const;
+
+  protected:
+
+    //! does the work for update method, which does some generic extra bits
+    virtual void update_work ();
   };
 
   class SourceObservation

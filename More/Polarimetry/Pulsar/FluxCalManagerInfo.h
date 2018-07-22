@@ -53,6 +53,9 @@ namespace Pulsar {
 
     //! The number of different classes of data
     unsigned nclass;
+
+    //! The number of FluxCalOn classes
+    unsigned nclass_on;
   };
 
 }

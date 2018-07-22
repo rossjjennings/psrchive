@@ -55,7 +55,7 @@ void Calibration::SourceEstimate::update ()
 
   try 
   {
-    estimate.update( source );
+    update_work ();
   }
   catch (Error& error)
   {
@@ -66,3 +66,8 @@ void Calibration::SourceEstimate::update ()
   }
 }
 
+/*! Update the best guess of each unknown input state */
+void Calibration::SourceEstimate::update_work ()
+{
+  estimate.update( source );
+}

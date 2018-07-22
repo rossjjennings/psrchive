@@ -60,7 +60,8 @@ ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
   step_after_cal = false;
 
   multiple_flux_calibrators = false;
-
+  model_fluxcal_on_minus_off = false;
+  
   check_pointing = false;
   physical_coherency = false;
 
@@ -395,8 +396,8 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
     return;
 
   if (verbose > 2)
-    cerr << "Pulsar::ReceptionCalibrator::prepare_calibrator_estimate"
-      " FluxCalOn nchan=" << get_nchan() << endl;
+    cerr << "Pulsar::ReceptionCalibrator::prepare_calibrator_estimate "
+	 << source << " nchan=" << get_nchan() << endl;
 
   const unsigned nchan = get_nchan();
 
@@ -411,7 +412,8 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
 
       fluxcal[ichan] = new Calibration::FluxCalManager( model[ichan] );
 
-      fluxcal[ichan]->multiple_source_states = multiple_flux_calibrators;
+      fluxcal[ichan]->model_multiple_source_states( multiple_flux_calibrators );
+      fluxcal[ichan]->model_on_minus_off( model_fluxcal_on_minus_off );
     }
   }
 
@@ -509,13 +511,18 @@ ReceptionCalibrator::get_fluxcal (unsigned ichan) const
   return fluxcal.at(ichan);
 }
 
+bool is_FluxCal_observation (Signal::Source source)
+{
+  return source == Signal::FluxCalOn || source == Signal::FluxCalOff;
+}
+
 void ReceptionCalibrator::submit_calibrator_data 
 (
  Calibration::CoherencyMeasurementSet& measurements,
  const Calibration::SourceObservation& data
  )
 {
-  if (data.source != Signal::FluxCalOn)
+  if (!is_FluxCal_observation(data.source))
   {
     SystemCalibrator::submit_calibrator_data (measurements, data);
     return;

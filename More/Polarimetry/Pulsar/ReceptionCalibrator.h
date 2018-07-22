@@ -72,6 +72,9 @@ namespace Pulsar
     //! Each flux calibrator observation may have unique values of I, Q & U
     bool multiple_flux_calibrators;
 
+    //! Model the difference between FluxCalOn and FluxCalOff observations
+    bool model_fluxcal_on_minus_off;
+    
     //! Reflections performed on the calibrator data immediately after loading
     ReflectStokes reflections;
 

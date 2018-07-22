@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2012 by Willem van Straten
+ *   Copyright (C) 2012 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -28,9 +28,10 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
 
   //
-  // It must be possible to extract the frontend, so that the temporal
-  // variations applied to pulsar and reference source are not applied
-  // to the flux calibrator
+  // It must be possible to separate the frontend and backend
+  // transformations , so that the temporal variations applied to
+  // pulsar and reference source are not applied to the flux
+  // calibrator
   //
 
   if (!physical)
@@ -70,10 +71,9 @@ void Calibration::FluxCalManager::add_observation (Signal::Source source_type)
   add_backend (obs);
   add_source (obs);
 
-  // TODO: make pairs and add difference to model
-
   if (source_type == Signal::FluxCalOn)
     on_observations.push_back( obs );
+
   else if (source_type == Signal::FluxCalOff)
     off_observations.push_back( obs );  
 }
@@ -114,37 +114,65 @@ Calibration::FluxCalManager::get_observations (Signal::Source source_type)
 
 void Calibration::FluxCalManager::add_source (FluxCalObservation* obs)
 {
-  Reference::To< SourceEstimate > source;
-
   FluxCalObsVector& observations = get_observations (obs->source_type);
   
   if (multiple_source_states || observations.size() == 0)
+    obs->source = create_SourceEstimate (obs->source_type);
+  else
+    obs->source = observations.at(0)->source;
+}
+
+Calibration::SourceEstimate*
+Calibration::FluxCalManager::create_SourceEstimate (Signal::Source source_type)
+{
+  Reference::To<SourceEstimate> source_estimate;
+
+  if (subtract_off_from_on)
   {
-    source = new SourceEstimate;
+    if (!standard_candle)
+      standard_candle = new SourceDeltaEstimate;
 
-    source->create_source( composite->get_equation() );
-
-    // set the initial guess
-    Stokes<double> flux_cal_state (1,0,0,0);
-  
-    source->source->set_stokes ( flux_cal_state );
-
-    if (!StokesV_may_vary)
-    {
-      // parameter index of Stokes V
-      const unsigned int StokesV = 3;
-
-      source->source->set_infit ( StokesV, false );
-      source->source->set_Estimate ( StokesV, 0.0);
-    }
-    
-    string name_prefix = "flux_" + tostring(observations.size()) + "_";
-    source->source->set_param_name_prefix( name_prefix );
+    if (source_type == Signal::FluxCalOn)
+      source_estimate = standard_candle;
+    else
+      source_estimate = new SourceEstimate;
   }
   else
-    source = observations.at(0)->source;
+    source_estimate = new SourceEstimate;
 
-  obs->source = source;
+  source_estimate->create_source( composite->get_equation() );
+
+  if (subtract_off_from_on && source_type == Signal::FluxCalOff)
+    standard_candle->set_baseline (source_estimate);
+
+  // set the initial guess
+  Stokes<double> flux_cal_state (1,0,0,0);
+  source_estimate->source->set_stokes ( flux_cal_state );
+
+  if (!StokesV_may_vary && source_type == Signal::FluxCalOn)
+  {
+    // parameter index of Stokes V
+    const unsigned int StokesV = 3;
+
+    source_estimate->source->set_infit ( StokesV, false );
+    source_estimate->source->set_Estimate ( StokesV, 0.0 );
+  }
+    
+  string name_prefix = "flux_";
+  if (source_type == Signal::FluxCalOn)
+    name_prefix += "on_";
+  else
+    name_prefix += "off_";
+
+  if (multiple_source_states)
+  {
+    FluxCalObsVector& observations = get_observations (source_type);
+    name_prefix += tostring(observations.size()) + "_";
+  }
+
+  source_estimate->source->set_param_name_prefix( name_prefix );
+
+  return source_estimate.release();
 }
 
 void Calibration::FluxCalManager::allow_StokesV_to_vary (bool flag)
@@ -153,6 +181,24 @@ void Calibration::FluxCalManager::allow_StokesV_to_vary (bool flag)
 
   set_StokesV_infit (on_observations);
   set_StokesV_infit (off_observations);
+}
+
+void Calibration::FluxCalManager::model_multiple_source_states (bool flag)
+{
+  if (on_observations.size() > 0 || off_observations.size() > 0)
+    throw Error (InvalidState, "FluxCalManager::model_multiple_source_states",
+		 "observations already added; set this flag before adding");
+
+  multiple_source_states = flag;
+}
+
+void Calibration::FluxCalManager::model_on_minus_off (bool flag)
+{
+  if (on_observations.size() > 0 || off_observations.size() > 0)
+    throw Error (InvalidState, "FluxCalManager::model_on_minus_off",
+		 "observations already added; set this flag before adding");
+
+  subtract_off_from_on = flag;
 }
 
 void FluxCalManager::set_StokesV_infit (FluxCalObsVector& observations)
@@ -248,6 +294,13 @@ const Calibration::SourceEstimate*
 FluxCalManager::get_source_on (unsigned istate) const
 {
   return on_observations.at(istate)->source;
+}
+
+
+const Calibration::SourceEstimate*
+FluxCalManager::get_source_off (unsigned istate) const
+{
+  return off_observations.at(istate)->source;
 }
 
 

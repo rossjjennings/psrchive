@@ -26,16 +26,31 @@ Pulsar::FluxCalManagerInfo::FluxCalManagerInfo (const ReceptionCalibrator* cal)
   nclass = 0;
 
   if (!calibrator->multiple_flux_calibrators)
-    nclass = 2;
+  {
+    if (calibrator->model_fluxcal_on_minus_off)
+    {
+      nclass = 4;
+      nclass_on = 2;
+    }
+    else
+      nclass = nclass_on = 2;
+  }
   else
   {
     unsigned nchan = get_nchan();
+    unsigned nstate_on = 0;
+    unsigned nstate_off = 0;
+    
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       const FluxCalManager* fluxcal = calibrator->get_fluxcal (ichan);
-      // two classes for each FluxCalOn state: StokesI and StokesQUV
-      nclass = std::max (fluxcal->get_nstate_on()*2, nclass);
+      nstate_on = std::max (fluxcal->get_nstate_on(), nstate_on);
+      nstate_off = std::max (fluxcal->get_nstate_off(), nstate_off);
     }
+
+    // two classes for each state: StokesI and StokesQUV
+    nclass_on = nstate_on * 2;
+    nclass = nclass_on + nstate_off * 2;
   }
 }
 
@@ -59,16 +74,27 @@ unsigned Pulsar::FluxCalManagerInfo::get_nclass () const
 //! Return the name of the specified class
 std::string Pulsar::FluxCalManagerInfo::get_name (unsigned iclass) const
 {
-  string label = "\\fiS'\\b\\d\\frk";
+  string label = "\\fiS'\\b\\d\\fr";
+
+  if (iclass < nclass_on)
+  {
+    if (calibrator->model_fluxcal_on_minus_off)
+      label += "std";
+    else
+      label += "on";
+  }
+  else
+    label += "off";
+
+  label += ",";
   
   if (iclass % 2 == 0)
-  {
     // even -> Stokes I
-    std::string::size_type index = label.find('k');
-    assert (index != std::string::npos);
-    label[index] = '0';
-  }
-
+    label += "0";
+  else
+    // odd -> Stokes QUV
+    label += "p";
+  
   return label;
 }
 
@@ -90,10 +116,10 @@ Pulsar::FluxCalManagerInfo::get_param (unsigned ichan, unsigned iclass,
   if (!calibrator->get_transformation_valid (ichan))
     return 0.0;
 
-  unsigned index = 0;
+  unsigned ipol = 0;
 
   if (iclass % 2)
-    index = iparam + 1;  // off -> Stokes QUV
+    ipol = iparam + 1;  // off -> Stokes QUV
 
   const FluxCalManager* fluxcal = calibrator->get_fluxcal (ichan);
 
@@ -105,10 +131,13 @@ Pulsar::FluxCalManagerInfo::get_param (unsigned ichan, unsigned iclass,
 #if _DEBUG
   cerr << "FluxCalManagerInfo::get_param ichan=" << ichan
        << " iclass=" << iclass << " iparam=" << iparam
-       << " istate=" << istate << " index=" << index << endl;
+       << " istate=" << istate << " ipol=" << ipol << endl;
 #endif
-  
-  return fluxcal->get_source_on(istate)->source->get_stokes()[index];
+
+  if (iclass < nclass_on)
+    return fluxcal->get_source_on(istate)->source->get_stokes()[ipol];
+  else
+    return fluxcal->get_source_off(istate)->source->get_stokes()[ipol];
 }
 
 

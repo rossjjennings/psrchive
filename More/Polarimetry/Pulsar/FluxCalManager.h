@@ -11,7 +11,7 @@
 #ifndef __Calibration_FluxCalManager_H
 #define __Calibration_FluxCalManager_H
 
-#include "Pulsar/SourceEstimate.h"
+#include "Pulsar/SourceDeltaEstimate.h"
 #include "Pulsar/BackendEstimate.h"
 #include "Pulsar/SignalPath.h"
 
@@ -80,6 +80,9 @@ namespace Calibration
     //! Get the number of independent FluxCalOff source states
     unsigned get_nstate_off () const;
     
+    //! Return the Source estimate for the ith state
+    const SourceEstimate* get_source_off (unsigned istate) const;
+    
     //! Update all backend models with current best estimate
     void update ();
 
@@ -87,10 +90,9 @@ namespace Calibration
     bool is_constrained () const;
 
     void allow_StokesV_to_vary (bool flag = true);
+    void model_multiple_source_states (bool flag = true);
+    void model_on_minus_off (bool flag = true);
     
-    bool multiple_source_states;
-    bool subtract_off_from_on;
-
   protected:
 
     //! Add a new backend to the model
@@ -114,14 +116,23 @@ namespace Calibration
     //! The set of off-source flux calibrator observations
     FluxCalObsVector off_observations;
 
+    //! The difference between on-source and off-source calibrator observations
+    /*! This attribute is used only when subtract_off_from_on is true */
+    Reference::To<SourceDeltaEstimate> standard_candle;
+    
     //! Returns a reference to on_observations or off_observations
     FluxCalObsVector& get_observations (Signal::Source source_type);
 
     //! Set the fit flag for Stokes V in each source state
     void set_StokesV_infit (FluxCalObsVector&);
-    
+
+    //! Create a new SourceEstimate of the required type
+    SourceEstimate* create_SourceEstimate (Signal::Source);
+
   private:
 
+    bool multiple_source_states;
+    bool subtract_off_from_on;
     bool StokesV_may_vary;
   };
 
