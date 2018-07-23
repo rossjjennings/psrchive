@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005-2012 by Willem van Straten
+ *   Copyright (C) 2005-2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -52,7 +52,8 @@ Calibration::SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
   time_variations_engaged = true;
   step_after_cal = false;
   constant_pulsar_gain = false;
-
+  refcal_through_frontend = true;
+  
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
@@ -302,17 +303,28 @@ void Calibration::SignalPath::add_polncal_backend ()
 	pcal_gain_chain->set_constraint( 0, gain );
     }
 
-    *pcal_path *= pcal_gain_chain;
+    pcal_path->add_model( pcal_gain_chain );
   }
 
   if (foreach_pcal && ReferenceCalibrator_path)
   {
     Reference::To< MEAL::Complex2 > clone = foreach_pcal->clone();
-    *pcal_path *= clone;
+    pcal_path->add_model( clone );
   }
 
-  *pcal_path *= instrument;
+  if (refcal_through_frontend)
+    pcal_path->add_model( instrument );
+  else
+  {
+    BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
+    if (!physical)
+      throw Error (InvalidState, "SignalPath::add_polncal_backend",
+		   "invalid parameterization; "
+		   "cannot couple reference source after backend");
 
+    pcal_path->add_model( physical->get_backend() );
+  }
+  
   add_transformation ( pcal_path );
   ReferenceCalibrator_path = equation->get_transformation_index ();
 }
@@ -851,6 +863,11 @@ void Calibration::SignalPath::add_step (Scalar* function, double step)
 void Calibration::SignalPath::set_step_after_cal (bool _after)
 {
   step_after_cal = _after;
+}
+
+void Calibration::SignalPath::set_refcal_through_frontend (bool flag)
+{
+  refcal_through_frontend = flag;
 }
 
 void Calibration::SignalPath::fix_last_step (Scalar* function)

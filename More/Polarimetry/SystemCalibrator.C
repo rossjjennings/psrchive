@@ -50,6 +50,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
   correct_interstellar_Faraday_rotation = false;
 
+  refcal_through_frontend = true;
+
   set_initial_guess = true;
   guess_physical_calibrator_stokes = false;
   
@@ -137,6 +139,12 @@ Pulsar::SystemCalibrator::get_Info () const
 
   return PolnCalibrator::get_Info ();
 }
+
+void Pulsar::SystemCalibrator::set_refcal_through_frontend (bool flag)
+{
+  refcal_through_frontend = flag;
+}
+
 
 MJD Pulsar::SystemCalibrator::get_epoch () const
 {
@@ -1123,6 +1131,8 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
       cerr << "Pulsar::SystemCalibrator::init_model impurity" << endl;
     model[ichan]->set_impurity( impurity->clone() );
   }
+
+  model[ichan] -> set_refcal_through_frontend (refcal_through_frontend);
 
   if (foreach_calibrator)
     model[ichan]->set_foreach_calibrator( foreach_calibrator );

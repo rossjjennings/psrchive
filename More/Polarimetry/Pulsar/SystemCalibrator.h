@@ -75,6 +75,9 @@ namespace Pulsar
     //! Retern a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
+    //! True if noise diode illuminates feed; false if coupled after OMT
+    void set_refcal_through_frontend (bool flag = true);
+    
     //! Set the flux calibrator solution used to estimate calibrator Stokes
     void set_flux_calibrator (const FluxCalibrator* fluxcal);
 
@@ -301,6 +304,9 @@ namespace Pulsar
     //! Include a correction for Faraday rotation in the ISM
     bool correct_interstellar_Faraday_rotation;
     
+    //! True if noise diode illuminates feed; false if coupled after OMT
+    bool refcal_through_frontend;
+
     //! Set the initial guess in solve_prepare
     bool set_initial_guess;
 

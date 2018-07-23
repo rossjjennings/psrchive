@@ -117,6 +117,7 @@ void usage ()
     "\n"
     "  -F days    use flux calibrators within days of pulsar data mid-time\n"
     "  -L hours   use reference sources within hours of pulsar data mid-time\n"
+    "  -Q         reference source coupled after frontend \n"
     "\n"
     "  Constraints on degeneracy under commutation \n"
     "  -- See " PSRCHIVE_HTTP "/manuals/pcm/degeneracy.shtml \n"
@@ -374,7 +375,7 @@ bool equal_ellipticities = false;
 bool normalize_by_invariant = false;
 bool independent_gains = false;
 bool step_after_cal = false;
-
+bool refcal_through_frontend = true;
 bool physical_coherency = false;
 
 float retry_chisq = 0.0;
@@ -661,7 +662,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
-    "M:m:Nn:O:o:Pp:qR:rS:sT:t:U:u:V:vW:wX:xYyZz";
+    "M:m:Nn:O:o:Pp:QqR:rS:sT:t:U:u:V:vW:wX:xYyZz";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -851,6 +852,14 @@ int actual_main (int argc, char *argv[]) try
       break;
     }
 
+    case 'q':
+      measure_cal_Q = false;
+      break;
+
+    case 'Q':
+      refcal_through_frontend = false;
+      break;
+
     case 'r':
       physical_coherency = true;
       break;
@@ -899,10 +908,6 @@ int actual_main (int argc, char *argv[]) try
     case 'U':
       cerr << "pcm: for each calibrator, a unique value of ";
       set_foreach_calibrator( optarg[0] );
-      break;
-
-    case 'q':
-      measure_cal_Q = false;
       break;
 
     case 'v':
@@ -1483,6 +1488,13 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model->add_state (phase_bins[ibin]);
 
+  if (refcal_through_frontend)
+    cerr << "pcm: reference source illuminates frontend" << endl;
+  else
+    cerr << "pcm: reference source coupled after frontend" << endl;
+
+  model->set_refcal_through_frontend( refcal_through_frontend );
+  
   if (multiple_flux_calibrators)
     cerr <<
       "pcm: each flux calibrator observation "
@@ -1491,8 +1503,7 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   model->multiple_flux_calibrators = multiple_flux_calibrators;
 
   if (model_fluxcal_on_minus_off)
-    cerr <<
-      "pcm: modeling the different between FluxCalOn and FluxCalOff" << endl;
+    cerr << "pcm: modeling difference between FluxCalOn and FluxCalOff" << endl;
 
   model->model_fluxcal_on_minus_off = model_fluxcal_on_minus_off;
   
@@ -1783,6 +1794,7 @@ void plot_state (SystemCalibrator* model, const std::string& state) try
 
   SystemCalibratorPlotter plotter (model);
   plotter.use_colour = !publication_plots;
+  plotter.npanel = 4;
 
   //
   // if the SystemCalibrator is a ReceptionCalibrator (MEM mode)
