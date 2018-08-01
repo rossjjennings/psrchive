@@ -30,7 +30,7 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
     set_nchan (nchan);
 
     for (unsigned ichan=0; ichan < nchan; ichan++) try {
-      calibrator->data[ichan].get (S_sys[ichan], S_cal[ichan]);
+      calibrator->data[ichan]->get (S_sys[ichan], S_cal[ichan]);
     }
     catch (Error& error) {
       if (Archive::verbose > 2)

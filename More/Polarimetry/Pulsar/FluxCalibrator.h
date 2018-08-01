@@ -98,10 +98,17 @@ namespace Pulsar {
     //! Calibrate a single sub-integration
     void calibrate (Integration* subint);
 
+    //! Virtual base class of flux calibration policies
     class Data;
 
+    //! Policy used when gain varies between FluxCal-On and FluxCal-Off
+    class VariableGain;
+
+    //! Policy used when gain is constant, but may be impacted by noise diode
+    class ConstantGain;
+
     //! Flux calibrator data for each frequency channel
-    std::vector< Data > data;
+    std::vector< Reference::To<Data> > data;
 
     //! Resize the data vector
     void resize (unsigned nchan, unsigned nreceptor);
