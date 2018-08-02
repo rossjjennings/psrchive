@@ -25,7 +25,7 @@ nobase_include_HEADERS = \
         Pulsar/FaradayRotation.h \
         Pulsar/Feed.h \
 	Pulsar/FitGoodnessReport.h \
-        Pulsar/FluxCalibratorData.h \
+        Pulsar/FluxCalibratorPolicy.h \
         Pulsar/FluxCalibrator.h \
 	Pulsar/FluxCalManager.h \
 	Pulsar/FluxCalManagerInfo.h \
@@ -121,7 +121,9 @@ libPolarimetry_la_SOURCES = \
         Feed_load.C \
 	FitGoodnessReport.C \
         FluxCalibrator.C \
-        FluxCalibratorData.C \
+	FluxCalibratorConstantGain.C \
+        FluxCalibratorPolicy.C \
+        FluxCalibratorVariableGain.C \
 	FluxCalibratorExt.C \
 	FluxCalManager.C \
 	FluxCalManagerInfo.C \

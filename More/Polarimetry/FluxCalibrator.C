@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/FluxCalibrator.h"
-#include "Pulsar/FluxCalibratorData.h"
+#include "Pulsar/FluxCalibratorPolicy.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/StandardCandles.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -56,8 +56,11 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
     unsigned nchan = fe->get_nchan();
     data.resize( nchan );
     for (unsigned ichan=0; ichan < nchan; ichan++)
-      data[ichan] = new VariableGain( fe->S_sys[ichan], fe->S_cal[ichan] );
-
+    {
+      data[ichan] = new VariableGain;
+      data[ichan]->set( fe->S_sys[ichan], fe->S_cal[ichan] );
+    }
+    
     // disable checks for sufficient data
     have_on = have_off = true;
   }
@@ -72,8 +75,15 @@ Pulsar::FluxCalibrator::~FluxCalibrator ()
 void Pulsar::FluxCalibrator::init ()
 {
   type = new CalibratorTypes::Flux;
+  policy = new FluxCalibrator::VariableGain;
+    
   calculated = have_on = have_off = false;
   outlier_threshold = 0.0;
+}
+
+void Pulsar::FluxCalibrator::set_policy (Policy* p)
+{
+  policy = p;
 }
 
 string Pulsar::FluxCalibrator::get_standard_candle_info () const
@@ -456,7 +466,7 @@ void Pulsar::FluxCalibrator::resize (unsigned nchan, unsigned nreceptor)
   data.resize( nchan );
   for (unsigned i=0; i < nchan; i++)
   {
-    data[i] = new VariableGain ();
+    data[i] = policy->clone();
     data[i]->set_nreceptor (nreceptor);
   }
 }

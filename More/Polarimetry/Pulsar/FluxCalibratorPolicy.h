@@ -6,10 +6,10 @@
  *
  ***************************************************************************/
 
-// psrchive/More/Polarimetry/Pulsar/FluxCalibratorData.h
+// psrchive/More/Polarimetry/Pulsar/FluxCalibratorPolicy.h
 
-#ifndef __Pulsar_FluxCalibratorData_H
-#define __Pulsar_FluxCalibratorData_H
+#ifndef __Pulsar_FluxCalibratorPolicy_H
+#define __Pulsar_FluxCalibratorPolicy_H
 
 #include "Pulsar/FluxCalibrator.h"
 #include "MEAL/ScalarMath.h"
@@ -20,33 +20,36 @@
 namespace Pulsar {
 
   //! Flux calibration data for each receptor
-  class FluxCalibrator::Data : public Reference::Able
+  class FluxCalibrator::Policy : public Reference::Able
   {
 
   public:
 
     //! Default constructor
-    Data ();
+    Policy ();
 
-    //! Construct from known flux densities for each receptor
-    Data ( const std::vector< Estimate<double> >& S_sys,
-	   const std::vector< Estimate<double> >& S_cal );
-    
-    //! Return the flux densities for each receptor
+    //! Return a new default constructed copy of self
+    virtual Policy* clone () const = 0;
+
+    //! Integrate an observation of the reference source
+    virtual void integrate (Signal::Source source, unsigned ireceptor,
+			    const Estimate<double>& cal_hi,
+			    const Estimate<double>& cal_lo) = 0;
+        
+    //! Get the flux densities for each receptor
     void get ( std::vector< Estimate<double> >& S_sys,
 	       std::vector< Estimate<double> >& S_cal ) const;
-    
+
+    //! Set the flux densities for each receptor
+    void set ( const std::vector< Estimate<double> >& S_sys,
+	       const std::vector< Estimate<double> >& S_cal );
+
     //! Set the number of receptors
     void set_nreceptor (unsigned);
     
     //! Get the number of receptors
     unsigned get_nreceptor () const;
 
-    //! Integrate an observation of the reference source
-    virtual void integrate (Signal::Source source, unsigned ireceptor,
-			    const Estimate<double>& cal_hi,
-			    const Estimate<double>& cal_lo) = 0;
-    
     //! Set the flux density of the standard candle
     void set_S_std (double S_std);
     
@@ -98,22 +101,20 @@ namespace Pulsar {
     
   };
 
-  //! Flux calibration policy when gain varies between FluxCal-On and Off
-  class FluxCalibrator::VariableGain : public FluxCalibrator::Data
+  //! Used when gain varies between FluxCal-On and Off observations
+  class FluxCalibrator::VariableGain : public FluxCalibrator::Policy
   {
 
   public:
 
     //! Default constructor
     VariableGain ();
+
+    VariableGain* clone () const;
     
     void integrate (Signal::Source source, unsigned ireceptor,
 		    const Estimate<double>& cal_hi,
 		    const Estimate<double>& cal_lo);
-    
-    //! Construct from known flux densities
-    VariableGain ( const std::vector< Estimate<double> >& S_sys,
-		   const std::vector< Estimate<double> >& S_cal );
     
   protected:
     
@@ -146,10 +147,54 @@ namespace Pulsar {
     
     MEAL::ScalarMath flux_cal;
     MEAL::ScalarMath flux_sys;
-
-    void init ();
   };
-  
+
+  //! Used when gain remains constant between FluxCal-On and Off observations
+  class FluxCalibrator::ConstantGain : public FluxCalibrator::Policy
+  {
+
+  public:
+
+    //! Default constructor
+    ConstantGain ();
+
+    ConstantGain* clone () const;
+    
+    void integrate (Signal::Source source, unsigned ireceptor,
+		    const Estimate<double>& cal_hi,
+		    const Estimate<double>& cal_lo);
+    
+  protected:
+    
+    //! Mean of on-source observations with noise diode emitting
+    std::vector< MeanEstimate<double> > mean_hi_on;
+    //! Mean of on-source observations with noise diode off
+    std::vector< MeanEstimate<double> > mean_lo_on;
+    
+    //! Mean of off-source observations with noise diode emitting
+    std::vector< MeanEstimate<double> > mean_hi_off;
+    //! Mean of off-source observations with noise diode off
+    std::vector< MeanEstimate<double> > mean_lo_off;
+    
+    //! Compute the fluxes of the reference source and system
+    void compute (unsigned ireceptor,
+		  Estimate<double>& S_cal,
+		  Estimate<double>& S_sys);
+
+  private:
+    
+    /* 
+       Use the ScalarMath class to calculate the variances.
+       These are static because they cost a bit during construction.
+    */
+    MEAL::ScalarParameter ratio_hi;
+    MEAL::ScalarParameter ratio_lo;
+    MEAL::ScalarConstant unity;
+    
+    MEAL::ScalarMath flux_cal;
+    MEAL::ScalarMath flux_sys;
+
+  };
 }
 
 #endif

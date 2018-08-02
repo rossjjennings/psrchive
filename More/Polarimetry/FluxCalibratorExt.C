@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FluxCalibratorExtension.h"
-#include "Pulsar/FluxCalibratorData.h"
+#include "Pulsar/FluxCalibratorPolicy.h"
 #include "Pulsar/FluxCalibrator.h"
 
 using namespace std;

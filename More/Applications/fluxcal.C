@@ -7,6 +7,7 @@
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/FluxCalibratorPolicy.h"
 #include "Pulsar/StandardCandles.h"
 
 #include "Pulsar/FixFluxCal.h"
@@ -131,6 +132,8 @@ int main (int argc, char** argv) try {
 
   Reference::To<Pulsar::FixFluxCal> fix;
 
+  Reference::To<Pulsar::FluxCalibrator::Policy> policy;
+
   string database_filename;
 
   bool print_flux = false;
@@ -138,7 +141,7 @@ int main (int argc, char** argv) try {
   float outlier_threshold = 0.0;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:K:O:P:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fgi:I:K:O:P:")) != -1) 
 
     switch (c)  {
 
@@ -190,6 +193,11 @@ int main (int argc, char** argv) try {
       fix = new Pulsar::FixFluxCal;
       break;
 
+    case 'g':
+      cerr << "fluxcal: assuming constant gain." << endl;
+      policy = new Pulsar::FluxCalibrator::ConstantGain;
+      break;
+      
     case 'i':
       interval = atof(optarg) * 60.0;
       cerr << "fluxcal: maximum interval between archives: " << interval/60
@@ -276,6 +284,9 @@ int main (int argc, char** argv) try {
 
   }
 
+  if (!policy)
+    policy = new Pulsar::FluxCalibrator::VariableGain;
+  
   Reference::To<Pulsar::Archive> last;
   Reference::To<Pulsar::Archive> archive;
   Reference::To<Pulsar::FluxCalibrator> fluxcal;
@@ -346,10 +357,16 @@ int main (int argc, char** argv) try {
     if (!fluxcal) {
 
       cerr << "fluxcal: starting new FluxCalibrator" << endl;
-      fluxcal = new Pulsar::FluxCalibrator (archive);
+      fluxcal = new Pulsar::FluxCalibrator;
+
+      fluxcal->set_policy (policy);
+      
       if (standards)
 	fluxcal->set_database (standards);
+
       fluxcal->set_outlier_threshold (outlier_threshold);
+
+      fluxcal->add_observation (archive);
     }
 
     last = archive;
