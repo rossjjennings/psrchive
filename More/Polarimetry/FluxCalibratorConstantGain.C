@@ -16,7 +16,7 @@ using Pulsar::FluxCalibrator;
 FluxCalibrator::ConstantGain::ConstantGain ()
   : unity(1.0)
 {
-  flux_cal = unity/(unity/ratio_hi - unity/ratio_lo);
+  flux_cal = unity/ratio_hi - unity/ratio_lo;
   flux_sys = unity/ratio_lo;
 }
 
@@ -97,6 +97,15 @@ void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
     S_cal = S_sys = 0;
     valid = false;
   }
+  
+  gain_ratio.resize( get_nreceptor() );
+
+  gain_ratio[ireceptor] = (hi_on - hi_off) / (lo_on - lo_off); 
 }
 
 
+Estimate<double> FluxCalibrator::ConstantGain::get_gain_ratio (unsigned ir)
+{
+  return gain_ratio.at(ir);
+}
+							       

@@ -444,7 +444,8 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   unsigned successful = 0;
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try
+  {
     gain[ichan] = data[ichan]->get_S_cal().get_value();
     successful ++;
   }

@@ -163,6 +163,8 @@ namespace Pulsar {
     void integrate (Signal::Source source, unsigned ireceptor,
 		    const Estimate<double>& cal_hi,
 		    const Estimate<double>& cal_lo);
+
+    Estimate<double> get_gain_ratio (unsigned ireceptor);
     
   protected:
     
@@ -181,6 +183,8 @@ namespace Pulsar {
 		  Estimate<double>& S_cal,
 		  Estimate<double>& S_sys);
 
+    std::vector< Estimate<double> > gain_ratio;
+    
   private:
     
     /* 
