@@ -36,6 +36,7 @@ namespace TextInterface
       std::cerr << "OptionalInterface name=" << t << std::endl;
 #endif
       help = false;
+      value = NULL;
     }
 
     //! Get the name of the attribute
