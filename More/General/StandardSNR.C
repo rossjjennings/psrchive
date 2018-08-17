@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/StandardSNR.h"
+#include "Pulsar/Archive.h"
 
 void Pulsar::StandardSNR::set_standard (const Profile* profile)
 {
@@ -13,11 +14,29 @@ void Pulsar::StandardSNR::set_standard (const Profile* profile)
   fit.set_standard (profile);
 }
 
-float Pulsar::StandardSNR::get_snr (const Profile* profile)
+float Pulsar::StandardSNR::get_snr (const Profile* profile) try
 {
   fit.set_Profile (profile);
   return fit.get_snr();
 }    
+ catch (Error& error)
+   {
+     throw error += "Pulsar::StandardSNR::get_snr";
+   }
+
+//! Set the name of the file from which the standard profile will be loaded
+void Pulsar::StandardSNR::set_standard_filename (const std::string& fname)
+{
+  Reference::To<Pulsar::Archive> archive = Pulsar::Archive::load (fname);
+  set_standard (archive->get_Profile(0,0,0));
+  filename = fname;
+}
+
+//! Return the name of the file from which the standard was loaded
+std::string Pulsar::StandardSNR::get_standard_filename () const
+{
+  return filename;
+}
 
 class Pulsar::StandardSNR::Interface
   : public TextInterface::To<StandardSNR>
@@ -27,6 +46,10 @@ public:
   {
     if (instance)
       set_instance (instance);
+
+    add( &StandardSNR::get_standard_filename,
+         &StandardSNR::set_standard_filename,
+         "file", "filename of standard" );
   }
 
   std::string get_interface_name () const { return "standard"; }

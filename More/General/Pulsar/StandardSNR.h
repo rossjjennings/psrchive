@@ -38,10 +38,19 @@ namespace Pulsar {
     //! Return a copy constructed instance of self
     StandardSNR* clone () const;
 
+    //! Set the name of the file from which the standard profile will be loaded
+    void set_standard_filename (const std::string& filename);
+
+    //! Return the name of the file from which the standard was loaded
+    std::string get_standard_filename () const;
+    
+    
   protected:
 
     //! Used to perform the fit and compute the S/N
     ProfileShiftFit fit;
+
+    std::string filename;
   };
 
 }
