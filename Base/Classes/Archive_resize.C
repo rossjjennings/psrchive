@@ -48,7 +48,7 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
   if (verbose == 3)
     cerr << "Pulsar::Archive::resize subints" << endl;
 
-  IntegrationManager::resize (nsubint);
+  _resize (nsubint);
 
   // convenience for calibrators
   if (get_type() != Signal::Pulsar)

@@ -235,7 +235,7 @@ void Pulsar::Archive::refresh()
   if (verbose == 3)
     cerr << "Pulsar::Archive::refresh" << endl;
 
-  IntegrationManager::resize(0);
+  _resize(0);
 
   load_header (__load_filename.c_str());
 }
