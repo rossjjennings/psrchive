@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/ProfileStrategies.h"
+#include "Pulsar/IntegrationMeta.h"
+#include "Pulsar/Archive.h"
 
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/PeakConsecutive.h"
@@ -95,12 +97,45 @@ Profile::Strategies* Profile::get_strategy() const
 {
   if (!strategy)
     strategy = new DefaultStrategies;
+  else
+  {
+    ManagedStrategies* managed
+      = dynamic_cast<ManagedStrategies*>( strategy.get() );
+
+    if (managed)
+      strategy = managed->get_container()->get_strategy();
+  }
+  
+  return strategy;
 }
 
-//! Set the strategy manager
-void Profile::set_strategy (Strategies* s)
+//! Returns the strategy manager
+Profile::Strategies* Integration::get_strategy() const
 {
-  strategy = s;
+  if (parent)
+    return parent->get_strategy();
+
+  if (orphaned)
+    return orphaned->get_strategy();
+
+  return new DefaultStrategies;
 }
 
-    
+
+//! Returns the strategy manager
+Profile::Strategies* Archive::get_strategy() const
+{
+  if (!strategy)
+    strategy = new DefaultStrategies;
+
+  return strategy;
+}
+
+Profile::Strategies* Integration::Meta::get_strategy ()
+{
+  if (!strategy)
+    strategy = new DefaultStrategies;
+
+  return strategy;
+}
+
