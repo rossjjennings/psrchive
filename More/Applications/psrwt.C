@@ -7,7 +7,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
+#include "Pulsar/ProfileStrategies.h"
 
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
@@ -142,7 +142,7 @@ int main (int argc, char** argv) try
 	return -1;
       }
 
-      Profile::snr_strategy = SNRatioEstimator::factory (optarg);
+      DefaultStrategies::default_snratio = SNRatioEstimator::factory (optarg);
 
       snr_chosen = true;
       break;
@@ -219,7 +219,7 @@ int main (int argc, char** argv) try
 	return -1;
       }
      
-      Profile::snr_strategy = &standard_snr;
+      DefaultStrategies::default_snratio = &standard_snr;
 
       cerr << "psrwt: loading standard from " << optarg << endl;
       standard = Archive::load (optarg);

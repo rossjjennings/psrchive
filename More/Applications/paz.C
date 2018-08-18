@@ -21,7 +21,7 @@
 
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/IntegrationExpert.h"
-#include "Pulsar/Profile.h"
+#include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/ProcHistory.h"
 
 #include "Error.h"
@@ -420,7 +420,7 @@ void paz::setup ()
     thestd = data->get_Profile (0, 0, 0);
     
     standard_snr.set_standard (thestd);
-    Pulsar::Profile::snr_strategy = new Pulsar::StandardSNR;
+    Pulsar::DefaultStrategies::default_snratio = new Pulsar::StandardSNR;
   }
 }
 
