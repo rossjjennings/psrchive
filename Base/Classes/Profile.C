@@ -167,6 +167,12 @@ void Pulsar::Profile::set_weight (float w)
   foreach<DataExtension> (this, &DataExtension::set_weight, weight);
 }
 
+//! Set the strategy manager
+void Pulsar::Profile::set_strategy (Strategies* s)
+{
+  strategy = s;
+}
+
 //! Return the number of extensions available
 unsigned Pulsar::Profile::get_nextension () const
 {

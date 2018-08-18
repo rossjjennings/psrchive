@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
+#include "Pulsar/ProfileStrategies.h"
 
 using namespace std;
 
@@ -47,6 +48,8 @@ void Pulsar::Integration::resize (unsigned new_npol,
 	profiles[ipol][ichan] = new_Profile();
 
       profiles[ipol][ichan] -> resize(new_nbin);
+
+      profiles[ipol][ichan] -> set_strategy (new ManagedStrategies(this));
     }
   }
   

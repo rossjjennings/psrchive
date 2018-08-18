@@ -84,6 +84,7 @@ libClasses_la_SOURCES = \
         Integration_mixable.C \
         Integration_resize.C \
         IntegrationTI.C \
+	ManagedStrategies.C \
 	MoreProfiles.C \
 	PhaseResolvedHistogram.C \
         Profile_average.C \

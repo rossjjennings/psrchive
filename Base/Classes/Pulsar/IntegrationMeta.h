@@ -74,6 +74,8 @@ namespace Pulsar {
     bool get_auxiliary_birefringence_corrected () const;
     void set_auxiliary_birefringence_corrected (bool);
 
+    Profile::Strategies* get_strategy ();
+    
   protected:
 
     double centre_frequency;
@@ -94,6 +96,7 @@ namespace Pulsar {
     std::string telescope;
     sky_coord coordinates;
 
+    mutable Reference::To<Profile::Strategies> strategy;
   };
 
 }
