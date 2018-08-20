@@ -99,7 +99,7 @@ Pulsar::Index Pulsar::Statistics::get_pol () const
   return ipol;
 }
 
-Pulsar::DefaultStrategies* Pulsar::Statistics::get_strategy () const try
+Pulsar::StrategySet* Pulsar::Statistics::get_strategy () const try
 {
     return get_Archive()->get_strategy();
 }
@@ -128,7 +128,7 @@ TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
   if (snr_estimator)
     return snr_estimator->get_interface();
   else
-    return DefaultStrategies::default_snratio.get_value()->get_interface();
+    return StrategySet::default_snratio.get_value()->get_interface();
 }
 
 //! Set the pulse width estimator

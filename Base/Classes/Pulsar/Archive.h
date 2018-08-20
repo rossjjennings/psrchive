@@ -35,7 +35,7 @@ namespace Pulsar
   class Predictor;
   class Parameters;
 
-  class DefaultStrategies;
+  class StrategySet;
   
   //! The primary interface to pulsar observational data
   /*! This virtual base class implements the primary interface to pulsar
@@ -565,7 +565,7 @@ namespace Pulsar
     static Functor< void (Archive*) > remove_baseline_strategy;
 
     //! Returns the strategy manager
-    DefaultStrategies* get_strategy() const;
+    StrategySet* get_strategy() const;
 
   protected:
 
@@ -683,7 +683,7 @@ namespace Pulsar
     mutable std::vector< Reference::To<Extension> > extension;
 
     //! Strategies used by all Profile instances contained by this instance
-    mutable Reference::To<DefaultStrategies> strategy;
+    mutable Reference::To<StrategySet> strategy;
 
     //! Store the name of the file from which the current instance was loaded
     /*! Although the logical name of the file may be changed with

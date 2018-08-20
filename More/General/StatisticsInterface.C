@@ -18,28 +18,28 @@
 using namespace Pulsar;
 using namespace std;
 
-class DefaultStrategiesInterface : public TextInterface::To<DefaultStrategies>
+class StrategySetInterface : public TextInterface::To<StrategySet>
   {
   public:
 
     //! Default constructor
-    DefaultStrategiesInterface ( DefaultStrategies* instance = 0 )
+    StrategySetInterface ( StrategySet* instance = 0 )
     {
       if (instance)
 	set_instance (instance);
 
-      add( &DefaultStrategies::onpulse,
-	   &DefaultStrategies::set_onpulse,
+      add( &StrategySet::onpulse,
+	   &StrategySet::set_onpulse,
 	   &ProfileWeightFunction::get_interface,
 	   "^on", "Install on-pulse estimator" );
 
-      add( &DefaultStrategies::baseline,
-	   &DefaultStrategies::set_baseline,
+      add( &StrategySet::baseline,
+	   &StrategySet::set_baseline,
 	   &ProfileWeightFunction::get_interface,
 	   "^off", "Install off-pulse estimator" );
 
-      add( &DefaultStrategies::snratio,
-	   &DefaultStrategies::set_snratio,
+      add( &StrategySet::snratio,
+	   &StrategySet::set_snratio,
 	   &SNRatioEstimator::get_interface,
 	   "^snr", "Install signal-to-noise ratio estimator" );
 
@@ -69,11 +69,11 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        &Statistics::set_pol,
        "pol", "Polarization index" );
 
-  DefaultStrategies* strategy = 0;
+  StrategySet* strategy = 0;
   if (instance)
     strategy = instance->get_strategy();
 
-  import( DefaultStrategiesInterface(strategy), &Statistics::get_strategy );
+  import( StrategySetInterface(strategy), &Statistics::get_strategy );
 
   ProfileStats* stats = 0;
   if (instance)

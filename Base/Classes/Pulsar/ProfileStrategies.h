@@ -30,7 +30,7 @@ namespace Pulsar {
     virtual SNRatioEstimator* snratio () const = 0;
   };
 
-  class DefaultStrategies : public Profile::Strategies
+  class StrategySet : public Profile::Strategies
   {
     //! The default implementation of the baseline finding algorithm
     mutable Reference::To<ProfileWeightFunction> baseline_strategy;

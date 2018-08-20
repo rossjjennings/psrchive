@@ -142,7 +142,7 @@ int main (int argc, char** argv) try
 	return -1;
       }
 
-      DefaultStrategies::default_snratio = SNRatioEstimator::factory (optarg);
+      StrategySet::default_snratio = SNRatioEstimator::factory (optarg);
 
       snr_chosen = true;
       break;
@@ -219,7 +219,7 @@ int main (int argc, char** argv) try
 	return -1;
       }
      
-      DefaultStrategies::default_snratio = &standard_snr;
+      StrategySet::default_snratio = &standard_snr;
 
       cerr << "psrwt: loading standard from " << optarg << endl;
       standard = Archive::load (optarg);

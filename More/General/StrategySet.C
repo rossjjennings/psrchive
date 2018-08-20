@@ -21,7 +21,7 @@ using namespace Pulsar;
   The default baseline estimator is the BaselineWindow class
 */
 Pulsar::Option< Reference::To<ProfileWeightFunction> >
-DefaultStrategies::default_baseline
+StrategySet::default_baseline
 (
  "Profile::baseline", new Pulsar::BaselineWindow,
 
@@ -32,7 +32,7 @@ DefaultStrategies::default_baseline
 );
 
 //! The implementation of the baseline finding algorithm
-ProfileWeightFunction* DefaultStrategies::baseline () const
+ProfileWeightFunction* StrategySet::baseline () const
 {
   /*
     Strategies are cloned because, in a multi-threaded application,
@@ -45,7 +45,7 @@ ProfileWeightFunction* DefaultStrategies::baseline () const
   return baseline_strategy;
 }
 
-void DefaultStrategies::set_baseline (ProfileWeightFunction* b)
+void StrategySet::set_baseline (ProfileWeightFunction* b)
 {
   baseline_strategy = b;
 }
@@ -55,7 +55,7 @@ void DefaultStrategies::set_baseline (ProfileWeightFunction* b)
   The default on-pulse estimator is the PeakConsecutive class
 */
 Pulsar::Option< Reference::To<ProfileWeightFunction> >
-DefaultStrategies::default_onpulse
+StrategySet::default_onpulse
 (
  "Profile::onpulse", new Pulsar::PeakConsecutive,
 
@@ -66,7 +66,7 @@ DefaultStrategies::default_onpulse
 );
 
 //! The implementation of the on-pulse finding algorithm
-ProfileWeightFunction* DefaultStrategies::onpulse () const
+ProfileWeightFunction* StrategySet::onpulse () const
 {
   if (!onpulse_strategy)
     onpulse_strategy = default_onpulse.get_value()->clone();
@@ -74,7 +74,7 @@ ProfileWeightFunction* DefaultStrategies::onpulse () const
   return onpulse_strategy;
 }
 
-void DefaultStrategies::set_onpulse (ProfileWeightFunction* pwf)
+void StrategySet::set_onpulse (ProfileWeightFunction* pwf)
 {
   onpulse_strategy = pwf;
 }
@@ -84,7 +84,7 @@ void DefaultStrategies::set_onpulse (ProfileWeightFunction* pwf)
      configure the S/N estimation algorithm.
 */
 Pulsar::Option< Reference::To<SNRatioEstimator> >
-DefaultStrategies::default_snratio
+StrategySet::default_snratio
 (
  "Profile::snr", new Pulsar::PhaseSNR,
 
@@ -96,7 +96,7 @@ DefaultStrategies::default_snratio
 );
 
 //! The implementation of the signal-to-noise ratio calculator
-SNRatioEstimator* DefaultStrategies::snratio () const
+SNRatioEstimator* StrategySet::snratio () const
 {
   if (!snratio_strategy)
     snratio_strategy = default_snratio.get_value()->clone();
@@ -104,7 +104,7 @@ SNRatioEstimator* DefaultStrategies::snratio () const
   return snratio_strategy;
 }
 
-void DefaultStrategies::set_snratio (SNRatioEstimator* snre)
+void StrategySet::set_snratio (SNRatioEstimator* snre)
 {
   snratio_strategy = snre;
 }
@@ -113,7 +113,7 @@ void DefaultStrategies::set_snratio (SNRatioEstimator* snre)
 Profile::Strategies* Profile::get_strategy() const
 {
   if (!strategy)
-    strategy = new DefaultStrategies;
+    strategy = new StrategySet;
   else
   {
     ManagedStrategies* managed
@@ -135,15 +135,15 @@ Profile::Strategies* Integration::get_strategy() const
   if (orphaned)
     return orphaned->get_strategy();
 
-  return new DefaultStrategies;
+  return new StrategySet;
 }
 
 
 //! Returns the strategy manager
-DefaultStrategies* Archive::get_strategy() const
+StrategySet* Archive::get_strategy() const
 {
   if (!strategy)
-    strategy = new DefaultStrategies;
+    strategy = new StrategySet;
 
   return strategy;
 }
@@ -151,7 +151,7 @@ DefaultStrategies* Archive::get_strategy() const
 Profile::Strategies* Integration::Meta::get_strategy ()
 {
   if (!strategy)
-    strategy = new DefaultStrategies;
+    strategy = new StrategySet;
 
   return strategy;
 }
