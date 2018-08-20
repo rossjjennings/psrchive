@@ -22,7 +22,7 @@ namespace Pulsar
   public:
 
     //! Default constructor
-    Interface ( ProfileStats* = 0 );
+    Interface ( ProfileStats* = 0, bool manage_estimators = true );
   };
 }
 

@@ -24,6 +24,7 @@ namespace Pulsar {
   class PhaseWeight;
   class SNRatioEstimator;
   class WidthEstimator;
+  class DefaultStrategies;
   
   //! Interface to a variety of useful statistics
   class Statistics : public Reference::Able
@@ -38,6 +39,9 @@ namespace Pulsar {
     void set_Archive (const Archive*);
     //! Get the instance from which statistics will be drawn
     const Archive* get_Archive () const;
+
+    //! Get the strategy manager owned by the Archive
+    DefaultStrategies* get_strategy () const;
 
     //! Set the sub-integration from which statistics will be drawn
     void set_subint (Index _isubint);

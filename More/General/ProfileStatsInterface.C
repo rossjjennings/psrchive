@@ -9,26 +9,9 @@
 #include "Pulsar/PhaseWeightInterface.h"
 
 #include "Pulsar/ProfileWeightFunction.h"
-#include "interface_stream.h"
 
-using namespace std;
-
-namespace Pulsar
-{
-  std::ostream& operator<< (std::ostream& ostr,
-			    ProfileWeightFunction* e)
-  {
-    return interface_insertion (ostr, e);
-  }
-
-  std::istream& operator>> (std::istream& istr,
-			    ProfileWeightFunction* &e)
-  {
-    return interface_extraction (istr, e);
-  }
-}
-
-Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
+Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
+					    bool manage_estimators)
 {
   if (instance)
     set_instance (instance);
@@ -37,18 +20,20 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
 
   typedef PhaseWeight* (ProfileStats::*Method) (void);
 
-  add( &ProfileStats::get_onpulse_estimator,
-       &ProfileStats::set_onpulse_estimator,
-       &ProfileWeightFunction::get_interface,
-       "on", "On-pulse estimator" );
+  if (manage_estimators)
+    add( &ProfileStats::get_onpulse_estimator,
+	 &ProfileStats::set_onpulse_estimator,
+	 &ProfileWeightFunction::get_interface,
+	 "on", "On-pulse estimator" );
 
   import( "on", PhaseWeight::Interface(), 
 	  (Method) &ProfileStats::get_onpulse );
 
-  add( &ProfileStats::get_baseline_estimator,
-       &ProfileStats::set_baseline_estimator,
-       &ProfileWeightFunction::get_interface,
-       "off", "Off-pulse estimator" );
+  if (manage_estimators)
+    add( &ProfileStats::get_baseline_estimator,
+	 &ProfileStats::set_baseline_estimator,
+	 &ProfileWeightFunction::get_interface,
+	 "off", "Off-pulse estimator" );
 
   import( "off", PhaseWeight::Interface(), 
 	  (Method) &ProfileStats::get_baseline );

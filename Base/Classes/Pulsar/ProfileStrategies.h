@@ -21,25 +21,25 @@ namespace Pulsar {
   public:
     
     //! The implementation of the baseline finding algorithm
-    virtual ProfileWeightFunction* baseline () = 0;
+    virtual ProfileWeightFunction* baseline () const = 0;
 
     //! The implementation of the on-pulse finding algorithm
-    virtual ProfileWeightFunction* onpulse () = 0;
+    virtual ProfileWeightFunction* onpulse () const = 0;
 
     //! The implementation of the signal-to-noise ratio calculation
-    virtual SNRatioEstimator* snratio () = 0;
+    virtual SNRatioEstimator* snratio () const = 0;
   };
 
   class DefaultStrategies : public Profile::Strategies
   {
     //! The default implementation of the baseline finding algorithm
-    Reference::To<ProfileWeightFunction> baseline_strategy;
+    mutable Reference::To<ProfileWeightFunction> baseline_strategy;
 
     //! The default implementation of the onpulse finding algorithm
-    Reference::To<ProfileWeightFunction> onpulse_strategy;
+    mutable Reference::To<ProfileWeightFunction> onpulse_strategy;
 
     //! The default implementation of the snr method
-    Reference::To<SNRatioEstimator> snratio_strategy;
+    mutable Reference::To<SNRatioEstimator> snratio_strategy;
 
   public:
 
@@ -53,13 +53,16 @@ namespace Pulsar {
     static Option< Reference::To<SNRatioEstimator> > default_snratio;
 
     //! The implementation of the baseline finding algorithm
-    ProfileWeightFunction* baseline ();
-
+    ProfileWeightFunction* baseline () const;
+    void set_baseline (ProfileWeightFunction*);
+    
     //! The implementation of the on-pulse finding algorithm
-    ProfileWeightFunction* onpulse ();
+    ProfileWeightFunction* onpulse () const;
+    void set_onpulse (ProfileWeightFunction*);
 
     //! The implementation of the signal-to-noise ratio calculation
-    SNRatioEstimator* snratio ();
+    SNRatioEstimator* snratio () const;
+    void set_snratio (SNRatioEstimator*);
   };
 
   class Integration;
@@ -105,7 +108,7 @@ namespace Pulsar {
   */
   class ManagedStrategies : public Profile::Strategies
   {
-    Reference::To<Integration> container;
+    Reference::To<Integration, false> container;
     
   public:
 
@@ -116,13 +119,13 @@ namespace Pulsar {
     Integration* get_container();
     
     //! The implementation of the baseline finding algorithm
-    ProfileWeightFunction* baseline ();
+    ProfileWeightFunction* baseline () const;
 
     //! The implementation of the on-pulse finding algorithm
-    ProfileWeightFunction* onpulse ();
+    ProfileWeightFunction* onpulse () const;
 
     //! The implementation of the signal-to-noise ratio calculation
-    SNRatioEstimator* snratio ();
+    SNRatioEstimator* snratio () const;
   };
 }
 

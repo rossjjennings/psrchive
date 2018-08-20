@@ -21,19 +21,19 @@ Integration* ManagedStrategies::get_container()
   return container;
 }
 
-ProfileWeightFunction* ManagedStrategies::baseline ()
+ProfileWeightFunction* ManagedStrategies::baseline () const
 {
   throw Error (InvalidState, "ManagedStrategies::baseline",
 	       "not implemented");
 }
 
-ProfileWeightFunction* ManagedStrategies::onpulse ()
+ProfileWeightFunction* ManagedStrategies::onpulse () const
 {
   throw Error (InvalidState, "ManagedStrategies::onpulse",
 	       "not implemented");
 }
 
-SNRatioEstimator* ManagedStrategies::snratio ()
+SNRatioEstimator* ManagedStrategies::snratio () const
 {
   throw Error (InvalidState, "ManagedStrategies::snratio",
 	       "not implemented");

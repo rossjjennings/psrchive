@@ -32,7 +32,7 @@ DefaultStrategies::default_baseline
 );
 
 //! The implementation of the baseline finding algorithm
-ProfileWeightFunction* DefaultStrategies::baseline ()
+ProfileWeightFunction* DefaultStrategies::baseline () const
 {
   /*
     Strategies are cloned because, in a multi-threaded application,
@@ -44,6 +44,12 @@ ProfileWeightFunction* DefaultStrategies::baseline ()
 
   return baseline_strategy;
 }
+
+void DefaultStrategies::set_baseline (ProfileWeightFunction* b)
+{
+  baseline_strategy = b;
+}
+
 
 /*!  
   The default on-pulse estimator is the PeakConsecutive class
@@ -60,13 +66,19 @@ DefaultStrategies::default_onpulse
 );
 
 //! The implementation of the on-pulse finding algorithm
-ProfileWeightFunction* DefaultStrategies::onpulse ()
+ProfileWeightFunction* DefaultStrategies::onpulse () const
 {
   if (!onpulse_strategy)
     onpulse_strategy = default_onpulse.get_value()->clone();
 
   return onpulse_strategy;
 }
+
+void DefaultStrategies::set_onpulse (ProfileWeightFunction* pwf)
+{
+  onpulse_strategy = pwf;
+}
+
 
 /*!  The SNRatioEstimator::factory method is used to choose and
      configure the S/N estimation algorithm.
@@ -84,12 +96,17 @@ DefaultStrategies::default_snratio
 );
 
 //! The implementation of the signal-to-noise ratio calculator
-SNRatioEstimator* DefaultStrategies::snratio ()
+SNRatioEstimator* DefaultStrategies::snratio () const
 {
   if (!snratio_strategy)
     snratio_strategy = default_snratio.get_value()->clone();
 
   return snratio_strategy;
+}
+
+void DefaultStrategies::set_snratio (SNRatioEstimator* snre)
+{
+  snratio_strategy = snre;
 }
 
 //! Returns the strategy manager
@@ -123,7 +140,7 @@ Profile::Strategies* Integration::get_strategy() const
 
 
 //! Returns the strategy manager
-Profile::Strategies* Archive::get_strategy() const
+DefaultStrategies* Archive::get_strategy() const
 {
   if (!strategy)
     strategy = new DefaultStrategies;

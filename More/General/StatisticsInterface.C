@@ -7,9 +7,45 @@
 
 #include "Pulsar/StatisticsInterface.h"
 #include "Pulsar/ProfileStatsInterface.h"
+#include "Pulsar/ProfileStrategies.h"
+
 #include "Pulsar/Archive.h"
 
+#include "Pulsar/ProfileWeightFunction.h"
+#include "Pulsar/SNRatioEstimator.h"
+#include "interface_stream.h"
+
+using namespace Pulsar;
 using namespace std;
+
+class DefaultStrategiesInterface : public TextInterface::To<DefaultStrategies>
+  {
+  public:
+
+    //! Default constructor
+    DefaultStrategiesInterface ( DefaultStrategies* instance = 0 )
+    {
+      if (instance)
+	set_instance (instance);
+
+      add( &DefaultStrategies::onpulse,
+	   &DefaultStrategies::set_onpulse,
+	   &ProfileWeightFunction::get_interface,
+	   "^on", "Install on-pulse estimator" );
+
+      add( &DefaultStrategies::baseline,
+	   &DefaultStrategies::set_baseline,
+	   &ProfileWeightFunction::get_interface,
+	   "^off", "Install off-pulse estimator" );
+
+      add( &DefaultStrategies::snratio,
+	   &DefaultStrategies::set_snratio,
+	   &SNRatioEstimator::get_interface,
+	   "^snr", "Install signal-to-noise ratio estimator" );
+
+    }
+    
+  };
 
 Pulsar::Statistics::Interface::Interface (Statistics* instance)
 {
@@ -32,6 +68,12 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_pol,
        &Statistics::set_pol,
        "pol", "Polarization index" );
+
+  DefaultStrategies* strategy = 0;
+  if (instance)
+    strategy = instance->get_strategy();
+
+  import( DefaultStrategiesInterface(strategy), &Statistics::get_strategy );
 
   ProfileStats* stats = 0;
   if (instance)

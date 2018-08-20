@@ -99,6 +99,15 @@ Pulsar::Index Pulsar::Statistics::get_pol () const
   return ipol;
 }
 
+Pulsar::DefaultStrategies* Pulsar::Statistics::get_strategy () const try
+{
+    return get_Archive()->get_strategy();
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::get_strategy";
+   }
+
 //! Set the signal-to-noise ratio estimator
 void Pulsar::Statistics::set_snr_estimator (const std::string& name)
 {
