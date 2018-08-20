@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,44 +8,10 @@
 #include "Pulsar/StatisticsInterface.h"
 #include "Pulsar/ProfileStatsInterface.h"
 #include "Pulsar/ProfileStrategies.h"
-
 #include "Pulsar/Archive.h"
-
-#include "Pulsar/ProfileWeightFunction.h"
-#include "Pulsar/SNRatioEstimator.h"
-#include "interface_stream.h"
 
 using namespace Pulsar;
 using namespace std;
-
-class StrategySetInterface : public TextInterface::To<StrategySet>
-  {
-  public:
-
-    //! Default constructor
-    StrategySetInterface ( StrategySet* instance = 0 )
-    {
-      if (instance)
-	set_instance (instance);
-
-      add( &StrategySet::onpulse,
-	   &StrategySet::set_onpulse,
-	   &ProfileWeightFunction::get_interface,
-	   "^on", "Install on-pulse estimator" );
-
-      add( &StrategySet::baseline,
-	   &StrategySet::set_baseline,
-	   &ProfileWeightFunction::get_interface,
-	   "^off", "Install off-pulse estimator" );
-
-      add( &StrategySet::snratio,
-	   &StrategySet::set_snratio,
-	   &SNRatioEstimator::get_interface,
-	   "^snr", "Install signal-to-noise ratio estimator" );
-
-    }
-    
-  };
 
 Pulsar::Statistics::Interface::Interface (Statistics* instance)
 {
@@ -73,7 +39,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   if (instance)
     strategy = instance->get_strategy();
 
-  import( StrategySetInterface(strategy), &Statistics::get_strategy );
+  import( StrategySet::Interface(strategy), &Statistics::get_strategy );
 
   ProfileStats* stats = 0;
   if (instance)

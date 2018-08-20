@@ -63,8 +63,15 @@ namespace Pulsar {
     //! The implementation of the signal-to-noise ratio calculation
     SNRatioEstimator* snratio () const;
     void set_snratio (SNRatioEstimator*);
-  };
 
+    class Interface : public TextInterface::To<StrategySet>
+    {
+    public:      
+      Interface ( StrategySet* instance = 0 );
+    };
+
+  };
+    
   class Integration;
   
   //! Inserted by Integration class to tell Profile instance it is managed
