@@ -62,8 +62,7 @@ try {
     cerr << "FITSArchive::load_Integration number " << isubint << endl;
   
   double nulldouble = 0.0;
-  float nullfloat = 0.0;
-  
+
   int initflag = 0;
   int colnum = 0;
   
@@ -326,13 +325,13 @@ try {
 	 << endl;
   
   int counter = 1;
-  vector < float >  chan_freqs(get_nchan());
+  vector<double> chan_freqs(get_nchan());
   
   colnum = 0;
   fits_get_colnum (read_fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   
-  fits_read_col (read_fptr, TFLOAT, colnum, row, counter, get_nchan(),
-		 &nullfloat, &(chan_freqs[0]), &initflag, &status);
+  fits_read_col (read_fptr, TDOUBLE, colnum, row, counter, get_nchan(),
+		 &nulldouble, &(chan_freqs[0]), &initflag, &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration",
@@ -363,7 +362,10 @@ try {
   else
   {
     for (unsigned j = 0; j < get_nchan(); j++)
+    {
+      //fprintf (stderr, "FITSArchive::load_integration ichan=%u freq=%.20lf \n", j, chan_freqs[j]);
       integ->set_centre_frequency(j, chan_freqs[j]);
+    }
   }
   
   // Load the profile weights
@@ -373,7 +375,8 @@ try {
 	 << endl;
   
   counter = 1;
-  vector < float >  weights(get_nchan());
+  vector<float> weights(get_nchan());
+  float nullfloat = 0.0;
   
   colnum = 0;
   fits_get_colnum (read_fptr, CASEINSEN, "DAT_WTS", &colnum, &status);

@@ -91,20 +91,25 @@ void Pulsar::FITSArchive::unload_Integration (fitsfile* thefptr, int row,
   if (verbose > 2)
     cerr << "FITSArchive::unload_integration writing DAT_FREQ" << endl;
 
-  vector<float> temp (nchan);
+  vector<double> tempd (nchan);
 
   for (unsigned j = 0; j < nchan; j++)
-    temp[j] = integ->get_centre_frequency(j);
-
-  psrfits_write_col (thefptr, "DAT_FREQ", row, temp, vector<unsigned> ());
+  {
+    tempd[j] = integ->get_centre_frequency(j);
+    // fprintf (stderr, "FITSArchive::unload_integration ichan=%u freq=%.20lf \n", j, tempd[j]);
+  }
+  
+  psrfits_write_col (thefptr, "DAT_FREQ", row, tempd, vector<unsigned> ());
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integration writing DAT_WTS" << endl;
 
-  for (unsigned j = 0; j < nchan; j++)
-    temp[j] = integ->get_weight(j);
+  vector<float> tempf (nchan);
 
-  psrfits_write_col (thefptr, "DAT_WTS", row, temp, vector<unsigned> ());
+  for (unsigned j = 0; j < nchan; j++)
+    tempf[j] = integ->get_weight(j);
+
+  psrfits_write_col (thefptr, "DAT_WTS", row, tempf, vector<unsigned> ());
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integration setup profiles" << endl;
