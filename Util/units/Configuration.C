@@ -45,22 +45,19 @@ void Configuration::load (const string& filename) throw (Error)
     if (!line.length())
       continue;
 
+    // confirm that there is an assignment
+    if (line.find("=") == string::npos)
+      continue;
+    
     // parse the key
-    string key = stringtok (line, " \t");
+    string key = stringtok (line, " \t=");
 
     DEBUG("Configuration::load key=" << key);
 
     if (!line.length())
       continue;
 
-    // parse the equals sign
-    string equals = stringtok (line, " \t");
-
-    if (equals != "=" || !line.length())
-      continue;
-
     DEBUG("Configuration::load value=" << line);
-
 
     Entry* entry = find (key);
     if (entry)

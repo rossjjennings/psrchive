@@ -56,7 +56,33 @@ int main () try {
 
   Configuration::Parameter<double> test ("F1", &config, 6.0);
 
-  cerr << "lazy evaluation test = " << test << endl;
+  cerr << "lazy evaluation test double = " << test << endl;
+
+  if (test != 3.0)
+  {
+    cerr << "F1 not lazily parsed from test.cfg" << endl;
+    return -1;
+  }
+
+  Configuration::Parameter<bool> flag ("flag", &config, true);
+
+  cerr << "lazy evaluation test bool = " << test << endl;
+
+  if (flag != false)
+  {
+    cerr << "flag not lazily parsed from test.cfg" << endl;
+    return -1;
+  }
+
+  Configuration::Parameter<string> text ("text", &config, "some text");
+
+  cerr << "lazy evaluation test string = " << text.get_value() << endl;
+
+  if (text.get_value() != "text=with whitespace")
+  {
+    cerr << "text not lazily parsed from test.cfg" << endl;
+    return -1;
+  }
 
   cerr << "All tests passed" << endl;
 
