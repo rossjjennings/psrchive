@@ -57,12 +57,21 @@ namespace Pulsar {
     void set_max_bin (bool s) { max_bin = s; }
     //! Search for the phase bin to be plotted
     bool get_max_bin () const { return max_bin; }
-    
+
+    //! Output text files for gnuplot splot
+    void set_splot_output (bool s) { splot_output = s; }
+    //! Output text files for gnuplot splot
+    bool get_splot_output () const { return splot_output; }
+
   private:
 
     unsigned lags;
     int bin;
     bool max_bin;
+
+    // if (bin>-1 or max_bin), output text files for gnuplot splot
+    bool splot_output;
+    
     std::pair<unsigned, unsigned> covar;
 
     Reference::To<StokesCrossCovariance> stokes_crossed;
