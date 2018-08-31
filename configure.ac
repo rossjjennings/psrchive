@@ -275,6 +275,7 @@ AC_CONFIG_FILES([
 		Base/Resources/Makefile
 		Base/Formats/Makefile
 		Base/Formats/EPN/Makefile
+		Base/Formats/EPOS/Makefile
 		Base/Formats/Timer/Makefile
 		Base/Formats/PSRFITS/Makefile
 		Base/Formats/PuMa/Makefile
