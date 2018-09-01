@@ -295,10 +295,10 @@ void printHeader(const Archive * archive,
 void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Parser* flui);
 
 // Plots the original and corrected phase vs. time
-void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* tui);
+void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* tui, pgplot::ColourMap::Name colour_map);
 
 // Plots the original and corrected phase vs. freq
-void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Parser* fui);
+void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Parser* fui, pgplot::ColourMap::Name colour_map);
 
 // Finds the best gradient that fits the corrected set of
 // profiles for each frequency channel
@@ -1282,7 +1282,7 @@ pdotHalfRange = accn2pdot*accnHalfRange;
   MJD reference_time = archive->start_time() + (archive->end_time() - archive->start_time())/2.0;
 
   // the archive will be fscrunched by the following method
-  plotPhaseTime(phaseTimeCopy, time_plot, tui);
+  plotPhaseTime(phaseTimeCopy, time_plot, tui, colour_map);
 
 
   counter_drift( phaseFreqCopy,
@@ -1290,7 +1290,7 @@ pdotHalfRange = accn2pdot*accnHalfRange;
   
   // the archive will be tscrunched by the following method
 
-  plotPhaseFreq(phaseFreqCopy, phase_plot, fui);
+  plotPhaseFreq(phaseFreqCopy, phase_plot, fui, colour_map);
 
   /* START MIKE_XML after period/DM optimisation */
 
@@ -2850,7 +2850,8 @@ void plotSNRdm (string & filename, double bestDM){
 
 void plotPhaseFreq (const Archive * archive, 
 		    Plot* phase_plot,
-		    TextInterface::Parser* fui)
+		    TextInterface::Parser* fui,
+		    pgplot::ColourMap::Name colour_map)
 {
 	Reference::To<Archive> phase_freq_copy = archive->clone();
 
@@ -2869,6 +2870,8 @@ void plotPhaseFreq (const Archive * archive,
 	fui->set_value("above:l", "Phase vs Frequency");
 	fui->set_value("x:opt", "BCNTSI");
 	fui->set_value("y:opt", "BNTIC");
+	
+	phase_plot->get_interface()->set_value("cmap:map", tostring(colour_map));
 
 	phase_plot->plot(phase_freq_copy);
 
@@ -2878,7 +2881,10 @@ void plotPhaseFreq (const Archive * archive,
 	cpgslw(8);
 }
 
-void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* tui) {
+void plotPhaseTime(const Archive * archive, Plot* plot,
+		   TextInterface::Parser* tui,
+		   pgplot::ColourMap::Name colour_map)
+{
 
 	string y_scale = get_scale(archive);
 	Reference::To<Archive> phase_time_copy = archive->clone();
@@ -2905,6 +2911,8 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 	tui->set_value("y:opt", "BNTIC");
 	tui->set_value("y:lab", yscale);
 
+	plot->get_interface()->set_value("cmap:map", tostring(colour_map));
+	
 	plot->plot(phase_time_copy);
 
 	// Draw the line of best fit of the original
