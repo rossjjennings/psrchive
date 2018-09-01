@@ -89,6 +89,13 @@ template
 Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
 Archive::Advocate<ASCIIArchive>::entry;
 
+#include "Pulsar/EPOSArchive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<EPOSArchive::Agent>
+Archive::Advocate<EPOSArchive>::entry;
+
+
 #include "Pulsar/pdv_KtZ_Archive.h"
 
 template
