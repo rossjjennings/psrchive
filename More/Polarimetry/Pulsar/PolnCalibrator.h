@@ -35,6 +35,11 @@ namespace Pulsar {
 
   public:
 
+    //! Minimum allowable determinant of Jones matrices
+    /*! Set this parameter to avoid unstable inversion of matrices with
+      a determinant close to zero by flagging such channels as invalid. */
+    static Option<double> minimum_determinant;
+    
     //! Construct with optional processed calibrator Archive
     PolnCalibrator (const Archive* archive = 0);
 
