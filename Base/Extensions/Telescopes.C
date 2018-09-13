@@ -205,85 +205,122 @@ void Pulsar::Telescopes::Effelsberg(Telescope *t)
 void Pulsar::Telescopes::LOFAR(Telescope *t)
 {
     t->set_name ("LOFAR");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
+
 }
 
 void Pulsar::Telescopes::DE601(Telescope *t)
 {
     t->set_name ("DE601");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::DE602(Telescope *t)
 {
     t->set_name ("DE602");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::DE603(Telescope *t)
 {
     t->set_name ("DE603");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::DE604(Telescope *t)
 {
     t->set_name ("DE604");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::DE605(Telescope *t)
 {
     t->set_name ("DE605");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::FR606(Telescope *t)
 {
     t->set_name ("FR606");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::SE607(Telescope *t)
 {
     t->set_name ("SE607");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::UK608(Telescope *t)
 {
     t->set_name ("UK608");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::DE609(Telescope *t)
 {
     t->set_name ("DE609");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::PL610(Telescope *t)
 {
     t->set_name ("PL610");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::PL611(Telescope *t)
 {
     t->set_name ("PL611");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::PL612(Telescope *t)
 {
     t->set_name ("PL612");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::IE613(Telescope *t)
 {
     t->set_name ("IE613");
-    // XXX what about other settings? mount, focus,...
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
+}
+
+void Pulsar::Telescopes::UTR2(Telescope *t)
+{
+    t->set_name ("UTR2");
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
 }
 
 void Pulsar::Telescopes::MeerKAT(Telescope *t)
