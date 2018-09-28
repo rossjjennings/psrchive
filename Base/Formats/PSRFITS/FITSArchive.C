@@ -918,7 +918,27 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     hdr->set_obsnchan( get_nchan() );
     
     hdr_ext = hdr;
+
+    // take the epoch of the first Integration with a duration
+    for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
+        if (get_Integration(jsubint)->get_duration() != 0.0)
+        {
+            reference_epoch = get_Integration(jsubint)->get_epoch();
+            if (verbose > 2)
+                cerr << "FITSArchive::unload_file subint=" << jsubint
+                    << " reference epoch=" << reference_epoch.printdays (13)
+                    << endl;
+            break;
+        }
+
+
+  } else {
+      reference_epoch = hdr_ext->get_start_time();
+      if (verbose > 2)
+          cerr << "FITSArchive::unload_file FITSHdr reference epoch="
+              << reference_epoch.printdays (13) << endl;
   }
+
 
   if (verbose > 2)
     cerr << "Pulsar::FITSArchive::unload_file FITSHdrExtension" << endl;
@@ -1005,27 +1025,6 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
       unload (fptr, ext);
   }
   
-  if (hdr_ext)
-  {
-    reference_epoch = hdr_ext->get_start_time();
-    if (verbose > 2)
-      cerr << "FITSArchive::unload_file FITSHdr reference epoch="
-	   << reference_epoch.printdays (13) << endl;
-  }
-  else
-  {
-    // take the epoch of the first Integration with a duration
-    for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
-      if (get_Integration(jsubint)->get_duration() != 0.0)
-      {
-	reference_epoch = get_Integration(jsubint)->get_epoch();
-	if (verbose > 2)
-	  cerr << "FITSArchive::unload_file subint=" << jsubint
-	       << " reference epoch=" << reference_epoch.printdays (13)
-	       << endl;
-	break;
-      }
-  }
 
   if (reference_epoch == MJD::zero && verbose > 1)
     cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
