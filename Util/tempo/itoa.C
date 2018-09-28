@@ -49,6 +49,7 @@ static int default_aliases ()
   add_alias ("JB", "jodrell");
   add_alias ("JB", "jodrell bank");
   add_alias ("JB", "lovell");
+  add_alias ("J2", "JB_MKII");
 
   add_alias ("VL", "vla");
 
