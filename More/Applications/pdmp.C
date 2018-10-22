@@ -428,6 +428,9 @@ bool force = false;
 bool silent = false;
 bool debug = false;
 
+bool write_acc = false;
+bool write_best = false;
+
 bool output_phcx=false;
 char output_phcx_file[128];
 bool input_phcx=false;
@@ -527,9 +530,14 @@ void usage (bool verbose_usage)
     " -po  <period offset>           Period offset in us       (default=0)          \n"
     " -pr  <period half-range>       Period half-range in us   (default=natural)    \n"
     " -ps  <period step>             Period step in us         (default=natural)    \n"
+    " -as  <acc step>                Acceleration step                              \n"
+    " -ar  <acc half-range>          Acceleration half-range                        \n"
+    " -ao  <acc offset>              Acceleration offset                            \n"
+    " -af                            Save S/N vs acceleration to accel.dat          \n"
     " -s   <profile file>            Use <profile file> as a standard profile to    \n"
-		"                                compare with                                   \n"
+    "                                compare with                                   \n"
     " -b   <bestfilename>            file output from best of SNR vs DM             \n"
+    " -bf                            file output for best period/freq/DM/width/NS   \n"
     "                                                                               \n"
     "Selection & configuration options:                                             \n"
     " -g <dev>   Manually specify a plot device                                     \n"
@@ -684,6 +692,15 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 			parseAndValidateDouble("-ao", argv[i], pdotOffset);
 		}
 
+                // save acc curve to a file
+                else  if (strcmp(argv[i], "-af") == 0) {
+                        write_acc = true;
+                }
+
+                // save best period/freq/DM/width to a file
+                else if (strcmp(argv[i], "-bf") == 0) {
+                        write_best = true;
+                }
 
 		// dm step
 		else if (strcmp(argv[i], "-ds") == 0) {
@@ -2515,16 +2532,33 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth*1.7;
 	bestValues_y = 1;
 
+        ofstream outfile;
+        if (write_best) {
+          outfile.open("pdmp.best");
+          outfile << "#BC_prd corr err" << endl << "#TC_prd corr err" << endl;
+          outfile << "#DM_val corr err" << endl << "#BC_freq err" << endl;
+          outfile << "#width S/N" << endl;
+        }
+
 	sprintf(temp, "%3.9f", bestPeriod_bc_us / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.9f", (bestPeriod_bc_us-refP_us) / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.9f", periodError_ms);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << endl;
+        }
 
 	// New column
 	bestValues_x += colWidth * 0.1;
@@ -2541,40 +2575,67 @@ void printResults(const Archive * archive) {
 
 	sprintf(temp, "%3.9f", dopplerFactor * bestPeriod_bc_us / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.9f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(archive) * MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.9f", periodError_ms);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << endl;
+        }
 
 
 	// New column
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
 	cpgtext(bestValues_x, bestValues_y, "DM:");
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Corrn:");
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Error:");
+        if (write_best) {
+          outfile << temp << endl;;
+        }
 
 	// New column: Print out all the values
 	bestValues_x += colWidth * 0.8;
 	bestValues_y = 1;
 	sprintf(temp, "%3.3f", bestDM);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.3f", bestDM-refDM);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.3f", dmError);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
+        if (write_best) {
+          outfile << temp << endl;
+        }
 
 
 	// New column
@@ -2594,19 +2655,34 @@ void printResults(const Archive * archive) {
 
 	sprintf(temp, "%-3.9f", bestFreq);
 	cpgtext(bestValues_x, bestValues_y, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%-3.9f", freqError);
 	cpgtext(bestValues_x, bestValues_y, temp);
+        if (write_best) {
+          outfile << temp << endl;
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%3.3f", bestPulseWidth * tbin);
 	cpgtext(bestValues_x, bestValues_y, temp);
+        if (write_best) {
+          outfile << temp << " ";
+        }
 
 	bestValues_y -= lineHeight;
 	sprintf(temp, "%-3.2f", bestSNR);
 	cpgtext(bestValues_x, bestValues_y, temp);
+        if (write_best) {
+          outfile << temp << endl;
+        }
 
+        if (write_best) {
+          outfile.close();
+        }
 
 	// Print out the results on the console
 	if (!silent) {
@@ -2720,12 +2796,27 @@ void plotPdotCurve(float* data, float xmin, float xmax, int npts){
 	cpgbox("BCINTS", 0.0, 5, "BCINTS", 5, 5);
 
 	float xstep=(xmax-xmin)/npts;
+
+          ofstream outfile;
+        if (write_acc) {
+          outfile.open("accel.dat");
+          if (!outfile.is_open()){
+            cerr << "Couldn't oppen accel.dat for writing" << endl;
+          }
+        }
 	// Go backwards through the array because it is ordered by pdot
 	// not by accn! (we are plotting accn)
 	for (int i=0; i < npts; i++){
 	  //cpgpt1((npts-i)*xstep+xmin, data[i], 0);
 	  cpgpt1(i*xstep+xmin, data[i], 0);
+          if (write_acc) {
+            outfile << i*xstep+xmin << " " << data[i] << endl;
+          }
 	}
+        if (write_acc) {
+          if (outfile.is_open())
+            outfile.close();
+        }
 
         cpglab("Accn","SNR","");
 }

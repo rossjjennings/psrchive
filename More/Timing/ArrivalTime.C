@@ -285,6 +285,36 @@ void Pulsar::ArrivalTime::dress_toas (unsigned isub,
 				      std::vector<Tempo::toa>& toas)
 {
   std::string nsite = observation->get_telescope();
+  // Try to get the special site codes for
+  // various Jodrell Bank backends.
+  // Perhaps there should be a subroutine for this?
+  if (format == Tempo::toa::Tempo2){
+      if (nsite == "h" || nsite=="JB_MKII") {
+          const Backend* be = observation->get<Backend>();
+          if (be) {
+              if (be->get_name()=="Jod"){
+                  nsite="jbmk2dfb";
+              }
+              if (be->get_name()=="ROACH"){
+                  nsite="jbmk2roach";
+              }
+          }
+      }
+      if (nsite == "8" || nsite=="Jodrell") {
+          const Backend* be = observation->get<Backend>();
+          if (be) {
+              if (be->get_name()=="Jod"){
+                  nsite="jbdfb";
+              }
+              if (be->get_name()=="ROACH"){
+                  nsite="jbroach";
+              }
+              if (be->get_name()=="COBRA2") {
+                  nsite="jb42";
+              }
+          }
+      }
+  } 
   std::string aux_txt;
 
   if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
