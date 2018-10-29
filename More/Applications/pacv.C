@@ -109,6 +109,9 @@ bool verbose = false;
 // called when the input archive has type == Signal::Calibrator
 void handle_calibrator (Archive*);
 
+// called when any of some of the print_* flags are set
+void print_cal_matrix (PolnCalibrator* calibrator);
+
 int main (int argc, char** argv) 
 {
   // treat all of the Archives as one FluxCalibrator observation set
@@ -352,7 +355,7 @@ int main (int argc, char** argv)
 
     case 'u':
       unload_derived_calibrator = true;
-      plot_calibrator_solution = false;
+      disable_plotting = true;
       break;
 
     case 'V':
@@ -589,6 +592,12 @@ int main (int argc, char** argv)
 	string newname = replace_extension (filenames[ifile], "pacv");
 	cerr << "pacv: Unloading solution " << newname << endl;
 	output -> unload (newname);
+      }
+
+      if (print_jones || print_mueller || print_IXR)
+      {
+        cerr << "pacv: Printing elements" << endl;
+        print_cal_matrix (calibrator);
       }
     }
   }
