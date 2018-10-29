@@ -76,16 +76,18 @@ void Pulsar::Config::load ()
   }
   
   const char* home = getenv ("HOME");
+  string home_config;
   if (home) try
   {
     DEBUG("Pulsar::Config::load $HOME=" << home);
-    string home_config = string(home) + "/.psrchive.cfg";
+    home_config = string(home) + "/.psrchive.cfg";
     Configuration::load( home_config );
   }
   catch (Error& error)
   {
     // use of a configuration file is optional
-    DEBUG("Pulsar::Config::load error loading " << home << "/.psrchive.cfg "  << error.get_message());
+    DEBUG("Pulsar::Config::load error loading " << home_config
+	  << " "  << error.get_message());
   }
 
   const char* psrchive_config_last = getenv ("PSRCHIVE_CONFIG_LAST");
