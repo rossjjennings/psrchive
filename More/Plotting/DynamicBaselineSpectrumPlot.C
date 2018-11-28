@@ -70,6 +70,7 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
 
     stats = new ProfileStats;
     parser = stats->get_interface ();
+    parser->set_prefix_name(false);
   }
   if (method==false)
   {
