@@ -15,6 +15,10 @@ using namespace std;
 void Pulsar::MultiFrame::manage (const std::string& name, PlotFrame* frame)
 {
   frames[name] = frame;
+
+  frame->set_character_height (character_height);
+  frame->set_character_font (character_font);
+  frame->set_line_width (line_width);
 }
 
 void Pulsar::MultiFrame::focus (const Archive* data)
