@@ -61,6 +61,11 @@ unsigned Pulsar::Passband::get_nband () const
   return nband;
 }
 
+bool Pulsar::Passband::has_data () const
+{
+  return nband * npol * nchan;
+}
+
 //! Set the number of channels, polarizations, and bands
 void Pulsar::Passband::resize (unsigned _nchan, unsigned _npol, unsigned _nband)
 {

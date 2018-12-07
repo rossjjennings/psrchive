@@ -1155,7 +1155,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 				  const char* hdu_name) const try
 {
   const Ext* extension = get<Ext>();
-  if (extension)
+  if (extension && extension->has_data())
     unload (fptr, extension);
   else
     delete_hdu (fptr, hdu_name);

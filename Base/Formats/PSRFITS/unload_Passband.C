@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass) try
 {
   int status = 0;
 
@@ -110,5 +110,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband exiting" << endl;
+}
+catch (Error &error)
+{
+  throw error += "FITSArchive::unload(Passband)";
 }
 

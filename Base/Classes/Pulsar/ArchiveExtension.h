@@ -42,6 +42,9 @@ namespace Pulsar
     //! Return an abbreviated name that can be typed relatively quickly
     virtual std::string get_short_name () const;
 
+    //! Returns true if the Extension contains useful data
+    virtual bool has_data () const { return true; }
+
     //! Resize the Extension
     virtual void resize (unsigned nsubint,
 		    unsigned npol  = 0,
