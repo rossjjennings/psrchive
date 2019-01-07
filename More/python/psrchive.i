@@ -387,6 +387,13 @@ double get_tobs(const char* filename) {
         return p->get_parallactic_angle().getDegrees();
     }
 
+   double get_position_angle() {
+       Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+       if (p==NULL) return 0.0;
+       p->update(self);
+       return p->get_position_angle().getDegrees();
+    }
+
     // Return Galactic latitude and longitude. Pulsar::Pointing is
     // inherited by Pulsar::Integration, hence we cannot call it
     // while in archive object.
