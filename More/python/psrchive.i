@@ -630,6 +630,25 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return (PyObject *)arr;
     }
 
+    // Return frequency table of the archive as 2-D numpy array
+    PyObject *get_frequency_table()
+    {
+        int ii, jj;
+        PyArrayObject *arr;
+        npy_intp ndims[2];  // nsubint, nchan
+
+        ndims[0] = self->get_nsubint();
+        ndims[1] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, PyArray_DOUBLE);
+        for (ii = 0; ii < ndims[0]; ii++) {
+            for (jj = 0; jj < ndims[1]; jj++) {
+                ((double *)arr->data)[ii*ndims[1]+jj] = \
+                    self->get_Profile(ii, 0, jj)->get_centre_frequency();
+            }
+        }
+        return (PyObject *)arr;
+    }
+
     // Return a copy of all the data as a numpy array
     PyObject *get_data()
     {
