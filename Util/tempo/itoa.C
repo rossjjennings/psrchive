@@ -96,6 +96,8 @@ static int default_aliases ()
   add_alias ("MK", "MeerKAT");
   add_alias ("MK", "MEERKAT");
 
+  add_alias ("CH", "chime");
+
   return 1;
 }
 

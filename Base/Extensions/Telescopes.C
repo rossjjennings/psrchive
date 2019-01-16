@@ -126,6 +126,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             Telescopes::LWA(t);
             break;
 
+        case 'y':
+            Telescopes::CHIME(t);
+            break;
+
         case 'z':
             Telescopes::SRT(t);
             break;
@@ -393,6 +397,14 @@ void Pulsar::Telescopes::LWA(Telescope *t)
     t->set_focus(Telescope::PrimeFocus);
 }
 
+void Pulsar::Telescopes::CHIME(Telescope *t)
+{
+    t->set_name("CHIME");
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
+}
+
 void Pulsar::Telescopes::SRT(Telescope *t)
 {
     t->set_name ("SRT");
@@ -400,3 +412,4 @@ void Pulsar::Telescopes::SRT(Telescope *t)
     t->set_primary (Telescope::Parabolic);
     t->set_focus (Telescope::PrimeFocus);
 }
+
