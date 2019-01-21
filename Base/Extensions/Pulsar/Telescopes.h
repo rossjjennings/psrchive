@@ -110,6 +110,9 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with LWA info
     void LWA (Telescope* t);
 
+    //! Initialize the Telescope Extension with CHIME info
+    void CHIME (Telescope* t);
+
     //! Initialize the Telescope Extension with SRT info
     void SRT (Telescope* t);
   } 
