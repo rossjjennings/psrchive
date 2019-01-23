@@ -1,0 +1,37 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -d epsic ) then
+
+  echo "Downloading EPSIC source code from github"
+
+  setenv EPSIC_GIT https://github.com/straten/epsic.git
+  git clone $EPSIC_GIT
+
+endif
+
+cd epsic/src
+git pull
+
+if ( ! -f configure ) then
+  ./bootstrap
+endif
+
+if ( ! -f Makefile ) then
+  ./configure --prefix=@prefix@
+endif
+
+make
+make install
+
+echo
+echo
+echo "EPSIC library installation completed"
+echo
+echo "Please re-run the PSRCHIVE configure script"
+echo
+

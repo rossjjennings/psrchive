@@ -95,8 +95,6 @@ ATNF_DISABLE_OPTIMIZE
 #
 # Check C++ template compilation
 #
-SWIN_BEST_PARTIAL_SPECIALIZATION
-SWIN_DEFAULT_PARTIAL_SPECIALIZATION
 SWIN_COMPLEX_TEMPLATE
 SWIN_TEST_LIMITS
 
@@ -130,6 +128,7 @@ AC_CHECK_LIB([m], [sin])
 SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP
+SWIN_LIB_EPSIC
 
 #
 # Set up for automatic package installation
@@ -141,7 +140,8 @@ AC_CONFIG_FILES([packages/Makefile
 	packages/pgplot.csh
 	packages/psrcat.csh
 	packages/tempo.csh
-	packages/tempo2.csh])
+	packages/tempo2.csh
+	packages/epsic.csh])
 
 AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*.csh])
 
@@ -159,6 +159,19 @@ if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
   Please see http://psrchive.sourceforge.net/third/fftw
 
   or simply run ./packages/fftw.csh to install FFTW automatically
+])
+fi
+
+if test x"$have_epsic" = xno; then
+
+  # produce the package installation scripts before aborting.
+  AC_OUTPUT
+
+  AC_MSG_ERROR([The EPSIC library was not found.
+
+  Please see http://psrchive.sourceforge.net/third/epsic
+
+  or simply run ./packages/epsic.csh to install EPSIC automatically
 ])
 fi
 

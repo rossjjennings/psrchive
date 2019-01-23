@@ -8,7 +8,6 @@ include_HEADERS = \
 	complex_public.h \
         Configuration.h \
 	debug.h \
-	Dirac.h \
         Error.h \
 	escape.h \
         EstimateStats.h \
