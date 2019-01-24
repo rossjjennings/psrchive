@@ -21,13 +21,14 @@ AC_DEFUN([SWIN_LIB_EPSIC],
 
     AC_LANG_POP(C++)
 
+    have_epsic=$have_epsic_lib
   else
     have_epsic=no
   fi
 
-  AC_MSG_RESULT([$have_epsic_lib])
+  AC_MSG_RESULT([$have_epsic])
 
-  if test $have_epsic_lib = yes; then
+  if test $have_epsic = yes; then
     AC_DEFINE(HAVE_EPSIC,1,[Define if the Eigen library is installed])
   fi
 
