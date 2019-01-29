@@ -282,7 +282,11 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     
     if (!( ignore_ctr_freq && (get_centre_frequency() > 0.0) ))
       set_centre_frequency ( last.ctr_freq );
-    
+ 
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory pre-version 6.0 set bandwidth="
+           << last.nchan * last.chan_bw << endl;
+
     set_bandwidth (last.nchan * last.chan_bw);
   }
 
