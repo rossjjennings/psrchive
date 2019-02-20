@@ -31,7 +31,9 @@
 
 #include "Pulsar/ProfileShiftFit.h"
 
+#if HAVE_GSL
 #include "Pulsar/WaveletSmooth.h"
+#endif
 
 #include "Pulsar/Append.h"
 #include "Pulsar/TimeAppend.h"
@@ -238,7 +240,11 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TextParameters.h"
 %include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
+
+#if HAVE_GSL
 %include "Pulsar/WaveletSmooth.h"
+#endif
+
 %include "Pulsar/Append.h"
 %include "Pulsar/TimeAppend.h"
 %include "Pulsar/FrequencyAppend.h"
