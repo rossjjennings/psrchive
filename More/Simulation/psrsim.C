@@ -33,6 +33,8 @@
 using namespace Pulsar;
 using namespace std;
 
+double pulse_width (const Profile* profile, double at_fraction_of_height);
+
 //! Pulsar modeling application
 class psrsim: public Pulsar::Application
 {
@@ -55,6 +57,9 @@ protected:
   //! Faraday rotation measure
   double rotation_measure;
 
+  //! Signal-to-noise ratio of integrated total
+  double signal_to_noise_ratio;
+
   //! Number of Pulse Profiles to be output 
   int profile_number;
 
@@ -72,6 +77,9 @@ protected:
 
   //! Set the total intensity profile to the ComponentModel
   void load_component_model (const std::string& filename);
+
+  //! Set the signal-to-noise ratio of the integrated total
+  void set_signal_to_noise_ratio (double snr) { signal_to_noise_ratio = snr; }
 };
 
 int main (int argc, char** argv)
@@ -89,6 +97,7 @@ psrsim::psrsim () :
 
   simulator = new SimplePolnProfile;
   rotation_measure = 0;
+  signal_to_noise_ratio = 0;
 
   profile_number = 1;
 
@@ -122,6 +131,9 @@ void psrsim::add_options (CommandLine::Menu& menu)
   arg = menu.add (simulator.get(), &SyntheticPolnProfile::set_noise, 'n');
   arg->set_help ("standard deviation of noise");
 
+  arg = menu.add (this, &psrsim::set_signal_to_noise_ratio, "snr");
+  arg->set_help ("signal-to-noise ratio of integrated total");
+
   arg = menu.add (simulator.get(), &SyntheticPolnProfile::set_swims, 's');
   arg->set_help ("peak standard deviation of simulated SWIMS");
 
@@ -150,7 +162,8 @@ void psrsim::process (Pulsar::Archive* data)
   unsigned nsubint = data->get_nsubint();
   unsigned nchan = data->get_nchan();
   unsigned npol = data->get_npol();
-  
+  unsigned nbin = data->get_nbin();
+ 
   if (simulate_reception)
   {
     if (npol != 4)
@@ -178,6 +191,20 @@ void psrsim::process (Pulsar::Archive* data)
 
     cerr << "psrsim: simulated observation written to " << unload << endl;
     return;
+  }
+
+  // if the S/N is specified, compute and set the noise in each frequency channel and sub-integration here
+  if (signal_to_noise_ratio != 0)
+  {
+    MEAL::ScaledVonMises* svm = simulator->get_Intensity();
+    Profile intensity (nbin);
+    simulator->set_Profile (&intensity, svm);
+
+    double area = intensity.sum();
+    double width = pulse_width (&intensity, 0.05);
+    double sigma = area / (signal_to_noise_ratio * sqrt(width));
+    sigma *= sqrt(nchan * nsubint);
+    simulator->set_noise( sigma );
   }
 
   for (int i=0; i<profile_number; i++)
@@ -238,3 +265,21 @@ catch (Error& error)
   cerr << error << endl;
   throw error += "psrsim::load_component_model";
 }
+
+double pulse_width (const Profile* profile, double at_fraction_of_height)
+{
+  int nbin = profile->get_nbin();
+  const float* amps = profile->get_amps();
+
+  double max = profile->max();
+  int max_bin = profile->find_max_bin();
+
+  int start_bin = max_bin;
+  while (max_bin - start_bin < nbin && amps[(start_bin+nbin)%nbin] > max*at_fraction_of_height) start_bin --;
+
+  int end_bin = max_bin;
+  while (end_bin - max_bin < nbin && amps[(end_bin+nbin)%nbin] > max*at_fraction_of_height) end_bin ++;
+
+  return end_bin - start_bin;
+}
+
