@@ -127,6 +127,11 @@ void psrsim::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &psrsim::load_component_model, 'P', "paas.m");
   arg->set_help ("load component model as output by paas");
+
+  typedef void(SyntheticPolnProfile::*the_float_one)(float);
+
+  arg = menu.add (simulator.get(), (the_float_one) &SyntheticPolnProfile::set_degree, 'L');
+  arg->set_help ("degree of linear polarization");
   
   arg = menu.add (simulator.get(), &SyntheticPolnProfile::set_noise, 'n');
   arg->set_help ("standard deviation of noise");
