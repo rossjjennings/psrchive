@@ -17,13 +17,8 @@ endif
 cd epsic/src
 git pull
 
-if ( ! -f configure ) then
-  ./bootstrap
-endif
-
-if ( ! -f Makefile ) then
-  ./configure --prefix=@prefix@
-endif
+./bootstrap
+./configure --prefix=@prefix@
 
 make
 make install

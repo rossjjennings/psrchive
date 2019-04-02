@@ -82,8 +82,7 @@ TESTS = test_Alias test_tostring test_Error		\
 	test_circular_Reference test_Registry test_Functor		\
 	test_Callback test_separate test_TextInterface			\
 	test_parse_indeces test_TextIndex test_DynamicInterface		\
-	test_substitute test_escape test_Estimate test_inner_product	\
-	test_ModifyRestore
+	test_substitute test_escape test_ModifyRestore
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 

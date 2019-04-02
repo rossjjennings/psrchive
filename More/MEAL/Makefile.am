@@ -282,7 +282,7 @@ doc: MEAL.pdf
 #############################################################################
 #
 
-LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la
+LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la @EPSIC_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
 

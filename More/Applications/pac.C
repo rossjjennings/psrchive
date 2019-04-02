@@ -31,6 +31,7 @@
 
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
+#include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/ProjectionCorrection.h"
 #include "Pulsar/ReflectStokes.h"
@@ -50,7 +51,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:K:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:K:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxXyZ";
 
 void usage ()
 {
@@ -105,6 +106,7 @@ void usage ()
     "  -f             Override flux calibration flag\n"
     "  -G             Normalize profile weights by absolute gain \n"
     "  -U             Disable frontend corrections (parallactic angle, etc)\n"
+    "  -X             Disable poln calibration (perform only corrections) \n"
     "\n"
     "Input/Output options: \n"
     "  -e ext         Extension added to output filenames (default .calib) \n"
@@ -126,8 +128,10 @@ int main (int argc, char *argv[]) try
   bool verbose = false;
   bool do_fluxcal = true;
   bool do_polncal = true;
+  bool do_backend = false;  // by default, the backend is calibrated by the PolnCalibrator
+  bool do_frontend = true;
+
   bool use_fluxcal_stokes = false;
-  bool enable_frontend = true;
   bool fscrunch_data_to_cal = false;
   float outlier_threshold = 0.0;
   
@@ -466,7 +470,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'U':
-      enable_frontend = false;
+      do_frontend = false;
       command += " -U ";
       break;
 
@@ -484,6 +488,12 @@ int main (int argc, char *argv[]) try
     case 'x':
       use_fluxcal_stokes = true;
       command += " -x";
+      break;
+
+    case 'X':
+      do_polncal = false;               // disable poln calibration
+      do_backend = do_frontend = true;  // enable backend and frontend corrections
+      unload_ext = "bc";                // "basis corrected"
       break;
 
     case 'y':
@@ -615,7 +625,7 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
-  else if ( model_file.empty() && ascii_model_file.empty()) try
+  else if ( model_file.empty() && ascii_model_file.empty() && (do_polncal || do_fluxcal) ) try
   {   
     // Generate the CAL file database
     cout << "pac: Generating new calibrator database" << endl;
@@ -821,10 +831,10 @@ int main (int argc, char *argv[]) try
 
       if (arch->get_npol() == 4)
       {
-        if (enable_frontend)
+        if (do_frontend)
 	{
           if (verbose)
-            cerr << "pac: Correcting platform, if necessary" << endl;
+            cerr << "pac: Correcting fronted, if necessary" << endl;
 
           Pulsar::FrontendCorrection correct;
           correct.calibrate (arch);
@@ -844,7 +854,29 @@ int main (int argc, char *argv[]) try
 
       successful_polncal = true;
     }
-        
+    else
+    {
+      cerr << "pac: Poln calibration disabled" << endl;
+
+      if (do_backend && (arch->get_npol() == 4 || arch->get_npol() == 2))
+      {
+        if (verbose)
+          cerr << "pac: Correcting backend, if necessary" << endl;
+
+        Pulsar::BackendCorrection correct;
+        correct (arch);
+      }
+
+      if (do_frontend && (arch->get_npol() == 4))
+      {
+        if (verbose)
+          cerr << "pac: Correcting fronted, if necessary" << endl;
+
+        Pulsar::FrontendCorrection correct;
+        correct.calibrate (arch);
+      }
+    }
+
     /* The PolnCalibrator classes normalize everything so that flux
        is given in units of the calibrator flux.  Unless the calibrator
        is flux calibrated, it will undo the flux calibration step.
@@ -855,7 +887,7 @@ int main (int argc, char *argv[]) try
     if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags)
       cout << "pac: " << filenames[i] << " already flux calibrated" << endl;
     
-    else if (!dbase)
+    else if (do_fluxcal && !dbase)
       cout << "pac: Not performing flux calibration (no database)." << endl;
 
     else if (do_fluxcal) try
@@ -908,7 +940,7 @@ int main (int argc, char *argv[]) try
 
     string newname = replace_extension( filenames[i], unload_ext );
 
-    if (!successful_fluxcal)
+    if (successful_polncal && !successful_fluxcal)
       newname += "P";
 
     if (!unload_path.empty())

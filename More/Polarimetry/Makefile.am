@@ -89,6 +89,7 @@ nobase_include_HEADERS = \
 	Pulsar/StokesCovariance.h Pulsar/StokesCrossCovariance.h \
         Pulsar/SystemCalibrator.h \
 	Pulsar/SystemCalibratorUnloader.h \
+	Pulsar/UnloadJones.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
 	Pulsar/VariationInfo.h
@@ -190,6 +191,7 @@ libPolarimetry_la_SOURCES = \
 	StokesCovariance.C StokesCrossCovariance.C \
         SystemCalibrator.C \
 	SystemCalibratorUnloader.C \
+	UnloadJones.C \
         TemplateUncertainty.C \
         TotalCovariance.C \
 	VariationInfo.C
@@ -240,7 +242,7 @@ test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 LDADD = libPolarimetry.la \
 	$(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/Base/libpsrbase.la \
-	$(top_builddir)/Util/libpsrutil.la
+	$(top_builddir)/Util/libpsrutil.la @EPSIC_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
 

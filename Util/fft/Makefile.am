@@ -44,7 +44,6 @@ check_PROGRAMS = $(TESTS) test_QuaternionFT
 test_enum_SOURCES		= test_enum.C
 test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
-test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
 test_real_complex_SOURCES	= test_real_complex.C
 test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 test_FTransformBench_SOURCES	= test_FTransformBench.C
@@ -58,7 +57,7 @@ bench: ./install_bench ./fft_bench ./fft_speed
 LDADD = libpsrfft.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/third/libthird.la
+	$(top_builddir)/Util/third/libthird.la @EPSIC_LIBS@
 
 libpsrfft_la_LIBADD = @FFT_LIBS@
 
