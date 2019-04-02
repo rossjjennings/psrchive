@@ -32,6 +32,9 @@ namespace Pulsar {
     //! Destructor
     ~CalInterpreter ();
 
+    //! perform the backend convention corrections
+    std::string backend (const std::string& arg);
+
     // calibrate the current top of the stack using the current state
     std::string cal (const std::string& args);
 
