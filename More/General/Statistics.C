@@ -131,6 +131,13 @@ TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
     return StrategySet::default_snratio.get_value()->get_interface();
 }
 
+Phase::Value Pulsar::Statistics::get_peak () const
+{
+  Phase::Value width = get_Profile()->find_max_phase();
+  set_period (width);
+  return width;
+}
+
 //! Set the pulse width estimator
 void Pulsar::Statistics::set_pulse_width_estimator (const std::string& name)
 {

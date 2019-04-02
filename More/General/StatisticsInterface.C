@@ -56,6 +56,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
       insert ( instance->plugins[i]->get_interface() );
   }
 
+  add( &Statistics::get_peak,
+       "peak", "Phase of pulse peak (turns)" );
+
   add( &Statistics::get_effective_duty_cycle,
        "weff", "Effective pulse width (turns)" );
 
