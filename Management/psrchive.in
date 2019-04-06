@@ -61,7 +61,7 @@ while test $# -gt 0; do
         ;;
 
     --cflags)
-        echo -I@includedir@ @PTHREAD_CFLAGS@
+        echo -I@includedir@ @EPSIC_CFLAGS@ @PTHREAD_CFLAGS@
         ;;
 
     --ldflags | --libs)
