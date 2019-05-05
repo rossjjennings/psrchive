@@ -13,6 +13,10 @@
 
 #include "Pulsar/InterpreterExtension.h"
 #include "Pulsar/Calibrator.h"
+
+#include "Pulsar/FscrunchInterpreter.h"
+#include "Pulsar/PolnCalExtFreqIntegrate.h"
+
 #include "MEAL/Complex2.h"
 
 namespace Pulsar {
@@ -78,6 +82,9 @@ namespace Pulsar {
 
     //! The transformation to be applied
     Reference::To<MEAL::Complex2> transformation;
+
+    //! Manages fscrunch interpretation
+    FscrunchInterpreter<PolnCalExtFreqIntegrate> fscruncher;
 
   };
 
