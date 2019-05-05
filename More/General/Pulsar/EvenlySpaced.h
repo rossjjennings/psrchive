@@ -64,12 +64,12 @@ void Pulsar::Integrate<C>::EvenlySpaced::get_range (unsigned irange,
   if (stop > input_size)
     stop = input_size;
 
-  if (C::verbose > 2)
+#if _DEBUG
     std::cerr << "Pulsar::Integrate::EvenlySpaced::get_range\n "
       " irange=" << irange << " output_nintegrate=" << output_nintegrate <<
       " input_size=" << input_size <<
       " start=" << start << " stop=" << stop << std::endl;
-  
+#endif
 }
 
 

@@ -56,6 +56,9 @@ namespace Pulsar {
     //! normalize profiles by absolute gain
     std::string set_gain (const std::string& arg);
 
+    //! frequency integrate the loaded PolnCalibrator
+    std::string fscrunch (const std::string& arg);
+
   protected:
 
     //! The type of calibrator to be used

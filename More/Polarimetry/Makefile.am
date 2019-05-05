@@ -53,6 +53,7 @@ nobase_include_HEADERS = \
         Pulsar/PolarCalibrator.h \
         Pulsar/Polarization.h \
         Pulsar/PolnCalibrator.h \
+	Pulsar/PolnCalExtFreqIntegrate.h \
         Pulsar/PolnProfile.h \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfileFitAnalysis.h \
@@ -156,6 +157,7 @@ libPolarimetry_la_SOURCES = \
         PolnCalibrator.C \
         PolnCalibratorExt.C \
         PolnCalibratorInfo.C \
+	PolnCalExtFreqIntegrate.C \
         PolnProfile.C \
         PolnProfileFit.C \
         PolnProfileFitAnalysis.C \

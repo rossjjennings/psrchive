@@ -74,6 +74,13 @@ Pulsar::CalInterpreter::CalInterpreter ()
     ( &CalInterpreter::set_gain,
       "gain", "normalize profile by absolute gain (ruins flux cal)" );
 
+  add_command
+    ( &CalInterpreter::fscrunch,
+      "fscrunch", "integrate PolnCalibrator Extension in frequency",
+      "usage: fscrunch [chans] \n"
+      "  unsigned chans    number of desired frequency channels \n"
+      "                    if not specified, fscrunch all (chans=1)\n" );
+
 }
 
 Pulsar::CalInterpreter::~CalInterpreter ()
@@ -300,4 +307,43 @@ catch (Error& error)
 {
   return response (Fail, error.get_message());
 }
+
+//
+// fscrunch <string> <int>
+//
+template<class Interpreter, class Container>
+void fscrunch_implementation (Interpreter* interpreter, Container* container, const string& args)
+{
+  bool scrunch_by = false;
+  string temp = args;
+
+  if (args[0] == 'x')
+  {
+    scrunch_by = true;
+    temp.erase (0,1);
+  }
+
+  unsigned scrunch = interpreter->template setup<unsigned> (temp, 0);
+
+  if (!scrunch)
+    container -> fscrunch();
+  else if (scrunch_by)
+    container -> fscrunch (scrunch);
+  else
+    container -> fscrunch_to_nchan (scrunch);
+}
+
+string Pulsar::CalInterpreter::fscrunch (const string& args) try
+{
+  PolnCalibratorExtension* ext = get()->get<PolnCalibratorExtension>();
+  if (!ext)
+    return response (Fail, "Archive has no Polarization Calibrator Extension");
+
+  fscrunch_implementation (this, ext, args);
+    return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
