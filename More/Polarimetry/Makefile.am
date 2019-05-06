@@ -37,6 +37,7 @@ nobase_include_HEADERS = \
 	Pulsar/InstrumentInfo.h \
         Pulsar/IonosphereCalibrator.h \
         Pulsar/IRIonosphere.h \
+	Pulsar/IXRInfo.h \
         Pulsar/ManualPolnCalibrator.h \
         Pulsar/MeanCoherency.h \
         Pulsar/MeanFeed.h \
@@ -138,6 +139,7 @@ libPolarimetry_la_SOURCES = \
 	InputDataReport.C \
         IonosphereCalibrator.C \
         IRIonosphere.C \
+	IXRInfo.C \
 	ManualPolnCalibrator.C \
         MeanCoherency.C \
         MeanFeed.C \
