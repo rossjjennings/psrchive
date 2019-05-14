@@ -73,3 +73,21 @@ Pulsar::ProfileWeightFunction::factory (const std::string& name_parse)
 
   return TextInterface::factory<ProfileWeightFunction> (instances, name_parse);
 }
+
+
+#include "interface_stream.h"
+
+namespace Pulsar
+{
+  std::ostream& operator<< (std::ostream& ostr,
+			    ProfileWeightFunction* e)
+  {
+    return interface_insertion (ostr, e);
+  }
+
+  std::istream& operator>> (std::istream& istr,
+			    ProfileWeightFunction* &e)
+  {
+    return interface_extraction (istr, e);
+  }
+}

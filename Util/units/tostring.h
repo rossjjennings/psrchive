@@ -120,7 +120,7 @@ T fromstring (const std::string& input)
   ist.clear();
   ist.str(input);
 
-  T retval;
+  T retval = T();
   ist >> retval;
 
   if (ist.fail())

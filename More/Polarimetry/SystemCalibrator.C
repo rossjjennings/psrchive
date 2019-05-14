@@ -50,6 +50,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
   correct_interstellar_Faraday_rotation = false;
 
+  refcal_through_frontend = true;
+
   set_initial_guess = true;
   guess_physical_calibrator_stokes = false;
   
@@ -137,6 +139,12 @@ Pulsar::SystemCalibrator::get_Info () const
 
   return PolnCalibrator::get_Info ();
 }
+
+void Pulsar::SystemCalibrator::set_refcal_through_frontend (bool flag)
+{
+  refcal_through_frontend = flag;
+}
+
 
 MJD Pulsar::SystemCalibrator::get_epoch () const
 {
@@ -683,13 +691,14 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 		 "invalid state=" + State2string(cal->get_state()));
 
   if ( cal->get_type() != Signal::FluxCalOn && 
+       cal->get_type() != Signal::FluxCalOff && 
        cal->get_type() != Signal::PolnCal )
     throw Error (InvalidParam, "Pulsar::SystemCalibrator::add_calibrator",
                  "invalid source=" + Source2string(cal->get_type()));
 
   string reason;
   if (!get_calibrator()->calibrator_match (cal, reason))
-    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_calibrator",
+    throw Error (InvalidParam, "Pulsar::SystemCalibrator::add_calibrator",
 		 "mismatch between \n\t" 
 		 + get_calibrator()->get_filename() +
                  " and \n\t" + cal->get_filename() + reason);
@@ -972,10 +981,12 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
             "\n\tobs=" << observed <<
             "\n\tresult=" << result << endl;
 
+#if 0
   Estimate<double> p = result.abs_vect();
-  if (p > 1)
+  if (p.val > 1 + p.var)
     cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
-	 << " output p-1=" << p-1 << endl;
+	 << " overpolarized by more than 1 sigma " << p-1 << endl;
+#endif
   
   calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
@@ -1120,6 +1131,8 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
       cerr << "Pulsar::SystemCalibrator::init_model impurity" << endl;
     model[ichan]->set_impurity( impurity->clone() );
   }
+
+  model[ichan] -> set_refcal_through_frontend (refcal_through_frontend);
 
   if (foreach_calibrator)
     model[ichan]->set_foreach_calibrator( foreach_calibrator );
@@ -1564,6 +1577,10 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
       try
       {
 	response[ichan] = get_transformation(data, isub, ichan)->evaluate();
+
+	if (verbose > 2)
+	  cerr << "SystemCalibrator::precalibrate chan=" << ichan
+	       << " response=" << response[ichan] << endl;
       }
       catch (Error& error)
       {
@@ -1644,25 +1661,6 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
     signal_path = equation->get_transformation ();
     break;
 
-#if 0
-
-    Should SystemCalibrator know nothing about FluxCalOn/Off ??
-  case Signal::FluxCalOn:
-  {
-    if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::get_transformation FluxCal" << endl;
-
-    // TODO: adjust the path index according to epoch?
-
-    unsigned index = fluxcal[ichan]->get_path_index();
-
-    equation->set_transformation_index ( index );
-    signal_path = equation->get_transformation ();
-    break;
-  }
-
-#endif
-
   default:
     throw Error (InvalidParam, "Pulsar::SystemCalibrator::get_transformation",
 		 "unknown Archive type for " + data->get_filename() );
@@ -1677,6 +1675,10 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
     throw Error (InvalidState, "Pulsar::SystemCalibrator::get_transformation",
 		 "measurement equation is not a congruence transformation");
 
+  if (verbose > 2)
+    cerr << "SystemCalibrator::get_transformation set epoch="
+	 << integration->get_epoch() << endl;
+  
   model[ichan]->time.set_value( integration->get_epoch() );
   return congruence->get_transformation();
 }

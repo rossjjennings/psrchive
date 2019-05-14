@@ -30,12 +30,12 @@ namespace Calibration
     SourceEstimate (int ibin = -1);
 
     //! Create the source and add it to the measurement equation
-    void create_source (ReceptionModel* equation);
+    virtual void create_source (ReceptionModel* equation);
 
     //! Update source with the estimate
     void update ();
 
-    //! Model of Stokes parameters as a function of frequency
+    //! Model of Stokes parameters 
     Reference::To<MEAL::Coherency> source;
 
     //! Best estimate (first guess) of Stokes parameters
@@ -60,6 +60,11 @@ namespace Calibration
 
     //! Return true if the last/top source estimate has data to constrain it
     bool is_constrained () const;
+
+  protected:
+
+    //! does the work for update method, which does some generic extra bits
+    virtual void update_work ();
   };
 
   class SourceObservation

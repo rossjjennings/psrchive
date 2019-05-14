@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,7 +8,7 @@
 #include "Pulsar/SourceInfo.h"
 #include "Pulsar/SystemCalibrator.h"
 
-#include <string.h>
+#include <assert.h>
 
 //! Constructor
 Pulsar::SourceInfo::SourceInfo 
@@ -56,16 +56,16 @@ unsigned Pulsar::SourceInfo::get_nclass () const
 //! Return the name of the specified class
 std::string Pulsar::SourceInfo::get_name (unsigned iclass) const
 {
-  if (!label.empty())
-    return label;
-
-  static char default_label [64] = "\\fiS'\\b\\d\\frk";
-  static char* replace = strchr (default_label, 'k');
+  std::string label = "\\fiS'\\b\\d\\frk";
 
   if (!together)
-    *replace = '0' + iclass;
+  {
+    std::string::size_type index = label.find('k');
+    assert (index != std::string::npos);
+    label[index] = '0' + iclass;
+  }
 
-  return default_label;
+  return label;
 }
 
 

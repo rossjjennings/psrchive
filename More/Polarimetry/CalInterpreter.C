@@ -1,13 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007 - 2019 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/CalInterpreter.h"
 #include "Pulsar/CalibratorType.h"
-//#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/PolnProfile.h"
 
@@ -25,6 +24,7 @@
 
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
+#include "Pulsar/BackendCorrection.h"
 
 using namespace std;
 
@@ -53,6 +53,10 @@ Pulsar::CalInterpreter::CalInterpreter ()
       "    string key           name of the criterion to set/get \n"
       "    string value         value of the criterion" );
 
+  add_command
+    ( &CalInterpreter::backend,
+      "backend", "backend convention correction" );
+
   add_command 
     ( &CalInterpreter::cal,
       "", "calibrate the current archive using the current settings" );
@@ -68,6 +72,13 @@ Pulsar::CalInterpreter::CalInterpreter ()
   add_command 
     ( &CalInterpreter::set_gain,
       "gain", "normalize profile by absolute gain (ruins flux cal)" );
+
+  add_command
+    ( &CalInterpreter::fscrunch,
+      "fscrunch", "integrate PolnCalibrator Extension in frequency",
+      "usage: fscrunch [chans] \n"
+      "  unsigned chans    number of desired frequency channels \n"
+      "                    if not specified, fscrunch all (chans=1)\n" );
 
 }
 
@@ -207,6 +218,19 @@ catch (Error& error)
   return response (Fail, "unrecognized type '" + args + "'");
 }
 
+
+string Pulsar::CalInterpreter::backend (const string& args) try
+{
+  Pulsar::BackendCorrection correct;
+  correct( get() );
+
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
 string Pulsar::CalInterpreter::cal (const string& arg) try
 {
   Reference::To<PolnCalibrator> use_cal;
@@ -282,4 +306,18 @@ catch (Error& error)
 {
   return response (Fail, error.get_message());
 }
+
+string Pulsar::CalInterpreter::fscrunch (const string& args) try
+{
+  PolnCalibratorExtension* ext = get()->get<PolnCalibratorExtension>();
+  if (!ext)
+    return response (Fail, "Archive has no Polarization Calibrator Extension");
+
+  fscruncher.fscrunch (this, ext, args);
+    return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 

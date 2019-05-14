@@ -1,13 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002-2008 by Willem van Straten
+ *   Copyright (C) 2002 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 // #define _DEBUG 1
 
-#include "Pulsar/Profile.h"
+#include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/DataExtension.h"
 
 #include "FTransform.h"
@@ -86,6 +86,20 @@ Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
     zero ();
 }
 
+//! copy constructor
+Pulsar::Profile::Profile (const Profile& profile)
+{
+  init();
+  copy (&profile);
+}
+
+//! copy constructor
+Pulsar::Profile::Profile (const Profile* profile)
+{
+  init();
+  copy (profile);
+}
+
 Pulsar::Profile::~Profile()
 {
   instance_count --;
@@ -151,6 +165,12 @@ void Pulsar::Profile::set_weight (float w)
 {
   weight = w;
   foreach<DataExtension> (this, &DataExtension::set_weight, weight);
+}
+
+//! Set the strategy manager
+void Pulsar::Profile::set_strategy (Strategies* s)
+{
+  strategy = s;
 }
 
 //! Return the number of extensions available

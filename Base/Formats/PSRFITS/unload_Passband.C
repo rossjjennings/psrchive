@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass) try
 {
   int status = 0;
 
@@ -62,6 +62,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
     minmax(bandpass->get_passband(i), min, max);
     data_offsets[i] = 0.5 * (max + min);
     data_scales[i] = ((max - min) / max_int) / 2.0;
+    if (data_scales[i] == 0.0) data_scales[i] = 1.0;
   }
   
   if (verbose == 3)
@@ -110,5 +111,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   
   if (verbose == 3)
     cerr << "FITSArchive::unload_passband exiting" << endl;
+}
+catch (Error &error)
+{
+  throw error += "FITSArchive::unload(Passband)";
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 - 2016 by Willem van Straten
+ *   Copyright (C) 2003 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -115,12 +115,17 @@ void usage ()
     "  -r         enforce physically realizable Stokes parameters [DEVEL]\n"
     "  -s         normalize Stokes parameters by total invariant interval \n"
     "\n"
-    "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
-    "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
-    "  -k         assume that the receptors have equal ellipticities \n"
-    "\n"
     "  -F days    use flux calibrators within days of pulsar data mid-time\n"
     "  -L hours   use reference sources within hours of pulsar data mid-time\n"
+    "  -Q         reference source coupled after frontend \n"
+    "\n"
+    "  Constraints on degeneracy under commutation \n"
+    "  -- See " PSRCHIVE_HTTP "/manuals/pcm/degeneracy.shtml \n"
+    "\n"
+    "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
+    "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
+    "  -Y         model the difference between FluxCal-On and FluxCal-Off \n"
+    "  -k         assume that the receptors have equal ellipticities \n"
     "\n"
     "METM: Measurement Equation Template Matching\n"
     "  -- observations of a known source as in van Straten (2013) \n"
@@ -145,6 +150,9 @@ SystemCalibrator* matrix_template_matching (const char* stdname);
 
 // Plot the various components of the model
 void plot_state (SystemCalibrator* model, const std::string& state);
+
+// Print the variations of the Jones matrices
+void print_time_variation (SystemCalibrator* model);
 
 Reference::To<Calibration::StandardPrepare> prepare;
 
@@ -357,6 +365,9 @@ vector<string> calibrator_filenames;
 // Each flux calibrator observation may have unique values of I, Q & U
 bool multiple_flux_calibrators = false;
 
+// Model the difference between FluxCalOn and FluxCalOff observations
+bool model_fluxcal_on_minus_off = false;
+
 // Derive first guess of calibrator Stokes parameters from fluxcal solution
 bool use_fluxcal_stokes = false;
 
@@ -367,7 +378,7 @@ bool equal_ellipticities = false;
 bool normalize_by_invariant = false;
 bool independent_gains = false;
 bool step_after_cal = false;
-
+bool refcal_through_frontend = true;
 bool physical_coherency = false;
 
 float retry_chisq = 0.0;
@@ -555,6 +566,8 @@ static bool plot_guess = false;
 static bool plot_residual = false;
 static bool plot_total = false;
 static bool plot_result = false;
+static bool print_variation = false;
+
 static bool publication_plots = false;
 
 static unsigned solver_verbosity = 0;
@@ -584,7 +597,13 @@ void enable_diagnostic (const string& name)
 
   else if (name == "solver")
     solver_verbosity = 1;
-  
+ 
+  else if (name == "temporal")
+  {
+    cerr << "pcm: will print temporal variations" << endl;
+    print_variation = true;
+  }
+ 
   else
   {
     cerr << "pcm: unrecognized diagnostic name '" << name << "'" << endl;
@@ -653,8 +672,8 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:j:J:K:kL:l:"
-    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:wW:xX:yzZ";
+    "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
+    "M:m:Nn:O:o:Pp:QqR:rS:sT:t:U:u:V:vW:wX:xYyZz";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -844,6 +863,14 @@ int actual_main (int argc, char *argv[]) try
       break;
     }
 
+    case 'q':
+      measure_cal_Q = false;
+      break;
+
+    case 'Q':
+      refcal_through_frontend = false;
+      break;
+
     case 'r':
       physical_coherency = true;
       break;
@@ -894,10 +921,6 @@ int actual_main (int argc, char *argv[]) try
       set_foreach_calibrator( optarg[0] );
       break;
 
-    case 'q':
-      measure_cal_Q = false;
-      break;
-
     case 'v':
       measure_cal_V = false;
       break;
@@ -922,6 +945,10 @@ int actual_main (int argc, char *argv[]) try
       ProjectionCorrection::trust_pointing_feed_angle = true;
       break;
 
+    case 'Y':
+      model_fluxcal_on_minus_off = true;
+      break;
+      
     case 'h':
       usage ();
       return 0;
@@ -940,11 +967,10 @@ int actual_main (int argc, char *argv[]) try
       if (level > 2)
 	Calibration::SignalPath::verbose = true;
 
+      if (level > 1)
+	Pulsar::Archive::set_verbosity (level-1);
+
       Pulsar::Calibrator::verbose = level;
-
-      level --; if (level < 0) level = 0;
-
-      Pulsar::Archive::set_verbosity (level);
 
       break;
     }
@@ -1284,6 +1310,9 @@ int actual_main (int argc, char *argv[]) try
   if (model->has_valid())
     unloader.unload (model);
 
+  if (print_variation && get_time_variation())
+    print_time_variation (model);
+
 #if HAVE_PGPLOT
 
   if (plot_result) try
@@ -1472,6 +1501,13 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model->add_state (phase_bins[ibin]);
 
+  if (refcal_through_frontend)
+    cerr << "pcm: reference source illuminates frontend" << endl;
+  else
+    cerr << "pcm: reference source coupled after frontend" << endl;
+
+  model->set_refcal_through_frontend( refcal_through_frontend );
+  
   if (multiple_flux_calibrators)
     cerr <<
       "pcm: each flux calibrator observation "
@@ -1479,6 +1515,11 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
 
   model->multiple_flux_calibrators = multiple_flux_calibrators;
 
+  if (model_fluxcal_on_minus_off)
+    cerr << "pcm: modeling difference between FluxCalOn and FluxCalOff" << endl;
+
+  model->model_fluxcal_on_minus_off = model_fluxcal_on_minus_off;
+  
   if (flux_cal)
     model->set_flux_calibrator (flux_cal);
   
@@ -1707,7 +1748,7 @@ void load_calibrator_database () try
   }
   
   if (template_filename)
-    cerr << "pcm: no need for on-source flux calibrator observations" << endl;
+    cerr << "pcm: no need for flux calibrator observations" << endl;
   else
   {
     double span_days = (end_time - start_time).in_days();
@@ -1725,6 +1766,22 @@ void load_calibrator_database () try
     if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"
 	   << database->get_closest_match_report () << endl;
+
+    if (model_fluxcal_on_minus_off)
+    {
+      unsigned ncals = oncals.size();
+      
+      criteria.entry.obsType = Signal::FluxCalOff;
+    
+      cerr << "pcm: searching for off-source flux calibrator observations"
+	" within " << search_days << " days of midtime" << endl;
+
+      database->all_matching (criteria, oncals);
+  
+      if (oncals.size() == ncals)
+	cerr << "pcm: no FluxCalOff observations found; closest match was \n\n"
+	     << database->get_closest_match_report () << endl;
+    }
   }
 
   for (unsigned i = 0; i < oncals.size(); i++)
@@ -1740,17 +1797,67 @@ catch (Error& error)
   exit (-1);
 }
 
+#include "Pulsar/Integration.h"
 
+void flat (std::ostream& output, const Jones<double>& J)
+{
+  output << J.j00.real() << " " << J.j00.imag() << " "
+         << J.j01.real() << " " << J.j01.imag() << " "
+         << J.j10.real() << " " << J.j10.imag() << " "
+         << J.j11.real() << " " << J.j11.imag();
+}
 
+void print_time_variation (SystemCalibrator* model)
+{
+  std::string filename = "temporal_variation.txt";
 
+  std::ofstream output (filename.c_str());
 
+  cerr << "pcm: printing temporal variation to " << filename << endl;
 
+  unsigned nchan = model->get_nchan();
+  MJD start = model->get_start_epoch ();
+  MJD end = model->get_end_epoch ();
 
+  unsigned nstep = 100;
+  MJD step = (end - start) / (nstep - 1);
 
+  const Integration* subint = model->get_Archive()->get_Integration(0);
 
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+  {
+    Calibration::SignalPath* path 
+        = const_cast<Calibration::SignalPath*>( model->get_model(ichan) );
 
+    if (!path->get_valid())
+      continue;
 
+    double cfreq_in_Hz = subint->get_centre_frequency(ichan) * 1e6;
 
+    path->engage_time_variations();
+
+    // Calibration::ReceptionModel* equation = path->get_equation();
+    // path->set_transformation_index (ipath);
+    // path->set_input_index (isource);
+
+    //! Get the instrumental transformation
+    const MEAL::Complex2* instrument = path->get_transformation ();
+
+    for (unsigned ipt=0; ipt<nstep; ipt++) try
+    {
+      MJD index = start + step * ipt;
+      path->time.set_value (index);
+
+      Jones<double> J = instrument->evaluate();
+      output << index.printdays(10) << " " << cfreq_in_Hz << " ";
+      flat (output, J);
+      output << endl;
+    }
+    catch (Error& err)
+    {
+    }
+  }
+}
 
 
 #if HAVE_PGPLOT
@@ -1761,6 +1868,7 @@ void plot_state (SystemCalibrator* model, const std::string& state) try
 
   SystemCalibratorPlotter plotter (model);
   plotter.use_colour = !publication_plots;
+  plotter.npanel = 4;
 
   //
   // if the SystemCalibrator is a ReceptionCalibrator (MEM mode)
@@ -1773,6 +1881,7 @@ void plot_state (SystemCalibrator* model, const std::string& state) try
   {
     rplotter = new ReceptionCalibratorPlotter (rmodel);
     rplotter->use_colour = !publication_plots;
+    rplotter->npanel = 4;
   }
 
   //

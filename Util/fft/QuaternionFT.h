@@ -13,6 +13,7 @@
 
 #include "Quaternion.h"
 #include "Matrix.h"
+#include <vector>
 
 class QuaternionFT {
 

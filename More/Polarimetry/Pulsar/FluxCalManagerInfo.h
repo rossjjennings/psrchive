@@ -43,6 +43,9 @@ namespace Pulsar {
     Estimate<float> get_param (unsigned ichan, unsigned iclass,
 			       unsigned iparam) const;
 
+    //! Return the colour index of the specified parameter
+    int get_colour_index (unsigned iclass, unsigned iparam) const;
+
   protected:
 
     //! The ReceptionCalibrator with FluxCalManager data to be plotted
@@ -50,6 +53,9 @@ namespace Pulsar {
 
     //! The number of different classes of data
     unsigned nclass;
+
+    //! The number of FluxCalOn classes
+    unsigned nclass_on;
   };
 
 }

@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/FluxCalibrator.h"
-#include "Pulsar/FluxCalibratorData.h"
+#include "Pulsar/FluxCalibratorPolicy.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/StandardCandles.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -56,8 +56,11 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
     unsigned nchan = fe->get_nchan();
     data.resize( nchan );
     for (unsigned ichan=0; ichan < nchan; ichan++)
-      data[ichan] = Data( fe->S_sys[ichan], fe->S_cal[ichan] );
-
+    {
+      data[ichan] = new VariableGain;
+      data[ichan]->set( fe->S_sys[ichan], fe->S_cal[ichan] );
+    }
+    
     // disable checks for sufficient data
     have_on = have_off = true;
   }
@@ -72,8 +75,15 @@ Pulsar::FluxCalibrator::~FluxCalibrator ()
 void Pulsar::FluxCalibrator::init ()
 {
   type = new CalibratorTypes::Flux;
+  policy = new FluxCalibrator::VariableGain;
+    
   calculated = have_on = have_off = false;
   outlier_threshold = 0.0;
+}
+
+void Pulsar::FluxCalibrator::set_policy (Policy* p)
+{
+  policy = p;
 }
 
 string Pulsar::FluxCalibrator::get_standard_candle_info () const
@@ -87,7 +97,7 @@ double Pulsar::FluxCalibrator::meanTsys ()
 
   for (unsigned i = 0; i < data.size(); i++)
     if (get_valid(i))
-      mean += data[i].get_S_sys ();
+      mean += data[i]->get_S_sys ();
   
   return mean.get_Estimate().val;
 }
@@ -98,7 +108,7 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::Tsys",
                  "ichan=%d > data.size=%d", ichan, data.size());
   
-  return data[ichan].get_S_sys().get_value();
+  return data[ichan]->get_S_sys().get_value();
 }
 
 //! Print all the fluxcal info in simple ascii columns
@@ -113,10 +123,10 @@ void Pulsar::FluxCalibrator::print (std::ostream& os)
     if (!get_valid(ic)) continue;
     os << ic << " ";
     for (unsigned ir=0; ir<get_nreceptor(); ir++) {
-      os << data[ic].get_S_sys(ir).get_value() << " " 
-        << data[ic].get_S_sys(ir).get_error() << "  "
-        << data[ic].get_S_cal(ir).get_value() << " "
-        << data[ic].get_S_cal(ir).get_error() << "  ";
+      os << data[ic]->get_S_sys(ir).get_value() << " " 
+        << data[ic]->get_S_sys(ir).get_error() << "  "
+        << data[ic]->get_S_cal(ir).get_value() << " "
+        << data[ic]->get_S_cal(ir).get_error() << "  ";
     }
     os << std::endl;
   }
@@ -153,8 +163,8 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const
     Stokes < Estimate<double> > stokes;
 
     // Skip invalid channels
-    if (get_valid(ichan)==false || data[ichan].get_S_cal()==0.0 || 
-        data[ichan].get_S_cal(0)==0.0 || data[ichan].get_S_cal(1)==0.0)
+    if (get_valid(ichan)==false || data[ichan]->get_S_cal()==0.0 || 
+        data[ichan]->get_S_cal(0)==0.0 || data[ichan]->get_S_cal(1)==0.0)
     { 
       stokes[0] = Estimate<double> (0.0, 0.0);
       stokes[1] = Estimate<double> (0.0, 0.0);
@@ -168,12 +178,12 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const
     // CalibratorStokes only stores fractional Stokes params
     stokes[0] = Estimate<double> (1.0,0.0);
 
-    diff = (data[ichan].get_S_cal(0) - data[ichan].get_S_cal(1))
-      / data[ichan].get_S_cal();
+    diff = (data[ichan]->get_S_cal(0) - data[ichan]->get_S_cal(1))
+      / data[ichan]->get_S_cal();
 
-    cross = data[ichan].get_S_cal(0) * data[ichan].get_S_cal(1);
+    cross = data[ichan]->get_S_cal(0) * data[ichan]->get_S_cal(1);
     if (cross<0.0) { cross = -cross; }
-    cross = 2.0 * sqrt(cross) / data[ichan].get_S_cal(); 
+    cross = 2.0 * sqrt(cross) / data[ichan]->get_S_cal(); 
 
     // This method may be more general.. applies the inverse basis
     // correction for the receiver, to produce the cal stokes parameters
@@ -234,13 +244,13 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const
 //! Return true if the flux scale for the specified channel is valid
 bool Pulsar::FluxCalibrator::get_valid (unsigned ch) const
 {
-  return data[ch].get_valid();
+  return data[ch]->get_valid();
 }
 
 //! Set the flux scale invalid flag for the specified channel
 void Pulsar::FluxCalibrator::set_invalid (unsigned ch)
 {
-  data[ch].set_valid (false);
+  data[ch]->set_valid (false);
 }
 
 void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
@@ -317,38 +327,35 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
   SquareWave estimator;
   estimator.set_outlier_threshold (outlier_threshold);
   
-  for (unsigned isub=0; isub < nsub; isub++) {
-
+  for (unsigned isub=0; isub < nsub; isub++)
+  {
     const Pulsar::Integration* integration = archive->get_Integration (isub);
 
     if (verbose > 2) 
       cerr << "Pulsar::FluxCalibrator call Integration::cal_levels" << endl;
 
     estimator.levels( integration, cal_hi, cal_lo );
-    Estimate<double> unity(1.0);
 
-    for (unsigned ichan=0; ichan<nchan; ++ichan) {
-      
+    for (unsigned ichan=0; ichan<nchan; ++ichan)
+    {
       if (integration->get_weight(ichan) == 0)
 	continue;
 
-      for (unsigned ir=0; ir < nreceptor; ir++) {
-
-	if (cal_lo[ir][ichan].val == 0)  {
+      for (unsigned ir=0; ir < nreceptor; ir++)
+      {
+	if (cal_lo[ir][ichan].val == 0)
+	{
 	  if (verbose > 2)
 	    cerr << "Pulsar::FluxCalibrator::add_observation ir="
 		 << ir << " ichan=" << ichan
 		 << " division by zero" << endl;
 	  continue;
 	}
-      
-	// Take the ratio of the flux
-	Estimate<double> ratio = cal_hi[ir][ichan]/cal_lo[ir][ichan] - unity ;
-	if (archive->get_type() == Signal::FluxCalOn)
-	  data[ichan].add_ratio_on (ir, ratio);
-	else if (archive->get_type() == Signal::FluxCalOff)
-	  data[ichan].add_ratio_off (ir, ratio);
-      
+
+	data[ichan]->integrate (archive->get_type(), ir,
+				cal_hi[ir][ichan],
+				cal_lo[ir][ichan]);
+	
       } // for each receptor
 
     } // for each frequency channel
@@ -437,8 +444,9 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   unsigned successful = 0;
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
-    gain[ichan] = data[ichan].get_S_cal().get_value();
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try
+  {
+    gain[ichan] = data[ichan]->get_S_cal().get_value();
     successful ++;
   }
   catch (Error& error) {
@@ -458,7 +466,10 @@ void Pulsar::FluxCalibrator::resize (unsigned nchan, unsigned nreceptor)
 {
   data.resize( nchan );
   for (unsigned i=0; i < nchan; i++)
-    data[i].set_nreceptor (nreceptor);
+  {
+    data[i] = policy->clone();
+    data[i]->set_nreceptor (nreceptor);
+  }
 }
 
 void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
@@ -538,7 +549,7 @@ void Pulsar::FluxCalibrator::setup () try {
       cerr << "Pulsar::FluxCalibrator::calculate channel=" << ichan << 
 	" freq=" << frequency << " flux=" << source_mJy << endl;
 
-    data[ichan].set_S_std (source_mJy);
+    data[ichan]->set_S_std (source_mJy);
     
   }
 
@@ -576,7 +587,7 @@ unsigned Pulsar::FluxCalibrator::get_nchan () const
 unsigned Pulsar::FluxCalibrator::get_nreceptor () const
 {
   if (data.size())
-    return data[0].get_nreceptor();
+    return data[0]->get_nreceptor();
   else
     return 0;
 }
@@ -619,9 +630,9 @@ Estimate<float> Pulsar::FluxCalibrator::Info::get_param (unsigned ichan,
   Estimate<float> retval;
 
   if (iclass == 0)
-    retval = instance->data[ichan].get_S_cal(iparam);
+    retval = instance->data[ichan]->get_S_cal(iparam);
   else if (iclass == 1)
-    retval = instance->data[ichan].get_S_sys(iparam);
+    retval = instance->data[ichan]->get_S_sys(iparam);
   
   // convert to Jy
   retval *= 1e-3;

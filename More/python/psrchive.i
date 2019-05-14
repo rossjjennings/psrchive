@@ -26,10 +26,10 @@
 
 #include "Pulsar/Interpreter.h"
 
+#include "Pulsar/ShiftEstimator.h"
+#include "Pulsar/ArrivalTime.h"
+
 #include "Pulsar/ProfileShiftFit.h"
-
-#include "Pulsar/WaveletSmooth.h"
-
 #include "Pulsar/Append.h"
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/FrequencyAppend.h"
@@ -37,6 +37,7 @@
 #include "Pulsar/Contemporaneity.h"
 #include "Pulsar/Predictor.h"
 #include "polyco.h"
+#include "toa.h"
 
 #include "Pulsar/ManualPolnCalibrator.h"
 
@@ -49,6 +50,10 @@
 
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
+#endif
+
+#if HAVE_GSL
+#include "Pulsar/WaveletSmooth.h"
 #endif
 
 // For some reason SWIG is not picking up the namespace for the emitted
@@ -65,6 +70,11 @@ using Pulsar::Predictor;
 // Language independent exception handler
 %include exception.i       
 %include std_string.i
+
+%include std_vector.i
+namespace std {
+  %template(StringVector) vector<string>;
+}
 
 using namespace std;
 
@@ -162,6 +172,9 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 // Also Contemporaneity
 %ignore Pulsar::PatchTime::set_contemporaneity_policy(Contemporaneity*);
 
+// This conflicted with std_vector for some reason
+%ignore Pulsar::ManualPolnCalibrator::match;
+
 // Return psrchive's Estimate class as a Python tuple
 %typemap(out) Estimate<double> {
     PyTupleObject *res = (PyTupleObject *)PyTuple_New(2);
@@ -224,8 +237,13 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Profile.h"
 %include "Pulsar/Parameters.h"
 %include "Pulsar/TextParameters.h"
+%include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
+
+#if HAVE_GSL
 %include "Pulsar/WaveletSmooth.h"
+#endif
+
 %include "Pulsar/Append.h"
 %include "Pulsar/TimeAppend.h"
 %include "Pulsar/FrequencyAppend.h"
@@ -372,6 +390,13 @@ double get_tobs(const char* filename) {
         if (p==NULL) return 0.0;
         p->update(self);
         return p->get_parallactic_angle().getDegrees();
+    }
+
+   double get_position_angle() {
+       Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+       if (p==NULL) return 0.0;
+       p->update(self);
+       return p->get_position_angle().getDegrees();
     }
 
     // Return Galactic latitude and longitude. Pulsar::Pointing is
@@ -610,6 +635,25 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return (PyObject *)arr;
     }
 
+    // Return frequency table of the archive as 2-D numpy array
+    PyObject *get_frequency_table()
+    {
+        int ii, jj;
+        PyArrayObject *arr;
+        npy_intp ndims[2];  // nsubint, nchan
+
+        ndims[0] = self->get_nsubint();
+        ndims[1] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, PyArray_DOUBLE);
+        for (ii = 0; ii < ndims[0]; ii++) {
+            for (jj = 0; jj < ndims[1]; jj++) {
+                ((double *)arr->data)[ii*ndims[1]+jj] = \
+                    self->get_Profile(ii, 0, jj)->get_centre_frequency();
+            }
+        }
+        return (PyObject *)arr;
+    }
+
     // Return a copy of all the data as a numpy array
     PyObject *get_data()
     {
@@ -685,4 +729,33 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyInt_FromLong((long)lo));
         return (PyObject *)result;
     }
+}
+
+%extend Pulsar::ArrivalTime
+{
+    // Allow use of the 'pat -A' strings directly
+    void set_shift_estimator(std::string type) {
+        self->set_shift_estimator(Pulsar::ShiftEstimator::factory(type));
+    }
+
+    // Allow use of 'pat -e' type options
+    void shift_estimator_config(std::string config) {
+        Reference::To<TextInterface::Parser> parser;
+        parser = self->get_shift_estimator()->get_interface();
+        parser->process(config);
+    }
+
+    // returns TOAs as a tuple of strings in python
+    std::vector<std::string> get_toas() {
+        std::vector<Tempo::toa> toas;
+        self->get_toas(toas);
+        std::vector<std::string> result;
+        for (int i=0; i<toas.size(); i++) {
+            char toatmp[2048];
+            toas[i].unload(toatmp);
+            result.push_back(toatmp);
+        }
+        return result;
+    }
+
 }

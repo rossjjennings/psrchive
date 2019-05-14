@@ -35,11 +35,13 @@ namespace TextInterface
 #if _DEBUG
       std::cerr << "OptionalInterface name=" << t << std::endl;
 #endif
+      help = false;
+      value = NULL;
     }
 
     //! Get the name of the attribute
     std::string get_name () const
-    { return AttributeGetSet<C,Type,Get,Set>::get_name() + "[:<name>]"; }
+    { return AttributeGetSet<C,Type,Get,Set>::get_name() + "[:@]"; }
 
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const;
@@ -163,7 +165,7 @@ namespace TextInterface
 
     //! Get the name of the attribute
     std::string get_name () const
-    { return prefix + "*:<name>"; }
+    { return prefix + "*:@"; }
 
     //! Get the description of the attribute
     std::string get_description () const
@@ -250,7 +252,7 @@ namespace TextInterface
 
     //! Get the name of the attribute
     std::string get_name () const
-    { return prefix + "?:<name>"; }
+    { return prefix + "?:@"; }
 
     //! Get the description of the attribute
     std::string get_description () const
@@ -334,7 +336,7 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
   if (text == this->name)
     return true;
 
-  if (text == this->name + "[:<name>]")
+  if (text == this->name + "[:@]")
     return true;
 
   std::string range;
@@ -499,7 +501,7 @@ template<class C,class Get,class Size>
   if (!match (prefix, name, &range, &remainder))
     return false;
 
-  if (remainder == "<name>")
+  if (remainder == "@")
     return true;
 
   if (remainder == "help")
@@ -604,7 +606,7 @@ template<class M, class K, class G>
   if (!match (prefix, name, &range, &remainder))
     return false;
 
-  if (remainder == "<name>")
+  if (remainder == "@")
     return true;
 
   if (!this->instance)

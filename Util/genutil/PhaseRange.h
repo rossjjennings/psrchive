@@ -17,7 +17,8 @@
 namespace Phase
 {
   //! The units of Phase
-  enum Unit { Turns, Degrees, Radians, Milliseconds, Bins };
+  enum Unit { Bins, Turns, Degrees, Radians,
+	      Milliseconds, Seconds, Minutes, Hours };
 
   std::ostream& operator << (std::ostream&, Unit);
   std::istream& operator >> (std::istream&, Unit&);

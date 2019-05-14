@@ -100,11 +100,13 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
   output_ndivide = 1;
   output_nintegrate = input_ndivide;
 
-  if (ndivide) {
+  if (ndivide)
+  {
 
-    if (C::verbose > 2)
+#if _DEBUG
       std::cerr << "Pulsar::Integrate::Divided::divide ndivide=" << ndivide
 		<< std::endl;
+#endif
 
     // the number of output frequency channel ranges was specified
     output_ndivide = ndivide;
@@ -114,11 +116,13 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
       output_nintegrate ++;
 
   }
-  else if (nintegrate) {
+  else if (nintegrate)
+  {
 
-    if (C::verbose > 2)
+#if _DEBUG
       std::cerr << "Pulsar::Integrate::Divided::divide nintegrate="
 		<< nintegrate << std::endl; 
+#endif
 
     // the output_nintegrate of frequency channels (scrunch) was specified
     output_nintegrate = nintegrate;
@@ -129,11 +133,11 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
 
   }
 
-  if (C::verbose > 2)
+#if _DEBUG
     std::cerr << "Pulsar::Integrate::Divided::divide into " << output_ndivide 
 	      << " ranges with " << output_nintegrate << " elements per range"
 	      << std::endl;
-
+#endif
 }
 
 

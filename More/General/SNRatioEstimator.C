@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2016 by Willem van Straten
+ *   Copyright (C) 2016 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -34,3 +34,17 @@ Pulsar::SNRatioEstimator::factory (const std::string& name_parse)
   return TextInterface::factory<SNRatioEstimator> (instances, name_parse);
 }
 
+#include "interface_stream.h"
+
+namespace Pulsar
+{
+  std::ostream& operator<< (std::ostream& ostr, SNRatioEstimator* e)
+  {
+    return interface_insertion (ostr, e);
+  }
+
+  std::istream& operator>> (std::istream& istr, SNRatioEstimator* &e)
+  {
+    return interface_extraction (istr, e);
+  }
+}

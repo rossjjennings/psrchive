@@ -54,6 +54,9 @@ namespace Pulsar {
     void set_reduced_chisq (bool x) { reduced_chisq = x; }
     bool get_reduced_chisq () const { return reduced_chisq; }
 
+    void set_intrinsic_crosspol_ratio (bool x) { intrinsic_crosspol_ratio = x; }
+    bool get_intrinsic_crosspol_ratio () const { return intrinsic_crosspol_ratio; }
+
     void set_outlier_threshold (float t) { outlier_threshold = t; }
     float get_outlier_threshold () const { return outlier_threshold; }
 
@@ -76,6 +79,9 @@ namespace Pulsar {
     
     //! plot the goodness-of-fit statistic
     bool reduced_chisq;
+
+    //! plot the intrinsic cross-polarization ratio
+    bool intrinsic_crosspol_ratio;
 
     //! threshold used to detect outliers when creating SingleAxis calibrator
     float outlier_threshold;

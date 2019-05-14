@@ -111,12 +111,12 @@ AC_DEFUN([SWIN_PACKAGE_TRY_COMPILE],
 
   cf_include_path_list="$with_[$1]_include_dir $swin_cv_[$1]_found [$4] ."
 
-  ac_save_CFLAGS="$CFLAGS"
+  ac_save_CPPFLAGS="$CPPFLAGS"
 
   AC_CACHE_VAL([swin_cv_[$1]_include_dir],
   [swin_cv_[$1]_include_dir=""
   for cf_dir in $cf_include_path_list; do
-    CFLAGS="-I$cf_dir $ac_save_CFLAGS"
+    CPPFLAGS="-I$cf_dir $ac_save_CPPFLAGS"
     AC_TRY_COMPILE([$2], [$3], have_[$1]=yes, have_[$1]=no)
     if test $have_[$1] = yes; then
       swin_cv_[$1]_include_dir="$cf_dir"

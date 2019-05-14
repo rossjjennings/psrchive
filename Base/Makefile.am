@@ -2,13 +2,14 @@
 SUBDIRS = Classes Extensions Checks Resources Formats . Applications
 
 lib_LTLIBRARIES = libpsrbase.la
-libpsrbase_la_SOURCES  =
+libpsrbase_la_SOURCES =
+libpsrbase_la_LIBTOOLFLAGS = --tag=CXX
 libpsrbase_la_LIBADD = \
 	Classes/libClasses.la \
 	Extensions/libExtensions.la \
 	Checks/libChecks.la \
 	Resources/libResources.la \
-	Formats/libFormats.la
+	Formats/libFormats.la @EPSIC_LIBS@
 
 include $(top_srcdir)/config/Makefile.local
 

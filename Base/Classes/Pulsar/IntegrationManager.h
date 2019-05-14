@@ -91,7 +91,7 @@ namespace Pulsar {
     virtual void set_nsubint (unsigned num_sub) = 0;
 
     //! Resize the Integration vector
-    virtual void resize (unsigned nsubint, bool instances=true);
+    virtual void _resize (unsigned nsubint, bool instances=true);
 
     //! Append new_Integration copies of Integration objects to self
     void append (const IntegrationManager* more_subints);

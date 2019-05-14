@@ -177,7 +177,10 @@ namespace Calibration
     void engage_time_variations ();
 
     //! Set whether steps occur before or after cals
-    void set_step_after_cal (bool _after = true);
+    void set_step_after_cal (bool flag = true);
+
+    //! e.g. true if noise diode illuminates feed; false if coupled after OMT
+    void set_refcal_through_frontend (bool flag = true);
 
     void set_valid (bool f, const char* reason = 0);
     bool get_valid () const { return valid; }
@@ -257,7 +260,8 @@ namespace Calibration
     bool time_variations_engaged;
     bool step_after_cal;
     bool constant_pulsar_gain;
-
+    bool refcal_through_frontend;
+    
     // ////////////////////////////////////////////////////////////////////
     //
     //! The signal path of the ReferenceCalibrator source

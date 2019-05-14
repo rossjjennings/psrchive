@@ -896,32 +896,58 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   string coord1, coord2;
   const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
 
-  if (hdr_ext)
+  Reference::To<FITSHdrExtension> hdr;
+  
+  if (!hdr_ext)
   {
     if (verbose > 2)
-      cerr << "Pulsar::FITSArchive::unload_file FITSHdrExtension" << endl;
-    
-    unload (fptr, hdr_ext);
-    hdr_ext->get_coord_string( get_coordinates(), coord1, coord2 );
-  }  
-  else
-  {
+      cerr << "Pulsar::FITSArchive::unload_file"
+	" creating temporary FITSHdrExtension" << endl;
+
+    hdr = new FITSHdrExtension;
+
     // If no FITSHdrExtension is present, assume J2000 Equatorial
+    hdr->set_coordmode( "J2000" );
+    hdr->set_equinox( 2000.0 );
+    hdr->set_stt_crd1( RA );
+    hdr->set_stt_crd2( DEC );
 
-    coord1 = RA;
-    coord2 = DEC;
+    // If no FITSHdrExtension is present, assume current parameters
+    hdr->set_obsbw( get_bandwidth() );
+    hdr->set_obsfreq( get_centre_frequency() );
+    hdr->set_obsnchan( get_nchan() );
+    
+    hdr_ext = hdr;
 
-    psrfits_update_key (fptr, "COORD_MD", "J2000");
-    psrfits_update_key (fptr, "EQUINOX", "2000.0");
+    // take the epoch of the first Integration with a duration
+    for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
+        if (get_Integration(jsubint)->get_duration() != 0.0)
+        {
+            reference_epoch = get_Integration(jsubint)->get_epoch();
+            if (verbose > 2)
+                cerr << "FITSArchive::unload_file subint=" << jsubint
+                    << " reference epoch=" << reference_epoch.printdays (13)
+                    << endl;
+            break;
+        }
 
+
+  } else {
+      reference_epoch = hdr_ext->get_start_time();
+      if (verbose > 2)
+          cerr << "FITSArchive::unload_file FITSHdr reference epoch="
+              << reference_epoch.printdays (13) << endl;
   }
+
+
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::unload_file FITSHdrExtension" << endl;
+    
+  unload (fptr, hdr_ext);
 
   // Virtual Observatory compatibility (redundant)
   psrfits_update_key (fptr, "RA", RA);
   psrfits_update_key (fptr, "DEC", DEC); 
-
-  psrfits_update_key (fptr, "STT_CRD1", coord1);
-  psrfits_update_key (fptr, "STT_CRD2", coord2); 
 
   string obs_mode;
   
@@ -1004,27 +1030,6 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
       unload (fptr, ext);
   }
   
-  if (hdr_ext)
-  {
-    reference_epoch = hdr_ext->get_start_time();
-    if (verbose > 2)
-      cerr << "FITSArchive::unload_file FITSHdr reference epoch="
-	   << reference_epoch.printdays (13) << endl;
-  }
-  else
-  {
-    // take the epoch of the first Integration with a duration
-    for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
-      if (get_Integration(jsubint)->get_duration() != 0.0)
-      {
-	reference_epoch = get_Integration(jsubint)->get_epoch();
-	if (verbose > 2)
-	  cerr << "FITSArchive::unload_file subint=" << jsubint
-	       << " reference epoch=" << reference_epoch.printdays (13)
-	       << endl;
-	break;
-      }
-  }
 
   if (reference_epoch == MJD::zero && verbose > 1)
     cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
@@ -1155,7 +1160,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 				  const char* hdu_name) const try
 {
   const Ext* extension = get<Ext>();
-  if (extension)
+  if (extension && extension->has_data())
     unload (fptr, extension);
   else
     delete_hdu (fptr, hdu_name);

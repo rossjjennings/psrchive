@@ -17,6 +17,7 @@
 namespace Pulsar {
 
   class PolnProfile;
+  class Profile;
 
   //! Simulated polarimetric pulse profile
   /*! Each function should accept the pulse phase in radians */
@@ -71,6 +72,8 @@ namespace Pulsar {
     
     //! Get the polarimetric profile
     void get_PolnProfile (PolnProfile*);
+
+    static void set_Profile (Profile* profile, MEAL::Univariate<MEAL::Scalar>* function);
 
   protected:
 

@@ -41,6 +41,48 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with LOFAR info
     void LOFAR (Telescope* t);
 
+    //! Initialize the Telescope Extension with DE601 info
+    void DE601 (Telescope* t);
+
+    //! Initialize the Telescope Extension with DE602 info
+    void DE602 (Telescope* t);
+
+    //! Initialize the Telescope Extension with DE603 info
+    void DE603 (Telescope* t);
+
+    //! Initialize the Telescope Extension with DE604 info
+    void DE604 (Telescope* t);
+
+    //! Initialize the Telescope Extension with DE605 info
+    void DE605 (Telescope* t);
+
+    //! Initialize the Telescope Extension with FR606 info
+    void FR606 (Telescope* t);
+
+    //! Initialize the Telescope Extension with SE607 info
+    void SE607 (Telescope* t);
+
+    //! Initialize the Telescope Extension with UK608 info
+    void UK608 (Telescope* t);
+
+    //! Initialize the Telescope Extension with DE609 info
+    void DE609 (Telescope* t);
+
+    //! Initialize the Telescope Extension with PL610 info
+    void PL610 (Telescope* t);
+
+    //! Initialize the Telescope Extension with PL611 info
+    void PL611 (Telescope* t);
+
+    //! Initialize the Telescope Extension with PL612 info
+    void PL612 (Telescope* t);
+
+    //! Initialize the Telescope Extension with IE613 info
+    void IE613 (Telescope* t);
+
+    //! Initialize the Telescope Extension with UTR2 info
+    void UTR2 (Telescope* t);
+
     //! Initialize the Telescope Extension with MeerKAT info
     void MeerKAT (Telescope* t);
 
@@ -67,6 +109,12 @@ namespace Pulsar {
 
     //! Initialize the Telescope Extension with LWA info
     void LWA (Telescope* t);
+
+    //! Initialize the Telescope Extension with CHIME info
+    void CHIME (Telescope* t);
+
+    //! Initialize the Telescope Extension with SRT info
+    void SRT (Telescope* t);
   } 
 
 }

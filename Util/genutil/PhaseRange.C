@@ -34,6 +34,12 @@ std::ostream& Phase::operator << (std::ostream& os, Unit units)
     return os << "rad";
   case Phase::Milliseconds:
     return os << "ms";
+  case Phase::Seconds:
+    return os << "s";
+  case Phase::Minutes:
+    return os << "min";
+  case Phase::Hours:
+    return os << "hr";
   case Phase::Bins:
     return os << "bin";
   default:
@@ -55,6 +61,12 @@ std::istream& Phase::operator >> (std::istream& is, Phase::Unit& units)
     units = Phase::Radians;
   else if (unit == "ms")
     units = Phase::Milliseconds;
+  else if (unit == "s")
+    units = Phase::Seconds;
+  else if (unit == "min")
+    units = Phase::Minutes;
+  else if (unit == "hr")
+    units = Phase::Hours;
   else if (unit == "bin")
     units = Phase::Bins;
   else {

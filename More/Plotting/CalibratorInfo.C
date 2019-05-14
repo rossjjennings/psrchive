@@ -10,6 +10,8 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorStokesInfo.h"
 #include "Pulsar/SolverInfo.h"
+#include "Pulsar/IXRInfo.h"
+
 #include "Pulsar/Archive.h"
 
 using namespace std;
@@ -22,6 +24,7 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
   calibrator_stokes = false;
   calibrator_stokes_degree = false;
   reduced_chisq = false;
+  intrinsic_crosspol_ratio = false;
 
   outlier_threshold = 0.0;
 }
@@ -43,6 +46,9 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
   
   else if (reduced_chisq)
     info = new SolverInfo (new PolnCalibrator(data));
+
+  else if (intrinsic_crosspol_ratio)
+    info = new IXRInfo (new PolnCalibrator(data));
 
   else
     info = CalibratorParameter::get_Info (data, outlier_threshold);
@@ -154,4 +160,9 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
   add( &CalibratorInfo::get_reduced_chisq,
        &CalibratorInfo::set_reduced_chisq,
        "gof", "Plot the model goodness-of-fit" );
+
+  add( &CalibratorInfo::get_intrinsic_crosspol_ratio,
+       &CalibratorInfo::set_intrinsic_crosspol_ratio,
+       "ixr", "Plot the intrinsic cross-polarization ratio");
+
 }

@@ -38,6 +38,10 @@ namespace Pulsar {
 
   };
 
+  std::ostream& operator<< (std::ostream&, SNRatioEstimator*);
+
+  std::istream& operator>> (std::istream&, SNRatioEstimator*&);
+
 }
 
 

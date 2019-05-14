@@ -28,7 +28,7 @@ dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Base/libpsrbase.la \
-	$(top_builddir)/Util/libpsrutil.la
+	$(top_builddir)/Util/libpsrutil.la @EPSIC_LIBS@
 
 LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 

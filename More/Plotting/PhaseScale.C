@@ -61,20 +61,39 @@ void Pulsar::PhaseScale::get_ordinates (const Archive* data,
 
 float Pulsar::PhaseScale::get_scale (const Archive* data) const
 {
-  if (units == Phase::Milliseconds && data != 0)
-    return data->get_Integration(0)->get_folding_period() * 1e3;
+  double period_in_seconds = 1.0;
+  if (data)
+    period_in_seconds = data->get_Integration(0)->get_folding_period();
 
-  else if (units == Phase::Radians)
-    return 2.0 * M_PI;
+  switch (units)
+    {
+    case Phase::Turns:
+      return 1.0;
+      
+    case Phase::Degrees:
+      return 360.0;
 
-  else if (units == Phase::Degrees)
-    return 360.0;
+    case Phase::Bins:
+      return data->get_nbin();
 
-  else if (units == Phase::Bins)
-    return data->get_nbin();
+    case Phase::Milliseconds:
+      return period_in_seconds * 1e3;
 
-  else
-    return 1.0;
+    case Phase::Seconds:
+      return period_in_seconds;
+
+    case Phase::Minutes:
+      return period_in_seconds / 60.0;
+
+    case Phase::Hours:
+      return period_in_seconds / 3600.0;
+
+    case Phase::Radians:
+      return 2.0 * M_PI;
+
+    default:
+      return 1.0;
+    }
 }
 
 //! Get the default label for the x axis
@@ -83,9 +102,12 @@ std::string Pulsar::PhaseScale::get_label () const
   switch (units) {
   case Phase::Turns: return "Pulse Phase";
   case Phase::Degrees: return "Phase (deg.)";
-  case Phase::Radians: return "Phase (rad.)";
-  case Phase::Milliseconds: return "Time (ms)";
   case Phase::Bins: return "Bin Number";
+  case Phase::Milliseconds: return "Time (ms)";
+  case Phase::Seconds: return "Time (s)";
+  case Phase::Minutes: return "Time (min.)";
+  case Phase::Hours: return "Time (hr.)";
+  case Phase::Radians: return "Phase (rad.)";
   default: return "Unknown";
   }
 }

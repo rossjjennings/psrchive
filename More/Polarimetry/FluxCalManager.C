@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2012 by Willem van Straten
+ *   Copyright (C) 2012 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -21,15 +21,17 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 {
   multiple_source_states = false;
   subtract_off_from_on = false;
-
+  StokesV_may_vary = false;
+  
   MEAL::Complex2* response = path->get_transformation();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
 
   //
-  // It must be possible to extract the frontend, so that the temporal
-  // variations applied to pulsar and reference source are not applied
-  // to the flux calibrator
+  // It must be possible to separate the frontend and backend
+  // transformations , so that the temporal variations applied to
+  // pulsar and reference source are not applied to the flux
+  // calibrator
   //
 
   if (!physical)
@@ -51,26 +53,29 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 
 bool Calibration::FluxCalManager::is_constrained () const
 {
-  return observations.size();
+  if (on_observations.size() == 0)
+    return false;
+
+  if (subtract_off_from_on && off_observations.size() == 0)
+    return false;
+
+  return true;
 }
 
 void Calibration::FluxCalManager::add_observation (Signal::Source source_type)
 {
   Reference::To<FluxCalObservation> obs = new FluxCalObservation;
 
+  obs->source_type = source_type;
+  
   add_backend (obs);
   add_source (obs);
 
-  Reference::To<FluxCalPair> pair = new FluxCalPair;
-
-  // TODO: make pairs and add difference to model
-
   if (source_type == Signal::FluxCalOn)
-    pair->on = obs;
-  else if (source_type == Signal::FluxCalOff)
-    pair->off = obs;
+    on_observations.push_back( obs );
 
-  observations.push_back( pair );
+  else if (source_type == Signal::FluxCalOff)
+    off_observations.push_back( obs );  
 }
 
 
@@ -95,42 +100,125 @@ void Calibration::FluxCalManager::add_backend (FluxCalObservation* obs)
     = composite->get_equation()->get_transformation_index ();
 }
 
+Calibration::FluxCalObsVector&
+Calibration::FluxCalManager::get_observations (Signal::Source source_type)
+{
+  if (source_type == Signal::FluxCalOn)
+    return on_observations;
+  if (source_type == Signal::FluxCalOff)
+    return off_observations;
+
+  throw Error (InvalidParam, "Calibration::FluxCalManager::get_observations",
+	       "invalid Signal::Source type=" + tostring(source_type));
+}
+
 void Calibration::FluxCalManager::add_source (FluxCalObservation* obs)
 {
-  Reference::To< SourceEstimate > source;
-
-  if (multiple_source_states || observations.size() == 0)
-  {
-    source = new SourceEstimate;
-
-    source->create_source( composite->get_equation() );
-
-    // set the initial guess
-    Stokes<double> flux_cal_state (1,0,0,0);
+  FluxCalObsVector& observations = get_observations (obs->source_type);
   
-    source->source->set_stokes ( flux_cal_state );
+  if (multiple_source_states || observations.size() == 0)
+    obs->source = create_SourceEstimate (obs->source_type);
+  else
+    obs->source = observations.at(0)->source;
+}
 
+Calibration::SourceEstimate*
+Calibration::FluxCalManager::create_SourceEstimate (Signal::Source source_type)
+{
+  Reference::To<SourceEstimate> source_estimate;
+
+  if (subtract_off_from_on)
+  {
+    if (!standard_candle)
+      standard_candle = new SourceDeltaEstimate;
+
+    if (source_type == Signal::FluxCalOn)
+      source_estimate = standard_candle;
+    else
+      source_estimate = new SourceEstimate;
+  }
+  else
+    source_estimate = new SourceEstimate;
+
+  source_estimate->create_source( composite->get_equation() );
+
+  if (subtract_off_from_on && source_type == Signal::FluxCalOff)
+    standard_candle->set_baseline (source_estimate);
+
+  // set the initial guess
+  Stokes<double> flux_cal_state (1,0,0,0);
+  source_estimate->source->set_stokes ( flux_cal_state );
+
+  if (!StokesV_may_vary && source_type == Signal::FluxCalOn)
+  {
     // parameter index of Stokes V
     const unsigned int StokesV = 3;
 
-    // TODO: on or off? ... does the user want to assume PolnCal[V] = 0?
-    source->source->set_infit ( StokesV, false );
-    source->source->set_Estimate ( StokesV, 0.0);
-
-    string name_prefix = "flux_" + tostring(observations.size()) + "_";
-    source->source->set_param_name_prefix( name_prefix );
+    source_estimate->source->set_infit ( StokesV, false );
+    source_estimate->source->set_Estimate ( StokesV, 0.0 );
   }
+    
+  string name_prefix = "flux_";
+  if (source_type == Signal::FluxCalOn)
+    name_prefix += "on_";
   else
-    // TODO: on or off?
-    source = observations[0]->on->source;
+    name_prefix += "off_";
 
-  obs->source = source;
+  if (multiple_source_states)
+  {
+    FluxCalObsVector& observations = get_observations (source_type);
+    name_prefix += tostring(observations.size()) + "_";
+  }
+
+  source_estimate->source->set_param_name_prefix( name_prefix );
+
+  return source_estimate.release();
+}
+
+void Calibration::FluxCalManager::allow_StokesV_to_vary (bool flag)
+{
+  StokesV_may_vary = flag;
+
+  set_StokesV_infit (on_observations);
+  set_StokesV_infit (off_observations);
+}
+
+void Calibration::FluxCalManager::model_multiple_source_states (bool flag)
+{
+  if (on_observations.size() > 0 || off_observations.size() > 0)
+    throw Error (InvalidState, "FluxCalManager::model_multiple_source_states",
+		 "observations already added; set this flag before adding");
+
+  multiple_source_states = flag;
+}
+
+void Calibration::FluxCalManager::model_on_minus_off (bool flag)
+{
+  if (on_observations.size() > 0 || off_observations.size() > 0)
+    throw Error (InvalidState, "FluxCalManager::model_on_minus_off",
+		 "observations already added; set this flag before adding");
+
+  subtract_off_from_on = flag;
+}
+
+void FluxCalManager::set_StokesV_infit (FluxCalObsVector& observations)
+{
+  // parameter index of Stokes V
+  const unsigned int StokesV = 3;
+
+  for (unsigned i=0; i<observations.size(); i++)
+  {
+    Reference::To< SourceEstimate > source = observations.at(i)->source;
+    source->source->set_infit ( StokesV, StokesV_may_vary );
+  }  
 }
 
 //! Integrate an estimate of the backend
 void FluxCalManager::integrate (Signal::Source type,
 				const MEAL::Complex2* xform)
 {
+  FluxCalObsVector& observations = get_observations (type);
+  
   if (!observations.size())
     throw Error (InvalidState, 
 		 "Calibration::FluxCalManager::integrate",
@@ -140,33 +228,35 @@ void FluxCalManager::integrate (Signal::Source type,
     = dynamic_cast<const Calibration::SingleAxis*> (xform);
 
   if (single)
-    observations.back()->on->backend->estimate.integrate (single);
+    observations.back()->backend->estimate.integrate (single);
 }
 
 void FluxCalManager::integrate (const Jones< Estimate<double> >& correct,
 				const SourceObservation& data)
 {
+  FluxCalObsVector& observations = get_observations (data.source);
+
   if (!observations.size())
     throw Error (InvalidState, 
 		 "Calibration::FluxCalManager::integrate",
 		 "no flux calibration source added to model");
 
   Stokes< Estimate<double> > result = transform( data.baseline, correct );
-  observations.back()->on->source->estimate.integrate (result);
+
+  observations.back()->source->estimate.integrate (result);
 }
 
 
 void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
-			     const Stokes< Estimate<double> >& data)
+			     const SourceObservation& data)
 {
+  FluxCalObsVector& observations = get_observations (data.source);
+   
   if (observations.size() == 0)
     throw Error (InvalidState, "Calibration::FluxCalManager::submit",
 		 "no flux calibration source/backend added to model");
 
-  FluxCalPair* current = observations.back();
-
-  // TODO: on or off?
-  FluxCalObservation* obs = current->on;
+  FluxCalObservation* obs = observations.back();
 
   obs->source->add_data_attempts ++;
 
@@ -174,7 +264,7 @@ void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
   {
     Calibration::CoherencyMeasurement state (obs->source->input_index);
 
-    state.set_stokes( data );
+    state.set_stokes( data.baseline );
     
     measurements.push_back (state);
     
@@ -192,18 +282,44 @@ void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
     }
 }
 
-void Calibration::FluxCalManager::update ()
+unsigned Calibration::FluxCalManager::get_nstate_on () const
 {
-  for (unsigned i=0; i < observations.size(); i++)
-    observations[i]->update ();
+  if (multiple_source_states)
+    return off_observations.size();
+  else
+    return 1;
 }
 
-void Calibration::FluxCalPair::update ()
+const Calibration::SourceEstimate*
+FluxCalManager::get_source_on (unsigned istate) const
 {
-  if (on)
-    on->update();
-  if (off)
-    off->update();
+  return on_observations.at(istate)->source;
+}
+
+
+const Calibration::SourceEstimate*
+FluxCalManager::get_source_off (unsigned istate) const
+{
+  return off_observations.at(istate)->source;
+}
+
+
+//! Get the number of independent FluxCalOff source states
+unsigned Calibration::FluxCalManager::get_nstate_off () const
+{
+  if (multiple_source_states)
+    return off_observations.size();
+  else
+    return 1;
+}
+
+void Calibration::FluxCalManager::update ()
+{
+  for (unsigned i=0; i < on_observations.size(); i++)
+    on_observations[i]->update ();
+
+  for (unsigned i=0; i < off_observations.size(); i++)
+    off_observations[i]->update ();
 }
 
 void Calibration::FluxCalObservation::update ()

@@ -32,6 +32,19 @@
 
 using namespace std;
 
+Pulsar::Option<double>
+Pulsar::PolnCalibrator::minimum_determinant
+(
+ "PolnCalibrator::minimum_determinant", 1e-9,
+
+ "Minimum allowable determinant of a Jones matrix",
+
+ "To avoid unstable inversion of matrices with a determinant close to zero, \n"
+ "any frequency channel with a polarimetric response described by a Jones \n"
+ "matrix with a determinant smaller than this value will be flagged as invalid."
+);
+
+
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
   PolnCalibratorExtension, then the constructed instance can be
@@ -437,11 +450,20 @@ void Pulsar::PolnCalibrator::build_response ()
 
       double normdet = norm(det( transformation[ichan]->evaluate() ));
 
-      if ( normdet < 1e-9 || !finite(normdet) )
+      if ( !finite(normdet) )
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
-	    " faulty response" << endl;
+	    " non-finite determinant" << endl;
+
+	bad[ichan] = true;
+      }
+      else if ( normdet < minimum_determinant )
+      {
+	if (verbose > 2)
+	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
+	    " determinant=" << normdet <<
+	    " less than threshold=" << minimum_determinant << endl;
 
 	bad[ichan] = true;
       }

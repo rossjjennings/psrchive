@@ -50,6 +50,7 @@ nobase_include_HEADERS = \
         Pulsar/FourierSNR.h \
 	Pulsar/FrequencyAppend.h \
         Pulsar/FrequencyIntegrate.h \
+	Pulsar/FscrunchInterpreter.h \
         Pulsar/GaussianBaseline.h \
 	Pulsar/ImageCorrection.h \
 	Pulsar/Index.h \
@@ -168,6 +169,8 @@ libGeneral_la_SOURCES = \
 	Contemporaneity.C \
 	Convolve.C \
 	Correlate.C \
+	StrategySet.C \
+	StrategySetInterface.C \
 	DeleteInterpreter.C \
 	Differentiate.C \
 	DisperseWeight.C \

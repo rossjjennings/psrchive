@@ -13,7 +13,6 @@
 //! Construct from the parent Archive instance
 Pulsar::Integration::Meta::Meta (const Archive* parent)
 {
-
   set_telescope( parent->get_telescope() );
   set_coordinates( parent->get_coordinates() );
 
@@ -170,3 +169,4 @@ void Pulsar::Integration::Meta::set_auxiliary_birefringence_corrected (bool f)
 {
   auxiliary_birefringence_corrected = f;
 }
+

@@ -14,6 +14,7 @@
 #include "pairutil.h"
 #include "Matrix.h"
 
+#include <fstream>
 #include <assert.h>
 
 using namespace std;
@@ -24,6 +25,7 @@ Pulsar::StokesCrossCovariancePlot::StokesCrossCovariancePlot ()
   lags = 4;
   bin = -1;
   max_bin = false;
+  splot_output = false;
 }
 
 TextInterface::Parser* Pulsar::StokesCrossCovariancePlot::get_interface ()
@@ -57,8 +59,7 @@ void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
 
 void Pulsar::StokesCrossCovariancePlot::plot_bin ()
 {
-  unsigned ndim = 10;
-  ndim = 4;
+  unsigned ndim = 4;
   plotter.profiles.resize( ndim );
   plotter.plot_sls.resize( ndim );
   plotter.plot_slw.resize( ndim );
@@ -72,25 +73,45 @@ void Pulsar::StokesCrossCovariancePlot::plot_bin ()
   unsigned npol=4;
 
   for (unsigned ipol=0; ipol < npol; ipol++)
-    //    for (unsigned jpol=ipol; jpol < npol; jpol++)
+    for (unsigned jpol=0; jpol < npol; jpol++)
     {
-      unsigned jpol=ipol;
-      
-      Profile* profile = new Profile(nbin);
-      plotter.profiles[idim] = profile;
-      plotter.plot_sls[idim] = 1;
-      plotter.plot_slw[idim] = 2;
-      idim ++;
+      if (jpol == ipol)
+      {
+	Profile* profile = new Profile(nbin);
+	plotter.profiles[idim] = profile;
+	plotter.plot_sls[idim] = 1;
+	plotter.plot_slw[idim] = 2;
+	idim ++;
     
-      float* amps = profile->get_amps();
+	float* amps = profile->get_amps();
+	
+	for (unsigned ibin=0; ibin < nbin; ibin++)
+	{
+	  Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
+	  amps[ibin] = c[ipol][jpol];
+	}
+      }
 
+      if (!splot_output)
+	continue;
+	 
+      string fname = "xpol_" + tostring(ipol) + "_" + tostring(jpol) + ".dat";
+      ofstream out (fname.c_str());
+
+      int nbin2 = int(nbin)/2;
+      
       for (unsigned ibin=0; ibin < nbin; ibin++)
       {
-	Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
-	amps[ibin] = c[ipol][jpol];
+	for (int ilag=-nbin2; ilag<nbin2; ilag++)
+	{
+	  unsigned jbin = (int(ibin) + ilag + nbin) % nbin;
+	  Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
+	  out << ibin << " " << ilag << " " << c[ipol][jpol] << endl;
+	}
+	out << endl;
       }
     }
-
+  
   assert (idim == ndim);
 }
 
@@ -143,6 +164,10 @@ Pulsar::StokesCrossCovariancePlot::Interface::Interface (StokesCrossCovariancePl
   add( &StokesCrossCovariancePlot::get_max_bin,
        &StokesCrossCovariancePlot::set_max_bin,
        "max", "find phase bin to plot");
+
+  add( &StokesCrossCovariancePlot::get_splot_output,
+       &StokesCrossCovariancePlot::set_splot_output,
+       "splot", "produce text files for splot (bin>0 || max)");
 }
 
 

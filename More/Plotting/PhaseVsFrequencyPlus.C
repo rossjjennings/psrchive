@@ -65,7 +65,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   // remove the x enumeration
   psd.get_frame()->get_x_axis()->rem_opt('N');
   // remove the x label
-  psd.get_frame()->get_x_axis()->set_label("");
+  psd.get_frame()->get_x_axis()->set_label(" ");
   // remove the y enumeration
   //psd.get_frame()->get_y_axis()->rem_opt('N');
   // shorten the y label

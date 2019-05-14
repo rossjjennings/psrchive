@@ -2,6 +2,7 @@
 SUBDIRS =
 
 lib_LTLIBRARIES = libpsrmore.la
+libpsrmore_la_LIBTOOLFLAGS = --tag=CXX
 libpsrmore_la_SOURCES =
 libpsrmore_la_LIBADD =
 
@@ -48,6 +49,8 @@ endif
 if HAVE_PYTHON
 SUBDIRS += python
 endif
+
+libpsrmore_la_LIBADD += @EPSIC_LIBS@
 
 include $(top_srcdir)/config/Makefile.local
 

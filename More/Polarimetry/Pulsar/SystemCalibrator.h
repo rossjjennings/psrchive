@@ -75,6 +75,9 @@ namespace Pulsar
     //! Retern a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
+    //! True if noise diode illuminates feed; false if coupled after OMT
+    void set_refcal_through_frontend (bool flag = true);
+    
     //! Set the flux calibrator solution used to estimate calibrator Stokes
     void set_flux_calibrator (const FluxCalibrator* fluxcal);
 
@@ -128,7 +131,13 @@ namespace Pulsar
 
     //! Add an observational epoch
     virtual void add_epoch (const MJD& epoch);
-    
+   
+    //! Get the epoch of the first observation
+    MJD get_start_epoch () const { return start_epoch; }
+
+    //! Get the epoch of the last observation
+    MJD get_end_epoch () const { return end_epoch; }
+
     //! Set the number of channels that may be simultaneously solved
     virtual void set_nthread (unsigned nthread);
 
@@ -301,6 +310,9 @@ namespace Pulsar
     //! Include a correction for Faraday rotation in the ISM
     bool correct_interstellar_Faraday_rotation;
     
+    //! True if noise diode illuminates feed; false if coupled after OMT
+    bool refcal_through_frontend;
+
     //! Set the initial guess in solve_prepare
     bool set_initial_guess;
 

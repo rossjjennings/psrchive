@@ -1,14 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/StatisticsInterface.h"
 #include "Pulsar/ProfileStatsInterface.h"
+#include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/Archive.h"
 
+using namespace Pulsar;
 using namespace std;
 
 Pulsar::Statistics::Interface::Interface (Statistics* instance)
@@ -33,6 +35,12 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        &Statistics::set_pol,
        "pol", "Polarization index" );
 
+  StrategySet* strategy = 0;
+  if (instance)
+    strategy = instance->get_strategy();
+
+  import( StrategySet::Interface(strategy), &Statistics::get_strategy );
+
   ProfileStats* stats = 0;
   if (instance)
     stats = instance->get_stats();
@@ -47,6 +55,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
     for (unsigned i=0; i < instance->plugins.size(); i++)
       insert ( instance->plugins[i]->get_interface() );
   }
+
+  add( &Statistics::get_peak,
+       "peak", "Phase of pulse peak (turns)" );
 
   add( &Statistics::get_effective_duty_cycle,
        "weff", "Effective pulse width (turns)" );

@@ -191,12 +191,12 @@ void Pulsar::IntegrationManager::unmanage (unsigned isubint)
   the dimension is left unchanged.
 */
 
-void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
+void Pulsar::IntegrationManager::_resize (unsigned nsubint, bool instances)
 {
   unsigned cur_nsub = subints.size();
 
   if (verbose == 3)
-    cerr << "Pulsar::IntegrationManager::resize nsub=" << nsubint
+    cerr << "Pulsar::IntegrationManager::_resize nsub=" << nsubint
 	 << "  old nsub=" << cur_nsub  << endl;
 
   subints.resize (nsubint);
@@ -208,7 +208,7 @@ void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
   set_nsubint (nsubint);
 
   if (verbose == 3)
-    cerr << "Pulsar::IntegrationManager::resize exit" << endl;
+    cerr << "Pulsar::IntegrationManager::_resize exit" << endl;
 }
 
 bool Pulsar::temporal_order (const Reference::To<Integration>& A,

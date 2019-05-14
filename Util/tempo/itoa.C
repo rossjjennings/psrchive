@@ -49,6 +49,7 @@ static int default_aliases ()
   add_alias ("JB", "jodrell");
   add_alias ("JB", "jodrell bank");
   add_alias ("JB", "lovell");
+  add_alias ("J2", "JB_MKII");
 
   add_alias ("VL", "vla");
 
@@ -64,9 +65,15 @@ static int default_aliases ()
   add_alias ("LF", "lofar");
   add_alias ("FL", "FR606");
   add_alias ("DL", "DE601");
+  add_alias ("D2", "DE602");
   add_alias ("D3", "DE603");
+  add_alias ("D4", "DE604");
   add_alias ("D5", "DE605");
   add_alias ("UL", "UK608");
+  add_alias ("D9", "DE609");
+  add_alias ("P0", "PL610");
+  add_alias ("P1", "PL611");
+  add_alias ("P2", "PL612");
 
   add_alias ("WT", "wsrt");
   add_alias ("WT", "westerbork");
@@ -88,6 +95,8 @@ static int default_aliases ()
   add_alias ("MK", "meerkat");
   add_alias ("MK", "MeerKAT");
   add_alias ("MK", "MEERKAT");
+
+  add_alias ("CH", "chime");
 
   return 1;
 }

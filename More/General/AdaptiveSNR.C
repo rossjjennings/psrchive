@@ -8,7 +8,7 @@
 #include "Pulsar/AdaptiveSNR.h"
 #include "Pulsar/ProfileWeightFunction.h"
 #include "Pulsar/PhaseWeight.h"
-#include "Pulsar/Profile.h"
+#include "Pulsar/ProfileStrategies.h"
 
 #include <math.h>
 
@@ -37,7 +37,7 @@ Pulsar::AdaptiveSNR::get_baseline_estimator () const
   if (baseline_estimator)
     return baseline_estimator;
   else
-    return Profile::baseline_strategy.get_value();
+    return StrategySet::default_baseline.get_value();
 }
 
 //! Return the signal to noise ratio
@@ -86,6 +86,7 @@ public:
 
     add( &AdaptiveSNR::get_baseline_estimator,
          &AdaptiveSNR::set_baseline_estimator,
+	 &ProfileWeightFunction::get_interface,
          "baseline", "algorithm used to locate the off-pulse baseline" );
 
   }

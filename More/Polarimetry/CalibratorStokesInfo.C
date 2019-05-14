@@ -1,13 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003 - 2018 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/CalibratorStokesInfo.h"
 #include "Pulsar/CalibratorStokes.h"
 
-#include <string.h>
+#include <assert.h>
 
 //! Constructor
 Pulsar::CalibratorStokesInfo::CalibratorStokesInfo (const CalibratorStokes* cs)
@@ -40,18 +41,18 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
 //! Return the name of the specified class
 std::string Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
 {
-  static char label [64] = "\\fiC\\fr\\dk\\u (\%\\fiC\\fr\\d0\\u)";
-  static char* replace = strchr (label, 'k');
-
   // degree of polarization
   if (degree && iclass == 3)
     return "|\\fiC\\fr| (\%\\fiC\\fr\\d0\\u)";
   
-  if (together)
-    *replace = 'k';
-  else
-    *replace = '1' + iclass;
-
+  std::string label = "\\fiC\\fr\\dk\\u (\%\\fiC\\fr\\d0\\u)";
+  if (!together)
+  {
+    std::string::size_type index = label.find('k');
+    assert (index != std::string::npos);
+    label[index] = '1' + iclass;
+  }
+  
   return label;
 }
 

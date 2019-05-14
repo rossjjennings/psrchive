@@ -25,7 +25,7 @@ TextInterface::Parser* Pulsar::StokesCovariancePlot::get_interface ()
   return new Interface (this);
 }
 
-void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data)
+void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data) try
 {
 
   if (verbose)
@@ -156,7 +156,10 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data)
 
 }
 
-
+ catch (Error& error)
+   {
+     throw error += "Pulsar::StokesCovariancePlot::get_profiles";
+   }
 
 
 

@@ -33,8 +33,8 @@ ThreadContext::ThreadContext ()
 ThreadContext::~ThreadContext ()
 {
 #if HAVE_PTHREAD
-  delete cond;
-  delete mutex;
+  delete reinterpret_cast<pthread_cond_t*>(cond);
+  delete reinterpret_cast<pthread_mutex_t*>(mutex);
 #endif
 }
 

@@ -26,16 +26,14 @@ extern float width (const Pulsar::Profile* profile,
 
 double Pulsar::PhaseWidth::get_width_turns (const Profile* profile)
 {
-  return width (profile, error, fraction_of_maximum*100, baseline_duty_cycle);
-}
+  baseline_duty_cycle.set_nbin( profile->get_nbin() );
+  error.set_nbin( profile->get_nbin() );
 
-void Pulsar::PhaseWidth::set_baseline_duty_cycle (float x)
-{
-  if (!(x>0 && x<1))
-    throw Error (InvalidParam, "Pulsar::PhaseWidth::set_baseline_duty_cycle",
-		 "duty cycle=%f must be >0 and <1", x);
+  float error_tmp;
+  return width (profile, error_tmp, fraction_of_maximum*100,
+		baseline_duty_cycle.get_as(Phase::Turns));
 
-  baseline_duty_cycle = x;
+  error.set_value( error_tmp );
 }
 
 void Pulsar::PhaseWidth::set_fraction_of_maximum (float x)
@@ -68,7 +66,7 @@ public:
 	 "error", "Error in last width estimate" );
   }
 
-  std::string get_interface_name () const { return "phase"; }
+  std::string get_interface_name () const { return "transitions"; }
 };
 
 

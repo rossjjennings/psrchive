@@ -21,7 +21,7 @@
 
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/IntegrationExpert.h"
-#include "Pulsar/Profile.h"
+#include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/ProcHistory.h"
 
 #include "Error.h"
@@ -420,7 +420,7 @@ void paz::setup ()
     thestd = data->get_Profile (0, 0, 0);
     
     standard_snr.set_standard (thestd);
-    Pulsar::Profile::snr_strategy = new Pulsar::StandardSNR;
+    Pulsar::StrategySet::default_snratio = new Pulsar::StandardSNR;
   }
 }
 
@@ -615,7 +615,7 @@ void paz::process (Pulsar::Archive* arch)
     vector<float> mask (nchan, 1.0);
     for (unsigned i = 0; i < chans_to_zero.size (); i++)
     {
-      if (chans_to_zero[i] >= nchan || chans_to_zero[i] < 0)
+      if (chans_to_zero[i] >= nchan)
         throw Error (InvalidRange, "paz::process",
             "channel %d is out of range (nchan=%d)",
            chans_to_zero[i], nchan); 
@@ -642,14 +642,14 @@ void paz::process (Pulsar::Archive* arch)
 	  - chan_bw/2.0;
 	chan.hi=arch->get_Integration(0)->get_centre_frequency(ic) 
 	  + chan_bw/2.0;
-	if (chan.lo > freq_ranges_to_zero[i].lo 
-	    && chan.lo < freq_ranges_to_zero[i].hi)
-	  mask[ic] = 0.0;
-	else if (chan.hi > freq_ranges_to_zero[i].lo 
-		 && chan.hi < freq_ranges_to_zero[i].hi)
-	  mask[ic] = 0.0;
-	else if (freq_ranges_to_zero[i].lo > chan.lo 
-		 && freq_ranges_to_zero[i].lo < chan.hi)
+
+	/*
+	  much simpler overlap logic fixes bug #422: 
+	  "paz -F fails when frequency range exactly matches single channel" 
+	*/
+
+	if (freq_ranges_to_zero[i].hi > chan.lo &&
+	    freq_ranges_to_zero[i].lo < chan.hi)
 	  mask[ic] = 0.0;
       }
     }

@@ -51,6 +51,9 @@ namespace Pulsar {
     //! Get the number of bands
     unsigned get_nband () const;
 
+    //! Return true if nchan * npol * nband != 0
+    bool has_data () const;
+
     //! Set the number of channels, polarizations, and bands
     void resize (unsigned nchan, unsigned npol, unsigned nband=1);
 

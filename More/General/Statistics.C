@@ -10,6 +10,7 @@
 
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ProfileShiftFit.h"
+#include "Pulsar/ProfileStrategies.h"
 
 #include "Pulsar/SNRatioEstimator.h"
 #include "Pulsar/PhaseWidth.h"
@@ -98,6 +99,15 @@ Pulsar::Index Pulsar::Statistics::get_pol () const
   return ipol;
 }
 
+Pulsar::StrategySet* Pulsar::Statistics::get_strategy () const try
+{
+    return get_Archive()->get_strategy();
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::Statistics::get_strategy";
+   }
+
 //! Set the signal-to-noise ratio estimator
 void Pulsar::Statistics::set_snr_estimator (const std::string& name)
 {
@@ -118,7 +128,14 @@ TextInterface::Parser* Pulsar::Statistics::get_snr_interface ()
   if (snr_estimator)
     return snr_estimator->get_interface();
   else
-    return Profile::snr_strategy.get_value()->get_interface();
+    return StrategySet::default_snratio.get_value()->get_interface();
+}
+
+Phase::Value Pulsar::Statistics::get_peak () const
+{
+  Phase::Value width = get_Profile()->find_max_phase();
+  set_period (width);
+  return width;
 }
 
 //! Set the pulse width estimator

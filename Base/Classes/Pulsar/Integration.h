@@ -13,6 +13,7 @@
 
 #include "Pulsar/Pulsar.h"
 #include "Pulsar/Container.h"
+#include "Pulsar/ProfileStrategies.h"
 
 #include "MJD.h"
 #include "Types.h"
@@ -26,7 +27,6 @@ template<typename T> class Stokes;
 
 namespace Pulsar {
 
-  class Profile;
   class PolnProfile;
   class PhaseWeight;
   class Archive;
@@ -369,7 +369,10 @@ namespace Pulsar {
     //! Provide access to the expert interface
     Expert* expert ();
     const Expert* expert () const;
-    
+
+    //! Returns the strategy manager
+    Profile::Strategies* get_strategy() const;
+
   protected:
 
     // //////////////////////////////////////////////////////////////////

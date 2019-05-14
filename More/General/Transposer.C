@@ -150,7 +150,7 @@ void Pulsar::Dimensions::set_if_zero (unsigned ndim)
   if (!nsub) nsub = ndim;
   if (!npol) npol = ndim;
   if (!nchan) nchan = ndim;
-  if (!nbin) nbin = nbin;
+  if (!nbin) nbin = ndim;
 }
 
 unsigned Pulsar::Dimensions::get_ndim (Signal::Dimension axis) const

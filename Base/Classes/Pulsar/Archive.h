@@ -27,7 +27,6 @@ template<typename T> class Jones;
 
 namespace Pulsar
 {
-
   class Receiver;
   class Integration;
   class Profile;
@@ -36,6 +35,8 @@ namespace Pulsar
   class Predictor;
   class Parameters;
 
+  class StrategySet;
+  
   //! The primary interface to pulsar observational data
   /*! This virtual base class implements the primary interface to pulsar
     observational data, including the pulse profiles, integrations, and all
@@ -563,6 +564,9 @@ namespace Pulsar
     //! The default baseline removal strategy
     static Functor< void (Archive*) > remove_baseline_strategy;
 
+    //! Returns the strategy manager
+    StrategySet* get_strategy() const;
+
   protected:
 
     friend class Expert;
@@ -677,6 +681,9 @@ namespace Pulsar
 
     //! The Extensions added to this Archive instance
     mutable std::vector< Reference::To<Extension> > extension;
+
+    //! Strategies used by all Profile instances contained by this instance
+    mutable Reference::To<StrategySet> strategy;
 
     //! Store the name of the file from which the current instance was loaded
     /*! Although the logical name of the file may be changed with

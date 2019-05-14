@@ -60,10 +60,10 @@ namespace Pulsar {
     Profile (unsigned nbin = 0);
 
     //! copy constructor
-    Profile (const Profile& profile) { init(); copy (&profile); }
+    Profile (const Profile& profile);
 
     //! copy constructor
-    Profile (const Profile* profile) { init(); copy (profile); }
+    Profile (const Profile* profile);
 
     //! destructor
     ~Profile ();
@@ -165,19 +165,17 @@ namespace Pulsar {
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall) const;
-    
-    typedef Reference::To<ProfileWeightFunction> Mask;
-    //! The default implementation of the baseline finding algorithm
-    static Option<Mask> baseline_strategy;
 
+    class Strategies;
+
+    //! Returns the strategy manager
+    Strategies* get_strategy() const;
+
+    //! Set the strategy manager
+    void set_strategy (Strategies*);
+    
     //! Return a new PhaseWeight instance with the baseline phase bins masked
     PhaseWeight* baseline () const;
-
-    //! The default implementation of the onpulse finding algorithm
-    static Option<Mask> onpulse_strategy;
-
-    //! The default implementation of the snr method
-    static Option< Reference::To<SNRatioEstimator> > snr_strategy;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
@@ -287,6 +285,9 @@ namespace Pulsar {
 
     //! The Extensions added to this Profile instance
     mutable std::vector< Reference::To<Extension> > extension;
+
+    //! The strategy manager
+    mutable Reference::To<Strategies> strategy;
   };
 
 }
