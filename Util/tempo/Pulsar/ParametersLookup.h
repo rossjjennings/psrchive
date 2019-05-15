@@ -23,6 +23,9 @@ namespace Pulsar {
     //! Default constructor
     Lookup ();
 
+    //! Return a single parameter from the catalogue
+    std::string get_param (const std::string& param, const std::string name) const;
+
     //! Factory returns new Parameters for specified pulsar name
     Parameters* operator() (const std::string& psrname) const;
 

@@ -11,6 +11,7 @@
 #include "T2Predictor.h"
 
 #include "Pulsar/Parameters.h"
+#include "Pulsar/ParametersLookup.h"
 
 #include "TemporaryDirectory.h"
 #include "DirectoryLock.h"
@@ -91,6 +92,27 @@ Tempo2::Generator::~Generator ()
 void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
 {
   parameters = p;
+
+  // lookup optional parameters for Tempo2 generators
+  Pulsar::Parameters::Lookup lookup;
+
+  string pulsar = parameters->get_value("PSRJ");
+
+  string param = lookup.get_param ("ntcoef", pulsar);
+  unsigned ntcoef = atoi (param.c_str());
+  if (param.compare("*") != 0 && ntcoef > 0 && ntcoef < 32)
+    set_time_ncoeff (ntcoef);
+
+  param = lookup.get_param ("nfcoef", pulsar);
+  unsigned nfcoef = atoi (param.c_str());
+  if (param.compare("*") != 0 && nfcoef > 0 && nfcoef < 32)
+    set_frequency_ncoeff (nfcoef);
+
+  // catalog stores this in seconds, convert to days
+  param = lookup.get_param ("predlen", pulsar);
+  double predlen = atof (param.c_str()) / 86400;
+  if (param.compare("*") != 0 && predlen > 0 && predlen < 1)
+    set_segment_length (predlen);
 }
 
 //! Set the range of epochs over which to generate
