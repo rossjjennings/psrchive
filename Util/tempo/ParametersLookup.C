@@ -71,9 +71,11 @@ string Pulsar::Parameters::Lookup::get_param (const string& param, const string 
   if (name[0] == 'J' || name[0] == 'B')
     psr_name.erase (0,1);
 
+  string command;
+
 #ifdef HAVE_PSRCAT
   string catalogue = "psrcat";
-  string command = catalogue;
+  command = catalogue;
 
   if (getenv("PSRCAT_RUNDIR") != 0)
     command += " -all ";
