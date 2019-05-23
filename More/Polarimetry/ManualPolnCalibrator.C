@@ -114,12 +114,24 @@ void Pulsar::ManualPolnCalibrator::calibrate (Archive* arch) try
       {
         //response[isub][ichan] = inv(best_match[ichan].get_response());
         response[isub][ichan] = inv((best_match.at(ichan)).get_response());
+
+#if 0
+
+DISABLED by Willem on 23 May 2019
+
+The same effect can be achieved by negating j11 and j01 in the text file input to pac -Q
+
+This also negates the determinant, but this doesn't matter.
+
         // Multiply first column of resulting (inverted) Jones matrix changes sign of Stokes U and V.
         if (site != "MeerKAT")
         {
           response[isub][ichan].j00 *= -1.;
           response[isub][ichan].j10 *= -1.;
         }
+
+#endif
+
         //cout << "response[" << isub << "][" << ichan << "].j00 " << response[isub][ichan].j00 << \
                 " response[" << isub << "][" << ichan << "].j01 " << response[isub][ichan].j01 << \
                 " response[" << isub << "][" << ichan << "].j10 " << response[isub][ichan].j10 << \
