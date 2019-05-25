@@ -3,9 +3,8 @@
         call smooth_mmw(pr,nbin,1,maxwidth,rmsp,kwmax,snrmax,smmax,wk)
       end
 
-      subroutine smooth_mmw(pr,nbin,minwidth,maxwidth, rmsp,kwmax,
-     &   snrmax
-     &   ,smmax,wrk)
+      subroutine smooth_mmw(pr,nbin,minwidth,maxwidth,rmsp,kwmax,
+     &   snrmax,smmax,wrk)
 c******************************************************************
 c
 c  convolves profile pr(nbin) with a boxcar of width kw.  it returns
@@ -126,14 +125,4 @@ C          write(*,*) ' QQ snrmax now ',snrmax, ' kwmax ', kwmax
 C 70   write(*,*) 'Best width : ',kwmax, ' Best SNR : ', snrmax
  70   continue
       end
-
-C rte old interface
-      subroutine smooth(pr,nbin, rmsp,kwmax,snrmax,smmax)
-      integer nbin,kwmax, maxwidth
-      real*4 pr(*),rmsp,snrmax,smmax
-      
-      call smooth_mmw(pr,nbin,1, 32, rmsp,kwmax,snrmax,smmax)
-      end
-
-
 
