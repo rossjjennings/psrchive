@@ -2,7 +2,9 @@
 SUBDIRS                 = units third genutil fft
 
 lib_LTLIBRARIES         = libpsrutil.la
+
 libpsrutil_la_SOURCES  =
+libpsrutil_la_LIBTOOLFLAGS = --tag=CXX
 libpsrutil_la_LIBADD   = third/libthird.la units/libunits.la fft/libpsrfft.la \
 			genutil/libgenutil.la tempo/libtempo.la @EPSIC_LIBS@ @FLIBS@
 

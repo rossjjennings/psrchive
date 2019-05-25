@@ -72,7 +72,10 @@ namespace Pulsar {
 
     //! Get the text interface of the pulse width estimator   
     TextInterface::Parser* get_pulse_width_interface ();
-    
+   
+    //! Get the phase of the pulse peak
+    Phase::Value get_peak () const;
+ 
     //! Get the effective duty cycle
     double get_effective_duty_cycle () const;
 

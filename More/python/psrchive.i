@@ -30,9 +30,6 @@
 #include "Pulsar/ArrivalTime.h"
 
 #include "Pulsar/ProfileShiftFit.h"
-
-#include "Pulsar/WaveletSmooth.h"
-
 #include "Pulsar/Append.h"
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/FrequencyAppend.h"
@@ -53,6 +50,10 @@
 
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
+#endif
+
+#if HAVE_GSL
+#include "Pulsar/WaveletSmooth.h"
 #endif
 
 // For some reason SWIG is not picking up the namespace for the emitted
@@ -238,7 +239,11 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TextParameters.h"
 %include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
+
+#if HAVE_GSL
 %include "Pulsar/WaveletSmooth.h"
+#endif
+
 %include "Pulsar/Append.h"
 %include "Pulsar/TimeAppend.h"
 %include "Pulsar/FrequencyAppend.h"

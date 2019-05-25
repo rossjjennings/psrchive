@@ -50,6 +50,7 @@ nobase_include_HEADERS = \
         Pulsar/FourierSNR.h \
 	Pulsar/FrequencyAppend.h \
         Pulsar/FrequencyIntegrate.h \
+	Pulsar/FscrunchInterpreter.h \
         Pulsar/GaussianBaseline.h \
 	Pulsar/ImageCorrection.h \
 	Pulsar/Index.h \

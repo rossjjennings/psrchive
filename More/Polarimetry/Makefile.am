@@ -37,6 +37,7 @@ nobase_include_HEADERS = \
 	Pulsar/InstrumentInfo.h \
         Pulsar/IonosphereCalibrator.h \
         Pulsar/IRIonosphere.h \
+	Pulsar/IXRInfo.h \
         Pulsar/ManualPolnCalibrator.h \
         Pulsar/MeanCoherency.h \
         Pulsar/MeanFeed.h \
@@ -53,6 +54,7 @@ nobase_include_HEADERS = \
         Pulsar/PolarCalibrator.h \
         Pulsar/Polarization.h \
         Pulsar/PolnCalibrator.h \
+	Pulsar/PolnCalExtFreqIntegrate.h \
         Pulsar/PolnProfile.h \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfileFitAnalysis.h \
@@ -89,6 +91,7 @@ nobase_include_HEADERS = \
 	Pulsar/StokesCovariance.h Pulsar/StokesCrossCovariance.h \
         Pulsar/SystemCalibrator.h \
 	Pulsar/SystemCalibratorUnloader.h \
+	Pulsar/UnloadJones.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
 	Pulsar/VariationInfo.h
@@ -136,6 +139,7 @@ libPolarimetry_la_SOURCES = \
 	InputDataReport.C \
         IonosphereCalibrator.C \
         IRIonosphere.C \
+	IXRInfo.C \
 	ManualPolnCalibrator.C \
         MeanCoherency.C \
         MeanFeed.C \
@@ -155,6 +159,7 @@ libPolarimetry_la_SOURCES = \
         PolnCalibrator.C \
         PolnCalibratorExt.C \
         PolnCalibratorInfo.C \
+	PolnCalExtFreqIntegrate.C \
         PolnProfile.C \
         PolnProfileFit.C \
         PolnProfileFitAnalysis.C \
@@ -190,6 +195,7 @@ libPolarimetry_la_SOURCES = \
 	StokesCovariance.C StokesCrossCovariance.C \
         SystemCalibrator.C \
 	SystemCalibratorUnloader.C \
+	UnloadJones.C \
         TemplateUncertainty.C \
         TotalCovariance.C \
 	VariationInfo.C
@@ -240,7 +246,7 @@ test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 LDADD = libPolarimetry.la \
 	$(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/Base/libpsrbase.la \
-	$(top_builddir)/Util/libpsrutil.la
+	$(top_builddir)/Util/libpsrutil.la @EPSIC_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
 

@@ -157,6 +157,9 @@ namespace Pulsar
     // Correct error due to REF_MJD precision
     void refmjd_rounding_correction();
 
+    //! Indicate the FITSArchive contains search mode data
+    void set_search_mode() { search_mode = true; };
+
   protected:
 
     class SKLoader;

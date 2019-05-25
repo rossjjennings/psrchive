@@ -97,7 +97,7 @@ void Pulsar::SyntheticPolnProfile::set_circular (Univariate<Scalar>* f)
   circular = f;
 }
 
-void set_Profile (Pulsar::Profile* profile, Univariate<Scalar>* function)
+void Pulsar::SyntheticPolnProfile::set_Profile (Pulsar::Profile* profile, Univariate<Scalar>* function)
 {
   unsigned nbin = profile->get_nbin();
 

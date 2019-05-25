@@ -94,6 +94,9 @@ namespace Pulsar {
     //! Get the transformation for the specified frequency channel
     const Transformation* get_transformation (unsigned c) const;
 
+    void fscrunch (unsigned factor = 0);
+    void fscrunch_to_nchan (unsigned new_nchan);
+
   protected:
 
     //! The instrumental response as a function of frequency

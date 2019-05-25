@@ -13,6 +13,10 @@
 
 #include "Pulsar/InterpreterExtension.h"
 #include "Pulsar/Calibrator.h"
+
+#include "Pulsar/FscrunchInterpreter.h"
+#include "Pulsar/PolnCalExtFreqIntegrate.h"
+
 #include "MEAL/Complex2.h"
 
 namespace Pulsar {
@@ -31,6 +35,9 @@ namespace Pulsar {
 
     //! Destructor
     ~CalInterpreter ();
+
+    //! perform the backend convention corrections
+    std::string backend (const std::string& arg);
 
     // calibrate the current top of the stack using the current state
     std::string cal (const std::string& args);
@@ -53,6 +60,9 @@ namespace Pulsar {
     //! normalize profiles by absolute gain
     std::string set_gain (const std::string& arg);
 
+    //! frequency integrate the loaded PolnCalibrator
+    std::string fscrunch (const std::string& arg);
+
   protected:
 
     //! The type of calibrator to be used
@@ -72,6 +82,9 @@ namespace Pulsar {
 
     //! The transformation to be applied
     Reference::To<MEAL::Complex2> transformation;
+
+    //! Manages fscrunch interpretation
+    FscrunchInterpreter<PolnCalExtFreqIntegrate> fscruncher;
 
   };
 

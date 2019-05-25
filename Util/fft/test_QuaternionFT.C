@@ -4,8 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "QuaternionFT.h"
 #include "random.h"
+#include "Error.h"
 
 using namespace std;
 

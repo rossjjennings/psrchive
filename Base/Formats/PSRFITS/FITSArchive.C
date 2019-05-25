@@ -962,7 +962,12 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   else if (get_type() == Signal::Calibrator)
     obs_mode = "PCM";
   else
-    obs_mode = "UNKNOWN";
+  {
+    if (search_mode)
+      obs_mode = "SEARCH";
+    else
+      obs_mode = "UNKNOWN";
+  }
   
   psrfits_update_key (fptr, "OBS_MODE", obs_mode);
 

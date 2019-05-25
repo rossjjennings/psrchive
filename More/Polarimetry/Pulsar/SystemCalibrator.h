@@ -131,7 +131,13 @@ namespace Pulsar
 
     //! Add an observational epoch
     virtual void add_epoch (const MJD& epoch);
-    
+   
+    //! Get the epoch of the first observation
+    MJD get_start_epoch () const { return start_epoch; }
+
+    //! Get the epoch of the last observation
+    MJD get_end_epoch () const { return end_epoch; }
+
     //! Set the number of channels that may be simultaneously solved
     virtual void set_nthread (unsigned nthread);
 
