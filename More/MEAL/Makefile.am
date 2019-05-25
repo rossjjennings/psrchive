@@ -135,6 +135,7 @@ libMEAL_la_SOURCES = \
         Argument.C \
         ArgumentPolicy.C \
 	besrat.f \
+	bessi0.c \
 	vkappa.f \
         BinaryScalar.C \
         Boost.C \
@@ -233,7 +234,7 @@ TESTS = \
 	test_Invariant test_CyclicParameter test_Univariate		 \
 	test_StokesError test_StokesCovariance test_Vectorize		 \
 	test_UnitTangent test_ComplexCorrelation	 \
-	test_Spinor test_CrossCoherency test_JonesMueller
+	test_Spinor test_CrossCoherency test_JonesMueller test_bessi0
 
 check_PROGRAMS = $(TESTS) test_Function_load 
 
