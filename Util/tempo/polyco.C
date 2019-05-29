@@ -614,7 +614,7 @@ bool polyco::matches (const Predictor* other) const
     get_dm() == like->get_dm();
 }
 
-void polyco::set_observing_frequency (long double MHz)
+void polyco::set_observing_frequency (long double)
 {
 }
 

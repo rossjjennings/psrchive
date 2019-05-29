@@ -38,7 +38,7 @@ std::string Pulsar::Parameters::get_name () const
 }
 
 //! Retrieve a string from the text
-std::string Pulsar::Parameters::get_value (const std::string& keyword) const
+std::string Pulsar::Parameters::get_value (const std::string&) const
 {
   throw Error (InvalidState, "Pulsar::Parameters::get_value",
 	       "not implemented");

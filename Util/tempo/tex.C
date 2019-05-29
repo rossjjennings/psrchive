@@ -166,7 +166,7 @@ string psrephem::tex_name () const
 
 // outputs a LaTex formatted string for the value
 // indexed by 'ephi' (as in ephio.h)
-string psrephem::tex_val (int ephi, double fac, unsigned precision) const
+string psrephem::tex_val (int ephi, double fac, unsigned /* precision */) const
 {
   if (!buf) {
     buf = new char[bufsz];
@@ -485,7 +485,7 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
   retval += "Characteristic age, $\\tau_c$ (Gyr)";
   for (ip=0; ip<vals.size(); ip++)
   {
-    double char_age, char_age_err;
+    double char_age, char_age_err = 0.0;
     vals[ip].characteristic_age (char_age, char_age_err);
     retval += bw + tex_double (char_age, char_age_err);
   }

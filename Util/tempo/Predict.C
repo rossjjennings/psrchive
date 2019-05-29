@@ -28,10 +28,10 @@
 using namespace std;
 
 LAZY_GLOBAL(Tempo::Predict, \
-	    Configuration::Parameter<unsigned>,	minimum_nspan, 0);
+	    Configuration::Parameter<unsigned>,	minimum_nspan, 0)
 
 LAZY_GLOBAL(Tempo::Predict, \
-	    Configuration::Parameter<double>, maximum_rms, 0.0);
+	    Configuration::Parameter<double>, maximum_rms, 0.0)
 
 static Warning warn;
 

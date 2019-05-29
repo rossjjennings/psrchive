@@ -106,7 +106,7 @@ Tempo::ObservatoryIAU1976::ObservatoryIAU1976 (double alat,
   lat = atan2 (aa_arsf,aa_arcf);
   lon = alon;
   rad = sqrt(aa_arcf*aa_arcf+aa_arsf*aa_arsf);
-};
+}
 
 //! Get the geocentric XYZ coordinates in metres
 void Tempo::ObservatoryIAU1976::get_xyz (double& x, double& y, double& z) const
@@ -122,7 +122,7 @@ void Tempo::ObservatoryIAU1976::get_sph (double& _lat,
 					 double& _rad) const
 {
   _lat = lat; _lon = lon; _rad = rad;
-};
+}
 
 
 const Tempo::Observatory*

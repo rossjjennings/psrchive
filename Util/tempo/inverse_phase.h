@@ -122,6 +122,6 @@ namespace Pulsar {
 
 
  
-};
+}
 
 #endif

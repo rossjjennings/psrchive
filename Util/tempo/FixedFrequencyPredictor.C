@@ -54,16 +54,16 @@ Pulsar::Phase Pulsar::FixedFrequencyPredictor::phase (const MJD& t) const {
   return to_Phase(prod);
 }
 
-MJD Pulsar::FixedFrequencyPredictor::iphase (const Pulsar::Phase& phase, const MJD* guess) const {
+MJD Pulsar::FixedFrequencyPredictor::iphase (const Pulsar::Phase& phase, const MJD*) const {
   MJD days = phase / m_freq;
   return days + m_epoch;
 }
 
-long double Pulsar::FixedFrequencyPredictor::frequency (const MJD& t) const {
+long double Pulsar::FixedFrequencyPredictor::frequency (const MJD&) const {
   return m_freq;
 }
 
 //! Return the phase correction for dispersion delay
-Pulsar::Phase Pulsar::FixedFrequencyPredictor::dispersion (const MJD &t, long double MHz) const {
+Pulsar::Phase Pulsar::FixedFrequencyPredictor::dispersion (const MJD&, long double) const {
   return to_Phase(0.);
 }
