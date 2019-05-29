@@ -5,17 +5,19 @@ nobase_include_HEADERS = Pulsar/SimplePredictor.h Pulsar/GeneratorInterpreter.h
 
 libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
 	Parameters_children.C Predictor_children.C Site_location.C \
-	GeneratorInterpreter.C Generator_factory.C
+	GeneratorInterpreter.C Generator_factory.C \
+	ParametersLookup_operator.C
 
 bin_PROGRAMS = getHorizon toaio
 
 getHorizon_SOURCES = getHorizon.C
 toaio_SOURCES = toaio.C
 
-check_PROGRAMS = test_Parameters_factory test_Predictor_factory
+check_PROGRAMS = test_Parameters_factory test_Predictor_factory test_Predictor
 
 test_Parameters_factory_SOURCES = test_Parameters_factory.C
 test_Predictor_factory_SOURCES = test_Predictor_factory.C
+test_Predictor_SOURCES = test_Predictor.C
 
 #############################################################################
 #
@@ -35,6 +37,8 @@ LDADD += $(top_builddir)/Util/tempo/libtempo.la
 if HAVE_TEMPO2
   LDADD += $(top_builddir)/Util/tempo2/libtempo_2.la
 endif
+
+LDADD += $(top_builddir)/Util/tempo/libtempo.la
 
 LDADD += $(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
