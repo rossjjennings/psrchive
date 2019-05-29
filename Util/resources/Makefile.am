@@ -1,12 +1,12 @@
 
 noinst_LTLIBRARIES = libresources.la
 
-nobase_include_HEADERS = Pulsar/SimplePredictor.h Pulsar/GeneratorInterpreter.h
+nobase_include_HEADERS = Pulsar/SimplePredictor.h Pulsar/GeneratorInterpreter.h toa.h
 
 libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
 	Parameters_children.C Predictor_children.C Site_location.C \
 	GeneratorInterpreter.C Generator_factory.C \
-	ParametersLookup_operator.C
+	ParametersLookup_operator.C toa.C fit.C
 
 bin_PROGRAMS = getHorizon toaio
 
@@ -27,12 +27,6 @@ include $(top_srcdir)/config/Makefile.include
 AM_CPPFLAGS += @TEMPO2_CFLAGS@
 
 LDADD = libresources.la
-
-if HAVE_TEMPO2
-  LDADD += $(top_builddir)/Util/tempo2/libtempo_2.la
-endif
-
-LDADD += $(top_builddir)/Util/tempo/libtempo.la
 
 if HAVE_TEMPO2
   LDADD += $(top_builddir)/Util/tempo2/libtempo_2.la
