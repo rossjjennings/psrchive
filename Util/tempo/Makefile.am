@@ -6,7 +6,7 @@ nobase_include_HEADERS = Pulsar/Predictor.h Pulsar/Parameters.h \
 	Pulsar/ParametersLookup.h Pulsar/FixedFrequencyPredictor.h
 
 include_HEADERS = psrephem.h ephio_func.h psrephem_orbital.h \
-	polyco.h Phase.h toa.h residual.h resio.h tempo++.h Predict.h \
+	polyco.h Phase.h residual.h resio.h tempo++.h Predict.h \
 	inverse_phase.h Observatory.h
 
 nodist_include_HEADERS = ephio.h
@@ -14,8 +14,8 @@ nodist_include_HEADERS = ephio.h
 libtempo_la_SOURCES = keys.dat ephio_c.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C psrephem_orbital.C \
 	getlun.f length.f posparse.f strmatch.f upcase.f zeropad.f \
-	polyco.C Phase.C toa.C residual.C resio.f \
-	tempo++.C Predict.C fit.C inverse_phase.C \
+	polyco.C Phase.C residual.C resio.f \
+	tempo++.C Predict.C inverse_phase.C \
 	Observatory.C obsys.C itoa.C tempo_impl.h \
 	Parameters.C TextParameters.C ParametersLookup.C \
 	Predictor.C FixedFrequencyPredictor.C
@@ -72,7 +72,7 @@ LDADD = libtempo.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += -I$(top_srcdir)/Util/tempo2 @CFITSIO_CFLAGS@
+# AM_CPPFLAGS += -I$(top_srcdir)/Util/tempo2 @CFITSIO_CFLAGS@
 
 #
 # builddir != srcdir fix: g77 version 3 looks for header files
