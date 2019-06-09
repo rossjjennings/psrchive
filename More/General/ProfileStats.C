@@ -6,10 +6,13 @@
  ***************************************************************************/
 
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/PeakConsecutive.h"
 #include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/SNRatioEstimator.h"
+#include "Pulsar/PhaseWidth.h"
 
 using namespace std;
 
@@ -22,6 +25,8 @@ Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
   GaussianBaseline* off_est = new GaussianBaseline;
   set_baseline_estimator (off_est);
   on_est->set_baseline_estimator (off_est);
+
+  pulse_width_estimator = new PhaseWidth;
 
   regions_set = false;
   set_profile (_profile);
@@ -331,6 +336,46 @@ catch (Error& error)
   throw error += "Pulsar::ProfileStats::build";
 }
 
+//! Set the signal-to-noise ratio estimator
+void Pulsar::ProfileStats::set_snr_estimator (const std::string& name)
+{
+  snr_estimator = SNRatioEstimator::factory (name);
+}
+
+//! Get the signal-to-noise ratio
+double Pulsar::ProfileStats::get_snr () const
+{
+  if (snr_estimator)
+    return snr_estimator->get_snr ( profile );
+  else
+    return profile->snr();
+}
+
+TextInterface::Parser* Pulsar::ProfileStats::get_snr_interface ()
+{
+  if (snr_estimator)
+    return snr_estimator->get_interface();
+  else
+    return StrategySet::default_snratio.get_value()->get_interface();
+}
+
+//! Set the pulse width estimator
+void Pulsar::ProfileStats::set_pulse_width_estimator (const std::string& name)
+{
+  pulse_width_estimator = WidthEstimator::factory (name);
+}
+
+//! Get the pulse width
+Phase::Value Pulsar::ProfileStats::get_pulse_width () const
+{
+  Phase::Value width = pulse_width_estimator->get_width( profile );
+  return width;
+}
+
+TextInterface::Parser* Pulsar::ProfileStats::get_pulse_width_interface ()
+{
+  return pulse_width_estimator->get_interface();
+}
 
 #include "Pulsar/ProfileStatsInterface.h"
 

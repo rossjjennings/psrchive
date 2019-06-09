@@ -40,6 +40,16 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
 
   import( "all", PhaseWeight::Interface(), 
 	  (Method) &ProfileStats::get_all );
+
+  add( &ProfileStats::get_pulse_width,
+       &ProfileStats::set_pulse_width_estimator,
+       &ProfileStats::get_pulse_width_interface,
+       "width", "Pulse width (turns)" );
+
+  add( &ProfileStats::get_snr,
+       &ProfileStats::set_snr_estimator,
+       &ProfileStats::get_snr_interface,
+       "snr", "Signal-to-noise ratio" );
 }
 
 

@@ -14,6 +14,7 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Algorithm.h"
 
+#include "PhaseRange.h"
 #include "TextInterface.h"
 #include "Estimate.h"
 
@@ -21,6 +22,8 @@ namespace Pulsar
 {
   class Profile;
   class ProfileWeightFunction;
+  class SNRatioEstimator;
+  class WidthEstimator;
 
   //! Computes pulse profile statistics
   class ProfileStats : public Algorithm
@@ -87,6 +90,24 @@ namespace Pulsar
     //! Return the all pulse phase bin mask
     PhaseWeight* get_all ();
 
+    //! Set the signal-to-noise ratio estimator
+    void set_snr_estimator (const std::string& name);
+
+    //! Get the signal-to-noise ratio
+    double get_snr () const;
+
+    //! Get the text interface of the signal-to-noise ratio estimator
+    TextInterface::Parser* get_snr_interface ();
+
+    //! Set the pulse width estimator
+    void set_pulse_width_estimator (const std::string& name);
+
+    //! Get the pulse width
+    Phase::Value get_pulse_width () const;
+
+    //! Get the text interface of the pulse width estimator
+    TextInterface::Parser* get_pulse_width_interface ();
+
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 
@@ -103,6 +124,9 @@ namespace Pulsar
 
     //! The algorithm used to find the off-pulse phase bins
     Reference::To<ProfileWeightFunction> baseline_estimator;
+
+    Reference::To<SNRatioEstimator> snr_estimator;
+    Reference::To<WidthEstimator> pulse_width_estimator;
 
     //! True when the onpulse and baseline regions have been set
     bool regions_set;
