@@ -6,7 +6,12 @@
  ***************************************************************************/
 
 #include "Pulsar/Profile.h"
+
+#define _DEBUG 0
+#include <iostream>
+
 using namespace Pulsar;
+using namespace std;
 
 float width (const Profile* profile, float& error, float pc, float dc)
 {
@@ -28,12 +33,16 @@ float width (const Profile* profile, float& error, float pc, float dc)
 
   float level = (profile->max() - min_mean) * pc/100.0 - stdev + min_mean;
 
-  std::vector<float> results;
+  unsigned ntries = 3;
+  std::vector<float> results (ntries);
 
-  for (unsigned tries = 0; tries < 3; tries++)
+  for (unsigned tries = 0; tries < ntries; tries++)
   {
-    if (level < 5.0*min_var)
+    if (level < 5.0*stdev)
     {
+#if _DEBUG
+      cerr << "width: level=" << level << " less than 5 sigma=" << stdev << endl;
+#endif
       return 0.0;
     }
 
@@ -89,13 +98,19 @@ float width (const Profile* profile, float& error, float pc, float dc)
     }
 
     float bin_dist = hi_edge - lo_edge;
+#if _DEBUG
+    cerr << "width: " << tries << " hi_edge=" << hi_edge << " lo_edge=" << lo_edge 
+         << " bin_dist=" << bin_dist << endl;
+#endif
+
     if (bin_dist < 0)
       bin_dist += float(nbin);
 
-    results.push_back(bin_dist / float(nbin));
+    results[tries] = bin_dist / float(nbin);
     level += stdev;
   }
 
   error = fabs(results.front()-results.back())/2.0;
   return results[1];
 }
+
