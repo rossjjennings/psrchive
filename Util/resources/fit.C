@@ -18,6 +18,16 @@
 
 using namespace std;
 
+namespace Tempo
+{
+  //! Run tempo to fit the model to the data
+  void fit (const Pulsar::Parameters* model,
+            std::vector<toa>& data,
+            Pulsar::Parameters* postfit = NULL,
+            bool track = false,
+            Tempo::toa::State min_state = Tempo::toa::Normal);
+}
+
 // ////////////////////////////////////////////////////////////////////////
 // Tempo::fit
 //
