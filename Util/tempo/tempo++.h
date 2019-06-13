@@ -14,7 +14,6 @@
 #include "Pulsar/Parameters.h"
 
 #include "polyco.h"
-#include "toa.h"
 #include "Observatory.h"
 #include "Warning.h"
 
@@ -76,13 +75,6 @@ namespace Tempo
     Tempo::get_directory, so input files should be written here and
     output files (created by tempo) can be found here. */
   void tempo (const std::string& arguments, const std::string& input);
-
-  //! Run tempo to fit the model to the data
-  void fit (const Pulsar::Parameters* model, 
-	    std::vector<toa>& data,
-	    Pulsar::Parameters* postfit = NULL,
-	    bool track = false,
-	    Tempo::toa::State min_state = Tempo::toa::Normal);
 
 }
 
