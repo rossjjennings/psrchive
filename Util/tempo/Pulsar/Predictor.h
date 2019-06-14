@@ -96,10 +96,9 @@ namespace Pulsar {
 
   };
 
+  std::ostream& operator<< (std::ostream& ostr, Predictor::Policy p);
+
+  std::istream& operator>> (std::istream& istr, Predictor::Policy& p);
 }
-
-std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p);
-
-std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p);
 
 #endif

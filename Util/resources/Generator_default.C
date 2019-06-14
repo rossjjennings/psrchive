@@ -13,7 +13,7 @@
 
 using namespace std;
 
-std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p)
+std::ostream& Pulsar::operator<< (std::ostream& ostr, Predictor::Policy p)
 {
   if (p == Pulsar::Predictor::Input)
     return ostr << "input";
@@ -27,7 +27,7 @@ std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p)
   return ostr;
 }
 
-std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p)
+std::istream& Pulsar::operator>> (std::istream& istr, Predictor::Policy& p)
 {
   std::string policy;
   istr >> policy;
