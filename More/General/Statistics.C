@@ -158,8 +158,7 @@ double Pulsar::Statistics::get_2bit_dist () const
 //! Get the off-pulse baseline
 Pulsar::PhaseWeight* Pulsar::Statistics::get_baseline () try
 {
-  setup_stats ();
-  return stats->get_baseline();
+  return get_stats()->get_baseline();
 }
  catch (Error& error)
    {
@@ -169,8 +168,7 @@ Pulsar::PhaseWeight* Pulsar::Statistics::get_baseline () try
 //! Get the on-pulse phase bins
 Pulsar::PhaseWeight* Pulsar::Statistics::get_onpulse () try
 {
-  setup_stats ();
-  return stats->get_onpulse();
+  return get_stats()->get_onpulse();
 }
  catch (Error& error)
    {
@@ -180,8 +178,7 @@ Pulsar::PhaseWeight* Pulsar::Statistics::get_onpulse () try
 //! Get all phase bins
 Pulsar::PhaseWeight* Pulsar::Statistics::get_all () try
 {
-  setup_stats ();
-  return stats->get_all();
+  return get_stats()->get_all();
 }
  catch (Error& error)
    {
@@ -244,6 +241,13 @@ void Pulsar::Statistics::setup_stats () try
   if (stats_setup)
     return;
 
+  // avoid recursion - part 1
+  // (Plugin::setup might call a function that calls setup_stats)
+  stats_setup = true;
+
+  for (unsigned i=0; i<plugins.size(); i++)
+    plugins[i]->set_setup (false);
+
   if (Profile::verbose)
     cerr << "Pulsar::Statistics::setup_stats stats=" << stats.ptr() << endl;
 
@@ -251,21 +255,11 @@ void Pulsar::Statistics::setup_stats () try
 
   if (Profile::verbose)
     cerr << "Pulsar::Statistics::setup_stats profile=" << profile.ptr() << endl;
-
-  // avoid recursion - part 1
-  // (Plugin::setup might call a function that calls setup_stats)
-  stats_setup = true;
-
-  for (unsigned i=0; i<plugins.size(); i++)
-    plugins[i]->setup ();
-
-  if (Profile::verbose)
-    cerr << "Pulsar::Statistics::setup_stats done" << endl;
 }
- catch (Error& error)
-   {
-     throw error += "Pulsar::Statistics::setup_stats";
-   }
+catch (Error& error)
+{
+  throw error += "Pulsar::Statistics::setup_stats";
+}
 
 void Pulsar::Statistics::add_plugin (Plugin* plugin)
 {

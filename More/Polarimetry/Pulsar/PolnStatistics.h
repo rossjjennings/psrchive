@@ -26,9 +26,6 @@ namespace Pulsar
     PolnStatistics ();
     ~PolnStatistics ();
 
-    //! Synchronize to the current state of the Statistic class
-    void setup ();
-
     //! Return a text interface
     TextInterface::Parser* get_interface ();
 
@@ -39,6 +36,10 @@ namespace Pulsar
 
     mutable Reference::To<PolnProfileStats> stats;
     mutable Reference::To<const PolnProfile, false> profile;
+
+    //! Synchronize to the current state of the Statistics class
+    void setup_stats ();
+
   };
 }
 

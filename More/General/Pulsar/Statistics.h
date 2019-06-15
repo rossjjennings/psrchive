@@ -128,7 +128,9 @@ namespace Pulsar {
   class Statistics::Plugin : public Reference::Able
   {
   public:
-    virtual void setup () = 0;
+
+    Plugin () { setup = false; }
+
     virtual TextInterface::Parser* get_interface () = 0;
 
     const Integration* get_Integration ()
@@ -137,6 +139,8 @@ namespace Pulsar {
   protected:
     friend class Statistics;
     Reference::To<Statistics, false> parent;
+    virtual void set_setup (bool flag) { setup = flag; }
+    mutable bool setup;
   };
 
 }
