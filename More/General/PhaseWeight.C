@@ -292,6 +292,10 @@ float Pulsar::PhaseWeight::get_median_difference () const
 //! Set the Profile to which the weights apply
 void Pulsar::PhaseWeight::set_Profile (const Profile* _profile) const
 {
+#if _DEBUG
+  cerr << "Pulsar::PhaseWeight::set_Profile this=" << this << " profile=" << _profile << endl;
+#endif
+
   profile = _profile;
   built = false;
   median_computed = false;
@@ -320,7 +324,7 @@ double Pulsar::PhaseWeight::get_weighted_sum () const
 Estimate<double> Pulsar::PhaseWeight::get_mean () const try
 {
   if (!built)
-    const_cast<PhaseWeight*>(this)->build();
+    build();
   return mean;
 }
  catch (Error& error)
@@ -336,8 +340,14 @@ float Pulsar::PhaseWeight::get_avg () const
 //! Get the weighted variance of the Profile
 Estimate<double> Pulsar::PhaseWeight::get_variance () const try
 {
+#if _DEBUG
+  cerr << "Pulsar::PhaseWeight::get_variance this=" << this 
+       << " profile=" << profile.get() << " built=" << built << endl;
+#endif
+
   if (!built)
-    const_cast<PhaseWeight*>(this)->build();
+    build();
+
   return variance;
 }
  catch (Error& error)
@@ -367,7 +377,7 @@ Pulsar::PhaseWeight::check_weight (unsigned nbin, const char* method) const
 		 weight.size(), nbin);
 }
 
-void Pulsar::PhaseWeight::build () try
+void Pulsar::PhaseWeight::build () const try
 {
   check_Profile ("build");
 
@@ -402,7 +412,7 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
 				 double* varmean, double* varvar) const
 {
   if (Profile::verbose)
-    cerr << "Pulsar::PhaseWeight::stats" << endl;
+    cerr << "Pulsar::PhaseWeight::stats this=" << this << " profile=" << profile << endl;
   
   unsigned nbin = profile->get_nbin();
   unsigned ibin = 0;
@@ -427,8 +437,8 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
       count ++;
   }
 
-  if (totwt == 0) {
-
+  if (totwt == 0)
+  {
     if (Profile::verbose)
       cerr << "Pulsar::PhaseWeight::stats total weight == 0" << endl;
  
@@ -440,6 +450,7 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
       *varmean = 0;
     if (varvar)
       *varvar = 0;
+
     return;
   }
 

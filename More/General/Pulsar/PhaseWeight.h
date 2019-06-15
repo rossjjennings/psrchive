@@ -153,10 +153,10 @@ namespace Pulsar {
     mutable bool built;
 
     //! The weighted mean of the Profile
-    Estimate<double> mean;
+    mutable Estimate<double> mean;
 
     //! The weighted variance of the Profile
-    Estimate<double> variance;
+    mutable Estimate<double> variance;
 
     //! The median of all phase bins with non-zero weight
     mutable float median;
@@ -173,7 +173,7 @@ namespace Pulsar {
     void fill_non_zero (const char* method) const;
 
     //! Compute the mean and variance attributes
-    void build ();
+    void build () const;
 
     //! Initialize attributes to default values
     void init ();
