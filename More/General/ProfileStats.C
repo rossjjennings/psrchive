@@ -98,7 +98,7 @@ void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
     cerr << "Pulsar::ProfileStats::set_baseline_estimator this=" << this
 	 << " est=" << est << endl;
 
-  baseline_estimator = est;
+  HasBaselineEstimator::set_baseline_estimator (est);
   built = false;
   regions_set = false;
 }
@@ -109,12 +109,6 @@ Pulsar::ProfileStats::get_onpulse_estimator () const
   return onpulse_estimator;
 }
     
-Pulsar::ProfileWeightFunction*
-Pulsar::ProfileStats::get_baseline_estimator () const
-{
-  return baseline_estimator;
-}
-
 //! Set the on-pulse and baseline regions
 void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
 					const PhaseWeight& off)
@@ -229,11 +223,32 @@ bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const try
 
 Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const try
 {
+#if _DEBUG
+  cerr << "Pulsar::ProfileStats::get_baseline_variance profile=" << profile.get() 
+       << " built=" << built << " variance=" << baseline_variance << endl;
+#endif
+
   if (!built)
+  {
+#if _DEBUG
+    cerr << "Pulsar::ProfileStats::get_baseline_variance call build" << endl;
+#endif
+
     build ();
+  }
 
   if (baseline_variance.get_value() == 0)
+  {
+#if _DEBUG
+    cerr << "Pulsar::ProfileStats::get_baseline_variance get variance" << endl;
+#endif
+
     baseline_variance = baseline.get_variance();
+  }
+
+#if _DEBUG
+  cerr << "Pulsar::ProfileStats::get_baseline_variance variance=" << baseline_variance << endl;
+#endif
 
   return baseline_variance;
 }
@@ -275,6 +290,8 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
 
 void Pulsar::ProfileStats::build () const try
 {
+  // Profile::verbose = true;
+
   baseline_variance = 0.0;
 
   if (!profile)
@@ -300,13 +317,13 @@ void Pulsar::ProfileStats::build () const try
 
   if (Profile::verbose)
     cerr << "Pulsar::ProfileStats::build this=" << this
-	 << " computing on-pulse and baseline" << endl;
+	 << " computing on-pulse and baseline of profile=" << profile.get() << endl;
 
   onpulse_estimator->set_Profile (profile);
   onpulse_estimator->get_weight (&onpulse);
-    
-  baseline_estimator->set_Profile (profile);
-  baseline_estimator->get_weight (&baseline);
+
+  get_baseline_estimator()->set_Profile (profile);
+  get_baseline_estimator()->get_weight (&baseline);
 
   built = true;
 
@@ -345,6 +362,10 @@ void Pulsar::ProfileStats::set_snr_estimator (const std::string& name)
 //! Get the signal-to-noise ratio
 double Pulsar::ProfileStats::get_snr () const
 {
+#if _DEBUG
+  cerr << "Pulsar::ProfileStats::get_snr profile=" << profile.get() << endl;
+#endif
+
   if (snr_estimator)
     return snr_estimator->get_snr ( profile );
   else

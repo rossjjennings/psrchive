@@ -10,6 +10,9 @@
 
 #include "Pulsar/ProfileWeightFunction.h"
 
+#include <iostream>
+using namespace std;
+
 Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
 					    bool manage_estimators)
 {
@@ -30,8 +33,8 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
 	  (Method) &ProfileStats::get_onpulse );
 
   if (manage_estimators)
-    add( &ProfileStats::get_baseline_estimator,
-	 &ProfileStats::set_baseline_estimator,
+    add( &HasBaselineEstimator::get_baseline_estimator,
+	 &HasBaselineEstimator::set_baseline_estimator,
 	 &ProfileWeightFunction::get_interface,
 	 "off", "Off-pulse estimator" );
 

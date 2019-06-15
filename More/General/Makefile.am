@@ -52,6 +52,7 @@ nobase_include_HEADERS = \
         Pulsar/FrequencyIntegrate.h \
 	Pulsar/FscrunchInterpreter.h \
         Pulsar/GaussianBaseline.h \
+	Pulsar/HasBaselineEstimator.h \
 	Pulsar/ImageCorrection.h \
 	Pulsar/Index.h \
 	Pulsar/Integrate.h \
@@ -190,6 +191,7 @@ libGeneral_la_SOURCES = \
 	FrequencyAppend.C \
         FrequencyIntegrate.C \
         GaussianBaseline.C \
+	HasBaselineEstimator.C \
 	ImageCorrection.C \
 	Index.C \
 	InstallInterpreter.C \

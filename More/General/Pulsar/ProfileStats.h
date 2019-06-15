@@ -13,6 +13,7 @@
 
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Algorithm.h"
+#include "Pulsar/HasBaselineEstimator.h"
 
 #include "PhaseRange.h"
 #include "TextInterface.h"
@@ -26,7 +27,7 @@ namespace Pulsar
   class WidthEstimator;
 
   //! Computes pulse profile statistics
-  class ProfileStats : public Algorithm
+  class ProfileStats : public Algorithm, public HasBaselineEstimator
   {   
   public:
 
@@ -52,7 +53,6 @@ namespace Pulsar
 
     //! The algorithm used to find the off-pulse phase bins
     void set_baseline_estimator (ProfileWeightFunction*);
-    ProfileWeightFunction* get_baseline_estimator () const;
 
     //! Set the on-pulse and baseline regions
     void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
@@ -121,9 +121,6 @@ namespace Pulsar
 
     //! The algorithm used to find the on-pulse phase bins
     Reference::To<ProfileWeightFunction> onpulse_estimator;
-
-    //! The algorithm used to find the off-pulse phase bins
-    Reference::To<ProfileWeightFunction> baseline_estimator;
 
     Reference::To<SNRatioEstimator> snr_estimator;
     Reference::To<WidthEstimator> pulse_width_estimator;
