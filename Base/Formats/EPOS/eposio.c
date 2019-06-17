@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 #include "eposio.h"
 
@@ -56,34 +57,66 @@ int check_file(const char* filename, eposhdr_t *eposhdr, int verbose)
   FILE *fp;
   int fd;
   int nbytes;
-  
+  int c = 0;
+ 
   fp = fopen(filename, "r");
   fd = fileno(fp);
   fstat(fd, &st);
 
-  if ( (st.st_size % 17000) != 0 ) {
-	file_flag = 1;
+  if ( (st.st_size % 17000) != 0 )
+  {
+        fclose(fp);
 	if (verbose > 2)
-	  fprintf(stderr, "File is not a multiple of 17000 bytes.");
+	  fprintf(stderr, "EPOS check_file: File is not a multiple of 17000 bytes.");
+        return -1;
   }
 
   nbytes = fread(eposhdr, 1, sizeof(eposhdr_t), fp);
+  fclose(fp);
 
   if ( nbytes != sizeof(eposhdr_t) ){
-	fclose(fp);
-	fprintf(stderr, "Unable to read header");
+        if (verbose > 2)
+	  fprintf(stderr, "EPOS check_file: Unable to read header");
 	return -1;
   }
   
   int masterref = get_master_clock(eposhdr);
 
   if ( (masterref != 30000000) && file_flag ) {
-	fclose(fp);
-	fprintf(stderr, "Not an EPOS File");
+        if (verbose > 2)
+	  fprintf(stderr, "EPOS check_file: Master clock is not 30 MHz");
 	return -1;
   }
 
-  fclose(fp);
+#define MAX_SOURCE_STRLEN 24
+
+  c = 0;
+  while (c < MAX_SOURCE_STRLEN)
+  {
+     if (eposhdr->source[c] == '\0')
+       break;
+
+     if (!isprint(eposhdr->source[c]))
+     {
+        if (verbose > 2)
+          fprintf(stderr, "EPOS check_file: Source name contains non-printable characters");
+        return -1;
+     }
+  }
+
+  if (c == MAX_SOURCE_STRLEN)
+  {
+    if (verbose > 2)
+      fprintf(stderr, "EPOS check_file: Source name exceeds buffer length");
+    return -1;
+  }
+
+  if (c == 0)
+  {
+    if (verbose > 2)
+      fprintf(stderr, "EPOS check_file: Source name not set");
+    return -1;
+  }
 
   return 1;
 }

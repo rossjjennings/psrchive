@@ -197,7 +197,7 @@ void Pulsar::EPOSArchive::load_header (const char* filename)
 
   // determine if the file is from EPOS.  If not, throw a error:
 
-  if (!check_file(filename, &eposhdr, verbose)) 
+  if (check_file(filename, &eposhdr, verbose) < 0) 
     throw Error (InvalidState, "Pulsar::EPOSArchive::load_header",
         "File (%s) is not correct type", filename);
 
