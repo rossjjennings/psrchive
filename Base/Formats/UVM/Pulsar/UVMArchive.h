@@ -13,6 +13,7 @@
 
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/Agent.h"
+#include "Pulsar/Config.h"
 
 namespace Pulsar {
 
@@ -20,6 +21,9 @@ namespace Pulsar {
   class UVMArchive : public BasicArchive {
 
   public:
+
+    //! Load the phase bins identified as part of the off-pulse baseline
+    static Option<bool> include_offpulse_region;
     
     //! Default constructor
     UVMArchive ();

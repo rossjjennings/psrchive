@@ -13,8 +13,18 @@
 #include "utc.h"
 
 #include <fstream>
+#include <string.h>
 
 using namespace std;
+
+Pulsar::Option<bool> Pulsar::UVMArchive::include_offpulse_region
+(
+ "UVMArchive::include_offpulse_region", true,
+
+ "Load phase bins identified as part of off-pulse baseline [boolean]",
+
+ "Self explanatory."
+);
 
 void Pulsar::UVMArchive::init ()
 {
@@ -105,6 +115,8 @@ void Pulsar::UVMArchive::load_header (const char* filename)
   cerr << "Pulsar::UVMArchive::load_header windows=" << buffer
        << " nwins=" << header->nwins << endl;
 
+  string windows = buffer;
+
   centre_frequency = header->obfreq;
   bandwidth = header->abandwd;
 
@@ -113,7 +125,12 @@ void Pulsar::UVMArchive::load_header (const char* filename)
     set_state (Signal::Stokes);
 
   cerr << "anumsbc=" << header->anumsbc << endl;
-
+  cerr << "aendscan=" << header->aendscan << endl;
+  cerr << "samint=" << header->samint << endl;
+  cerr << "apbins=" << header->apbins << endl;
+  cerr << "nseq=" << header->nseq << endl;
+  cerr << "baseval=" << header->baseval << endl;
+  
   /*
   if (header->apoladd)
     npol = 1;
@@ -131,10 +148,11 @@ void Pulsar::UVMArchive::load_header (const char* filename)
   {
     nbin = 0;
     for (int iwin=0; iwin < header->nwins; iwin++)
-    {
-      cerr << "nbin += " <<  header->nwbins[iwin] << endl;
-      nbin += header->nwbins[iwin];
-    }
+      if (include_offpulse_region || windows[iwin] != 'N')
+      {
+        cerr << "nbin += " <<  header->nwbins[iwin] << endl;
+        nbin += header->nwbins[iwin];
+      }
   }
 
   nchan = 1;
@@ -171,24 +189,54 @@ void Pulsar::UVMArchive::load_header (const char* filename)
 
     // cerr << "start usec=" << header->scantime << endl;
     epoch = mjd_start + header->scantime * 1e-6;
+
+    /* from readscn.f:
+    c		samint	 f9.7	interval between samples in seconds (average)
+    c				sampled fraction of period in SP program */
+
+    double interval = header->period * header->samint;
     
-    integration->set_folding_period (header->period);
-    integration->set_duration (header->period);
+    integration->set_folding_period (interval);
+    integration->set_duration (interval);
     integration->set_epoch (epoch);
     integration->set_centre_frequency(0, centre_frequency);
     
-
     // scaleI is the scale to convert to microJy
     double scale = header->scaleI * 1e-3;
-    double offset = header->baseval;
-  
+    double offset = 0;
+
     for (unsigned ipol=0; ipol < get_npol(); ipol++)
     {
       float* amps = integration->get_Profile(ipol, 0) -> get_amps();
 
-      for (unsigned ibin=0; ibin < get_nbin(); ibin++)
+      if (ipol == 0)
+	offset = header->baseval;
+      else
+	offset = 0;
+
+      if (header->nwins == 0)
+      {      
+        for (unsigned ibin=0; ibin < get_nbin(); ibin++)
+        {
+	  amps[ibin] = (data.data[ipol][ibin] + offset) * scale;
+        }
+      }
+      else
       {
-	amps[ibin] = (data.data[ipol][ibin] + offset) * scale;
+        unsigned data_ibin = 0;
+        unsigned amps_ibin = 0;
+        for (int iwin=0; iwin < header->nwins; iwin++)
+          if (include_offpulse_region || windows[iwin] != 'N')
+          {
+            for (unsigned ibin = 0; ibin < header->nwbins[iwin]; ibin++)
+            {
+              amps[amps_ibin] = (data.data[ipol][data_ibin] + offset) * scale;
+              data_ibin ++;
+              amps_ibin ++;
+            }
+          }
+          else
+            data_ibin += header->nwbins[iwin];
       }
     }
   }
