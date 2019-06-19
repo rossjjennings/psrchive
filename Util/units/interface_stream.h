@@ -17,6 +17,9 @@
 template<class T>
 std::ostream& interface_insertion (std::ostream& ostr, const T* e) try
 {
+  if (!e)
+    return ostr;
+ 
   Reference::To<TextInterface::Parser> interface 
     = const_cast<T*>(e)->get_interface();
 

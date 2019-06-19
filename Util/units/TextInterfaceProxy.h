@@ -42,11 +42,12 @@ namespace TextInterface
 
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const 
-      { return this->value->get_value (ptr); }
+    { if (!ptr) return "null";
+      return this->value->get_value (ptr); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
-      { this->value->set_value (ptr, value); }
+    { if (ptr) this->value->set_value (ptr, value); }
   };
 
   //! Proxy enables attribute interface of member to be used by class
@@ -80,11 +81,12 @@ namespace TextInterface
 
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const 
-      { return this->value->get_value ((const_cast<C*>(ptr)->*get)()); }
+    { if (!ptr) return "null";
+      return this->value->get_value ((const_cast<C*>(ptr)->*get)()); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& val)
-      { this->value->set_value ((ptr->*get)(), val); }
+    { if (ptr) this->value->set_value ((ptr->*get)(), val); }
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const
