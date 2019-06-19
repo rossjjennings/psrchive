@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdlib.h>
+
 void sgi_inithack_(void);
 void sgi_prepfd_(void);
 void sgi_getfd_(int *r);
@@ -17,8 +19,6 @@ int nfd;                        /* maximum number of fd's*/
  */
 void sgiinithack_(void)
 {
-        int i;
-
         nfd = getdtablesize();
 
         /* allocate memory for the tables */
