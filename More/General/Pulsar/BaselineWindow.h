@@ -44,6 +44,7 @@ namespace Pulsar {
 
     //! Set to find the mean closest to the specified value
     void set_find_mean (float mean);
+    float get_find_mean () const;
 
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);

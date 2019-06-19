@@ -96,16 +96,12 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
       cerr << "Pulsar::IterativeBaseline::calculate initial_baseline" << endl;
 
     initial_baseline->set_Profile (profile);
-    initial_baseline->get_weight (weight);
-
     if (include)
-    {
-#ifndef _DEBUG
-      if (Profile::verbose)
-#endif
-	cerr << "Pulsar::IterativeBaseline::calculate mask include" << endl;
-      (*weight) *= *include;
-    }
+      initial_baseline->set_include (include);
+    if (exclude)
+      initial_baseline->set_exclude (exclude);
+
+    initial_baseline->get_weight (weight);
 
     if (weight->get_variance() == 0.0)
     {
@@ -170,7 +166,7 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 
     for (unsigned ibin=0; ibin<nbin; ibin++)
     {
-      if (include && !(*include)[ibin])
+      if (!consider(ibin))
 	continue;
       
       if ( amps[ibin] > lower && amps[ibin] < upper )

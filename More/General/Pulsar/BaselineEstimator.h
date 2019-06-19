@@ -32,9 +32,6 @@ namespace Pulsar {
     //! Convenience interface
     PhaseWeight* operate (const Profile*);
 
-    //! Include only the specified phase bins for consideration
-    void set_include (PhaseWeight* include);
-
     //! Cut samples from baseline with median difference over threshold
     void set_median_cut (float threshold);
 
@@ -42,9 +39,6 @@ namespace Pulsar {
     virtual BaselineEstimator* clone () const = 0;
 
   protected:
-
-    //! Excluded phase bins
-    Reference::To<PhaseWeight> include;
 
     float median_cut;
 

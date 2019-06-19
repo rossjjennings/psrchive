@@ -23,6 +23,14 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
 
   typedef PhaseWeight* (ProfileStats::*Method) (void);
 
+  add( &ProfileStats::get_include_estimator,
+       &ProfileStats::set_include_estimator,
+       "include", "Estimator of included bins" );
+
+  add( &ProfileStats::get_exclude_estimator,
+       &ProfileStats::set_exclude_estimator,
+       "exclude", "Estimator of excluded bins" );
+
   if (manage_estimators)
     add( &ProfileStats::get_onpulse_estimator,
 	 &ProfileStats::set_onpulse_estimator,

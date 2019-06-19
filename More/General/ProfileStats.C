@@ -26,7 +26,7 @@ Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
   set_baseline_estimator (off_est);
   on_est->set_baseline_estimator (off_est);
 
-  pulse_width_estimator = new PhaseWidth;
+  width_estimator = new PhaseWidth;
 
   regions_set = false;
   set_profile (_profile);
@@ -35,6 +35,42 @@ Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
 //! Destructor
 Pulsar::ProfileStats::~ProfileStats()
 {
+}
+
+//! The algorithm used to find the bins to include
+void Pulsar::ProfileStats::set_include_estimator (ProfileWeightFunction* est)
+{
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_include this=" << this
+	 << " est=" << est << endl;
+
+  include_estimator = est;
+  built = false;
+  regions_set = false;
+}
+
+Pulsar::ProfileWeightFunction*
+Pulsar::ProfileStats::get_include_estimator () const
+{
+  return include_estimator.ptr();
+}
+
+//! The algorithm used to find the bins to exclude
+void Pulsar::ProfileStats::set_exclude_estimator (ProfileWeightFunction* est)
+{
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_exclude this=" << this
+	 << " est=" << est << endl;
+
+  exclude_estimator = est;
+  built = false;
+  regions_set = false;
+}
+
+Pulsar::ProfileWeightFunction*
+Pulsar::ProfileStats::get_exclude_estimator () const
+{
+  return exclude_estimator.ptr();
 }
 
 //! Set the Profile from which statistics will be derived
@@ -91,6 +127,12 @@ void Pulsar::ProfileStats::set_onpulse_estimator (ProfileWeightFunction* est)
   regions_set = false;
 }
 
+Pulsar::ProfileWeightFunction*
+Pulsar::ProfileStats::get_onpulse_estimator () const
+{
+  return onpulse_estimator;
+}
+
 //! The algorithm used to find the off-pulse phase bins
 void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
 {
@@ -103,12 +145,39 @@ void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
   regions_set = false;
 }
 
-Pulsar::ProfileWeightFunction*
-Pulsar::ProfileStats::get_onpulse_estimator () const
+void Pulsar::ProfileStats::set_width_estimator (WidthEstimator* est)
 {
-  return onpulse_estimator;
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_width_estimator this=" << this
+         << " est=" << est << endl;
+
+  width_estimator = est;
+  built = false;
 }
-    
+
+Pulsar::WidthEstimator*
+Pulsar::ProfileStats::get_width_estimator () const
+{
+  return width_estimator;
+}
+
+void Pulsar::ProfileStats::set_snratio_estimator (SNRatioEstimator* est)
+{
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_snratio_estimator this=" << this
+         << " est=" << est << endl;
+
+  snratio_estimator = est;
+  built = false;
+}
+
+Pulsar::SNRatioEstimator*
+Pulsar::ProfileStats::get_snratio_estimator () const
+{
+  return snratio_estimator;
+}
+
+ 
 //! Set the on-pulse and baseline regions
 void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
 					const PhaseWeight& off)
@@ -317,7 +386,24 @@ void Pulsar::ProfileStats::build () const try
 
   if (Profile::verbose)
     cerr << "Pulsar::ProfileStats::build this=" << this
-	 << " computing on-pulse and baseline of profile=" << profile.get() << endl;
+	 << " computing on-pulse and baseline of profile=" << profile.get() 
+	 << endl;
+
+  if (include_estimator)
+  {
+    include_estimator->set_Profile (profile);
+    include_estimator->get_weight (&include);
+    onpulse_estimator->set_include (&include);
+    get_baseline_estimator()->set_include (&include);
+  }
+
+  if (exclude_estimator)
+  {
+    exclude_estimator->set_Profile (profile);
+    exclude_estimator->get_weight (&exclude);
+    onpulse_estimator->set_exclude (&exclude);
+    get_baseline_estimator()->set_exclude (&exclude);
+  }
 
   onpulse_estimator->set_Profile (profile);
   onpulse_estimator->get_weight (&onpulse);
@@ -356,7 +442,7 @@ catch (Error& error)
 //! Set the signal-to-noise ratio estimator
 void Pulsar::ProfileStats::set_snr_estimator (const std::string& name)
 {
-  snr_estimator = SNRatioEstimator::factory (name);
+  snratio_estimator = SNRatioEstimator::factory (name);
 }
 
 //! Get the signal-to-noise ratio
@@ -366,16 +452,16 @@ double Pulsar::ProfileStats::get_snr () const
   cerr << "Pulsar::ProfileStats::get_snr profile=" << profile.get() << endl;
 #endif
 
-  if (snr_estimator)
-    return snr_estimator->get_snr ( profile );
+  if (snratio_estimator)
+    return snratio_estimator->get_snr ( profile );
   else
     return profile->snr();
 }
 
 TextInterface::Parser* Pulsar::ProfileStats::get_snr_interface ()
 {
-  if (snr_estimator)
-    return snr_estimator->get_interface();
+  if (snratio_estimator)
+    return snratio_estimator->get_interface();
   else
     return StrategySet::default_snratio.get_value()->get_interface();
 }
@@ -383,19 +469,19 @@ TextInterface::Parser* Pulsar::ProfileStats::get_snr_interface ()
 //! Set the pulse width estimator
 void Pulsar::ProfileStats::set_pulse_width_estimator (const std::string& name)
 {
-  pulse_width_estimator = WidthEstimator::factory (name);
+  width_estimator = WidthEstimator::factory (name);
 }
 
 //! Get the pulse width
 Phase::Value Pulsar::ProfileStats::get_pulse_width () const
 {
-  Phase::Value width = pulse_width_estimator->get_width( profile );
+  Phase::Value width = width_estimator->get_width( profile );
   return width;
 }
 
 TextInterface::Parser* Pulsar::ProfileStats::get_pulse_width_interface ()
 {
-  return pulse_width_estimator->get_interface();
+  return width_estimator->get_interface();
 }
 
 #include "Pulsar/ProfileStatsInterface.h"

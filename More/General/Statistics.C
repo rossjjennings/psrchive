@@ -230,11 +230,8 @@ double Pulsar::Statistics::get_dispersive_smearing () const
 
 void Pulsar::Statistics::setup_stats () try
 {
-  if (!stats)
-  {
-    stats = new ProfileStats;
-    stats_setup = false;
-  }
+  if (archive)
+    stats = archive->get_strategy()->get_stats();
 
   // avoid recursion - part 2
   // (Plugin::setup might call a function that calls setup_stats)

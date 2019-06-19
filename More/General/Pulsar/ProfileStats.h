@@ -37,6 +37,14 @@ namespace Pulsar
     //! Destructor
     ~ProfileStats();
 
+    //! The algorithm used to find the included phase bins
+    void set_include_estimator (ProfileWeightFunction*);
+    ProfileWeightFunction* get_include_estimator () const;
+
+    //! The algorithm used to find the excluded phase bins
+    void set_exclude_estimator (ProfileWeightFunction*);
+    ProfileWeightFunction* get_exclude_estimator () const;
+
     //! Set the Profile from which statistics will be derived
     void set_profile (const Profile*);
     void set_Profile (const Profile* profile) { set_profile(profile); }
@@ -90,6 +98,10 @@ namespace Pulsar
     //! Return the all pulse phase bin mask
     PhaseWeight* get_all ();
 
+    //! The algorithm used to estimate the signal-to-noise ratio
+    void set_snratio_estimator (SNRatioEstimator*);
+    SNRatioEstimator* get_snratio_estimator () const;
+
     //! Set the signal-to-noise ratio estimator
     void set_snr_estimator (const std::string& name);
 
@@ -98,6 +110,10 @@ namespace Pulsar
 
     //! Get the text interface of the signal-to-noise ratio estimator
     TextInterface::Parser* get_snr_interface ();
+
+    //! The algorithm used to estimate the pulse width
+    void set_width_estimator (WidthEstimator*);
+    WidthEstimator* get_width_estimator () const;
 
     //! Set the pulse width estimator
     void set_pulse_width_estimator (const std::string& name);
@@ -122,8 +138,8 @@ namespace Pulsar
     //! The algorithm used to find the on-pulse phase bins
     Reference::To<ProfileWeightFunction> onpulse_estimator;
 
-    Reference::To<SNRatioEstimator> snr_estimator;
-    Reference::To<WidthEstimator> pulse_width_estimator;
+    Reference::To<SNRatioEstimator> snratio_estimator;
+    Reference::To<WidthEstimator> width_estimator;
 
     //! True when the onpulse and baseline regions have been set
     bool regions_set;
@@ -136,6 +152,18 @@ namespace Pulsar
 
     //! The variance of the total intensity baseline
     mutable Estimate<double> baseline_variance;
+
+    //! The algorithm used to find the included phase bins
+    mutable Reference::To<ProfileWeightFunction> include_estimator;
+
+    //! The included phase bin mask
+    mutable PhaseWeight include;
+
+    //! The algorithm used to find the excluded phase bins
+    mutable Reference::To<ProfileWeightFunction> exclude_estimator;
+
+    //! The excluded phase bin mask
+    mutable PhaseWeight exclude;
 
     //! Computes the phase bin masks
     void build () const;

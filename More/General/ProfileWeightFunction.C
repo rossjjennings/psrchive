@@ -9,6 +9,8 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+using namespace Pulsar;
+
 Pulsar::ProfileWeightFunction::ProfileWeightFunction ()
 {
 }
@@ -35,6 +37,21 @@ Pulsar::ProfileWeightFunction::operate (const Profile* _profile)
   get_weight( _weight );
 
   return _weight.release();
+}
+
+void Pulsar::ProfileWeightFunction::set_include (PhaseWeight* _include)
+{
+  include = _include;
+}
+
+void Pulsar::ProfileWeightFunction::set_exclude (PhaseWeight* _exclude)
+{
+  exclude = _exclude;
+}
+
+bool Pulsar::ProfileWeightFunction::consider (unsigned ibin) const
+{
+  return (!include || (*include)[ibin]) && (!exclude || !(*exclude)[ibin]);
 }
 
 //

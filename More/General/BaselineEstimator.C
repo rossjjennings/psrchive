@@ -81,10 +81,3 @@ Pulsar::BaselineEstimator::operator () (const Profile* profile)
   return operate (profile);
 }
 
-//! Include only the specified phase bins for consideration
-void Pulsar::BaselineEstimator::set_include (PhaseWeight* _include)
-{
-  include = _include;
-}
-
-
