@@ -11,7 +11,7 @@
 
 #include "Pulsar/Integration.h"
 
-#define _DEBUG 1
+#define _DEBUG 0
 
 using namespace std;
 
@@ -21,7 +21,6 @@ Pulsar::PolnStatistics::~PolnStatistics () {}
 Pulsar::PolnProfileStats* Pulsar::PolnStatistics::get_stats () try
 {
   if (!stats)
-  {
     stats = new PolnProfileStats;
 
 #if _DEBUG
@@ -29,20 +28,19 @@ Pulsar::PolnProfileStats* Pulsar::PolnStatistics::get_stats () try
 	 << " stats=" << stats.ptr() << endl;
 #endif
 
-    /*
-      Use the same on-pulse and baseline estimators as used by the 
-      parent Statistics class.
-    */
-  
-    ProfileStats* into = stats->get_stats();
-    ProfileStats* from = parent->get_stats();
-    
-    into->set_onpulse_estimator( from->get_onpulse_estimator() );
-    into->set_baseline_estimator( from->get_baseline_estimator() );
-  }
-
   if (!setup)
+  {
+
+  /*
+
+    Use the same on-pulse and baseline estimators as used by the parent Statistics class.
+
+    */
+
+    stats->set_stats( parent->get_stats() );
+
     setup_stats ();
+  }
 
   return stats;
 }
