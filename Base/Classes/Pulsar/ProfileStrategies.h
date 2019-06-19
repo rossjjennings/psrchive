@@ -15,6 +15,8 @@
 
 namespace Pulsar {
 
+  class WidthEstimator;
+
   //! Manages the strategies that implement algorithms
   class Profile::Strategies : public Reference::Able
   {
@@ -28,18 +30,18 @@ namespace Pulsar {
 
     //! The implementation of the signal-to-noise ratio calculation
     virtual SNRatioEstimator* snratio () const = 0;
+
+    //! The implementation of the pulse width estimator
+    virtual WidthEstimator* width () const = 0;
   };
+
+  // forward declaration of ProfileStats class, which manages strategies
+  class ProfileStats;
 
   class StrategySet : public Profile::Strategies
   {
-    //! The default implementation of the baseline finding algorithm
-    mutable Reference::To<ProfileWeightFunction> baseline_strategy;
-
-    //! The default implementation of the onpulse finding algorithm
-    mutable Reference::To<ProfileWeightFunction> onpulse_strategy;
-
-    //! The default implementation of the snr method
-    mutable Reference::To<SNRatioEstimator> snratio_strategy;
+    //! The default manager of Profile class strategies
+    mutable Reference::To<ProfileStats> stats;
 
   public:
 
@@ -64,11 +66,13 @@ namespace Pulsar {
     SNRatioEstimator* snratio () const;
     void set_snratio (SNRatioEstimator*);
 
-    class Interface : public TextInterface::To<StrategySet>
-    {
-    public:      
-      Interface ( StrategySet* instance = 0 );
-    };
+    //! The implementation of the pulse width calculation
+    WidthEstimator* width () const;
+    void set_width (WidthEstimator*);
+
+    //! The manager of Profile Strategies
+    ProfileStats* get_stats () const;
+    void set_stats (ProfileStats*);
 
   };
     
@@ -133,6 +137,10 @@ namespace Pulsar {
 
     //! The implementation of the signal-to-noise ratio calculation
     SNRatioEstimator* snratio () const;
+
+    //! The implementation of the pulse width estimator
+    WidthEstimator* width () const;
+
   };
 }
 

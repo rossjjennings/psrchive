@@ -39,3 +39,9 @@ SNRatioEstimator* ManagedStrategies::snratio () const
 	       "not implemented");
 }
 
+WidthEstimator* ManagedStrategies::width () const
+{
+  throw Error (InvalidState, "ManagedStrategies::width",
+               "not implemented");
+}
+

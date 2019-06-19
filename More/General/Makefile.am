@@ -171,7 +171,6 @@ libGeneral_la_SOURCES = \
 	Convolve.C \
 	Correlate.C \
 	StrategySet.C \
-	StrategySetInterface.C \
 	DeleteInterpreter.C \
 	Differentiate.C \
 	DisperseWeight.C \

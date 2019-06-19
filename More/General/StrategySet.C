@@ -9,6 +9,7 @@
 #include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/Archive.h"
 
+#include "Pulsar/ProfileStats.h"
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/PeakConsecutive.h"
 #include "Pulsar/PhaseSNR.h"
@@ -34,20 +35,12 @@ StrategySet::default_baseline
 //! The implementation of the baseline finding algorithm
 ProfileWeightFunction* StrategySet::baseline () const
 {
-  /*
-    Strategies are cloned because, in a multi-threaded application,
-    each Profile instance must manage its own copy of this resource
-  */
-
-  if (!baseline_strategy)
-    baseline_strategy = default_baseline.get_value()->clone();
-
-  return baseline_strategy;
+  return get_stats()->get_baseline_estimator();
 }
 
 void StrategySet::set_baseline (ProfileWeightFunction* b)
 {
-  baseline_strategy = b;
+  get_stats()->set_baseline_estimator(b);
 }
 
 
@@ -68,15 +61,12 @@ StrategySet::default_onpulse
 //! The implementation of the on-pulse finding algorithm
 ProfileWeightFunction* StrategySet::onpulse () const
 {
-  if (!onpulse_strategy)
-    onpulse_strategy = default_onpulse.get_value()->clone();
-
-  return onpulse_strategy;
+  return get_stats()->get_onpulse_estimator();
 }
 
 void StrategySet::set_onpulse (ProfileWeightFunction* pwf)
 {
-  onpulse_strategy = pwf;
+  get_stats()->set_onpulse_estimator( pwf );
 }
 
 
@@ -98,15 +88,42 @@ StrategySet::default_snratio
 //! The implementation of the signal-to-noise ratio calculator
 SNRatioEstimator* StrategySet::snratio () const
 {
-  if (!snratio_strategy)
-    snratio_strategy = default_snratio.get_value()->clone();
-
-  return snratio_strategy;
+  return get_stats()->get_snratio_estimator();
 }
 
 void StrategySet::set_snratio (SNRatioEstimator* snre)
 {
-  snratio_strategy = snre;
+  get_stats()->set_snratio_estimator( snre );
+}
+
+//! The implementation of the pulse width estimator
+WidthEstimator* StrategySet::width () const
+{
+  return get_stats()->get_width_estimator();
+}
+
+void StrategySet::set_width (WidthEstimator* we)
+{
+  get_stats()->set_width_estimator( we );
+}
+
+ProfileStats* StrategySet::get_stats () const
+{
+  if (!stats)
+  {
+    stats = new ProfileStats;
+
+    /*
+      Strategies are cloned because, in a multi-threaded application,
+      each Profile instance must manage its own copy of this resource
+    */
+
+    stats -> set_onpulse_estimator( default_onpulse.get_value()->clone() );
+    stats -> set_baseline_estimator( default_baseline.get_value()->clone() );
+    stats -> set_snratio_estimator( default_snratio.get_value()->clone() );
+  }
+
+  return stats;
 }
 
 //! Returns the strategy manager

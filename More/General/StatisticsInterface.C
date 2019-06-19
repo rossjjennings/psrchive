@@ -35,12 +35,6 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        &Statistics::set_pol,
        "pol", "Polarization index" );
 
-  StrategySet* strategy = 0;
-  if (instance)
-    strategy = instance->get_strategy();
-
-  import( StrategySet::Interface(strategy), &Statistics::get_strategy );
-
   ProfileStats* stats = 0;
   if (instance)
     stats = instance->get_stats();
@@ -80,3 +74,4 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_dispersive_smearing,
        "dsmear", "Dispersive smearing in worst channel" );
 }
+
