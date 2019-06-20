@@ -150,6 +150,9 @@ namespace Pulsar
     //! The off-pulse baseline mask
     mutable PhaseWeight baseline;
 
+    //! All phase bins (subject to include and exclude)
+    mutable PhaseWeight all;
+
     //! The variance of the total intensity baseline
     mutable Estimate<double> baseline_variance;
 

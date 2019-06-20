@@ -354,7 +354,9 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline () try
 //! Return the off-pulse baseline mask
 Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
 {
-  return new PhaseWeight (profile.get());
+  if (!built)
+    build ();
+  return &all;
 }
 
 void Pulsar::ProfileStats::build () const try
@@ -379,6 +381,7 @@ void Pulsar::ProfileStats::build () const try
 
     onpulse.set_Profile (profile);
     baseline.set_Profile (profile);
+    all.set_Profile (profile);
 
     built = true;
     return;
@@ -389,12 +392,17 @@ void Pulsar::ProfileStats::build () const try
 	 << " computing on-pulse and baseline of profile=" << profile.get() 
 	 << endl;
 
+  all.set_Profile (profile);
+  all.set_all (1.0);
+
   if (include_estimator)
   {
     include_estimator->set_Profile (profile);
     include_estimator->get_weight (&include);
     onpulse_estimator->set_include (&include);
     get_baseline_estimator()->set_include (&include);
+
+    all = include;
   }
 
   if (exclude_estimator)
@@ -403,6 +411,10 @@ void Pulsar::ProfileStats::build () const try
     exclude_estimator->get_weight (&exclude);
     onpulse_estimator->set_exclude (&exclude);
     get_baseline_estimator()->set_exclude (&exclude);
+
+    PhaseWeight negation = exclude;
+    negation.negate();
+    all *= negation;
   }
 
   onpulse_estimator->set_Profile (profile);
