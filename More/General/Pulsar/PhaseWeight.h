@@ -72,6 +72,9 @@ namespace Pulsar {
 
     //! Set all weights to the specified value
     void set_all (float weight);
+
+    //! Set all weights to the logical negation of their current value
+    void negate ();
   
     //! Get the sum of all weights
     double get_weight_sum () const;

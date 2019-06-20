@@ -72,7 +72,7 @@ Pulsar::PhaseWeight::operator = (const PhaseWeight& pm)
 {
   weight = pm.weight;
   reference_frequency = pm.reference_frequency;
-  built = false;
+  set_Profile (pm.profile);
   return *this;
 }
 
@@ -114,7 +114,14 @@ void Pulsar::PhaseWeight::set_all (float value)
     weight[ipt] = value;
   built = false;
 }
- 
+
+void Pulsar::PhaseWeight::negate ()
+{
+  for (unsigned ipt=0; ipt<weight.size(); ipt++)
+    weight[ipt] = !weight[ipt];
+  built = false;
+} 
+
 //! Retrieve the weights
 void Pulsar::PhaseWeight::get_weights (vector<float>& weights) const
 {
