@@ -25,10 +25,12 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
 
   add( &ProfileStats::get_include_estimator,
        &ProfileStats::set_include_estimator,
+       &ProfileWeightFunction::get_interface,
        "include", "Estimator of included bins" );
 
   add( &ProfileStats::get_exclude_estimator,
        &ProfileStats::set_exclude_estimator,
+       &ProfileWeightFunction::get_interface,
        "exclude", "Estimator of excluded bins" );
 
   if (manage_estimators)
