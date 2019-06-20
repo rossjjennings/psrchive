@@ -392,8 +392,7 @@ void Pulsar::ProfileStats::build () const try
 	 << " computing on-pulse and baseline of profile=" << profile.get() 
 	 << endl;
 
-  all.set_Profile (profile);
-  all.set_all (1.0);
+  all = PhaseWeight (profile.get());
 
   if (include_estimator)
   {
