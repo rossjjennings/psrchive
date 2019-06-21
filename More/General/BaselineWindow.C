@@ -36,6 +36,19 @@ Pulsar::BaselineWindow::BaselineWindow ()
   */
 }
 
+Pulsar::BaselineWindow::BaselineWindow (const BaselineWindow& copy)
+{
+  find_max = copy.find_max;
+  find_mean = copy.find_mean;
+  mean = copy.mean;
+
+  if (copy.smooth)
+    smooth = copy.smooth->clone();
+
+  range_specified = copy.range_specified;
+  search_range = copy.search_range;
+}
+
 Pulsar::BaselineWindow* Pulsar::BaselineWindow::clone () const
 {
   return new BaselineWindow (*this);
@@ -280,10 +293,6 @@ public:
 	 &BaselineWindow::set_smooth,
 	 &Smooth::get_interface,
 	 "smooth", "smoothing algorithm" );
-
-    add( &BaselineWindow::get_find_minimum,
-	 &BaselineWindow::set_find_minimum,
-	 "find_min", "find the minimum" );
 
     add( &BaselineWindow::get_find_minimum,
          &BaselineWindow::set_find_minimum,

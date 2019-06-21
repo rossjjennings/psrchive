@@ -28,6 +28,9 @@ namespace Pulsar {
     //! Default constructor
     BaselineWindow ();
 
+    //! Copy constructor
+    BaselineWindow (const BaselineWindow&);
+
     //! Set the smoothing function
     void set_smooth (Smooth*);
 
