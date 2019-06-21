@@ -272,7 +272,7 @@ string Pulsar::DeleteInterpreter::bin (const string& args) try
     }
 
     double new_period = (period * new_nbin) / nbin;
-    cerr << "setting new folding period = " << new_period;
+    cerr << "setting new folding period = " << new_period << endl;
     subint->set_folding_period (new_period);
 
     for (unsigned ipol=0; ipol < npol; ipol++)
