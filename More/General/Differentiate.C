@@ -10,9 +10,9 @@
 
 using namespace std;
 
-Pulsar::Differentiate::Differentiate ()
+Pulsar::Differentiate::Differentiate (unsigned _span)
 {
-  span = 1;
+  span = _span;
 }
 
 Pulsar::Differentiate::~Differentiate ()

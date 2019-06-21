@@ -23,15 +23,15 @@ namespace Pulsar {
   public:
 
     //! Default constructor
-    Differentiate ();
+    Differentiate (unsigned span = 1);
 
     //! Destructor
     ~Differentiate ();
 
-    //! Set the number of phase bins in the span used to smooth
+    //! Set the phase bin offset added and subtracted from each bin
     void set_span (unsigned);
 
-    //! Get the number of phase bins in the span used to smooth
+    //! Get the phase bin offset added and subtracted from each bin
     unsigned get_span () const;
 
     //! Differentiate the given Profile

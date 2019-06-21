@@ -72,7 +72,7 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
   add_command 
     ( &ProfileInterpreter::difference,
       "difference", "form the difference profile",
-      "usage: difference \n" );
+      "usage: difference [phase] \n" );
 
   add_command 
     ( &ProfileInterpreter::subtract,
@@ -123,8 +123,17 @@ catch (Error& error) {
 }
 
 string Pulsar::ProfileInterpreter::difference (const string& args) try
-{ 
-  foreach (get(), new Differentiate);
+{
+  unsigned span = 1;
+
+  if (args.length())
+  {
+    Phase::Value phase = setup<Phase::Value> (args);
+    phase.set_nbin( get()->get_nbin() );
+    span = phase.get_bin();
+  }
+
+  foreach (get(), new Differentiate(span) );
   return response (Good);
 }
 catch (Error& error) {
