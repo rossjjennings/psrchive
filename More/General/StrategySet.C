@@ -36,9 +36,6 @@ StrategySet::default_baseline
 //! The implementation of the baseline finding algorithm
 ProfileWeightFunction* StrategySet::baseline () const
 {
-  cerr << "StrategySet::baseline this=" << this << " stats=" << get_stats() 
-       << " baseline=" << (void*) get_stats()->get_baseline_estimator() << endl;
-
   return get_stats()->get_baseline_estimator();
 }
 
