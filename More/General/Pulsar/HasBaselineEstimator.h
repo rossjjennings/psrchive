@@ -26,6 +26,9 @@ namespace Pulsar
     //! Default constructor
     HasBaselineEstimator ();
 
+    //! Copy constructor
+    HasBaselineEstimator (const HasBaselineEstimator&);
+
     //! Destructor
     ~HasBaselineEstimator();
 

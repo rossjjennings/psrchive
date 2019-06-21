@@ -34,8 +34,14 @@ namespace Pulsar
     //! Default constructor
     ProfileStats (const Profile* profile = 0);
 
+    //! Copy constructor
+    ProfileStats (const ProfileStats&);
+
     //! Destructor
     ~ProfileStats();
+
+    //! Clone operator
+    ProfileStats* clone () const;
 
     //! The algorithm used to find the included phase bins
     void set_include_estimator (ProfileWeightFunction*);

@@ -28,14 +28,42 @@ Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
 
   width_estimator = new PhaseWidth;
 
+  built = false;
   regions_set = false;
   set_profile (_profile);
+}
+
+Pulsar::ProfileStats::ProfileStats (const ProfileStats& copy) : HasBaselineEstimator (copy)
+{
+  if (copy.onpulse_estimator)
+    onpulse_estimator = copy.onpulse_estimator->clone();
+
+  if (copy.snratio_estimator)
+    snratio_estimator = copy.snratio_estimator->clone();
+
+  if (copy.width_estimator)
+    width_estimator = copy.width_estimator->clone();
+
+  if (copy.include_estimator)
+    include_estimator = copy.include_estimator->clone();
+
+  if (copy.exclude_estimator)
+    exclude_estimator = copy.exclude_estimator->clone();
+
+  built = false;
+  regions_set = false;
 }
 
 //! Destructor
 Pulsar::ProfileStats::~ProfileStats()
 {
 }
+
+Pulsar::ProfileStats* Pulsar::ProfileStats::clone () const
+{
+  return new ProfileStats (*this);
+}
+
 
 //! The algorithm used to find the bins to include
 void Pulsar::ProfileStats::set_include_estimator (ProfileWeightFunction* est)

@@ -18,6 +18,13 @@ Pulsar::HasBaselineEstimator::HasBaselineEstimator ()
   other = 0;
 }
 
+Pulsar::HasBaselineEstimator::HasBaselineEstimator (const HasBaselineEstimator& copy)
+{
+  if (copy.baseline_estimator)
+    baseline_estimator = copy.baseline_estimator->clone();
+  other = 0;
+}
+
 //! Destructor
 Pulsar::HasBaselineEstimator::~HasBaselineEstimator()
 {
