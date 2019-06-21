@@ -54,6 +54,15 @@ namespace Pulsar {
     //! The default implementation of the snr method
     static Option< Reference::To<SNRatioEstimator> > default_snratio;
 
+    //! Default constructor
+    StrategySet ();
+
+    //! Copy constructor
+    StrategySet (const StrategySet&);
+
+    //! Clone
+    StrategySet* clone () const;
+
     //! The implementation of the baseline finding algorithm
     ProfileWeightFunction* baseline () const;
     void set_baseline (ProfileWeightFunction*);
@@ -74,6 +83,8 @@ namespace Pulsar {
     ProfileStats* get_stats () const;
     void set_stats (ProfileStats*);
 
+    //! The Archive::Extension used to clone StrategySet during Archive::copy
+    class Extension;
   };
     
   class Integration;
