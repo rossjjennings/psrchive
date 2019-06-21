@@ -7,7 +7,7 @@
 
 #include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/IntegrationMeta.h"
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/BaselineWindow.h"
@@ -17,6 +17,7 @@
 #include "interface_stream.h"
 
 using namespace Pulsar;
+using namespace std;
 
 /*!  
   The default baseline estimator is the BaselineWindow class
@@ -35,6 +36,9 @@ StrategySet::default_baseline
 //! The implementation of the baseline finding algorithm
 ProfileWeightFunction* StrategySet::baseline () const
 {
+  cerr << "StrategySet::baseline this=" << this << " stats=" << get_stats() 
+       << " baseline=" << (void*) get_stats()->get_baseline_estimator() << endl;
+
   return get_stats()->get_baseline_estimator();
 }
 
@@ -126,6 +130,21 @@ ProfileStats* StrategySet::get_stats () const
   return stats;
 }
 
+StrategySet::StrategySet ()
+{
+}
+
+StrategySet::StrategySet (const StrategySet& copy)
+{
+  if (copy.stats)
+    stats = copy.stats->clone();
+}
+
+StrategySet* StrategySet::clone () const
+{
+  return new StrategySet (*this);
+}
+
 //! Returns the strategy manager
 Profile::Strategies* Profile::get_strategy() const
 {
@@ -155,12 +174,39 @@ Profile::Strategies* Integration::get_strategy() const
   return new StrategySet;
 }
 
+class StrategySet::Extension : public Archive::Extension
+{
+  Reference::To<StrategySet> set;
+
+  public:
+
+    //! Default constructor
+    Extension (StrategySet* _set) : Archive::Extension("StrategySet") { set = _set; }
+
+    //! Copy constructor
+    Extension (const Extension& copy) : Archive::Extension("StrategySet") { set = copy.set->clone(); }
+
+    //! Clone method
+    Extension* clone () const { return new Extension ( *this ); }
+
+    StrategySet* get_strategy() const { return set; }
+};
+
 
 //! Returns the strategy manager
 StrategySet* Archive::get_strategy() const
 {
   if (!strategy)
-    strategy = new StrategySet;
+  {
+    const StrategySet::Extension* ext = get<StrategySet::Extension>();
+    if (ext)
+      strategy = ext->get_strategy();
+    else
+    {
+      strategy = new StrategySet;
+      const_cast<Archive*>(this)->add_extension( new StrategySet::Extension(strategy) );
+    }
+  }
 
   return strategy;
 }
