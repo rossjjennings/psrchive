@@ -116,11 +116,12 @@ void Pulsar::LastHarmonic::build ()
 
   Reference::To<PhaseWeight> baseline = baseline_estimator->baseline (profile);
 
-  Estimate<double> mean = baseline->get_mean ();
   Estimate<double> var = baseline->get_variance ();
   Estimate<double> rms = sqrt(var);
 
 #ifdef _DEBUG
+  Estimate<double> mean = baseline->get_mean ();
+
   cerr << "Pulsar::LastHarmonic::build mean=" << mean
        << " rms=" << rms << endl;
 #endif
