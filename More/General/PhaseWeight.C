@@ -72,7 +72,10 @@ Pulsar::PhaseWeight::operator = (const PhaseWeight& pm)
 {
   weight = pm.weight;
   reference_frequency = pm.reference_frequency;
-  set_Profile (pm.profile);
+
+  if (pm.profile)
+    set_Profile (pm.profile);
+
   return *this;
 }
 
