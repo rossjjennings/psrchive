@@ -132,6 +132,11 @@ void Pulsar::BaselineWindow::set_find_mean (float _mean)
   mean = _mean;
 }
 
+float Pulsar::BaselineWindow::get_find_mean () const
+{
+  return find_mean;
+}
+
 //! Set the start and end bins of the search
 void Pulsar::BaselineWindow::set_range (int start, int end)
 {
@@ -204,6 +209,9 @@ try {
 
   for (unsigned ibin=start; ibin < stop; ibin++)
   {
+    if (!consider(ibin))
+      continue;
+
     float value = temp.get_amps()[ibin%nbin];
 
     if ( find_mean )
@@ -276,6 +284,14 @@ public:
     add( &BaselineWindow::get_find_minimum,
 	 &BaselineWindow::set_find_minimum,
 	 "find_min", "find the minimum" );
+
+    add( &BaselineWindow::get_find_minimum,
+         &BaselineWindow::set_find_minimum,
+         "find_min", "find the minimum" );
+
+    add( &BaselineWindow::get_find_mean,
+         &BaselineWindow::set_find_mean,
+         "find_mean", "find the specified mean" );
 
     add( &BaselineWindow::get_search_range,
 	 &BaselineWindow::set_search_range,
