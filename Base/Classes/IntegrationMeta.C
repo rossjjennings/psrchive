@@ -8,6 +8,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/AuxColdPlasma.h"
+#include "Pulsar/ProfileStrategies.h"
+
 #include "sky_coord.h"
 
 //! Construct from the parent Archive instance

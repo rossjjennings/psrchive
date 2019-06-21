@@ -9,6 +9,7 @@
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/ArchiveMatch.h"
+#include "Pulsar/ProfileStrategies.h"
 
 #include "Pulsar/Agent.h"
 #include "Pulsar/Integration.h"

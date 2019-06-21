@@ -13,7 +13,7 @@
 
 #include "Pulsar/Pulsar.h"
 #include "Pulsar/Container.h"
-#include "Pulsar/ProfileStrategies.h"
+#include "Pulsar/Profile.h"
 
 #include "MJD.h"
 #include "Types.h"
