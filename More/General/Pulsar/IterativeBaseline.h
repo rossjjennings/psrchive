@@ -28,15 +28,13 @@ namespace Pulsar {
     //! Destructor
     ~IterativeBaseline ();
 
-    //! Set the Profile from which baseline PhaseWeight will be computed
-    void set_Profile (const Profile* profile);
-
     //! Set the BaselineEstimator used to find the initial baseline
     void set_initial_baseline (BaselineEstimator*);
     BaselineEstimator* get_initial_baseline () const;
 
     //! Set the threshold below which samples are included in the baseline
     virtual void set_threshold (float sigma);
+    float get_threshold () const { return threshold; }
 
     //! Set the maximum number of iterations
     void set_max_iterations (unsigned iterations);

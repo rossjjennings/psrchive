@@ -67,12 +67,6 @@ void Pulsar::IterativeBaseline::set_max_iterations (unsigned iterations)
 }
 
 
-void Pulsar::IterativeBaseline::set_Profile (const Profile* _profile)
-{
-  profile = _profile;
-}
-
-
 void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 {
 #ifndef _DEBUG
