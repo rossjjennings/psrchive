@@ -61,6 +61,7 @@ nobase_include_HEADERS = \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
 	Pulsar/InterpreterExtension.h \
+	Pulsar/IQRBaseline.h \
         Pulsar/IterativeBaseline.h \
 	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
@@ -210,6 +211,7 @@ libGeneral_la_SOURCES = \
 	IntegrationBarycentre.C \
 	IntegrationWeight.C \
 	Interpreter.C \
+	IQRBaseline.C \
         IterativeBaseline.C \
 	LastHarmonic.C \
         LastSignificant.C \

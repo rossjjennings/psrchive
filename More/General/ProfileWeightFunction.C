@@ -10,6 +10,7 @@
 #include "Pulsar/Profile.h"
 
 using namespace Pulsar;
+using namespace std;
 
 Pulsar::ProfileWeightFunction::ProfileWeightFunction ()
 {
@@ -72,6 +73,7 @@ bool Pulsar::ProfileWeightFunction::consider (unsigned ibin) const
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/ExponentialBaseline.h"
 #include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/IQRBaseline.h"
 
 Pulsar::ProfileWeightFunction* 
 Pulsar::ProfileWeightFunction::factory (const std::string& name_parse)
@@ -86,6 +88,7 @@ Pulsar::ProfileWeightFunction::factory (const std::string& name_parse)
 
   instances.push_back( new ExponentialBaseline );
   instances.push_back( new GaussianBaseline );
+  instances.push_back( new IQRBaseline );
   instances.push_back( new BaselineWindow );
 
   return TextInterface::factory<ProfileWeightFunction> (instances, name_parse);
