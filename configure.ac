@@ -53,8 +53,7 @@ SWIN_COMPILER
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 # Create static libraries by default
-AC_DISABLE_SHARED
-AC_SUBST(enable_shared)
+LT_INIT([disable-shared])
 
 # Ensure that SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
@@ -70,7 +69,6 @@ AC_PROG_CXXCPP
 AM_PROG_CC_C_O
 
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
 
 AC_F77_WRAPPERS
 AC_F77_LIBRARY_LDFLAGS
@@ -158,7 +156,12 @@ if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   Please see http://psrchive.sourceforge.net/third/fftw
 
-  or simply run ./packages/fftw.csh to install FFTW automatically
+  or simply run the following commands to install FFTW automatically
+
+  cd packages && make && cd -
+  ./packages/fftw.csh
+
+  then re-run the configure script.
 ])
 fi
 
@@ -171,7 +174,12 @@ if test x"$have_epsic" = xno; then
 
   Please see http://psrchive.sourceforge.net/third/epsic
 
-  or simply run ./packages/epsic.csh to install EPSIC automatically
+  or simply run the following commands to install EPSIC automatically
+
+  cd packages && make && cd -
+  ./packages/epsic.csh
+
+  then re-run the configure script.
 ])
 fi
 
@@ -355,18 +363,6 @@ if test x"$have_pgplot" != xyes; then
    echo "The PGPLOT library was not found: (desirable)"
    echo "  PSRCHIVE applications will not be able to plot."
    echo "  Run ./packages/pgplot.csh to automatically install."
-fi
-
-if test x"$have_qt" != xyes; then
-   echo
-   echo "The Qt library was not found: (optional)"
-   echo "  PSRCHIVE graphical user interfaces will not be compiled."
-fi
-
-if test x"$have_qtdriv" != xyes; then
-   echo
-   echo "The qtdriv device handler is not installed: (optional)"
-   echo "  rhythm will not be compiled."
 fi
 
 fi
