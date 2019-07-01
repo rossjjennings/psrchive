@@ -54,6 +54,7 @@ void usage ()
     "  -e extension filename extension added to output archives\n"
     "  -O path      directory in which output will be written \n"
     "  -f           fix the type and name attributes, based on coordinates\n"
+    "  -g           assume that on-source gain equals off-source gain \n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "  -I freq_mhz  Print all cal sources fluxes at the given frequency\n"
     "  -K sigma     Reject outliers when computing CAL levels \n"
