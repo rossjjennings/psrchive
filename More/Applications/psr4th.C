@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 - 2014 by Willem van Straten
+ *   Copyright (C) 2008 - 2016 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -87,6 +87,9 @@ protected:
   unsigned histogram_el;
   float histogram_threshold;
   bool cross_covariance;
+
+  bool total_baseline;
+  bool each_baseline;
   
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -121,6 +124,8 @@ psr4th::psr4th ()
   histogram_el = 0;
   histogram_threshold = 3.0;
   cross_covariance = false;
+
+  total_baseline = each_baseline = false;
 }
 
 
@@ -150,6 +155,12 @@ void psr4th::add_options (CommandLine::Menu& menu)
   arg = menu.add (cross_covariance, "c");
   arg->set_help ("compute the cross covariances between phase bins");
 
+  arg = menu.add (total_baseline, "B");
+  arg->set_help ("remove the baseline, found from integrated total");
+
+  arg = menu.add (each_baseline, "b");
+  arg->set_help ("remove the baseline, found from each sub-integration");
+
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
   // arg->set_help ("set the source name to 'string'");
@@ -170,7 +181,7 @@ void psr4th::process (Pulsar::Archive* archive)
 
   archive->convert_state( Signal::Stokes );
 
-  if (histogram_pa || histogram_el)
+  if (total_baseline)
     archive->remove_baseline();
   
   if (!output)
@@ -214,6 +225,9 @@ void psr4th::process (Pulsar::Archive* archive)
     {
       if (subint->get_weight(ichan) == 0)
         continue;
+
+      if (each_baseline)
+        subint->remove_baseline();
 
       Reference::To<Pulsar::PolnProfile> profile 
 	= subint->new_PolnProfile (ichan);
@@ -352,6 +366,7 @@ void psr4th::finalize()
       
       Stokes<double> mean = results[ichan].get_mean (ibin);
 
+#if 0
       /*
 	Normalize the covariance matrix so that it represents the
 	covariances of the mean Stokes parameters (as opposed to the
@@ -361,6 +376,7 @@ void psr4th::finalize()
 	off-pulse baselines of the variances of the Stokes parameters.
       */
       covar /= results[ichan].count;
+#endif
 
       unsigned index=0;
       for (unsigned i=0; i<4; i++)
