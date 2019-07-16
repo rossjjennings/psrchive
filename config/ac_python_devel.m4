@@ -37,7 +37,7 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 
 	# Check for numpy
 	AC_MSG_CHECKING([for Numpy include path])
-	numpy_include=`$PYTHON -c "import numpy; print numpy.get_include()"`
+	numpy_include=`$PYTHON -c "import numpy; print(numpy.get_include())"`
 	AC_MSG_RESULT([$numpy_include])
 	if test -z "$numpy_include" ; then
 		AC_MSG_ERROR([cannot find Numpy include path])
@@ -70,7 +70,7 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 	AC_MSG_CHECKING(python extra libraries)
 	PYTHON_EXTRA_LIBS=`$PYTHON -c "import distutils.sysconfig; \
                 conf = distutils.sysconfig.get_config_var; \
-                print conf('LOCALMODLIBS')+' '+conf('LIBS')"
+                print(conf('LOCALMODLIBS')+' '+conf('LIBS'))"
 	AC_MSG_RESULT($PYTHON_EXTRA_LIBS)`
 	AC_SUBST(PYTHON_EXTRA_LIBS)
 ])
