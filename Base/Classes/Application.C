@@ -171,6 +171,9 @@ void Pulsar::Application::run ()
 
     process (archive);
 
+    if (!finish())
+      continue;
+
     if (result())
       archive = result();
 

@@ -81,6 +81,9 @@ namespace Pulsar {
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;
 
+    //! Return true if Options::finish tasks should be run after process
+    virtual bool finish () { return true; }
+
     //! Return pointer to new result constructed by process method
     /*! 
       The result method was added to enable out-of-place process
