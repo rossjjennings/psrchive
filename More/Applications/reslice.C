@@ -39,7 +39,7 @@ public:
   //! Return true if finished archive is ready for unloading 
   bool finish () { return finished; }
 
-  virtual Archive* result () { return finished.release(); }
+  virtual Archive* result () { if (!finished) return 0; return finished; }
 
 protected:
 
@@ -154,16 +154,12 @@ void reslice::process (Archive* archive)
 
   else
   {
-    if (finished)
-      throw Error (InvalidState, "reslice::process",
-		   "last finished archive was not released");
-
     unsigned nsub = unfinished->get_nsubint();
 
     copy_shift (unfinished->get_Integration(nsub-1), 
 		archive->get_Integration(0));
 
-    finished = unfinished.release();
+    finished = unfinished;
   }
 
   unsigned nsub = archive->get_nsubint();
