@@ -691,7 +691,10 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'a':
-      alignment_threshold = atof (optarg);
+      if (optarg[0] == '@')
+	auto_alignment_threshold = atof (optarg+1);
+      else
+	alignment_threshold = atof (optarg);
       break;
 
     case 'B':
