@@ -356,6 +356,9 @@ bool shared_phase = false;
 // significance of phase shift required to fail test
 float alignment_threshold = 4.0; // sigma
 
+// significance of phase shift required to automatically rotate in phase
+float auto_alignment_threshold = 0.0; // sigma
+
 // total instensity profile of first archive, used to check for phase jumps
 Reference::To<Pulsar::Profile> phase_std;
 
@@ -1134,12 +1137,20 @@ int actual_main (int argc, char *argv[]) try
 
       double abs_shift = fabs( shift.get_value() );
 
-      /* if the shift is greater than 1 phase bin and significantly
-	 more than the error, then there may be a problem */
-
-      if( abs_shift > 1.0 / phase_std->get_nbin() &&
-	  abs_shift > alignment_threshold * shift.get_error() )
+      if ( auto_alignment_threshold &&
+	   abs_shift > auto_alignment_threshold * shift.get_error() )
       {
+	cerr << "pcm: phase shifting observation to match reference" << endl;
+	archive->rotate_phase( shift.get_value() );
+      }
+
+      else if ( abs_shift > 1.0 / phase_std->get_nbin() &&
+		abs_shift > alignment_threshold * shift.get_error() )
+      {
+
+	/* if the shift is greater than 1 phase bin and significantly
+	   more than the error, then there may be a problem */
+
 	cerr << endl <<
 	  "pcm: ERROR apparent phase shift between input archives\n"
 	  "\tshift = " << shift.get_value() << " +/- " << shift.get_error () <<
@@ -1153,7 +1164,8 @@ int actual_main (int argc, char *argv[]) try
     catch (Error& error)
     {
       cerr << "pcm: ERROR while testing phase shift\n" << error << endl;
-      return -1;
+      archive = 0;
+      continue;
     }
 
     if (alignment_threshold && !phase_std)
@@ -1164,25 +1176,6 @@ int actual_main (int argc, char *argv[]) try
       Reference::To<Archive> temp = archive->total();
       phase_std = temp->get_Profile (0,0,0);	
     }
-
-#if 0
-
-    MIGHT WANT TO MAKE PCM AUTO-ALIGN WHEN THE EPHEMERIS IS NO GOOD
-
-  if (phase_align)
-  {
-    Reference::To<Pulsar::Archive> standard;
-    standard = total->total();
-    Pulsar::Profile* std = standard->get_Profile(0,0,0);
-    
-    Reference::To<Pulsar::Archive> observation;
-    observation = archive->total();
-    Pulsar::Profile* obs = observation->get_Profile(0,0,0);
-    
-    archive->rotate_phase( obs->shift(std).get_value() );
-  }
-
-#endif
 
     if (fscrunch_data_to_template &&
 	model->get_nchan() != archive->get_nchan())
