@@ -21,20 +21,28 @@ namespace Pulsar {
     Reference::To<const Archive,false> archive;
     unsigned subint;
     unsigned chan;
+    std::string description;
+    bool built;
 
   public:
 
+    //! Default constructor
+    VariableTransformation ();
+
     //! Set the Archive for which a tranformation will be computed
-    virtual void set_archive (const Archive* _archive) { archive = _archive; }
+    virtual void set_archive (const Archive* _archive);
 
     //! Set the sub-integration for which a tranformation will be computed
-    virtual void set_subint (unsigned _subint) { subint = _subint; }
+    virtual void set_subint (unsigned _subint);
 
     //! Set the frequency channel for which a tranformation will be computed
-    virtual void set_chan (unsigned _chan) { chan = _chan; }
+    virtual void set_chan (unsigned _chan);
 
     //! Get the transformation
     virtual Jones<double> get_transformation () = 0;
+
+    //! Get the description of the transformation
+    virtual std::string get_description () const { return description; }
   };
 }
 
