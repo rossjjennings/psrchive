@@ -39,6 +39,7 @@ nobase_include_HEADERS = \
         Pulsar/IRIonosphere.h \
 	Pulsar/IXRInfo.h \
         Pulsar/ManualPolnCalibrator.h \
+	Pulsar/ManualVariableTransformation.h \
         Pulsar/MeanCoherency.h \
         Pulsar/MeanFeed.h \
         Pulsar/MeanInstrument.h \
@@ -94,6 +95,7 @@ nobase_include_HEADERS = \
 	Pulsar/UnloadJones.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
+	Pulsar/VariableTransformation.h \
 	Pulsar/VariationInfo.h
 
 libPolarimetry_la_SOURCES = \
@@ -141,6 +143,7 @@ libPolarimetry_la_SOURCES = \
         IRIonosphere.C \
 	IXRInfo.C \
 	ManualPolnCalibrator.C \
+	ManualVariableTransformation.C \
         MeanCoherency.C \
         MeanFeed.C \
         MeanInstrument.C \
