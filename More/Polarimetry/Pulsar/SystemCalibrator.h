@@ -26,6 +26,7 @@ namespace Pulsar
   class ReferenceCalibrator;
   class FluxCalibrator;
   class CalibratorStokes;
+  class VariableTransformation;
 
   //! PolnCalibrator with estimated calibrator Stokes parameters
   /*! The SystemCalibrator is the virtual base class of polarization
@@ -92,6 +93,9 @@ namespace Pulsar
 
     //! Set the impurity transformation
     virtual void set_impurity( MEAL::Real4* );
+
+    //! Set the projection transformation
+    virtual void set_projection( VariableTransformation* );
 
     //! Set the time variation of absolute gain
     virtual void set_gain( MEAL::Univariate<MEAL::Scalar>* );
@@ -234,6 +238,9 @@ namespace Pulsar
     //! The FluxCalibrator solution
     Reference::To<const FluxCalibrator> flux_calibrator;
     
+    //! The projection transformation (overrides ProjectionCorrection)
+    Reference::To<VariableTransformation> projection;
+
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 

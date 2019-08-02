@@ -11,6 +11,7 @@
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/ProjectionCorrection.h"
+#include "Pulsar/VariableTransformation.h"
 
 #include "Pulsar/Faraday.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
@@ -386,17 +387,11 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   MJD epoch = integration->get_epoch ();
   add_epoch (epoch);
 
-  // use the ProjectionCorrection class to calculate the transformation
-  ProjectionCorrection correction;
-  correction.set_archive (data);
-  Jones<double> projection = correction (isub);
+  projection->set_archive(data);
+  projection->set_subint(isub);
 
   if (report_projection || verbose)
-    cerr << correction.get_summary ();
-
-  if (verbose)
-    cerr << "Pulsar::SystemCalibrator::add_pulsar isub=" << isub
-         << "\n\t projection=" << projection << endl;
+    cerr << projection->get_description ();
 
   // correct ionospheric Faraday rotation
   Reference::To<Faraday> iono_faraday;
@@ -458,8 +453,9 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     
     // epoch abscissa
     Argument::Value* time = model[mchan]->time.new_Value( epoch );
-    
-    Jones<double> known = projection;
+
+    projection->set_chan (ichan);
+    Jones<double> known = projection->get_transformation();
 
     if (iono_faraday)
     {
@@ -498,7 +494,8 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     catch (Error& error)
     {
       if (verbose > 2 || error.get_code() != InvalidParam)
-        cerr << "Pulsar::SystemCalibrator::add_pulsar error" << error << endl;
+	cerr << "Pulsar::SystemCalibrator::add_pulsar ichan=" << ichan
+	     << "error" << error << endl;
     }
     
     model[mchan]->add_observation_epoch (epoch);
@@ -509,10 +506,14 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     cerr << "Pulsar::SystemCalibrator::add_pulsar ichan="
 	 << ichan << " error\n" << error.get_message() << endl;
   }
-  
+
+  if (verbose > 2)
+    cerr << "Pulsar::SystemCalibrator::add_pulsar subint exit" << endl;
 }
 catch (Error& error)
 {
+  cerr << "Pulsar::SystemCalibrator::add_pulsar error" << error << endl;
+
   throw error += "Pulsar::SystemCalibrator::add_pulsar subint";
 }
 
