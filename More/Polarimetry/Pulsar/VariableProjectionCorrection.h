@@ -17,12 +17,24 @@ namespace Pulsar {
   //! Adapts a VariableTransformation to a ProjectionCorrection
   class VariableProjectionCorrection : public VariableTransformation
   {
-    ProjectionCorrection correction;
+    mutable ProjectionCorrection correction;
+    mutable Jones<double> transformation;
+
+    void build () const;
 
   public:
 
     //! Get the transformation
-    virtual Jones<double> get_transformation ();
+    Jones<double> get_transformation ();
+
+    //! Return true if the transformation is required
+    bool required () const;
+
+    //! Return the description
+    std::string get_description () const;
+
+    //! Set the frequency channel index
+    void set_chan (unsigned);
   };
 }
 

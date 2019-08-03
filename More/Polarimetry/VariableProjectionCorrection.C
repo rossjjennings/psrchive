@@ -13,8 +13,41 @@ using namespace Pulsar;
 
 Jones<double> VariableProjectionCorrection::get_transformation ()
 {
+  if (!built)
+    build ();
+
+  return transformation;
+}
+
+bool VariableProjectionCorrection::required () const
+{
+  if (!built)
+    build ();
+
+  return correction.required (subint);
+}
+
+std::string VariableProjectionCorrection::get_description() const
+{
+  if (!built)
+    build ();
+
+  return description;
+}
+
+void VariableProjectionCorrection::build () const
+{
+  if (built)
+    return;
+
   // use the ProjectionCorrection class to calculate the transformation
   correction.set_archive (archive);
+  transformation = correction (subint);
   description = correction.get_summary();
-  return correction (subint);
 }
+
+void VariableProjectionCorrection::set_chan (unsigned)
+{
+  // ignore (this override disables resetting the built flag)
+}
+

@@ -21,7 +21,8 @@ namespace Pulsar {
     Reference::To<const Archive,false> archive;
     unsigned subint;
     unsigned chan;
-    std::string description;
+
+    mutable std::string description;
     bool built;
 
   public:
@@ -43,6 +44,10 @@ namespace Pulsar {
 
     //! Get the description of the transformation
     virtual std::string get_description () const { return description; }
+
+    //! Return true if the transformation is required
+    virtual bool required () const { return true; }
+
   };
 }
 
