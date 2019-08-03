@@ -10,8 +10,7 @@
 
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/BasisCorrection.h"
-#include "Pulsar/ProjectionCorrection.h"
-#include "Pulsar/VariableTransformation.h"
+#include "Pulsar/VariableProjectionCorrection.h"
 
 #include "Pulsar/Faraday.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
@@ -71,6 +70,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   report_input_data = false;
 
   outlier_threshold = 0.0;
+
+  projection = new VariableProjectionCorrection;
   
   if (archive)
     set_calibrator (archive);
@@ -85,6 +86,11 @@ void Pulsar::SystemCalibrator::set_calibrator (const Archive* archive)
 
   extension = archive->get<const PolnCalibratorExtension>();
   calibrator_stokes = archive->get<const CalibratorStokes>();
+}
+
+void Pulsar::SystemCalibrator::set_projection (VariableTransformation* _projection)
+{
+  projection = _projection;
 }
 
 //! Return true if least squares minimization solvers are available
@@ -1534,9 +1540,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
   vector< Jones<float> > response (nchan);
 
-  // use the ProjectionCorrection class to calculate the transformation
-  ProjectionCorrection correction;
-  correction.set_archive (data);
+  projection->set_archive (data);
 
   bool projection_corrected = false;
 
@@ -1547,10 +1551,10 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
   {
     Integration* integration = data->get_Integration (isub);
 
-    if (correction.required (isub))
-      projection_corrected = true;
+    projection->set_subint (isub);
 
-    Jones<double> projection = correction (isub);
+    if (projection->required ())
+      projection_corrected = true;
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
@@ -1608,7 +1612,10 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
       }
 
       if ( data->get_type() == Signal::Pulsar )
-	response[ichan] *= projection;
+      {
+        projection->set_chan (ichan);
+	response[ichan] *= projection->get_transformation();
+      }
 
       response[ichan] = inv( response[ichan] );
     }
