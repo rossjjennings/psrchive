@@ -35,7 +35,7 @@ std::string VariableProjectionCorrection::get_description() const
   return description;
 }
 
-void VariableProjectionCorrection::build () const
+void VariableProjectionCorrection::build () const try
 {
   if (built)
     return;
@@ -44,6 +44,10 @@ void VariableProjectionCorrection::build () const
   correction.set_archive (archive);
   transformation = correction (subint);
   description = correction.get_summary();
+}
+catch (Error& error)
+{
+  throw error += "VariableProjectionCorrection::build";
 }
 
 void VariableProjectionCorrection::set_chan (unsigned)

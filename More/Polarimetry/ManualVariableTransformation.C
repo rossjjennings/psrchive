@@ -10,6 +10,11 @@
 
 using namespace Pulsar;
 
+ManualVariableTransformation::ManualVariableTransformation (ManualPolnCalibrator* _calibrator)
+{
+  calibrator = _calibrator;
+}
+
 Jones<double> ManualVariableTransformation::get_transformation ()
 {
   MJD epoch = archive->get_Integration(subint)->get_epoch();

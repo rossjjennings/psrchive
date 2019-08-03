@@ -18,7 +18,7 @@ VariableTransformation::VariableTransformation ()
 //! Set the Archive for which a tranformation will be computed
 void VariableTransformation::set_archive (const Archive* _archive) 
 {
-  if (archive != _archive)
+  if (archive && archive != _archive)
     built = false;
  
   archive = _archive;
@@ -41,3 +41,4 @@ void VariableTransformation::set_chan (unsigned _chan)
 
   chan = _chan;
 }
+

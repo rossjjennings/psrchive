@@ -15,6 +15,10 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
+
+#include "Pulsar/ManualVariableTransformation.h"
+#include "Pulsar/ManualPolnCalibrator.h"
+
 #include "Pulsar/SystemCalibratorUnloader.h"
 
 #include "Pulsar/Database.h"
@@ -71,7 +75,8 @@ void usage ()
     "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
     "  -m model   receiver model name: e.g. bri00e19 or van04e18 [default]\n"
     "  -l solver  solver: MEAL [default] of GSL \n"
-    "  -I impure  load impurity transformation from file \n"
+    "  -I fname   load impurity transformation from file \n"
+    "  -P fname   load projection transformations from file \n"
     "  -x         estimate calibrator Stokes parameter using fluxcal solution \n"
     "  -y         always trust the Pointing::feed_angle attribute \n"
     "  -Z         ignore the sky coordinates of PolnCal observations \n"
@@ -145,7 +150,7 @@ void usage ()
 SystemCalibrator* measurement_equation_modeling (const char* binname,
 						 unsigned nbin);
 
-// Construct a calibrator model for MTM mode
+// Construct a calibrator model for METM mode
 SystemCalibrator* matrix_template_matching (const char* stdname);
 
 // Plot the various components of the model
@@ -405,6 +410,7 @@ int main (int argc, char *argv[])
   return ret;
 }
 
+Reference::To< Pulsar::VariableTransformation > projection;
 Reference::To< MEAL::Real4 > impurity;
 Reference::To< MEAL::Complex2 > response;
 
@@ -853,7 +859,7 @@ int actual_main (int argc, char *argv[]) try
     }
 
     case 'P':
-      publication_plots = true;
+      projection = new ManualVariableTransformation( new ManualPolnCalibrator(optarg) );
       break;
 
     case 'p':
@@ -1076,6 +1082,9 @@ int actual_main (int argc, char *argv[]) try
 
       if (impurity)
 	model->set_impurity( impurity );
+
+      if (projection)
+        model->set_projection( projection );
 
       if (gain_variation)
 	model->set_gain( gain_variation );
