@@ -19,5 +19,5 @@ fi
 
 ID=`git log -1 --format='(%cd %h)' --date=short 2>/dev/null || echo ''`
 sed "s/PSRCHIVEGITHASH/$ID/" $1 > $DEST
-chmod 755 $2/$DEST
+chmod 755 $DEST
 
