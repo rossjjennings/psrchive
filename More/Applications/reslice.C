@@ -37,9 +37,12 @@ public:
   void process (Archive*);
 
   //! Return true if finished archive is ready for unloading 
-  bool finish () { return finished; }
+  bool do_finish () { return finished; }
 
   virtual Archive* result () { if (!finished) return 0; return finished; }
+
+  //! Output any finished sub-integrations in partially finished archive
+  void finalize ();
 
 protected:
 
@@ -175,6 +178,16 @@ void reslice::process (Archive* archive)
   }
 
   unfinished = archive;
+}
+
+void reslice::finalize ()
+{
+  if (unfinished && unfinished->get_nsubint() > 1)
+  { 
+    // the last sub-integration is only partially finished
+    unfinished->resize( unfinished->get_nsubint() - 1 );
+    finish (unfinished);
+  }
 }
 
 /*!
