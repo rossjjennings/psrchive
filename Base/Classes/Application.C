@@ -142,7 +142,7 @@ void Pulsar::Application::parse (int argc, char** argv)
 
 }
 
-Pulsar::Archive * Pulsar::Application::load (const string& filename)
+Pulsar::Archive* Pulsar::Application::load (const string& filename)
 {
   Reference::To<Archive> archive;
   archive = Archive::load (filename);
@@ -171,31 +171,35 @@ void Pulsar::Application::run ()
 
     process (archive);
 
-    if (!finish())
+    if (!do_finish())
       continue;
 
     if (result())
       archive = result();
 
-    if (update_history)
-    {
-      ProcHistory * fitsext = archive->get<ProcHistory> ();
-      if (fitsext)
-	fitsext->set_command_str (command);
-    }
-
-    for (unsigned i=0; i<options.size(); i++)
-    {
-      if (very_verbose)
-	cerr << "Pulsar::Application::main feature "<< i <<" finish" << endl;
-      options[i]->finish (archive);
-    }
-
+    finish (archive);
   }
   catch (Error& error)
   {
     cerr << name << ": error while processing " << filenames[ifile] << ":";
     cerr << error << endl;
+  }
+}
+
+void Pulsar::Application::finish (Archive* archive)
+{
+  if (update_history)
+  {
+    ProcHistory * fitsext = archive->get<ProcHistory> ();
+    if (fitsext)
+      fitsext->set_command_str (command);
+  }
+
+  for (unsigned i=0; i<options.size(); i++)
+  {
+    if (very_verbose)
+      cerr << "Pulsar::Application::finish feature " << i << endl;
+    options[i]->finish (archive);
   }
 }
 

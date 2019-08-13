@@ -82,7 +82,7 @@ namespace Pulsar {
     virtual void process (Archive*) = 0;
 
     //! Return true if Options::finish tasks should be run after process
-    virtual bool finish () { return true; }
+    virtual bool do_finish () { return true; }
 
     //! Return pointer to new result constructed by process method
     /*! 
@@ -90,6 +90,9 @@ namespace Pulsar {
       methods without changing the interface of the base class.
     */
     virtual Archive* result () { return 0; }
+
+    //! Finishing work performed on each output archive
+    virtual void finish (Archive*);
 
     //! Any final work after main loop finishes
     virtual void finalize ();
