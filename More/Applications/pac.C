@@ -729,7 +729,10 @@ int main (int argc, char *argv[]) try
     bool successful_polncal = false;
 
     if (do_polncal && arch->get_poln_calibrated() )
+    {
       cout << "pac: " << filenames[i] << " already poln calibrated" << endl;
+      successful_polncal = true;
+    }
 
     else if (do_polncal && !arch->get_poln_calibrated())
     {
