@@ -48,3 +48,21 @@ void Pulsar::MultiData::configure (const std::string& option)
   options.push_back (option);
 }
 
+//! Set the pre-processor
+void Pulsar::MultiData::set_preprocessor (Processor* processor)
+{
+  managed_plot->set_preprocessor (processor);
+}
+
+//! Get the pre-processor
+Pulsar::Processor* Pulsar::MultiData::get_preprocessor ()
+{
+  return managed_plot->get_preprocessor ();
+}
+
+//! Return true if pre-processor has been set
+bool Pulsar::MultiData::has_preprocessor () const
+{
+  return managed_plot->has_preprocessor ();
+}
+

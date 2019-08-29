@@ -61,13 +61,13 @@ namespace Pulsar {
     Constructor* get_constructor ();
 
     //! Set the pre-processor
-    void set_preprocessor (Processor*);
+    virtual void set_preprocessor (Processor*);
 
     //! Get the pre-processor
-    Processor* get_preprocessor ();
+    virtual Processor* get_preprocessor ();
 
     //! Return true if pre-processor has been set
-    bool has_preprocessor () const;
+    virtual bool has_preprocessor () const;
 
   private:
 

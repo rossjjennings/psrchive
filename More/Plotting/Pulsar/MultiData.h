@@ -39,6 +39,15 @@ namespace Pulsar {
     //! Process a configuration command and store it for later use
     void configure (const std::string& option);
 
+    //! Set the pre-processor
+    void set_preprocessor (Processor*);
+
+    //! Get the pre-processor
+    Processor* get_preprocessor ();
+
+    //! Return true if pre-processor has been set
+    bool has_preprocessor () const;
+
   protected:
 
     //! The plot that is managed by this instance
