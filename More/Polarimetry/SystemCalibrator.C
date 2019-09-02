@@ -48,6 +48,8 @@ using namespace Calibration;
 */
 Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
+  solve_in_reverse_channel_order = false;
+
   correct_interstellar_Faraday_rotation = false;
 
   refcal_through_frontend = true;
@@ -1306,35 +1308,55 @@ void Pulsar::SystemCalibrator::solve ()
 
   unsigned nchan = get_nchan ();
 
+  vector<unsigned> order (nchan);
+  if (solve_in_reverse_channel_order)
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      order[ichan] = nchan - ichan - 1;
+  else
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      order[ichan] = ichan;
+
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    if (!model[ichan]->get_valid())
+    if (!model[ order[ichan] ]->get_valid())
     {
-      cerr << "channel " << ichan << " flagged invalid" << endl;
+      cerr << "channel " << order[ichan] << " flagged invalid" << endl;
       continue;
     }
 
-    queue.submit( model[ichan].get(), &SignalPath::solve );
+    queue.submit( model[ order[ichan] ].get(), &SignalPath::solve );
   }
 
   queue.wait ();
 
-  unsigned resolve_singular = 1;
+  unsigned retried = 1;
 
-  while (resolve_singular)
+  while (retried)
   {
-    resolve_singular = 0;
+    retried = 0;
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      if (!get_solver(ichan)->get_singular())
-	continue;
+      Solver* solver = get_solver( order[ichan] );
 
-      if (model[ichan]->reduce_nfree())
+      bool to_retry = false;
+
+      if (solver->get_singular())
       {
-	cerr << "retry singular channel " << ichan << endl;
-	resolve (ichan);
-	resolve_singular ++;
+        cerr << "retry singular channel " << order[ichan] << endl;
+        to_retry = true;
+      }
+
+      if (solver->get_iterations() >= solver->get_maximum_iterations()) 
+      {
+        cerr << "retry max iterations channel " << order[ichan] << endl;
+        to_retry = true;
+      }
+
+      if (to_retry && model[ order[ichan] ]->reduce_nfree())
+      {
+	resolve (order[ichan]);
+	retried ++;
       }
     }
 
@@ -1346,17 +1368,17 @@ void Pulsar::SystemCalibrator::solve ()
     // attempt to fix up any channels that didn't converge well
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      if (!model[ichan]->get_valid())
+      if (!model[ order[ichan] ]->get_valid())
 	continue;
 
-      float reduced_chisq = get_reduced_chisq (ichan);
+      float reduced_chisq = get_reduced_chisq ( order[ichan] );
 
       if (reduced_chisq > retry_chisq)
       {
-	cerr << "try for better fit in ichan=" << ichan 
+	cerr << "try for better fit in ichan=" << order[ichan]
 	     << " chisq/nfree=" << reduced_chisq << endl;
 
-	resolve (ichan);
+	resolve ( order[ichan] );
       }
     }
 
@@ -1448,7 +1470,7 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
       unsigned free = equation->get_solver()->get_nfree ();
       float reduced_chisq = chisq/free;
 
-      if (reduced_chisq > retry_chisq)
+      if (retry_chisq > 0.0 && reduced_chisq > retry_chisq)
       {
 #ifdef _DEBUG
         cerr << "not good; reduced chisq=" << reduced_chisq << endl;
@@ -1456,10 +1478,18 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 	continue;
       }
 
-      cerr << "copying solution from jchan=" << jchan 
+      cerr << "copying solution from chan=" << jchan 
 	   << " chisq/nfree=" << reduced_chisq << endl;
 
-      model[ichan]->get_equation()->copy_fit( equation );      
+      try {
+        model[ichan]->copy( model[jchan] );
+      }
+      catch (Error& error)
+      {
+        cerr << "copy failed: " << error.get_message() << endl;
+        continue;
+      }
+
       queue.submit( model[ichan].get(), &SignalPath::solve );
 
       return;

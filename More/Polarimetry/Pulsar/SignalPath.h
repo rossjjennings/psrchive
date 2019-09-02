@@ -45,6 +45,9 @@ namespace Calibration
     //! Default constructor
     SignalPath (Pulsar::Calibrator::Type*);
 
+    //! Copy the state of another instance
+    void copy (SignalPath*);
+
     //! Set the response transformation
     void set_response (MEAL::Complex2*);
 

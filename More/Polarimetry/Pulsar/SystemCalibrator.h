@@ -314,6 +314,9 @@ namespace Pulsar
     //! Epoch of the last observation
     MJD end_epoch;
 
+    //! Solve measurement equations in reverse channel order
+    bool solve_in_reverse_channel_order;
+
     //! Include a correction for Faraday rotation in the ISM
     bool correct_interstellar_Faraday_rotation;
     

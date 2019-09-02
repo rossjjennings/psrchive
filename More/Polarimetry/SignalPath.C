@@ -57,6 +57,11 @@ Calibration::SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
+void Calibration::SignalPath::copy (SignalPath* other)
+{
+  equation->copy_fit( other->equation );
+}
+
 void Calibration::SignalPath::set_valid (bool f, const char* reason)
 {
   valid = f;
