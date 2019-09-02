@@ -32,6 +32,9 @@ namespace MEAL {
     //! Set the maximum number of iterations in fit algorithm
     void set_maximum_iterations (unsigned maximum_iterations);
 
+    //! Get the maximum number of iterations in fit algorithm
+    unsigned get_maximum_iterations () const { return maximum_iterations; }
+
     //! Set the convergence threshold as an absolute value of chisq
     void set_convergence_chisq (float chisq);
 
