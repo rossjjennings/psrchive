@@ -165,6 +165,8 @@ namespace Pulsar {
 		    const Estimate<double>& cal_lo);
 
     Estimate<double> get_gain_ratio (unsigned ireceptor);
+    Estimate<double> get_gain (unsigned ireceptor);
+    Estimate<double> get_gain ();
     
   protected:
     
@@ -183,13 +185,13 @@ namespace Pulsar {
 		  Estimate<double>& S_cal,
 		  Estimate<double>& S_sys);
 
-    std::vector< Estimate<double> > gain_ratio;
+    std::vector< Estimate<double> > gain_hi;
+    std::vector< Estimate<double> > gain_lo;
     
   private:
     
     /* 
        Use the ScalarMath class to calculate the variances.
-       These are static because they cost a bit during construction.
     */
     MEAL::ScalarParameter ratio_hi;
     MEAL::ScalarParameter ratio_lo;

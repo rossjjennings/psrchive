@@ -98,14 +98,33 @@ void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
     valid = false;
   }
   
-  gain_ratio.resize( get_nreceptor() );
+  gain_hi.resize( get_nreceptor() );
+  gain_lo.resize( get_nreceptor() );
 
-  gain_ratio[ireceptor] = (hi_on - hi_off) / (lo_on - lo_off); 
+  gain_hi[ireceptor] = (hi_on - hi_off) / S_std_i;
+  gain_lo[ireceptor] = (lo_on - lo_off) / S_std_i; 
 }
 
 
 Estimate<double> FluxCalibrator::ConstantGain::get_gain_ratio (unsigned ir)
 {
-  return gain_ratio.at(ir);
+  return gain_hi.at(ir) / gain_lo.at(ir);
 }
-							       
+
+Estimate<double> FluxCalibrator::ConstantGain::get_gain (unsigned ireceptor)
+{
+  return gain_lo.at(ireceptor);
+}
+
+Estimate<double> FluxCalibrator::ConstantGain::get_gain ()
+{
+  if (gain_lo.size() == 1)
+    return gain_lo[0];
+
+  else if (gain_lo.size() == 2)
+    return sqrt( gain_lo[0] * gain_lo[1] );
+  
+  else
+    throw Error (InvalidState, "FluxCalibrator::ConstantGain::get_gain",
+		 "invalid nreceptor=%u", gain_lo.size());
+}
