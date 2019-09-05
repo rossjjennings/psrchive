@@ -11,6 +11,7 @@
 #include "Pulsar/CalibratorStokesInfo.h"
 #include "Pulsar/SolverInfo.h"
 #include "Pulsar/IXRInfo.h"
+#include "Pulsar/ConstantGainInfo.h"
 
 #include "Pulsar/Archive.h"
 
@@ -25,6 +26,7 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
   calibrator_stokes_degree = false;
   reduced_chisq = false;
   intrinsic_crosspol_ratio = false;
+  constant_gain = false;
 
   outlier_threshold = 0.0;
 }
@@ -49,6 +51,9 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
 
   else if (intrinsic_crosspol_ratio)
     info = new IXRInfo (new PolnCalibrator(data));
+
+  else if (constant_gain)
+    info = new ConstantGainInfo (new FluxCalibrator(data));
 
   else
     info = CalibratorParameter::get_Info (data, outlier_threshold);
@@ -164,5 +169,9 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
   add( &CalibratorInfo::get_intrinsic_crosspol_ratio,
        &CalibratorInfo::set_intrinsic_crosspol_ratio,
        "ixr", "Plot the intrinsic cross-polarization ratio");
+
+  add( &CalibratorInfo::get_constant_gain,
+       &CalibratorInfo::set_constant_gain,
+       "gain", "Plot constant gain flux calibrator information");
 
 }

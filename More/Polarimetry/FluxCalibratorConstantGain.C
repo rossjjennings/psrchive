@@ -52,6 +52,16 @@ void FluxCalibrator::ConstantGain::integrate (Signal::Source source,
   }
 }
 
+//! Set the number of receptors
+void Pulsar::FluxCalibrator::ConstantGain::set_nreceptor (unsigned nreceptor)
+{
+  Policy::set_nreceptor( nreceptor );
+
+  scale.resize( nreceptor );
+  gain_ratio.resize( nreceptor );
+}
+
+
 void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
 					    Estimate<double>& S_cal,
 					    Estimate<double>& S_sys)

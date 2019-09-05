@@ -99,6 +99,7 @@ namespace Pulsar {
   protected:
 
     friend class FluxCalibratorExtension;
+    friend class ConstantGainInfo;
     friend class Info;
 
     //! Flux calibrator database
@@ -151,39 +152,6 @@ namespace Pulsar {
     //! Set up the data array with standard candle flux density
     void setup ();
 
-  };
-
-  //! FluxCalibrator parameter communication
-  class FluxCalibrator::Info : public Calibrator::Info
-  {
-  public:
-
-    //! Constructor
-    Info (const FluxCalibrator* cal) { instance = cal; }
-    
-    //! Return the title
-    std::string get_title () const;
-
-    //! Return the number of frequency channels
-    unsigned get_nchan () const;
-
-    //! Return the number of parameter classes
-    unsigned get_nclass () const { return 2; }
-    
-    //! Return the name of the specified class
-    std::string get_name (unsigned iclass) const;
-    
-    //! Return the number of parameters in the specified class
-    unsigned get_nparam (unsigned iclass) const;
-    
-    //! Return the estimate of the specified parameter
-    Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			       unsigned iparam) const;
-    
-  protected:
-    
-    Reference::To<const FluxCalibrator> instance;
-      
   };
 
 }

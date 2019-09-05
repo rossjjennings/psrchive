@@ -45,7 +45,7 @@ namespace Pulsar {
 	       const std::vector< Estimate<double> >& S_cal );
 
     //! Set the number of receptors
-    void set_nreceptor (unsigned);
+    virtual void set_nreceptor (unsigned);
     
     //! Get the number of receptors
     unsigned get_nreceptor () const;
@@ -159,6 +159,9 @@ namespace Pulsar {
     ConstantGain ();
 
     ConstantGain* clone () const;
+
+    //! Set the number of receptors
+    void set_nreceptor (unsigned);
     
     void integrate (Signal::Source source, unsigned ireceptor,
 		    const Estimate<double>& cal_hi,

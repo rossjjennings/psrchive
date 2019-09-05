@@ -57,6 +57,9 @@ namespace Pulsar {
     void set_intrinsic_crosspol_ratio (bool x) { intrinsic_crosspol_ratio = x; }
     bool get_intrinsic_crosspol_ratio () const { return intrinsic_crosspol_ratio; }
 
+    void set_constant_gain (bool x) { constant_gain = x; }
+    bool get_constant_gain () const { return constant_gain; }
+
     void set_outlier_threshold (float t) { outlier_threshold = t; }
     float get_outlier_threshold () const { return outlier_threshold; }
 
@@ -82,6 +85,9 @@ namespace Pulsar {
 
     //! plot the intrinsic cross-polarization ratio
     bool intrinsic_crosspol_ratio;
+
+    //! plot constant gain flux calibrator information
+    bool constant_gain;
 
     //! threshold used to detect outliers when creating SingleAxis calibrator
     float outlier_threshold;
