@@ -18,11 +18,11 @@ namespace Pulsar {
   void unload (fitsfile* fptr, const CalibratorExtension* ext);
 
   void load_Estimates (fitsfile* fptr, std::vector< Estimate<double> >& data,
-		       char* column_name);
+		       const char* column_name);
 
   void unload_Estimates (fitsfile* fptr, 
 			 const std::vector< Estimate<double> >& data,
-			 char* column_name,
+			 const char* column_name,
 			 const std::vector<unsigned>* dims = 0);
 }
 

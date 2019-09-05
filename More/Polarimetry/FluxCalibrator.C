@@ -55,9 +55,22 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 
     unsigned nchan = fe->get_nchan();
     data.resize( nchan );
+
+    if (fe->has_scale())
+      policy = new ConstantGain;
+
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      data[ichan] = new VariableGain;
+      if (fe->has_scale())
+      {
+	ConstantGain* cg = new ConstantGain;
+	cg->set_scale( fe->scale[ichan] );
+	cg->set_gain_ratio( fe->ratio[ichan] );
+	data[ichan] = cg;
+      }
+      else
+	data[ichan] = new VariableGain;
+
       data[ichan]->set( fe->S_sys[ichan], fe->S_cal[ichan] );
     }
     

@@ -11,7 +11,7 @@
 using namespace std;
 
 void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
-			     char* column_name)
+			     const char* column_name)
 {
   long dimension = data.size();
   
@@ -21,8 +21,10 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   int colnum = 0;
   int initflag = 0;
   
+  char* c_name = const_cast<char*>( column_name );
+
   // Read the data values
-  fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, c_name, &colnum, &status);
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat,
 		 &(temp[0]), &initflag, &status);
@@ -37,24 +39,25 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
     data[idim].val = temp[idim];
   
   // name of column containing data errors
-  string cname = column_name;
-  cname += "ERR";
-  column_name = const_cast<char*>(cname.c_str());
+  string name = column_name;
+  name += "ERR";
+  c_name = const_cast<char*>(name.c_str());
   
   colnum = 0;
   initflag = 0;
   
   // Read the data errors
-  fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, c_name, &colnum, &status);
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
 		 &(temp[0]), &initflag, &status);
   
   if (status)
     throw FITSError (status, "Pulsar::load_Estimates",
-		     "fits_read_col " + cname);
+		     "fits_read_col " + name);
   
-  for (idim=0; idim < dimension; idim++) {
+  for (idim=0; idim < dimension; idim++)
+  {
     float err = temp[idim];
     data[idim].var = err*err;
   }
@@ -63,7 +66,7 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
 
 void Pulsar::unload_Estimates (fitsfile* fptr,
 			       const vector<Estimate<double> >& data,
-			       char* column_name,
+			       const char* column_name,
 			       const vector<unsigned>* dimensions)
 {
   long dimension = data.size();
@@ -76,9 +79,11 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
   for (idim = 0; idim < dimension; idim++)
     temp[idim] = data[idim].val;
 
+  char* c_name = const_cast<char*>( column_name );
+
   int status = 0;
   int colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, c_name, &colnum, &status);
   fits_modify_vector_len (fptr, colnum, dimension, &status);
 
   if (dimensions)
@@ -92,16 +97,16 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
 		     "fits_write_col %s", column_name);
 
   // name of column containing data errors
-  string cname = column_name;
-  cname += "ERR";
-  column_name = const_cast<char*>(cname.c_str());
+  string name = column_name;
+  name += "ERR";
+  c_name = const_cast<char*>(name.c_str());
   
   // Write the data errors
   for (idim = 0; idim < dimension; idim++)
     temp[idim] = sqrt(data[idim].var);
 
   colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, c_name, &colnum, &status);
   fits_modify_vector_len (fptr, colnum, dimension, &status);
 
   if (dimensions)
@@ -113,5 +118,5 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
   if (status)
     throw FITSError (status, "Pulsar::unload_Estimates", 
 		     "fits_write_col %s", column_name);
-
 }
+

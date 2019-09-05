@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2019 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
@@ -22,7 +23,8 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
   
   fits_movnam_hdu (fptr, BINARY_TBL, "FLUX_CAL", 0, &status);
   
-  if (status == BAD_HDU_NUM) {
+  if (status == BAD_HDU_NUM)
+  {
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_FluxCalibratorExtension"
 	" no FLUX_CAL HDU" << endl;
@@ -44,11 +46,12 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
   Pulsar::load (fptr, fce);
 
-  if (fce->get_nchan() == 0) {
+  if (fce->get_nchan() == 0)
+  {
     if (verbose == 3)
       cerr << "FITSArchive::load_FluxCalibratorExtension FLUX_CAL HDU"
 	   << " contains no data. FluxCalibratorExtension not loaded" << endl;
-      return;
+    return;
   }
 
   // Get NRCVR
@@ -91,6 +94,47 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
 	fce->set_S_cal (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+
+    /*
+      2019-Sep-05 Willem van Straten
+      Optionally parse new SCALE and RATIO parameters produced by fluxcal -g
+    */
+
+    try {
+
+      load_Estimates (fptr, temp, "SCALE");
+
+      fce->has_scale (true);
+
+      for (ichan=0; ichan < nchan; ichan++)
+	for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	  fce->set_scale (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+
+    }
+    catch (Error& error)
+    {
+      if (verbose == 3)
+	cerr << "FITSArchive::load_FluxCalibratorExtension fail SCALE: "
+	     << error.get_message();
+
+      fce->has_scale (false);
+    }
+
+    try {
+
+      load_Estimates (fptr, temp, "RATIO");
+
+      for (ichan=0; ichan < nchan; ichan++)
+	for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	  fce->set_gain_ratio (ichan, ireceptor, temp[ichan+nchan*ireceptor]);
+
+    }
+    catch (Error& error)
+    {
+      if (verbose == 3)
+	cerr << "FITSArchive::load_FluxCalibratorExtension fail RATIO: "
+	     << error.get_message();
+    }
 
   }
   catch (Error& error) {

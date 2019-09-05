@@ -14,6 +14,7 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
   : CalibratorExtension ("FluxCalibratorExtension")
 {
   type = Calibrator::Type::factory ("Flux");
+  scale_available = false;
 }
 
 //! Copy constructor
@@ -36,6 +37,11 @@ Pulsar::FluxCalibratorExtension::operator= (const FluxCalibratorExtension& fc)
   S_cal = fc.S_cal;
   S_sys = fc.S_sys;
 
+  scale_available = fc.scale_available;
+
+  scale = fc.scale;
+  ratio = fc.ratio;
+
   return *this;
 }
 
@@ -51,12 +57,14 @@ void Pulsar::FluxCalibratorExtension::set_nchan (unsigned nchan)
 
   S_cal.resize( nchan );
   S_sys.resize( nchan );
+  scale.resize( nchan );
+  ratio.resize( nchan );
 }
 
 //! Get the number of frequency channels
 unsigned int Pulsar::FluxCalibratorExtension::get_nchan( void ) const
 {
-	return S_cal.size();
+  return S_cal.size();
 }
 
 void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first, unsigned last)
@@ -64,6 +72,8 @@ void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first, unsigned last
   CalibratorExtension::remove_chan (first, last);
   remove (S_cal, first, last);
   remove (S_sys, first, last);
+  remove (scale, first, last);
+  remove (ratio, first, last);
 }
 
 //! Set the number of frequency channels
@@ -73,9 +83,12 @@ void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned nreceptor)
     throw Error (InvalidParam,"Pulsar::FluxCalibratorExtension::set_nreceptor",
 		 "cannot set nreceptor to 0");
 
-  for (unsigned ichan=0; ichan < S_cal.size(); ichan++) {
+  for (unsigned ichan=0; ichan < S_cal.size(); ichan++)
+  {
     S_cal[ichan].resize( nreceptor );
     S_sys[ichan].resize( nreceptor );
+    scale[ichan].resize( nreceptor );
+    ratio[ichan].resize( nreceptor );
   }
 }
 
@@ -126,6 +139,37 @@ std::vector< std::vector< Estimate<double> > >
 FluxCalibratorExtension::get_S_cal () const
 {
   return S_cal;
+}
+
+
+void FluxCalibratorExtension::set_scale (unsigned ichan, unsigned ireceptor,
+					 const Estimate<double>& _scale)
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_scale");
+  scale[ichan][ireceptor] = _scale;
+}
+
+Estimate<double>
+FluxCalibratorExtension::get_scale (unsigned ichan, unsigned ireceptor) const
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_scale");
+  return scale[ichan][ireceptor];
+}
+
+void FluxCalibratorExtension::set_gain_ratio (unsigned ichan,
+					      unsigned ireceptor,
+					      const Estimate<double>& _ratio)
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_gain_ratio");
+  ratio[ichan][ireceptor] = _ratio;
+}
+
+Estimate<double>
+FluxCalibratorExtension::get_gain_ratio (unsigned ichan, 
+					 unsigned ireceptor) const
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_gain_ratio");
+  return ratio[ichan][ireceptor];
 }
 
 TextInterface::Parser* FluxCalibratorExtension::get_interface()

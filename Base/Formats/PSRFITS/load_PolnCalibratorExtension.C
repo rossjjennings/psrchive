@@ -112,7 +112,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
     if (verbose == 3)
       cerr << "FITSArchive::load_PolnCalibratorExtension FEEDPAR HDU"
 	   << " contains no data. PolnCalibratorExtension not loaded" << endl;
-      return;
+    return;
   }
 
   unsigned ichan;

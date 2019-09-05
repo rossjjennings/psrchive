@@ -98,33 +98,69 @@ void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
     valid = false;
   }
   
-  gain_hi.resize( get_nreceptor() );
-  gain_lo.resize( get_nreceptor() );
+  scale.resize( get_nreceptor() );
+  scale[ireceptor] = (lo_on - lo_off) / S_std_i; 
 
-  gain_hi[ireceptor] = (hi_on - hi_off) / S_std_i;
-  gain_lo[ireceptor] = (lo_on - lo_off) / S_std_i; 
+  gain_ratio.resize( get_nreceptor() );
+  gain_ratio[ireceptor] = (hi_on - hi_off) / (lo_on - lo_off);
 }
 
 
-Estimate<double> FluxCalibrator::ConstantGain::get_gain_ratio (unsigned ir)
+Estimate<double> 
+FluxCalibrator::ConstantGain::get_gain_ratio (unsigned ir) const
 {
-  return gain_hi.at(ir) / gain_lo.at(ir);
+  return gain_ratio.at(ir);
 }
 
-Estimate<double> FluxCalibrator::ConstantGain::get_gain (unsigned ireceptor)
+void FluxCalibrator::ConstantGain::get_gain_ratio (vector<Estimate<double> >& r)
 {
-  return gain_lo.at(ireceptor);
+  r = gain_ratio;
 }
 
-Estimate<double> FluxCalibrator::ConstantGain::get_gain ()
+void FluxCalibrator::ConstantGain::set_gain_ratio (unsigned ir,
+						   const Estimate<double>& r)
 {
-  if (gain_lo.size() == 1)
-    return gain_lo[0];
+  gain_ratio.at(ir) = r;
+}
 
-  else if (gain_lo.size() == 2)
-    return sqrt( gain_lo[0] * gain_lo[1] );
+void FluxCalibrator::ConstantGain::set_gain_ratio (const vector<Estimate<double> >& r)
+{
+  gain_ratio = r;
+}
+
+
+Estimate<double> 
+FluxCalibrator::ConstantGain::get_scale (unsigned ireceptor) const
+{
+  return scale.at(ireceptor);
+}
+
+void FluxCalibrator::ConstantGain::get_scale (vector<Estimate<double> >& s)
+{
+  s = scale;
+}
+
+void FluxCalibrator::ConstantGain::set_scale (unsigned ir,
+					      const Estimate<double>& s)
+{
+  scale.at(ir) = s;
+}
+
+void FluxCalibrator::ConstantGain::set_scale (const vector<Estimate<double> >& s)
+{
+  scale = s;
+}
+
+
+Estimate<double> FluxCalibrator::ConstantGain::get_scale () const
+{
+  if (scale.size() == 1)
+    return scale[0];
+
+  else if (scale.size() == 2)
+    return sqrt( scale[0] * scale[1] );
   
   else
     throw Error (InvalidState, "FluxCalibrator::ConstantGain::get_gain",
-		 "invalid nreceptor=%u", gain_lo.size());
+		 "invalid nreceptor=%u", scale.size());
 }

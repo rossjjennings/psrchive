@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2019 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -88,6 +88,20 @@ namespace Pulsar
     //! Get the calibrator flux densities of the fluxcal 
     std::vector< std::vector< Estimate<double> > > get_S_cal () const;
 
+    //! Returns true if scale and gain_ratio data are available
+    bool has_scale () const { return scale_available; }
+    void has_scale (bool flag) { scale_available = flag; }
+
+    //! Set the flux scale of the specified channel
+    void set_scale (unsigned chan, unsigned receptor, const Estimate<double>&);
+    //! Get the flux scale of the specified channel
+    Estimate<double> get_scale (unsigned chan, unsigned receptor) const;
+
+    //! Set the gain ratio of the specified channel
+    void set_gain_ratio (unsigned chan, unsigned r, const Estimate<double>&);
+    //! Get the gain ratio of the specified channel
+    Estimate<double> get_gain_ratio (unsigned chan, unsigned receptor) const;
+
   protected:
 
     //! System equivalent flux density in each receptor and frequency channel
@@ -97,6 +111,17 @@ namespace Pulsar
     //! Calibrator flux density in each receptor and frequency channel
     /*! in mJy */
     std::vector< std::vector< Estimate<double> > > S_cal;
+
+    //! Flag set if the following data are available
+    bool scale_available;
+
+    //! Flux scale in each receptor and frequency channel
+    /*! in mJy per uncalibrated flux density unit */
+    std::vector< std::vector< Estimate<double> > > scale;
+
+    //! Gain ratio in each receptor and frequency channel
+    /*! unitless */
+    std::vector< std::vector< Estimate<double> > > ratio;
 
   };
 

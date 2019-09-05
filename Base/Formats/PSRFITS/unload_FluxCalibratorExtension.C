@@ -56,6 +56,26 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
     unload_Estimates(fptr, temp, "S_CAL", &dimensions);
 
+    /*
+      2019-Sep-05 Willem van Straten
+      Optionally write new SCALE and RATIO parameters produced by fluxcal -g
+    */
+
+    if (!fce->has_scale())
+      return;
+
+    for (ichan=0; ichan < nchan; ichan++)
+      for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	temp[ichan + nchan*ireceptor] = fce->get_scale (ichan, ireceptor);
+
+    unload_Estimates (fptr, temp, "SCALE", &dimensions);
+
+    for (ichan=0; ichan < nchan; ichan++)
+      for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	temp[ichan + nchan*ireceptor] = fce->get_gain_ratio (ichan, ireceptor);
+
+    unload_Estimates (fptr, temp, "RATIO", &dimensions);
+
   }
   catch (Error& error) {
     throw error += "Pulsar::FITSArchive::unload FluxCalibratorExtension";
