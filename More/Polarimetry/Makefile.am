@@ -15,6 +15,7 @@ nobase_include_HEADERS = \
         Pulsar/CoherencyMeasurement.h \
         Pulsar/CoherencyMeasurementSet.h \
 	Pulsar/ComplexRVMFit.h \
+	Pulsar/ConstantGainInfo.h \
         Pulsar/ConvertMJD.h \
         Pulsar/Database.h \
         Pulsar/DeltaPA.h \
@@ -25,8 +26,9 @@ nobase_include_HEADERS = \
         Pulsar/FaradayRotation.h \
         Pulsar/Feed.h \
 	Pulsar/FitGoodnessReport.h \
-        Pulsar/FluxCalibratorPolicy.h \
         Pulsar/FluxCalibrator.h \
+        Pulsar/FluxCalibratorInfo.h \
+        Pulsar/FluxCalibratorPolicy.h \
 	Pulsar/FluxCalManager.h \
 	Pulsar/FluxCalManagerInfo.h \
 	Pulsar/FourthMomentStats.h \
@@ -115,6 +117,7 @@ libPolarimetry_la_SOURCES = \
         CoherencyMeasurement.C \
         CoherencyMeasurementSet.C \
 	ComplexRVMFit.C \
+	ConstantGainInfo.C \
         ConvertMJD.C \
         Database.C \
         DeltaPA.C \
@@ -127,10 +130,11 @@ libPolarimetry_la_SOURCES = \
         Feed_load.C \
 	FitGoodnessReport.C \
         FluxCalibrator.C \
-	FluxCalibratorConstantGain.C \
-        FluxCalibratorPolicy.C \
-        FluxCalibratorVariableGain.C \
 	FluxCalibratorExt.C \
+        FluxCalibratorInfo.C \
+        FluxCalibratorPolicy.C \
+	FluxCalibratorConstantGain.C \
+        FluxCalibratorVariableGain.C \
 	FluxCalManager.C \
 	FluxCalManagerInfo.C \
 	FourthMomentStats.C \
