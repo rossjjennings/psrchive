@@ -732,15 +732,16 @@ void Pulsar::Database::load (const string& dbase_filename)
   path = temp;
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::load setting path = "
-	 << path << endl;
+    cerr << "Pulsar::Database::load setting path = " << path << endl;
 
   unsigned count = 0;
 
-  if (!old_style)
-    fscanf (fptr, "Pulsar::Database # of entries = %d\n", &count);
-  else
-    fscanf (fptr, "Pulsar::Calibration::Database # of entries = %d\n", &count);
+  string parse = "Pulsar::Database # of entries = %d\n";
+  if (old_style)
+    parse = "Pulsar::Calibration::Database # of entries = %d\n";
+
+  if ( fscanf (fptr, parse.c_str(), &count) < 1 )
+    cerr << "Pulsar::Database::load failed to read number of entries" << endl;
 
   if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::loading " << count << " entries" << endl;
@@ -819,7 +820,7 @@ void Pulsar::Database::shorten_filename (Entry& entry)
   if (entry.filename.substr(0, path.length()) == path)
     entry.filename.erase (0, path.length()+1);
 
-    entry.path = path;
+  entry.path = path;
 }
 
 //! Add the given Archive to the database
