@@ -28,7 +28,7 @@ std::string Pulsar::ConstantGainInfo::get_name (unsigned iclass) const
   case 0:
     return "Scale (Jy)";
   case 1:
-    return "Gain Ratio";
+    return "Gain Ratio (g\\dH\\u/g\\dL\\u)";
   default:
     return "";
   }
