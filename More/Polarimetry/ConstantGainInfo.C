@@ -26,7 +26,7 @@ std::string Pulsar::ConstantGainInfo::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
-    return "Scale (Jy\\u-1\\d)";
+    return "Scale (Jy)";
   case 1:
     return "Gain Ratio";
   default:
@@ -56,7 +56,7 @@ Estimate<float> Pulsar::ConstantGainInfo::get_param (unsigned ichan,
   Estimate<float> retval;
 
   if (iclass == 0)
-    retval = cg->get_scale(iparam);
+    retval = 1.0e-3 / cg->get_scale(iparam);  // convert mJy^-1 to Jy
   else if (iclass == 1)
     retval = cg->get_gain_ratio(iparam);
   
