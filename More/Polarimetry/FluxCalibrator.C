@@ -405,7 +405,17 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
 		 "no FluxCal Archive");
 
-  if (arch->get_scale() != Signal::ReferenceFluxDensity)
+  constant_scale = false;
+
+  if ( arch->get_scale() == Signal::FluxDensity
+       && dynamic_cast<ConstantGain*>(policy.get()) )
+  {
+    cerr << "Pulsar::FluxCalibrator::calibrate assuming constant scale"
+	 << endl;
+
+    constant_scale = true;
+  }
+  else if (arch->get_scale() != Signal::ReferenceFluxDensity)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::calibrate", 
                  "Archive scale != ReferenceFluxDensity");
 
@@ -461,10 +471,18 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
-    gain[ichan] = data[ichan]->get_S_cal().get_value();
+    if (constant_scale)
+    {
+      ConstantGain* cg = dynamic_cast<ConstantGain*>( data[ichan].get() );
+      gain[ichan] = 1.0 / cg->get_scale().get_value();
+    }
+    else
+      gain[ichan] = data[ichan]->get_S_cal().get_value();
+
     successful ++;
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     gain[ichan] = 0;
   }
 

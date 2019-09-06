@@ -146,6 +146,9 @@ namespace Pulsar {
     //! Threshold used to reject outliers when computing levels
     double outlier_threshold;
 
+    //! Assume that pulsar and standard candle were observed on same scale
+    bool constant_scale;
+
     //! Initialize attributes
     void init ();
 
