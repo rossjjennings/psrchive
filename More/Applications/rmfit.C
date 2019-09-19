@@ -144,7 +144,7 @@ void usage ()
     "  -P paas.m     Perform RM refinement for each profile component in model\n"
     "  -b [+/-][i-k] Include/exclude phase bins i through k (inclusive)\n"
     "\n"
-    "Quadratic fitting algorithm (Noutsos et al. 2008) otpions: \n"
+    "Quadratic fitting algorithm (Noutsos et al. 2008) options: \n"
     "\n"
     "  -p [x1,x2]        Fit for every phase bin in window \n"
     "  -w [x1,x2]        Average over phase window \n"
