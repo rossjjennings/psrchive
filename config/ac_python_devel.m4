@@ -50,17 +50,19 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 	AC_MSG_CHECKING([for Python library path])
 	python_path=`echo $PYTHON | sed "s,/bin.*$,,"`
 	for i in "$python_path/lib/python$PYTHON_VERSION/config/" "$python_path/lib64/python$PYTHON_VERSION/config/" "$python_path/lib/python$PYTHON_VERSION/" "$python_path/lib/python/config/" "$python_path/lib/python/" "$python_path/" ; do
-		python_path=`find $i -name libpython$PYTHON_VERSION.* -print | sed "1q"`
+for PYTHON_LIB_VERSION in "${PYTHON_VERSION}" "${PYTHON_VERSION}m" ; do
+		python_path=`find $i -name libpython${PYTHON_LIB_VERSION}.* -print | sed "1q"`
 		if test -n "$python_path" ; then
 			break
 		fi
+done
 	done
 	python_path=`echo $python_path | sed "s,/libpython.*$,,"`
 	AC_MSG_RESULT([$python_path])
 	if test -z "$python_path" ; then
 		AC_MSG_ERROR([cannot find Python library path])
 	fi
-	AC_SUBST([PYTHON_LDFLAGS],["-L$python_path -lpython$PYTHON_VERSION"])
+	AC_SUBST([PYTHON_LDFLAGS],["-L$python_path -lpython$PYTHON_LIB_VERSION"])
 	#
 	python_site=`echo $python_path | sed "s/config/site-packages/"`
 	AC_SUBST([PYTHON_SITE_PKG],[$python_site])

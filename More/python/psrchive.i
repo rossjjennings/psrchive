@@ -41,6 +41,10 @@
 
 #include "Pulsar/ManualPolnCalibrator.h"
 
+#include "Pulsar/CalibratorExtension.h"
+#include "Pulsar/BackendCorrection.h"
+#include "Pulsar/FrontendCorrection.h"
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -136,6 +140,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Integration::get_extension(unsigned);
 %ignore Pulsar::Integration::get_extension(unsigned) const;
 %ignore Pulsar::Integration::add_extension(Extension*);
+
+%ignore Pulsar::FrontendCorrection::new_Extension() const;
 
 // Also does not use the assignment operator
 %ignore Pulsar::Archive::operator=(const Archive&);
@@ -239,6 +245,10 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TextParameters.h"
 %include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
+
+
+%include "Pulsar/BackendCorrection.h"
+%include "Pulsar/FrontendCorrection.h"
 
 #if HAVE_GSL
 %include "Pulsar/WaveletSmooth.h"
