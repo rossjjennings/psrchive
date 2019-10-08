@@ -1853,9 +1853,11 @@ void print_time_variation (SystemCalibrator* model)
   unsigned n_mjd = mjds.size();  // get number of MJDs in file/files used
 
   if (verbose)
+  {
     cerr << "pcm: temporal variations printed for " << n_mjd << " MJDs: " << endl;
     for (unsigned i_mjd = 0; i_mjd < n_mjd; i_mjd++)
       cerr << "MJD[" << i_mjd << "] = " << mjds[i_mjd] << endl;
+  }
 
   unsigned nchan = model->get_nchan();
 
