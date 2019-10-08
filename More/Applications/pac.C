@@ -134,7 +134,7 @@ int main (int argc, char *argv[]) try
   bool use_fluxcal_stokes = false;
   bool fscrunch_data_to_cal = false;
   float outlier_threshold = 0.0;
-  
+
   // Flag for only displaying the system-equivalent flux density.
   bool only_display_sefd = false;
 
@@ -191,7 +191,7 @@ int main (int argc, char *argv[]) try
   string command = "pac ";
 
   string::size_type index;
-  
+
   string optarg_str;
 
   Pulsar::ReflectStokes reflections;
@@ -229,7 +229,7 @@ int main (int argc, char *argv[]) try
     case 'K':
       outlier_threshold = atof(optarg);
       break;
-      
+
     case 'A':
       model_file = optarg;
       command += " -A ";
@@ -239,12 +239,12 @@ int main (int argc, char *argv[]) try
       index = optarg_str.rfind("/", optarg_str.length()-2);
 
       if (index == string::npos)
-      	command += optarg_str;      
+        command += optarg_str;
       else
       {
-        // Larger than last index but doesn't matter. String class will 
-	// just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length()); 
+        // Larger than last index but doesn't matter. String class will
+        // just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length());
       }
       break;
 
@@ -273,12 +273,12 @@ int main (int argc, char *argv[]) try
       index = optarg_str.rfind("/", optarg_str.length()-2);
 
       if (index == string::npos) {
-      	command += optarg_str;
+              command += optarg_str;
       }
-      
+
       else {
-        // Larger than last index but doesn't matter. String class will 
-	// just take the rest of the string safely
+        // Larger than last index but doesn't matter. String class will
+        // just take the rest of the string safely
         command += optarg_str.substr(index+1, optarg_str.length()); 
       }
       break;
@@ -315,7 +315,7 @@ int main (int argc, char *argv[]) try
     case 'j':
       separate (optarg, jobs, ",");
       break;
-      
+
     case 'J':
       loadlines (optarg, jobs);
       break;
@@ -338,12 +338,12 @@ int main (int argc, char *argv[]) try
       index = optarg_str.rfind("/", optarg_str.length()-2);
 
       if (index == string::npos)
-      	command += optarg_str;      
+        command += optarg_str;
       else
       {
-        // Larger than last index but doesn't matter. String class will 
-	// just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length()); 
+        // Larger than last index but doesn't matter. String class will
+        // just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length());
       }
       break;
 
@@ -353,12 +353,12 @@ int main (int argc, char *argv[]) try
 
     case 'm': 
       if (optarg[0] == 'b')
-	criteria.set_sequence(Pulsar::Database::CalibratorBefore);
+        criteria.set_sequence(Pulsar::Database::CalibratorBefore);
       else if (optarg[0] == 'a')
-	criteria.set_sequence(Pulsar::Database::CalibratorAfter);
+        criteria.set_sequence(Pulsar::Database::CalibratorAfter);
       else {
-	cerr << "pac: unrecognized matching sequence code" << endl;
-	return -1;
+        cerr << "pac: unrecognized matching sequence code" << endl;
+        return -1;
       }
       command += " -m ";
       command += optarg;
@@ -394,16 +394,16 @@ int main (int argc, char *argv[]) try
       index = optarg_str.rfind("/", optarg_str.length()-2);
       
       if (index == string::npos) {
-      	cout << "No slash present\n";
-      	command += optarg_str;
+              cout << "No slash present\n";
+              command += optarg_str;
       }
-      
+
       else {
-        // Larger than last index but doesn't matter. String class will 
-	// just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length()); 
+        // Larger than last index but doesn't matter. String class will
+        // just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length());
       }
-      
+
       break;
 
     case 'P':
@@ -420,15 +420,15 @@ int main (int argc, char *argv[]) try
       feed = new Calibration::Feed;
       feed -> load (optarg);
       cerr << "pac: Feed parameters loaded:"
-	"\n  orientation 0 = "
-	   << feed->get_orientation(0).get_value() * 180/M_PI << " deg"
-	"\n  ellipticity 0 = "
-	   << feed->get_ellipticity(0).get_value() * 180/M_PI << " deg"
-	"\n  orientation 1 = "
-	   << feed->get_orientation(1).get_value() * 180/M_PI << " deg"
-	"\n  ellipticity 1 = "
-	   << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
-	   << endl;
+        "\n  orientation 0 = "
+           << feed->get_orientation(0).get_value() * 180/M_PI << " deg"
+        "\n  ellipticity 0 = "
+           << feed->get_ellipticity(0).get_value() * 180/M_PI << " deg"
+        "\n  orientation 1 = "
+           << feed->get_orientation(1).get_value() * 180/M_PI << " deg"
+        "\n  ellipticity 1 = "
+           << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
+           << endl;
       command += " -r ";
 
       // Just take the filename, not the full path
@@ -436,13 +436,13 @@ int main (int argc, char *argv[]) try
       index = optarg_str.rfind("/", optarg_str.length()-2);
 
       if (index == string::npos) {
-      	command += optarg_str;
+              command += optarg_str;
       }
-      
+
       else {
-        // Larger than last index but doesn't matter. String class will 
-	// just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length()); 
+        // Larger than last index but doesn't matter. String class will
+        // just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length());
       }
       break;
 
@@ -459,9 +459,9 @@ int main (int argc, char *argv[]) try
     case 'u':
       key = strtok (optarg, whitespace);
       while (key) {
-	// remove the leading .
-	while (*key == '.')
-	  key ++;
+        // remove the leading .
+        while (*key == '.')
+          key ++;
         exts.push_back(key);
         key = strtok (NULL, whitespace);
       }
@@ -530,7 +530,7 @@ int main (int argc, char *argv[]) try
     default:
       return -1;
     }
- 
+
 
   Pulsar::Database::set_default_criteria (criteria);
 
@@ -549,7 +549,7 @@ int main (int argc, char *argv[]) try
       cout << "pac: No filenames specified. Exiting" << endl;
       exit(-1);
     }
-  } 
+  }
 
   // the archive from which a calibrator will be constructed
   Reference::To<Pulsar::Archive> model_arch;
@@ -559,7 +559,7 @@ int main (int argc, char *argv[]) try
 
   // the database from which calibrators will be selected
   Reference::To<Pulsar::Database> dbase;
-  
+
   if ( !model_file.empty() ) try
   {
     cerr << "pac: Loading calibrator from " << model_file << endl;
@@ -603,7 +603,7 @@ int main (int argc, char *argv[]) try
   if ( use_fluxcal_stokes && 
        ! pcal_type->is_a<Pulsar::CalibratorTypes::SingleAxis>() )
   {
-    cerr << "pac: Fluxcal-derived Stokes params are incompatible with the " 
+    cerr << "pac: Fluxcal-derived Stokes params are incompatible with the "
       << "selected calibration method" << endl;
     return -1;
   }
@@ -614,9 +614,9 @@ int main (int argc, char *argv[]) try
     {
       cout << "pac: Loading database from " << cal_dbase_filenames[i] << endl;
       if (i==0)
-	dbase = new Pulsar::Database (cal_dbase_filenames[i]);
+        dbase = new Pulsar::Database (cal_dbase_filenames[i]);
       else
-	dbase->load (cal_dbase_filenames[i]);
+        dbase->load (cal_dbase_filenames[i]);
     }
   }
   catch (Error& error)
@@ -626,17 +626,17 @@ int main (int argc, char *argv[]) try
   }
 
   else if ( model_file.empty() && ascii_model_file.empty() && (do_polncal || do_fluxcal) ) try
-  {   
+  {
     // Generate the CAL file database
     cout << "pac: Generating new calibrator database" << endl;
-    
+
     if (cals_metafile)
     {
       Reference::To<Pulsar::Database> temp;
 
       for (unsigned i=0; i < filenames.size(); i++)
       {
-        cout << "pac: Loading calibrator filenames from metafile=" 
+        cout << "pac: Loading calibrator filenames from metafile="
              << filenames[i] << endl;
 
         temp = new Pulsar::Database (cals_are_here, filenames[i]);
@@ -656,9 +656,9 @@ int main (int argc, char *argv[]) try
 
       if (dbase->size() <= 0)
       {
-	cerr << "pac: No calibrators found in the provided metafiles" << endl;
-	return -1;
-      }    
+        cerr << "pac: No calibrators found in the provided metafiles" << endl;
+        return -1;
+      }
     }
     else
     {
@@ -666,27 +666,27 @@ int main (int argc, char *argv[]) try
       exts.push_back("pcal");
       exts.push_back("fcal");
       exts.push_back("pfit");
-    
+
       dbase = new Pulsar::Database (cals_are_here, exts);
 
       if (dbase->size() <= 0)
       {
-	cerr << "pac: No calibrators found in " << cals_are_here << endl;
-	return -1;
-      }    
+        cerr << "pac: No calibrators found in " << cals_are_here << endl;
+        return -1;
+      }
     }
 
     if (verbose)
       cerr << "pac: " << dbase->size() << " calibrators found" << endl;
-    
+
     if (write_database_file)
     {
       if (database_filename.empty ())
-	database_filename = dbase->get_path() + "/database.txt";
+        database_filename = dbase->get_path() + "/database.txt";
 
-      cout << "pac: Writing database summary file to " 
-	   << database_filename << endl;
-      
+      cout << "pac: Writing database summary file to "
+           << database_filename << endl;
+
       dbase -> unload (database_filename);
     }
 
@@ -713,7 +713,7 @@ int main (int argc, char *argv[]) try
 
     if (verbose)
       cerr << "pac: Loading " << filenames[i] << endl;
-    
+
     Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filenames[i]);
 
     cout << "pac: Loaded archive " << filenames[i] << endl;
@@ -721,7 +721,7 @@ int main (int argc, char *argv[]) try
     if (jobs.size())
     {
       if (verbose)
-	cerr << "pac: preprocessing " << filenames[i] << endl;
+        cerr << "pac: preprocessing " << filenames[i] << endl;
       preprocessor->set (arch);
       preprocessor->script (jobs);
     }
@@ -740,24 +740,24 @@ int main (int argc, char *argv[]) try
 
       if (model_calibrator)
       {
-	if (verbose)
-	  cout << "pac: Applying specified calibrator" << endl;
+        if (verbose)
+          cout << "pac: Applying specified calibrator" << endl;
 
-	pcal_engine = model_calibrator;
+        pcal_engine = model_calibrator;
       }
 
       else try
       {
-	if (verbose)
-	  cout << "pac: Finding PolnCalibrator" << endl;
+        if (verbose)
+          cout << "pac: Finding PolnCalibrator" << endl;
 
-	pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
+        pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
       }
       catch (Error& error)
       {
-	error << " -- closest match: \n\n"
-	      << dbase->get_closest_match_report ();
-	throw error;
+        error << " -- closest match: \n\n"
+              << dbase->get_closest_match_report ();
+        throw error;
       }
 
       if (use_fluxcal_stokes) try
@@ -765,77 +765,77 @@ int main (int argc, char *argv[]) try
         if (verbose)
           cout << "pac: Calculating fluxcal Stokes params" << endl;
 
-	Pulsar::ReferenceCalibrator* refcal = 0;
-	refcal = dynamic_cast<Pulsar::ReferenceCalibrator*> (pcal_engine.get());
-	if (!refcal)
-	  throw Error (InvalidState, "pcm",
-		       "PolnCalibrator is not a ReferenceCalibrator");
+        Pulsar::ReferenceCalibrator* refcal = 0;
+        refcal = dynamic_cast<Pulsar::ReferenceCalibrator*> (pcal_engine.get());
+        if (!refcal)
+          throw Error (InvalidState, "pcm",
+                       "PolnCalibrator is not a ReferenceCalibrator");
 
         // Find appropriate fluxcal from DB 
         Reference::To<Pulsar::FluxCalibrator> flux_cal;
-	try
-	{
-	  flux_cal = dbase->generateFluxCalibrator(arch);
-	}
-	catch (Error& error)
-	{
-	  error << " -- closest match: \n\n"
-		<< dbase->get_closest_match_report ();
-	  throw error;
-	}
+        try
+        {
+          flux_cal = dbase->generateFluxCalibrator(arch);
+        }
+        catch (Error& error)
+        {
+          error << " -- closest match: \n\n"
+                << dbase->get_closest_match_report ();
+          throw error;
+        }
 
         // Combine already-selected pcal_engine with fluxcal stokes
         // into a new HybridCalibrator
         Reference::To<Pulsar::HybridCalibrator> hybrid_cal;
         hybrid_cal = new Pulsar::HybridCalibrator;
         hybrid_cal->set_reference_input( flux_cal->get_CalibratorStokes(),
-					 flux_cal->get_filenames() );
-	
+                                         flux_cal->get_filenames() );
+
         hybrid_cal->set_reference_observation( refcal );
 
         pcal_engine = hybrid_cal;
       }
       catch (Error& error)
       {
-        cerr << "pac: Error computing cal Stokes for " << arch->get_filename() 
+        cerr << "pac: Error computing cal Stokes for " << arch->get_filename()
           << endl
           << "\t" << error.get_message() << endl;
       }
-      
+
       pcal_file = pcal_engine->get_filenames();
 
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
 
       if (fscrunch_data_to_cal && pcal_engine->get_nchan() != arch->get_nchan())
       {
-	cout << "pac: Frequency integrating data (nchan=" << arch->get_nchan()
-	     << ") to match calibrator (nchan=" << pcal_engine->get_nchan()
-	     << ")" << endl;
-	arch->fscrunch_to_nchan (pcal_engine->get_nchan());
+        cout << "pac: Frequency integrating data (nchan=" << arch->get_nchan()
+             << ") to match calibrator (nchan=" << pcal_engine->get_nchan()
+             << ")" << endl;
+        arch->fscrunch_to_nchan (pcal_engine->get_nchan());
       }
 
       if (outlier_threshold)
       {
-	ReferenceCalibrator* ref = 0;
-	ref = dynamic_cast<ReferenceCalibrator*> (pcal_engine.get());
-	if (ref)
-	  ref->set_outlier_threshold (outlier_threshold);
+        ReferenceCalibrator* ref = 0;
+        ref = dynamic_cast<ReferenceCalibrator*> (pcal_engine.get());
+        if (ref)
+          ref->set_outlier_threshold (outlier_threshold);
 
-      	HybridCalibrator* hyb = 0;
-	hyb = dynamic_cast<HybridCalibrator*> (pcal_engine.get());
-	if (hyb)
-	{
-	  ref = const_cast<ReferenceCalibrator*>(hyb->get_reference_observation ());
-	  ref->set_outlier_threshold (outlier_threshold);
-	}
+              HybridCalibrator* hyb = 0;
+        hyb = dynamic_cast<HybridCalibrator*> (pcal_engine.get());
+        if (hyb)
+        {
+          ref = const_cast<ReferenceCalibrator*>(hyb->get_reference_observation ());
+          ref->set_outlier_threshold (outlier_threshold);
+        }
       }
-      
+
       pcal_engine->calibrate (arch);
 
       if (arch->get_npol() == 4)
       {
         if (do_frontend)
-	{
+        {
           if (verbose)
             cerr << "pac: Correcting fronted, if necessary" << endl;
 
@@ -843,14 +843,14 @@ int main (int argc, char *argv[]) try
           correct.calibrate (arch);
 
         }
-	else 
+        else 
           cerr << "pac: Frontend corrections disabled, skipping" << endl;
       }
 
       if (ionosphere)
       {
-	cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
-	ionosphere->calibrate (arch);
+        cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
+        ionosphere->calibrate (arch);
       }
 
       cout << "pac: Poln calibration complete" << endl;
@@ -881,34 +881,34 @@ int main (int argc, char *argv[]) try
     }
 
     /* The PolnCalibrator classes normalize everything so that flux
-       is given in units of the calibrator flux.  Unless the calibrator
+       is given in units of the calibrator flux. Unless the calibrator
        is flux calibrated, it will undo the flux calibration step.
        Therefore, the flux cal should take place after the poln cal */
 
     bool successful_fluxcal = false;
-    
+
     if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags)
       cout << "pac: " << filenames[i] << " already flux calibrated" << endl;
-    
+
     else if (do_fluxcal && !dbase)
       cout << "pac: Not performing flux calibration (no database)." << endl;
 
     else if (do_fluxcal) try
     {
       if (verbose)
-	cout << "pac: Generating flux calibrator" << endl;
-      
+        cout << "pac: Generating flux calibrator" << endl;
+
       Reference::To<Pulsar::FluxCalibrator> fcal_engine;
 
       try
       {
-	fcal_engine = dbase->generateFluxCalibrator(arch);
+        fcal_engine = dbase->generateFluxCalibrator(arch);
       }
       catch (Error& error)
       {
-	error << " -- closest match: \n\n"
-	      << dbase->get_closest_match_report ();
-	throw error;
+        error << " -- closest match: \n\n"
+              << dbase->get_closest_match_report ();
+        throw error;
       }
 
       cout << "pac: Mean SEFD = " << fcal_engine->meanTsys() * 1e-3
@@ -922,23 +922,23 @@ int main (int argc, char *argv[]) try
       }
 
       cout << "pac: FluxCalibrator constructed from:\n\t"
-	   << fcal_engine->get_filenames() << endl;
+           << fcal_engine->get_filenames() << endl;
 
       fcal_engine->set_outlier_threshold (outlier_threshold);
-      
+
       if (verbose) 
-	cerr << "pac: Calibrating Archive fluxes" << endl;
+        cerr << "pac: Calibrating Archive fluxes" << endl;
 
       fcal_engine->calibrate(arch);
-      
+
       cout << "pac: Flux calibration complete" << endl;
-      
+
       successful_fluxcal = true;
     }
     catch (Error& error)
     {
       cerr << "pac: Could not flux calibrate " << arch->get_filename() << endl
-	   << "\t" << error.get_message() << endl;
+           << "\t" << error.get_message() << endl;
     }
 
     string newname = replace_extension( filenames[i], unload_ext );
@@ -951,11 +951,11 @@ int main (int argc, char *argv[]) try
 
     if (verbose)
       cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
-    
+
     reflections.transform (arch);
 
     // See if the archive contains a history that should be updated
-    
+
     Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
 
     if (fitsext)
@@ -965,15 +965,15 @@ int main (int argc, char *argv[]) try
 
     if (verbose)
       cerr << "pac: Unloading " << newname << endl;
-    
+
     arch->unload(newname);
-    
+
     cout << "pac: Calibrated archive " << newname << " unloaded" << endl;
-    
+
   }
   catch (Error& error)
   {
-    cerr << "pac: Error while handling " << filenames[i] << ":" << endl; 
+    cerr << "pac: Error while handling " << filenames[i] << ":" << endl;
     cerr << error << endl;
   }
 
@@ -986,8 +986,6 @@ int main (int argc, char *argv[]) try
    cerr << "pac: error" << error << endl;
    return -1;
  }
-
-
 
 using Calibration::BackendFeed;
 
@@ -1006,8 +1004,8 @@ void keep_only_feed( Pulsar::PolnCalibrator* cal )
 
     if (!feed)
       throw Error (InvalidState, "keep_only_feed",
-		   "PolnCalibrator at ichan=%u is not a "
-		   "BackendFeed transformation", ichan);
+                   "PolnCalibrator at ichan=%u is not a "
+                   "BackendFeed transformation", ichan);
 
     feed->set_gain( 1.0 );
     feed->set_diff_gain( 0.0 );
