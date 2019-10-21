@@ -51,7 +51,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:K:k:lLM:m:n:O:op:PqQ:Rr:sSt:Tu:UvVwWxXyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:K:k:lLM:m:Nn:O:op:PqQ:Rr:sSt:Tu:UvVwWxXyZ";
 
 void usage ()
 {
@@ -105,8 +105,9 @@ void usage ()
     "Expert options: \n"
     "  -f             Override flux calibration flag\n"
     "  -G             Normalize profile weights by absolute gain \n"
+    "  -N             Disable backend corrections \n"
     "  -U             Disable frontend corrections (parallactic angle, etc)\n"
-    "  -X             Disable poln calibration (perform only corrections) \n"
+    "  -X             Disable poln calibration \n"
     "\n"
     "Input/Output options: \n"
     "  -e ext         Extension added to output filenames (default .calib) \n"
@@ -128,7 +129,7 @@ int main (int argc, char *argv[]) try
   bool verbose = false;
   bool do_fluxcal = true;
   bool do_polncal = true;
-  bool do_backend = false;  // by default, the backend is calibrated by the PolnCalibrator
+  bool do_backend = true;
   bool do_frontend = true;
 
   bool use_fluxcal_stokes = false;
@@ -364,6 +365,11 @@ int main (int argc, char *argv[]) try
       command += optarg;
       break;
 
+    case 'N':
+      do_backend = false;
+      command += " -N ";
+      break;
+
     case 'n': {
 
       reflections.add_reflection( optarg[0] );
@@ -492,7 +498,6 @@ int main (int argc, char *argv[]) try
 
     case 'X':
       do_polncal = false;               // disable poln calibration
-      do_backend = do_frontend = true;  // enable backend and frontend corrections
       unload_ext = "bc";                // "basis corrected"
       break;
 
@@ -735,7 +740,7 @@ int main (int argc, char *argv[]) try
       correct (arch);
     }
     else
-      cerr << "pac: Backend corrections disabled." << endl;
+      cerr << "pac: Backend corrections disabled" << endl;
 
     bool successful_polncal = false;
 
