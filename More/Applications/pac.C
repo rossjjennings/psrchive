@@ -726,6 +726,17 @@ int main (int argc, char *argv[]) try
       preprocessor->script (jobs);
     }
 
+    if (do_backend && (arch->get_npol() == 4 || arch->get_npol() == 2))
+    {
+      if (verbose)
+        cerr << "pac: Correcting backend, if necessary" << endl;
+
+      Pulsar::BackendCorrection correct;
+      correct (arch);
+    }
+    else
+      cerr << "pac: Backend corrections disabled." << endl;
+
     bool successful_polncal = false;
 
     if (do_polncal && arch->get_poln_calibrated() )
@@ -832,27 +843,6 @@ int main (int argc, char *argv[]) try
 
       pcal_engine->calibrate (arch);
 
-      if (arch->get_npol() == 4)
-      {
-        if (do_frontend)
-        {
-          if (verbose)
-            cerr << "pac: Correcting fronted, if necessary" << endl;
-
-          Pulsar::FrontendCorrection correct;
-          correct.calibrate (arch);
-
-        }
-        else 
-          cerr << "pac: Frontend corrections disabled, skipping" << endl;
-      }
-
-      if (ionosphere)
-      {
-        cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
-        ionosphere->calibrate (arch);
-      }
-
       cout << "pac: Poln calibration complete" << endl;
 
       successful_polncal = true;
@@ -860,24 +850,24 @@ int main (int argc, char *argv[]) try
     else
     {
       cerr << "pac: Poln calibration disabled" << endl;
+    }
 
-      if (do_backend && (arch->get_npol() == 4 || arch->get_npol() == 2))
-      {
-        if (verbose)
-          cerr << "pac: Correcting backend, if necessary" << endl;
+    if (do_frontend && (arch->get_npol() == 4))
+    {
+      if (verbose)
+        cerr << "pac: Correcting fronted, if necessary" << endl;
 
-        Pulsar::BackendCorrection correct;
-        correct (arch);
-      }
+      Pulsar::FrontendCorrection correct;
+      correct.calibrate (arch);
+    }
+    else
+      cerr << "pac: Frontend corrections disabled." << endl;
 
-      if (do_frontend && (arch->get_npol() == 4))
-      {
-        if (verbose)
-          cerr << "pac: Correcting fronted, if necessary" << endl;
 
-        Pulsar::FrontendCorrection correct;
-        correct.calibrate (arch);
-      }
+    if (ionosphere)
+    {
+      cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
+      ionosphere->calibrate (arch);
     }
 
     /* The PolnCalibrator classes normalize everything so that flux
