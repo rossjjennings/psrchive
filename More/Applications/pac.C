@@ -846,6 +846,7 @@ int main (int argc, char *argv[]) try
         }
       }
 
+      pcal_engine->set_backend_correction( do_backend );
       pcal_engine->calibrate (arch);
 
       cout << "pac: Poln calibration complete" << endl;
