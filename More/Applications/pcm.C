@@ -231,7 +231,7 @@ void range_select (Pulsar::ReceptionCalibrator& model,
   if (phmin > phmax)
     phmax += 1.0;
 
-  float increment = (phmax - phmin)/maxbins;
+  float increment = (phmax - phmin) / (maxbins - 1);
 
   unsigned last_bin = unsigned (phmax * nbin);
 
