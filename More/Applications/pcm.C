@@ -159,6 +159,51 @@ void plot_state (SystemCalibrator* model, const std::string& state);
 // Print the variations of the Jones matrices
 void print_time_variation (SystemCalibrator* model);
 
+#if HAVE_PGPLOT
+
+void plot_chosen (Pulsar::Archive* archive, const vector<unsigned>& bins,
+                  string base = "chosen")
+{
+  string device = base + ".ps/cps";
+  cpgbeg (0, device.c_str(), 0, 0);
+
+  cpgslw(2);
+  cpgsvp (.1,.9, .1,.9);
+
+  cerr << "pcm: plotting chosen phase bins" << endl;
+  Pulsar::StokesSpherical plot;
+  plot.plot (archive);
+
+  cpgswin (0,1,0,1);
+  cpgsls (2);
+
+  for (unsigned ibin=0; ibin < bins.size(); ibin++)
+  {
+    float phase = float(bins[ibin])/float(archive->get_nbin());
+    cpgmove (phase, 0);
+    cpgdraw (phase, 1);
+  }
+
+  cpgend();
+}
+
+void plot_onpulse (Pulsar::ReceptionCalibrator& model, Pulsar::Archive* archive)
+{
+  cpgbeg (0, "onpulse.ps/CPS", 0, 0);
+
+  cpgslw(2);
+  cpgsvp (.1,.9, .1,.9);
+
+  cerr << "pcm: plotting on-pulse phase bins" << endl;
+  Pulsar::StokesSpherical plot;
+  plot.get_flux()->set_selection( model.get_onpulse() );
+  plot.plot (archive);
+
+  cpgend();
+}
+
+#endif
+
 Reference::To<Calibration::StandardPrepare> prepare;
 
 void auto_select (Pulsar::ReceptionCalibrator& model,
@@ -167,6 +212,10 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
 {
   cerr << "pcm: choosing up to " << maxbins << " pulse phase bins" << endl;
   vector<unsigned> bins;
+
+  if (!prepare)
+    throw Error (InvalidState, "auto_select", 
+    "StandardPrepare policy not set");
 
   prepare->set_input_states (maxbins);
   prepare->choose (archive);
@@ -187,44 +236,12 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   model.set_standard_data( archive );
 
 #if HAVE_PGPLOT
-
-  cpgbeg (0, "chosen.ps/CPS", 0, 0);
-
-  cpgslw(2);
-  cpgsvp (.1,.9, .1,.9);
-
-  cerr << "pcm: plotting chosen phase bins" << endl;
-  Pulsar::StokesSpherical plot;
-  plot.plot (archive);
-
-  cpgswin (0,1,0,1);
-  cpgsls (2);
-
-  for (unsigned ibin=0; ibin < bins.size(); ibin++)
-  {
-    float phase = float(bins[ibin])/float(archive->get_nbin());
-    cpgmove (phase, 0);
-    cpgdraw (phase, 1);
-  }
-
-  cpgend();
-
-  cpgbeg (0, "onpulse.ps/CPS", 0, 0);
-
-  cpgslw(2);
-  cpgsvp (.1,.9, .1,.9);
-
-  cerr << "pcm: plotting on-pulse phase bins" << endl;
-  plot.get_flux()->set_selection( model.get_onpulse() );
-  plot.plot (archive);
-
-  cpgend();
-
+  plot_chosen (archive, bins);
+  plot_onpulse (model, archive);
 #endif
 }
 
-
-void range_select (Pulsar::ReceptionCalibrator& model,
+void range_select (vector<unsigned>& bins,
                    float phmin, float phmax,
                    unsigned nbin, unsigned maxbins)
 {
@@ -242,7 +259,7 @@ void range_select (Pulsar::ReceptionCalibrator& model,
     if (ibin != last_bin)
     {
       cerr << "pcm: adding phase bin " << ibin << endl;
-      model.add_state (ibin%nbin);
+      bins.push_back (ibin);
       last_bin = ibin;
     }
   }
@@ -1439,6 +1456,15 @@ int actual_main (int argc, char *argv[]) try
     cpgend ();
   }
 
+  if (total && phase_bins.size() != 0)
+  {
+    total->fscrunch ();
+    total->tscrunch ();
+    prepare->prepare (total);
+
+    plot_chosen (total, phase_bins, "selected");
+  }
+
 #endif // HAVE_PGPLOT
 
   cerr << "pcm: finished" << endl;
@@ -1502,10 +1528,6 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
 
   model->physical_coherency = physical_coherency;
 
-  // add the specified phase bins
-  for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
-    model->add_state (phase_bins[ibin]);
-
   if (refcal_through_frontend)
     cerr << "pcm: reference source illuminates frontend" << endl;
   else
@@ -1531,33 +1553,38 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   cerr << "pcm: set calibrators" << endl;
   model->set_calibrators (calibrator_filenames);
 
-  if (model->get_nstate_pulsar() == 0)
+  // archive from which pulse phase bins will be chosen
+  Reference::To<Pulsar::Archive> autobin;
+
+  if (binfile) try 
   {
     // archive from which pulse phase bins will be chosen
     Reference::To<Pulsar::Archive> autobin;
 
-    if (binfile) try 
-    {
-      autobin = load (binfile);
+    autobin = load (binfile);
 
-      auto_select (*model, autobin, maxbins);
+    auto_select (*model, autobin, maxbins);
 
-      if (alignment_threshold)
-        phase_std = autobin->get_Profile (0,0,0);
-    }
-    catch (Error& error)
-    {
-      error << "\ncould not load constraint archive '" << binfile << "'";
-      throw error;
-    }
-    else
-      range_select (*model, phmin, phmax, nbin, maxbins);
-
-    cerr << "pcm: " << model->get_nstate_pulsar() << " states" << endl;
-    if ( model->get_nstate_pulsar() == 0 )
-      throw Error (InvalidState, "pcm:mode A",
-                   "no pulsar phase bins have been selected");
+    if (alignment_threshold)
+      phase_std = autobin->get_Profile (0,0,0);
   }
+  catch (Error& error)
+  {
+    error << "\ncould not load constraint archive '" << binfile << "'";
+    throw error;
+  }
+
+  if (phmin != phmax)
+    range_select (phase_bins, phmin, phmax, nbin, maxbins);
+
+  // add the specified phase bins
+  for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
+    model->add_state (phase_bins[ibin]);
+
+  cerr << "pcm: " << model->get_nstate_pulsar() << " states" << endl;
+  if ( model->get_nstate_pulsar() == 0 )
+    throw Error (InvalidState, "pcm:mode A",
+                 "no pulsar phase bins have been selected");
 
   return model;
 }
