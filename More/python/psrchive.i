@@ -637,6 +637,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         int ii;
         PyArrayObject *arr;
         npy_intp ndim[1];
+
         ndim[0] = self->get_nchan();
         arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
         for (ii = 0; ii < ndim[0]; ii++) {
@@ -660,6 +661,21 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
                 ((double *)arr->data)[ii*ndims[1]+jj] = \
                     self->get_Profile(ii, 0, jj)->get_centre_frequency();
             }
+        }
+        return (PyObject *)arr;
+    }
+
+    // Return mjd table of the archive as numpy array
+    PyObject *get_mjds()
+    {
+        int ii;
+        PyArrayObject *arr;
+        npy_intp ndim[1];
+
+        ndim[0] = self->get_nsubint();
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        for (ii = 0; ii < ndim[0]; ii++) {
+            ((double *)arr->data)[ii] = self->get_Integration(ii)->get_epoch().in_days();
         }
         return (PyObject *)arr;
     }
