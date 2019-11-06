@@ -62,7 +62,15 @@ done
 	if test -z "$python_path" ; then
 		AC_MSG_ERROR([cannot find Python library path])
 	fi
-	AC_SUBST([PYTHON_LDFLAGS],["-L$python_path -lpython$PYTHON_LIB_VERSION"])
+        # This seems to fix segfaults on some Mac OSX python versions
+        # where python was statically linked.  See discussion in:
+        # https://github.com/shogun-toolbox/shogun/issues/4068
+        python_static=`$PYTHON -c 'import sysconfig; print("dynamic_lookup" in sysconfig.get_config_var("LDSHARED"))'`
+        if test "x$python_static" = "xTrue" ; then
+	        AC_SUBST([PYTHON_LDFLAGS],["-Wl,-undefined,dynamic_lookup"])
+        else
+	        AC_SUBST([PYTHON_LDFLAGS],["-L$python_path -lpython$PYTHON_LIB_VERSION"])
+        fi 
 	#
 	python_site=`echo $python_path | sed "s/config/site-packages/"`
 	AC_SUBST([PYTHON_SITE_PKG],[$python_site])
