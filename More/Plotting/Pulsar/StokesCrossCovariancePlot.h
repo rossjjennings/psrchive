@@ -17,6 +17,7 @@
 namespace Pulsar {
 
   class StokesCrossCovariance;
+  class ProfileStats;
 
   //! Plots a polarization pulse profile
   class StokesCrossCovariancePlot : public FluxPlot {
@@ -58,6 +59,16 @@ namespace Pulsar {
     //! Search for the phase bin to be plotted
     bool get_max_bin () const { return max_bin; }
 
+    //! Set the ProfileStats expression to evaluate
+    void set_expression (const std::string& str) { expression = str; }
+    //! Get the ProfileStats expression to evaluate
+    std::string get_expression () const { return expression; }
+
+    //! Configure the ProfileStats expression evaluator
+    void set_config (const std::string& str);
+    //! Dummy function
+    std::string get_config () const { return ""; }
+
     //! Output text files for gnuplot splot
     void set_splot_output (bool s) { splot_output = s; }
     //! Output text files for gnuplot splot
@@ -68,6 +79,7 @@ namespace Pulsar {
     unsigned lags;
     int bin;
     bool max_bin;
+    std::string expression;
 
     // if (bin>-1 or max_bin), output text files for gnuplot splot
     bool splot_output;
@@ -76,9 +88,15 @@ namespace Pulsar {
 
     Reference::To<StokesCrossCovariance> stokes_crossed;
 
+    // used to evaluate expressions on each row of cross-covariance matrix (at covar)
+    Reference::To<ProfileStats> stats;
+    Reference::To<TextInterface::Parser> parser;
+
     void plot_lags ();
     void plot_bin ();
-      
+    void plot_stats ();      
+
+
   };
 
 }

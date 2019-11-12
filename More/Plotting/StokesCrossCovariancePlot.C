@@ -10,14 +10,20 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/CovarianceMatrix.h"
+#include "Pulsar/ProfileStats.h"
 
 #include "pairutil.h"
 #include "Matrix.h"
 
 #include <fstream>
+#include <iomanip>
+
 #include <assert.h>
 
 using namespace std;
+
+// defined in More/General/standard_interface.C
+std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::StokesCrossCovariancePlot::StokesCrossCovariancePlot ()
 {
@@ -26,6 +32,9 @@ Pulsar::StokesCrossCovariancePlot::StokesCrossCovariancePlot ()
   bin = -1;
   max_bin = false;
   splot_output = false;
+
+  stats = new ProfileStats;
+  parser = stats->get_interface ();
 }
 
 TextInterface::Parser* Pulsar::StokesCrossCovariancePlot::get_interface ()
@@ -33,7 +42,10 @@ TextInterface::Parser* Pulsar::StokesCrossCovariancePlot::get_interface ()
   return new Interface (this);
 }
 
-
+void Pulsar::StokesCrossCovariancePlot::set_config (const std::string& str)
+{ 
+  cerr << parser->process(str);
+}
 
 void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
 {
@@ -51,7 +63,9 @@ void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
   if (max_bin)
     bin = archive->get_Profile(0,0,0)->find_max_bin();
 
-  if (bin >= 0)
+  if (!expression.empty())
+    plot_stats();
+  else if (bin >= 0)
     plot_bin ();
   else
     plot_lags ();
@@ -141,6 +155,48 @@ void Pulsar::StokesCrossCovariancePlot::plot_lags ()
   }
 }
 
+void Pulsar::StokesCrossCovariancePlot::plot_stats ()
+{
+  plotter.profiles.resize( 1 );
+  plotter.plot_sls.resize( 1 );
+  plotter.plot_slw.resize( 1 );
+
+  unsigned nbin = stokes_crossed->get_nbin();
+  Profile* profile = new Profile(nbin);
+  float* amps = profile->get_amps();
+
+  plotter.profiles[0] = profile;
+  plotter.plot_sls[0] = 1;
+  plotter.plot_slw[0] = 2;
+
+  Reference::To<Profile> row = new Profile(nbin);
+  float* ramps = row->get_amps();
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    ostringstream value;
+    value << setfill('0') << setw(4) << ibin;
+    string unload = string("bin_") + value.str() + string(".txt");
+
+    ofstream out (unload.c_str());
+
+    for (unsigned jbin=0; jbin < nbin; jbin++)
+    {
+      Matrix<4,4,double> c = stokes_crossed->get_cross_covariance(ibin,jbin);
+      ramps[jbin] = c[covar.first][covar.second];
+    }
+
+    // ramps[ibin] = 0.5 * ( ramps[(ibin+1)%nbin] + ramps[(ibin+nbin-1)%nbin] );
+
+    for (unsigned jbin=0; jbin < nbin; jbin++)
+      out << jbin << " " << ramps[jbin] << endl;
+
+    stats->set_Profile (row);
+    string text = process( parser, expression );
+    amps[ibin] = fromstring<float>( text );
+  }
+}
+
 
 Pulsar::StokesCrossCovariancePlot::Interface::Interface (StokesCrossCovariancePlot* obj)
 {
@@ -165,9 +221,16 @@ Pulsar::StokesCrossCovariancePlot::Interface::Interface (StokesCrossCovariancePl
        &StokesCrossCovariancePlot::set_max_bin,
        "max", "find phase bin to plot");
 
+  add( &StokesCrossCovariancePlot::get_expression,
+       &StokesCrossCovariancePlot::set_expression,
+       "exp", "Expression to evaluate for each row" );
+
+  add( &StokesCrossCovariancePlot::get_config,
+       &StokesCrossCovariancePlot::set_config,
+       "config", "Configure the expression evaluator" );
+
   add( &StokesCrossCovariancePlot::get_splot_output,
        &StokesCrossCovariancePlot::set_splot_output,
        "splot", "produce text files for splot (bin>0 || max)");
 }
-
 
