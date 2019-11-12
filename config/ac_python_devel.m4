@@ -34,9 +34,9 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 		AC_MSG_CHECKING([for Python include path (again)])
 		python_path=`$PYTHON -c "from sysconfig import get_paths; print(get_paths().get('include'))"`
 	fi
-	if test -z "$python_path" ; then
-		python_path=`echo $python_path | sed "s,/Python.h$,,"`
-	fi
+
+	python_path=`echo $python_path | sed "s,/Python.h$,,"`
+
 	AC_MSG_RESULT([$python_path])
 	if test -z "$python_path" ; then
 		AC_MSG_ERROR([cannot find Python include path])
