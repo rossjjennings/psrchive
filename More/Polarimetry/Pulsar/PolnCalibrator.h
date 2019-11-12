@@ -112,6 +112,9 @@ namespace Pulsar {
     //
     // ///////////////////////////////////////////////////////////////////
 
+    //! Perform backend corrections before inverting response
+    void set_backend_correction (bool f) { do_backend_correction = f; }
+
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
 
@@ -159,6 +162,9 @@ namespace Pulsar {
     //! The number of frequency channels in the observation to be calibrated
     unsigned observation_nchan;
 
+    //! Perform backend corrections before inverting
+    bool do_backend_correction;
+
     //! Derived classes can create and fill the transformation array
     virtual void calculate_transformation ();
 
@@ -186,6 +192,10 @@ namespace Pulsar {
     //! The Receiver Extension used as the basis for corrections
     Reference::To<const Receiver> receiver;
     std::string receiver_basis_filename;
+
+    //! Used by constructors to initialize variables
+    void init ();
+
   };
 
   //! Create a new transformation instance described by the extension

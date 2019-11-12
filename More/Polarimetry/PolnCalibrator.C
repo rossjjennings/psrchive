@@ -45,6 +45,13 @@ Pulsar::PolnCalibrator::minimum_determinant
 );
 
 
+void Pulsar::PolnCalibrator::init ()
+{
+  do_backend_correction = true;
+  built = false;
+  observation_nchan = 0;
+}
+
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
   PolnCalibratorExtension, then the constructed instance can be
@@ -52,6 +59,8 @@ Pulsar::PolnCalibrator::minimum_determinant
 */
 Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
 {
+  init ();
+
   if (!archive)
     return;
 
@@ -108,8 +117,7 @@ void Pulsar::PolnCalibrator::set_calibrator (const Archive* archive)
 //! Copy constructor
 Pulsar::PolnCalibrator::PolnCalibrator (const PolnCalibrator& calibrator)
 {
-  built = false;
-  observation_nchan = 0;
+  init ();
 }
 
 //! Destructor
@@ -758,8 +766,11 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
 
   if (arch->get_npol() == 4 || arch->get_npol() == 2)
   {
-    BackendCorrection correct_backend;
-    correct_backend (arch);
+    if (do_backend_correction)
+    {
+      BackendCorrection correct_backend;
+      correct_backend (arch);
+    }
 
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::calibrate Archive::transform" <<endl;

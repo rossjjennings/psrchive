@@ -80,8 +80,8 @@ void psrsplit::setup ()
   if (nsubint == 0 && nchannel == 0)
     throw Error (InvalidState, "psrsplit::setup",
 		 "please specify number of sub-integrations per output file");
-  if (nsubint == 0)
-    useall_subints = true;
+
+  useall_subints = nsubint == 0;
 }
 
 string get_extension (const std::string& filename)

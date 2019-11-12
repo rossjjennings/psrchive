@@ -55,33 +55,30 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 
 	# Check for Python library path
 	AC_MSG_CHECKING([for Python library path])
-	python_path=`$PYTHON -c "import os; from sysconfig import get_paths; print(os.path.dirname(get_paths().get('stdlib')))"`
-	AC_MSG_RESULT([$python_path])
-
-	if test -z "$python_path" ; then
-		python_path=`echo $PYTHON | sed "s,/bin.*$,,"`
-		for i in "$python_path/lib/python$PYTHON_VERSION/config/" "$python_path/lib64/python$PYTHON_VERSION/config/" "$python_path/lib/python$PYTHON_VERSION/" "$python_path/lib/python/config/" "$python_path/lib/python/" "$python_path/" ; do
-			python_path=`find $i -name libpython$PYTHON_VERSION.* -print | sed "1q"`
-			if test -n "$python_path" ; then
-				break
-			fi
-		done
-	fi
-
-	if test -z "$python_path" ; then
-		python_path=`echo $python_path | sed "s,/libpython.*$,,"`
-	fi
-
+	python_path=`echo $PYTHON | sed "s,/bin.*$,,"`
+	for i in "$python_path/lib/python$PYTHON_VERSION/config/" "$python_path/lib64/python$PYTHON_VERSION/config/" "$python_path/lib/python$PYTHON_VERSION/" "$python_path/lib/python/config/" "$python_path/lib/python/" "$python_path/" ; do
+for PYTHON_LIB_VERSION in "${PYTHON_VERSION}" "${PYTHON_VERSION}m" ; do
+		python_path=`find $i -name libpython${PYTHON_LIB_VERSION}.* -print | sed "1q"`
+		if test -n "$python_path" ; then
+			break
+		fi
+done
+	done
+	python_path=`echo $python_path | sed "s,/libpython.*$,,"`
 	AC_MSG_RESULT([$python_path])
 	if test -z "$python_path" ; then
 		AC_MSG_ERROR([cannot find Python library path])
 	fi
-	python_major_version=`$PYTHON -c "import sys; print(sys.version_info[[0]])"`
-	python_lib_name=`echo "python${python_major_version}"`
-	AC_MSG_RESULT([$python_lib_name])
-	AC_SUBST([PYTHON_LDFLAGS],["-L$python_path -l$python_lib_name"])
-	AC_MSG_RESULT([$PYTHON_LDFLAGS])
-
+        # This seems to fix segfaults on some Mac OSX python versions
+        # where python was statically linked.  See discussion in:
+        # https://github.com/shogun-toolbox/shogun/issues/4068
+        python_static=`$PYTHON -c 'import sysconfig; print("dynamic_lookup" in sysconfig.get_config_var("LDSHARED"))'`
+        if test "x$python_static" = "xTrue" ; then
+	        AC_SUBST([PYTHON_LDFLAGS],["-Wl,-undefined,dynamic_lookup"])
+        else
+	        AC_SUBST([PYTHON_LDFLAGS],["-L$python_path -lpython$PYTHON_LIB_VERSION"])
+        fi 
+	#
 	python_site=`echo $python_path | sed "s/config/site-packages/"`
 	AC_SUBST([PYTHON_SITE_PKG],[$python_site])
 	#

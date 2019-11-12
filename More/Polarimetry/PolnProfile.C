@@ -665,6 +665,7 @@ void remove_baseline (Pulsar::Profile* profile,
   profile->offset( -baseline->get_mean().get_value() );
 }
 
+
 /*!
   rss stands for root-sum-squared
 
@@ -737,6 +738,11 @@ void Pulsar::PolnProfile::get_circular (Profile* absV) const try
 {
   absV->operator=( *get_Profile(3) );
   absV->absolute();
+
+  // correct bias by removing the baseline
+  Reference::To<PhaseWeight> base = get_baseline();
+  base->set_Profile( absV );
+  absV->offset( -base->get_mean().get_value() );
 }
 catch (Error& error)
 {

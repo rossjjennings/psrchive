@@ -102,6 +102,8 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
 
   float hip[3] = { mean_hi, mean_hi-sigma_hi, mean_hi+sigma_hi };
   float lop[3] = { mean_lo, mean_lo-sigma_lo, mean_lo+sigma_lo };
+
+  // solid lines for the means, dashed lines for mean +/- 1-sigma
   int line_style[3] = { 1, 2, 2 };
 
   int colour=0, line=0;

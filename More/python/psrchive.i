@@ -41,6 +41,10 @@
 
 #include "Pulsar/ManualPolnCalibrator.h"
 
+#include "Pulsar/CalibratorExtension.h"
+#include "Pulsar/BackendCorrection.h"
+#include "Pulsar/FrontendCorrection.h"
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -136,6 +140,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Integration::get_extension(unsigned);
 %ignore Pulsar::Integration::get_extension(unsigned) const;
 %ignore Pulsar::Integration::add_extension(Extension*);
+
+%ignore Pulsar::FrontendCorrection::new_Extension() const;
 
 // Also does not use the assignment operator
 %ignore Pulsar::Archive::operator=(const Archive&);
@@ -239,6 +245,10 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TextParameters.h"
 %include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
+
+
+%include "Pulsar/BackendCorrection.h"
+%include "Pulsar/FrontendCorrection.h"
 
 #if HAVE_GSL
 %include "Pulsar/WaveletSmooth.h"
@@ -627,6 +637,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         int ii;
         PyArrayObject *arr;
         npy_intp ndim[1];
+
         ndim[0] = self->get_nchan();
         arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
         for (ii = 0; ii < ndim[0]; ii++) {
@@ -650,6 +661,21 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
                 ((double *)arr->data)[ii*ndims[1]+jj] = \
                     self->get_Profile(ii, 0, jj)->get_centre_frequency();
             }
+        }
+        return (PyObject *)arr;
+    }
+
+    // Return mjd table of the archive as numpy array
+    PyObject *get_mjds()
+    {
+        int ii;
+        PyArrayObject *arr;
+        npy_intp ndim[1];
+
+        ndim[0] = self->get_nsubint();
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        for (ii = 0; ii < ndim[0]; ii++) {
+            ((double *)arr->data)[ii] = self->get_Integration(ii)->get_epoch().in_days();
         }
         return (PyObject *)arr;
     }

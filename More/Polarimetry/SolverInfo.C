@@ -49,6 +49,9 @@ Estimate<float>
 Pulsar::SolverInfo::get_param (unsigned ichan, unsigned iclass,
 			       unsigned iparam) const
 {
+  if (!poln_calibrator->get_transformation_valid(ichan))
+    return 0.0;
+
   const MEAL::LeastSquares* solver = poln_calibrator->get_solver (ichan);
 
   if (!solver->get_solved() || !solver->get_nfree())
