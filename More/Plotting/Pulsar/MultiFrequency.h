@@ -16,7 +16,7 @@
 
 namespace Pulsar {
 
-  //! Plots multiple viewports with pulse phase along the shared x-axis
+  //! Plots multiple viewports with radio frequency along the shared x-axis
   class MultiFrequency : public MultiPlot {
 
   public:
