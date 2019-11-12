@@ -151,6 +151,22 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data) try
       stats->set_bandwidth (subint->get_bandwidth() / subint->get_nchan());
 
     plotter.profiles[0] = stats->get_modulation_index();
+
+    double num=0, den=0;
+    unsigned nbin = profile->get_nbin();
+    const float* I = profile->get_Profile(0)->get_amps();
+    const float* beta = plotter.profiles[0]->get_amps();
+
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+      if (beta[ibin] != 0.0)
+      {
+        double x = beta[ibin] * I[ibin];
+        num += x * x;
+        den += I[ibin] * I[ibin];
+      }
+
+    cerr << "bar beta = " << sqrt(num/den) << endl;
+
   }
 
 
