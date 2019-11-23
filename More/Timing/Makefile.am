@@ -14,6 +14,7 @@ nobase_include_HEADERS = \
 	Pulsar/SincInterpShift.h \
 	Pulsar/FluxCentroid.h \
 	Pulsar/MatrixTemplateMatching.h \
+	Pulsar/MeanPhase.h \
 	Pulsar/ComponentModel.h \
 	Pulsar/PolnProfileShiftEstimator.h \
 	Pulsar/RotatingVectorModelShift.h
@@ -30,6 +31,7 @@ libTiming_la_SOURCES = \
 	FourierDomainFit.C \
 	FluxCentroid.C \
 	MatrixTemplateMatching.C \
+	MeanPhase.C \
 	ComponentModel.C \
 	RotatingVectorModelShift.C
 
