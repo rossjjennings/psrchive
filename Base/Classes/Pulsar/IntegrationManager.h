@@ -75,6 +75,17 @@ namespace Pulsar {
     /*! This attribute may be set only through IntegrationManager::resize */
     virtual unsigned get_nsubint () const = 0;
 
+    //! Sort the Integrations according to the specified order
+    template<class StrictWeakOrdering>
+    void sort (StrictWeakOrdering comp = temporal_order)
+    {
+      load_all ();
+      std::sort (subints.begin(), subints.begin()+get_nsubint(), comp);
+    }
+
+    //! Randomly rearrange the sub-integrations
+    void shuffle ();
+      
     //! Provides access to protected and private methods of IntegrationManager
     class Expert;
 
@@ -111,14 +122,7 @@ namespace Pulsar {
     //! Remove the Integration at the specified index
     void unmanage (unsigned isubint);
 
-    //! Sort the Integrations according to the specified order
-    template<class StrictWeakOrdering>
-    void sort (StrictWeakOrdering comp = temporal_order)
-    {
-      load_all ();
-      std::sort (subints.begin(), subints.begin()+get_nsubint(), comp);
-    }
-
+    //! Load all sub-integrations
     void load_all ();
 
   private:

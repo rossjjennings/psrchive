@@ -27,6 +27,7 @@
 #include "Pulsar/Transposer.h"
 
 #include "Pulsar/FluxCentroid.h"
+#include "Pulsar/MeanPhase.h"
 #include "Pulsar/DynamicSpectrum.h"
 #include "Pulsar/StandardFlux.h"
 
@@ -152,6 +153,10 @@ void Pulsar::Interpreter::init()
       "usage: freq_append <name> \n"
       "  string name       name of archive to be appended \n" );
 
+  add_command
+    ( &Interpreter::shuffle,
+      "shuffle", "randomly rearrange sub-integrations",
+      "usage: shuffle\n" );
   
   add_command
     ( &Interpreter::edit, 'e',
@@ -225,7 +230,8 @@ void Pulsar::Interpreter::init()
       "centre", "centre profiles using either polyco or data",
       "usage: centre <max|cof> \n"
       "  max               centre on the peak in total intensity \n"
-      "  cof               centre on flux-weighted mean phase\n");
+      "  cof               centre on flux-weighted mean linear shift\n"
+      "  phs               centre on flux-weighted mean phase\n");
 
   add_command 
     ( &Interpreter::dedisperse, 'D',
@@ -890,6 +896,23 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+// //////////////////////////////////////////////////////////////////////
+//
+// shuffle
+//
+string Pulsar::Interpreter::shuffle (const string& args) try
+{
+  if (args.length())
+    return response (Fail, "accepts no arguments");
+
+  get() -> shuffle();
+
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -1051,29 +1074,40 @@ catch (Error& error) {
 }
 
 
-void centre_of_flux (Pulsar::Archive* archive)
+void shift_using_estimator (Pulsar::ProfileShiftEstimator* shift,
+			    Pulsar::Archive* archive)
 {
   Reference::To<Pulsar::Archive> total = archive->total();
  
-  Pulsar::FluxCentroid cof;
-  cof.set_observation( total->get_Profile(0,0,0) );
-  cof.set_duty_cycle( 1.0 );
+  shift->set_observation( total->get_Profile(0,0,0) );
 
-  double shift_phase = cof.get_shift().get_value();
+  double shift_phase = shift->get_shift().get_value();
   double period = total->get_Integration(0)->get_folding_period();
   double shift_time = (shift_phase+0.5) * period;
 
   archive->rotate (shift_time); 
 }
 
+
 string Pulsar::Interpreter::centre (const string& args) try
 {
   vector<string> arguments = setup (args);
 
-  if (arguments.size() == 1 && arguments[0] == "cof")
-    centre_of_flux( get() );
+  if (arguments.size() == 1 && arguments[0] == "phs")
+  {
+    Reference::To<MeanPhase> phs = new MeanPhase;
+    shift_using_estimator( phs, get() );
+  }
+  else if (arguments.size() == 1 && arguments[0] == "cof")
+  {
+    Reference::To<FluxCentroid> cof = new FluxCentroid;
+    cof->set_duty_cycle (1.0);
+    shift_using_estimator( cof, get() );
+  }
   else if (arguments.size() == 1 && arguments[0] == "max")
+  {
     get()->centre_max_bin();
+  }
   else if (arguments.size() == 1)
   {
     try { double phase = fromstring<double>(arguments[0]); get()->centre(phase); }

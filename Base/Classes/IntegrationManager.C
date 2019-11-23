@@ -217,6 +217,12 @@ bool Pulsar::temporal_order (const Reference::To<Integration>& A,
   return A->get_epoch() < B->get_epoch();
 }
 
+void Pulsar::IntegrationManager::shuffle ()
+{
+  load_all ();
+  std::random_shuffle (subints.begin(), subints.begin()+get_nsubint());
+}
+
 void Pulsar::IntegrationManager::load_all ()
 {
   for (unsigned i=0; i < get_nsubint(); i++)

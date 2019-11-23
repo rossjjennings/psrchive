@@ -136,6 +136,9 @@ namespace Pulsar {
     //! append one archive to another in frequency direction
     std::string freq_append (const std::string& args);
 
+    //! randomly rearrange sub-integrations
+    std::string shuffle (const std::string& args);
+
     //! frequency scrunch an archive in the stack
     std::string fscrunch (const std::string& args);
     
