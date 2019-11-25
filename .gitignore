@@ -46,6 +46,7 @@ More/Applications/paz
 More/Applications/pazi
 More/Applications/pcm
 More/Applications/pcmavg
+More/Applications/pcmdiff
 More/Applications/pdmp
 More/Applications/pdv
 More/Applications/psr4th
@@ -66,8 +67,10 @@ More/Applications/psrsplit
 More/Applications/psrstability
 More/Applications/psrstat
 More/Applications/psrtrash
+More/Applications/psrtxt2
 More/Applications/psrwt
 More/Applications/psrzap
+More/Applications/reslice
 More/Applications/rmfit
 More/Applications/sesdiv
 More/Applications/spa
@@ -124,6 +127,7 @@ configure
 libtool
 local_include/
 packages/cfitsio.csh
+packages/epsic.csh
 packages/fftw.csh
 packages/pgplot.csh
 packages/psrcat.csh
@@ -207,6 +211,7 @@ Util/genutil/test_sky_coord
 Util/genutil/test_sum
 Util/resources/test_Parameters_factory
 Util/resources/test_Predictor_factory
+Util/resources/toaio
 Util/tempo/test.psrephem.out1
 Util/tempo/test.psrephem.out2
 Util/tempo/test.psrephem.out3
