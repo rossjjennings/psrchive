@@ -3,7 +3,7 @@ noinst_LTLIBRARIES = libChecks.la
 
 nobase_dist_data_DATA = fluxcal.on fluxcal.off \
 	Parkes/receiver.log Parkes/MULT_1.rcvr \
-	Parkes/H-OH.rcvr Parkes/1050CM.rcvr Parkes/5010CM.rcvr
+	Parkes/H-OH.rcvr Parkes/1050CM.rcvr Parkes/5010CM.rcvr Parkes/UWL.rcvr
 
 nobase_include_HEADERS = \
         Pulsar/CalSource.h \
