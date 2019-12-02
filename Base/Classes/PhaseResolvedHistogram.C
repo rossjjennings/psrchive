@@ -19,22 +19,13 @@ Pulsar::PhaseResolvedHistogram* Pulsar::PhaseResolvedHistogram::clone () const
   return new PhaseResolvedHistogram (*this);
 }
 
-// defined in Profile_average.C
-void weighted_average (Pulsar::Profile* result,
-		       const Pulsar::Profile* other,
-		       bool second_moment);
-
 //! average information from another MoreProfiles
 void Pulsar::PhaseResolvedHistogram::average (const MoreProfiles* more)
 {
-  const PhaseResolvedHistogram* hist
-    = dynamic_cast<const PhaseResolvedHistogram*> (more);
-  if (!hist)
+  if (!dynamic_cast<const PhaseResolvedHistogram*> (more))
     return;
 
-  const unsigned nprof = profile.size();
-  for (unsigned iprof=0; iprof < nprof; iprof++)
-    weighted_average (get_Profile(iprof), more->get_Profile(iprof), true);
+  MoreProfiles::average (more);
 }
 
 //! Set the minimum and maximum values spanned by the histogram

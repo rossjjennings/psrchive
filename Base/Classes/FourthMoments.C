@@ -69,11 +69,8 @@ void weighted_average (Pulsar::Profile* result,
 //! average information from another MoreProfiles
 void Pulsar::FourthMoments::average (const MoreProfiles* more)
 {
-  const FourthMoments* fourth = dynamic_cast<const FourthMoments*> (more);
-  if (!fourth)
+  if (!dynamic_cast<const FourthMoments*> (more))
     return;
 
-  const unsigned nprof = profile.size();
-  for (unsigned iprof=0; iprof < nprof; iprof++)
-    weighted_average (get_Profile(iprof), more->get_Profile(iprof), true);
+  MoreProfiles::average (more);
 }

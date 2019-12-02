@@ -10,8 +10,7 @@
 
 using namespace std;
 
-void weighted_average (Pulsar::Profile* result, const Pulsar::Profile* other,
-		       bool second_moment = false)
+void weighted_average (Pulsar::Profile* result, const Pulsar::Profile* other)
 {
   if (result->get_nbin() != other->get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::weighted_average",
@@ -30,14 +29,6 @@ void weighted_average (Pulsar::Profile* result, const Pulsar::Profile* other,
   if (weight != 0)
     norm = 1.0 / weight;
 
-  if (second_moment)
-  {
-    // square the various scale factors
-    weight1 *= weight1;
-    weight2 *= weight2;
-    norm *= norm;
-  }
-  
   const unsigned nbin = result->get_nbin();
   for (unsigned ibin=0; ibin<nbin; ibin++)
     amps1[ibin] = norm * ( amps1[ibin]*weight1 + amps2[ibin]*weight2 );
