@@ -13,6 +13,7 @@
 #include "Pulsar/CalInterpreter.h"
 #include "Pulsar/InstallInterpreter.h"
 #include "Pulsar/ExtensionInterpreter.h"
+#include "Pulsar/FourthMomentInterpreter.h"
 
 Pulsar::Interpreter* standard_shell ()
 {
@@ -50,6 +51,9 @@ Pulsar::Interpreter* standard_shell ()
 
   interpreter->import( new Pulsar::InstallInterpreter,
 		       "install", "install auxilliary data" );
+
+  interpreter->import( new Pulsar::FourthMomentInterpreter,
+		       "fourth", "operate on fourth moment data" );
 
   return interpreter.release();
 }

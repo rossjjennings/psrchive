@@ -219,6 +219,11 @@ const Pulsar::StokesCovariance* Pulsar::PolnProfile::get_covariance () const
   return covariance;
 }
 
+Pulsar::StokesCovariance* Pulsar::PolnProfile::get_covariance ()
+{
+  return covariance;
+}
+
 
 void Pulsar::PolnProfile::check (const char* method,
 				 Signal::State want_state,

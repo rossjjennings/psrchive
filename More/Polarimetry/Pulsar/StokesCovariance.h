@@ -33,8 +33,8 @@ namespace Pulsar {
     //! Default constructor
     StokesCovariance ();
 
-    //! Construct with the specified number of phase bins
-    StokesCovariance (const FourthMoments*);
+    //! Construct from the FourthMoments object
+    StokesCovariance (FourthMoments*);
     
     //! Destructor
     ~StokesCovariance();

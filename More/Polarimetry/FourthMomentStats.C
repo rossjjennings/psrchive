@@ -6,8 +6,12 @@
  ***************************************************************************/
 
 #include "Pulsar/FourthMomentStats.h"
+
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/StokesCovariance.h"
+#include "Pulsar/PhaseWeight.h"
 #include "Pulsar/ModeSeparation.h"
 
 #include "Pauli.h"
@@ -42,6 +46,33 @@ void Pulsar::FourthMomentStats::set_profile (const PolnProfile* _profile)
     covariance = profile->get_covariance();
 }
 
+const Pulsar::StokesCovariance*
+Pulsar::FourthMomentStats::get_covariance () const
+{
+  return covariance;
+}
+
+//! Get the eigen values of the polarization vector space
+const Pulsar::Profile*
+Pulsar::FourthMomentStats::get_eigen_value (unsigned k)
+{
+  return eigen_value.at(k);
+}
+
+//! Get the regression coefficients for each polarization vector
+const Pulsar::Profile*
+Pulsar::FourthMomentStats::get_regression_coefficient (unsigned k)
+{
+  return regression_coefficient.at(k);
+}
+
+//! Get covariance between polarized and total intensity in natural basis
+const Pulsar::Profile*
+Pulsar::FourthMomentStats::get_natural_covariance (unsigned k)
+{
+  return natural_covariance.at(k);
+}
+
 void Pulsar::FourthMomentStats::set_bandwidth (double bw)
 {
   bandwidth = fabs(bw);
@@ -60,146 +91,52 @@ void sort (Vector<3,double>& v)
 
 Reference::To<Pulsar::Profile> Pulsar::FourthMomentStats::get_modulation_index()
 {
-  if (folding_period <= 0)
-    throw Error (InvalidState,
-		 "Pulsar::FourthMomentStats::get_modulation_index", 
-		 "folding period unknown");
-
-  if (bandwidth <= 0)
-    throw Error (InvalidState,
-		 "Pulsar::FourthMomentStats::get_modulation_index",
-		 "bandwidth unknown");
-
-  if (duration <= 0)
-    throw Error (InvalidState,
-		 "Pulsar::FourthMomentStats::get_modulation_index",
-		 "integration length unknown");
-
   const unsigned nbin = covariance->get_nbin();
 
-  Reference::To<Profile> result = covariance->get_Profile(0)->clone();
-
   PhaseWeight* baseline = stats->get_baseline ();
-  double off_pulse_moment;
-  baseline->stats (result, &off_pulse_moment);
 
-  Stokes<double> off_pulse_mean;
-  Stokes<double> off_pulse_var;
-  for (unsigned i=0; i<4; i++)
-  {
-    const Profile* p = profile->get_Profile(i);
-    baseline->stats (p, &off_pulse_mean[i], &off_pulse_var[i]);
-  }
+  double off_pulse_mean;
+  double off_pulse_var;
 
-  const float* I = profile->get_Profile(0)->get_amps();
+  // total intensity
+  const Profile* intensity = profile->get_Profile(0);
+  baseline->stats (intensity, &off_pulse_mean, &off_pulse_var);
 
-  cerr << "bandwidth=" << bandwidth
-       << " weight=" << profile->get_Profile(0)->get_weight() << endl;
+  const float* I = intensity->get_amps();
 
-#define ASSUME_EFFECTIVE_BANDWIDTH 0
-#if ASSUME_EFFECTIVE_BANDWIDTH
-
-  /*
-    the following code computes the effective banwidth of CASPSR
-    after bad channels have been zapped
-  */
-
-  // 62 is the number of sub-integrations in first.meta
-
-  double effective_nchan = profile->get_Profile(0)->get_weight () / 62;
-
-  cerr << "effective nchan=" << effective_nchan << endl;
-
-  double original_nchan = 512;
-
-  bandwidth *= effective_nchan / original_nchan;
-
-  cerr << "effective bandwidth=" << bandwidth << endl;
-
-#endif
-
-  double npulse = duration / folding_period;
-  double nsample = folding_period * bandwidth * 1e6 / nbin;
-
-  cerr << "npulse=" << npulse << " nsample=" << nsample << endl;
-
-  double fnorm = 1.0;
-
-  double ratio = off_pulse_var[0] / off_pulse_moment;
-  if (ratio > 4 || ratio < 0.25)
-  {
-    // this is approx. the normalization factor that psr4th should have applied
-    fnorm = npulse / profile->get_Profile(0)->get_weight();
-    cerr << "correcting psr4th bug by norm=" << fnorm << endl;
-  }
-
-  cerr << "mean=" << off_pulse_mean[0] << " var=" << off_pulse_var[0]
-       << " moment=" << off_pulse_moment
-       << " normalized moment=" << off_pulse_moment / fnorm << endl;
-
-  cerr << "missing factor=" << off_pulse_var[0] / (off_pulse_moment / fnorm) << endl;
-
-  double dof = nsample * 2;
-
-  double predicted = normsq(off_pulse_mean)/dof;
-  double measured = off_pulse_moment*npulse/fnorm;
-
-#define BASEBAND_FOURTH 0
-#if BASEBAND_FOURTH
-  predicted =  normsq(off_pulse_mean);
-  measured = off_pulse_moment;
-#endif
-
-  cerr << "dof=" << dof << endl;
-  cerr << "predicted rms=" << sqrt(predicted)
-       << endl
-       << "measured rms=" << sqrt(measured)
-       << endl;
-  
-  double correction = measured / predicted;
-
-  cerr << "correction=" << correction << endl;
-
+  Reference::To<Profile> result = covariance->get_Profile(0)->clone();
   float* M = result->get_amps();
 
-  double peak_bias = 0;
+  double Itot = 0.0;
+  double Isqtot = 0.0;
+  double Mtot = 0.0;
+  unsigned count = 0;
 
+  // 6-sigma ... TODO: should be adjustable
+  float threshold = 6.0;
+    
   for (unsigned i=0; i<nbin; i++)
   {
-    float Ival = I[i] - off_pulse_mean[0];
+    float Ival = I[i] - off_pulse_mean;
     double Isq = Ival * Ival;
 
-    if (Isq < 100 * off_pulse_var[0])
-      M[i] = 0;
-    else
+    if (Isq < threshold * threshold * off_pulse_var)
     {
-      double bias = normsq( profile->get_Stokes(i) );
-      //- normsq( profile->get_Stokes(i) - off_pulse_mean )
-      //- normsq( off_pulse_mean );
-
-      bias /= dof;
-
-      // bias = 0;
-
-      // bias *= correction;
-#if 0
-      cerr << "bias=" << bias
-	   << " off=" << off_pulse_moment*npulse/fnorm << endl;
-#endif
-
-      peak_bias = std::max (bias, peak_bias);
-	
-      M[i] = (M[i]*npulse/fnorm - bias) / Isq;
-      if (M[i] < 0)
-	M[i] = 0;
-      else
-	M[i] = sqrt(M[i]);
+      M[i] = 0;
+      continue;
     }
 
+    Itot += Ival;
+    Isqtot += Isq;
+    Mtot += M[i];
+    count ++;
+	
+    M[i] = M[i] / Isq;
+    if (M[i] < 0)
+      M[i] = 0;
+    else
+      M[i] = sqrt(M[i]);
   }
-
-  cerr << "peak bias=" << peak_bias
-       << " off=" << off_pulse_moment*npulse/fnorm << endl;
 
   return result;
 }
@@ -296,8 +233,8 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     Stokes<double> result;
 
     // get the eigen vectors of the coherency matrix
-    Jones<double> rotation = convert( ::eigen( natural(mean) ) );
-    Matrix<4,4,double> R = Mueller( rotation );
+    // Jones<double> rotation = convert( ::eigen( natural(mean) ) );
+    // Matrix<4,4,double> R = Mueller( rotation );
 
     // C = R * C * herm(R);
 
@@ -379,9 +316,9 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
     C = rotate * C * herm(rotate);
 
+#if 0
     Vector<3,double> pmean = mean.get_vector();
 
-#if 0
     double cos_theta = regression * pmean / norm(pmean);
     double theta = acos (cos_theta);
 
@@ -553,3 +490,166 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
     cerr << "mean=" << coherency(modes.get_mean()->evaluate()) << endl;
   }
 }
+
+void Pulsar::FourthMomentStats::debias (Archive* data) try
+{
+  unsigned nsubint = data->get_nsubint();
+  unsigned nchan = data->get_nchan();
+
+  // cerr << "FourthMomentStats::debias Archive=" << data << endl;
+  
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+  {
+    Integration* subint = data->get_Integration(isubint);
+    double folding_period = subint->get_folding_period();
+    double duration = subint->get_duration();
+    // bandwidth in Hz
+    double bandwidth = abs(subint->get_bandwidth() * 1e6 / subint->get_nchan());
+
+    // cerr << "FourthMomentStats::debias Integration=" << subint << endl;
+
+    if (folding_period <= 0)
+      throw Error (InvalidState,
+		 "Pulsar::FourthMomentStats::debias", 
+		 "folding period unknown");
+
+    if (bandwidth <= 0)
+      throw Error (InvalidState,
+		   "Pulsar::FourthMomentStats::debias",
+		   "bandwidth unknown");
+
+    if (duration <= 0)
+      throw Error (InvalidState,
+		   "Pulsar::FourthMomentStats::debias",
+		   "integration length unknown");
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      Reference::To<PolnProfile> profile = subint->new_PolnProfile (ichan);
+
+      StokesCovariance* covariance = profile->get_covariance();
+
+      // cerr << "FourthMomentStats::debias StokesCovariance=" << covariance << endl;
+
+      unsigned nbin = covariance->get_nbin();
+      // double npulse = duration / folding_period;
+      double nsample = folding_period * bandwidth / nbin;
+
+      PhaseWeight* baseline = data->baseline ();
+      vector<float> weight;
+      baseline->get_weights (weight);
+      
+      Stokes<double> off_pulse_mean;
+      Stokes<double> off_pulse_var;
+
+#if _DEBUG
+      Matrix<4,4,double> off_pulse_covar;
+#endif
+      
+      for (unsigned i=0; i<4; i++)
+      {
+	const Profile* pi = profile->get_Profile(i);
+	baseline->stats (pi, &off_pulse_mean[i], &off_pulse_var[i]);
+
+#if _DEBUG
+	const float* ai = pi->get_amps();
+	for (unsigned j=i; j<4; j++)
+        {
+	  const Profile* pj = profile->get_Profile(j);
+	  const float* aj = pj->get_amps();
+
+	  double totsq = 0;
+	  double totwt = 0;
+	  for (unsigned ibin=0; ibin<nbin; ibin++)
+	  {
+	    double xi = ai[ibin] - off_pulse_mean[i];
+	    double xj = aj[ibin] - off_pulse_mean[j];
+	    totsq += weight[ibin] * xi * xj;
+	    totwt += weight[ibin];
+	  }
+	  off_pulse_covar[i][j] = totsq / totwt;
+	  off_pulse_covar[j][i] = off_pulse_covar[i][j];
+	}
+
+	cerr << i
+	     << " covar=" << off_pulse_covar[i][i]
+	     << " var=" << off_pulse_var[i] << endl;
+#endif
+
+      }
+
+#if _DEBUG
+      
+      cerr << "bandwidth=" << bandwidth
+	   << " weight=" << profile->get_Profile(0)->get_weight()
+	   << " npulse=" << npulse << " nsample=" << nsample << endl;
+
+      Matrix<4,4,double> predicted = Minkowski::outer(off_pulse_mean,
+						      off_pulse_mean);
+      predicted /= double(nsample);
+
+      unsigned iprof=0;
+      for (unsigned i=0; i<4; i++)
+	for (unsigned j=i; j<4; j++)
+	{
+	  Reference::To<Profile> result = covariance->get_Profile(iprof);
+	  double off_pulse_moment = 0;
+	  baseline->stats (result, &off_pulse_moment);
+
+	  cerr << i << " " << j << " "
+	       << predicted[i][j] << " "
+	       << off_pulse_moment << " -> "
+	       << off_pulse_moment/predicted[i][j] << endl;
+
+	  // " " << off_pulse_covar[i][j]*npulse << endl;
+
+	  iprof ++;
+	}
+
+#endif
+
+      // collect the off-pulse mean values
+      Matrix<4,4,double> off;
+      unsigned iprof=0;
+      for (unsigned i=0; i<4; i++)
+	for (unsigned j=i; j<4; j++)
+	  {
+	    Profile* Cij = covariance->get_Profile(iprof);
+	    baseline->stats (Cij, &(off[i][j]));
+	    iprof ++;
+	  }
+
+      for (unsigned ibin = 0; ibin < nbin; ibin++)
+      {
+	Stokes<double> stokes = profile->get_Stokes(ibin);
+	stokes -= off_pulse_mean;
+
+	// Equation 43 of van Straten & Tiburzi (2017)
+	Matrix<4,4,double> bias = Minkowski::outer(stokes, off_pulse_mean);
+	bias += transpose (bias);
+
+	// third term on rhs of Equation 42 of van Straten & Tiburzi (2017)
+	bias /= nsample;
+
+	// second term on rhs of Equation 42
+	bias += off;
+
+	// cerr << ibin << " " << bias << endl;
+	
+	unsigned iprof=0;
+	for (unsigned i=0; i<4; i++)
+	  for (unsigned j=i; j<4; j++)
+	  {
+	    Profile* Cij = covariance->get_Profile(iprof);
+	    Cij->get_amps()[ibin] -= bias[i][j];
+	    iprof ++;
+	  }
+      }
+    }
+  }
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::FourthMomentStats::debias";
+}
+

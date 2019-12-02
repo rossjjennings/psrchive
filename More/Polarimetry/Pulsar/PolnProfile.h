@@ -161,6 +161,7 @@ namespace Pulsar {
 		     float sigma) const;
 
     const StokesCovariance* get_covariance () const;
+    StokesCovariance* get_covariance ();
 
   protected:
 
