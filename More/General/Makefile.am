@@ -159,6 +159,7 @@ libGeneral_la_SOURCES = \
 	Archive_total.C \
         Archive_transform.C \
         Archive_tscrunch.C \
+	Archive_tscrunched.C \
         Archive_update_model.C \
 	Archive_weighted_frequency.C \
 	BaselineEstimator.C \

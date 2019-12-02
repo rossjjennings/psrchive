@@ -18,9 +18,12 @@
 
 #include "Matrix.h"
 #include "Stokes.h"
+
 #include <assert.h>
+#include <fstream>
 
 using namespace std;
+using namespace Pulsar;
 
 //
 //! Computes the phase-resolved 4x4 covariance matrix of the Stokes parameters
@@ -90,7 +93,8 @@ protected:
 
   bool total_baseline;
   bool each_baseline;
-  
+  bool report_baseline;
+ 
   //! Add command line options
   void add_options (CommandLine::Menu&);
 };
@@ -125,7 +129,7 @@ psr4th::psr4th ()
   histogram_threshold = 3.0;
   cross_covariance = false;
 
-  total_baseline = each_baseline = false;
+  total_baseline = each_baseline = report_baseline = false;
 }
 
 
@@ -161,6 +165,9 @@ void psr4th::add_options (CommandLine::Menu& menu)
   arg = menu.add (each_baseline, "b");
   arg->set_help ("remove the baseline, found from each sub-integration");
 
+  arg = menu.add (report_baseline, "r");
+  arg->set_help ("report baselines in psr4th_baselines.txt");
+
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
   // arg->set_help ("set the source name to 'string'");
@@ -181,15 +188,13 @@ void psr4th::process (Pulsar::Archive* archive)
 
   archive->convert_state( Signal::Stokes );
 
-  if (total_baseline)
-    archive->remove_baseline();
-  
+  Reference::To<Archive> tscrunched = archive->tscrunched();
+
   if (!output)
   {
     string output_format = "PSRFITS";
     output = Pulsar::Archive::new_Archive (output_format);  
-    output->copy (*archive);
-    output->tscrunch();
+    output->copy (tscrunched);
     
     results.resize (nchan);
     for (unsigned ichan = 0; ichan < nchan; ichan++)
@@ -205,6 +210,14 @@ void psr4th::process (Pulsar::Archive* archive)
       results[ichan].histogram_threshold = histogram_threshold;
     }
   }
+  else
+  {
+    output->append (tscrunched);
+    output->tscrunch();
+  }
+
+  if (total_baseline)
+    archive->remove_baseline();
 
   if (output->get_nchan() != nchan)
     throw Error (InvalidParam, "psr4th::process",
@@ -215,6 +228,10 @@ void psr4th::process (Pulsar::Archive* archive)
     throw Error (InvalidParam, "psr4th::process",
 		 "archive nbin = %u != required nbin = %u",
 		 nbin, output->get_nbin());
+
+  ofstream baselines;
+  if (each_baseline && report_baseline)
+    baselines.open( "psr4th_baselines.txt");
 
   for (unsigned isub=0; isub < nsub; isub++)
   {
@@ -227,7 +244,19 @@ void psr4th::process (Pulsar::Archive* archive)
         continue;
 
       if (each_baseline)
+      {
+        if (report_baseline)
+        {
+          vector< std::vector< Estimate<double> > > mean;
+          subint->baseline_stats( &mean );
+
+          for (unsigned i=0; i<4; i++)
+            baselines << mean[i][0].val << " ";
+          baselines << endl;
+        }
+
         subint->remove_baseline();
+      }
 
       Reference::To<Pulsar::PolnProfile> profile 
 	= subint->new_PolnProfile (ichan);
@@ -381,7 +410,7 @@ void psr4th::finalize()
       unsigned index=0;
       for (unsigned i=0; i<4; i++)
       {
-	profile->get_Profile(i)->get_amps()[ibin] = mean[i];
+	// profile->get_Profile(i)->get_amps()[ibin] = mean[i];
 	for (unsigned j=i; j<4; j++)
 	{
 	  more->get_Profile(index)->get_amps()[ibin] = covar[i][j];

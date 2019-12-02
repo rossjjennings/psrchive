@@ -147,6 +147,10 @@ namespace Pulsar
     //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
     Archive* total (bool tscrunch = true) const;
 
+    //! Return pointer to a new tscrunched clone
+    /*! This is more efficient than clone followed by tscrunch */
+    Archive* tscrunched () const;
+
     //! Return pointer to a new instance with only the specified subints
     Archive* extract (std::vector<unsigned>& subints) const;
 
