@@ -60,7 +60,7 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 for PYTHON_LIB_VERSION in "${PYTHON_VERSION}" "${PYTHON_VERSION}m" ; do
 		python_path=`find $i -name libpython${PYTHON_LIB_VERSION}.* -print | sed "1q"`
 		if test -n "$python_path" ; then
-			break
+			break 2
 		fi
 done
 	done
