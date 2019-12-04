@@ -30,7 +30,7 @@ find_first_if (const std::string& text, Pred pred, std::string::size_type pos)
 }
 
 template<class T>
-std::string substitute (const std::string& text, const T* resolver,
+std::string substitute (const std::string& text, T* resolver,
 			char substitution = '$',
 			Functor< bool(char) > in_name = 
 			Functor< bool(char) > (new TextInterface::Name,
@@ -54,6 +54,20 @@ try
     std::string::size_type name_start = start;
     while (name_start < remain.length() && remain[name_start] == substitution)
       name_start ++;
+
+    // check for commands to send to resolver without substitution
+    while (remain[name_start] == '<')
+    {
+      std::string::size_type command_start = name_start + 1;
+      std::string::size_type command_end = remain.find('>',name_start);
+      if (command_end == std::string::npos)
+        throw Error (InvalidState, "substitute", "command opening '<' without closing '>'");
+
+      std::string command = remain.substr (command_start, command_end - command_start);
+
+      resolver->process (command);
+      start = name_start = command_end + 1;
+    }
 
     // find the end of the variable name
     std::string::size_type end;
