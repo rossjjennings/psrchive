@@ -59,14 +59,18 @@ void Pulsar::ManualPolnCalibrator::load (const string& ascii_model_filename)
   }
   string line;
   //Entry entry;
-  while (true) try
+
+  while (input) try
   {
     getline (input, line);
+
+    line = stringtok (line, "#\n", false);  // get rid of comments
+
+    if (!line.length())
+      continue;
+
     if (verbose > 2) cerr << "Pulsar::ManualPolnCalibrator::load '"<< line << "'" << endl;
-    if (input.eof())
-    {
-      break;
-    }
+
     entries.push_back( Entry(line) );
   }
   catch (Error& error)
