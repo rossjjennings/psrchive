@@ -79,8 +79,9 @@ string Pulsar::Parameters::Lookup::get_param (const string& param, const string 
 
   command += " -c " + param + " " + psr_name + " -nohead -nonumber";
 #else
-  throw Error (InvalidParam, "Pulsar::Parameters::Lookup::get_param()",
-               "not implemneted for PSRINFO");
+  if (verbose)
+    cerr << "Pulsar::Parameters::Lookup::get_param psrcat not available at compilation time" << endl;
+  return string("*");
 #endif
 
   char buffer[128];
