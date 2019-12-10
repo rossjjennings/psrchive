@@ -112,11 +112,31 @@ void Pulsar::ManualPolnCalibrator::calibrate (Archive* arch) try
     for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
     {
       //response[isub].resize(arch->get_nchan());
+      for (unsigned ichan=0; ichan < arch->get_nchan(); ichan++) {
+      }
       std::vector<Entry> best_match = match(arch->get_Integration(isub)->get_epoch());
       for (unsigned ichan=0; ichan < arch->get_nchan(); ichan++)
       {
+          // The number of channels in the calibration file may not match the actual data.
+          // M. Keith Dec-2019
+          //
+          // Frequency in .jones files is in Hz, so get our channel freq in Hz.
+          const double freq = 1e6*arch->get_Integration(isub)->get_centre_frequency(ichan);
+
+          // This could be done much cleaner with iterators, but doesn't seem to be the style for psrchive.
+          // In any case, should not be too bad.
+          Entry best_freq_match = best_match.at(0);
+          double best_df=abs(best_freq_match.ref_frequency-freq);
+          for (unsigned imatch = 0; imatch < best_match.size() ; ++imatch){
+              const double df = abs(best_match.at(imatch).ref_frequency-freq);
+              if (df < best_df){
+                  best_df = df;
+                  best_freq_match = best_match.at(imatch);
+              }
+          }
         //response[isub][ichan] = inv(best_match[ichan].get_response());
-        response[isub][ichan] = inv((best_match.at(ichan)).get_response());
+        //response[isub][ichan] = inv((best_match.at(ichan)).get_response());
+        response[isub][ichan] = inv((best_freq_match).get_response());
 
 	/*
 
