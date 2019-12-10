@@ -65,6 +65,8 @@ keys2c_LDADD =
 #############################################################################
 #
 
+AM_CXXFLAGS = -I$(top_srcdir)/Util/resources
+
 LDADD = libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
