@@ -699,7 +699,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
-    "M:m:Nn:O:o:Pp:QqR:rS:sT:t:U:u:V:vW:wX:xYyZz";
+    "M:m:Nn:O:o:P:p:QqR:rS:sT:t:U:u:V:vW:wX:xYyZz";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
