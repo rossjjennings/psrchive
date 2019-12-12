@@ -18,6 +18,7 @@
 #include "Pulsar/RobustMower.h"
 #include "Pulsar/Statistics.h"
 #include "Pulsar/InterQuartileRange.h"
+#include "Pulsar/TimeFrequencyZap.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"
@@ -58,6 +59,12 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "iqr", "zap subint/chan outliers using inter-quartile range",
       "usage: iqr <TI> \n"
       "  type 'zap iqr help' for text interface help" );
+
+  add_command 
+    ( &ZapInterpreter::tfzap, 
+      "tfzap", "zap subint/chan outliers using time-frequency plane",
+      "usage: tfzap <TI> \n"
+      "  type 'zap tfzap help' for text interface help" );
 
   add_command
     ( &ZapInterpreter::chan,
@@ -197,6 +204,37 @@ string Pulsar::ZapInterpreter::iqr (const string& args) try
 
   //! Zap median interface
   Reference::To<TextInterface::Parser> interface = iq_range->get_interface();
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+  {
+    if (icmd)
+      retval += " ";
+    retval += interface->process (arguments[icmd]);
+  }
+
+  return retval;
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ZapInterpreter::tfzap (const string& args) try
+{
+  bool expand = false;
+  vector<string> arguments = setup (args, expand);
+
+  if (!tf_zapper)
+    tf_zapper = new TimeFrequencyZap;
+
+  if (!arguments.size())
+  {
+    (*tf_zapper)( get() );
+    return response (Good);
+  }
+
+  //! TF zap interface
+  Reference::To<TextInterface::Parser> interface = tf_zapper->get_interface();
 
   string retval;
   for (unsigned icmd=0; icmd < arguments.size(); icmd++)
