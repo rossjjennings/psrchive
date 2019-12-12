@@ -153,8 +153,8 @@ void Pulsar::TimeFrequencyZap::update_mask ()
   smoother->smooth(smoothed, stat, mask, freq, time);
   const unsigned ntot = nsubint * nchan * npol;
 
-#if 1 
-  // XXX temp for debug
+#if 0 
+  // Output arrays for debug
   FILE *s1, *s2;
   s1 = fopen("stat.dat","w");
   s2 = fopen("smoothed.dat","w");
