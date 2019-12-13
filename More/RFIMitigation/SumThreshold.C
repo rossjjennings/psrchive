@@ -50,6 +50,7 @@ void Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
   for (unsigned i=0; i<ntot; i++)
     if (model[i]!=0.0 && stat[i]!=0.0 && mask[i]!=0.0)
       dattmp.push_back(stat[i]/model[i]);
+  if (dattmp.size()==0) return; // everything is masked
   std::sort(dattmp.begin(), dattmp.end());
   int qq = dattmp.size() / 4;
   const float rms = 1.35 * (dattmp[3*qq] - dattmp[qq]);
