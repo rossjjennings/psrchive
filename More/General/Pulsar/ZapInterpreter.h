@@ -19,6 +19,7 @@ namespace Pulsar {
   class Mower;
   class InterQuartileRange;
   class TimeFrequencyZap;
+  class ZapExtend;
   
   class ZapInterpreter : public Interpreter::Extension {
 
@@ -57,6 +58,9 @@ namespace Pulsar {
     //! zap the specified ranges of frequencies
     std::string freq (const std::string& args);
 
+    //! extend zapped regions in time/freq
+    std::string extend (const std::string& args);
+
     std::string zerodm (const std::string& args);
 
     //! toggle the flag to zap channels in calibrator
@@ -78,6 +82,9 @@ namespace Pulsar {
     
     //! Time/Frequency zaping algorithm
     Reference::To<TimeFrequencyZap> tf_zapper;
+    
+    //! Zap extender
+    Reference::To<ZapExtend> zap_extend;
     
     //! Store specified set of subints to apply channel/freq zapping
     std::vector<unsigned> set_subints;

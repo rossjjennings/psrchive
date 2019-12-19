@@ -19,6 +19,7 @@
 #include "Pulsar/Statistics.h"
 #include "Pulsar/InterQuartileRange.h"
 #include "Pulsar/TimeFrequencyZap.h"
+#include "Pulsar/ZapExtend.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"
@@ -65,6 +66,12 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "tfzap", "zap subint/chan outliers using time-frequency plane",
       "usage: tfzap <TI> \n"
       "  type 'zap tfzap help' for text interface help" );
+
+  add_command 
+    ( &ZapInterpreter::extend, 
+      "extend", "extend zapped regions in time and/or frequency",
+      "usage: extend <TI> \n"
+      "  type 'zap extend help' for text interface help" );
 
   add_command
     ( &ZapInterpreter::chan,
@@ -235,6 +242,37 @@ string Pulsar::ZapInterpreter::tfzap (const string& args) try
 
   //! TF zap interface
   Reference::To<TextInterface::Parser> interface = tf_zapper->get_interface();
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+  {
+    if (icmd)
+      retval += " ";
+    retval += interface->process (arguments[icmd]);
+  }
+
+  return retval;
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ZapInterpreter::extend (const string& args) try
+{
+  bool expand = false;
+  vector<string> arguments = setup (args, expand);
+
+  if (!zap_extend)
+    zap_extend = new ZapExtend;
+
+  if (!arguments.size())
+  {
+    (*zap_extend)( get() );
+    return response (Good);
+  }
+
+  //! TF zap interface
+  Reference::To<TextInterface::Parser> interface = zap_extend->get_interface();
 
   string retval;
   for (unsigned icmd=0; icmd < arguments.size(); icmd++)

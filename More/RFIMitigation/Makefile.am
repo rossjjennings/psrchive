@@ -10,7 +10,9 @@ nobase_include_HEADERS = \
 	Pulsar/SumThreshold.h \
 	Pulsar/TimeFrequencyMask.h \
 	Pulsar/TimeFrequencySmooth.h \
-	Pulsar/TimeFrequencyZap.h
+	Pulsar/TimeFrequencyZap.h \
+	Pulsar/ZapExtend.h
+
 
 libRFIMitigation_la_SOURCES = \
 	DoubleMedian.C \
@@ -20,7 +22,8 @@ libRFIMitigation_la_SOURCES = \
 	RobustMower.C \
 	SumThreshold.C \
 	TimeFrequencySmooth.C \
-	TimeFrequencyZap.C
+	TimeFrequencyZap.C \
+	ZapExtend.C
 
 #############################################################################
 #
