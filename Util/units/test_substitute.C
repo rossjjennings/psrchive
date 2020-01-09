@@ -18,6 +18,8 @@ public:
     return A;
   };
 
+  string process (string txt) { return "not implemented"; }
+
   string get_interface_name () const { return "tester"; }
 };
 
