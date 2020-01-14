@@ -205,8 +205,8 @@ SWIN_LIB_EIGEN
 MJK_LIB_PSRXML
 
 #
-# Generate python module if --enable-shared is used but not
-# if --disable-python is also used.
+# Generate python module if --enable-shared is used 
+# but not if --disable-python is also used.
 #
 AC_ARG_ENABLE([python],
               AC_HELP_STRING([--disable-python],
@@ -221,6 +221,7 @@ else
 fi
 
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
+AM_CONDITIONAL([HAVE_SWIG], [test x"$SWIG" != x])
 
 ACX_PTHREAD
 LIBS="$PTHREAD_LIBS $LIBS"
