@@ -396,6 +396,7 @@ bool model_fluxcal_on_minus_off = false;
 // Derive first guess of calibrator Stokes parameters from fluxcal solution
 bool use_fluxcal_stokes = false;
 
+bool degenerate_V_boost = true;
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
 bool equal_ellipticities = false;
@@ -699,7 +700,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
-    "M:m:Nn:O:o:P:p:QqR:rS:sT:t:U:u:V:vW:wX:xYyZz";
+    "M:m:Nn:O:o:P:p:QqR:rS:sTt:U:u:V:vW:wX:xYyZz";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -925,6 +926,11 @@ int actual_main (int argc, char *argv[]) try
       }
 
       cerr << "pcm: solving using " << nthread << " threads" << endl;
+      break;
+
+    case 'T':
+      cerr << "pcm: assuming that Stokes V boost is not degenerate" << endl;
+      degenerate_V_boost = false;
       break;
 
     case 'u':
@@ -1486,6 +1492,13 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   ReceptionCalibrator* model = new ReceptionCalibrator (model_type);
 
   model->output_report = output_report;
+
+  if (degenerate_V_boost)
+    cerr << "pcm: boost along Stokes V is intrinsically degenerate" << endl;
+  else
+    cerr << "pcm: boost along Stokes V is not degenerate" << endl;
+
+  model->degenerate_V_boost = degenerate_V_boost;
 
   if (measure_cal_V)
     cerr << "pcm: if available, will use fluxcal data to constrain"

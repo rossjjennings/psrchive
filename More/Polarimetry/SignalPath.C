@@ -411,18 +411,13 @@ void Calibration::SignalPath::check_constraints ()
     fix_last_step(diff_phase);
 }
 
-void Calibration::SignalPath::no_reference_calibrators (bool fit_gain)
+void Calibration::SignalPath::fit_gain (bool flag)
 {
-  /*
-    ReferenceCalibrator observations are used to constrain the boost
-    component of the degeneracy along the Stokes V axis.  If there
-    no such observations, then it is assumed that the boost is 
-    zero ...
-  */
+  response->set_infit (0, flag);
+}
 
-  if (!fit_gain)
-    response->set_infit (0, false);
-
+void Calibration::SignalPath::equal_ellipticities ()
+{
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
   {
@@ -449,8 +444,8 @@ void Calibration::SignalPath::no_reference_calibrators (bool fit_gain)
   }
 
   throw Error (InvalidState, 
-               "Calibration::SignalPath::no_reference_calibrators",
-               "don't know how to handle this");
+               "Calibration::SignalPath::equal_ellipticities",
+               "don't know how to handle this for the calibrator model");
 }
 
 bool decrement_nfree (MEAL::Scalar* function)

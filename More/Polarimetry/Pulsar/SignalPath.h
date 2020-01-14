@@ -112,8 +112,11 @@ namespace Calibration
     //! Update the relevant estimate
     void update ();
 
-    //! Work around the fact that no reference calibrators are available
-    void no_reference_calibrators (bool fit_gain);
+    //! Allow the absolute gain to vary as a free parameter
+    void fit_gain (bool flag);
+
+    //! Set the receptor ellipticities to a single value
+    void equal_ellipticities ();
 
     //! Attempt to reduce the number of degrees of freedom in the model
     bool reduce_nfree ();

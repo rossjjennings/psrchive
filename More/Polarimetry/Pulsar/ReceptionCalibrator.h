@@ -48,6 +48,9 @@ namespace Pulsar
     //! Descructor
     ~ReceptionCalibrator ();
 
+    //! The boost along Stokes V is intrinsically degenerate
+    bool degenerate_V_boost;
+
     //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;
 
