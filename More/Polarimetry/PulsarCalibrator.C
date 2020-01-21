@@ -53,7 +53,6 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type* model)
   chosen_maximum_harmonic = 0;
   choose_maximum_harmonic = false;
 
-  normalize_by_invariant = false;
   monitor_gimbal_lock = false;
 
   solve_each = false;
@@ -83,11 +82,6 @@ void Pulsar::PulsarCalibrator::set_maximum_harmonic (unsigned max)
 void Pulsar::PulsarCalibrator::set_choose_maximum_harmonic (bool flag)
 {
   choose_maximum_harmonic = flag;
-}
-
-void Pulsar::PulsarCalibrator::set_normalize_by_invariant (bool flag)
-{
-  normalize_by_invariant = flag;
 }
 
 void Pulsar::PulsarCalibrator::set_fixed_phase (bool flag)
@@ -393,9 +387,12 @@ void Pulsar::PulsarCalibrator::add_pulsar
   {
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::add_pulsar ichan=" << ichan 
-	   << " error\n\t" << error.get_message() << endl;
+	   << " error\n\t" << error << endl;
     get_data_fail ++;
   }
+
+  if (verbose > 2)
+    cerr << "Pulsar::PulsarCalibrator::add_pulsar exit" << endl;
 }
 
 //! Add the observation to the set of constraints

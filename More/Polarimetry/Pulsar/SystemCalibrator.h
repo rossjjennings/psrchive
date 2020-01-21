@@ -124,6 +124,9 @@ namespace Pulsar
     //! Add the observation to the set of constraints
     virtual void add_observation (const Archive* data);
 
+    //! Normalize each pulsar Stokes vector by the mean on-pulse invariant
+    virtual void set_normalize_by_invariant (bool flag = true);
+
     //! Add the pulsar observation to the set of constraints
     virtual void add_pulsar (const Archive* data);
 
@@ -313,6 +316,9 @@ namespace Pulsar
 
     //! Epoch of the last observation
     MJD end_epoch;
+
+    //! Normalize pulsar Stokes parameters by the invariant interval
+    bool normalize_by_invariant;
 
     //! Solve measurement equations in reverse channel order
     bool solve_in_reverse_channel_order;

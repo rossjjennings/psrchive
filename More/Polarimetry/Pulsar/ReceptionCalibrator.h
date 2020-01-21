@@ -152,9 +152,6 @@ namespace Pulsar
     //! The number of channels that may be simultaneously solved
     unsigned nthread;
 
-    //! Normalize the Stokes parameters by the invariant interval
-    bool normalize_by_invariant;
-
     //! Apply time step after rather than before cals
     bool step_after_cal;
 

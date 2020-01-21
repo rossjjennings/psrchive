@@ -48,6 +48,8 @@ using namespace Calibration;
 */
 Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 {
+  normalize_by_invariant = false;
+
   solve_in_reverse_channel_order = false;
 
   correct_interstellar_Faraday_rotation = false;
@@ -93,6 +95,11 @@ void Pulsar::SystemCalibrator::set_calibrator (const Archive* archive)
 void Pulsar::SystemCalibrator::set_projection (VariableTransformation* _projection)
 {
   projection = _projection;
+}
+
+void Pulsar::SystemCalibrator::set_normalize_by_invariant (bool flag)
+{
+  normalize_by_invariant = flag;
 }
 
 //! Return true if least squares minimization solvers are available
@@ -475,6 +482,15 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     {
       ism_faraday->set_frequency( integration->get_centre_frequency(ichan) );
       known *= ism_faraday->evaluate();
+    }
+
+    if (normalize_by_invariant)
+    {
+      /* Any gain variations in observed Stokes parameters should have
+         been normalized away; therefore, do not allow the gain of the 
+         known transformation to vary with time */
+
+      known /= sqrt( det(known) );
     }
 
     // projection transformation

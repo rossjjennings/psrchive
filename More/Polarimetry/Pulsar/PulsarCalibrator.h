@@ -66,9 +66,6 @@ namespace Pulsar {
     //! Get the number of harmonics in use
     unsigned get_nharmonic () const;
 
-    //! Normalize each Stokes vector by the mean on-pulse invariant
-    void set_normalize_by_invariant (bool flag = true);
-
     //! Set the standard to which pulsar profiles will be fit
     void set_standard (const Archive* data);
 
@@ -136,9 +133,6 @@ namespace Pulsar {
 
     //! The maximum harmonic chosen
     unsigned chosen_maximum_harmonic;
-
-    //! Normalize the Stokes parameters by the invariant interval
-    bool normalize_by_invariant;
 
     //! The on-pulse region
     PhaseWeight onpulse;
