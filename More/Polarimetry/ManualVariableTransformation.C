@@ -18,17 +18,20 @@ ManualVariableTransformation::ManualVariableTransformation (ManualPolnCalibrator
 
 Jones<double> ManualVariableTransformation::get_transformation ()
 {
-  MJD epoch = archive->get_Integration(subint)->get_epoch();
+  const Integration* the_subint = archive->get_Integration(subint);
+  MJD epoch = the_subint->get_epoch();
+  double freq = the_subint->get_centre_frequency (chan);
 
-  std::vector<ManualPolnCalibrator::Entry> best_match;
-  best_match = calibrator->match(epoch);
+  ManualPolnCalibrator::Entry best_match = calibrator->match(epoch, freq);
 
-  Jones<double> retval = best_match.at(chan).get_response();
+  Jones<double> retval = best_match.get_response();
 
-  cerr << "ManualVariableTransformation::get_transformation epoch=" << epoch.printdays(13) << " chan=" << chan
-       << " data freq=" << archive->get_Integration(subint)->get_centre_frequency(chan) 
-       << " cal freq=" << best_match.at(chan).ref_frequency*1e-6 << " response.size=" << best_match.size()
+  cerr << "ManualVariableTransformation::get_transformation"
+       << " subint=" << subint << " epoch=" << epoch.printdays(13) 
+       << " chan=" << chan << " data freq=" << freq
+       << " cal freq=" << best_match.ref_frequency*1e-6 
        << " det(J)=" << det(retval) << endl;
 
+  retval /= sqrt( det(retval) );
   return retval;
 }

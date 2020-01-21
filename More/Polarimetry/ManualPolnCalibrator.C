@@ -197,7 +197,7 @@ void Pulsar::ManualPolnCalibrator::Entry::load (const string& str)
 }
 
 //! Return true if the source name matches
-std::vector<Pulsar::ManualPolnCalibrator::Entry> Pulsar::ManualPolnCalibrator::matches_epoch (const MJD& epoch)
+std::vector<Pulsar::ManualPolnCalibrator::Entry> Pulsar::ManualPolnCalibrator::matches_epoch (const MJD& epoch) const
 {
   Entry best_match;
   best_match.ref_epoch = 0.0;
@@ -235,7 +235,7 @@ std::vector<Pulsar::ManualPolnCalibrator::Entry> Pulsar::ManualPolnCalibrator::m
 }
 
 std::vector<Pulsar::ManualPolnCalibrator::Entry>
-Pulsar::ManualPolnCalibrator::match (const MJD& epoch)
+Pulsar::ManualPolnCalibrator::match (const MJD& epoch) const
 {
   Entry best_match;
   std::vector<Entry> e_entries;
@@ -258,3 +258,37 @@ Pulsar::ManualPolnCalibrator::match (const MJD& epoch)
   //return best_match;
   return e_entries;
 }
+
+
+//! Return the Entry that is closest in time and frequency
+const Pulsar::ManualPolnCalibrator::Entry& 
+Pulsar::ManualPolnCalibrator::match (const MJD& epoch, double freq_MHz) const
+{
+  if (entries.size() == 0)
+    throw Error (InvalidState, "Pulsar::ManualPolnCalibrator::match",
+                 "no entries loaded");
+
+  const Entry* best_match = &(entries[0]);
+
+  double frequency = freq_MHz * 1e6;
+
+  for (unsigned ie=1; ie<entries.size(); ie++)
+  {
+    double diff = fabs(cast_double(entries[ie].ref_epoch - epoch));
+    double best_diff = fabs(cast_double(best_match->ref_epoch - epoch));
+
+    if (diff < best_diff)
+      best_match = &(entries[ie]);
+
+    else if (diff == best_diff)
+    {
+      diff = fabs(entries[ie].ref_frequency - frequency);
+      best_diff = fabs(best_match->ref_frequency - frequency);
+      if (diff < best_diff)
+        best_match = &(entries[ie]);
+    }
+  }
+
+  return *best_match;
+}
+
