@@ -26,12 +26,13 @@ Jones<double> ManualVariableTransformation::get_transformation ()
 
   Jones<double> retval = best_match.get_response();
 
+#if 0
   cerr << "ManualVariableTransformation::get_transformation"
        << " subint=" << subint << " epoch=" << epoch.printdays(13) 
        << " chan=" << chan << " data freq=" << freq
        << " cal freq=" << best_match.ref_frequency*1e-6 
        << " det(J)=" << det(retval) << endl;
+#endif
 
-  retval /= sqrt( det(retval) );
   return retval;
 }
