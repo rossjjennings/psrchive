@@ -116,8 +116,8 @@ namespace Pulsar {
     //Jones<float> get_response () {return response;}
     
     //! Returns the best match, given the source name and centre frequency
-    std::vector<Entry> match (const MJD& epoch);
-    //std::vector<Entry> match (const MJD& epoch, double MHz) const;
+    std::vector<Entry> match (const MJD& epoch) const;
+    const Entry& match (const MJD& epoch, double MHz) const;
 
     //! Returns a given entry
     Entry get_entry (const unsigned idx) const { return entries[idx]; }
@@ -131,7 +131,7 @@ namespace Pulsar {
     //! vector of entries in the database
     std::vector<Entry> entries;
 
-    std::vector<Entry> matches_epoch (const MJD& epoch);
+    std::vector<Entry> matches_epoch (const MJD& epoch) const;
 
   private:
     

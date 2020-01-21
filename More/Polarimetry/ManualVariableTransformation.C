@@ -17,10 +17,11 @@ ManualVariableTransformation::ManualVariableTransformation (ManualPolnCalibrator
 
 Jones<double> ManualVariableTransformation::get_transformation ()
 {
-  MJD epoch = archive->get_Integration(subint)->get_epoch();
+  const Integration* the_subint = archive->get_Integration(subint);
+  MJD epoch = the_subint->get_epoch();
+  double freq = the_subint->get_centre_frequency (chan);
 
-  std::vector<ManualPolnCalibrator::Entry> best_match;
-  best_match = calibrator->match(epoch);
+  ManualPolnCalibrator::Entry best_match = calibrator->match(epoch, freq);
 
-  return best_match.at(chan).get_response();
+  return best_match.get_response();
 }
