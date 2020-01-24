@@ -15,6 +15,8 @@
 #include "Reference.h"
 #include "Jones.h"
 
+class MountProjection;
+
 namespace Pulsar
 {
   class Archive;
@@ -56,6 +58,9 @@ namespace Pulsar
     //! Return the basis rotation correction
     Jones<double> get_rotation () const;
 
+    //! Return the basis projection correction
+    Jones<double> get_projection () const;
+
     /** @name Correction Information
      *  These attributes are set during the call to required and
      *  are used by the correct method
@@ -82,6 +87,9 @@ namespace Pulsar
     
     //! Flag set when the receiver vertical angle should be corrected
     mutable bool should_correct_vertical;
+
+    //! The projection correction calculator
+    mutable Reference::To<MountProjection> projection;
 
     //! Flag set when the receiver projection should be corrected
     mutable bool should_correct_projection;

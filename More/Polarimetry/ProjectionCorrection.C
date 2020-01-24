@@ -17,6 +17,7 @@
 #include "Horizon.h"    // like Parkes
 #include "Meridian.h"   // like Hobart
 #include "KrausType.h"  // like Nancay
+#include "Fixed.h"      // like LOFAR
 
 #include "Pauli.h"
 
@@ -34,7 +35,7 @@ Pulsar::ProjectionCorrection::~ProjectionCorrection ()
 }
 
 namespace Pulsar {
-  Directional* directional_factory (Telescope::Mount mount)
+  Mount* mount_factory (Telescope::Mount mount)
   {
     switch (mount)
     {
@@ -44,9 +45,10 @@ namespace Pulsar {
       return new Meridian;
     case Telescope::KrausType:
       return new KrausType;
-      
-    case Telescope::Equatorial:
     case Telescope::Fixed:
+      return new Fixed;
+  
+    case Telescope::Equatorial:
     case Telescope::Mobile:
       return 0;  // no Directional-derived class for this type
       
@@ -81,26 +83,29 @@ void Pulsar::ProjectionCorrection::set_archive (const Archive* _archive)
     throw Error (InvalidState, "Pulsar::ProjectionCorrection::set_archive",
 		 "no Telescope extension available");
 
-  Directional* directional = directional_factory (telescope->get_mount());
+  Mount* mount = mount_factory (telescope->get_mount());
+  if (!mount)
+    return;
 
-  if (directional)
-  {
-    double lat = telescope->get_latitude().getRadians();
-    double lon = telescope->get_longitude().getRadians();
+  double lat = telescope->get_latitude().getRadians();
+  double lon = telescope->get_longitude().getRadians();
 
-    if (Archive::verbose > 2)
-      cerr << "Pulsar::ProjectionCorrection::set_archive "
-        << directional->get_name() << " mount \n"
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::ProjectionCorrection::set_archive "
+         << mount->get_name() << " mount \n"
 	" antenna latitude=" << lat*180/M_PI << "deg"
 	" longitude=" << lon*180/M_PI << "deg \n"
 	" source coordinates=" << archive->get_coordinates() << endl;
 
-    directional->set_observatory_latitude (lat);
-    directional->set_observatory_longitude (lon);
-    directional->set_source_coordinates ( archive->get_coordinates() );
+  mount->set_observatory_latitude (lat);
+  mount->set_observatory_longitude (lon);
+  mount->set_source_coordinates ( archive->get_coordinates() );
 
+  Directional* directional = dynamic_cast<Directional*> (mount);
+  if (directional)
     para.set_directional (directional);
-  }
+
+  projection = dynamic_cast<MountProjection*> (mount);
 }
 
 bool equal_pi (const Angle& a, const Angle& b, float tolerance = 0.01)
@@ -321,6 +326,30 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
   return rotation.evaluate();
 }
 
+/*!
+  \pre both set_archive and required methods must be called before
+       calling this method
+*/
+Jones<double> Pulsar::ProjectionCorrection::get_projection () const
+{
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::ProjectionCorrection::get_projection" << endl;
+
+  Jones<double> J = projection->get_response();
+
+  complex<double> det;
+  Quaternion<double, Hermitian> herm;
+  Quaternion<double, Unitary> unit;
+
+  polar (det, herm, unit, J);
+
+  cerr << "Pulsar::ProjectionCorrection::get_projection"
+          "\n\t herm=" << herm.get_vector() <<
+          "\n\t unit=" << unit.get_vector() << endl;
+
+  return J;
+}
+
 std::string Pulsar::ProjectionCorrection::get_summary () const
 {
   return summary;
@@ -338,7 +367,14 @@ Pulsar::ProjectionCorrection::operator () (unsigned isub) const
   if (!required (isub))
     return 1.0;
 
-  return get_rotation ();
+  Jones<double> retval = 1.0;
+
+  if (must_correct_platform && should_correct_projection)
+    retval = get_projection ();
+  else
+    retval = get_rotation ();
+
+  return retval;
 }
 
 
