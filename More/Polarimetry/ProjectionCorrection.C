@@ -335,6 +335,8 @@ Jones<double> Pulsar::ProjectionCorrection::get_projection () const
   if (Archive::verbose > 2)
     cerr << "Pulsar::ProjectionCorrection::get_projection" << endl;
 
+  projection->set_epoch( integration->get_epoch() );
+
   Jones<double> J = projection->get_response();
 
   complex<double> det;
@@ -343,9 +345,10 @@ Jones<double> Pulsar::ProjectionCorrection::get_projection () const
 
   polar (det, herm, unit, J);
 
-  cerr << "Pulsar::ProjectionCorrection::get_projection"
-          "\n\t herm=" << herm.get_vector() <<
-          "\n\t unit=" << unit.get_vector() << endl;
+  summary += " using " + projection->get_name() + " projection "
+          "\n\t J=" + tostring(J) + 
+          "\n\t herm=" + tostring( herm.get_vector() ) +
+          "\n\t unit=" + tostring( unit.get_vector() ) + "\n";
 
   return J;
 }
