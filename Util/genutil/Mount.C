@@ -139,6 +139,15 @@ void Mount::build () const
        << endl;
 #endif
 
+  /*
+    start with basis at equator and
+    basis(0) pointing North
+    basis(1) pointing East
+    basis(2) pointing toward centre of earth
+
+    rotate about North by right ascension then rotation about East by negative declination
+  */
+
   // Basis pointing to source in celestial reference frame
   source_basis =
     transpose( rotation (Vector<3,double>::basis(0), right_ascension) *

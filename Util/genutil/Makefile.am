@@ -20,6 +20,7 @@ include_HEADERS = \
 	ExponentialDistribution.h \
 	extutil.h \
 	f77util.h \
+	Fixed.h \
 	format_it.h \
         fsleep.h \
 	Horizon.h \
@@ -35,6 +36,7 @@ include_HEADERS = \
 	Meridian.h \
         MJD.h \
 	Mount.h \
+	MountProjection.h \
 	FITSUTC.h \
 	NormalDistribution.h \
         orbital.h \
@@ -94,6 +96,7 @@ libgenutil_la_SOURCES = \
 	ExponentialDistribution.C \
 	f77util.c \
 	filesize.c \
+	Fixed.C \
 	format_it.C \
         fsleep.c \
 	Horizon.C \
