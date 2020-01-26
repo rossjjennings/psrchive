@@ -28,11 +28,13 @@ Jones<double> ManualVariableTransformation::get_transformation ()
 
 #if 0
   cerr << "ManualVariableTransformation::get_transformation"
-       << " subint=" << subint << " epoch=" << epoch.printdays(13) 
-       << " chan=" << chan << " data freq=" << freq
+       << " subint=" << subint << " data epoch=" << epoch.printdays(13) 
+       << " chan=" << chan << " data freq=" << freq << endl
+       << " cal epoch=" << best_match.ref_epoch.printdays(13)
        << " cal freq=" << best_match.ref_frequency*1e-6 
        << " det(J)=" << det(retval) << endl;
 #endif
 
   return retval;
 }
+
