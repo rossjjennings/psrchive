@@ -40,6 +40,8 @@ namespace MEAL {
     //! The last calculated gradient of the Scalar
     std::vector<double> gradient;
 
+    //! Index within ChainRule vector
+    unsigned index;
   };
 
   //! Parameterizes a Function by one or more Scalar ordinates.
@@ -74,7 +76,9 @@ namespace MEAL {
 
     //! Set the Scalar instance used to constrain the specified parameter
     void set_constraint (unsigned iparam, Scalar* scalar);
-
+    bool has_constraint (unsigned iparam);
+    Scalar* get_constraint (unsigned iparam);
+    
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation
@@ -91,6 +95,9 @@ namespace MEAL {
 
     //! Scalars used to constrain the parameters
     std::vector<ConstrainedParameter> constraints;
+
+    //! Find the matching constraint
+    ConstrainedParameter* find_constraint (unsigned iparam);
 
     //! The Function to be constrained by Scalar ordinates
     Project<T> model;
@@ -126,6 +133,19 @@ MEAL::ChainRule<T>::operator = (const ChainRule& rule)
   return *this;
 }
 
+template<class T>
+MEAL::ConstrainedParameter* 
+MEAL::ChainRule<T>::find_constraint (unsigned iparam)
+{
+  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++)
+    if (constraints[ifunc].parameter == iparam)
+    {
+      constraints[ifunc].index = ifunc;
+      return &constraints[ifunc];
+    }
+
+  return 0;
+}
 
 template<class T>
 void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
@@ -134,24 +154,22 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
     std::cerr << get_name() + "::set_constraint iparam=" << iparam
 	      << std::endl;
 
+ 
+  ConstrainedParameter* existing = find_constraint (iparam);
+
   // only one scalar may control a parameter
-  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
-
-    if (constraints[ifunc].parameter == iparam) {
-
-      if (this->get_verbose())
-	std::cerr << get_name() + "::set_constraint"
+  if (existing)
+  {
+    if (this->get_verbose())
+      std::cerr << get_name() + "::set_constraint"
 	  " remove param=" << iparam << std::endl;
 
-      composite.unmap (constraints[ifunc].scalar);
+    composite.unmap (existing->scalar);
 
-      if (model)
-	model->set_infit (iparam, constraints[ifunc].previously_infit);
+    if (model)
+      model->set_infit (iparam, existing->previously_infit);
 
-      constraints.erase (constraints.begin() + ifunc);
-      break;
-
-    }
+    constraints.erase (constraints.begin() + existing->index);
   }
 
   if (!scalar)
@@ -172,6 +190,23 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 
   if (model)
     model->set_infit (iparam, false);
+}
+
+template<class T>
+MEAL::Scalar* MEAL::ChainRule<T>::get_constraint (unsigned iparam)
+{
+  ConstrainedParameter* existing = find_constraint (iparam);
+  if (!existing)
+    throw Error (InvalidParam, "MEAL::ChainRule<T>::get_constraint",
+                 "iparam=%u is not constrained", iparam);
+
+  return existing->scalar;
+}
+
+template<class T>
+bool MEAL::ChainRule<T>::has_constraint (unsigned iparam)
+{
+  return find_constraint (iparam) != 0;
 }
 
 template<class T>
