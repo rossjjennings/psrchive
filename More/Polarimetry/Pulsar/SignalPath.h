@@ -51,6 +51,12 @@ namespace Calibration
     //! Set the response transformation
     void set_response (MEAL::Complex2*);
 
+    //! Allow the specified response parameter to vary as a function of time
+    void set_response_variation (unsigned iparam, MEAL::Univariate<MEAL::Scalar>*);
+
+    //! Get the specified response parameter temporal variation function
+    const MEAL::Univariate<MEAL::Scalar>* get_response_variation (unsigned iparam) const;
+
     //! Include an impurity transformation
     void set_impurity (MEAL::Real4*);
 
@@ -82,13 +88,13 @@ namespace Calibration
     //! Set differential phase to the univariate function of time
     void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
 
-    //! Set gain to the univariate function of time
+    //! Get the gain function of time
     const MEAL::Scalar* get_gain () const;
 
-    //! Set differential gain to the univariate function of time
+    //! Get the differential gain function of time
     const MEAL::Scalar* get_diff_gain () const;
 
-    //! Set differential phase to the univariate function of time
+    //! Get the differential phase function of time
     const MEAL::Scalar* get_diff_phase () const;
 
     //! Add a step if any of the above functions require it
@@ -224,6 +230,12 @@ namespace Calibration
 
     //! The instrumental response
     Reference::To< MEAL::Complex2 > response;
+
+    //! ChainRule used to model instrumental response parameter variations
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > response_chain;
+
+    //! Temporal variation of response parameters
+    std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
 
     //! The best estimate of the backend
     Calibration::MeanSingleAxis backend_estimate;

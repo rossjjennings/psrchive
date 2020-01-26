@@ -31,10 +31,10 @@ using Calibration::SignalPath;
 
 // #define _DEBUG 1
 
-bool Calibration::SignalPath::verbose = false;
+bool SignalPath::verbose = false;
 
 
-Calibration::SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
+SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
 {
   // ////////////////////////////////////////////////////////////////////
   //
@@ -57,33 +57,58 @@ Calibration::SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
-void Calibration::SignalPath::copy (SignalPath* other)
+void SignalPath::copy (SignalPath* other)
 {
   equation->copy_fit( other->equation );
 }
 
-void Calibration::SignalPath::set_valid (bool f, const char* reason)
+void SignalPath::set_valid (bool f, const char* reason)
 {
   valid = f;
 
   if (!valid && reason && verbose)
-    cerr << "Calibration::SignalPath::set_valid reason: " << reason << endl;
+    cerr << "SignalPath::set_valid reason: " << reason << endl;
 }
 
-void Calibration::SignalPath::set_response (MEAL::Complex2* x)
+void SignalPath::set_response (MEAL::Complex2* x)
 {
   response = x;
 }
 
-void Calibration::SignalPath::set_impurity (MEAL::Real4* x)
+//! Allow the specified response parameter to vary as a function of time 
+void SignalPath::set_response_variation (unsigned iparam, 
+                                         Univariate<Scalar>* function)
+{
+  if (!built)
+    build ();
+
+  response_variation[iparam] = function;
+  response_chain->set_constraint (iparam, function);
+  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
+}
+
+//! Get the specified response parameter temporal variation function
+const Univariate<Scalar>*
+SignalPath::get_response_variation (unsigned iparam) const
+{
+  if (!response_chain->has_constraint (iparam))
+    throw Error (InvalidParam, "SignalPath::get_response_variation",
+                 "response iparam=%u is not constrained", iparam);
+
+  const Scalar* func = response_chain->get_constraint (iparam);
+
+  return dynamic_cast<const Univariate<Scalar>*> (func);
+}
+
+void SignalPath::set_impurity (MEAL::Real4* x)
 {
   impurity = x;
 }
 
-void Calibration::SignalPath::set_basis (MEAL::Complex2* x)
+void SignalPath::set_basis (MEAL::Complex2* x)
 {
   if (response)
-    throw Error (InvalidState, "Calibration::SignalPath::set_basis"
+    throw Error (InvalidState, "SignalPath::set_basis"
 		 "cannot set basis after response is constructed");
   
   basis = x;
@@ -93,7 +118,7 @@ void Calibration::SignalPath::set_basis (MEAL::Complex2* x)
     *instrument *= basis;
 }
 
-void Calibration::SignalPath::set_solver (ReceptionModel::Solver* s)
+void SignalPath::set_solver (ReceptionModel::Solver* s)
 {
   solver = s;
   if (equation)
@@ -101,7 +126,7 @@ void Calibration::SignalPath::set_solver (ReceptionModel::Solver* s)
 }
 
 //! Set true when the pulsar Stokes parameters have been normalized
-void Calibration::SignalPath::set_constant_pulsar_gain (bool value)
+void SignalPath::set_constant_pulsar_gain (bool value)
 {
   constant_pulsar_gain = value;
 
@@ -121,13 +146,13 @@ void Calibration::SignalPath::set_constant_pulsar_gain (bool value)
   if (function)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath::set_constant_pulsar_gain"
+      cerr << "SignalPath::set_constant_pulsar_gain"
 	" disabling gain variation" << endl;
       
     if (pcal_gain)
     {
       if (verbose)
-	cerr << "Calibration::SignalPath::set_constant_pulsar_gain"
+	cerr << "SignalPath::set_constant_pulsar_gain"
 	  " transfer to pcal gain" << endl;
       pcal_gain_chain->set_constraint (0, function);
     }
@@ -142,7 +167,7 @@ void Calibration::SignalPath::set_constant_pulsar_gain (bool value)
 
 //! Get the measurement equation solver
 Calibration::ReceptionModel*
-Calibration::SignalPath::get_equation ()
+SignalPath::get_equation ()
 {
   if (!built)
     build ();
@@ -152,19 +177,19 @@ Calibration::SignalPath::get_equation ()
 
 //! Get the measurement equation solver
 const Calibration::ReceptionModel*
-Calibration::SignalPath::get_equation () const
+SignalPath::get_equation () const
 {
   return equation;
 }
 
-void Calibration::SignalPath::set_equation (Calibration::ReceptionModel* e)
+void SignalPath::set_equation (Calibration::ReceptionModel* e)
 {
   if (equation)
-    throw Error (InvalidState, "Calibration::SignalPath::set_equation",
+    throw Error (InvalidState, "SignalPath::set_equation",
 		 "equation already set; cannot be reset after construction");
 
 #ifdef _DEBUG
-  cerr << "Calibration::SignalPath::set_equation " << e << endl;
+  cerr << "SignalPath::set_equation " << e << endl;
 #endif
 
   equation = e;
@@ -172,7 +197,7 @@ void Calibration::SignalPath::set_equation (Calibration::ReceptionModel* e)
 
 //! Get the signal path experienced by the pulsar
 const MEAL::Complex2*
-Calibration::SignalPath::get_transformation () const
+SignalPath::get_transformation () const
 {
   if (!built)
     const_build ();
@@ -181,7 +206,7 @@ Calibration::SignalPath::get_transformation () const
 }
 
 const MEAL::Complex2*
-Calibration::SignalPath::get_pulsar_transformation () const
+SignalPath::get_pulsar_transformation () const
 {
   if (!built)
     const_build ();
@@ -190,18 +215,18 @@ Calibration::SignalPath::get_pulsar_transformation () const
 }
 
 MEAL::Complex2*
-Calibration::SignalPath::get_transformation ()
+SignalPath::get_transformation ()
 {
   const SignalPath* thiz = this;
   return const_cast<MEAL::Complex2*>( thiz->get_transformation() );
 }
 
-void Calibration::SignalPath::const_build () const
+void SignalPath::const_build () const
 {
   const_cast<SignalPath*>(this)->build();
 }
 
-void Calibration::SignalPath::add_transformation (MEAL::Complex2* xform)
+void SignalPath::add_transformation (MEAL::Complex2* xform)
 {
   if (!impurity)
   {
@@ -218,7 +243,7 @@ void Calibration::SignalPath::add_transformation (MEAL::Complex2* xform)
   equation->add_transformation( combination );
 }
 
-void Calibration::SignalPath::build ()
+void SignalPath::build ()
 {
   if (built)
     return;
@@ -226,17 +251,23 @@ void Calibration::SignalPath::build ()
   if (!response)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath using " << type->get_name() << endl;
+      cerr << "SignalPath using " << type->get_name() << endl;
 
     response = Pulsar::new_transformation (type);
   }
-  
+
+  // embed the response in a chain rule so that any parameter can optionally
+  // be made to vary (e.g. as a function of time)
   //
-  // construct the instrumental response share by pulsar and calibrator
+  response_chain = new MEAL::ChainRule<MEAL::Complex2>;
+  response_chain->set_model( response );
+
+  //
+  // construct the instrumental response shared by pulsar and calibrators
   //
   instrument = new MEAL::ProductRule<MEAL::Complex2>;
 
-  *instrument *= response;
+  *instrument *= response_chain;
 
   if (basis)
     *instrument *= basis;
@@ -265,7 +296,7 @@ void Calibration::SignalPath::build ()
   if (!equation)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath::build new ReceptionModel" << endl;
+      cerr << "SignalPath::build new ReceptionModel" << endl;
     equation = new Calibration::ReceptionModel;
   }
 
@@ -274,7 +305,7 @@ void Calibration::SignalPath::build ()
   Pulsar_path = equation->get_transformation_index ();
 
   if (verbose)
-    cerr << "Calibration::SignalPath::build pulsar path="
+    cerr << "SignalPath::build pulsar path="
 	 << Pulsar_path << endl;
 
   if (solver)
@@ -284,12 +315,12 @@ void Calibration::SignalPath::build ()
 }
 
 void
-Calibration::SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
+SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
 {
   foreach_pcal = x;
 }
 
-void Calibration::SignalPath::add_polncal_backend ()
+void SignalPath::add_polncal_backend ()
 {
   if (!built)
     build ();
@@ -334,21 +365,21 @@ void Calibration::SignalPath::add_polncal_backend ()
   ReferenceCalibrator_path = equation->get_transformation_index ();
 }
 
-void Calibration::SignalPath::fix_orientation ()
+void SignalPath::fix_orientation ()
 {
   if (!built)
     build ();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
-    throw Error (InvalidState, "Calibration::SignalPath::fix_orientation",
+    throw Error (InvalidState, "SignalPath::fix_orientation",
 		 "cannot fix orientation when response=" + response->get_name());
 
   // fix the orientation of the first receptor
   physical->set_constant_orientation (true);
 }
 
-void Calibration::SignalPath::update () try
+void SignalPath::update () try
 {
   if (!built)
     return;
@@ -381,10 +412,10 @@ void Calibration::SignalPath::update () try
 }
 catch (Error& error)
 {
-  throw error += "Calibration::SignalPath::update";
+  throw error += "SignalPath::update";
 }
 
-void Calibration::SignalPath::update_parameter (MEAL::Scalar* function,
+void SignalPath::update_parameter (MEAL::Scalar* function,
 						   double value)
 {
   MEAL::Polynomial* polynomial = dynamic_cast<MEAL::Polynomial*>( function );
@@ -393,7 +424,7 @@ void Calibration::SignalPath::update_parameter (MEAL::Scalar* function,
 }
 
 
-void Calibration::SignalPath::check_constraints ()
+void SignalPath::check_constraints ()
 {
   /* for now, do nothing.
 
@@ -411,12 +442,12 @@ void Calibration::SignalPath::check_constraints ()
     fix_last_step(diff_phase);
 }
 
-void Calibration::SignalPath::fit_gain (bool flag)
+void SignalPath::fit_gain (bool flag)
 {
   response->set_infit (0, flag);
 }
 
-void Calibration::SignalPath::equal_ellipticities ()
+void SignalPath::equal_ellipticities ()
 {
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
@@ -444,7 +475,7 @@ void Calibration::SignalPath::equal_ellipticities ()
   }
 
   throw Error (InvalidState, 
-               "Calibration::SignalPath::equal_ellipticities",
+               "SignalPath::equal_ellipticities",
                "don't know how to handle this for the calibrator model");
 }
 
@@ -468,7 +499,7 @@ bool decrement_nfree (MEAL::Scalar* function)
 }
 
 //! Attempt to reduce the number of degrees of freedom in the model
-bool Calibration::SignalPath::reduce_nfree ()
+bool SignalPath::reduce_nfree ()
 {
   bool reduced = false;
 
@@ -498,7 +529,7 @@ void copy_param (MEAL::Function* to, const MEAL::Function* from)
 
 
 void 
-Calibration::SignalPath::copy_transformation (const MEAL::Complex2* xform)
+SignalPath::copy_transformation (const MEAL::Complex2* xform)
 {
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
@@ -524,7 +555,7 @@ Calibration::SignalPath::copy_transformation (const MEAL::Complex2* xform)
 }
 
 void 
-Calibration::SignalPath::integrate_parameter (MEAL::Scalar* function,
+SignalPath::integrate_parameter (MEAL::Scalar* function,
 						 double value)
 {
   MEAL::Steps* steps = dynamic_cast<MEAL::Steps*>( function );
@@ -539,7 +570,7 @@ Calibration::SignalPath::integrate_parameter (MEAL::Scalar* function,
 }
 
 void 
-Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
+SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
 {
   const MEAL::Polar* polar_solution;
   polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
@@ -547,7 +578,7 @@ Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
   if (polar_solution)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath::integrate_calibrator Polar" << endl;
+      cerr << "SignalPath::integrate_calibrator Polar" << endl;
     
     polar_estimate.integrate( polar_solution );
     return;
@@ -559,7 +590,7 @@ Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
   if (sa)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath::integrate_calibrator SingleAxis" << endl;
+      cerr << "SignalPath::integrate_calibrator SingleAxis" << endl;
     
     backend_estimate.integrate( sa );
   
@@ -580,7 +611,7 @@ Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
   if (product)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath::integrate_calibrator ProductRule" << endl;
+      cerr << "SignalPath::integrate_calibrator ProductRule" << endl;
     
     for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
       integrate_calibrator( product->get_model(imodel) );
@@ -590,7 +621,7 @@ Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
   
 }
 
-void Calibration::SignalPath::set_gain (Univariate<Scalar>* function)
+void SignalPath::set_gain (Univariate<Scalar>* function)
 {
   if (!built)
     build ();
@@ -600,7 +631,7 @@ void Calibration::SignalPath::set_gain (Univariate<Scalar>* function)
     if (pcal_gain)
     {
       if (verbose)
-	cerr << "Calibration::SignalPath::set_gain set pcal gain" << endl;
+	cerr << "SignalPath::set_gain set pcal gain" << endl;
       pcal_gain_chain->set_constraint (0, function);
     }
   }
@@ -608,11 +639,11 @@ void Calibration::SignalPath::set_gain (Univariate<Scalar>* function)
   {
     BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
     if (!physical)
-      throw Error (InvalidState, "Calibration::SignalPath::set_gain",
+      throw Error (InvalidState, "SignalPath::set_gain",
 		   "cannot set gain variation in polar model");
 
     if (verbose)
-      cerr << "Calibration::SignalPath::set_gain set physical gain" << endl;
+      cerr << "SignalPath::set_gain set physical gain" << endl;
     physical->set_gain( function );
   }
 
@@ -620,14 +651,14 @@ void Calibration::SignalPath::set_gain (Univariate<Scalar>* function)
   gain = function;
 }
 
-void Calibration::SignalPath::set_diff_gain (Univariate<Scalar>* function)
+void SignalPath::set_diff_gain (Univariate<Scalar>* function)
 {
   if (!built)
     build ();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
-    throw Error (InvalidState, "Calibration::SignalPath::set_diff_gain",
+    throw Error (InvalidState, "SignalPath::set_diff_gain",
 		 "cannot set gain variation in polar model");
 
   physical -> set_diff_gain( function );
@@ -635,14 +666,14 @@ void Calibration::SignalPath::set_diff_gain (Univariate<Scalar>* function)
   diff_gain = function;
 }
 
-void Calibration::SignalPath::set_diff_phase (Univariate<Scalar>* function)
+void SignalPath::set_diff_phase (Univariate<Scalar>* function)
 {
   if (!built)
     build ();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
-    throw Error (InvalidState, "Calibration::SignalPath::set_diff_phase",
+    throw Error (InvalidState, "SignalPath::set_diff_phase",
 		 "cannot set diff_phase variation in polar model");
 
   physical -> set_diff_phase( function );
@@ -650,10 +681,10 @@ void Calibration::SignalPath::set_diff_phase (Univariate<Scalar>* function)
   diff_phase = function;
 }
 
-void Calibration::SignalPath::set_reference_epoch (const MJD& epoch)
+void SignalPath::set_reference_epoch (const MJD& epoch)
 {
 #ifdef _DEBUG
-  cerr << "Calibration::SignalPath::set_reference_epoch " << epoch << endl;
+  cerr << "SignalPath::set_reference_epoch " << epoch << endl;
 #endif
 
   MJD current_epoch = convert.get_reference_epoch();
@@ -673,25 +704,25 @@ void Calibration::SignalPath::set_reference_epoch (const MJD& epoch)
 }
 
 //! Set gain to the univariate function of time
-const MEAL::Scalar* Calibration::SignalPath::get_gain () const
+const MEAL::Scalar* SignalPath::get_gain () const
 {
   return gain;
 }
 
 //! Set differential gain to the univariate function of time
-const MEAL::Scalar* Calibration::SignalPath::get_diff_gain () const
+const MEAL::Scalar* SignalPath::get_diff_gain () const
 {
   return diff_gain;
 }
 
 //! Set differential phase to the univariate function of time
-const MEAL::Scalar* Calibration::SignalPath::get_diff_phase () const
+const MEAL::Scalar* SignalPath::get_diff_phase () const
 {
   return diff_phase;
 }
 
 //! Add a step to the gain variations
-void Calibration::SignalPath::add_gain_step (const MJD& mjd)
+void SignalPath::add_gain_step (const MJD& mjd)
 {
   if (!gain)
     set_gain( new Steps );
@@ -700,7 +731,7 @@ void Calibration::SignalPath::add_gain_step (const MJD& mjd)
 }
 
 //! Add a step to the differential gain variations
-void Calibration::SignalPath::add_diff_gain_step (const MJD& mjd)
+void SignalPath::add_diff_gain_step (const MJD& mjd)
 {
   if (!diff_gain)
     set_diff_gain( new Steps );
@@ -709,7 +740,7 @@ void Calibration::SignalPath::add_diff_gain_step (const MJD& mjd)
 }
 
 //! Add a step to the differential phase variations
-void Calibration::SignalPath::add_diff_phase_step (const MJD& mjd)
+void SignalPath::add_diff_phase_step (const MJD& mjd)
 {
   if (!diff_phase)
     set_diff_phase( new Steps );
@@ -717,11 +748,11 @@ void Calibration::SignalPath::add_diff_phase_step (const MJD& mjd)
   add_step (diff_phase, mjd);
 }
 
-void Calibration::SignalPath::add_step (Scalar* function, const MJD& mjd)
+void SignalPath::add_step (Scalar* function, const MJD& mjd)
 {
   Steps* steps = dynamic_cast<Steps*> (function);
   if (!steps)
-    throw Error (InvalidState, "Calibration::SignalPath::add_step",
+    throw Error (InvalidState, "SignalPath::add_step",
 		 "function is not a Steps");
 
   MJD zero;
@@ -734,14 +765,14 @@ void Calibration::SignalPath::add_step (Scalar* function, const MJD& mjd)
   steps->add_step (step);
 }
 
-void Calibration::SignalPath::offset_steps (Scalar* function, double offset)
+void SignalPath::offset_steps (Scalar* function, double offset)
 {
   Steps* steps = dynamic_cast<Steps*> (function);
   if (!steps)
     return;
 
 #ifdef _DEBUG
-  cerr << "Calibration::SignalPath::offset_steps offset=" << offset << " ";
+  cerr << "SignalPath::offset_steps offset=" << offset << " ";
 #endif
   for (unsigned i=0; i < steps->get_nstep(); i++)
   {
@@ -755,7 +786,7 @@ void Calibration::SignalPath::offset_steps (Scalar* function, double offset)
 #endif
 }
 
-void Calibration::SignalPath::add_observation_epoch (const MJD& epoch)
+void SignalPath::add_observation_epoch (const MJD& epoch)
 {
   MJD zero;
 
@@ -780,7 +811,7 @@ void Calibration::SignalPath::add_observation_epoch (const MJD& epoch)
     set_min_step( diff_phase, min_step );
 }
 
-void Calibration::SignalPath::set_min_step (Scalar* function, double step)
+void SignalPath::set_min_step (Scalar* function, double step)
 {
   Steps* steps = dynamic_cast<Steps*> (function);
   if (!steps)
@@ -789,7 +820,7 @@ void Calibration::SignalPath::set_min_step (Scalar* function, double step)
   if (!steps->get_nstep())
   {
 #ifdef _DEBUG
-    cerr << "Calibration::SignalPath::set_min_step add step[0]="
+    cerr << "SignalPath::set_min_step add step[0]="
          << step << endl;
 #endif
     steps->add_step( step );
@@ -798,7 +829,7 @@ void Calibration::SignalPath::set_min_step (Scalar* function, double step)
   else if (step < steps->get_step(0))
   {
 #ifdef _DEBUG
-    cerr << "Calibration::SignalPath::set_min_step set step[0]="
+    cerr << "SignalPath::set_min_step set step[0]="
          << step << endl;
 #endif
     if (step_after_cal)
@@ -808,7 +839,7 @@ void Calibration::SignalPath::set_min_step (Scalar* function, double step)
   }
 }
 
-void Calibration::SignalPath::add_calibrator_epoch (const MJD& epoch)
+void SignalPath::add_calibrator_epoch (const MJD& epoch)
 {
   MJD zero;
 
@@ -820,14 +851,14 @@ void Calibration::SignalPath::add_calibrator_epoch (const MJD& epoch)
   if (!get_polncal_path() || foreach_pcal)
   {
     if (verbose)
-      cerr << "Calibration::SignalPath::add_calibrator_epoch"
+      cerr << "SignalPath::add_calibrator_epoch"
 	" add_polncal_backend" << endl;
 
     add_polncal_backend();
   }
 
 #ifdef _DEBUG
-  cerr << "Calibration::SignalPath::add_calibrator_epoch epoch="
+  cerr << "SignalPath::add_calibrator_epoch epoch="
        << epoch << endl;
 #endif
 
@@ -848,29 +879,29 @@ void Calibration::SignalPath::add_calibrator_epoch (const MJD& epoch)
     add_step( diff_phase, convert.get_value() );
 }
 
-void Calibration::SignalPath::add_step (Scalar* function, double step)
+void SignalPath::add_step (Scalar* function, double step)
 {
   Steps* steps = dynamic_cast<Steps*> (function);
   if (steps)
   {
 #ifdef _DEBUG
-    cerr << "Calibration::SignalPath::add_step step=" << step << endl;
+    cerr << "SignalPath::add_step step=" << step << endl;
 #endif
     steps->add_step (step);
   }
 }
 
-void Calibration::SignalPath::set_step_after_cal (bool _after)
+void SignalPath::set_step_after_cal (bool _after)
 {
   step_after_cal = _after;
 }
 
-void Calibration::SignalPath::set_refcal_through_frontend (bool flag)
+void SignalPath::set_refcal_through_frontend (bool flag)
 {
   refcal_through_frontend = flag;
 }
 
-void Calibration::SignalPath::fix_last_step (Scalar* function)
+void SignalPath::fix_last_step (Scalar* function)
 {
   Steps* steps = dynamic_cast<Steps*> (function);
   if (steps && step_after_cal) 
@@ -891,12 +922,16 @@ void Calibration::SignalPath::fix_last_step (Scalar* function)
   }
 }
 
-void Calibration::SignalPath::engage_time_variations () try
+void SignalPath::engage_time_variations () try
 {
   if (time_variations_engaged)
     return;
 
   time_variations_engaged = true;
+
+  std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
+  for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
+    response_chain->set_constraint( ptr->first, ptr->second );
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
@@ -949,10 +984,10 @@ void Calibration::SignalPath::engage_time_variations () try
 }
 catch (Error& error)
 {
-  throw error += "Calibration::SignalPath::engage_time_variations";
+  throw error += "SignalPath::engage_time_variations";
 }
 
-void Calibration::SignalPath::disengage_time_variations (const MJD& epoch) 
+void SignalPath::disengage_time_variations (const MJD& epoch) 
 try
 {
 #ifdef _DEBUG
@@ -964,13 +999,20 @@ try
 
   time_variations_engaged = false;
 
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    return;
-
   time.set_value (epoch);
 
   Univariate<Scalar>* zero = 0;
+
+  std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
+  for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
+  {
+    response_chain->set_constraint( ptr->first, zero );
+    response->set_Estimate( ptr->first, ptr->second->estimate() );
+  }
+
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
+  if (!physical)
+    return;
 
 #ifdef _DEBUG
   cerr << "before disengage nparam = " << physical->get_nparam() << endl;
@@ -1023,10 +1065,10 @@ try
 }
 catch (Error& error)
 {
-  throw error += "Calibration::SignalPath::disengage_time_variations";
+  throw error += "SignalPath::disengage_time_variations";
 }
 
-void Calibration::SignalPath::solve () try
+void SignalPath::solve () try
 {
   engage_time_variations ();
 
@@ -1042,12 +1084,12 @@ void Calibration::SignalPath::solve () try
 }
 catch (Error& error)
 {
-  cerr << "Calibration::SignalPath::solve failure \n\t"
+  cerr << "SignalPath::solve failure \n\t"
        << error.get_message() << endl;
 }
 
 
-void Calibration::SignalPath::compute_covariance
+void SignalPath::compute_covariance
 ( unsigned index, vector< vector<double> >& covar,
   vector<unsigned>& function_imap, MEAL::Scalar* function )
 {
@@ -1083,14 +1125,14 @@ void set_difference (C1& B, const C2& A)
   B.erase (newlast, B.end());
 }
 
-void Calibration::SignalPath::get_covariance( vector<double>& covar,
+void SignalPath::get_covariance( vector<double>& covar,
 					      const MJD& epoch )
 {
   vector< vector<double> > Ctotal;
   get_equation()->get_solver()->get_covariance (Ctotal);
 
   if (Ctotal.size() != get_equation()->get_nparam())
-    throw Error( InvalidState, "Calibration::SignalPath::get_covariance",
+    throw Error( InvalidState, "SignalPath::get_covariance",
 		 "covariance matrix size=%u != nparam=%u",
 		 Ctotal.size(), get_equation()->get_nparam() );
 
@@ -1123,6 +1165,15 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
     set_difference (imap, diff_phase_imap);
   }
 
+  std::map< unsigned, vector< unsigned > > variation_imap;
+
+  std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
+  for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
+  {
+    MEAL::get_imap( get_equation(), ptr->second, variation_imap[ptr->first] );
+    set_difference (imap, variation_imap[ptr->first]);
+  }
+
   /*
     If the Instrument class ellipticities are set equal to a single
     independent parameter via a ChainRule, then this will need fixing.
@@ -1151,6 +1202,9 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
 
   if (diff_phase)
     compute_covariance( imap[2], Ctotal, diff_phase_imap, diff_phase );
+
+  for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
+    compute_covariance( imap[ptr->first], Ctotal, variation_imap[ptr->first], ptr->second );
 
   if (van04 && ell_imap.size() == 1)
   {
@@ -1187,7 +1241,7 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
   }
 
   if (count != ncovar)
-    throw Error( InvalidState, "Calibration::SignalPath::get_covariance",
+    throw Error( InvalidState, "SignalPath::get_covariance",
 		 "count=%u != ncovar=%u", count, ncovar );
   
 }

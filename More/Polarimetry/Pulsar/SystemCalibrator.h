@@ -91,6 +91,10 @@ namespace Pulsar
     //! Set the response (pure Jones) transformation
     virtual void set_response( MEAL::Complex2* );
 
+    //! Set the temporal variation function of a specified response parameter
+    virtual void set_response_variation ( unsigned iparam,
+                                          MEAL::Univariate<MEAL::Scalar>* );
+
     //! Set the impurity transformation
     virtual void set_impurity( MEAL::Real4* );
 
@@ -252,6 +256,9 @@ namespace Pulsar
 
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;
+
+    //! Temporal variation of response parameters
+    std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
 
     //! Time variation of absolute gain
     Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;

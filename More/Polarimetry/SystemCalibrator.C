@@ -251,6 +251,12 @@ void Pulsar::SystemCalibrator::set_response( MEAL::Complex2* f )
 	 << response->get_name() << " type=" << type->get_name() << endl;
 }
 
+void Pulsar::SystemCalibrator::set_response_variation( unsigned iparam,
+                                                       Univariate<Scalar>* f )
+{
+  response_variation[iparam] = f;
+}
+
 void Pulsar::SystemCalibrator::set_impurity( MEAL::Real4* f )
 {
   impurity = f;
@@ -1161,6 +1167,12 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
 
   if (foreach_calibrator)
     model[ichan]->set_foreach_calibrator( foreach_calibrator );
+
+  std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
+  for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
+  {
+    model[ichan]->set_response_variation( ptr->first, ptr->second->clone() );
+  }
 
   if (gain_variation)
     model[ichan]->set_gain( gain_variation->clone() );

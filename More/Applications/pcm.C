@@ -436,9 +436,13 @@ Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
+//! Temporal variation of response parameters
+std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
+
 bool get_time_variation ()
 {
-  return gain_variation || diff_gain_variation || diff_phase_variation;
+  return gain_variation || diff_gain_variation || diff_phase_variation
+         || (response_variation.size() != 0);
 }
 
 string get_string (char code)
@@ -472,6 +476,14 @@ void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
     diff_gain_variation = function;
     diff_phase_variation = function;
     return;
+  default:
+    int index = code - '0';
+    if (index >=0 && index <= 9)
+    {
+      cerr << "reception model parameter " << index << endl;
+      response_variation[index] = function;
+      return;
+    }
   }
   throw Error (InvalidParam, "set_time_variation",
                "unrecognized PAR code = %c", code);
@@ -1117,6 +1129,10 @@ int actual_main (int argc, char *argv[]) try
 
       if (diff_phase_variation)
         model->set_diff_phase( diff_phase_variation );
+
+      std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > >::iterator ptr;
+      for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
+        model->set_response_variation( ptr->first, ptr->second );
 
       if (get_foreach_calibrator())
       {
