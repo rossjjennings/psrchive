@@ -157,7 +157,8 @@ template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::setup (const Integration* data)
 {
   set_reference_frequency( data->get_centre_frequency() );
-  set_measure( get_correction_measure(data) );
+  set_measure( get_effective_measure(data) );
+
 
   if (Integration::verbose)
     std::cerr << "Pulsar::" + name + "::setup lambda=" 
@@ -240,6 +241,10 @@ void Pulsar::ColdPlasma<Corrector,History>::update (const Integration* data)
 try
 {
   backup_measure = get_measure();
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::" + name + "::update"
+                 " backup measure=" << backup_measure << std::endl;
 
   delta = get_identity();
 
@@ -396,7 +401,8 @@ void Pulsar::ColdPlasma<C,H>::range (Integration* data,
     throw Error (InvalidRange, "Pulsar::"+name+"::range",
                  "end chan=%d > nchan=%d", kchan, data->get_nchan());
 
-  for (unsigned jchan=ichan; jchan < kchan; jchan++) {
+  for (unsigned jchan=ichan; jchan < kchan; jchan++)
+  {
     corrector.set_frequency( data->get_centre_frequency (jchan) );
     apply (data, jchan);
   }
@@ -418,7 +424,14 @@ void Pulsar::ColdPlasma<C,H>::correct (Integration* subint,
 				       double reference_frequency) 
 try
 {
-  set_measure( get_effective_measure (subint) );
+  double effective_measure = get_effective_measure (subint);
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::" + name + "::correct"
+                 " reference freq=" << reference_frequency << 
+                 " effective measure=" << effective_measure << std::endl;
+
+  set_measure( effective_measure );
   set_reference_frequency( reference_frequency );
   set_delta( get_identity() );
 
