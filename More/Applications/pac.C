@@ -27,7 +27,7 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
-
+#include "Pulsar/Receiver.h"
 
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
@@ -161,11 +161,11 @@ int main (int argc, char *argv[]) try
   Pulsar::IonosphereCalibrator* ionosphere = 0;
 
   // default calibrator type
-  Reference::To<const Pulsar::Calibrator::Type> pcal_type;
-  pcal_type = new Pulsar::CalibratorTypes::SingleAxis;
+  Reference::To<const Calibrator::Type> pcal_type;
+  pcal_type = new CalibratorTypes::SingleAxis;
 
   // default searching criteria
-  Pulsar::Database::Criteria criteria;
+  Database::Criteria criteria;
 
   string cals_are_here = "./";
 
@@ -179,6 +179,8 @@ int main (int argc, char *argv[]) try
   // filename from which calibrator solution to be applied will be loaded
   string model_file;
   string ascii_model_file;
+  string projection_file;
+  
   // strip down the above-named calibrator solution to keep only the feed
   bool apply_only_feed = false;
 
@@ -196,7 +198,7 @@ int main (int argc, char *argv[]) try
 
   string optarg_str;
 
-  Pulsar::ReflectStokes reflections;
+  ReflectStokes reflections;
 
   while ((gotc = getopt(argc, argv, args)) != -1) 
 
@@ -207,17 +209,17 @@ int main (int argc, char *argv[]) try
       return 0;
 
     case 'q':
-      Pulsar::Archive::set_verbosity(0);
+      Archive::set_verbosity(0);
       break;
 
     case 'v':
-      Pulsar::Archive::set_verbosity(2);
+      Archive::set_verbosity(2);
       verbose = true;
       break;
 
     case 'V':
       verbose = true;
-      Pulsar::Archive::set_verbosity(3);
+      Archive::set_verbosity(3);
       break;
 
     case 'i':
@@ -238,18 +240,18 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'B':
-      pcal_type = new Pulsar::CalibratorTypes::OffPulse;
+      pcal_type = new CalibratorTypes::OffPulse;
       command += " -B";
       break;
 
     case 'C':
-      pcal_type = Pulsar::Calibrator::Type::factory(optarg);
+      pcal_type = Calibrator::Type::factory(optarg);
       command += " -C ";
       command += optarg;
       break;
 
     case 'D':
-      pcal_type = new Pulsar::CalibratorTypes::DoP;
+      pcal_type = new CalibratorTypes::DoP;
       command += " -D";
       break;
 
@@ -279,12 +281,12 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'G':
-      Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
+      PolnProfile::normalize_weight_by_absolute_gain = true;
       command += " -g";
       break;
 
     case 'I':
-      ionosphere = new Pulsar::IonosphereCalibrator;
+      ionosphere = new IonosphereCalibrator;
       break;
 
     case 'j':
@@ -296,7 +298,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'l':
-      Pulsar::Database::cache_last_cal = true;
+      Database::cache_last_cal = true;
       command += " -l";
       break;
 
@@ -315,9 +317,9 @@ int main (int argc, char *argv[]) try
 
     case 'm': 
       if (optarg[0] == 'b')
-        criteria.set_sequence(Pulsar::Database::CalibratorBefore);
+        criteria.set_sequence(Database::CalibratorBefore);
       else if (optarg[0] == 'a')
-        criteria.set_sequence(Pulsar::Database::CalibratorAfter);
+        criteria.set_sequence(Database::CalibratorAfter);
       else {
         cerr << "pac: unrecognized matching sequence code" << endl;
         return -1;
@@ -348,7 +350,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'o':
-      Pulsar::Archive::Match::opposite_sideband = true;
+      Archive::Match::opposite_sideband = true;
       command += " -o";
       break;
 
@@ -384,12 +386,12 @@ int main (int argc, char *argv[]) try
       break;
 
     case 's':
-      pcal_type = new Pulsar::CalibratorTypes::van02_EqA1;
+      pcal_type = new CalibratorTypes::van02_EqA1;
       command += " -s";
       break;
 
     case 'S':
-      pcal_type = new Pulsar::CalibratorTypes::ovhb04;
+      pcal_type = new CalibratorTypes::ovhb04;
       command += " -S";
       break;
 
@@ -432,8 +434,14 @@ int main (int argc, char *argv[]) try
       unload_ext = "bc";                // "basis corrected"
       break;
 
+    case 'Y':
+      projection_file = optarg;
+      command += " -Y " + basename(projection_file);
+      do_frontend = false;
+      break;
+
     case 'y':
-      Pulsar::ProjectionCorrection::trust_pointing_feed_angle = true;
+      ProjectionCorrection::trust_pointing_feed_angle = true;
       command += " -y";
       break;
 
@@ -468,7 +476,7 @@ int main (int argc, char *argv[]) try
     }
 
 
-  Pulsar::Database::set_default_criteria (criteria);
+  Database::set_default_criteria (criteria);
 
   vector <string> filenames;
 
@@ -488,13 +496,13 @@ int main (int argc, char *argv[]) try
   }
 
   // the archive from which a calibrator will be constructed
-  Reference::To<Pulsar::Archive> model_arch;
+  Reference::To<Archive> model_arch;
 
   // the calibrator constructed from the specified archive
-  Reference::To<Pulsar::PolnCalibrator> model_calibrator;
+  Reference::To<PolnCalibrator> model_calibrator;
 
   // the database from which calibrators will be selected
-  Reference::To<Pulsar::Database> dbase;
+  Reference::To<Database> dbase;
 
   if ( !model_file.empty() ) try
   {
@@ -503,10 +511,10 @@ int main (int argc, char *argv[]) try
     if (criteria.check_frequency_array)
       cerr << "pac: Warning: -a and -A options are incompatible" << endl;
 
-    model_arch = Pulsar::Archive::load(model_file);
+    model_arch = Archive::load(model_file);
 
     if (model_arch->get<PolnCalibratorExtension>())
-      model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+      model_calibrator = new PolnCalibrator(model_arch);
     else
       model_calibrator = ReferenceCalibrator::factory(pcal_type, model_arch);
 
@@ -526,7 +534,7 @@ int main (int argc, char *argv[]) try
   if ( !ascii_model_file.empty() ) try
   {
     cerr << "pac: Loading ascii Jones calibrator from " << ascii_model_file << endl;
-    model_calibrator = new Pulsar::ManualPolnCalibrator(ascii_model_file);
+    model_calibrator = new ManualPolnCalibrator(ascii_model_file);
     pcal_type = model_calibrator->get_type();
   }
   catch (Error& error)
@@ -537,7 +545,7 @@ int main (int argc, char *argv[]) try
   }
 
   if ( use_fluxcal_stokes && 
-       ! pcal_type->is_a<Pulsar::CalibratorTypes::SingleAxis>() )
+       ! pcal_type->is_a<CalibratorTypes::SingleAxis>() )
   {
     cerr << "pac: Fluxcal-derived Stokes params are incompatible with the "
       << "selected calibration method" << endl;
@@ -550,7 +558,7 @@ int main (int argc, char *argv[]) try
     {
       cout << "pac: Loading database from " << cal_dbase_filenames[i] << endl;
       if (i==0)
-        dbase = new Pulsar::Database (cal_dbase_filenames[i]);
+        dbase = new Database (cal_dbase_filenames[i]);
       else
         dbase->load (cal_dbase_filenames[i]);
     }
@@ -568,14 +576,14 @@ int main (int argc, char *argv[]) try
 
     if (cals_metafile)
     {
-      Reference::To<Pulsar::Database> temp;
+      Reference::To<Database> temp;
 
       for (unsigned i=0; i < filenames.size(); i++)
       {
         cout << "pac: Loading calibrator filenames from metafile="
              << filenames[i] << endl;
 
-        temp = new Pulsar::Database (cals_are_here, filenames[i]);
+        temp = new Database (cals_are_here, filenames[i]);
 
         if (temp->size() <= 0)
         {
@@ -603,7 +611,7 @@ int main (int argc, char *argv[]) try
       exts.push_back("fcal");
       exts.push_back("pfit");
 
-      dbase = new Pulsar::Database (cals_are_here, exts);
+      dbase = new Database (cals_are_here, exts);
 
       if (dbase->size() <= 0)
       {
@@ -641,7 +649,7 @@ int main (int argc, char *argv[]) try
 
   // Start calibrating archives
   
-  Pulsar::Interpreter* preprocessor = standard_shell();
+  Interpreter* preprocessor = standard_shell();
 
   for (unsigned i = 0; i < filenames.size(); i++) try
   {
@@ -650,7 +658,7 @@ int main (int argc, char *argv[]) try
     if (verbose)
       cerr << "pac: Loading " << filenames[i] << endl;
 
-    Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filenames[i]);
+    Reference::To<Archive> arch = Archive::load(filenames[i]);
 
     cout << "pac: Loaded archive " << filenames[i] << endl;
 
@@ -667,7 +675,7 @@ int main (int argc, char *argv[]) try
       if (verbose)
         cerr << "pac: Correcting backend, if necessary" << endl;
 
-      Pulsar::BackendCorrection correct;
+      BackendCorrection correct;
       correct (arch);
     }
     else
@@ -683,7 +691,7 @@ int main (int argc, char *argv[]) try
 
     else if (do_polncal && !arch->get_poln_calibrated())
     {
-      Reference::To<Pulsar::PolnCalibrator> pcal_engine;
+      Reference::To<PolnCalibrator> pcal_engine;
 
       if (model_calibrator)
       {
@@ -712,14 +720,14 @@ int main (int argc, char *argv[]) try
         if (verbose)
           cout << "pac: Calculating fluxcal Stokes params" << endl;
 
-        Pulsar::ReferenceCalibrator* refcal = 0;
-        refcal = dynamic_cast<Pulsar::ReferenceCalibrator*> (pcal_engine.get());
+        ReferenceCalibrator* refcal = 0;
+        refcal = dynamic_cast<ReferenceCalibrator*> (pcal_engine.get());
         if (!refcal)
           throw Error (InvalidState, "pcm",
                        "PolnCalibrator is not a ReferenceCalibrator");
 
         // Find appropriate fluxcal from DB 
-        Reference::To<Pulsar::FluxCalibrator> flux_cal;
+        Reference::To<FluxCalibrator> flux_cal;
         try
         {
           flux_cal = dbase->generateFluxCalibrator(arch);
@@ -733,8 +741,8 @@ int main (int argc, char *argv[]) try
 
         // Combine already-selected pcal_engine with fluxcal stokes
         // into a new HybridCalibrator
-        Reference::To<Pulsar::HybridCalibrator> hybrid_cal;
-        hybrid_cal = new Pulsar::HybridCalibrator;
+        Reference::To<HybridCalibrator> hybrid_cal;
+        hybrid_cal = new HybridCalibrator;
         hybrid_cal->set_reference_input( flux_cal->get_CalibratorStokes(),
                                          flux_cal->get_filenames() );
 
@@ -794,13 +802,33 @@ int main (int argc, char *argv[]) try
       if (verbose)
         cerr << "pac: Correcting fronted, if necessary" << endl;
 
-      Pulsar::FrontendCorrection correct;
+      FrontendCorrection correct;
       correct.calibrate (arch);
     }
     else
       cerr << "pac: Frontend corrections disabled." << endl;
 
+    if ( ! projection_file.empty() )
+    {
+      cerr << "pac: Loading projection transformations from "
+	   << projection_file << endl;
 
+      Receiver* receiver = arch->get<Receiver>();
+
+      BasisCorrection basis_correction;
+      if ( basis_correction.required (arch) )
+      {
+	arch->transform( inv( basis_correction(arch) ) );
+	receiver->set_basis_corrected (true);
+      }
+      
+      Reference::To<ManualPolnCalibrator> calibrator;
+      calibrator = new ManualPolnCalibrator (projection_file);
+      calibrator->calibrate (arch);
+
+      receiver->set_projection_corrected (true);
+    }
+    
     if (ionosphere)
     {
       cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
@@ -825,7 +853,7 @@ int main (int argc, char *argv[]) try
       if (verbose)
         cout << "pac: Generating flux calibrator" << endl;
 
-      Reference::To<Pulsar::FluxCalibrator> fcal_engine;
+      Reference::To<FluxCalibrator> fcal_engine;
 
       try
       {
@@ -883,7 +911,7 @@ int main (int argc, char *argv[]) try
 
     // See if the archive contains a history that should be updated
 
-    Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
+    ProcHistory* fitsext = arch->get<ProcHistory>();
 
     if (fitsext)
     {
@@ -916,7 +944,7 @@ int main (int argc, char *argv[]) try
 
 using Calibration::BackendFeed;
 
-void keep_only_feed( Pulsar::PolnCalibrator* cal )
+void keep_only_feed( PolnCalibrator* cal )
 {
   const unsigned nchan = cal->get_nchan();
 
