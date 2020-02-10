@@ -75,6 +75,7 @@ void usage ()
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
     "  -Q filename    Use the Jones calibrator in filename \n"
+    "  -Y filename    Load projection transformations from file \n"
     "  -C model       Use the specified model of the calibrator solution \n"
     "  -P             Calibrate polarisation only (not flux)\n"
     "  -R             Calibrate the receiver (feed) only \n"
@@ -233,20 +234,7 @@ int main (int argc, char *argv[]) try
 
     case 'A':
       model_file = optarg;
-      command += " -A ";
-
-      // Just take the filename, not the full path
-      optarg_str = optarg;
-      index = optarg_str.rfind("/", optarg_str.length()-2);
-
-      if (index == string::npos)
-        command += optarg_str;
-      else
-      {
-        // Larger than last index but doesn't matter. String class will
-        // just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length());
-      }
+      command += " -A " + basename(model_file);
       break;
 
     case 'B':
@@ -267,21 +255,7 @@ int main (int argc, char *argv[]) try
 
     case 'd':
       cal_dbase_filenames.push_back (optarg);
-      command += " -d ";
-
-      // Just take the filename, not the full path
-      optarg_str = optarg;
-      index = optarg_str.rfind("/", optarg_str.length()-2);
-
-      if (index == string::npos) {
-              command += optarg_str;
-      }
-
-      else {
-        // Larger than last index but doesn't matter. String class will
-        // just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length()); 
-      }
+      command += " -d " + basename (optarg);
       break;
 
     case 'e':
@@ -332,20 +306,7 @@ int main (int argc, char *argv[]) try
 
     case 'Q':
       ascii_model_file = optarg;
-      command += " -L ";
-
-      // Just take the filename, not the full path
-      optarg_str = optarg;
-      index = optarg_str.rfind("/", optarg_str.length()-2);
-
-      if (index == string::npos)
-        command += optarg_str;
-      else
-      {
-        // Larger than last index but doesn't matter. String class will
-        // just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length());
-      }
+      command += " -Q " + basename(ascii_model_file);
       break;
 
     case 'M':
@@ -393,23 +354,7 @@ int main (int argc, char *argv[]) try
 
     case 'p':
       cals_are_here = optarg;
-      command += " -p ";
-      
-      // Just take the filename, not the full path
-      optarg_str = optarg;
-      index = optarg_str.rfind("/", optarg_str.length()-2);
-      
-      if (index == string::npos) {
-              cout << "No slash present\n";
-              command += optarg_str;
-      }
-
-      else {
-        // Larger than last index but doesn't matter. String class will
-        // just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length());
-      }
-
+      command += " -p " + basename(cals_are_here);
       break;
 
     case 'P':
@@ -435,21 +380,7 @@ int main (int argc, char *argv[]) try
         "\n  ellipticity 1 = "
            << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
            << endl;
-      command += " -r ";
-
-      // Just take the filename, not the full path
-      optarg_str = optarg;
-      index = optarg_str.rfind("/", optarg_str.length()-2);
-
-      if (index == string::npos) {
-              command += optarg_str;
-      }
-
-      else {
-        // Larger than last index but doesn't matter. String class will
-        // just take the rest of the string safely
-        command += optarg_str.substr(index+1, optarg_str.length());
-      }
+      command += " -r " + basename(optarg);
       break;
 
     case 's':
