@@ -257,7 +257,7 @@ int main (int argc, char *argv[]) try
 
     case 'd':
       cal_dbase_filenames.push_back (optarg);
-      command += " -d " + basename (optarg);
+      command += " -d " + basename (string(optarg));
       break;
 
     case 'e':
@@ -382,7 +382,7 @@ int main (int argc, char *argv[]) try
         "\n  ellipticity 1 = "
            << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
            << endl;
-      command += " -r " + basename(optarg);
+      command += " -r " + basename(string(optarg));
       break;
 
     case 's':
