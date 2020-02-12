@@ -26,6 +26,8 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
     throw Error (InvalidParam, "Pulsar::FluxCalibratorExtension",
                  "null FluxCalibrator*");
 
+  scale_available = false;
+
   try {
 
     if (Archive::verbose > 2)
@@ -47,6 +49,8 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 
     if (!dynamic_cast<FluxCalibrator::ConstantGain*>(calibrator->policy.get()))
       return;
+
+    scale_available = true;
 
     for (unsigned ichan=0; ichan < nchan; ichan++) try
     {
@@ -75,3 +79,4 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
   }
 
 }
+
