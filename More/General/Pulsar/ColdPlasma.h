@@ -47,7 +47,7 @@ namespace Pulsar {
     //! Return the measure to be corrected with respect to centre frequency
     virtual double get_correction_measure (const Integration*) = 0;
 
-    //! Return the measure to be corrected with respect to infinity frequency
+    //! Return the measure to be corrected with respect to infinite frequency
     virtual double get_absolute_measure (const Integration*) = 0;
 
     //! Return true if the data have been corrected
@@ -157,8 +157,7 @@ template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::setup (const Integration* data)
 {
   set_reference_frequency( data->get_centre_frequency() );
-  set_measure( get_effective_measure(data) );
-
+  set_measure( get_correction_measure(data) );
 
   if (Integration::verbose)
     std::cerr << "Pulsar::" + name + "::setup lambda=" 
@@ -242,6 +241,8 @@ try
 {
   backup_measure = get_measure();
 
+  double effective_measure = backup_measure;
+
   if (Integration::verbose)
     std::cerr << "Pulsar::" + name + "::update"
                  " backup measure=" << backup_measure << std::endl;
@@ -255,11 +256,15 @@ try
       std::cerr << "Pulsar::" + name + "::update absolute"
 	" measure=" << absolute_measure << std::endl;
 
+    // the following corrects centre frequency to infinite frequency
     Corrector absolute;
     absolute.set_measure( absolute_measure );
     absolute.set_reference_wavelength( 0 );
     absolute.set_frequency( data->get_centre_frequency() );
     combine (delta, absolute.evaluate());
+
+    // the following corrects channel frequency to centre frequency
+    effective_measure += absolute_measure;
   }
 
   const History* corrected = 0;
@@ -281,15 +286,15 @@ try
     corrector.set_wavelength( lambda );
     combine (delta, corrector.evaluate());
 
-    double effective_measure = backup_measure - corrected_measure;
-
-    if (Integration::verbose)
-      std::cerr << "Pulsar::" + name + "::update effective_measure="
-		<< effective_measure << std::endl;
-
-    // set the effective correction measure to the difference
-    set_measure( effective_measure );
+    effective_measure -= corrected_measure;
   }
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::" + name + "::update effective_measure="
+	      << effective_measure << std::endl;
+
+  // set the effective correction measure
+  set_measure( effective_measure );
 }
 catch (Error& error)
 {
