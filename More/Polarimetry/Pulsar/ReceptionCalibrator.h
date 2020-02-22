@@ -54,6 +54,9 @@ namespace Pulsar
     //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;
 
+    //! The rotation about Stokes V is instrinsically degenerate
+    bool degenerate_V_rotation;
+
     //! Allow the CAL Stokes Q to vary
     bool measure_cal_Q;
 

@@ -51,6 +51,8 @@ ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
   type = _type;
 
   degenerate_V_boost = true;
+  degenerate_V_rotation = true;
+
   measure_cal_V = true;
   measure_cal_Q = false;
   equal_ellipticities = false;
@@ -225,7 +227,7 @@ void ReceptionCalibrator::init_model (unsigned ichan)
   if (step_after_cal)
     model[ichan] -> set_step_after_cal();
 
-  if (measure_cal_Q)
+  if (measure_cal_Q && degenerate_V_rotation)
     model[ichan] -> fix_orientation ();
 }
 
