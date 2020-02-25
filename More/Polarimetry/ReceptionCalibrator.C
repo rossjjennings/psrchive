@@ -668,8 +668,13 @@ void ReceptionCalibrator::initialize ()
   }
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
+  {
+    if (report_input_failed)
+      SystemCalibrator::print_input_failed (pulsar[istate]);
+
     for (unsigned ichan=0; ichan<pulsar[istate].size(); ichan++)
       pulsar[istate][ichan].update ();
+  }
 
   /*
     The various calls to update_source can incorrectly reset values

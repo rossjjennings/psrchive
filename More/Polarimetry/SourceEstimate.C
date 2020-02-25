@@ -37,20 +37,16 @@ bool Calibration::SourceEstimate::is_constrained () const
   return add_data_attempts > add_data_failures;
 }
 
+void Calibration::SourceEstimate::report_input_failed (std::ostream& out) const
+{
+  out << "add data failed " << add_data_failures << " out of "
+      << add_data_attempts << " times for " << source->get_param_name_prefix()
+      << endl;
+}
+
 /*! Update the best guess of each unknown input state */
 void Calibration::SourceEstimate::update ()
 {
-  if (add_data_attempts && add_data_failures)
-  {
-    cerr << "Failed to add data " << add_data_failures << " out of "
-	 << add_data_attempts << " times";
-
-    if (phase_bin >= 0)
-      cerr << " for phase bin " << phase_bin;
-
-    cerr << endl;
-  }
-
   valid = true;
 
   try 

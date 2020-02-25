@@ -182,6 +182,9 @@ namespace Pulsar
     //! Report on the data included as constraints before fitting
     virtual void set_report_input_data (bool flag = true);
 
+    //! Report on the number of failed attempts to add data
+    virtual void set_report_input_failed (bool flag = true);
+
     //! Set the threshold used to reject outliers when computing levels
     void set_outlier_threshold (float f) { outlier_threshold = f; }
 
@@ -283,6 +286,10 @@ namespace Pulsar
     virtual void init_estimates ( std::vector<Calibration::SourceEstimate>&,
 				  unsigned ibin = 0 );
 
+    //! Report on input data failure rates
+    virtual void print_input_failed (const std::vector<Calibration::SourceEstimate>&);
+    std::vector<std::ofstream*> input_failed;
+
     //! Prepare any calibrator estimates
     virtual void prepare_calibrator_estimate (Signal::Source);
 
@@ -356,6 +363,9 @@ namespace Pulsar
 
     //! Report on the data included as constraints
     bool report_input_data;
+
+    //! Report the number of input failures
+    bool report_input_failed;
 
     //! Threshold used to reject outliers when computing levels
     double outlier_threshold;

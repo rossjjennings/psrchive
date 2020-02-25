@@ -38,6 +38,8 @@ namespace MEAL {
 
     //! Set the prefix to each parameter name
     void set_param_name_prefix (const std::string& prefix);
+    const std::string& get_param_name_prefix () const 
+    { return param_name_prefix; }
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -53,6 +55,8 @@ namespace MEAL {
     //! Calculate the Jones matrix and its gradient
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);
 
+    //! Prefix added to all parameter names
+    std::string param_name_prefix;
   };
 
 }

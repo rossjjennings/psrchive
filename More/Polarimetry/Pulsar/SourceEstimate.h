@@ -61,6 +61,9 @@ namespace Calibration
     //! Return true if the last/top source estimate has data to constrain it
     bool is_constrained () const;
 
+    //! Report the input data fail rate
+    void report_input_failed (std::ostream&) const;
+
   protected:
 
     //! does the work for update method, which does some generic extra bits

@@ -92,6 +92,8 @@ Stokes< Estimate<double> > MEAL::Coherency::get_stokes () const
 
 void MEAL::Coherency::set_param_name_prefix (const string& prefix)
 {
+  param_name_prefix = prefix;
+
   Parameters* current = dynamic_kast<Parameters>(parameter_policy);
   if (!current)
     return;
@@ -99,6 +101,6 @@ void MEAL::Coherency::set_param_name_prefix (const string& prefix)
   const char* iquv = "IQUV";
 
   for (unsigned i=0; i<4; i++)
-    current->set_name (i, prefix + iquv[i]);
+    current->set_name (i, prefix + "_" + iquv[i]);
 }
 

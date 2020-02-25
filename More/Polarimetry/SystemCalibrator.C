@@ -72,6 +72,7 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   report_projection = false;
   report_initial_state = false;
   report_input_data = false;
+  report_input_failed = false;
 
   outlier_threshold = 0.0;
 
@@ -893,7 +894,7 @@ void Pulsar::SystemCalibrator::init_estimates
     estimate[ichan].phase_bin = ibin;
 
     string name_prefix = "psr";
-    name_prefix += "_" + tostring(ibin) + "_";
+    name_prefix += "_" + tostring(ibin);
 
     estimate[ichan].source->set_param_name_prefix( name_prefix );
   }
@@ -917,12 +918,12 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
   init_estimates (calibrator_estimate);
 
   // set the initial guess and fit flags
-  Stokes<double> cal_state (1,0,.5,0);
+  Stokes<double> cal_state (1,0,.9,0);
 
   Signal::Basis basis = get_calibrator()->get_basis ();
 
   if (basis == Signal::Circular)
-    cal_state = Stokes<double> (1,.5,0,0);
+    cal_state = Stokes<double> (1,.9,0,0);
 
   unsigned nchan = get_nchan ();
 
@@ -932,7 +933,7 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
       calibrator_estimate[ichan].source->set_stokes( cal_state );
       calibrator_estimate[ichan].source->set_infit( 0, false );
 
-      calibrator_estimate[ichan].source->set_param_name_prefix( "cal_" );
+      calibrator_estimate[ichan].source->set_param_name_prefix( "cal" );
     }
 }
 
@@ -1250,11 +1251,37 @@ catch (Error& error)
   exit (-1);
 }
 
+void Pulsar::SystemCalibrator::print_input_failed 
+     (const std::vector<Calibration::SourceEstimate>& sources)
+{
+  unsigned nchan = sources.size();
+
+  if (input_failed.size() == 0)
+  {
+    input_failed.resize( nchan );
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      string filename = "input_failed_" + tostring(ichan) + ".txt";
+      input_failed[ichan] = new ofstream (filename.c_str());
+    }
+  }
+  else if (sources.size() != input_failed.size())
+    throw Error (InvalidState, "SystemCalibrator::print_input_failed",
+                 "source nchan=%u != output nchan=%u",
+                 sources.size(), input_failed.size());
+
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    sources[ichan].report_input_failed (*(input_failed[ichan]));
+}
+
 void Pulsar::SystemCalibrator::solve_prepare ()
 {
   if (is_prepared)
     return;
 
+  if (report_input_failed)
+    print_input_failed (calibrator_estimate);
+  
   if (set_initial_guess)
     for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
       calibrator_estimate[ichan].update ();
@@ -1819,6 +1846,11 @@ void Pulsar::SystemCalibrator::set_report_initial_state (bool flag)
 void Pulsar::SystemCalibrator::set_report_input_data (bool flag)
 {
   report_input_data = flag;
+}
+
+void Pulsar::SystemCalibrator::set_report_input_failed (bool flag)
+{
+  report_input_failed = flag;
 }
 
 void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)

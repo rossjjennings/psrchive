@@ -599,6 +599,7 @@ Pulsar::Archive* load (const std::string& filename)
 
 static bool output_report = false;
 static bool prefit_report = false;
+static bool failed_report = false;
 static bool input_data = false;
 
 static bool plot_guess = false;
@@ -642,6 +643,8 @@ void enable_diagnostic (const string& name)
     cerr << "pcm: will print temporal variations" << endl;
     print_variation = true;
   }
+  else if (name == "failed")
+    failed_report = true;
 
   else
   {
@@ -1111,6 +1114,7 @@ int actual_main (int argc, char *argv[]) try
 
       model->set_report_initial_state (prefit_report);
       model->set_report_input_data (input_data);
+      model->set_report_input_failed (failed_report);
 
       if (response)
         model->set_response( response );
