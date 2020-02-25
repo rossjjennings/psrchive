@@ -397,8 +397,11 @@ bool model_fluxcal_on_minus_off = false;
 bool use_fluxcal_stokes = false;
 
 bool degenerate_V_boost = true;
+bool degenerate_V_rotation = true;
+
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
+
 bool equal_ellipticities = false;
 
 bool normalize_by_invariant = false;
@@ -711,11 +714,13 @@ int actual_main (int argc, char *argv[]) try
   bool unload_each_calibrated = true;
   bool fscrunch_data_to_template = false;
 
+  string unload_path;
+
   int gotc = 0;
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
-    "M:m:Nn:O:o:P:p:QqR:rS:sTt:U:u:V:vW:wX:xYyZz";
+    "M:m:Nn:O:o:P:p:QqR:rS:sT:t:U:u:V:vW:wX:xYyZz";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -876,7 +881,8 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'O':
-      unloader.set_filename(optarg);
+      unload_path = optarg;
+      // unloader.set_filename(optarg);
       break;
 
     case 'o': {
@@ -944,8 +950,17 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'T':
-      cerr << "pcm: assuming that Stokes V boost is not degenerate" << endl;
-      degenerate_V_boost = false;
+      if (strchr(optarg,'b'))
+      {
+        cerr << "pcm: assuming that Stokes V boost is not degenerate" << endl;
+        degenerate_V_boost = false;
+      }
+      if (strchr(optarg,'r'))
+      {
+        cerr << "pcm: assuming that Stokes V rotation is not degenerate" << endl;
+        degenerate_V_rotation = false;
+      }
+
       break;
 
     case 'u':
@@ -1431,6 +1446,9 @@ int actual_main (int argc, char *argv[]) try
     {
       string newname = replace_extension (filenames[i], ".calib");
 
+      if (!unload_path.empty())
+        newname = unload_path + "/" + basename (newname);
+
       if (verbose)
         cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
 
@@ -1527,6 +1545,13 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
     cerr << "pcm: assuming that CAL Stokes V = 0" << endl;
 
   model->measure_cal_V = measure_cal_V;
+
+  if (degenerate_V_rotation)
+    cerr << "pcm: rotation about Stokes V is intrinsically degenerate" << endl;
+  else
+    cerr << "pcm: rotation about Stokes V is not degenerate" << endl;
+
+  model->degenerate_V_rotation = degenerate_V_rotation;
 
   if (measure_cal_Q)
     cerr << "pcm: allowing CAL Stokes Q to vary" << endl;
