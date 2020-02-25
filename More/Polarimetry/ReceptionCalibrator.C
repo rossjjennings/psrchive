@@ -676,6 +676,9 @@ void ReceptionCalibrator::initialize ()
       pulsar[istate][ichan].update ();
   }
 
+  if (report_input_failed)
+    SystemCalibrator::close_input_failed ();
+
   /*
     The various calls to update_source can incorrectly reset values
     that should remain fixed because they are not free parameters

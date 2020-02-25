@@ -1251,6 +1251,16 @@ catch (Error& error)
   exit (-1);
 }
 
+void Pulsar::SystemCalibrator::close_input_failed ()
+{
+  for (unsigned ichan=0; ichan < input_failed.size(); ichan++)
+  {
+    input_failed[ichan]->close();
+    delete input_failed[ichan];
+  }
+  input_failed.resize(0);
+}
+
 void Pulsar::SystemCalibrator::print_input_failed 
      (const std::vector<Calibration::SourceEstimate>& sources)
 {

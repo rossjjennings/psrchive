@@ -289,6 +289,7 @@ namespace Pulsar
     //! Report on input data failure rates
     virtual void print_input_failed (const std::vector<Calibration::SourceEstimate>&);
     std::vector<std::ofstream*> input_failed;
+    virtual void close_input_failed ();
 
     //! Prepare any calibrator estimates
     virtual void prepare_calibrator_estimate (Signal::Source);
