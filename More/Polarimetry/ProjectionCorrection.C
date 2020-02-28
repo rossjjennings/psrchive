@@ -346,8 +346,10 @@ Jones<double> Pulsar::ProjectionCorrection::get_projection () const
           "\n\t herm=" + tostring( herm.get_vector() ) +
           "\n\t unit=" + tostring( unit.get_vector() ) + "\n";
 
+  // note that the rotation about the line of sight _precedes_ 
+  // the projection tranformation because it is an azimuthal rotation
   Jones<double> rot = get_rotation();
-  return J * rot;
+  return rot * J;
 }
 
 std::string Pulsar::ProjectionCorrection::get_summary () const
