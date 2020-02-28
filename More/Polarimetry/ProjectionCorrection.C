@@ -241,12 +241,8 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
     feed_rotation = receiver->get_tracking_angle();
   }
 
-  if (must_correct_platform && should_correct_projection)
-    throw Error (InvalidState,
-		 "Pulsar::ProjectionCorrection::get_rotation",
-		 "Projection of fixed receptors not yet implemented");
-
-  if (must_correct_platform && should_correct_vertical)
+  if (must_correct_platform && 
+      should_correct_vertical && !should_correct_projection)
   {
     para.set_epoch( integration->get_epoch() );
  
@@ -350,7 +346,8 @@ Jones<double> Pulsar::ProjectionCorrection::get_projection () const
           "\n\t herm=" + tostring( herm.get_vector() ) +
           "\n\t unit=" + tostring( unit.get_vector() ) + "\n";
 
-  return J;
+  Jones<double> rot = get_rotation();
+  return J * rot;
 }
 
 std::string Pulsar::ProjectionCorrection::get_summary () const
