@@ -21,8 +21,10 @@
 #include "Pulsar/TimeFrequencyZap.h"
 #include "Pulsar/ZapExtend.h"
 
+#include "RobustEstimateZapper.h"
 #include "TextInterface.h"
 #include "pairutil.h"
+#include "evaluate.h"
 #include "Ranges.h"
 
 using namespace std;
@@ -291,7 +293,7 @@ catch (Error& error) {
 string Pulsar::ZapInterpreter::cal (const string& args)
 {
   /*
-    Passing false as the second argument disables the default variable
+    Passing false as the second argument to setup disables variable
     substitution and expression evaluation using the Archive::Interpreter.
     
     This is done because any variables will be interpreted using the
@@ -315,6 +317,18 @@ string Pulsar::ZapInterpreter::cal (const string& args)
   if (!ext)
     return response (Fail, "archive does not contain PolnCalibratorExtension");
 
+  if (arguments[0] == "robust")
+  {
+    RobustEstimateZapper zap;
+    for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
+      zap.excise (iparam, ext.get(), 
+                  &PolnCalibratorExtension::get_nchan,
+                  &PolnCalibratorExtension::get_Estimate,
+                  &PolnCalibratorExtension::set_weight);
+
+    return response (Good);
+  }
+
   for (unsigned ichan=0; ichan<ext->get_nchan(); ichan++)
   {
     PolnCalibratorExtension::Transformation::Interface parser;
@@ -325,7 +339,7 @@ string Pulsar::ZapInterpreter::cal (const string& args)
       string expression = arguments[iarg];
       string value = process( &parser, expression );
 
-      if (fromstring<bool>( value ))
+      if ( compute(value) )
 	ext->set_weight( ichan, 0.0 );
     }
   }
