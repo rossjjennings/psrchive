@@ -48,6 +48,7 @@ include_HEADERS = \
 	Ranges.h \
         RealTimer.h \
         RegularExpression.h \
+	RobustEstimateZapper.h \
 	RobustStats.h \
 	RunningMedian.h \
         sky_coord.h \
