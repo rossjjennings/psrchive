@@ -97,6 +97,8 @@ namespace Pulsar {
     void fscrunch (unsigned factor = 0);
     void fscrunch_to_nchan (unsigned new_nchan);
 
+    Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
+
   protected:
 
     //! The instrumental response as a function of frequency

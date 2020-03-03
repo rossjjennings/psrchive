@@ -16,13 +16,13 @@ using namespace std;
 using namespace Pulsar;
 
 //! Default constructor
-Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
+PolnCalibratorExtension::PolnCalibratorExtension ()
   : CalibratorExtension ("PolnCalibratorExtension")
 {
   init ();
 }
 
-void Pulsar::PolnCalibratorExtension::init ()
+void PolnCalibratorExtension::init ()
 {
   nparam = 0;
   has_covariance = false;
@@ -30,7 +30,7 @@ void Pulsar::PolnCalibratorExtension::init ()
 }
 
 //! Copy constructor
-Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
+PolnCalibratorExtension::PolnCalibratorExtension
 (const PolnCalibratorExtension& copy)
   : CalibratorExtension (copy)
 {
@@ -38,15 +38,15 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 }
 
 //! Operator =
-const Pulsar::PolnCalibratorExtension&
-Pulsar::PolnCalibratorExtension::operator= 
+const PolnCalibratorExtension&
+PolnCalibratorExtension::operator= 
 (const PolnCalibratorExtension& copy)
 {
   if (this == &copy)
     return *this;
 
   if (Archive::verbose == 3)
-    cerr << "Pulsar::PolnCalibratorExtension::operator=" << endl;
+    cerr << "PolnCalibratorExtension::operator=" << endl;
 
   type = copy.get_type();
   epoch = copy.get_epoch();
@@ -64,12 +64,12 @@ Pulsar::PolnCalibratorExtension::operator=
 }
 
 //! Destructor
-Pulsar::PolnCalibratorExtension::~PolnCalibratorExtension ()
+PolnCalibratorExtension::~PolnCalibratorExtension ()
 {
 }
 
 //! Set the type of the instrumental response parameterization
-void Pulsar::PolnCalibratorExtension::set_type (const Calibrator::Type* _type)
+void PolnCalibratorExtension::set_type (const Calibrator::Type* _type)
 {
   type = _type;
   nparam = type->get_nparam();
@@ -77,7 +77,7 @@ void Pulsar::PolnCalibratorExtension::set_type (const Calibrator::Type* _type)
 
 
 //! Set the number of frequency channels
-void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
+void PolnCalibratorExtension::set_nchan (unsigned _nchan)
 {
   CalibratorExtension::set_nchan( _nchan );
   response.resize( _nchan );
@@ -91,13 +91,13 @@ void PolnCalibratorExtension::remove_chan (unsigned first, unsigned last)
 }
 
 //! Set the weight of the specified channel
-void Pulsar::PolnCalibratorExtension::set_weight (unsigned ichan, float weight)
+void PolnCalibratorExtension::set_weight (unsigned ichan, float weight)
 {
   set_valid (ichan, weight != 0.0);
 }
 
 //! Set the weight of the specified channel
-float Pulsar::PolnCalibratorExtension::get_weight (unsigned ichan) const
+float PolnCalibratorExtension::get_weight (unsigned ichan) const
 {
   if (get_valid (ichan))
     return 1.0;
@@ -107,15 +107,15 @@ float Pulsar::PolnCalibratorExtension::get_weight (unsigned ichan) const
 
 //! Get the weight of the specified channel
 
-bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
+bool PolnCalibratorExtension::get_valid (unsigned ichan) const
 {
-  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_valid");
+  range_check (ichan, "PolnCalibratorExtension::get_valid");
   return response[ichan].get_valid();
 }
 
-void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
+void PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
 {
-  range_check (ichan, "Pulsar::PolnCalibratorExtension::set_valid");
+  range_check (ichan, "PolnCalibratorExtension::set_valid");
 
   if (!valid)
     weight[ichan] = 0;
@@ -125,53 +125,59 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
   response[ichan].set_valid (valid);
 }
 
-unsigned Pulsar::PolnCalibratorExtension::get_nparam () const
+unsigned PolnCalibratorExtension::get_nparam () const
 {
   return nparam;
 }
 
-bool Pulsar::PolnCalibratorExtension::get_has_covariance () const
+bool PolnCalibratorExtension::get_has_covariance () const
 {
   return has_covariance;
 }
 
-void Pulsar::PolnCalibratorExtension::set_has_covariance (bool has)
+void PolnCalibratorExtension::set_has_covariance (bool has)
 {
   has_covariance = has;
 }
 
 //! Get if the covariances of the transformation parameters
-bool Pulsar::PolnCalibratorExtension::get_has_solver () const
+bool PolnCalibratorExtension::get_has_solver () const
 {
   return has_solver;
 }
 
 //! Set if the covariances of the transformation parameters
-void Pulsar::PolnCalibratorExtension::set_has_solver (bool has)
+void PolnCalibratorExtension::set_has_solver (bool has)
 {
   has_solver = has;
 }
 
 //! Get the transformation for the specified frequency channel
-Pulsar::PolnCalibratorExtension::Transformation* 
-Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan)
+PolnCalibratorExtension::Transformation* 
+PolnCalibratorExtension::get_transformation (unsigned ichan)
 {
-  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
+  range_check (ichan, "PolnCalibratorExtension::get_transformation");
   return &response[ichan];
 }
 
 //! Get the transformation for the specified frequency channel
-const Pulsar::PolnCalibratorExtension::Transformation*
-Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan) const
+const PolnCalibratorExtension::Transformation*
+PolnCalibratorExtension::get_transformation (unsigned ichan) const
 {
-  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
+  range_check (ichan, "PolnCalibratorExtension::get_transformation");
   return &response[ichan];
 }
 
-void Pulsar::PolnCalibratorExtension::construct ()
+Estimate<float>
+PolnCalibratorExtension::get_Estimate ( unsigned iparam, unsigned ichan ) const
+{
+  return get_transformation(ichan)->get_Estimate(iparam);
+}
+
+void PolnCalibratorExtension::construct ()
 {
   if (Archive::verbose == 3)
-    cerr << "Pulsar::PolnCalibratorExtension::construct nchan="
+    cerr << "PolnCalibratorExtension::construct nchan="
          << response.size() << " type=" << get_type()->get_name() << endl;
 
   for (unsigned ichan=0; ichan<response.size(); ichan++)
