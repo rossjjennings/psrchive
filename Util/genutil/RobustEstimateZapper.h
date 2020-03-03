@@ -11,17 +11,37 @@
 #ifndef __RobustEstimateZapper_h
 #define __RobustEstimateZapper_h
 
-#include <iostream>
+#include "TextInterface.h"
+#include "Estimate.h"
 
 //! Excises outliers from a container using robust statistics
-class RobustEstimateZapper
+class RobustEstimateZapper : public Reference::Able
 {
-  public:
+private:
   bool error;
   bool logarithmic;
   float threshold;
 
-  RobustEstimateZapper () { error = true; logarithmic = false; threshold = 3.0; }
+public:
+
+  RobustEstimateZapper ();
+
+  //! Flag outliers based on their error bar
+  bool get_error_bar () const { return error; }
+  void set_error_bar (bool flag) { error = flag; }
+
+  //! Flag outliers based on the logarithm of either the value or the error bar
+  bool get_log () const { return logarithmic; }
+  void set_log (bool flag) { logarithmic = flag; }
+
+  //! Set threshold used to identify outliers (multiple of madm)
+  float get_threshold () const { return threshold; }
+  void set_threshold (float val) { threshold = val; }
+
+  //! Return a text interface that can be used to access this instance
+  TextInterface::Parser* get_interface();
+
+  class Interface;
 
   float get_value (const Estimate<float>& datum)
   {

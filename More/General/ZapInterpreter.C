@@ -319,14 +319,27 @@ string Pulsar::ZapInterpreter::cal (const string& args)
 
   if (arguments[0] == "robust")
   {
-    RobustEstimateZapper zap;
-    for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
-      zap.excise (iparam, ext.get(), 
-                  &PolnCalibratorExtension::get_nchan,
-                  &PolnCalibratorExtension::get_Estimate,
-                  &PolnCalibratorExtension::set_weight);
+    if (!robust_estimate_zapper)
+      robust_estimate_zapper = new RobustEstimateZapper;
 
-    return response (Good);
+    if (arguments.size() == 1)
+    {
+      for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
+        robust_estimate_zapper->excise (iparam, ext.get(), 
+                                        &PolnCalibratorExtension::get_nchan,
+                                        &PolnCalibratorExtension::get_Estimate,
+                                        &PolnCalibratorExtension::set_weight);
+      return response (Good);
+    }
+
+    // parse any configuration options
+    TextInterface::Parser* parser = robust_estimate_zapper->get_interface();
+
+    string retval;
+    for (unsigned iarg=1; iarg < arguments.size(); iarg++)
+      retval += parser->process (arguments[iarg]);
+
+    return response (Good, retval);
   }
 
   for (unsigned ichan=0; ichan<ext->get_nchan(); ichan++)

@@ -121,6 +121,7 @@ libgenutil_la_SOURCES = \
 	Ranges.C \
         RealTimer.C \
         RegularExpression.C \
+	RobustEstimateZapper.C \
 	replace_extension.C \
         sky_coord.C \
         sla_MJD.C \

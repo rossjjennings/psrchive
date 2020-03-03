@@ -13,6 +13,8 @@
 
 #include "Pulsar/InterpreterExtension.h"
 
+class RobustEstimateZapper;
+
 namespace Pulsar {
 
   class ChannelZapMedian;
@@ -20,7 +22,7 @@ namespace Pulsar {
   class InterQuartileRange;
   class TimeFrequencyZap;
   class ZapExtend;
-  
+
   class ZapInterpreter : public Interpreter::Extension {
 
   public:
@@ -85,7 +87,10 @@ namespace Pulsar {
     
     //! Zap extender
     Reference::To<ZapExtend> zap_extend;
-    
+
+    //! Robust estimate zapper
+    Reference::To<RobustEstimateZapper> robust_estimate_zapper;
+ 
     //! Store specified set of subints to apply channel/freq zapping
     std::vector<unsigned> set_subints;
 
