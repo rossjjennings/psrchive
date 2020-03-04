@@ -14,6 +14,8 @@
 #include "TextInterface.h"
 #include "Estimate.h"
 
+#include <algorithm>
+
 //! Excises outliers from a container using robust statistics
 class RobustEstimateZapper : public Reference::Able
 {
