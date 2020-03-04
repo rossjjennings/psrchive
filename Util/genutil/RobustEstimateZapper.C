@@ -9,13 +9,17 @@
 
 RobustEstimateZapper::RobustEstimateZapper ()
 { 
-  // by default, seek outliers based on the logarithm of the error bar
+  // seek outliers based on the base 10 logarithm of the error bar
   error = true;
   logarithmic =true;
 
-  // WvS: this default was determined by experimentation on one file ...
-  // ... it's unexpectedly large ...
-  threshold = 20.0;
+  /* do not scale threshold by MADM
+     when combined with logarithmic, this makes threshold an upper limit
+     on the order of magnitude difference from the median */
+  scale = false;
+
+  // allow error bars up to 10x greater than the median error bar
+  threshold = 1.0;
 }
 
 
@@ -35,7 +39,11 @@ RobustEstimateZapper::Interface::Interface (RobustEstimateZapper* a)
 
   add( &RobustEstimateZapper::get_threshold,
        &RobustEstimateZapper::set_threshold,
-       "threshold", "Outlier threshold (multiple of MADM)" );
+       "threshold", "Outlier threshold (maximum offset from median)" );
+
+  add( &RobustEstimateZapper::get_scale,
+       &RobustEstimateZapper::set_scale,
+       "scale", "Scale threshold by MADM" );
 
   add( &RobustEstimateZapper::get_error_bar,
        &RobustEstimateZapper::set_error_bar,
@@ -43,7 +51,6 @@ RobustEstimateZapper::Interface::Interface (RobustEstimateZapper* a)
 
   add( &RobustEstimateZapper::get_log,
        &RobustEstimateZapper::set_log,
-       "log", "Compute MADM of natural logarithm" );
-
+       "log", "Take base 10 logarithm of data" );
 }
 

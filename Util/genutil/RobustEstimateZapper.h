@@ -14,12 +14,15 @@
 #include "TextInterface.h"
 #include "Estimate.h"
 
+// #define _DEBUG 1
+
 //! Excises outliers from a container using robust statistics
 class RobustEstimateZapper : public Reference::Able
 {
 private:
   bool error;
   bool logarithmic;
+  bool scale;
   float threshold;
 
 public:
@@ -33,6 +36,10 @@ public:
   //! Flag outliers based on the logarithm of either the value or the error bar
   bool get_log () const { return logarithmic; }
   void set_log (bool flag) { logarithmic = flag; }
+
+  //! Do not multiply threshold by MADM
+  bool get_scale () const { return scale; }
+  void set_scale (bool flag) { scale = flag; }
 
   //! Set threshold used to identify outliers (multiple of madm)
   float get_threshold () const { return threshold; }
@@ -53,7 +60,7 @@ public:
       val = datum.val;
 
     if (logarithmic)
-      val = log (val);
+      val = log10 (val);
 
     return val;
   }
@@ -77,6 +84,11 @@ public:
         continue;
 
       work[iwork] = get_value (val);
+
+#if _DEBUG
+      std::cout << iparam << " " << ipt << " " << work[iwork] << std::endl;
+#endif
+
       iwork ++;
     }
 
@@ -84,16 +96,22 @@ public:
     std::nth_element (work.begin(), work.begin()+iwork/2, work.begin()+iwork);
     float median = work[ iwork/2 ];
 
-    // compute the absolute deviation from the median
-    for (unsigned ipt=0; ipt < iwork; ipt++)
-      work[ipt] = fabs(work[ipt] - median);
+    float madm = 1.0;
 
-    // find the median absolute deviation from the median 
-    std::nth_element (work.begin(), work.begin()+iwork/2, work.begin()+iwork);
-    float madm = work[ iwork/2 ];
+    if (scale)
+    {
+      // compute the absolute deviation from the median
+      for (unsigned ipt=0; ipt < iwork; ipt++)
+        work[ipt] = fabs(work[ipt] - median);
+
+      // find the median absolute deviation from the median 
+      std::nth_element (work.begin(), work.begin()+iwork/2, work.begin()+iwork);
+      madm = work[ iwork/2 ];
+    }
 
 #if _DEBUG
-    std::cerr << "RobustEstimateZapper::excise iwork=" << iwork << " median=" << median
+    std::cerr << "RobustEstimateZapper::excise iwork=" << iwork 
+              << " iparam=" << iparam << " median=" << median
               << " madm=" << madm << std::endl;
 #endif
 
