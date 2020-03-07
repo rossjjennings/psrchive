@@ -39,7 +39,9 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
   
   while (iter < max_iterations)
   {
+#if _DEBUG
     cerr << "InterQuartileRange::transform iteration=" << iter << endl;
+#endif
     once (archive);
 
     if (iter == 0)
@@ -53,9 +55,11 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
       break;
   }
 
+#if _DEBUG
   cerr << "Pulsar::InterQuartileRange::transform tested=" << tot_valid
        << " iter=" << iter << " high=" << tot_high << " low=" << tot_low
        << " %=" << (tot_high+tot_low)*100.0/tot_valid << endl;
+#endif
 }
 
 void Pulsar::InterQuartileRange::once (Archive* archive)
@@ -80,7 +84,9 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
   
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
+#if _DEBUG
     cerr << "InterQuartileRange::once isubint=" << isubint << endl;
+#endif
 
     Integration* subint = archive->get_Integration( isubint );
     
@@ -115,7 +121,8 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
   }
 
 #ifdef _DEBUG
-  cerr << "nchan=" << nchan << " nsub=" << nsubint << " nchan*nsub=" << nchan*nsubint << " valid=" << valid << endl;
+  cerr << "nchan=" << nchan << " nsub=" << nsubint 
+       << " nchan*nsub=" << nchan*nsubint << " valid=" << valid << endl;
 #endif
 
   std::vector<float> val (values.begin(), values.begin()+ valid);
