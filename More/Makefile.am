@@ -34,6 +34,9 @@ if HAVE_PGPLOT
 SUBDIRS += Plotting
 endif
 
+SUBDIRS += Resources
+libpsrmore_la_LIBADD += Resources/libResources.la
+
 SUBDIRS += . Applications Simulation
 
 if HAVE_QTDRIV

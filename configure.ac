@@ -319,6 +319,7 @@ AC_CONFIG_FILES([
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
 		More/RFIMitigation/Makefile
+		More/Resources/Makefile
 		More/Applications/Makefile
 		More/Applications/njkk08/Makefile
 		More/Simulation/Makefile
