@@ -9,6 +9,8 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Fourier.h"
 
+#include <algorithm>
+
 using namespace std;
 using namespace Pulsar;
 
