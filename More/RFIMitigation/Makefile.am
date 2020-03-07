@@ -2,6 +2,7 @@
 noinst_LTLIBRARIES = libRFIMitigation.la
 
 nobase_include_HEADERS = \
+	Pulsar/ChannelZapMedian.h \
 	Pulsar/DoubleMedian.h \
 	Pulsar/InterQuartileRange.h \
 	Pulsar/LawnMower.h \
@@ -11,10 +12,11 @@ nobase_include_HEADERS = \
 	Pulsar/TimeFrequencyMask.h \
 	Pulsar/TimeFrequencySmooth.h \
 	Pulsar/TimeFrequencyZap.h \
-	Pulsar/ZapExtend.h
-
+	Pulsar/ZapExtend.h \
+	Pulsar/ZapInterpreter.h
 
 libRFIMitigation_la_SOURCES = \
+	ChannelZapMedian.C \
 	DoubleMedian.C \
 	InterQuartileRange.C \
 	LawnMower.C \
@@ -23,7 +25,8 @@ libRFIMitigation_la_SOURCES = \
 	SumThreshold.C \
 	TimeFrequencySmooth.C \
 	TimeFrequencyZap.C \
-	ZapExtend.C
+	ZapExtend.C \
+	ZapInterpreter.C
 
 #############################################################################
 #

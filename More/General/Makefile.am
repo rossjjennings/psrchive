@@ -19,8 +19,6 @@ nobase_include_HEADERS = \
         Pulsar/BaselineWindow.h \
         Pulsar/ChannelSubsetMatch.h \
         Pulsar/ChannelWeight.h \
-        Pulsar/ChannelZapMedian.h \
-        Pulsar/ChannelZapModulation.h \
         Pulsar/ColdPlasma.h \
 	Pulsar/Combination.h \
 	Pulsar/Contemporaneity.h \
@@ -122,8 +120,7 @@ nobase_include_HEADERS = \
         Pulsar/Weight.h \
 	Pulsar/WeightedFrequency.h \
 	Pulsar/WeightInterpreter.h \
-	Pulsar/WidthEstimator.h \
-        Pulsar/ZapInterpreter.h
+	Pulsar/WidthEstimator.h
 
 libGeneral_la_SOURCES = \
 	counter_drift.C \
@@ -164,8 +161,6 @@ libGeneral_la_SOURCES = \
 	BaselineEstimator.C \
         BaselineWindow.C \
         ChannelSubsetMatch.C \
-        ChannelZapMedian.C \
-        ChannelZapModulation.C \
 	ConvertIsolated.C \
 	Contemporaneity.C \
 	Convolve.C \
@@ -274,8 +269,7 @@ libGeneral_la_SOURCES = \
 	WeightedFrequency.C \
 	WeightInterpreter.C \
 	width.C \
-	WidthEstimator.C \
-	ZapInterpreter.C
+	WidthEstimator.C
 
 
 ##############################################################################

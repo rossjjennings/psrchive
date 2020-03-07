@@ -208,10 +208,10 @@ string Pulsar::ZapInterpreter::iqr (const string& args) try
   if (!arguments.size())
   {
     (*iq_range)( get() );
-    return response (Good);
+    return response (Good, iq_range->get_report());
   }
 
-  //! Zap median interface
+  //! InterQuartileRange interface
   Reference::To<TextInterface::Parser> interface = iq_range->get_interface();
 
   string retval;
