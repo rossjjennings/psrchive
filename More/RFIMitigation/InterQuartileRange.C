@@ -9,6 +9,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/ProfileStatistic.h"
 #include "Pulsar/Index.h"
 
 #include <algorithm>
@@ -25,6 +26,10 @@ Pulsar::InterQuartileRange::InterQuartileRange ()
   max_iterations = 15;
 }
 
+Pulsar::InterQuartileRange::~InterQuartileRange ()
+{
+}
+
 void Pulsar::InterQuartileRange::transform (Archive* archive)
 {
   unsigned tot_valid = 0;
@@ -34,6 +39,7 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
   
   while (iter < max_iterations)
   {
+    cerr << "InterQuartileRange::transform iteration=" << iter << endl;
     once (archive);
 
     if (iter == 0)
@@ -74,6 +80,8 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
   
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
+    cerr << "InterQuartileRange::once isubint=" << isubint << endl;
+
     Integration* subint = archive->get_Integration( isubint );
     
     for (unsigned ichan=0; ichan < nchan; ichan++)
@@ -84,8 +92,12 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
       Index pol (0, true); // integrate over polarizations
       Reference::To<const Profile> profile
 	= Pulsar::get_Profile (subint, pol, ichan);
-	
-      if (stats)
+
+      if (statistic)
+      {
+        values[valid] = statistic->get(profile);
+      }
+      else if (stats)
       {
 	stats->set_Profile (profile);
 	string value = process( parser, expression );
@@ -158,6 +170,20 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
   assert (revisit == valid);
 }
 
+//! Set the profile statistic
+void Pulsar::InterQuartileRange::set_statistic (const std::string& name)
+{
+  statistic = ProfileStatistic::factory (name);
+}
+
+//! Get the profile statistic
+std::string Pulsar::InterQuartileRange::get_statistic () const
+{
+  if (!statistic)
+    return "none";
+
+  return statistic->get_identity();
+}
 
 //! Get the text interface to the configuration attributes
 TextInterface::Parser* Pulsar::InterQuartileRange::get_interface ()
@@ -174,7 +200,12 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
        &InterQuartileRange::set_expression,
        "exp", "Statistical expression" );
 
+  add( &InterQuartileRange::get_statistic,
+       &InterQuartileRange::set_statistic,
+       "stat", "Profile statistic" );
+
   add( &InterQuartileRange::get_cutoff_threshold,
        &InterQuartileRange::set_cutoff_threshold,
        "cutoff", "Outlier threshold: Q1-cutoff*IQR - Q3+cutoff*IQR" );
 }
+

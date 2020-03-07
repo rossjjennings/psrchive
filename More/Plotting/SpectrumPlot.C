@@ -11,6 +11,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/ProfileStatistic.h"
 
 using namespace std;
 
@@ -20,6 +21,25 @@ std::string process (TextInterface::Parser* interface, const std::string& txt);
 Pulsar::SpectrumPlot::SpectrumPlot ()
   : ibin (0, true) // sum over all phase bins by default
 {
+}
+
+Pulsar::SpectrumPlot::~SpectrumPlot ()
+{
+}
+
+//! Set the profile statistic
+void Pulsar::SpectrumPlot::set_statistic (const std::string& name)
+{
+  statistic = ProfileStatistic::factory (name);
+}
+
+//! Get the profile statistic
+std::string Pulsar::SpectrumPlot::get_statistic () const
+{
+  if (!statistic)
+    return "none";
+
+  return statistic->get_identity();
 }
 
 void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
@@ -47,6 +67,10 @@ void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
     profile = get_Profile (subint, ipol, ichan);
     if (profile -> get_weight() == 0.0)
       spectra[0][ichan] = 0.0;
+    else if (statistic)
+    {
+      spectra[0][ichan] = statistic->get(profile);
+    }
     else if (stats)
     {
       stats->set_Profile (profile);

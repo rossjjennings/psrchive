@@ -16,6 +16,10 @@ Pulsar::SpectrumPlot::Interface::Interface (SpectrumPlot* instance)
        &SpectrumPlot::set_bin,
        "bin", "Phase bin to plot" );
 
+  add( &SpectrumPlot::get_statistic,
+       &SpectrumPlot::set_statistic,
+       "stat", "Profile statistic to plot" );
+
   add( &SpectrumPlot::get_expression,
        &SpectrumPlot::set_expression,
        "exp", "Expression to evaluate" );

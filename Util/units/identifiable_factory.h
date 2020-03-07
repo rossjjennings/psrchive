@@ -46,7 +46,8 @@ T* identifiable_factory (C& ptrs, std::string name)
     {
       if (name == "help")
 	{
-	  std::cerr << (*ptr)->get_identity() << std::endl;
+	  std::cerr << (*ptr)->get_identity() 
+                    << "\t" << (*ptr)->get_description() << std::endl;
 	}
       else if ((*ptr)->identify(name))
 	{

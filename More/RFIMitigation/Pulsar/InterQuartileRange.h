@@ -16,6 +16,8 @@
 
 namespace Pulsar {
 
+  class ProfileStatistic;
+
   //! Uses the inter-quartile range to find bad channels and sub-integrations
   /*! By default, this algorithm uses the modulation index as the
     statistic derived from each pulse profile and used to find
@@ -45,12 +47,18 @@ namespace Pulsar {
 
     //! Maximum number of iterations before aborting
     unsigned max_iterations;
+
+    //! The statistic to be derived from each profile
+    Reference::To<ProfileStatistic> statistic;
     
   public:
 
-    //! Default construction
+    //! Default constructor
     InterQuartileRange ();
-    
+   
+    //! Destructor
+    ~InterQuartileRange ();
+ 
     //! Iteratively flag bad sub-integrations and frequency channels using IQR
     void transform (Archive*);
 
@@ -69,11 +77,18 @@ namespace Pulsar {
     //! Get the statistical expression
     std::string get_expression () const { return expression; }
 
+    //! Set the profile statistic
+    void set_statistic (const std::string&);
+
+    //! Get the profile statistic
+    std::string get_statistic () const;
+
     //! Set the cut-off threshold
     void set_cutoff_threshold (float t) { cutoff_threshold = t; }
 
     //! Get the cut-off threshold
     float get_cutoff_threshold () const { return cutoff_threshold; }
+
 
   };
 

@@ -55,3 +55,14 @@ const std::string& Identifiable::get_identity () const
   return identities[0];
 }
 
+void Identifiable::set_description (const std::string& text)
+{
+  description = text;
+}
+
+//! Returns the identity of the object
+const std::string& Identifiable::get_description () const
+{
+  return description;
+}
+

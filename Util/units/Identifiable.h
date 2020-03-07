@@ -12,7 +12,7 @@
 #ifndef __Identifiable_H
 #define __Identifiable_H
 
-#include "ReferenceAble.h"
+#include "ReferenceTo.h"
 
 class Identifiable : public Reference::Able
 {
@@ -27,14 +27,45 @@ class Identifiable : public Reference::Able
   //! Returns the identity of the object
   virtual const std::string& get_identity () const;
 
+  //! Set the description of the object
+  virtual void set_description (const std::string&);
+
+  //! Returns the description of the object
+  virtual const std::string& get_description () const;
+
   //! Add an alias for the object
   virtual void add_alias (const std::string&);
+
+  class Decorator;
 
  private:
 
   //! Primary identity and aliases
   std::vector<std::string> identities;
 
+  //! The description of the object
+  std::string description;
+
 };
+
+class Identifiable::Decorator : public Identifiable
+{
+  Reference::To<Identifiable> decorated;
+
+public:
+
+  Decorator (Identifiable* id) { decorated = id; }
+
+  bool identify (const std::string& name)
+  { return decorated->identify(name); }
+
+  const std::string& get_identity () const
+  { return decorated->get_identity (); }
+
+  const std::string& get_description () const
+  { return decorated->get_description (); }
+
+};
+
 
 #endif
