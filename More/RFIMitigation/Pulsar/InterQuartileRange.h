@@ -43,7 +43,8 @@ namespace Pulsar {
     std::string expression;
 
     //! Fraction of IQR
-    float cutoff_threshold;
+    float cutoff_threshold_max;
+    float cutoff_threshold_min;
 
     //! Maximum number of iterations before aborting
     unsigned max_iterations;
@@ -84,11 +85,33 @@ namespace Pulsar {
     std::string get_statistic () const;
 
     //! Set the cut-off threshold
-    void set_cutoff_threshold (float t) { cutoff_threshold = t; }
+    void set_cutoff_threshold (float t)
+    { cutoff_threshold_max = cutoff_threshold_min = t; }
 
     //! Get the cut-off threshold
-    float get_cutoff_threshold () const { return cutoff_threshold; }
+    float get_cutoff_threshold () const { return cutoff_threshold_max; }
 
+    //! Set the cut-off threshold for the maximum value
+    void set_cutoff_threshold_max (float t) { cutoff_threshold_max = t; }
+
+    //! Get the cut-off threshold for the maximum value
+    float get_cutoff_threshold_max () const { return cutoff_threshold_max; }
+
+    //! Set the cut-off threshold for the minimum value
+    void set_cutoff_threshold_min (float t) { cutoff_threshold_min = t; }
+
+    //! Get the cut-off threshold for the minimum value
+    float get_cutoff_threshold_min () const { return cutoff_threshold_min; }
+
+    //! Report the number of profiles excise
+    std::string get_report () const;
+
+  private:
+
+    unsigned tot_valid;
+    unsigned tot_high;
+    unsigned tot_low;
+    unsigned iter;
 
   };
 

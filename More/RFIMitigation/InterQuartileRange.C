@@ -22,7 +22,7 @@ std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::InterQuartileRange::InterQuartileRange ()
 {
-  cutoff_threshold = 1.5;
+  cutoff_threshold_max = cutoff_threshold_min = 1.5;
   max_iterations = 15;
 }
 
@@ -32,10 +32,10 @@ Pulsar::InterQuartileRange::~InterQuartileRange ()
 
 void Pulsar::InterQuartileRange::transform (Archive* archive)
 {
-  unsigned tot_valid = 0;
-  unsigned tot_high = 0;
-  unsigned tot_low = 0;
-  unsigned iter = 0;
+  tot_valid = 0;
+  tot_high = 0;
+  tot_low = 0;
+  iter = 0;
   
   while (iter < max_iterations)
   {
@@ -54,12 +54,13 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
     if (too_high + too_low == 0)
       break;
   }
+}
 
-#if _DEBUG
-  cerr << "Pulsar::InterQuartileRange::transform tested=" << tot_valid
-       << " iter=" << iter << " high=" << tot_high << " low=" << tot_low
-       << " %=" << (tot_high+tot_low)*100.0/tot_valid << endl;
-#endif
+std::string Pulsar::InterQuartileRange::get_report () const
+{
+  return string("tested=") + tostring(tot_valid) + " iter=" + tostring(iter)
+           + " high=" + tostring(tot_high) + " low=" + tostring(tot_low)
+           + " %=" + tostring((tot_high+tot_low)*100.0/tot_valid);
 }
 
 void Pulsar::InterQuartileRange::once (Archive* archive)
@@ -154,13 +155,15 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
       if (subint->get_weight(ichan) == 0)
 	continue;
 
-      if (values[revisit] < Q1 - cutoff_threshold * IQR)
+      if (cutoff_threshold_min > 0 &&
+          values[revisit] < Q1 - cutoff_threshold_min * IQR)
       {
 	subint->set_weight(ichan, 0);
         too_low ++;
       }
 
-      if (values[revisit] > Q3 + cutoff_threshold * IQR)
+      if (cutoff_threshold_max > 0 &&
+          values[revisit] > Q3 + cutoff_threshold_max * IQR)
       {
 	subint->set_weight(ichan, 0);
         too_high ++;
@@ -214,5 +217,13 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
   add( &InterQuartileRange::get_cutoff_threshold,
        &InterQuartileRange::set_cutoff_threshold,
        "cutoff", "Outlier threshold: Q1-cutoff*IQR - Q3+cutoff*IQR" );
+
+  add( &InterQuartileRange::get_cutoff_threshold_min,
+       &InterQuartileRange::set_cutoff_threshold_min,
+       "cutmin", "Outlier threshold: Q1-cutmin*IQR - Q3+cutmax*IQR" );
+
+  add( &InterQuartileRange::get_cutoff_threshold_max,
+       &InterQuartileRange::set_cutoff_threshold_max,
+       "cutmax", "Outlier threshold: Q1-cutmin*IQR - Q3+cutmax*IQR" );
 }
 
