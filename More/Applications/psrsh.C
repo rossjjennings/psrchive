@@ -99,7 +99,7 @@ void psrsh::add_options (CommandLine::Menu& menu)
      "If no files are specified, psrsh enters the interactive shell mode \n"
      "\n"
      "Otherwise, psrsh enters the shell script command processor mode: \n"
-     "the first file must be the script, and all subseqent archive files \n"
+     "the first file must be the script, and all subsequent archive files \n"
      "will be processed using this script \n"
      + menu.get_help_footer ());
 }
