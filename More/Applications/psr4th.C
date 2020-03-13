@@ -15,6 +15,7 @@
 #include "Pulsar/FourthMoments.h"
 #include "Pulsar/CovarianceMatrix.h"
 #include "Pulsar/PhaseResolvedHistogram.h"
+#include "Pulsar/FourthMomentStats.h"
 
 #include "Matrix.h"
 #include "Stokes.h"
@@ -37,6 +38,9 @@ public:
 
   //! Process the given archive
   void process (Pulsar::Archive*);
+
+  //! output the eigenvector profiles
+  void output_eigenvectors (const Pulsar::Archive*);
 
   //! Output the results
   void finalize ();
@@ -94,6 +98,9 @@ protected:
   bool total_baseline;
   bool each_baseline;
   bool report_baseline;
+
+  bool extract_eigenvectors;
+  bool smooth_eigenvectors;
  
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -111,9 +118,6 @@ protected:
   - StandardOptions (-j -J etc.): an option set that provides standard
   preprocessing with the pulsar command language interpreter.
 
-  - UnloadOptions (-e -m etc.): an option set that provides standard
-  options for unloading data.
-
   This constructor also sets the default values of the attributes that
   are unique to the program.
 
@@ -130,6 +134,8 @@ psr4th::psr4th ()
   cross_covariance = false;
 
   total_baseline = each_baseline = report_baseline = false;
+  extract_eigenvectors = false;
+  smooth_eigenvectors = false;
 }
 
 
@@ -168,6 +174,12 @@ void psr4th::add_options (CommandLine::Menu& menu)
   arg = menu.add (report_baseline, "r");
   arg->set_help ("report baselines in psr4th_baselines.txt");
 
+  arg = menu.add (extract_eigenvectors, "e");
+  arg->set_help ("extract eigenvectors from psr4th.fits");
+
+  arg = menu.add (smooth_eigenvectors, "smooth");
+  arg->set_help ("smooth eigenvectors by maximizing projections");
+
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
   // arg->set_help ("set the source name to 'string'");
@@ -185,6 +197,12 @@ void psr4th::process (Pulsar::Archive* archive)
   unsigned nsub = archive->get_nsubint();
   unsigned nbin = archive->get_nbin();
   unsigned nchan = archive->get_nchan();
+
+  if (extract_eigenvectors)
+  {
+    output_eigenvectors (archive);
+    return;
+  }
 
   archive->convert_state( Signal::Stokes );
 
@@ -313,6 +331,9 @@ void dump (Pulsar::MoreProfiles* hist)
 
 void psr4th::finalize()
 {
+  if (extract_eigenvectors)
+    return;
+
   unsigned nbin = output->get_nbin();
   unsigned nchan = output->get_nchan();
   unsigned npol = 4;
@@ -363,7 +384,7 @@ void psr4th::finalize()
       
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
+    // Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
 
     Reference::To<Pulsar::MoreProfiles> more = new Pulsar::FourthMoments;
     more->resize( nmoment, nbin );
@@ -392,10 +413,10 @@ void psr4th::finalize()
     {
       Matrix<4,4,double> covar;
       covar = results[ichan].get_covariance (ibin);
-      
+
+#if 0 
       Stokes<double> mean = results[ichan].get_mean (ibin);
 
-#if 0
       /*
 	Normalize the covariance matrix so that it represents the
 	covariances of the mean Stokes parameters (as opposed to the
@@ -563,6 +584,43 @@ void psr4th::result::histogram_el (const Pulsar::PolnProfile* profile)
 
     Pulsar::Profile* of = hist_el->at( sin(epsilon[ibin].get_value()*M_PI/90) );
     of->get_amps()[ibin] += P[ibin];
+  }
+}
+
+void psr4th::output_eigenvectors (const Pulsar::Archive* data)
+{
+  vector< Reference::To<Pulsar::Archive> > eigen (3);
+  for (unsigned i=0; i<3; i++)
+    eigen[i] = data->clone();
+
+  for (unsigned isubint=0; isubint < data->get_nsubint(); isubint++)
+  {
+    Reference::To<const Integration> subint = data->get_Integration (isubint);
+
+    vector< Reference::To<Integration> > subeigen (3);
+    for (unsigned i=0; i<3; i++)
+      subeigen[i] = eigen[i]->get_Integration (isubint);
+
+    for (unsigned ichan=0; ichan < data->get_nchan(); ichan++)
+    {
+      Reference::To<const PolnProfile> profile;
+      profile = subint->new_PolnProfile (ichan);
+      Reference::To<FourthMomentStats> stats = new FourthMomentStats(profile);
+
+      vector< Reference::To<PolnProfile> > peigen (3);
+      for (unsigned i=0; i<3; i++)
+        peigen[i] = subeigen[i]->new_PolnProfile (ichan);
+
+      stats->eigen (peigen[0], peigen[1], peigen[2]);
+      if (smooth_eigenvectors)
+        stats->smooth_eigenvectors (peigen[0], peigen[1], peigen[2]);
+    }
+  }
+
+  for (unsigned i=0; i<3; i++)
+  {
+    string filename = "psr4th_e" + tostring(i+1) + ".ar";
+    eigen[i]->unload (filename);
   }
 }
 

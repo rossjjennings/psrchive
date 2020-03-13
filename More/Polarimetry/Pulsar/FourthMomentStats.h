@@ -31,7 +31,7 @@ namespace Pulsar {
     ~FourthMomentStats();
 
     //! Worker function corrects bias in output of psr4th
-    static void debias (Archive*);
+    static void debias (Archive*, bool xcovar = true);
     
     void set_profile (const PolnProfile* _profile);
     void set_bandwidth (double bw);
@@ -45,6 +45,8 @@ namespace Pulsar {
 
     //! Get the eigen polarization profiles
     void eigen (PolnProfile* = 0, PolnProfile* = 0, PolnProfile* = 0);
+
+    void smooth_eigenvectors (PolnProfile*, PolnProfile*, PolnProfile*);
 
     //! Get the eigen values of the polarization vector space
     const Profile* get_eigen_value (unsigned k);
@@ -95,7 +97,8 @@ namespace Pulsar {
     //! The variance of the baseline for each moment
     mutable std::vector< Estimate<double> > moment_variance;
 
-
+    void smooth (unsigned poln, unsigned ibin, Stokes<double>& match,
+                 std::vector<PolnProfile*>& eigen_vector);
 
   };
 

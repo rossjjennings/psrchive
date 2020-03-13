@@ -19,6 +19,7 @@
 #include "Minkowski.h"
 
 using namespace std;
+using namespace Pulsar;
 
 // #define _DEBUG
 
@@ -197,7 +198,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 	k++;
       }
 
-  PolnProfile* v[3] = { v1, v2, v3 };
+  PolnProfile* eigen_vector[3] = { v1, v2, v3 };
 
   const unsigned nbin = profile->get_nbin();
 
@@ -207,8 +208,8 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   for (unsigned i=0; i<3; i++)
   {
-    if (v[i])
-      v[i]->resize( nbin );
+    if (eigen_vector[i])
+      eigen_vector[i]->resize( nbin );
 
     eigen_value[i] = new Profile (nbin);
     regression_coefficient[i] = new Profile (nbin);
@@ -275,6 +276,24 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
       eigen_value[i]->get_amps()[ibin] = pvar[order[i]];
       natural_covariance[i]->get_amps()[ibin] = fabs(natural[order[i]]);
       regression_coefficient[i]->get_amps()[ibin] = regression[i];
+
+      if (eigen_vector[i])
+      {
+        // cerr << "extracting eigen vectors ibin=" << ibin;
+
+        // total intensity equal to eigen value
+        eigen_vector[i]->get_Profile(0)->get_amps()[ibin] = pvar[order[i]];
+        // cerr << " " << (void*) eigen_vector[i]->get_Profile(0);
+
+        for (unsigned j=0; j < 3; j++)
+        {
+          eigen_vector[i]->get_Profile(j+1)->get_amps()[ibin] 
+            = pvar[order[i]] * peigen[order[i]][j];
+          // cerr << " " << (void*) eigen_vector[i]->get_Profile(j+1);
+        }
+
+        // cerr << endl;
+      }
     }
 
     Vector<3,double> primary = peigen[ order[0] ];
@@ -358,6 +377,14 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   }
 
+  // remove the off-pulse baseline from the eigenvalue profiles
+  for (unsigned i=0; i < 3; i++)
+  {
+    double mean, variance;
+    baseline->stats (eigen_value[i], &mean, &variance);
+    eigen_value[i]->offset (-mean);
+  }
+
   double off_pulse_mean;
   double off_pulse_var;
   
@@ -389,6 +416,80 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
 }
 
+void Pulsar::FourthMomentStats::smooth_eigenvectors (PolnProfile* v1, 
+                                                     PolnProfile* v2,
+                                                     PolnProfile* v3)
+{
+  vector<PolnProfile*> eigen_vector (3);
+  eigen_vector[0] = v1;
+  eigen_vector[1] = v2;
+  eigen_vector[2] = v3;
+
+  // start working away from the peak in the mean polarization
+  Reference::To<Profile> p = new Profile;
+  profile->get_polarized (p);
+
+  unsigned maxbin = p->find_max_bin ();
+  unsigned nbin = p->get_nbin();
+
+  const PolnProfile* pmatch = profile;
+
+  for (unsigned ipol=0; ipol<3; ipol++)
+  { 
+    if (ipol > 0)
+      pmatch = eigen_vector[ipol];
+
+    Stokes<double> match = pmatch->get_Stokes(maxbin);
+
+    for (unsigned ibin=maxbin; ibin < nbin; ibin++)
+      smooth (ipol, ibin, match, eigen_vector);
+
+    match = pmatch->get_Stokes(maxbin);
+
+    for (int ibin=maxbin; ibin >= 0; ibin--)
+      smooth (ipol, ibin, match, eigen_vector);
+  }
+}
+
+void FourthMomentStats::smooth (unsigned poln, unsigned ibin,
+                                Stokes<double>& match,
+                                vector<PolnProfile*>& eigen_vector)
+{
+  double dotmax = 0;
+  unsigned imax = 0;
+
+  for (unsigned i=poln; i<3; i++)
+  {
+    Stokes<double> test = eigen_vector[i]->get_Stokes(ibin);
+    double dot = test.get_vector() * match.get_vector();
+#if 0
+    double norm = test.abs_vect() * match.abs_vect();
+    dot /= norm;
+#endif
+    if (fabs(dot) > fabs(dotmax))
+    {
+      dotmax = dot;
+      imax = i;
+    }
+  }
+
+  cerr << "ibin=" << ibin << "imax=" << imax << " dotmax=" << dotmax << endl;
+
+  Stokes<double> stokes = eigen_vector[imax]->get_Stokes(ibin);
+
+  if (dotmax < 0)
+    stokes.set_vector( -stokes.get_vector() );
+
+  if (imax != poln)
+  {
+    Stokes<double> stokes_poln = eigen_vector[poln]->get_Stokes(ibin);
+    eigen_vector[imax]->set_Stokes(ibin,stokes_poln);
+  }
+
+  eigen_vector[poln]->set_Stokes(ibin,stokes);
+
+  match = stokes;
+}
 
 
 //! Get the Stokes parameters of the specified phase bin
@@ -491,7 +592,7 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
   }
 }
 
-void Pulsar::FourthMomentStats::debias (Archive* data) try
+void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
 {
   unsigned nsubint = data->get_nsubint();
   unsigned nchan = data->get_nchan();
@@ -619,17 +720,28 @@ void Pulsar::FourthMomentStats::debias (Archive* data) try
 	    iprof ++;
 	  }
 
+      double max_ratio = 0;
+
       for (unsigned ibin = 0; ibin < nbin; ibin++)
       {
 	Stokes<double> stokes = profile->get_Stokes(ibin);
 	stokes -= off_pulse_mean;
 
-	// Equation 43 of van Straten & Tiburzi (2017)
-	Matrix<4,4,double> bias = Minkowski::outer(stokes, off_pulse_mean);
-	bias += transpose (bias);
+	Matrix<4,4,double> bias = 0;
 
-	// third term on rhs of Equation 42 of van Straten & Tiburzi (2017)
-	bias /= nsample;
+        if (xcovar)
+        {
+          // Equation 43 of van Straten & Tiburzi (2017)
+          bias = Minkowski::outer(stokes, off_pulse_mean);
+	  bias += transpose (bias);
+
+	  // third term on rhs of Equation 42 of van Straten & Tiburzi (2017)
+	  bias /= nsample;
+
+          double ratio = normsq(bias) / normsq(off);
+          if (ratio > max_ratio)
+            max_ratio = ratio;
+        }
 
 	// second term on rhs of Equation 42
 	bias += off;
@@ -645,6 +757,9 @@ void Pulsar::FourthMomentStats::debias (Archive* data) try
 	    iprof ++;
 	  }
       }
+
+      cerr << "relative significance of xcovar=" << sqrt(max_ratio) << endl;
+
     }
   }
 }
