@@ -838,7 +838,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
 	submit_calibrator_data( measurements, data );
 
-        integrate_calibrator_data( solution->get_response(ichan), data );
+        if (solution->get_transformation_valid (ichan) )
+          integrate_calibrator_data( solution->get_response(ichan), data );
 
       }
       catch (Error& error)
