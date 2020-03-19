@@ -142,7 +142,8 @@ Calibration::FluxCalManager::create_SourceEstimate (Signal::Source source_type)
 
   source_estimate->create_source( composite->get_equation() );
 
-  if (subtract_off_from_on && source_type == Signal::FluxCalOff)
+  if (subtract_off_from_on && source_type == Signal::FluxCalOff
+      && ! standard_candle->has_baseline ())
     standard_candle->set_baseline (source_estimate);
 
   // set the initial guess

@@ -29,7 +29,10 @@ namespace Calibration
 
     //! Set the baseline to which the delta is added
     void set_baseline (SourceEstimate*);
-    
+
+    //! Return true if baseline is set
+    bool has_baseline () const;
+
   protected:
 
     Reference::To< MEAL::SumRule<MEAL::Complex2> > total;
