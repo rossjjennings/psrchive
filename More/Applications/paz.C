@@ -15,7 +15,6 @@
 #include "Pulsar/RemoveVariableBaseline.h"
 
 #include "Pulsar/RFIMitigation.h"
-#include "Pulsar/ChannelZapModulation.h"
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
 
@@ -138,8 +137,6 @@ unsigned median_zap_window = 0;
 
 //Update to remove variable baseline MJK2013, adapted from Patrick Weltevrede
 bool removeVariableBaseline = false;
-
-Pulsar::ChannelZapModulation * modulation_zapper = 0;
 
 int pol_to_delete = -1;
 
@@ -583,12 +580,6 @@ void paz::process (Pulsar::Archive* arch)
   {
     cout << "Using median smoothed difference zapper" << endl;
     (*median_zapper) (arch);
-  }
-
-  if (modulation_zapper)
-  {
-    cout << "Using modulation index zapper" << endl;
-    (*modulation_zapper) (arch);
   }
 
   if (simple)
