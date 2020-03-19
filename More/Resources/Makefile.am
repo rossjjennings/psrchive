@@ -13,7 +13,5 @@ nobase_include_HEADERS = \
 #############################################################################
 #
 
-include $(top_srcdir)/config/Makefile.local
-
-AM_CPPFLAGS = -I$(top_builddir)/local_include
+include $(top_srcdir)/config/Makefile.include
 
