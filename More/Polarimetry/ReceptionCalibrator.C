@@ -420,16 +420,9 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
     }
   }
 
+  fluxcal_observation_added.resize( nchan );
   for (unsigned ichan=0; ichan<nchan; ichan++)
-  {
-    if (!model[ichan]->get_valid())
-      fluxcal[ichan] = 0;
-
-    if (!fluxcal[ichan])
-      continue;
-
-    fluxcal[ichan]->add_observation (source);
-  }
+    fluxcal_observation_added[ichan] = false;
 }
 
 void ReceptionCalibrator::setup_calibrators ()
@@ -532,7 +525,14 @@ void ReceptionCalibrator::submit_calibrator_data
   }
 
   if (fluxcal[data.ichan])
+  {
+    if (!fluxcal_observation_added[data.ichan])
+      fluxcal[data.ichan]->add_observation (data.source);
+
+    fluxcal_observation_added[data.ichan] = true;
+
     fluxcal[data.ichan]->submit (measurements, data);
+  }
 }
 
 

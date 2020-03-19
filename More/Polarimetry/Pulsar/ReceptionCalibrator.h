@@ -183,7 +183,7 @@ namespace Pulsar
 
     //! Prepare the calibrator estimate
     void prepare_calibrator_estimate (Signal::Source);
-
+    std::vector<bool> fluxcal_observation_added;
 
     void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 				 const Calibration::SourceObservation&);
