@@ -1215,7 +1215,8 @@ int actual_main (int argc, char *argv[]) try
         archive->rotate_phase( shift.get_value() );
       }
 
-      else if ( abs_shift > 1.0 / phase_std->get_nbin() &&
+      else if ( alignment_threshold &&
+                abs_shift > 1.0 / phase_std->get_nbin() &&
                 abs_shift > alignment_threshold * shift.get_error() )
       {
 
@@ -1239,7 +1240,7 @@ int actual_main (int argc, char *argv[]) try
       continue;
     }
 
-    if (alignment_threshold && !phase_std)
+    if ((alignment_threshold || auto_alignment_threshold) && !phase_std)
     {
       cerr << "pcm: creating phase reference" << endl;
 

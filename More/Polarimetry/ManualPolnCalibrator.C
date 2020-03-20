@@ -55,7 +55,7 @@ void Pulsar::ManualPolnCalibrator::load (const string& ascii_model_filename)
   if (!input)
   {
     throw Error (FailedSys, "Pulsar::ManualPolnCalibrator::load",
-                 "ifstrean (" + ascii_model_filename + ")");
+                 "ifstream (" + ascii_model_filename + ")");
   }
   string line;
   //Entry entry;

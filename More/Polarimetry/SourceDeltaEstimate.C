@@ -25,6 +25,16 @@ void Calibration::SourceDeltaEstimate::create_source (ReceptionModel* equation)
   equation->add_input( total );
 }
 
+bool Calibration::SourceDeltaEstimate::has_baseline () const
+{
+  return baseline;
+}
+
+bool Calibration::SourceDeltaEstimate::has_total () const
+{
+  return total;
+}
+
 //! Set the baseline to which the delta is added
 void Calibration::SourceDeltaEstimate::set_baseline (SourceEstimate* base) try
 {

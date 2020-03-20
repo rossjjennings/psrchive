@@ -145,8 +145,8 @@ void Mount::build () const
     basis(1) pointing East
     basis(2) pointing toward centre of earth
 
-    rotate about North by right ascension 
-    then rotate about East by negative declination
+    rotate about North by right ascension then
+    rotate about East by negative declination
   */
 
   // Basis passing through source in celestial reference frame
