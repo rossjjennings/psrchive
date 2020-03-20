@@ -12,6 +12,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CalibratorStokes.h"
 
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
@@ -307,16 +308,6 @@ string Pulsar::ZapInterpreter::cal (const string& args)
     return response (Good);
   }
 
-  /* If arguments are specified, each is interpreted as an expression
-    to be evaluated using the
-    PolnCalibratorExtension::Transformation::Interface class.  This
-    could also be extended to FluxCalibratorExtension */
-
-  Reference::To<PolnCalibratorExtension> ext;
-  ext = get()->get<PolnCalibratorExtension>();
-  if (!ext)
-    return response (Fail, "archive does not contain PolnCalibratorExtension");
-
   if (arguments[0] == "robust")
   {
     if (!robust_estimate_zapper)
@@ -324,12 +315,28 @@ string Pulsar::ZapInterpreter::cal (const string& args)
 
     if (arguments.size() == 1)
     {
-      for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
+      Reference::To<PolnCalibratorExtension> ext;
+      ext = get()->get<PolnCalibratorExtension>();
+      if (ext)
+       for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
         robust_estimate_zapper->excise (iparam, ext.get(), 
                                         &PolnCalibratorExtension::get_nchan,
                                         &PolnCalibratorExtension::get_Estimate,
                                         &PolnCalibratorExtension::set_weight);
-      return response (Good);
+
+      Reference::To<CalibratorStokes> cs;
+      cs = get()->get<CalibratorStokes>();
+      if (cs)
+       for (unsigned iparam=0; iparam < cs->get_nparam(); iparam++)
+        robust_estimate_zapper->excise (iparam, cs.get(), 
+                                        &CalibratorStokes::get_nchan,
+                                        &CalibratorStokes::get_Estimate,
+                                        &CalibratorStokes::set_valid);
+
+      if (!ext && !cs)
+        return response (Fail, "archive contains no calibrator extensions");
+      else
+        return response (Good);
     }
 
     // parse any configuration options
@@ -341,6 +348,16 @@ string Pulsar::ZapInterpreter::cal (const string& args)
 
     return response (Good, retval);
   }
+
+  /* If arguments are specified, each is interpreted as an expression
+     to be evaluated using the
+     PolnCalibratorExtension::Transformation::Interface class.  This
+     could also be extended to FluxCalibratorExtension */
+
+  Reference::To<PolnCalibratorExtension> ext;
+  ext = get()->get<PolnCalibratorExtension>();
+  if (!ext)
+    return response (Fail, "archive does not contain PolnCalibratorExtension");
 
   for (unsigned ichan=0; ichan<ext->get_nchan(); ichan++)
   {
