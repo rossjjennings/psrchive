@@ -95,6 +95,12 @@ CalibratorStokes::get_stokes (unsigned ichan) const
   return stokes[ichan];
 }
 
+Estimate<float>
+CalibratorStokes::get_Estimate ( unsigned iparam, unsigned ichan ) const
+{
+  return get_stokes(ichan)[iparam+1];
+}
+
 void CalibratorStokes::range_check (unsigned ichan, 
 					    const char* method) const
 {

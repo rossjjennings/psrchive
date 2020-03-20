@@ -66,6 +66,9 @@ namespace Pulsar {
     //! Get the Stokes parameters of the specified frequency channel
     Stokes< Estimate<float> > get_stokes (unsigned ichan) const;
 
+    unsigned get_nparam () const { return 3; /* Stokes Q,U,V */ }
+    Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
+
   protected:
 
     //! The Stokes parameters for each frequency channel
