@@ -33,6 +33,9 @@ namespace Calibration
     //! Return true if baseline is set
     bool has_baseline () const;
 
+    //! Return true if total is set
+    bool has_total () const;
+
   protected:
 
     Reference::To< MEAL::SumRule<MEAL::Complex2> > total;

@@ -142,9 +142,14 @@ Calibration::FluxCalManager::create_SourceEstimate (Signal::Source source_type)
 
   source_estimate->create_source( composite->get_equation() );
 
-  if (subtract_off_from_on && source_type == Signal::FluxCalOff
-      && ! standard_candle->has_baseline ())
+  if (subtract_off_from_on && source_type == Signal::FluxCalOff)
+  {
+    if (!standard_candle->has_total())
+      throw Error (InvalidState, "FluxCalManager::create_SourceEstimate", 
+                   "FluxCal-Off with no matching FluxCal-On");
+
     standard_candle->set_baseline (source_estimate);
+  }
 
   // set the initial guess
   Stokes<double> flux_cal_state (1,0,0,0);
