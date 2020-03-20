@@ -145,15 +145,16 @@ void Mount::build () const
     basis(1) pointing East
     basis(2) pointing toward centre of earth
 
-    rotate about North by right ascension then rotation about East by negative declination
+    rotate about North by right ascension 
+    then rotate about East by negative declination
   */
 
-  // Basis pointing to source in celestial reference frame
+  // Basis passing through source in celestial reference frame
   source_basis =
     transpose( rotation (Vector<3,double>::basis(0), right_ascension) *
 	       rotation (Vector<3,double>::basis(1), -declination) );
 
-  // Basis pointing to observatory in celestial reference frame
+  // Basis passing through observatory in celestial reference frame
   observatory_basis = 
     transpose( rotation (Vector<3,double>::basis(0), lst) *
 	       rotation (Vector<3,double>::basis(1), -latitude) );
