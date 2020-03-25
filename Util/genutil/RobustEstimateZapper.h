@@ -11,6 +11,8 @@
 #ifndef __RobustEstimateZapper_h
 #define __RobustEstimateZapper_h
 
+// #define _DEBUG 1
+
 #include "TextInterface.h"
 #include "Estimate.h"
 
@@ -23,7 +25,8 @@ private:
   bool error;
   bool logarithmic;
   bool scale;
-  float threshold;
+  float threshold_min;
+  float threshold_max;
 
 public:
 
@@ -42,8 +45,16 @@ public:
   void set_scale (bool flag) { scale = flag; }
 
   //! Set threshold used to identify outliers (multiple of madm)
-  float get_threshold () const { return threshold; }
-  void set_threshold (float val) { threshold = val; }
+  float get_cutoff_threshold () const { return threshold_max; }
+  void set_cutoff_threshold (float val) { threshold_max = threshold_min = val; }
+
+  //! Set threshold used to identify outliers (multiple of madm)
+  float get_cutoff_threshold_min () const { return threshold_min; }
+  void set_cutoff_threshold_min (float val) { threshold_min = val; }
+
+  //! Set threshold used to identify outliers (multiple of madm)
+  float get_cutoff_threshold_max () const { return threshold_max; }
+  void set_cutoff_threshold_max (float val) { threshold_max = val; }
 
   //! Return a text interface that can be used to access this instance
   TextInterface::Parser* get_interface();
@@ -117,17 +128,39 @@ public:
 
     unsigned excised = 0;
 
+    double max_extreme = median + threshold_max * madm;
+    double min_extreme = median - threshold_min * madm;
+
     for (unsigned ipt=0; ipt<npt; ipt++)
     {
       Estimate<float> val = (container->*get)(iparam, ipt);
       if (val.var == 0.0)
         continue;
 
-      if (get_value(val) > median + threshold * madm)
+      double test = get_value(val);
+
+      if (threshold_max && test > max_extreme)
       {
+#if _DEBUG
+    std::cerr << "RobustEstimateZapper::excise zapping >max iparam=" << iparam
+              << " ipt=" << ipt << std::endl;
+#endif
+
         excised ++;
         (container->*valid)(ipt, false);
       }
+
+      if (threshold_min && test < min_extreme)
+      {
+#if _DEBUG
+    std::cerr << "RobustEstimateZapper::excise zapping <min iparam=" << iparam
+              << " ipt=" << ipt << std::endl;
+#endif
+
+        excised ++;
+        (container->*valid)(ipt, false);
+      }
+
     }
 
 #if _DEBUG
