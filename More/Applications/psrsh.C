@@ -52,6 +52,12 @@ protected:
   //! The interpreter used to parse commands
   Reference::To<Pulsar::Interpreter> interpreter;
 
+  //! Convenience interface to interpreter
+  Pulsar::Interpreter* get_interpreter (bool refresh = false);
+
+  //! Create a new Interpreter for each input Archive
+  bool refresh_foreach_archive;
+
   //! Load data from filenames provided as arguments
   bool load_files;
 
@@ -75,10 +81,9 @@ psrsh::psrsh ()
   version = "$Id: psrsh.C,v 1.23 2011/01/12 04:13:18 straten Exp $";
 
   load_files = true;
-  
+  refresh_foreach_archive = true;
+ 
   add( new Pulsar::UnloadOptions );
-
-  interpreter = standard_shell();
 }
 
 void psrsh::add_options (CommandLine::Menu& menu)
@@ -118,25 +123,34 @@ void psrsh::run ()
     if (load_files)
       Application::run ();
     else
-      interpreter->script( script_lines );
+      get_interpreter()->script( script_lines );
   }
   else
   {
     // no arguments: interactive mode
-    interpreter->set_reply( true );
-    interpreter->standard_input ("psrsh");
+    get_interpreter()->set_reply( true );
+    get_interpreter()->standard_input ("psrsh");
   }
 }
 
 void psrsh::process (Pulsar::Archive* archive)
 {
-  interpreter->set( archive );
-  interpreter->script( script_lines );
-  processed = interpreter->get ();
+  get_interpreter(refresh_foreach_archive)->set( archive );
+  get_interpreter()->script( script_lines );
+  processed = get_interpreter()->get ();
 }
 
 void psrsh::interpreter_help (const string& cmd)
 {
-  cout << endl << interpreter->help (cmd);
+  cout << endl << get_interpreter()->help (cmd);
   exit (0);
 }
+
+Pulsar::Interpreter* psrsh::get_interpreter (bool refresh)
+{
+  if (!interpreter || refresh)
+    interpreter = standard_shell ();
+
+  return interpreter;
+}
+

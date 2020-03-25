@@ -129,6 +129,9 @@ public:
   //! Adds to the pre-processing options for a specific plot
   void specific_script (std::string job);
 
+  //! Provide access to custom interpreter
+  Interpreter* get_interpreter ();
+
 private:
 
   Reference::To<psrplot> program;
@@ -138,7 +141,13 @@ private:
 SpecificPreprocessingOptions::SpecificPreprocessingOptions (psrplot* p)
 {
   program = p;
-  get_interpreter()->allow_infinite_frequency = true;
+}
+
+Pulsar::Interpreter* SpecificPreprocessingOptions::get_interpreter ()
+{
+  Pulsar::Interpreter* shell = StandardOptions::get_interpreter ();
+  shell->allow_infinite_frequency = true;
+  return shell;
 }
 
 void SpecificPreprocessingOptions::add_job (const std::string& arg)

@@ -41,7 +41,7 @@ namespace Pulsar {
     virtual void add_default_job (const std::string& job);
 
     //! Provide access to the interpreter
-    Interpreter* get_interpreter ();
+    virtual Interpreter* get_interpreter ();
 
   private:
 

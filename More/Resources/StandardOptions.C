@@ -5,14 +5,14 @@
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/Archive.h"
 
 #include "strutil.h"
 #include "separate.h"
+
+using namespace std;
 
 Pulsar::StandardOptions::StandardOptions ()
 {
@@ -57,8 +57,7 @@ void Pulsar::StandardOptions::process (Archive* archive)
   if (jobs.size() == 0)
     return;
 
-  if (!interpreter)
-    interpreter = standard_shell();
+  interpreter = get_interpreter();
 
   if (application && application->get_verbose())
     cerr << application->get_name() << ": interpreter processing "
@@ -79,8 +78,6 @@ Pulsar::Archive* Pulsar::StandardOptions::result ()
 //! Provide access to the interpreter
 Pulsar::Interpreter* Pulsar::StandardOptions::get_interpreter ()
 {
-  if (!interpreter)
-    interpreter = standard_shell();
-
-  return interpreter;
+  return standard_shell();
 }
+
