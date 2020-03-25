@@ -103,9 +103,19 @@ protected:
 
   // plot the result
   bool plot_result;
+
+  // plot the initial guess before fitting
+  bool plot_guess;
+  
   void set_plot_result ()
   {
     plot_result = true; 
+    plot.set_open_device (true);
+  }
+
+  void set_plot_guess ()
+  {
+    plot_guess = true; 
     plot.set_open_device (true);
   }
 
@@ -114,6 +124,9 @@ protected:
 
   void set_plot_options(const std::string& arg);
 
+  // Plot data with model
+  void plot_data (Pulsar::Archive* data, MEAL::RotatingVectorModel* model);
+  
   // Extra config options for the profile plot
   vector<string> plot_config;
 
@@ -190,6 +203,17 @@ int main (int argc, char** argv)
   return program.main (argc, argv);
 }
 
+class CustomOptions : public Pulsar::StandardOptions
+{
+ public:
+  Pulsar::Interpreter* get_interpreter ()
+  {
+    Pulsar::Interpreter* shell = Pulsar::StandardOptions::get_interpreter();
+    shell->allow_infinite_frequency = true;
+    return shell;
+  }
+};
+
 psrmodel::psrmodel () :
   Pulsar::Application ("psrmodel", "pulsar modeling program")
 #if HAVE_PGPLOT
@@ -199,12 +223,12 @@ psrmodel::psrmodel () :
   has_manual = false;
   version = "$Id: psrmodel.C,v 1.13 2010/05/28 21:56:32 straten Exp $";
 
-  Pulsar::StandardOptions* preprocessor = new Pulsar::StandardOptions;
-  preprocessor->get_interpreter()->allow_infinite_frequency = true;
-  add( preprocessor );
+  add( new CustomOptions );
+
 #if HAVE_PGPLOT
   add( &plot );
   plot_result = false;
+  plot_guess = false;
   label_plot = false;
   plot_pa_lines = false;
 #endif
@@ -241,6 +265,9 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 #if HAVE_PGPLOT
   arg = menu.add (this, &psrmodel::set_plot_result, 'd');
   arg->set_help ("plot the resulting model with data");
+
+  arg = menu.add (this, &psrmodel::set_plot_guess, 'G');
+  arg->set_help ("plot the initial guess with data");
 
   arg = menu.add (label_plot, 'l');
   arg->set_help ("label plot with best-fit parameter values");
@@ -435,23 +462,10 @@ void psrmodel::process (Pulsar::Archive* data)
       "phi_0 " << state(RVM->magnetic_meridian) << " deg"
 	 << endl;
 
-#if HAVE_PGPLOT && _DEBUG
-  if (plot_result)
+#if HAVE_PGPLOT
+  if (plot_guess)
   {
-    cerr << "Plotting initial guess" << endl;
-    StokesCylindrical plotter;
-
-    AnglePlot* pa = plotter.get_orientation();
-
-    pa->set_threshold( rvmfit->get_threshold() );
-    pa->model.set (rvmfit.get(), &ComplexRVMFit::evaluate);
-    pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
-
-    plotter.get_scale()->set_units( PhaseScale::Degrees );
-    for (unsigned i=0; i<plot_config.size(); i++)
-      plotter.configure(plot_config[i]);
-    plotter.plot( data );
-
+    plot_data (data, RVM);
     cerr << "Hit <ENTER> to continue" << endl;
     getchar();
   }
@@ -482,64 +496,67 @@ void psrmodel::process (Pulsar::Archive* data)
 
 #if HAVE_PGPLOT
   if (plot_result)
-  {
-    StokesCylindrical plotter;
-
-    AnglePlot* pa = plotter.get_orientation();
-
-    pa->set_threshold( rvmfit->get_threshold() );
-    pa->model.set (rvmfit.get(), &ComplexRVMFit::evaluate);
-    pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
-
-    plotter.get_scale()->set_units( Phase::Degrees );
-    for (unsigned i=0; i<plot_config.size(); i++)
-      plotter.configure(plot_config[i]);
-
-    if (label_plot) 
-    {
-      StokesPlot* flux = plotter.get_flux();
-      char label[256];
-      sprintf(label, 
-          "\\\\ga=%.1f\xB0\n"
-          "\\\\g%c=%.1f\xB0\n"
-          "\\\\gf=%.1f\xB0\n"
-          "\\\\gq=%.1f\xB0", 
-          deg*RVM->magnetic_axis->get_value().get_value(),
-          RVM->impact ? 'b' : 'z', 
-          RVM->impact ? 
-            deg*RVM->impact->get_value().get_value() :
-            deg*RVM->line_of_sight->get_value().get_value(),
-          deg*RVM->magnetic_meridian->get_value().get_value(),
-          deg*RVM->reference_position_angle->get_value().get_value());
-      flux->get_frame()->get_label_below()->set_right(label);
-    }
-
-    if (plot_pa_lines)
-    {
-      pa->add_annotation(new line(line::Horizontal,
-            deg*RVM->reference_position_angle->get_value().get_value(),2,1));
-      pa->add_annotation(new line(line::Vertical,
-            deg*RVM->magnetic_meridian->get_value().get_value(),2,1));
-    }
-
-    if (proper_motion.length()) 
-    {
-      size_t ii, pm_ci = 2;
-      if ((ii=proper_motion.find(':')) != string::npos) 
-        pm_ci = fromstring<int>(proper_motion.substr(ii+1));
-      Estimate<float> pm;
-      pm = fromstring< Estimate<float> >(proper_motion.substr(0,ii));
-      pa->add_annotation(new line(line::Horizontal,pm.get_value(),1,pm_ci));
-      pa->add_annotation(new err1(180.0,pm.get_value(),pm.get_error(),pm_ci));
-    }
-
-    plotter.plot( data );
-
-  }
+    plot_data (data, RVM);
 #endif
 
 }
 
+#if HAVE_PGPLOT
+
+void psrmodel::plot_data (Pulsar::Archive* data, MEAL::RotatingVectorModel* RVM)
+{
+  StokesCylindrical plotter;
+
+  AnglePlot* pa = plotter.get_orientation();
+
+  pa->set_threshold( rvmfit->get_threshold() );
+  pa->model.set (rvmfit.get(), &ComplexRVMFit::evaluate);
+  pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
+
+  plotter.get_scale()->set_units( Phase::Degrees );
+  for (unsigned i=0; i<plot_config.size(); i++)
+    plotter.configure(plot_config[i]);
+
+  if (label_plot) 
+  {
+    StokesPlot* flux = plotter.get_flux();
+    char label[256];
+    sprintf(label, 
+	    "\\\\ga=%.1f\xB0\n"
+	    "\\\\g%c=%.1f\xB0\n"
+	    "\\\\gf=%.1f\xB0\n"
+	    "\\\\gq=%.1f\xB0", 
+	    deg*RVM->magnetic_axis->get_value().get_value(),
+	    RVM->impact ? 'b' : 'z', 
+	    RVM->impact ? 
+            deg*RVM->impact->get_value().get_value() :
+            deg*RVM->line_of_sight->get_value().get_value(),
+	    deg*RVM->magnetic_meridian->get_value().get_value(),
+	    deg*RVM->reference_position_angle->get_value().get_value());
+    flux->get_frame()->get_label_below()->set_right(label);
+  }
+  
+  if (plot_pa_lines)
+  {
+    pa->add_annotation(new line(line::Horizontal,
+				deg*RVM->reference_position_angle->get_value().get_value(),2,1));
+    pa->add_annotation(new line(line::Vertical,
+				deg*RVM->magnetic_meridian->get_value().get_value(),2,1));
+  }
+  
+  if (proper_motion.length()) 
+  {
+    size_t ii, pm_ci = 2;
+    if ((ii=proper_motion.find(':')) != string::npos) 
+      pm_ci = fromstring<int>(proper_motion.substr(ii+1));
+    Estimate<float> pm;
+    pm = fromstring< Estimate<float> >(proper_motion.substr(0,ii));
+    pa->add_annotation(new line(line::Horizontal,pm.get_value(),1,pm_ci));
+    pa->add_annotation(new err1(180.0,pm.get_value(),pm.get_error(),pm_ci));
+  }
+  
+  plotter.plot( data );
+}
 
 void psrmodel::output_residuals ()
 {
@@ -589,3 +606,5 @@ void psrmodel::output_residuals ()
     }
   }
 }
+
+#endif
