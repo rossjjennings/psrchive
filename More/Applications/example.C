@@ -5,14 +5,14 @@
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/UnloadOptions.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+
+using namespace std;
 
 //
 //! An example of an application
@@ -88,7 +88,7 @@ void example::add_options (CommandLine::Menu& menu)
   arg->set_help ("multiply all amplitudes by 'scale'");
 
   // add an option that enables the user to set the source name with -name
-  arg = menu.add (scale, "name", "string");
+  arg = menu.add (name, "name", "string");
   arg->set_help ("set the source name to 'string'");
 }
 
