@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG 1
+
 #include "Pulsar/PlotOptions.h"
 #include "pgutil.h"
 
@@ -15,6 +17,10 @@ using namespace std;
 
 Pulsar::PlotOptions::PlotOptions (bool open)
 {
+#if _DEBUG
+  cerr << "Pulsar::PlotOptions open=" << open << endl;
+#endif
+
   plot_device = "?";
 
   x_npanel = y_npanel = 1;
@@ -77,6 +83,10 @@ void Pulsar::PlotOptions::set_panels (const std::string& arg)
 //! Open the graphics device and configure it
 void Pulsar::PlotOptions::setup ()
 {
+#if _DEBUG
+  cerr << "Pulsar::PlotOptions::setup" << endl;
+#endif
+
   if (!open_device)
     return;
 
@@ -105,6 +115,10 @@ void Pulsar::PlotOptions::setup ()
 
 void Pulsar::PlotOptions::finalize ()
 {
+#if _DEBUG
+  cerr << "Pulsar::PlotOptions::finalize" << endl;
+#endif
+
   if (open_device)
     cpgend();
 }
