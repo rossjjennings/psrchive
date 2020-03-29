@@ -103,7 +103,18 @@ void Pulsar::Integration::add_extension (Extension* ext)
 //! Return a comma-separated list of the short names of all extensions
 std::string Pulsar::Integration::list_extensions () const
 {
-  return "not implemented";
+  string retval;
+
+  unsigned next = get_nextension();
+
+  for (unsigned iext=0; iext<next; iext++)
+  {
+    if (iext>0)
+      retval += ",";
+    retval += get_extension(iext)->get_short_name();
+  }
+
+  return retval;
 }
 
 //! Add or remove extensions with the specified short name
@@ -507,10 +518,19 @@ double Pulsar::Integration::get_effective_dispersion_measure () const try
     dm += get_dispersion_measure ();
 
   if (! get_auxiliary_dispersion_corrected())
-  {    
+  {
+    if (verbose)
+      cerr << "Integration::get_effective_dispersion_measure"
+              " aux dm not corrected" << endl;
+
     const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
     if (aux)
+    {
+      cerr << "Integration::get_effective_dispersion_measure"
+              " aux dm = " << aux->get_dispersion_measure() << endl;
+
       dm += aux->get_dispersion_measure();
+    }
   }
   return dm;
 }
