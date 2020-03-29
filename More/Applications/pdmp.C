@@ -1722,7 +1722,7 @@ void solve_and_plot (Archive* archive,
 	dmError *= 3;
 	freqError *= 3;
 
-	float trf [6] = {(float)(-periodStep_us - periodHalfRange_us) + periodOffset_us, (float)periodStep_us, 0.0, (float)(minDM - 0.5*dmStep), 0.0, (float)dmStep};
+	float trf [6] = {(float)(-periodStep_us - periodHalfRange_us + periodOffset_us), (float)periodStep_us, 0.0, (float)(minDM - 0.5*dmStep), 0.0, (float)dmStep};
 
 	///////////////////////////////////////////
 	// Plot the deltaPeriod vs. DM vs. SNR plot
