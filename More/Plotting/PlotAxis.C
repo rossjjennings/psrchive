@@ -34,3 +34,9 @@ void Pulsar::PlotAxis::rem_opt (char o)
     opt.erase (found, 1);
 }
 
+void Pulsar::PlotAxis::set_label (const std::string& _label, bool overwrite)
+{
+  if (overwrite || label == PlotLabel::unset)
+    label = _label;
+}
+

@@ -30,7 +30,8 @@ namespace Pulsar {
     };
 
     //! Set the label to be drawn on the axis
-    void set_label (const std::string& _label) { label = _label; }
+    void set_label (const std::string& _label, bool overwrite);
+    void set_label (const std::string& _label) { set_label(_label, true); }
     //! Get the label to be drawn on the axis
     std::string get_label () const { return label; }
 
