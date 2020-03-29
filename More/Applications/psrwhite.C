@@ -20,7 +20,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Cholesky>
 #include <Eigen/Eigenvalues> 
-#include <eigen2/unsupported/Eigen/MatrixFunctions>
+#include <unsupported/Eigen/MatrixFunctions>
 
 using namespace std;
 using namespace Pulsar;
@@ -181,7 +181,7 @@ void psrwhite::eigenvalue_decomp()
             {
             for (int j=0;j<col;j++)
               {
-                covariance(i,j) = covar->covariance.at(count); 
+                covariance(i,j) = covar->get_data().at(count); 
                 count ++;
               }    
             }      
