@@ -1,5 +1,8 @@
 %module psrchive
 
+%rename(Archive_Extension) Pulsar::Archive::Extension;
+%rename(Integration_Extension) Pulsar::Integration::Extension;
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include "numpy/noprefix.h"
@@ -132,14 +135,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         }
 }
 %}
-
-// SWIG can't handle nested classes, so ignore them
-%ignore Pulsar::Archive::get_extension(unsigned);
-%ignore Pulsar::Archive::get_extension(unsigned) const;
-%ignore Pulsar::Archive::add_extension(Extension*);
-%ignore Pulsar::Integration::get_extension(unsigned);
-%ignore Pulsar::Integration::get_extension(unsigned) const;
-%ignore Pulsar::Integration::add_extension(Extension*);
 
 %ignore Pulsar::FrontendCorrection::new_Extension() const;
 
