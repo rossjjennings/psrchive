@@ -288,6 +288,16 @@ libGeneral_la_SOURCES += ProfilePCA.C
 endif
 endif
 
+##############################################################################
+#
+# SPLINTER-dependent code
+#
+if HAVE_SPLINTER
+
+libGeneral_la_SOURCES += SplineSmooth.C
+nobase_include_HEADERS += Pulsar/SplineSmooth.h
+
+endif
 #############################################################################
 #
 
