@@ -100,12 +100,6 @@ namespace Pulsar {
     //! Adjustment when computing variance of samples below threshold
     float moment_correction;
 
-    //! Value of lower last returned by get_bounds
-    float last_lower;
-
-    //! Value of upper last returned by get_bounds
-    float last_upper;
-
     //! Last mean computed during get_bounds
     float last_mean;
 

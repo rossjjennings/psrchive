@@ -83,8 +83,8 @@ void Pulsar::GaussianBaseline::get_bounds (PhaseWeight* weight,
 	 << " = " << threshold << " sigma" << endl;
 
   last_mean = mean;
-  last_lower = lower = mean - cutoff;
-  last_upper = upper = mean + cutoff;
+  lower = mean - cutoff;
+  upper = mean + cutoff;
 }
 
 void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight, 
