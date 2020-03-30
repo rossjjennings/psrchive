@@ -12,11 +12,7 @@
 #include "ReferenceAble.h"
 #include "Estimate.h"
 
-#include <bspline.h>
-
 namespace Pulsar {
-
-  class Profile;
 
   //! Base class of penalized splines (p-spline) for smoothing
   /*! Derived classes interface with the SPLINT library */
@@ -31,23 +27,32 @@ namespace Pulsar {
       ~SplineSmooth();
 
       //! Set the smoothing factor
-      void set_alpha (double);
+      void set_alpha (double _alpha) { alpha = _alpha; }
       double get_alpha () const { return alpha; }
 
       //! Get the string that describes the p-spline
-      virtual std::string unload () const = 0;
+      std::string unload () const;
 
       //! Load the string that describes the p-spline
-      virtual void load (const std::string&) = 0;
+      void load (const std::string&);
 
     protected:
+
+      //! evaluate method used by derived types
+      double evaluate (const std::vector<double>& xval);
+
+      //! constructor used by derived types
+      template<typename T>
+      void new_spline (const std::vector<T>& data_x,
+                       const std::vector< Estimate<double> >& data_y);
+
+    private:
 
       //! Smoothing factor
       double alpha;
 
-      template<typename T>
-      SPLINTER::BSpline make_spline (const std::vector<T>& data_x,
-                           const std::vector< Estimate<double> >& data_y);
+      class Handle;
+      Handle* handle;
 
   };
 
@@ -59,15 +64,6 @@ namespace Pulsar {
                      const std::vector< Estimate<double> >& data_y);
 
       double evaluate (double x);
-
-      //! Get the string that describes the p-spline
-      std::string unload () const;
-
-      //! Load the string that describes the p-spline
-      void load (const std::string&);
-
-    private:
-      SPLINTER::BSpline pspline;
   };
 
   class SplineSmooth2D : public SplineSmooth
@@ -77,18 +73,10 @@ namespace Pulsar {
       void set_data (const std::vector< std::pair<double,double> >& data_x,
                      const std::vector< Estimate<double> >& data_y);
 
-      double evaluate (double x);
-      
-      //! Get the string that describes the p-spline
-      std::string unload () const;
-
-      //! Load the string that describes the p-spline
-      void load (const std::string&);
-
-    private:
-      SPLINTER::BSpline pspline;
+      double evaluate ( const std::pair<double,double>& );
   };
 
 }
 
 #endif
+

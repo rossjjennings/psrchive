@@ -9,11 +9,30 @@
 #include "Error.h"
 
 #include <data_table.h>
+#include <bspline.h>
 #include <bspline_builders.h>
 
 using namespace SPLINTER;
 using namespace Pulsar;
 using namespace std;
+
+class SplineSmooth::Handle
+{
+  public:
+    BSpline spline;
+    Handle (const BSpline& _spline) : spline(_spline) {}
+};
+
+SplineSmooth::SplineSmooth ()
+{
+  handle = 0;
+}
+
+SplineSmooth::~SplineSmooth ()
+{
+  if (handle)
+    delete handle;
+}
 
 double convert (double x) { return x; }
 
@@ -26,8 +45,8 @@ vector<double> convert (const pair<double,double>& x)
 }
 
 template<typename T>
-BSpline SplineSmooth::make_spline (const vector<T>& data_x, 
-                                   const vector< Estimate<double> >& data_y)
+void SplineSmooth::new_spline (const vector<T>& data_x, 
+                               const vector< Estimate<double> >& data_y)
 {
   if (data_x.size() != data_y.size())
     throw Error (InvalidState, "SplineSmooth::make_spline",
@@ -48,19 +67,46 @@ BSpline SplineSmooth::make_spline (const vector<T>& data_x,
   unsigned int degree = 3;  // cubic
   BSpline::Smoothing smoothing = BSpline::Smoothing::PSPLINE;
 
-  return bspline_smoother(samples, degree, smoothing, alpha, weights);
+  if (handle)
+    delete handle;
+
+  handle = new Handle( bspline_smoother(samples, degree, smoothing, alpha, weights) );
 }
 
 void SplineSmooth1D::set_data (const vector< double >& data_x,
                                const vector< Estimate<double> >& data_y)
 {
-  pspline = make_spline (data_x, data_y);
+  new_spline (data_x, data_y);
 }
 
 void SplineSmooth2D::set_data (const vector< std::pair<double,double> >& data_x,
                                const vector< Estimate<double> >& data_y)
 { 
-  pspline = make_spline (data_x, data_y);
+  new_spline (data_x, data_y);
 }
 
+double SplineSmooth1D::evaluate (double x)
+{
+  vector<double> xval (1);
+  xval[0] = x;
+  return SplineSmooth::evaluate (xval);
+}
+
+double SplineSmooth2D::evaluate (const std::pair<double,double>& x)
+{
+  vector<double> xval (2);
+  xval[0] = x.first;
+  xval[1] = x.second;
+
+  return SplineSmooth::evaluate (xval);
+}
+
+double SplineSmooth::evaluate (const vector<double>& xval)
+{
+  if (!handle)
+    throw Error (InvalidState, "SplineSmooth::evaluate", "spline not constructed");
+
+  vector<double> yval = handle->spline.eval (xval);
+  return yval[0];
+}
 
