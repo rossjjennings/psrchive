@@ -6,9 +6,9 @@
  ***************************************************************************/
 
 /*
-   smint - Smooth and interpolate something, where something might be
-         - PolnCalibratorExtension model parameters
-         - CalibratorStokes parameters
+   smint - Smooth and interpolate data, where data might be
+         - MEM/METM model parametersm, including PolnCalibratorExtension
+           and CalibratorStokes parameters
          - Pulsar spectrum (e.g. in each phase bin)
 */
 
@@ -21,12 +21,12 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Profile.h"
 
 #ifdef HAVE_PGPLOT
 #include <cpgplot.h>
 #include "EstimatePlotter.h"
-#include "Pulsar/PlotOptions.h"
 #endif
 
 #ifdef HAVE_SPLINTER
@@ -38,11 +38,13 @@
 #include "MEAL/Polynomial.h"
 #include "MEAL/Axis.h"
 
+#include <fstream>
+
 using namespace Pulsar;
 using namespace std;
 
 //
-//! Smooth and interpolate, mostly as a function of radio frequency
+//! Smooth and interpolate data
 //
 class smint : public Pulsar::Application
 {
@@ -57,17 +59,19 @@ public:
   //! Perform the fit
   void finalize ();
 
+protected:
+
   void fit_polynomial (const vector< double >& data_x,
                        const vector< Estimate<double> >& data_y);
 
+#if HAVE_PGPLOT
   void plot_data (const vector< double >& data_x,
                   const vector< Estimate<double> >& data_y);
 
   void plot_model (MEAL::Axis<double>& argument,
                    MEAL::Scalar* scalar,
                    unsigned npts, double xmin, double xmax);
-
-protected:
+#endif
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -78,15 +82,42 @@ protected:
   unsigned time_order;
   float threshold;
 
+  // a spectrum of estimates observed at a given epoch
   class row
   {
   public:
     MJD epoch;
-    vector<double> freq;
+    vector< double > freq;
     vector< Estimate<double> > data;
   };
 
-  std::vector<row> table;
+  // a set of spectra from an indexed slice of data
+  class set
+  {
+  public:
+    unsigned index;
+    std::vector<row> table;
+  };
+
+  // pulsar profile [ipol][ibin] to be smoothed
+  vector< vector<set> > profile_data;
+
+  // PolnCalibratorExtension [iparam] to be smoothed
+  vector<set> pcal_data;
+
+  // CalibratorStokes [ipol] to be smoothed
+  vector<set> cal_stokes_data;
+
+  // the centre frequency of the data
+  double centre_frequency;
+  vector<double> channel_frequency;
+  string filename;
+
+  // load data from a container into a set::table
+  template<class Container>
+  void load (vector<set>& data, Container* ext, const MJD& epoch);
+
+  void fit (vector<row>& table);
 
 #if HAVE_SPLINTER
 
@@ -95,11 +126,14 @@ protected:
 
   void fit_pspline (const vector<row>& table);
 
+#if HAVE_PGPLOT
   void plot_model (SplineSmooth1D& spline,
                    unsigned npts, double xmin, double xmax);
 
   void plot_model (SplineSmooth2D& spline, double x0,
                    unsigned npts, double xmin, double xmax);
+
+#endif
 
 #endif
 
@@ -115,10 +149,6 @@ smint::smint ()
   : Application ("smint", "smooth and interpolate")
 {
   add( new Pulsar::StandardOptions );
-
-#ifdef HAVE_PGPLOT
-  add( new Pulsar::PlotOptions );
-#endif
 
   freq_order = time_order = 0;
   threshold = 0.001;
@@ -160,42 +190,101 @@ void smint::add_options (CommandLine::Menu& menu)
 
 */
 
+template<class Container>
+void smint::load (vector<set>& data, Container* ext, const MJD& epoch)
+{
+  for (unsigned i=0; i<data.size(); i++)
+  {
+    data[i].table.resize( data[i].table.size() + 1 );
+
+    std::vector< double >& data_x = data[i].table.back().freq;
+    std::vector< Estimate<double> >& data_y = data[i].table.back().data;
+
+    data[i].table.back().epoch = epoch;
+
+    unsigned nchan = ext->get_nchan();
+    unsigned iparam = data[i].index;
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (!ext->get_valid(ichan))
+        continue;
+
+      data_x.push_back( channel_frequency[ichan] );
+      data_y.push_back( ext->get_Estimate (iparam, ichan) );
+    }
+  }
+}
+
 void smint::process (Pulsar::Archive* archive)
 {
   Reference::To< PolnCalibratorExtension > ext;
   ext = archive->get<PolnCalibratorExtension>();
-  if (!ext)
-    throw Error (InvalidState, "smint::process",
-                 "Archive does not contain PolnCalibratorExtension");
-
-  table.resize( table.size() + 1 );
-
-  std::vector< double >& data_x = table.back().freq;
-  std::vector< Estimate<double> >& data_y = table.back().data;
-
-  table.back().epoch = ext->get_epoch();
-
-  unsigned nchan = ext->get_nchan();
-  unsigned iparam = 3;
-
-  double centre_frequency = archive->get_centre_frequency ();
-
-  for (unsigned ichan=0; ichan < nchan; ichan++)
+  if (ext)
   {
-    if (!ext->get_valid(ichan))
-      continue;
+    if (pcal_data.size() == 0)
+    {
+      // smooth the receptor parameters
+      pcal_data.resize (4);
 
-    double freq = ext->get_centre_frequency (ichan);
+      for (unsigned i=0; i<pcal_data.size(); i++)
+        // +3 to ignore the backend (gain and phase)
+        // and smooth only the receptor parameters
+        pcal_data[i].index = i + 3;
 
-    Estimate<double> val = ext->get_Estimate (iparam, ichan);
+      centre_frequency = archive->get_centre_frequency();
+      filename = archive->get_filename();
 
-    data_x.push_back( freq - centre_frequency );
-    data_y.push_back ( val );
+      channel_frequency.resize( ext->get_nchan() );
+      for (unsigned i=0; i<ext->get_nchan(); i++)
+        channel_frequency[i] = ext->get_centre_frequency(i) - centre_frequency;
+    }
+    else
+    {
+      if (archive->get_centre_frequency() != centre_frequency)
+        throw Error (InvalidState, "smint::process", "centre frequency mismatch\n"
+                     "\t" + filename + " freq=" + tostring(centre_frequency) + "\n"
+                     "\t" + archive->get_filename() + " freq=" + tostring(archive->get_centre_frequency()) );
+
+      if (ext->get_nchan() != channel_frequency.size())
+        throw Error (InvalidState, "smint::process", "nchan mismatch\n"
+                     "\t" + filename + " freq=" + tostring(channel_frequency.size()) + "\n"
+                     "\t" + archive->get_filename() + " freq=" + tostring(ext->get_nchan()) );
+
+      for (unsigned i=0; i<ext->get_nchan(); i++)
+        if (channel_frequency[i] != ext->get_centre_frequency(i) - centre_frequency)
+          throw Error (InvalidState, "smint::process", "channel frequency mismatch\n"
+                     "\t" + filename + " freq=" + tostring(centre_frequency+channel_frequency[i]) + "\n"
+                     "\t" + archive->get_filename() + " freq=" + tostring(ext->get_centre_frequency(i)) );
+    }
+
+    MJD epoch = ext->get_epoch();
+
+    load (pcal_data, ext.get(), epoch);
+
+    Reference::To< CalibratorStokes > cal;
+    cal = archive->get<CalibratorStokes>();
+    if (cal)
+    {
+      if (cal_stokes_data.size() == 0)
+      {
+        // smooth Q, U, and V
+        cal_stokes_data.resize (3);
+  
+        for (unsigned i=0; i<pcal_data.size(); i++)
+          cal_stokes_data[i].index = i;
+      }
+    
+      load (cal_stokes_data, cal.get(), epoch);
+    }
   }
 }
 
-void smint::finalize ()
+void smint::fit (vector<row>& table)
 {
+  if (table.size() == 0)
+    throw Error (InvalidState, "smint::fit", "empty table");
+
   if (table.size() == 1)
   {
 #if HAVE_SPLINTER
@@ -217,7 +306,22 @@ void smint::finalize ()
     throw Error (InvalidState, "smint::finalize",
                  "2-D smoothing requires SPLINTER library");
 #endif
-  } 
+  }
+}
+
+void smint::finalize ()
+{
+  for (unsigned i=0; i < pcal_data.size(); i++)
+  {
+    cerr << "smint: fitting PolnCalibrator iparam=" << i << endl;
+    fit (pcal_data[i].table);
+  }
+
+  for (unsigned i=0; i < cal_stokes_data.size(); i++)
+  {
+    cerr << "smint: fitting CalibratorStokes iparam=" << i << endl;
+    fit (cal_stokes_data[i].table);
+  }
 }
 
 #if HAVE_SPLINTER
@@ -227,23 +331,6 @@ void smint::fit_pspline (const vector< double >& data_x, const vector< Estimate<
   SplineSmooth1D spline;
   spline.set_alpha (pspline_alpha);
   spline.set_data (data_x, data_y);
-
-  unsigned npts = 500;
-
-  double xmin = *min_element(data_x.begin(), data_x.end());
-  double xmax = *max_element(data_x.begin(), data_x.end());
-
-  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
-
-#ifdef HAVE_PGPLOT
-
-  cpgpage();
-  plot_data (data_x, data_y);
-
-  cpgsci(2);
-  plot_model (spline, npts, xmin, xmax);
-
-#endif
 }
 
 
@@ -297,6 +384,30 @@ void smint::fit_pspline (const vector<row>& table)
   spline.set_data (data_x, data_y);
 
   cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
+
+  unsigned npts = 200;
+
+  double x1del = (xmax-xmin)/(npts-1);
+  double x0del = diff/(npts-1);
+  double x0min = -0.5*diff;
+
+  ofstream out ("spline.2d");
+  for (unsigned i=0; i<npts; i++)
+  {
+    double x0 = x0min + x0del * double(i);
+
+    for (unsigned j=0; j<npts; j++)
+    {
+      double x1 = xmin + x1del * double(j);
+
+      double y = spline.evaluate ( pair<double,double>(x0,x1) );
+
+      out << x0 << " " << x1 << " " << y << endl;
+    }
+
+    out << endl;
+  }
+
 
 #ifdef HAVE_PGPLOT
   for (unsigned irow = 0; irow < table.size(); irow++)
@@ -413,8 +524,8 @@ void smint::plot_data (const vector< double >& data_x,
 }
 
 void smint::plot_model (MEAL::Axis<double>& argument,
-                 MEAL::Scalar* scalar,
-                 unsigned npts, double xmin, double xmax)
+                        MEAL::Scalar* scalar,
+                        unsigned npts, double xmin, double xmax)
 {
   double xdel = (xmax-xmin)/(npts-1);
 
@@ -431,10 +542,27 @@ void smint::plot_model (MEAL::Axis<double>& argument,
     else
       cpgdraw (x,y);
   }
-
 }
 
 #if HAVE_SPLINTER
+
+#if 0
+
+  // this should be wrapped in a template
+  unsigned npts = 500;
+
+  double xmin = *min_element(data_x.begin(), data_x.end());
+  double xmax = *max_element(data_x.begin(), data_x.end());
+
+  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
+
+  cpgpage();
+  plot_data (data_x, data_y);
+
+  cpgsci(2);
+  plot_model (spline, npts, xmin, xmax);
+
+#endif
 
 void smint::plot_model (SplineSmooth1D& spline,
                         unsigned npts, double xmin, double xmax)
