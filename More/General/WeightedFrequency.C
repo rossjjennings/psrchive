@@ -92,13 +92,16 @@ double Pulsar::WeightedFrequency::operator () (unsigned istart,
       cerr << "Pulsar::WeightedFrequency::get_mean mid=" << result << endl;
   }
 
+  if (Archive::verbose > 2)
+    fprintf (stderr, "WeightedFrequency::operator MHz=%.20lf\n", result);
+
   if (round_to_kHz)
   {
     // Nearest kHz
     result = 1e-3 * double( int(result*1e3) );
 
     if (Archive::verbose > 2)
-      cerr << "Pulsar::WeightedFrequency::get_mean kHz=" << result*1e3 << endl;
+      fprintf (stderr, "WeightedFrequency::operator kHz=%.20lf\n", result*1e3);
   }
 
   return result;

@@ -199,8 +199,15 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 	epoch = model->iphase (desired, &epoch);
   
 	if (Archive::verbose > 2)
+	{
 	  cerr << "TimeIntegrate::transform epoch=" << epoch 
                << " phase=" << model->phase(epoch) << endl;
+
+	  cerr << "TimeIntegrate::transform period"
+	    " old=" << result->get_folding_period() << 
+	    " new=" << period << 
+	    " diff=" << result->get_folding_period() - period << endl;
+	}
 	
 	result->set_folding_period (period);
       }
