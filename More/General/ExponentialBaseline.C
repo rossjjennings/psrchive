@@ -67,8 +67,8 @@ public:
     if (instance)
       set_instance (instance);
 
-    add( &ExponentialBaseline::get_threshold,
-	 &ExponentialBaseline::set_threshold,
+    add( &IterativeBaseline::get_threshold,
+	 &IterativeBaseline::set_threshold,
 	 "threshold", "cutoff threshold used to avoid outliers" );
   }
 

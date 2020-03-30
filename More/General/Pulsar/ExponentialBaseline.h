@@ -23,10 +23,6 @@ namespace Pulsar {
     //! Default constructor
     ExponentialBaseline ();
 
-    //! Set the threshold below which samples are included in the baseline
-    void set_threshold (float sigma);
-    float get_threshold () const { return threshold; }
-
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 
@@ -35,6 +31,9 @@ namespace Pulsar {
 
     //! Return a copy constructed instance of self
     ExponentialBaseline* clone () const;
+
+    //! Set the threshold below which samples are included in the baseline
+    void set_threshold (float sigma);
 
   protected:
 
