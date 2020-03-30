@@ -3,7 +3,22 @@
 #
 # This m4 macro checks availability of the SPLINTER (SPLine INTERpolation)
 # library for multivariate function approximation with splines, written by
-# Bjarne Grimstad and others.
+# Bjarne Grimstad and others.  The psrchive application, smint, requires
+# SPLINTER version 4.0 which, at the time of writing (2020-03-30) is the
+# development version of this library.  After cloning the splinter git
+# repository, run 
+#
+# git checkout develop
+#
+# and then the usual
+#
+# mkdir build
+# cd build
+# cmake ..
+# make
+# make install
+#
+# This m4 macro creates the following variables
 #
 # SPLINTER_CFLAGS - autoconfig variable with flags required for compiling
 # SPLINTER_LIBS   - autoconfig variable with flags required for linking
@@ -11,8 +26,6 @@
 # HAVE_SPLINTER   - pre-processor macro in config.h
 #
 # This macro tries to link a test program, using
-#
-#    -I$SPLINTER/include -L$SPLINTER/lib -ltempo2pred
 #
 # ----------------------------------------------------------
 dnl @synopsis PSR_LIB_SPLINTER
@@ -30,11 +43,11 @@ AC_DEFUN([PSR_LIB_SPLINTER],
     AC_LANG_PUSH(C++)
 
     SWIN_PACKAGE_FIND([splinter],[bspline.h])
-    SWIN_PACKAGE_TRY_COMPILE([splinter],[#include "bspline.h"])
+    SWIN_PACKAGE_TRY_COMPILE([splinter],[#include "bspline_basis.h"])
 
-    SWIN_PACKAGE_FIND([splinter_lib],[libsplinter-3-0.*])
-    SWIN_PACKAGE_TRY_LINK([splinter_lib],[#include "datatable.h"],
-                          [SPLINTER::DataTable samples;],[-lsplinter-3-0])
+    SWIN_PACKAGE_FIND([splinter_lib],[libsplinter-4-0.*])
+    SWIN_PACKAGE_TRY_LINK([splinter_lib],[#include "data_table.h"],
+                          [SPLINTER::DataTable samples;],[-lsplinter-4-0])
 
     AC_LANG_POP(C++)
 
