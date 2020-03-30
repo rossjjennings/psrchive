@@ -5,7 +5,7 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-setenv URL http://www.atnf.csiro.au/people/pulsar/psrcat/downloads
+setenv URL http://www.atnf.csiro.au/research/pulsar/psrcat/downloads
 
 if ( ! -f psrcat.tar.gz ) then
   @download@ ${URL}/psrcat_pkg.tar.gz
