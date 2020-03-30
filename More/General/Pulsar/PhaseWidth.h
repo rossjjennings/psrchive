@@ -12,17 +12,26 @@
 #define __Pulsar_PhaseWidth_h
 
 #include "Pulsar/WidthEstimator.h"
-#include <vector>
+#include "Pulsar/HasBaselineEstimator.h"
+#include "Pulsar/PhaseWeight.h"
 
 namespace Pulsar {
 
   //! Calculates the pulse width in the phase domain
   /*! This default implementation of the width estimator is taken from pdv. */
-  class PhaseWidth : public WidthEstimator
+  class PhaseWidth : public WidthEstimator, public HasBaselineEstimator
   {
+    // stores the estimated uncertainty in pulse width estimate
     Phase::Value error;
-    Phase::Value baseline_duty_cycle;
+
+    // height at which to estimate width
     float fraction_of_maximum;
+
+    // threshold above noise below which algorithm gives up
+    float threshold_above_noise;
+
+    //! The off-pulse baseline mask
+    mutable PhaseWeight baseline;
     
   public:
 
@@ -33,14 +42,6 @@ namespace Pulsar {
     double get_width_turns (const Profile* profile);
 
     Phase::Value get_error () const { return error; }
-
-    //! Set the duty cycle used to search for the off-pulse baseline
-    void set_baseline_duty_cycle (const Phase::Value& w)
-    { baseline_duty_cycle = w; }
-
-    //! Get the baseline_duty_cycle of the smoothing function
-    Phase::Value get_baseline_duty_cycle () const
-    { return baseline_duty_cycle; }
 
     float get_fraction_of_maximum () const { return fraction_of_maximum; }
     void set_fraction_of_maximum (float);
