@@ -11,7 +11,8 @@ EXTRA_DIST = psrhelp
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
-	drifting_subpulses dynamic_spectra psr4th psrtxt2 reslice
+	drifting_subpulses dynamic_spectra psr4th psrtxt2 reslice \
+	smint
 
 pam_SOURCES = pam.C
 
@@ -79,6 +80,9 @@ psr4th_SOURCES = psr4th.C
 psrtxt2_SOURCES = psrtxt2.C
 
 reslice_SOURCES = reslice.C
+
+smint_SOURCES = smint.C
+smint_LDADD = @SPLINTER_LIBS@ $(LDPLOT)
 
 ######################################################################
 #
