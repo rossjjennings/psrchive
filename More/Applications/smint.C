@@ -198,9 +198,11 @@ void smint::finalize ()
 {
   if (table.size() == 1)
   {
+#if HAVE_SPLINTER
     if (pspline_alpha)
       fit_pspline (table.front().freq, table.front().data);
     else
+#endif
       fit_polynomial (table.front().freq, table.front().data);
   }
   else if (table.size() > 1)
@@ -209,9 +211,16 @@ void smint::finalize ()
       throw Error (InvalidState, "smint::finalize",
                    "2-D smoothing with polynomials not implemented");
 
+#if HAVE_SPLINTER
     fit_pspline (table);
+#else
+    throw Error (InvalidState, "smint::finalize",
+                 "2-D smoothing requires SPLINTER library");
+#endif
   } 
 }
+
+#if HAVE_SPLINTER
 
 void smint::fit_pspline (const vector< double >& data_x, const vector< Estimate<double> >& data_y)
 {
@@ -305,6 +314,7 @@ void smint::fit_pspline (const vector<row>& table)
 
 }
 
+#endif // HAVE_SPLINTER
 
 void smint::fit_polynomial (const vector< double >& data_x, const vector< Estimate<double> >& data_y)
 {
@@ -460,8 +470,8 @@ void smint::plot_model (SplineSmooth2D& spline, double x0,
 }
 
 #endif  // HAVE_SPLINTER
-#endif  // HAVE_PGPLOT
 
+#endif  // HAVE_PGPLOT
 
 
 /*!
