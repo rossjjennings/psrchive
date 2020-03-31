@@ -8,10 +8,11 @@ libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
 	GeneratorInterpreter.C Generator_factory.C \
 	ParametersLookup_operator.C toa.C fit.C
 
-bin_PROGRAMS = getHorizon toaio
+bin_PROGRAMS = getHorizon toaio getRiseSet
 
 getHorizon_SOURCES = getHorizon.C
 toaio_SOURCES = toaio.C
+getRiseSet_SOURCES = getRiseSet.C
 
 check_PROGRAMS = test_Parameters_factory test_Predictor_factory test_Predictor
 
@@ -36,5 +37,5 @@ LDADD += $(top_builddir)/Util/tempo/libtempo.la
 
 LDADD += $(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/third/libthird.la @FLIBS@
+	$(top_builddir)/Util/third/libthird.la @EPSIC_LIBS@ @FLIBS@
 
