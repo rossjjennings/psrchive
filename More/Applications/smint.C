@@ -117,6 +117,12 @@ protected:
   template<class Container>
   void load (vector<set>& data, Container* ext, const MJD& epoch);
 
+  // unload text to file
+  void unload (const string& filename, const vector<row>& table);
+
+  string spline_filename;
+  string plot_filename;
+
   void fit (vector<row>& table);
 
 #if HAVE_SPLINTER
@@ -297,15 +303,31 @@ void smint::fit (vector<row>& table)
   else if (table.size() > 1)
   {
     if (!pspline_alpha)
-      throw Error (InvalidState, "smint::finalize",
+      throw Error (InvalidState, "smint::fit",
                    "2-D smoothing with polynomials not implemented");
 
 #if HAVE_SPLINTER
     fit_pspline (table);
 #else
-    throw Error (InvalidState, "smint::finalize",
+    throw Error (InvalidState, "smint::fit",
                  "2-D smoothing requires SPLINTER library");
 #endif
+  }
+}
+
+void smint::unload (const string& filename, const vector<row>& table)
+{
+  ofstream out (filename.c_str());
+  for (unsigned irow=0; irow < table.size(); irow++)
+  {
+    string epoch = table[irow].epoch.printdays(4);
+    for (unsigned idat=0; idat < table[irow].freq.size(); idat++)
+    {
+      out << epoch << " " << table[irow].freq[idat] 
+          << " " << table[irow].data[idat].val
+          << " " << sqrt(table[irow].data[idat].var) << endl;
+    }
+    out << endl;
   }
 }
 
@@ -313,20 +335,45 @@ void smint::finalize ()
 {
   for (unsigned i=0; i < pcal_data.size(); i++)
   {
-    cerr << "smint: fitting PolnCalibrator iparam=" << i << endl;
+    string filename = "pcal_data_" + tostring(pcal_data[i].index) + ".txt";
+    unload (filename, pcal_data[i].table);
+  }
+
+  for (unsigned i=0; i < cal_stokes_data.size(); i++)
+  {
+    string idx = tostring(cal_stokes_data[i].index);
+    string filename = "cal_stokes_data_" + idx + ".txt";
+    unload (filename, cal_stokes_data[i].table);
+  }
+
+  for (unsigned i=0; i < pcal_data.size(); i++)
+  {
+    cerr << "smint: fitting PolnCalibrator "
+            "iparam=" << pcal_data[i].index << endl;
+
+    string idx = tostring(pcal_data[i].index);
+    spline_filename = "pcal_spline_" + idx + ".txt";
+    plot_filename = "pcal_fit_" + idx + ".eps/cps";
+
     fit (pcal_data[i].table);
   }
 
   for (unsigned i=0; i < cal_stokes_data.size(); i++)
   {
     cerr << "smint: fitting CalibratorStokes iparam=" << i << endl;
+
+    string idx = tostring(cal_stokes_data[i].index);
+    spline_filename = "cal_stokes_spline_" + idx + ".txt";
+    plot_filename = "cal_stokes_fit_" + idx + ".eps/cps";
+
     fit (cal_stokes_data[i].table);
   }
 }
 
 #if HAVE_SPLINTER
 
-void smint::fit_pspline (const vector< double >& data_x, const vector< Estimate<double> >& data_y)
+void smint::fit_pspline (const vector< double >& data_x,
+                         const vector< Estimate<double> >& data_y)
 {
   SplineSmooth1D spline;
   spline.set_alpha (pspline_alpha);
@@ -350,11 +397,11 @@ void smint::fit_pspline (const vector<row>& table)
       min_epoch = table[irow].epoch;
   }
 
-  double diff = (max_epoch - min_epoch).in_days();
+  double span_days = (max_epoch - min_epoch).in_days();
 
-  cerr << "smint::fit_pspline data span " << diff << " days" << endl;
+  cerr << "smint::fit_pspline data span " << span_days << " days" << endl;
 
-  MJD mid_epoch = min_epoch + MJD(0.5 * diff);
+  MJD mid_epoch = min_epoch + MJD(0.5 * span_days);
 
   cerr << "smint::fit_pspline min=" << min_epoch << " ref=" << mid_epoch << endl;
 
@@ -385,31 +432,40 @@ void smint::fit_pspline (const vector<row>& table)
 
   cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
 
-  unsigned npts = 200;
-
-  double x1del = (xmax-xmin)/(npts-1);
-  double x0del = diff/(npts-1);
-  double x0min = -0.5*diff;
-
-  ofstream out ("spline.2d");
-  for (unsigned i=0; i<npts; i++)
+  if (spline_filename != "")
   {
-    double x0 = x0min + x0del * double(i);
+    unsigned npts = 200;
 
-    for (unsigned j=0; j<npts; j++)
+    double x1del = (xmax-xmin)/(npts-1);
+    double x0del = span_days/(npts-1);
+    double x0min = -0.5*span_days;
+
+    ofstream out (spline_filename.c_str());
+    for (unsigned i=0; i<npts; i++)
     {
-      double x1 = xmin + x1del * double(j);
+      double x0 = x0min + x0del * double(i);
 
-      double y = spline.evaluate ( pair<double,double>(x0,x1) );
-
-      out << x0 << " " << x1 << " " << y << endl;
+      for (unsigned j=0; j<npts; j++)
+      {
+        double x1 = xmin + x1del * double(j);
+  
+        double y = spline.evaluate ( pair<double,double>(x0,x1) );
+  
+        out << x0 << " " << x1 << " " << y << endl;
+      }
+  
+      out << endl;
     }
-
-    out << endl;
   }
 
 
 #ifdef HAVE_PGPLOT
+
+  if (plot_filename == "")
+    return;
+
+  cpgopen (plot_filename.c_str());
+
   for (unsigned irow = 0; irow < table.size(); irow++)
   {
     unsigned npts = 500;
@@ -421,6 +477,9 @@ void smint::fit_pspline (const vector<row>& table)
     double x0 = (table[irow].epoch - mid_epoch).in_days();
     plot_model (spline, x0, npts, xmin, xmax);
   }
+
+  cpgend ();
+
 #endif
 
 }
@@ -474,11 +533,11 @@ void smint::fit_polynomial (const vector< double >& data_x, const vector< Estima
     cerr << "     chisq = " << nchisq << endl;
 
     if (nchisq < chisq) {
-      float diffchisq = chisq - nchisq;
+      float diff_chisq = chisq - nchisq;
       chisq = nchisq;
       not_improving = 0;
-      if (diffchisq/chisq < threshold && diffchisq > 0) {
-        cerr << "no big diff in chisq = " << diffchisq << endl;
+      if (diff_chisq/chisq < threshold && diff_chisq > 0) {
+        cerr << "no big diff in chisq = " << diff_chisq << endl;
         break;
       }
     }
