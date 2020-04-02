@@ -97,11 +97,13 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
   if (lowtohigh < hightolow)
     st_low = 1;
 
-  double sigma_hi = sqrt(var_hi);
-  double sigma_lo = sqrt(var_lo);
+  float m_hi = mean_hi;
+  float m_lo = mean_lo;
+  float sigma_hi = sqrt(var_hi);
+  float sigma_lo = sqrt(var_lo);
 
-  float hip[3] = { mean_hi, mean_hi-sigma_hi, mean_hi+sigma_hi };
-  float lop[3] = { mean_lo, mean_lo-sigma_lo, mean_lo+sigma_lo };
+  float hip[3] = { m_hi, m_hi-sigma_hi, m_hi+sigma_hi };
+  float lop[3] = { m_lo, m_lo-sigma_lo, m_lo+sigma_lo };
 
   // solid lines for the means, dashed lines for mean +/- 1-sigma
   int line_style[3] = { 1, 2, 2 };

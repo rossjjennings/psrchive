@@ -156,8 +156,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       // cerr << " xoff=" << xoff << " x_min=" << x_min << " x_res=" << x_res
       //      << " y_min=" << y_min << " y_res=" << y_res << endl;
 
-      float trf[6] = { xoff + x_min - 0.5*x_res, x_res, 0.0,
-                       y_min - 0.5*y_res,        0.0, y_res };
+      float trf[6] = { xoff + x_min - 0.5f*x_res, x_res, 0.0f,
+                       y_min - 0.5f*y_res,        0.0f, y_res };
 
       if (get_frame()->get_transpose())
 	for (unsigned i=0; i<3; i++)
