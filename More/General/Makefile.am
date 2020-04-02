@@ -308,5 +308,8 @@ AM_CPPFLAGS += \
         -I$(top_srcdir)/More/Polarimetry \
         -I$(top_srcdir)/More/MEAL \
         -I$(top_srcdir)/More/RFIMitigation \
-	@PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@
+	@PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ \
+	@SPLINTER_CFLAGS@
+
+libGeneral_la_LIBADD = @SPLINTER_LIBS@
 
