@@ -55,10 +55,11 @@ Estimate<float> Pulsar::ConstantGainInfo::get_param (unsigned ichan,
 
   Estimate<float> retval;
 
-  if (iclass == 1)
+  if (iclass == 0)
+    retval = 1.0e-3 * cg->get_gain(iparam);  // convert mJy to Jy
+  else if (iclass == 1)
     retval = cg->get_gain_ratio(iparam);
-  else if ( cg->get_scale(iparam).val != 0 )
-    retval = 1.0e-3 / cg->get_scale(iparam);  // convert mJy^-1 to Jy
 
   return retval;
 }
+

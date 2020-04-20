@@ -145,6 +145,20 @@ FluxCalibrator::ConstantGain::get_scale (unsigned ireceptor) const
   return scale.at(ireceptor);
 }
 
+Estimate<double> scale_to_gain (const Estimate<double>& scale)
+{
+  if (scale.val == 0.0)
+    return 0.0;
+  else
+    return 1.0 / scale;
+}
+
+Estimate<double>
+FluxCalibrator::ConstantGain::get_gain (unsigned ireceptor) const
+{
+  return scale_to_gain( get_scale (ireceptor) );
+}
+
 void FluxCalibrator::ConstantGain::get_scale (vector<Estimate<double> >& s)
 {
   s = scale;
@@ -173,4 +187,9 @@ Estimate<double> FluxCalibrator::ConstantGain::get_scale () const
   else
     throw Error (InvalidState, "FluxCalibrator::ConstantGain::get_gain",
 		 "invalid nreceptor=%u", scale.size());
+}
+
+Estimate<double> FluxCalibrator::ConstantGain::get_gain () const
+{
+  return scale_to_gain( get_scale () );
 }

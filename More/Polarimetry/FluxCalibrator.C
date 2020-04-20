@@ -474,7 +474,7 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
     if (constant_scale)
     {
       ConstantGain* cg = dynamic_cast<ConstantGain*>( data[ichan].get() );
-      gain[ichan] = 1.0 / cg->get_scale().get_value();
+      gain[ichan] = cg->get_gain().get_value();
     }
     else
       gain[ichan] = data[ichan]->get_S_cal().get_value();
