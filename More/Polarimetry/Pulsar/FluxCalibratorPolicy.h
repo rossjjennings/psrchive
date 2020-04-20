@@ -206,6 +206,8 @@ namespace Pulsar {
 		  Estimate<double>& S_cal,
 		  Estimate<double>& S_sys);
 
+    void invalidate (unsigned ireceptor);
+
     std::vector< Estimate<double> > scale;
     std::vector< Estimate<double> > gain_ratio;
     
