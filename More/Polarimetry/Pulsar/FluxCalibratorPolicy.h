@@ -177,6 +177,9 @@ namespace Pulsar {
     //! Set the scale for each receptor
     void set_scale ( const std::vector< Estimate<double> >& );
 
+    //! Get the gain for the specified receptor
+    Estimate<double> get_gain (unsigned ireceptor) const;
+
     //! Get the gain ratio for the specified receptor
     Estimate<double> get_gain_ratio (unsigned ireceptor) const;
     //! Get the gain ratio for each receptor
@@ -188,7 +191,8 @@ namespace Pulsar {
     void set_gain_ratio ( const std::vector< Estimate<double> >& );
 
     Estimate<double> get_scale () const;
-    
+    Estimate<double> get_gain () const;
+
   protected:
     
     //! Mean of on-source observations with noise diode emitting
