@@ -35,19 +35,19 @@ void FluxCalibrator::ConstantGain::integrate (Signal::Source source,
     
   if (source == Signal::FluxCalOn)
   {
-    mean_hi_on.resize( get_nreceptor() );
+    mean_hi_on.resize( get_nreceptor(), 0.0 );
     mean_hi_on[ireceptor] += hi;
 
-    mean_lo_on.resize( get_nreceptor() );
+    mean_lo_on.resize( get_nreceptor(), 0.0 );
     mean_lo_on[ireceptor] += lo;
   }
   
   else if (source == Signal::FluxCalOff)
   {
-    mean_hi_off.resize( get_nreceptor() );
+    mean_hi_off.resize( get_nreceptor(), 0.0 );
     mean_hi_off[ireceptor] += hi;
 
-    mean_lo_off.resize( get_nreceptor() );
+    mean_lo_off.resize( get_nreceptor(), 0.0 );
     mean_lo_off[ireceptor] += lo;
   }
 }
@@ -57,23 +57,35 @@ void Pulsar::FluxCalibrator::ConstantGain::set_nreceptor (unsigned nreceptor)
 {
   Policy::set_nreceptor( nreceptor );
 
-  scale.resize( nreceptor );
-  gain_ratio.resize( nreceptor );
+  scale.resize( nreceptor, 0.0 );
+  gain_ratio.resize( nreceptor, 0.0 );
 }
 
+void FluxCalibrator::ConstantGain::invalidate (unsigned ireceptor)
+{
+  // cerr << "FluxCalibrator::ConstantGain::invalidate ireceptor=" << ireceptor << endl;
+
+  valid = false;
+
+  scale.resize( get_nreceptor(), 0.0 );
+  scale.at(ireceptor) = 0.0;
+
+  gain_ratio.resize( get_nreceptor(), 0.0 );
+  gain_ratio.at(ireceptor) = 0.0;
+}
 
 void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
 					    Estimate<double>& S_cal,
 					    Estimate<double>& S_sys)
 {
-  // cerr << "FluxCalibrator::ConstantGain::integrate" << endl;
+  // cerr << "FluxCalibrator::ConstantGain::compute ireceptor=" << ireceptor << endl;
 
   if (mean_hi_on.size() <= ireceptor)
-    throw Error (InvalidState, "FluxCalibrator::ConstantGain::calculate",
+    throw Error (InvalidState, "FluxCalibrator::ConstantGain::compute",
 		 "no on-source observations available");
 
   if (mean_hi_off.size() <= ireceptor)
-    throw Error (InvalidState, "FluxCalibrator::ConstantGain::calculate",
+    throw Error (InvalidState, "FluxCalibrator::ConstantGain::compute",
 		 "no off-source observations available");
 
   // the flux density of the standard candle in each polarization
@@ -90,7 +102,7 @@ void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
   if (hi_on==0 || hi_off==0 || lo_on==0 || lo_off==0)
   {
     S_cal = S_sys = 0;
-    valid = false;
+    invalidate (ireceptor);
     return;
   }
 
@@ -105,14 +117,17 @@ void FluxCalibrator::ConstantGain::compute (unsigned ireceptor,
       S_sys.val < S_sys.get_error() )
   {
     S_cal = S_sys = 0;
-    valid = false;
+    invalidate (ireceptor);
+    return;
   }
   
-  scale.resize( get_nreceptor() );
+  scale.resize( get_nreceptor(), 0.0 );
   scale[ireceptor] = (lo_on - lo_off) / S_std_i; 
 
-  gain_ratio.resize( get_nreceptor() );
+  gain_ratio.resize( get_nreceptor(), 0.0 );
   gain_ratio[ireceptor] = (hi_on - hi_off) / (lo_on - lo_off);
+
+  // cerr << "scale=" << scale[ireceptor] << endl;
 }
 
 
@@ -193,3 +208,4 @@ Estimate<double> FluxCalibrator::ConstantGain::get_gain () const
 {
   return scale_to_gain( get_scale () );
 }
+

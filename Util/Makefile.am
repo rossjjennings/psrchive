@@ -1,13 +1,13 @@
 
-SUBDIRS                 = units third genutil fft epsic/src
+SUBDIRS                 = epsic/src units third genutil fft
 
 lib_LTLIBRARIES         = libpsrutil.la
 
 libpsrutil_la_SOURCES  =
 libpsrutil_la_LIBTOOLFLAGS = --tag=CXX
-libpsrutil_la_LIBADD   = third/libthird.la units/libunits.la fft/libpsrfft.la \
-			genutil/libgenutil.la tempo/libtempo.la \
-			epsic/src/libepsic.la @FLIBS@
+libpsrutil_la_LIBADD   = epsic/src/libepsic.la \
+			third/libthird.la units/libunits.la fft/libpsrfft.la \
+			genutil/libgenutil.la tempo/libtempo.la @FLIBS@
 
 if HAVE_CFITSIO
   SUBDIRS += fitsutil
