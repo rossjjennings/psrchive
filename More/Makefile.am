@@ -53,7 +53,5 @@ if HAVE_PYTHON
 SUBDIRS += python
 endif
 
-libpsrmore_la_LIBADD += @EPSIC_LIBS@
-
 include $(top_srcdir)/config/Makefile.local
 

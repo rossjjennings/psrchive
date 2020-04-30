@@ -9,7 +9,7 @@ libpsrbase_la_LIBADD = \
 	Extensions/libExtensions.la \
 	Checks/libChecks.la \
 	Resources/libResources.la \
-	Formats/libFormats.la @EPSIC_LIBS@
+	Formats/libFormats.la
 
 include $(top_srcdir)/config/Makefile.local
 

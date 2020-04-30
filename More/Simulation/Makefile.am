@@ -30,7 +30,7 @@ endif
 LDADD = libSimulation.la \
 	$(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \
-        $(top_builddir)/Util/libpsrutil.la @EPSIC_LIBS@
+        $(top_builddir)/Util/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
 
