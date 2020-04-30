@@ -7,6 +7,20 @@
 
 #include "Horizon.h"
 
+Horizon::Horizon (double az, double el)
+{
+  azimuth = az;
+  elevation = el;
+
+  minimum_azimuth = 0.0;
+  maximum_azimuth = 2*M_PI;
+  minimum_elevation = 0.0;
+  maximum_elevation = M_PI/4;
+
+  // 1 deg per second
+  azimuth_velocity = elevation_velocity = 1.0 * M_PI/180.0;
+}
+
 //! Get the azimuth angle in radians
 double Horizon::get_azimuth () const
 {
@@ -67,4 +81,46 @@ Matrix<3,3,double> Horizon::get_basis (const Vector<3,double>& from) const
   */
   return transpose( rotation (Vector<3,double>::basis(2), azimuth - M_PI) *
 		    rotation (Vector<3,double>::basis(1), zenith) );
+}
+
+std::vector< std::pair<double,Mount*> >
+Horizon::slew_times (const sky_coord& coords)
+{
+  Horizon next (*this);
+  next.set_source_coordinates (coords);
+
+  return slew_times( next.get_azimuth(), next.get_elevation() );
+}
+
+std::vector< std::pair<double,Mount*> >
+Horizon::slew_times (double next_azimuth, double next_elevation)
+{
+  double diff_elevation = fabs( get_elevation() - next_elevation );
+  double time_elevation = diff_elevation / elevation_velocity;
+  
+  // consider every valid slew in azimuth
+  while (next_azimuth > minimum_azimuth)
+    next_azimuth -= 2*M_PI;
+
+  // after the above loop, the azimuth will be less than the minimum
+  next_azimuth += 2*M_PI;
+
+  std::vector< std::pair<double,Mount*> > retval;
+
+  while (next_azimuth < maximum_azimuth)
+  {
+    double diff_azimuth = fabs( get_azimuth() - next_azimuth );
+    double time_azimuth = diff_azimuth / azimuth_velocity;
+
+    double time = std::max (time_azimuth, time_elevation);
+
+    Horizon* next = new Horizon (*this);
+    next->azimuth = next_azimuth;
+
+    retval.push_back( std::pair<double,Mount*>( time, next ) );
+
+    next_azimuth += 2*M_PI;
+  }
+  
+  return retval;
 }

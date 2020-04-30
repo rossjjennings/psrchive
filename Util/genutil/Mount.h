@@ -16,8 +16,7 @@
 #include "sky_coord.h"
 #include "Matrix.h"
 
-//! Calculates horizon pointing parameters using SLALIB
-
+//! Base class of antenna/telescope mount types
 class Mount : public Reference::Able
 {
   
@@ -57,6 +56,10 @@ public:
 
   //! Get the vertical angle (rotation about the line of sight)
   virtual double get_vertical () const = 0;
+
+  //! Return all possible slew times and resulting telescope states
+  virtual std::vector< std::pair<double,Mount*> >
+  slew_times (const sky_coord& coords);
 
 protected:
 

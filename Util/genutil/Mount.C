@@ -33,7 +33,7 @@ void Mount::set_source_coordinates (const sky_coord& pos)
   declination = pos.dec().getRadians();
   right_ascension = pos.ra().getRadians();
 
-  lst = hour_angle = unset;
+  hour_angle = unset;
 }
 
 void Mount::set_observatory_latitude (double lat)
@@ -164,3 +164,10 @@ bool Mount::get_built () const
 {
   return lst != unset && hour_angle != unset;
 }
+
+std::vector< std::pair<double,Mount*> >
+Mount::slew_times (const sky_coord& coords)
+{
+  throw Error (InvalidState, "Mount::slew_times", "not implemented");
+}
+
