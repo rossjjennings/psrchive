@@ -11,8 +11,11 @@
 #include "strutil.h"
 
 #include <fstream>
+#include <algorithm>
+
 #include <unistd.h>
 #include <stdlib.h>
+#include <assert.h>
 
 using namespace std;
 
