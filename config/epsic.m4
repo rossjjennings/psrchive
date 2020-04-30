@@ -29,7 +29,7 @@ AC_DEFUN([SWIN_LIB_EPSIC],
   AC_MSG_RESULT([$have_epsic])
 
   if test $have_epsic = yes; then
-    AC_DEFINE(HAVE_EPSIC,1,[Define if the Eigen library is installed])
+    AC_DEFINE(HAVE_EPSIC,1,[Define if the EPSIC library is installed])
   fi
 
   EPSIC_LIBS="$epsic_lib_LIBS"
