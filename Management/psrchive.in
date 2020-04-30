@@ -57,15 +57,15 @@ while test $# -gt 0; do
         ;;
 
     --cppflags)
-        echo -I@includedir@ @EPSIC_CFLAGS@
+        echo -I@includedir@
         ;;
 
     --cflags)
-        echo -I@includedir@ @EPSIC_CFLAGS@ @PTHREAD_CFLAGS@
+        echo -I@includedir@ @PTHREAD_CFLAGS@
         ;;
 
     --ldflags | --libs)
-        echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil @EPSIC_LIBS@ \
+        echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil \
              @LDFLAGS@ @FFT_LIBS@ @CFITSIO_LIBS@ @PUMA_LIBS@ @TEMPO2_LIBS@ \
              @GSL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @FLIBS@
         ;;

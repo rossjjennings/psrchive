@@ -28,6 +28,18 @@ else
   fi
 fi
 
+if test ! -d Util/epsic/src; then
+  echo Attempting to git pull EPSIC
+  git submodule update --init --recursive
+fi
+
+if test ! -f $srcdir/Util/epsic/src/configure; then
+  echo Running EPSIC bootstrap script
+  builddir=$PWD
+  cd $srcdir/Util/epsic/src
+  ./bootstrap
+  cd $builddir
+fi
 
 ################################################################################
 #
@@ -126,7 +138,6 @@ AC_CHECK_LIB([m], [sin])
 SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP
-SWIN_LIB_EPSIC
 PSR_LIB_SPLINTER
 
 #
@@ -161,24 +172,6 @@ if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   cd packages && make && cd -
   ./packages/fftw.csh
-
-  then re-run the configure script.
-])
-fi
-
-if test x"$have_epsic" = xno; then
-
-  # produce the package installation scripts before aborting.
-  AC_OUTPUT
-
-  AC_MSG_ERROR([The EPSIC library was not found.
-
-  Please see http://psrchive.sourceforge.net/third/epsic
-
-  or simply run the following commands to install EPSIC automatically
-
-  cd packages && make && cd -
-  ./packages/epsic.csh
 
   then re-run the configure script.
 ])
@@ -332,6 +325,8 @@ AC_CONFIG_FILES([
 		Management/psrchive_install.h
 		Management/release.csh
 		Makefile])
+
+AC_CONFIG_SUBDIRS([Util/epsic/src])
 
 AC_OUTPUT
 
