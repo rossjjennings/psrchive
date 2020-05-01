@@ -13,7 +13,9 @@ test_threads_SOURCES	= test_threads.C
 
 #############################################################################
 
-AM_CPPFLAGS = -I$(top_builddir)/local_include
+include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += -I$(top_builddir)/local_include
 
 LDADD = $(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la
