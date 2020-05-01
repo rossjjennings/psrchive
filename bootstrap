@@ -2,6 +2,8 @@
 
 echo "Running the GNU autotools.  Please be patient ..."
 
+./config/epsic.sh
+
 if autoreconf --install --force; then
 
   echo

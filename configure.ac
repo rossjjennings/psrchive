@@ -28,17 +28,9 @@ else
   fi
 fi
 
-if test ! -d Util/epsic/src; then
-  echo Attempting to git pull EPSIC
-  git submodule update --init --recursive
-fi
-
-if test ! -f $srcdir/Util/epsic/src/configure; then
-  echo Running EPSIC bootstrap script
-  builddir=$PWD
-  cd $srcdir/Util/epsic/src
-  ./bootstrap
-  cd $builddir
+# ensure that epsic source is configured
+if test -f $srcdir/config/epsic.sh; then
+  $srcdir/config/epsic.sh
 fi
 
 ################################################################################
