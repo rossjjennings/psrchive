@@ -23,7 +23,9 @@ CLEANFILES = psrchive.py psrchive.pyc ./psrchive_wrap.cxx
 #############################################################################
 #
 
-AM_CPPFLAGS = @SWIG_PYTHON_CPPFLAGS@ -I$(top_builddir)/local_include
+include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @SWIG_PYTHON_CPPFLAGS@ -I$(top_builddir)/local_include
 AM_CPPFLAGS += @CFITSIO_CFLAGS@ @GSL_CFLAGS@
 AM_LDFLAGS = @CFITSIO_LDFLAGS@
 
