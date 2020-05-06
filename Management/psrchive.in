@@ -65,7 +65,7 @@ while test $# -gt 0; do
         ;;
 
     --ldflags | --libs)
-        echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil \
+        echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil -lepsic \
              @LDFLAGS@ @FFT_LIBS@ @CFITSIO_LIBS@ @PUMA_LIBS@ @TEMPO2_LIBS@ \
              @GSL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @FLIBS@
         ;;
