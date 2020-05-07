@@ -107,6 +107,7 @@ test_CalibratorType_SOURCES = test_CalibratorType.C
 
 LDADD = libClasses.la \
 	$(top_builddir)/Util/libpsrutil.la
+	$(top_builddir)/Util/epsic/src/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
 
