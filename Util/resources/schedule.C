@@ -1,4 +1,4 @@
-/**************************************************************************2
+/***************************************************************************
  *
  *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
@@ -23,10 +23,12 @@ void usage ()
 {
   cout <<
     "schedule - create a schedule\n"
+    "  -i         interactive mode \n"
     "  -l lst     start LST \n"
     "  -L lst     end LST \n"
     "  -p         create lst_density.txt and exit \n"
     "  -P         add PRESS-specific constraints \n"
+    "  -s         minimize slew time \n"
     "\n"
        << endl;
 }
@@ -50,13 +52,39 @@ public:
   double up_hours;
   double Tint_min;
   double tsamp_us;
+
+  // computed
   double min_avg_density;
+  double slewtime;
+  double Tobs;
+  Mount* mount;
+
   void parse (string line);
 };
 
 bool by_priority (const source& a, const source& b)
 {
   return a.priority > b.priority;
+}
+
+bool by_slewtime (const source& a, const source& b)
+{
+  return a.slewtime < b.slewtime;
+}
+
+pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
+{
+  vector< pair<double,Mount*> > slew_times;
+  slew_times = mount->slew_times (coord);
+
+  pair<double,Mount*> result = slew_times[0];
+
+  for (unsigned i=1; i<slew_times.size(); i++)
+  {
+    if (slew_times[i].first < result.first)
+      result = slew_times[i];
+  }
+  return result;
 }
 
 int main (int argc, char* argv[]) 
@@ -101,9 +129,11 @@ int main (int argc, char* argv[])
   vector<double> lst_density (180, 0.0);
 
   bool press = false;
+  bool minimize_slew_time = false;
+  bool interactive = false;
 
   int c;
-  while ((c = getopt(argc, argv, "he:l:L:pP")) != -1)
+  while ((c = getopt(argc, argv, "he:il:L:pPs")) != -1)
   {
     switch (c)
     {
@@ -113,6 +143,10 @@ int main (int argc, char* argv[])
 
     case 'e':
       min_elevation = atof (optarg);
+      break;
+
+    case 'i':
+      interactive = true;
       break;
 
     case 'l':
@@ -131,6 +165,10 @@ int main (int argc, char* argv[])
 
     case 'P':
       press = true;
+      break;
+
+    case 's':
+      minimize_slew_time = true;
       break;
     }
   }
@@ -228,7 +266,8 @@ int main (int argc, char* argv[])
     }
 
     sources[i].min_avg_density += min_avg_density;
-    sout << sources[i].name << " " << sources[i].up_hours << " " << sources[i].min_avg_density << endl;
+    sout << sources[i].name << " " << sources[i].up_hours 
+         << " " << sources[i].min_avg_density << endl;
 
     sources[i].priority *= min_avg_density;
   }
@@ -245,7 +284,7 @@ int main (int argc, char* argv[])
   // assume that it takes some time to start up and slew
   current_lst += ten_minutes;
 
-  Mount* current_pointing = &horizon;
+  Mount* current_pointing = 0;
 
   double tsamp4_tot = 0;
   double tsamp16_tot = 0;
@@ -259,6 +298,9 @@ int main (int argc, char* argv[])
   {
     horizon.set_local_sidereal_time( current_lst.getRadians() );
 
+    if (current_pointing)
+      current_pointing -> set_local_sidereal_time( current_lst.getRadians() );
+
     vector<source> up;
     for (unsigned i=0; i<sources.size(); i++)
     {
@@ -268,92 +310,122 @@ int main (int argc, char* argv[])
 
       // cerr << "coord=" << sources[i].coord << " elevation=" << elevation << endl;
 
-      if (elevation > min_elevation)
-        up.push_back( sources[i] );
+      if (elevation < min_elevation)
+        continue;
+
+      // source is above horizon
+
+      double desired_min = sources[i].Tint_min;
+
+      if (press)
+      {
+        // PRESS specific
+        if (sources[i].tsamp_us == 4 && desired_min > 20)
+          desired_min = 20;
+        else if (desired_min > 60)
+          desired_min = 60.0;
+
+        if ( sources[i].tsamp_us == 4 &&
+             (tsamp16_tot > 0 || desired_min+tsamp4_tot > max_tsamp4) )
+          continue;
+
+        if (sources[i].tsamp_us == 16 &&
+             (tsamp4_tot > 0 || desired_min+tsamp16_tot > max_tsamp16) )
+          continue;
+
+        // there is sufficent disk space
+      }
+
+      source add = sources[i];
+
+      add.Tobs = desired_min;
+
+      double setting_in = (add.set_lst - current_lst).getRadians();
+      double min_slew = 5.0; // minutes
+
+      pair<double,Mount*> trial;
+
+      if (current_pointing)
+      {
+        trial = best_slew (current_pointing, add.coord);
+        min_slew = trial.first/60.0;
+        add.slewtime = min_slew;
+        add.mount = trial.second;
+      }
+
+      min_slew += 1.0;  // empirically guessed
+
+      cerr << "sets in:" << setting_in / one_minute
+           << " need:" << desired_min << " slew:" << min_slew
+           << " minutes" << endl;
+
+      if (desired_min + min_slew > setting_in / one_minute + 10.0)
+         continue;
+
+      up.push_back( add );
     }
 
     Angle lst = current_lst;
     lst.setWrapPoint( 2*M_PI );
 
     cout << "at " << lst.getHMS(0)
-         << " " << up.size() << " sources above horizon" << endl;
+         << " " << up.size() << " available sources" << endl;
 
-    std::sort (up.begin(), up.end(), by_priority);
+    unsigned choose_index = 0;
 
-    for (unsigned i=0; i<up.size(); i++)
+    if (interactive)
     {
-      double desired_min = up[i].Tint_min;
+      std::sort (up.begin(), up.end(), by_priority);
 
-      if (press)
+      unsigned long maxshow = 10;
+      unsigned nshow = std::min( maxshow, up.size() );
+
+      cerr << "NAME\t\tRANK\tSLEW" << endl;
+      for (unsigned i=0; i<nshow; i++)
+        cerr << i << " " << up[i].name << "\t" << up[i].priority
+             << "\t" << up[i].slewtime << endl;
+
+      char got = 0;
+      while ( got < '0' || got > '9')
+        got = getchar();
+
+      choose_index = got - '0';
+      cerr << "chosen index =" << choose_index << endl;
+    }
+    else if (current_pointing && minimize_slew_time)
+      std::sort (up.begin(), up.end(), by_slewtime);
+    else
+      std::sort (up.begin(), up.end(), by_priority);
+
+    source chosen = up[choose_index];
+
+    cout << lst.getHMS(0) << " " << chosen.name 
+         << " tsamp=" << chosen.tsamp_us 
+         << " Tint=" << chosen.Tobs
+         << " slew=" << chosen.slewtime << endl;
+
+    double slop = 3;  // 2 min CAL plus any other delays
+    current_lst += (chosen.Tobs + chosen.slewtime + slop) * one_minute;
+
+    if (press)
+    {
+      if (chosen.tsamp_us == 4) tsamp4_tot += chosen.Tobs;
+      if (chosen.tsamp_us == 16) tsamp16_tot += chosen.Tobs;
+    }
+
+    for (unsigned j=0; j<sources.size(); j++)
+      if (sources[j].name == chosen.name)
       {
-        // PRESS specific
-        if (up[i].tsamp_us == 4 && desired_min > 20)
-          desired_min = 20;
-        else if (desired_min > 60) 
-          desired_min = 60.0;
-
-        if ( up[i].tsamp_us == 4 && 
-             (tsamp16_tot > 0 || desired_min+tsamp4_tot > max_tsamp4) )
-          continue;
-
-        if (up[i].tsamp_us == 16 && 
-             (tsamp4_tot > 0 || desired_min+tsamp16_tot > max_tsamp16) )
-          continue;
-      }
-
-      double setting_in = (up[i].set_lst - current_lst).getRadians();
-
-      vector< pair<double,Mount*> > slew_times;
-      slew_times = current_pointing->slew_times (up[i].coord);
-
-      double min_slew = slew_times[0].first/60.0;
-      current_pointing = slew_times[0].second;
-
-      for (unsigned i=1; i<slew_times.size(); i++)
-      {
-        double min = slew_times[i].first/60.0;
-        if (min < min_slew)
-        {
-          min_slew = min;
-          current_pointing = slew_times[i].second;
-        }
-      }
-
-      min_slew += 1.0;  // empirically guessed
-
-      cerr << "sets in:" << setting_in / one_minute 
-           << " need:" << desired_min << " slew:" << min_slew 
-           << " minutes" << endl;
-
-      if (desired_min + min_slew < setting_in / one_minute + 10.0)
-      {
-        Angle lst = current_lst;
-        lst.setWrapPoint( 2*M_PI );
-
-        cout << lst.getHMS(0) << " " << up[i].name 
-             << " tsamp=" << up[i].tsamp_us 
-             << " Tint=" << desired_min
-             << " slew=" << min_slew << endl;
-
-        double slop = 3;  // 2 min CAL plus any other delays
-        current_lst += (desired_min + min_slew + slop) * one_minute;
-
-        if (press)
-        {
-          if (up[i].tsamp_us == 4) tsamp4_tot += desired_min;
-          if (up[i].tsamp_us == 16) tsamp16_tot += desired_min;
-        }
-
-        for (unsigned j=0; j<sources.size(); j++)
-          if (sources[j].name == up[i].name)
-          {
-            sources.erase (sources.begin() + j);
-            break;
-          }
-
+        sources.erase (sources.begin() + j);
         break;
       }
-    }
+
+    if (current_pointing)
+      current_pointing = chosen.mount;
+    else
+      current_pointing = new Horizon(horizon);
+
+    current_pointing->set_source_coordinates (chosen.coord);
   }
   return 0;
 }
