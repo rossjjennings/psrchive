@@ -5,16 +5,19 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-set cfitsio=cfitsio3450
+set cfitsio=cfitsio-3.48
+set place=http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c
+
+# http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.48.tar.gz
 
 if ( ! -f ${cfitsio}.tar.gz ) then
-  @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/${cfitsio}.tar.gz
+  @download@ ${place}/${cfitsio}.tar.gz
 endif
 
 gunzip -c ${cfitsio}.tar.gz | tar xvf -
-cd cfitsio
+cd $cfitsio
 
-./configure --prefix=@prefix@
+./configure --prefix=@prefix@ --enable-reentrant
 
 make clean
 make
