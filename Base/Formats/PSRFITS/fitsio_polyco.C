@@ -10,6 +10,8 @@
 #include "FITSError.h"
 
 #include <iostream>
+#include <memory>
+
 #include <assert.h>
 
 using namespace std;
