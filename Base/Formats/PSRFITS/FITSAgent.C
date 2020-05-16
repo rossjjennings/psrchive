@@ -4,8 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/FITSArchive.h"
 #include "psrfitsio.h"
+#include "ThreadContext.h"
 
 #include <unistd.h>
 
@@ -51,9 +57,16 @@ static string get_version ()
   return version;
 }
 
+#if HAVE_PTHREAD
+static ThreadContext* context = new ThreadContext;
+#else
+static ThreadContext* context = 0;
+#endif
 
 string Pulsar::FITSArchive::Agent::get_description ()
 {
+  ThreadContext::Lock lock (context);
+
   static string version;
 
   if (version.empty())

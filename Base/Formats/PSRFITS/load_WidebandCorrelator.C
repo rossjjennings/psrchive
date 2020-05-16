@@ -10,12 +10,45 @@
 #include "Pulsar/FITSHdrExtension.h"
 
 #include "psrfitsio.h"
-
+#include "ThreadContext.h"
 #include "RegularExpression.h"
 #include "templates.h"
 #include "strutil.h"
 
 using namespace std;
+
+static vector<string> conv_configs;
+
+#if HAVE_PTHREAD
+static ThreadContext* context = new ThreadContext;
+#else
+static ThreadContext* context = 0;
+#endif
+
+void load_configs (unsigned verbose)
+{
+  ThreadContext::Lock lock (context);
+
+  static char* conv_config = getenv ("WBCCONVCFG");
+
+  if (conv_config)
+  {
+    if (verbose > 1)
+      cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+        "  loading " << conv_config << endl;
+  
+    stringfload (&conv_configs, conv_config);
+  
+    conv_config = 0; // load it only once
+  
+    if (verbose > 2 && conv_configs.size())
+    {
+      cerr << "WBCORR conv configurations:" << endl;
+      for (unsigned i=0; i < conv_configs.size(); i++)
+        cerr << conv_configs[i] << endl;
+    }
+  }
+}
 
 void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 {
@@ -124,29 +157,10 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 	   << hdr_ext->hdrver << endl;
     
   }
-    
-  static char* conv_config = getenv ("WBCCONVCFG");
-  static vector<string> conv_configs;
-
-  if (conv_config)  {
-    
-    if (verbose > 1)
-      cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-	"  loading " << conv_config << endl;
-    
-    stringfload (&conv_configs, conv_config);
-    
-    conv_config = 0; // load it only once
-    
-    if (verbose > 2 && conv_configs.size()) {
-      cerr << "WBCORR conv configurations:" << endl;
-      for (unsigned i=0; i < conv_configs.size(); i++)
-	cerr << conv_configs[i] << endl;
-    }
-    
-  }
-
-  static RegularExpression conv_grep ("wb.*_c");
+  
+  load_configs (verbose);
+  
+  RegularExpression conv_grep ("wb.*_c");
 
   bool in_grep = conv_grep.get_match(ext->configfile);
   bool in_list = found (ext->configfile, conv_configs);

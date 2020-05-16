@@ -777,10 +777,18 @@ catch (Error& error)
 // /////////////////////////////////////////////////////////////////////
 //! An unload function to write FITSArchive data to a FITS file on disk.
 
-  // To create a new file we need a FITS file template to provide the format
+// To create a new file we need a FITS file template to provide the format
+
+#if HAVE_PTHREAD
+static ThreadContext* context = new ThreadContext;
+#else
+static ThreadContext* context = 0;
+#endif
 
 string Pulsar::FITSArchive::get_template_name ()
 {
+  ThreadContext::Lock lock (context);
+
   static char* template_defn = getenv ("PSRFITSDEFN");
 
   if (template_defn)

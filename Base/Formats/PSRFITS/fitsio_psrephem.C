@@ -221,9 +221,9 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 
     case 0:  // string
       {
-	static char* nul = strdup(" ");
+	auto_ptr<char> nul ( strdup(" ") );
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       &nul, &strval, &anynul, &status);
+		       nul.get(), &strval, &anynul, &status);
 
         // strip off any leading spaces
         char* start = strtok (strval, " \t\n");
@@ -280,9 +280,9 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
       }
     case 2:  // h:m:s
       {
-	static char* nul = strdup(" ");
+	auto_ptr<char> nul ( strdup(" ") );
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       nul, &strval, &anynul, &status);
+		       nul.get(), &strval, &anynul, &status);
 
         if (anynul)
           break;
@@ -305,9 +305,9 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
       }
     case 3:  // d:m:s
       {
-	static char* nul = strdup(" ");
+	auto_ptr<char> nul ( strdup(" ") );
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       nul, &strval, &anynul, &status);
+		       nul.get(), &strval, &anynul, &status);
 
         if (anynul)
           break;
