@@ -67,8 +67,8 @@ void Pulsar::ZapExtend::transform (Archive* archive)
   for (unsigned isub=0; isub<nsubint; isub++) {
     Integration *subint = archive->get_Integration(isub);
     for (unsigned ichan=0; ichan<nchan; ichan++) {
-      if ( (tcount[ichan] > (time_cutoff*nchan)) 
-          || (fcount[isub] > (freq_cutoff*nsubint)) ) {
+      if ( (tcount[ichan] > (time_cutoff*nsubint)) 
+          || (fcount[isub] > (freq_cutoff*nchan)) ) {
         subint->set_weight(ichan, 0.0);
       }
     }
