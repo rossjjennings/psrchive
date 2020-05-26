@@ -26,6 +26,9 @@ namespace Pulsar {
     //! Initialize an archive for appending
     virtual void init (Archive* into) { }
 
+    //! Throw an exception if there is any reason to not call append
+    virtual void check (Archive* into, const Archive* from);
+
     //! Copy the data in 'from' to 'into'
     void append (Archive* into, const Archive* from);
 
@@ -37,9 +40,6 @@ namespace Pulsar {
 
     //! Return true if there is a benign reason to stop
     virtual bool stop (Archive* into, const Archive* from);
-
-    //! Throw an exception if there is a fatal reason to stop
-    virtual void check (Archive* into, const Archive* from);
 
     //! Return the policy used to verify that data are mixable
     virtual const Archive::Match* get_mixable_policy (const Archive* into);

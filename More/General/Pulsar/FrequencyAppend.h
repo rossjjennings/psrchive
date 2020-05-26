@@ -28,6 +28,9 @@ namespace Pulsar {
     //! Initialize an archive for appending
     void init (Archive* into);
 
+    //! Throw an exception if there is a reason to not append
+    virtual void check (Archive* into, const Archive* from);
+
     typedef Functor< void (Integration*) > Weight;
 
     //! The policy used to weight each profile during combine
@@ -40,9 +43,6 @@ namespace Pulsar {
 
     //! Return true if there is a benign reason to stop
     virtual bool stop (Archive* into, const Archive* from);
-
-    //! Throw an exception if there is a fatal reason to stop
-    virtual void check (Archive* into, const Archive* from);
 
     //! Add the data in 'from' to 'into'
     virtual void combine (Archive* into, Archive* from);

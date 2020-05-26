@@ -23,6 +23,9 @@ namespace Pulsar {
     //! Default constructor
     TimeAppend ();
 
+    //! Throw an exception if there is a reason to not append
+    virtual void check (Archive* into, const Archive* from);
+
     bool chronological;
     float max_overlap;
 
@@ -30,9 +33,6 @@ namespace Pulsar {
 
     //! Return true if there is a benign reason to stop
     virtual bool stop (Archive* into, const Archive* from);
-
-    //! Throw an exception if there is a fatal reason to stop
-    virtual void check (Archive* into, const Archive* from);
 
     //! Add the data in 'from' to 'into'
     virtual void combine (Archive* into, Archive* from);

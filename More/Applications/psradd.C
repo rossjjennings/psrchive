@@ -63,6 +63,9 @@ protected:
   // add the archive to the total
   void append (Pulsar::Archive* archive);
 
+  //! check that the append method will succeed
+  void check_match (Pulsar::Archive*);
+
   //! check the gap between the end of total and start of archive
   void check_interval_between (Pulsar::Archive*);
 
@@ -441,6 +444,8 @@ void psradd::process (Pulsar::Archive* archive)
 
   if (total)
   {
+    check_match (archive);
+
     if (max_integration_length != 0.0)
       check_integration_length ();
 
@@ -692,6 +697,19 @@ catch (...)
     reset_total = true;
 }
 
+void psradd::check_match (Pulsar::Archive* archive) try
+{
+  if (time_direction)
+    time.check (total, archive);
+  else
+    frequency.check (total, archive);
+}
+catch (Error& error)
+{
+  if (verbose)
+    cerr << "psradd: " << error.get_message() << endl;
+  reset_total = true;
+}
 
 // ///////////////////////////////////////////////////////////////
 //
