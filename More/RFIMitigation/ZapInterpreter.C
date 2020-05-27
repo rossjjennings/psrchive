@@ -12,6 +12,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 
 #include "Pulsar/ChannelZapMedian.h"
@@ -333,7 +334,16 @@ string Pulsar::ZapInterpreter::cal (const string& args)
                                         &CalibratorStokes::get_Estimate,
                                         &CalibratorStokes::set_valid);
 
-      if (!ext && !cs)
+      Reference::To<FluxCalibratorExtension> fext;
+      fext = get()->get<FluxCalibratorExtension>();
+      if (fext)
+       for (unsigned iparam=0; iparam < fext->get_nparam(); iparam++)
+        robust_estimate_zapper->excise (iparam, fext.get(),
+                                        &FluxCalibratorExtension::get_nchan,
+                                        &FluxCalibratorExtension::get_Estimate,
+                                        &FluxCalibratorExtension::set_weight);
+
+      if (!ext && !cs && !fext)
         return response (Fail, "archive contains no calibrator extensions");
       else
         return response (Good);

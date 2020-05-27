@@ -74,6 +74,8 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 	data[ichan] = new VariableGain;
 
       data[ichan]->set( fe->S_sys[ichan], fe->S_cal[ichan] );
+      data[ichan]->set_valid ( fe->get_weight(ichan) != 0 );
+
     }
     
     // disable checks for sufficient data

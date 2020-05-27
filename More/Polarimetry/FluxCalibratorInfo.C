@@ -47,6 +47,13 @@ Estimate<float> Pulsar::FluxCalibrator::Info::get_param (unsigned ichan,
 {
   Estimate<float> retval;
 
+  if (! instance->get_valid(ichan) )
+  {
+    if (verbose > 2) cerr << "Pulsar::FluxCalibrator::Info::get_param"
+                   " invalid ichan=" << ichan << endl;
+    return 0;
+  }
+
   if (iclass == 0)
     retval = instance->data[ichan]->get_S_cal(iparam);
   else if (iclass == 1)

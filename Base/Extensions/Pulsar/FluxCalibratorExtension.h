@@ -102,6 +102,12 @@ namespace Pulsar
     //! Get the gain ratio of the specified channel
     Estimate<double> get_gain_ratio (unsigned chan, unsigned receptor) const;
 
+    //! Get the number of parameters that describe each solution
+    unsigned get_nparam () const;
+
+    //! Get the specified parameter for the specified channel
+    Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
+
   protected:
 
     //! System equivalent flux density in each receptor and frequency channel
