@@ -608,12 +608,32 @@ string Pulsar::ZapInterpreter::freq (const string& args) try
     for (unsigned iarg=0; iarg < arguments.size(); iarg++)
     {
       Range r = fromstring<Range> (arguments[iarg]);
-      
+
+      cerr << "iarg=" << iarg << " range=" << r << endl;
+
       for (unsigned ichan=0; ichan<nchan; ichan++)
 	if (r.within( ext->get_centre_frequency(ichan) ))
             ext->set_weight (ichan, 0.0);
     }
-    
+
+    Reference::To<CalibratorStokes> cs = get()->get<CalibratorStokes>();
+    if (!cs)
+      return response (Good);
+
+    if (nchan != cs->get_nchan())
+      return response (Fail, 
+             "CalibratorStokes nchan=" + tostring(cs->get_nchan()) +
+             " != CalibratorExtension nchan=" + tostring(nchan));
+
+    for (unsigned iarg=0; iarg < arguments.size(); iarg++)
+    {
+      Range r = fromstring<Range> (arguments[iarg]);
+
+      for (unsigned ichan=0; ichan<nchan; ichan++)
+        if (r.within( ext->get_centre_frequency(ichan) ))
+          cs->set_valid (ichan, false);
+    }
+
     return response (Good);
   }
 

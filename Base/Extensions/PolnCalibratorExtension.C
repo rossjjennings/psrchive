@@ -174,6 +174,17 @@ PolnCalibratorExtension::get_Estimate ( unsigned iparam, unsigned ichan ) const
   return get_transformation(ichan)->get_Estimate(iparam);
 }
 
+void PolnCalibratorExtension::set_Estimate ( unsigned iparam, unsigned ichan,
+                                             Estimate<float>& datum )
+{
+#if _DEBUG
+  cerr << "PolnCalibratorExtension::set_Estimate iparam=" << iparam
+       << " ichan=" << ichan << " val=" << datum << endl;
+#endif
+
+  get_transformation(ichan)->set_Estimate(iparam, datum);
+}
+
 void PolnCalibratorExtension::construct ()
 {
   if (Archive::verbose == 3)

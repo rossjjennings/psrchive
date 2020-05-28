@@ -98,11 +98,26 @@ CalibratorStokes::get_stokes (unsigned ichan) const
 Estimate<float>
 CalibratorStokes::get_Estimate ( unsigned iparam, unsigned ichan ) const
 {
+  assert (iparam < 3);
   return get_stokes(ichan)[iparam+1];
 }
 
+void CalibratorStokes::set_Estimate (unsigned iparam, unsigned ichan,
+                                     Estimate<float>& val)
+{
+  range_check (ichan, "CalibratorStokes::get_Estimate");
+  assert (iparam < 3);
+
+#if _DEBUG
+  cerr << "CalibratorStokes::set_Estimate iparam=" << iparam
+       << " ichan=" << ichan << " val=" << val << endl;
+#endif
+
+  stokes[ichan][iparam+1] = val;
+}
+
 void CalibratorStokes::range_check (unsigned ichan, 
-					    const char* method) const
+				    const char* method) const
 {
   if (ichan >= stokes.size())
     throw Error (InvalidRange, method, "ichan=%d >= nchan=%d", 

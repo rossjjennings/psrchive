@@ -68,6 +68,7 @@ namespace Pulsar {
 
     unsigned get_nparam () const { return 3; /* Stokes Q,U,V */ }
     Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
+    void set_Estimate (unsigned iparam, unsigned ichan, Estimate<float>&);
 
   protected:
 
