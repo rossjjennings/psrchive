@@ -129,9 +129,11 @@ protected:
   template<class Container>
   void load (vector<set>& data, Container* ext, const MJD& epoch);
 
+#if HAVE_SPLINTER
   // unload smoothed model values into container
   template<class Container>
   void unload (Container* ext, vector<set>& data, unsigned ifile);
+#endif
 
   // unload text to file
   void unload (const string& filename, const vector<row>& table);
@@ -382,6 +384,8 @@ void smint::unload (const string& filename, const vector<row>& table)
   }
 }
 
+#if HAVE_SPLINTER
+
 template<class Extension>
 void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 {
@@ -415,6 +419,8 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
     }
   }
 }
+
+#endif
 
 void smint::finalize ()
 {
@@ -469,6 +475,8 @@ void smint::finalize ()
     cpgend ();
 #endif
 
+#if HAVE_SPLINTER
+
   for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
   {
     string filename = input_filenames[ifile];
@@ -502,6 +510,9 @@ void smint::finalize ()
     string new_filename = replace_extension (filename, ".smint");
     archive->unload (new_filename);
   }
+
+#endif
+
 }
 
 #if HAVE_SPLINTER
