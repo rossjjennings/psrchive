@@ -34,7 +34,10 @@ Pulsar::PolnProfileStats::Interface::Interface (PolnProfileStats* instance)
        "sumV", "Total Stokes V of on-pulse phase bins" );
 
   add( &PolnProfileStats::get_total_abs_circular,
-       "sumC", "Total circularly polarized flux of on-pulse phase bins" );
+       "sumC", "Total circularly polarized flux |V| of on-pulse phase bins" );
+
+  add( &PolnProfileStats::get_total_determinant,
+       "sumS", "Total coherency matrix determinant of on-pulse phase bins" );
 
   add (&PolnProfileStats::get_linear_variance,
        "varL", "Variance of the off-pulse linearly polarized flux");
