@@ -18,7 +18,8 @@ namespace Pulsar {
   class Smooth;
   class RemoveBaseline;
 
-  class ProfileInterpreter : public Interpreter::Extension {
+  class ProfileInterpreter : public Interpreter::Extension
+  {
 
   public:
 
@@ -30,6 +31,9 @@ namespace Pulsar {
 
     //! Remove the profile baseline
     std::string baseline (const std::string& args);
+
+    //! Scale each profile by a mathematical expression
+    std::string scale (const std::string& args);
 
     //! Form the cummulative profile
     std::string cumulative (const std::string& args);
