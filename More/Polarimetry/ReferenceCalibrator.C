@@ -50,12 +50,15 @@ void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
   bool fullStokes = state == Signal::Stokes 
     || state == Signal::Coherence 
     || state == Signal::PseudoStokes;
+
+#if 0
   bool calibratable = fullStokes || state == Signal::PPQQ;
 
   if (!calibratable)
     throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::set_calibrator", 
 		 "Archive='" + archive->get_filename() + "'\n\t"
 		 "invalid state=" + State2string(state));
+#endif
 
   Archive* clone = 0;
 
