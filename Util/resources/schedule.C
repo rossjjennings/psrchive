@@ -368,7 +368,7 @@ int main (int argc, char* argv[])
     Angle lst = current_lst;
     lst.setWrapPoint( 2*M_PI );
 
-    cout << "at " << lst.getHMS(0)
+    cerr << "at " << lst.getHMS(0)
          << " " << up.size() << " available sources" << endl;
 
     unsigned choose_index = 0;
@@ -386,8 +386,22 @@ int main (int argc, char* argv[])
              << "\t" << up[i].slewtime << endl;
 
       char got = 0;
-      while ( got < '0' || got > '9')
+      while ( (got < '0' || got > '9') && got != 's' )
         got = getchar();
+
+      if (got == 's')
+      {
+        cerr << "sorting by slew time" << endl;
+        std::sort (up.begin(), up.end(), by_slewtime);
+
+        cerr << "NAME\t\tRANK\tSLEW" << endl;
+        for (unsigned i=0; i<nshow; i++) 
+          cerr << i << " " << up[i].name << "\t" << up[i].priority
+               << "\t" << up[i].slewtime << endl;
+
+        while ( got < '0' || got > '9')
+          got = getchar();
+      }
 
       choose_index = got - '0';
       cerr << "chosen index =" << choose_index << endl;
@@ -421,11 +435,20 @@ int main (int argc, char* argv[])
       }
 
     if (current_pointing)
+    {
       current_pointing = chosen.mount;
+      Horizon* horizon = dynamic_cast<Horizon*> (current_pointing);
+      cerr << "chosen azimuth = " << horizon->get_azimuth() << endl;
+    }
     else
+    {
       current_pointing = new Horizon(horizon);
+      current_pointing->set_source_coordinates (chosen.coord);
+    }
 
-    current_pointing->set_source_coordinates (chosen.coord);
+    Horizon* horizon = dynamic_cast<Horizon*> (current_pointing);
+    cerr << "current azimuth = " << horizon->get_azimuth() << endl;
+
   }
   return 0;
 }
