@@ -7,6 +7,8 @@
 
 #include "Horizon.h"
 
+using namespace std;
+
 Horizon::Horizon (double az, double el)
 {
   azimuth = az;
@@ -58,6 +60,12 @@ Matrix<3,3,double> Horizon::get_basis (const Vector<3,double>& from) const
   */
   azimuth = M_PI + atan2 (from[1], from[0]);
 
+  while (azimuth > maximum_azimuth)
+    azimuth -= 2*M_PI;
+
+  while (azimuth < minimum_azimuth)
+    azimuth += 2*M_PI;
+
   /*
     radius projected into horizontal plane
   */
@@ -95,6 +103,14 @@ Horizon::slew_times (const sky_coord& coords)
 std::vector< std::pair<double,Mount*> >
 Horizon::slew_times (double next_azimuth, double next_elevation)
 {
+#if _DEBUG
+  cerr << "Horizon::slew_times current az=" << get_azimuth()*180/M_PI
+       << " el=" << get_elevation()*180/M_PI << endl;
+
+  cerr << "Horizon::slew_times next az=" << next_azimuth*180/M_PI
+       << " el=" << next_elevation*180/M_PI << endl;
+#endif
+
   double diff_elevation = fabs( get_elevation() - next_elevation );
   double time_elevation = diff_elevation / elevation_velocity;
   
@@ -124,3 +140,4 @@ Horizon::slew_times (double next_azimuth, double next_elevation)
   
   return retval;
 }
+
