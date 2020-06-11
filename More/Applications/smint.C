@@ -20,7 +20,9 @@
 #include "Pulsar/StandardOptions.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Profile.h"
 
@@ -63,6 +65,8 @@ public:
 
 protected:
 
+  bool convert_epochs;
+
   void fit_polynomial (const vector< double >& data_x,
                        const vector< Estimate<double> >& data_y);
 
@@ -91,7 +95,7 @@ protected:
   {
   public:
     MJD epoch;
-    double x0; // converted epoch
+    double x0; // coordinate shared by all data in row
     vector< double > freq;
     vector< Estimate<double> > data;
   };
@@ -110,8 +114,8 @@ protected:
     std::vector<row> table;
   };
 
-  // pulsar profile [ipol][ibin] to be smoothed
-  vector< vector<set> > profile_data;
+  // pulsar profile [ipol] to be smoothed
+  vector<set> profile_data;
 
   // PolnCalibratorExtension [iparam] to be smoothed
   vector<set> pcal_data;
@@ -119,15 +123,32 @@ protected:
   // CalibratorStokes [ipol] to be smoothed
   vector<set> cal_stokes_data;
 
+  // FluxCalibratorExtension [iparam] to be smoothed
+  vector<set> fcal_data;
+
   // the centre frequency of the data
   double centre_frequency;
   vector<double> channel_frequency;
   string reference_filename;
   vector<string> input_filenames;
 
+  // load profile data from Integration
+  void load (vector<set>& data, Integration* subint);
+
   // load data from a container into one or more set::table
   template<class Container>
   void load (vector<set>& data, Container* ext, const MJD& epoch);
+
+  // add parameters, from istart to iend inclusive, only if they have been measured
+  template<class Container>
+  void add_if_has_data (vector<set>& data, Container* ext,
+                        unsigned istart, unsigned iend);
+
+  template<typename Container>
+  void set_reference (Pulsar::Archive* archive, Container* ext);
+
+  template<typename Container>
+  void check_reference (Pulsar::Archive* archive, Container* ext);
 
 #if HAVE_SPLINTER
   // unload smoothed model values into container
@@ -243,16 +264,138 @@ void smint::load (vector<set>& data, Container* ext, const MJD& epoch)
       if (!ext->get_valid(ichan))
         continue;
 
+      Estimate<float> val = ext->get_Estimate (iparam, ichan);
+
+      if (val.var == 0.0)
+      {
+        cerr << "smint::load ignoring valid data in ichan=" << ichan << " with zero variance" << endl;
+        continue;
+      }
+
       data_x.push_back( channel_frequency[ichan] );
-      data_y.push_back( ext->get_Estimate (iparam, ichan) );
+      data_y.push_back( val );
     }
   }
 }
 
+template<class Container>
+void smint::add_if_has_data (vector<set>& data, Container* ext, 
+                             unsigned istart, unsigned iend)
+{
+  const unsigned nchan = ext->get_nchan();
+
+  for (unsigned iparam=istart; iparam <= iend; iparam++)
+  {
+    bool has_data = false; 
+
+    for (unsigned ichan=0; ichan < nchan; ichan++) 
+      if (ext->get_Estimate (iparam, ichan).var != 0.0)
+        has_data = true;
+
+    if (!has_data)
+      continue;
+
+    data.resize ( data.size() + 1 );
+    data.back().index = iparam;
+  }
+}
+
+template<typename Container>
+void smint::set_reference (Pulsar::Archive* archive, Container* ext)
+{
+  centre_frequency = archive->get_centre_frequency();
+  reference_filename = archive->get_filename();
+
+  channel_frequency.resize( ext->get_nchan() );
+  for (unsigned i=0; i<ext->get_nchan(); i++)
+    channel_frequency[i] = ext->get_centre_frequency(i) - centre_frequency;
+}
+
+template<typename Container>
+void smint::check_reference (Pulsar::Archive* archive, Container* ext)
+{
+  if (archive->get_centre_frequency() != centre_frequency)
+    throw Error (InvalidState, "smint::process", "centre frequency mismatch\n"
+                 "\t" + reference_filename
+                      + " freq=" + tostring(centre_frequency) + "\n"
+                 "\t" + archive->get_filename()
+                      + " freq=" + tostring(archive->get_centre_frequency()) );
+
+  if (ext->get_nchan() != channel_frequency.size())
+    throw Error (InvalidState, "smint::process", "nchan mismatch\n"
+                 "\t" + reference_filename
+                      + " nchan=" + tostring(channel_frequency.size()) + "\n"
+                 "\t" + archive->get_filename()
+                      + " nchan=" + tostring(ext->get_nchan()) );
+
+  for (unsigned i=0; i<ext->get_nchan(); i++)
+    if (channel_frequency[i] != ext->get_centre_frequency(i) - centre_frequency)
+      throw Error (InvalidState, "smint::process", "channel frequency mismatch\n"
+                    "\t" + reference_filename +
+                    " freq=" + tostring(centre_frequency+channel_frequency[i]) + "\n"
+                    "\t" + archive->get_filename() +
+                    " freq=" + tostring(ext->get_centre_frequency(i)) );
+}
+
 void smint::process (Pulsar::Archive* archive)
 {
-  Reference::To< PolnCalibratorExtension > ext;
-  ext = archive->get<PolnCalibratorExtension>();
+  if (archive->get_nsubint() == 1)
+  {
+    cerr << "smint::process sub-integration" << endl;
+    load (profile_data, archive->get_Integration(0));
+    cerr << "smint::process loaded sub-integration" << endl;
+
+    convert_epochs = false;
+
+#if HAVE_PGPLOT
+  if (plot_device != "")
+    cpgopen (plot_device.c_str());
+#endif
+
+    for (unsigned ipol=0; ipol < profile_data.size(); ipol++)
+    {
+      string idx = tostring(profile_data[ipol].index);
+
+      spline_filename = "profile_spline_" + idx + ".txt";
+
+      if (plot_device == "")
+        plot_filename = "profile_fit_" + idx + ".eps/cps";
+
+      cerr << "smint::process fit ipol=" << ipol << endl;
+      fit (profile_data[ipol]); 
+    }
+
+#if HAVE_PGPLOT
+  if (plot_device != "")
+    cpgend ();
+#endif
+
+    cerr << "smint::process sub-integration data fit" << endl;
+  }
+
+  FluxCalibratorExtension* fext = archive->get<FluxCalibratorExtension>();
+  if (fext)
+  {
+    unsigned nchan = fext->get_nchan();
+
+    if (fcal_data.size() == 0)
+    {
+      // smooth only S_cal for each receptor parameters 
+
+      add_if_has_data (fcal_data, fext, 2, 3);
+      set_reference (archive, fext);
+    }
+    else
+    {
+      check_reference (archive, fext);
+    }
+
+    MJD epoch = fext->get_epoch();
+    load (fcal_data, fext, epoch);
+
+  }
+
+  PolnCalibratorExtension* ext = archive->get<PolnCalibratorExtension>();
   if (ext)
   {
     unsigned nchan = ext->get_nchan();
@@ -262,49 +405,17 @@ void smint::process (Pulsar::Archive* archive)
       /* smooth only receptor parameters 3, 4, 5, 6
          and ignore the backend (gain and phase) */
 
-      for (unsigned iparam=3; iparam <= 6; iparam++)
-      {
-        bool has_data = false;
-        for (unsigned ichan=0; ichan < nchan; ichan++)
-          if (ext->get_Estimate (iparam, ichan).var != 0.0)
-            has_data = true;
-        if (!has_data)
-          continue;
-
-        pcal_data.resize ( pcal_data.size() + 1 );
-
-        pcal_data.back().index = iparam;
-      }
-
-      centre_frequency = archive->get_centre_frequency();
-      reference_filename = archive->get_filename();
-
-      channel_frequency.resize( ext->get_nchan() );
-      for (unsigned i=0; i<ext->get_nchan(); i++)
-        channel_frequency[i] = ext->get_centre_frequency(i) - centre_frequency;
+      add_if_has_data (pcal_data, ext, 3, 6);
+      set_reference (archive, ext);
     }
     else
     {
-      if (archive->get_centre_frequency() != centre_frequency)
-        throw Error (InvalidState, "smint::process", "centre frequency mismatch\n"
-                     "\t" + reference_filename + " freq=" + tostring(centre_frequency) + "\n"
-                     "\t" + archive->get_filename() + " freq=" + tostring(archive->get_centre_frequency()) );
-
-      if (ext->get_nchan() != channel_frequency.size())
-        throw Error (InvalidState, "smint::process", "nchan mismatch\n"
-                     "\t" + reference_filename + " freq=" + tostring(channel_frequency.size()) + "\n"
-                     "\t" + archive->get_filename() + " freq=" + tostring(ext->get_nchan()) );
-
-      for (unsigned i=0; i<ext->get_nchan(); i++)
-        if (channel_frequency[i] != ext->get_centre_frequency(i) - centre_frequency)
-          throw Error (InvalidState, "smint::process", "channel frequency mismatch\n"
-                     "\t" + reference_filename + " freq=" + tostring(centre_frequency+channel_frequency[i]) + "\n"
-                     "\t" + archive->get_filename() + " freq=" + tostring(ext->get_centre_frequency(i)) );
+      check_reference (archive, ext);
     }
 
     MJD epoch = ext->get_epoch();
 
-    load (pcal_data, ext.get(), epoch);
+    load (pcal_data, ext, epoch);
 
     Reference::To< CalibratorStokes > cal;
     cal = archive->get<CalibratorStokes>();
@@ -312,22 +423,8 @@ void smint::process (Pulsar::Archive* archive)
     {
       if (cal_stokes_data.size() == 0)
       {
-        // smooth Q, U, and V
-        for (unsigned iparam=0; iparam < 3; iparam++)
-        {
-          bool has_data = false; 
-          for (unsigned ichan=0; ichan < nchan; ichan++) 
-            if (cal->get_Estimate (iparam, ichan).var != 0.0)
-              has_data = true;
-
-          if (!has_data)
-            continue;
-
-          cal_stokes_data.resize ( cal_stokes_data.size() + 1 );
-  
-          cal_stokes_data.back().index = iparam;
-        }
-
+        // smooth Q=0, U=1, and V=2
+        add_if_has_data (cal_stokes_data, cal.get(), 0, 2);
       }
     
       load (cal_stokes_data, cal.get(), epoch);
@@ -335,6 +432,50 @@ void smint::process (Pulsar::Archive* archive)
   }
 
   input_filenames.push_back( archive->get_filename() );
+}
+
+void smint::load (vector<set>& data, Integration* subint)
+{
+  const unsigned nchan = subint->get_nchan();
+  const unsigned nbin = subint->get_nbin();
+  const unsigned npol = subint->get_npol();
+
+  cerr << "smint::load Integration npol=" << npol << " nchan=" << nchan 
+       << " nbin=" << nbin << endl;
+
+  data.resize (npol);
+
+  vector< vector< Estimate<double> > > mean;
+  vector< vector< double > > variance;
+
+  subint->baseline_stats (&mean, &variance);
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    data[ipol].table.resize( nbin );
+    data[ipol].index = ipol;
+
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+    {
+      std::vector< double >& data_x = data[ipol].table[ibin].freq;
+      std::vector< Estimate<double> >& data_y = data[ipol].table[ibin].data;
+
+      data[ipol].table[ibin].x0 = ibin;
+
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+        if (subint->get_weight(ichan) == 0.0)
+          continue;
+
+        data_x.push_back( subint->get_centre_frequency(ichan) );
+
+        double amp = subint->get_Profile(ipol,ichan)->get_amps()[ibin];
+        double var = variance.at(ipol).at(ichan);
+
+        data_y.push_back( Estimate<double>(amp,var) );
+      }
+    }
+  }
 }
 
 void smint::fit (set& dataset)
@@ -437,6 +578,12 @@ void smint::finalize ()
     unload (filename, cal_stokes_data[i].table);
   }
 
+  for (unsigned i=0; i < fcal_data.size(); i++)
+  {
+    string filename = "fcal_data_" + tostring(fcal_data[i].index) + ".txt";
+    unload (filename, fcal_data[i].table);
+  }
+
 #if HAVE_PGPLOT
   if (plot_device != "")
     cpgopen (plot_device.c_str());
@@ -454,6 +601,8 @@ void smint::finalize ()
     if (plot_device == "")
       plot_filename = "pcal_fit_" + idx + ".eps/cps";
 
+    convert_epochs = true;
+
     fit (pcal_data[i]);
   }
 
@@ -467,7 +616,26 @@ void smint::finalize ()
     if (plot_device == "")
       plot_filename = "cal_stokes_fit_" + idx + ".eps/cps";
 
+    convert_epochs = true;
+
     fit (cal_stokes_data[i]);
+  }
+
+  for (unsigned i=0; i < fcal_data.size(); i++)
+  {
+    cerr << "smint: fitting FluxCalibrator "
+            "iparam=" << fcal_data[i].index << endl;
+
+    string idx = tostring(fcal_data[i].index);
+
+    spline_filename = "fcal_spline_" + idx + ".txt";
+
+    if (plot_device == "")
+      plot_filename = "fcal_fit_" + idx + ".eps/cps";
+
+    convert_epochs = true;
+
+    fit (fcal_data[i]);
   }
 
 #if HAVE_PGPLOT
@@ -505,6 +673,17 @@ void smint::finalize ()
                      filename + " does not have CalibratorStokes");
 
       unload (ext, cal_stokes_data, ifile);
+    }
+
+    if (fcal_data.size())
+    {
+      FluxCalibratorExtension* ext;
+      ext = archive->get<FluxCalibratorExtension>();
+      if (!ext)
+        throw Error (InvalidState, "smint",
+                     filename + " does not have FluxCalibratorExtension");
+
+      unload (ext, fcal_data, ifile);
     }
 
     string new_filename = replace_extension (filename, ".smint");
@@ -586,24 +765,30 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 { 
   spline.set_alpha (pspline_alpha);
 
-  MJD min_epoch = table.front().epoch;
-  MJD max_epoch = table.front().epoch;
+  MJD mid_epoch;
+  double x0_span = 0.0;
 
-  for (unsigned irow = 1; irow < table.size(); irow++)
+  if (convert_epochs)
   {
-    if (table[irow].epoch > max_epoch)
-      max_epoch = table[irow].epoch;
-    if (table[irow].epoch < min_epoch)
-      min_epoch = table[irow].epoch;
+    MJD min_epoch = table.front().epoch;
+    MJD max_epoch = table.front().epoch;
+
+    for (unsigned irow = 1; irow < table.size(); irow++)
+    {
+      if (table[irow].epoch > max_epoch)
+        max_epoch = table[irow].epoch;
+      if (table[irow].epoch < min_epoch)
+        min_epoch = table[irow].epoch;
+    }
+  
+    x0_span = (max_epoch - min_epoch).in_days();
+  
+    cerr << "smint::fit_pspline data span " << x0_span << " days" << endl;
+  
+    mid_epoch = min_epoch + MJD(0.5 * x0_span);
+  
+    cerr << "smint::fit_pspline min=" << min_epoch << " ref=" << mid_epoch << endl;
   }
-
-  double span_days = (max_epoch - min_epoch).in_days();
-
-  cerr << "smint::fit_pspline data span " << span_days << " days" << endl;
-
-  MJD mid_epoch = min_epoch + MJD(0.5 * span_days);
-
-  cerr << "smint::fit_pspline min=" << min_epoch << " ref=" << mid_epoch << endl;
 
   vector< pair<double,double> > data_x;
   vector< Estimate<double> > data_y;
@@ -613,8 +798,10 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   for (unsigned irow = 0; irow < table.size(); irow++)
   {
-    double x0 = (table[irow].epoch - mid_epoch).in_days();
-    table[irow].x0 = x0;
+    if (convert_epochs)
+      table[irow].x0 = (table[irow].epoch - mid_epoch).in_days();
+
+    double x0 = table[irow].x0;
 
     unsigned nchan = table[irow].freq.size();
 
@@ -638,8 +825,8 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     unsigned npts = 200;
 
     double x1del = (xmax-xmin)/(npts-1);
-    double x0del = span_days/(npts-1);
-    double x0min = -0.5*span_days;
+    double x0del = x0_span/(npts-1);
+    double x0min = -0.5*x0_span;
 
     ofstream out (spline_filename.c_str());
     for (unsigned i=0; i<npts; i++)
@@ -672,7 +859,7 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     plot_data (table[irow].freq, table[irow].data);
 
     cpgsci(2); 
-    double x0 = (table[irow].epoch - mid_epoch).in_days();
+    double x0 = table[irow].x0;
     plot_model (spline, x0, npts, xmin, xmax);
   }
 
