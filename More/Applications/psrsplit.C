@@ -9,14 +9,17 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/ArchiveExtension.h"
+#include "Pulsar/CalibratorExtension.h"
+#include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Dispersion.h"
 #include "Pulsar/Integration.h"
 
 #include "strutil.h"
 
 using namespace std;
+using namespace Pulsar;
 
-//! Pulsar Archive Zapping application
+//! Pulsar Archive splitting application
 class psrsplit: public Pulsar::Application
 {
 public:
@@ -30,6 +33,9 @@ public:
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  //! Process the given archive
+  void split_cal_extensions (Pulsar::Archive*);
+
 protected:
 
   //! Add command line options
@@ -41,6 +47,8 @@ protected:
   bool resize_extensions;
   // deal correctly with frequency-only splitting
   bool useall_subints;
+
+  bool cal_extensions;
 };
 
 int main (int argc, char** argv)
@@ -56,6 +64,7 @@ psrsplit::psrsplit ()
   nsubint = 0;
   nchannel = 0;
   resize_extensions = false;
+  cal_extensions = false;
 }
 
 void psrsplit::add_options (CommandLine::Menu& menu)
@@ -73,6 +82,9 @@ void psrsplit::add_options (CommandLine::Menu& menu)
   arg->set_help ("Attempt to strip the extensions in the output archives\n"
 		  "\t\tWarning: this is almost only useful for reducing the size of output archives\n"
 		  "\t\tbut can render the extensions meaningless");
+
+  arg = menu.add (cal_extensions, "cal");
+  arg->set_help ("split calibration-related extensions");
 }
 
 void psrsplit::setup ()
@@ -80,6 +92,10 @@ void psrsplit::setup ()
   if (nsubint == 0 && nchannel == 0)
     throw Error (InvalidState, "psrsplit::setup",
 		 "please specify number of sub-integrations per output file");
+
+  if (cal_extensions && nchannel == 0)
+    throw Error (InvalidState, "psrsplit::setup",
+                 "please specify number of channel per output calibrator file");
 
   useall_subints = nsubint == 0;
 }
@@ -95,6 +111,15 @@ string get_extension (const std::string& filename)
 
 void psrsplit::process (Pulsar::Archive* archive)
 {
+  cerr << "psrsplit::process " << archive->get_filename() << endl;
+
+  if (cal_extensions)
+  {
+    cerr << "psrsplit::process calibrator extensions" << endl;
+    split_cal_extensions (archive);
+    return;
+  }
+
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
   if ( nsubint > nsub )
@@ -200,3 +225,66 @@ B) after deleting these sub-integrations, the Archive tries to reload them
     isplit ++;
   }
 }
+
+template<typename Container>
+void remove (Container* container, unsigned ichan_start, unsigned nchannel)
+{
+  unsigned nchan = container->get_nchan();
+
+  if ( ichan_start + nchannel < nchan )
+    container->remove_chan (ichan_start + nchannel, nchan - 1);
+  if ( ichan_start > 0 )
+    container->remove_chan (0, ichan_start - 1 );
+}
+
+void psrsplit::split_cal_extensions (Pulsar::Archive* archive)
+{
+  CalibratorExtension* ext = archive->get<CalibratorExtension>();
+
+  if (!ext)
+    throw Error (InvalidState, "psrsplit::split_cal_extensions",
+                 "Archive does not contain a calibrator extension");
+
+  const unsigned nchan = ext->get_nchan();
+  unsigned ichan_start = 0;
+  unsigned ichansplit = 0;
+
+  for (unsigned ichan_start = 0; ichan_start < nchan; ichan_start += nchannel)
+  {
+    Reference::To<Archive> output = archive->clone();
+    ext = output->get<CalibratorExtension>();
+
+    remove (ext, ichan_start, nchannel);
+
+    unsigned new_nchan = ext->get_nchan();
+
+    double f0 = ext->get_centre_frequency (0);
+    double fN = ext->get_centre_frequency (new_nchan - 1);
+    double bw = (fN - f0) * new_nchan / double (new_nchan - 1);
+
+    f0 = ext->get_centre_frequency (new_nchan / 2);
+    fN = ext->get_centre_frequency (new_nchan / 2 -1);
+    double cf = (f0+fN) / 2;
+
+    CalibratorStokes* cs = output->get<CalibratorStokes>();
+    if (cs)
+      remove (cs, ichan_start, nchannel);
+
+    string filename = archive->get_filename();
+    string ext = stringprintf ("%04d", ichansplit) + get_extension (filename);
+    filename = replace_extension( filename, ext );
+
+    cerr << "psrsplit: writing " << filename << endl;
+
+    output->expert()->set_nchan (nchannel);
+
+    output->set_dedispersed (false);
+    output->set_bandwidth (bw);
+    output->set_centre_frequency (cf);
+    
+    output->unload ( filename );
+
+    ichansplit ++;
+  }
+}
+
