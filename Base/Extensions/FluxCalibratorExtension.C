@@ -9,6 +9,11 @@
 #include "Pulsar/CalibratorType.h"
 #include "templates.h"
 
+#if _DEBUG
+#include <iostream>
+using namespace std;
+#endif
+
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
   : CalibratorExtension ("FluxCalibratorExtension")
@@ -205,5 +210,36 @@ Estimate<float> FluxCalibratorExtension::get_Estimate ( unsigned iparam, unsigne
                    "iparam=%u,nreceptor=%u -> jparam=%u,ireceptor=%u", 
                     iparam, get_nreceptor(), jparam, ireceptor);
   }
+}
+
+void FluxCalibratorExtension::set_Estimate ( unsigned iparam, unsigned ichan, const Estimate<float>& val)
+{
+  unsigned jparam = iparam / get_nreceptor();
+  unsigned ireceptor = iparam % get_nreceptor();
+
+  switch (jparam)
+  {
+    case 0: set_S_sys (ichan, ireceptor, val); return;
+    case 1: set_S_cal (ichan, ireceptor, val); return;
+    case 2: set_scale (ichan, ireceptor, val); return;
+    case 3: set_gain_ratio (ichan, ireceptor, val); return;
+    default:
+      throw Error (InvalidParam, "FluxCalibratorExtension::get_Estimate",
+                   "iparam=%u,nreceptor=%u -> jparam=%u,ireceptor=%u",
+                    iparam, get_nreceptor(), jparam, ireceptor);
+  }
+}
+
+bool FluxCalibratorExtension::get_valid (unsigned ichan) const
+{
+  return get_weight (ichan) != 0;
+}
+
+void FluxCalibratorExtension::set_valid (unsigned ichan, bool valid)
+{
+  if (!valid)
+    set_weight (ichan, 0);
+  else
+    set_weight (ichan, 1.0);
 }
  

@@ -107,6 +107,10 @@ namespace Pulsar
 
     //! Get the specified parameter for the specified channel
     Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
+    void set_Estimate ( unsigned iparam, unsigned ichan, const Estimate<float>& );
+
+    bool get_valid (unsigned ichan) const;
+    void set_valid (unsigned ichan, bool valid);
 
   protected:
 
