@@ -269,26 +269,15 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     WvS - 04 Jul 2017
     Beginning with PSRFITS version 6, the centre frequency and bandwidth
     are defined by the REFFREQ and CHAN_BW*NCHAN attributes of the SUBINT HDU.
+
+    WvS - 11 Jun 2020
+    Some files (like the output of pcm) have no SUBINT HDU.  Therefore, the
+    centre frequency and bandwidth are set here with the understanding that 
+    they may be reset during load_integrations.
   */
 
-  if (psrfits_version < 6.0)
-  {
-    /* 
-       The re-interpretation of CTR_FREQ was implemented only by the
-       Parkes digital filter bank (PDFB)
-    */
-    bool ignore_ctr_freq =
-      backend->get_name() == "PDFB3" || backend->get_name() == "PDFB4";
-    
-    if (!( ignore_ctr_freq && (get_centre_frequency() > 0.0) ))
-      set_centre_frequency ( last.ctr_freq );
- 
-    if (verbose > 2)
-      cerr << "FITSArchive::load_ProcHistory pre-version 6.0 set bandwidth="
-           << last.nchan * last.chan_bw << endl;
-
-    set_bandwidth (last.nchan * last.chan_bw);
-  }
+  set_centre_frequency ( last.ctr_freq );
+  set_bandwidth (last.nchan * last.chan_bw);
 
   /*
     WvS - 07 Feb 2008
