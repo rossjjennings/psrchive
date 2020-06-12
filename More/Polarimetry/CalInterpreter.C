@@ -143,9 +143,23 @@ string Pulsar::CalInterpreter::load (const string& args)
 
   try {
     // try to load the file as a database
-    database = new Database( filename );
+    Database* temp = new Database( filename );
+
+    string result;
+
+    if (!database)
+    {
+      database = temp;
+      result = filename + " database loaded";
+    }
+    else
+    {
+      database->merge(temp);
+      result = filename + " database merged";
+    }
+
     calibrator = 0;
-    return response (Good);
+    return response (Good, result);
   }
   catch (Error& error) {
     dbase_error = error.get_message();
