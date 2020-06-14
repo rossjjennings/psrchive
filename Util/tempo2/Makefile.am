@@ -7,9 +7,10 @@ include_HEADERS = T2Generator.h T2Predictor.h T2Observatory.h
 
 libtempo_2_la_SOURCES = T2Predictor.C T2Generator.C T2Observatory.C
 
-check_PROGRAMS = test_T2Generator
+check_PROGRAMS = test_T2Generator test_T2Predictor
 
 test_T2Generator_SOURCES = test_T2Generator.C
+test_T2Predictor_SOURCES = test_T2Predictor.C
 
 #############################################################################
 #
