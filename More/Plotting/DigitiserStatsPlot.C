@@ -104,14 +104,14 @@ bool DigitiserStatsPlot::CheckStats( Reference::To<DigitiserStatistics> ext )
 {
   if( !ext )
   {
-    if( verbose > 1 )
+    if( verbose )
       cerr << "No digitiser Satistics extension" << endl;
     return false;
   }
 
   if( ext->rows.size() == 0 )
   {
-    if( verbose > 1 )
+    if( verbose )
       cerr << "Digitiser Satistics extension has zero rows" << endl;
     return false;
   }
@@ -197,7 +197,7 @@ void DigitiserStatsPlot::prepare( const Archive *const_arch )
     }
     else
     {
-      if( verbose > 1 )
+      if( verbose )
         cerr << "Digitiser Stats values are all zero" << endl;
     }
   }
