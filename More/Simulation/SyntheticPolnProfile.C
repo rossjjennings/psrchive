@@ -118,11 +118,11 @@ Pulsar::SyntheticPolnProfile::get_PolnProfile (unsigned nbin) const
 {
   Reference::To<PolnProfile> result = new PolnProfile (nbin);
   // result->convert_state (Signal::Stokes);
-  get_PolnProfile (result);
+  get_PolnProfile (result.get());
   return result.release();
 }
 
-void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
+void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result) const
 {
   unsigned nbin = result->get_nbin();
 
