@@ -139,8 +139,7 @@ namespace Pulsar {
       unsigned         nchan;        // Number of channels across bandwidth
       std::string      instrument;   // name of backend
       std::string      receiver;     // name of receiver
-      std::string      filename;     // relative path of file
-      std::string      path;         // path to filename
+      std::string      filename;     // full path of file
       
       //! Null constructor
       Entry ();
@@ -298,6 +297,9 @@ namespace Pulsar {
     //! Remove the preceding path from the Entry filename, if applicable
     void shorten_filename (Entry& entry);
 
+    //! Add path to Entry filename, if applicable
+    void expand_filename (Entry& entry);
+
     //! Get the closest match report
     std::string get_closest_match_report () const;
 
@@ -305,10 +307,21 @@ namespace Pulsar {
     
     std::vector<Entry> entries;   // list of entries in the database
     std::string path;
-    Entry lastEntry;
-    Reference::To<PolnCalibrator> lastPolnCal;
-    Reference::To<HybridCalibrator> lastHybridCal;
-    
+
+    template<class Cal> class Cache
+    {
+    public:
+      Entry entry;
+      Reference::To<Cal> calibrator;
+
+      void cache (const Entry& _entry, Cal* cal)
+      { entry = _entry; calibrator = cal; }
+    };
+
+    Cache<PolnCalibrator> lastPolnCal;
+    Cache<HybridCalibrator> lastHybridCal;
+    Cache<FluxCalibrator> lastFluxCal;
+ 
     //! Return a pointer to a new FluxCalibrator for the given archive
     FluxCalibrator* rawFluxCalibrator (Archive* a);
 
