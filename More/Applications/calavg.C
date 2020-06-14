@@ -240,7 +240,8 @@ void calavg::process(Pulsar::Archive* archive)
   Reference::To<Pulsar::FluxCalibratorExtension> ext =
     archive->get<Pulsar::FluxCalibratorExtension>();
 
-  if (ext == NULL) {
+  if (!ext)
+  {
     cerr << archive->get_filename() << " is not a fluxcal... " << endl;
 
     return;
