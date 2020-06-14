@@ -68,7 +68,7 @@ void Pulsar::AdaptiveSmooth::transform(Profile *p)
   complex<float> *cprof = (complex<float> *)fprof;
   for (ih=0; (ih<nh) && (ih<filter.size()); ih++) 
     cprof[ih] *= filter[ih];
-  for (ih=ih; ih<nh; ih++)
+  for (; ih<nh; ih++)
     cprof[ih] = 0.0;
 
   // Inverse transform back to profile
