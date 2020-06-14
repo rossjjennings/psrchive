@@ -838,7 +838,14 @@ void Pulsar::Database::add (const Entry& entry) try
 		 entry.filename + " has epoch = 0 (MJD)");
 
   for (unsigned ie=0; ie < entries.size(); ie++) 
-    if (entries[ie] == entry)
+  {
+    if (entries[ie].filename == entry.filename)
+    {
+      cerr << "Pulsar::Database::add ignoring duplicate entry: \n\t"
+           << entry.filename << endl;
+      return;
+    }
+    else if (entries[ie] == entry)
     {
       cerr << "Pulsar::Database::add keeping newest of duplicate entries:\n\t"
            << entries[ie].filename << " and\n\t" << entry.filename << endl;
@@ -847,6 +854,7 @@ void Pulsar::Database::add (const Entry& entry) try
 	entries[ie] = entry;
       return;
     }
+  }
 
   entries.push_back (entry);
 }
@@ -1147,8 +1155,7 @@ Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
     lastFluxCal.cache (match, fcal);
   }
 
-  return fcal;
-
+  return fcal.release();
 }
 catch (Error& error)
 {  
@@ -1166,7 +1173,7 @@ catch (Error& error)
 Pulsar::FluxCalibrator* 
 Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
 {
-   vector<Pulsar::Database::Entry> oncals;
+  vector<Pulsar::Database::Entry> oncals;
   all_matching (criteria (arch, Signal::FluxCalOn), oncals);
 
   if (!oncals.size())
@@ -1420,3 +1427,4 @@ string Pulsar::Database::get_path () const
 {
   return path;
 }
+
