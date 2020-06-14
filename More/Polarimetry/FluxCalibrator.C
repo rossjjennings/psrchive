@@ -38,6 +38,8 @@ using namespace std;
 */
 Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 {
+  // cerr << "FluxCalibrator ctor this=" << this << endl;
+
   init ();
 
   if (!archive)
@@ -87,6 +89,7 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 
 Pulsar::FluxCalibrator::~FluxCalibrator ()
 {
+  // cerr << "FluxCalibrator dtor this=" << this << endl;
 }
 
 void Pulsar::FluxCalibrator::init ()
@@ -119,12 +122,21 @@ double Pulsar::FluxCalibrator::meanTsys ()
   return mean.get_Estimate().val;
 }
 
-double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
+void Pulsar::FluxCalibrator::data_range_check (unsigned ichan, 
+                                               const char* method) const
 {
   if (ichan >= data.size())
-    throw Error (InvalidParam, "Pulsar::FluxCalibrator::Tsys",
+    throw Error (InvalidParam, method,
                  "ichan=%d > data.size=%d", ichan, data.size());
-  
+
+  if (!data[ichan])
+    throw Error (InvalidParam, method, "data[%u] is not valid", ichan);
+}
+
+double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
+{
+  data_range_check (ichan, "Pulsar::FluxCalibrator::Tsys");
+
   return data[ichan]->get_S_sys().get_value();
 }
 
@@ -135,11 +147,13 @@ void Pulsar::FluxCalibrator::print (std::ostream& os)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::print",
 		 "no FluxCal Archive");
 
-  for (unsigned ic=0; ic<get_nchan(); ic++) {
+  for (unsigned ic=0; ic<get_nchan(); ic++)
+  {
     // Skip invalid channels
     if (!get_valid(ic)) continue;
     os << ic << " ";
-    for (unsigned ir=0; ir<get_nreceptor(); ir++) {
+    for (unsigned ir=0; ir<get_nreceptor(); ir++)
+    {
       os << data[ic]->get_S_sys(ir).get_value() << " " 
         << data[ic]->get_S_sys(ir).get_error() << "  "
         << data[ic]->get_S_cal(ir).get_value() << " "
@@ -261,13 +275,25 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const
 //! Return true if the flux scale for the specified channel is valid
 bool Pulsar::FluxCalibrator::get_valid (unsigned ch) const
 {
-  return data[ch]->get_valid();
+  if (ch >= data.size())
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::get_valid",
+                 "ichan=%u >= size=%u", ch, data.size());
+
+  if (!data[ch])
+    return false;
+  else
+    return data[ch]->get_valid();
 }
 
 //! Set the flux scale invalid flag for the specified channel
 void Pulsar::FluxCalibrator::set_invalid (unsigned ch)
 {
-  data[ch]->set_valid (false);
+  if (ch >= data.size())
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::set_invalid",
+                 "ichan=%u >= size=%u", ch, data.size());
+
+  if (data[ch])
+    data[ch]->set_valid (false);
 }
 
 void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
