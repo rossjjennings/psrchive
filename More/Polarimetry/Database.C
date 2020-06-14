@@ -1147,6 +1147,8 @@ Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
     lastFluxCal.cache (match, fcal);
   }
 
+  return fcal;
+
 }
 catch (Error& error)
 {  
