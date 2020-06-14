@@ -597,7 +597,7 @@ string get_current_path ()
 
   while (getcwd(fullpath, size) == 0)
   {
-    delete fullpath;
+    delete [] fullpath;
     if (errno != ERANGE)
       throw Error (FailedSys, "get_current_path", "getcwd");
     size *= 2;
@@ -605,7 +605,7 @@ string get_current_path ()
   }
 
   string retval = fullpath;
-  delete fullpath;
+  delete [] fullpath;
   return retval;
 }
 
