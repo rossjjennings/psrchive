@@ -12,11 +12,16 @@
 using namespace std;
 using namespace Pulsar;
 
-int main ()
+int main () try
 {
-  ProfileStatistic* stat = ProfileStatistic::factory ("iqr");  
+  ProfileStatistic* stat = ProfileStatistic::factory ("avg");  
 
   cerr << "stat=" << stat << endl;
   return 0;
+}
+catch (Error& error)
+{
+  cerr << error << endl;
+  return -1;
 }
 

@@ -271,13 +271,6 @@ libGeneral_la_SOURCES = \
 	width.C \
 	WidthEstimator.C
 
-
-TESTS = test_ProfileStatistic_factory
-
-check_PROGRAMS = $(TESTS)
-
-test_ProfileStatistic_factory_SOURCES = test_ProfileStatistic_factory.C
-
 ##############################################################################
 #
 # GSL-dependent code
@@ -308,13 +301,6 @@ endif
 #
 
 include $(top_srcdir)/config/Makefile.include
-
-LDADD = $(top_builddir)/More/General/libGeneral.la \
-	$(top_builddir)/More/Polarimetry/libPolarimetry.la \
-	$(top_builddir)/More/MEAL/libMEAL.la \
-        $(top_builddir)/Base/libpsrbase.la \
-        $(top_builddir)/Util/libpsrutil.la \
-        $(top_builddir)/Util/epsic/src/libepsic.la
 
 AM_CPPFLAGS += \
         -I$(top_srcdir)/More/Timing \
