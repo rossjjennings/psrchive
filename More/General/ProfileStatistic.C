@@ -10,6 +10,7 @@
 #include "Pulsar/Fourier.h"
 
 #include <algorithm>
+#include <cassert>
 
 using namespace std;
 using namespace Pulsar;
