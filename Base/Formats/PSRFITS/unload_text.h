@@ -45,9 +45,6 @@ void unload_text (fitsfile* fptr, const char* table, const char* column,
     throw Error (InvalidState, "unload_text",
 		 "%s typecode != TSTRING", column);
 
-  std::vector<char> text (repeat);
-  char* temp = &(text[0]);
-
   FilePtr stream = tmpfile();
   if (!stream)
     throw Error (FailedSys, "unload_text", "tmpfile");
@@ -64,6 +61,9 @@ void unload_text (fitsfile* fptr, const char* table, const char* column,
   // seek back to the start of the file
   fseek (stream, 0, SEEK_SET);
 
+  std::vector<char> text (repeat * 2);
+  char* temp = &(text[0]);
+
   int row = 0;
   while (fgets (temp, repeat, stream) == temp)
   {    
@@ -74,10 +74,13 @@ void unload_text (fitsfile* fptr, const char* table, const char* column,
     if (newline)
       *newline = '\0';
 
+    if (verbose)
+      std::cerr << "unload_text row=" << row << " line='" << temp << "'" << std::endl;
+
     fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &temp, &status);
 
     if (status)
-      throw FITSError (status, "polynomial::unload",
+      throw FITSError (status, "unload_text",
 		       "fits_write_col row=%d", row);
   }
 
