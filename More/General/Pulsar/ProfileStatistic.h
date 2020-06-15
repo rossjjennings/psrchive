@@ -32,23 +32,13 @@ namespace Pulsar {
     //! Derived types define the value returned
     virtual double get (const Profile*) = 0;
 
-    class Agent : public Identifiable::Decorator
-    {
-      public:
-        Agent (ProfileStatistic* ps) : Identifiable::Decorator (ps) { }
-        virtual ProfileStatistic* clone () const = 0;
-    };
+    //! Derived types must also define clone method
+    virtual ProfileStatistic* clone () const = 0;
 
-    template<class Derived>
-    class Advocate : public Agent
-    {
-      public:
-        Advocate () : Agent (new Derived) {}
+  private:
 
-        //! Return a new instance of derived type
-        Derived* clone () const { return new Derived; }
-    };
-    
+    //! thread-safe build for factory
+    static void build (); 
   };
 
 }
