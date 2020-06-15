@@ -557,10 +557,11 @@ int main (int argc, char *argv[]) try
     for (unsigned i=0; i<cal_dbase_filenames.size(); i++)
     {
       cout << "pac: Loading database from " << cal_dbase_filenames[i] << endl;
-      if (i==0)
-        dbase = new Database (cal_dbase_filenames[i]);
+      Reference::To<Database> tmp = new Database (cal_dbase_filenames[i]);
+      if (!dbase)
+        dbase = tmp;
       else
-        dbase->load (cal_dbase_filenames[i]);
+        dbase->merge(tmp);
     }
   }
   catch (Error& error)
@@ -893,7 +894,7 @@ int main (int argc, char *argv[]) try
     catch (Error& error)
     {
       cerr << "pac: Could not flux calibrate " << arch->get_filename() << endl
-           << "\t" << error.get_message() << endl;
+           << "\t" << error << endl;
     }
 
     string newname = replace_extension( filenames[i], unload_ext );
