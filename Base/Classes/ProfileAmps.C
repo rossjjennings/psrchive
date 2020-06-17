@@ -90,7 +90,9 @@ Pulsar::ProfileAmps::~ProfileAmps ()
 {
   DEBUG("Pulsar::ProfileAmps dtor amps=" << amps);
 
-  if (amps != NULL) amps_free (amps); amps = 0;
+  if (amps != NULL) amps_free (amps);
+
+  amps = 0;
 }
 
 /*
@@ -106,7 +108,9 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
   if (amps_size >= nbin && nbin != 0)
     return;
 
-  if (amps) amps_free(amps); amps = NULL;
+  if (amps) amps_free(amps);
+
+  amps = NULL;
   amps_size = 0;
 
   if (nbin == 0)
