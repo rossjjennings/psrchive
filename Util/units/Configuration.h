@@ -43,6 +43,9 @@ public:
   //! Get the value for the specified key
   template<typename T> T get (const std::string& key, T default_value) const;
 
+  //! Get the value for the specified key (throw exception if not found
+  template<typename T> T get (const std::string& key) const;
+
   //! Find the entry with the specified key
   Entry* find (const std::string& key) const;
 
@@ -94,6 +97,14 @@ public:
   {
     key = _key;
     loader = new DirectLoader (default_value);
+    loader->parameter = this;
+    loader->configuration = config;
+  }
+
+  Parameter (const std::string& _key, Configuration* config)
+  {
+    key = _key;
+    loader = new DirectLoader;
     loader->parameter = this;
     loader->configuration = config;
   }
@@ -200,7 +211,10 @@ class Configuration::Parameter<T>::DirectLoader : public Loader
 {
 public:
 
-  DirectLoader (const T& _default) { default_value = _default; }
+  DirectLoader () { default_value_set = false; }
+
+  DirectLoader (const T& _default) 
+  { default_value = _default; default_value_set = true; }
 
   //! Load the parameter value
   virtual void load ()
@@ -208,15 +222,27 @@ public:
     Parameter<T>* param = this->parameter;
     Configuration* config = this->configuration;
 
-    param->value = config->get (param->key, default_value);
-    DEBUG("Configuration::Parameter<T>::Loader::load key=" << param->key \
-	  << " default=" << default_value << " value=" << param->value);
+    if (default_value_set)
+    {
+      param->value = config->get (param->key, default_value);
+  
+      DEBUG("Configuration::Parameter<T>::Loader::load key=" << param->key \
+	    << " default=" << default_value << " value=" << param->value);
+    }
+    else if (config->find (param->key))
+    {
+      param->value = config->get<T> (param->key);
+
+      DEBUG("Configuration::Parameter<T>::Loader::load key=" << param->key \
+            << " value=" << param->value);
+    }
 
     this->destroy();
   }
 
 protected:
   T default_value;
+  bool default_value_set;
 };
 
 template<typename T>
@@ -272,6 +298,20 @@ T Configuration::get (const std::string& key, T default_value) const
   DEBUG("Configuration::get default " << key << " = " << default_value);
 
   return default_value;
+}
+
+//! Get the value for the specified key
+template<typename T>
+T Configuration::get (const std::string& key) const
+{
+  Entry* entry = find (key);
+  if (entry)
+  {
+    DEBUG("Configuration::get found entry->value=" << entry->value);
+    return fromstring<T> (entry->value);
+  }
+  else
+    throw Error (InvalidParam, "Configuration::get", "entry not found");
 }
 
 #endif

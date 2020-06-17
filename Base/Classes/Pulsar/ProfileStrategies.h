@@ -46,13 +46,13 @@ namespace Pulsar {
   public:
 
     //! The default implementation of the baseline finding algorithm
-    static Option< Reference::To<ProfileWeightFunction> > default_baseline;
+    static Configuration::Parameter< Reference::To<ProfileWeightFunction> >& get_default_baseline();
 
     //! The default implementation of the onpulse finding algorithm
-    static Option< Reference::To<ProfileWeightFunction> > default_onpulse;
+    static Configuration::Parameter< Reference::To<ProfileWeightFunction> >& get_default_onpulse();
 
     //! The default implementation of the snr method
-    static Option< Reference::To<SNRatioEstimator> > default_snratio;
+    static Configuration::Parameter< Reference::To<SNRatioEstimator> >& get_default_snratio();
 
     //! Default constructor
     StrategySet ();

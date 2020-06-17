@@ -37,7 +37,7 @@ Pulsar::AdaptiveSNR::get_baseline_estimator () const
   if (baseline_estimator)
     return baseline_estimator;
   else
-    return StrategySet::default_baseline.get_value();
+    return StrategySet::get_default_baseline().get_value();
 }
 
 //! Return the signal to noise ratio

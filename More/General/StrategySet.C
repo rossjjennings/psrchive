@@ -15,17 +15,24 @@
 #include "Pulsar/PhaseSNR.h"
 
 #include "interface_stream.h"
+#include "lazy.h"
 
 using namespace Pulsar;
 using namespace std;
+
+LAZY_GLOBAL(Pulsar::StrategySet, \
+            Configuration::Parameter< Reference::To<ProfileWeightFunction> >,
+            default_baseline, new Pulsar::BaselineWindow)
 
 /*!  
   The default baseline estimator is the BaselineWindow class
 */
 Pulsar::Option< Reference::To<ProfileWeightFunction> >
-StrategySet::default_baseline
+default_baseline
 (
- "Profile::baseline", new Pulsar::BaselineWindow,
+ StrategySet::get_default_baseline(),
+
+ "Profile::baseline",
 
  "Baseline estimation algorithm",
 
@@ -44,14 +51,19 @@ void StrategySet::set_baseline (ProfileWeightFunction* b)
   get_stats()->set_baseline_estimator(b);
 }
 
+LAZY_GLOBAL(Pulsar::StrategySet, \
+            Configuration::Parameter< Reference::To<ProfileWeightFunction> >,
+            default_onpulse, new Pulsar::PeakConsecutive)
 
 /*!  
   The default on-pulse estimator is the PeakConsecutive class
 */
 Pulsar::Option< Reference::To<ProfileWeightFunction> >
-StrategySet::default_onpulse
+default_onpulse
 (
- "Profile::onpulse", new Pulsar::PeakConsecutive,
+ StrategySet::get_default_onpulse(),
+
+ "Profile::onpulse",
 
  "On-pulse estimation algorithm",
 
@@ -70,14 +82,19 @@ void StrategySet::set_onpulse (ProfileWeightFunction* pwf)
   get_stats()->set_onpulse_estimator( pwf );
 }
 
+LAZY_GLOBAL(Pulsar::StrategySet, \
+            Configuration::Parameter< Reference::To<SNRatioEstimator> >,
+            default_snratio, new Pulsar::PhaseSNR)
 
 /*!  The SNRatioEstimator::factory method is used to choose and
      configure the S/N estimation algorithm.
 */
 Pulsar::Option< Reference::To<SNRatioEstimator> >
-StrategySet::default_snratio
+default_snratio
 (
- "Profile::snr", new Pulsar::PhaseSNR,
+ StrategySet::get_default_snratio(),
+
+ "Profile::snr",
 
  "Algorithm used to compute S/N",
 

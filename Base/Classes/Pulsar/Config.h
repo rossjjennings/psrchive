@@ -90,6 +90,12 @@ namespace Pulsar
 	    const std::string& description = "none",
 	    const std::string& detailed_description = "none" );
 
+    //! Wrap an existing Configuration::Parameter with own default value
+    Option (Configuration::Parameter<T>& parameter,
+            const std::string& name,
+            const std::string& description = "none",
+            const std::string& detailed_description = "none" );
+
     //! Wrap an existing Configuration::Parameter with an associated parser
     Option (Configuration::Parameter<T>& parameter,
 	    CommandParser* parser,
@@ -207,6 +213,29 @@ Pulsar::Option<T>::Option (Configuration::Parameter<T>& parameter,
 			   const std::string& _description,
 			   const std::string& _detailed_description )
   : Configuration::Parameter<T> (_name, Config::get_configuration(), _default)
+{
+  DEBUG("Pulsar::Option<T> wrap Configuration::parameter");
+
+  description = _description;
+  detailed_description = _detailed_description;
+  parameter.set_key (_name);
+
+  parameter.set_loader( this->loader );
+  this->loader = 0;
+
+  DEBUG("Pulsar::Option<T> wrap add to interface");
+
+  Config::get_interface()->add(this)->instance = &parameter;
+
+  DEBUG("Pulsar::Option<T> wrap return");
+}
+
+template<typename T>
+Pulsar::Option<T>::Option (Configuration::Parameter<T>& parameter,
+                           const std::string& _name,
+                           const std::string& _description,
+                           const std::string& _detailed_description )
+  : Configuration::Parameter<T> (_name, Config::get_configuration())
 {
   DEBUG("Pulsar::Option<T> wrap Configuration::parameter");
 

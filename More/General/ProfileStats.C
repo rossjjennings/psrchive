@@ -502,7 +502,7 @@ TextInterface::Parser* Pulsar::ProfileStats::get_snr_interface ()
   if (snratio_estimator)
     return snratio_estimator->get_interface();
   else
-    return StrategySet::default_snratio.get_value()->get_interface();
+    return StrategySet::get_default_snratio().get_value()->get_interface();
 }
 
 //! Set the pulse width estimator
