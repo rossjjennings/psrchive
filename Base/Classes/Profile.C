@@ -81,6 +81,9 @@ void Pulsar::Profile::init()
 //
 Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
 {
+  if (verbose)
+    cerr << "Pulsar::Profile ctor this=" << this << " instances=" << instance_count << endl;
+
   init();
   if (!no_amps && nbin)
     zero ();
@@ -89,6 +92,9 @@ Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
 //! copy constructor
 Pulsar::Profile::Profile (const Profile& profile)
 {
+  if (verbose)
+    cerr << "Pulsar::Profile ctor this=" << this << " instances=" << instance_count << endl;
+
   init();
   copy (&profile);
 }
@@ -96,12 +102,18 @@ Pulsar::Profile::Profile (const Profile& profile)
 //! copy constructor
 Pulsar::Profile::Profile (const Profile* profile)
 {
+  if (verbose)
+    cerr << "Pulsar::Profile ctor this=" << this << " instances=" << instance_count << endl;
+
   init();
   copy (profile);
 }
 
 Pulsar::Profile::~Profile()
 {
+  if (verbose)
+    cerr << "Pulsar::Profile dtor this=" << this << " instances=" << instance_count << endl;
+
   instance_count --;
 }
 

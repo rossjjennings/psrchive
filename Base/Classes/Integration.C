@@ -149,7 +149,7 @@ unsigned Pulsar::Integration::get_instance_count ()
 Pulsar::Integration::Integration ()
 {
   if (verbose)
-    cerr << "Pulsar::Integration ctor this=" << this << endl;
+    cerr << "Pulsar::Integration ctor this=" << this << " instances=" << instance_count << endl;
 
   zero_phase_aligned = false;
   instance_count ++;
@@ -190,7 +190,7 @@ void Pulsar::Integration::zero ()
 Pulsar::Integration::~Integration ()
 {
   if (verbose)
-    cerr << "Pulsar::Integration dtor this=" << this << endl;
+    cerr << "Pulsar::Integration dtor this=" << this << " instances=" << instance_count << endl;
 
   instance_count --;
 }
