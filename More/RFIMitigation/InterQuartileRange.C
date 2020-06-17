@@ -17,6 +17,8 @@
 
 using namespace std;
 
+// #define _DEBUG 1
+
 // defined in More/General/standard_interface.C
 std::string process (TextInterface::Parser* interface, const std::string& txt);
 
@@ -126,6 +128,14 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
        << " nchan*nsub=" << nchan*nsubint << " valid=" << valid << endl;
 #endif
 
+  if (valid < 4)
+  {
+#ifdef _DEBUG
+    cerr << "valid < 4 - giving up" << endl;
+#endif
+    return;
+  }
+
   std::vector<float> val (values.begin(), values.begin()+ valid);
     
   unsigned iq1 = valid/4;
@@ -158,6 +168,10 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
       if (cutoff_threshold_min > 0 &&
           values[revisit] < Q1 - cutoff_threshold_min * IQR)
       {
+#ifdef _DEBUG
+  cerr << "TOO LOW ichan=" << ichan << endl;
+#endif
+
 	subint->set_weight(ichan, 0);
         too_low ++;
       }
@@ -165,6 +179,10 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
       if (cutoff_threshold_max > 0 &&
           values[revisit] > Q3 + cutoff_threshold_max * IQR)
       {
+#ifdef _DEBUG
+  cerr << "TOO HIGH ichan=" << ichan << endl;
+#endif
+
 	subint->set_weight(ichan, 0);
         too_high ++;
       }
