@@ -42,5 +42,5 @@
     DEBUG( #class "::get_" #name " ptr=" << the_##name); \
     return *the_##name;					 \
   }
-
 #endif
+

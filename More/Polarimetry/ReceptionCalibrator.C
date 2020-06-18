@@ -253,8 +253,11 @@ void ReceptionCalibrator::load_calibrators ()
     if (!model[ichan]->get_valid())
       continue;
 
-    cerr << "ichan=" << ichan << " flux calibrator is not constrained" << endl;
-    model[ichan]->set_valid (false, "no flux cal data");
+    std::string why = fluxcal.at(ichan)->why_not_constrained();
+
+    cerr << "ichan=" << ichan << " flux calibrator not constrained: " << why << endl;
+
+    model[ichan]->set_valid (false, why.c_str());
   }
 }
 

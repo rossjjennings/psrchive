@@ -89,6 +89,9 @@ namespace Calibration
     //! Return true if at least one complete flux calibrator observation
     bool is_constrained () const;
 
+    //! Explain why if not constrained
+    const std::string& why_not_constrained () const { return not_constrained_reason; }
+
     void allow_StokesV_to_vary (bool flag = true);
     void model_multiple_source_states (bool flag = true);
     void model_on_minus_off (bool flag = true);
@@ -134,6 +137,8 @@ namespace Calibration
     bool multiple_source_states;
     bool subtract_off_from_on;
     bool StokesV_may_vary;
+
+    mutable std::string not_constrained_reason;
   };
 
 }

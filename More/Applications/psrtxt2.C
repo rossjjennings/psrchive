@@ -124,7 +124,6 @@ class polarization
   vector< Reference::To<const Profile> > profiles;
 
   Reference::To<Integration> subint;
-  unsigned ichan;
 
 public:
   polarization (string txt) { indeces = txt; auxiliary = false; }

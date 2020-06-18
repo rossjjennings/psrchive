@@ -134,7 +134,6 @@ void Pulsar::Database::Entry::init ()
   receiver = "unset";
   instrument = "unset";
   filename = "unset";
-  path = "unset";
 }
 
 Pulsar::Database::Entry::Entry ()
@@ -299,10 +298,7 @@ void Pulsar::Database::Entry::unload (string& retval)
 //! Returns the full pathname of the Entry filename
 string Pulsar::Database::Entry::get_filename () const
 {
-  if (filename[0] == '/' or path == "unset")
-    return filename;
-  else
-    return path + "/" + filename;
+  return filename;
 }
 
 namespace Pulsar
@@ -601,7 +597,7 @@ string get_current_path ()
 
   while (getcwd(fullpath, size) == 0)
   {
-    delete fullpath;
+    delete [] fullpath;
     if (errno != ERANGE)
       throw Error (FailedSys, "get_current_path", "getcwd");
     size *= 2;
@@ -609,7 +605,7 @@ string get_current_path ()
   }
 
   string retval = fullpath;
-  delete fullpath;
+  delete [] fullpath;
   return retval;
 }
 
@@ -754,7 +750,7 @@ void Pulsar::Database::load (const string& dbase_filename)
       cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
 
     entry.load (temp);
-    shorten_filename (entry);
+    expand_filename (entry);
     add (entry);
   }
   catch (Error& error)
@@ -787,8 +783,13 @@ void Pulsar::Database::unload (const string& filename)
 	   (unsigned)entries.size());
 
   string out;
-  for (unsigned ie=0; ie<entries.size(); ie++) {
-    entries[ie].unload(out);
+  for (unsigned ie=0; ie<entries.size(); ie++)
+  {
+    Entry temp = entries[ie];
+
+    shorten_filename (temp);
+    temp.unload(out);
+
     fprintf (fptr, "%s\n", out.c_str());
   }
   fclose (fptr);
@@ -803,13 +804,21 @@ void Pulsar::Database::add (const Pulsar::Archive* archive)
   try
   {
     Entry entry (*archive);
-    shorten_filename (entry);
+    expand_filename (entry);
     add (entry);
   }
   catch (Error& error)
   {
     throw error += "Pulsar::Database::add Archive";
   }
+}
+
+void Pulsar::Database::expand_filename (Entry& entry)
+{
+  if (path.empty())
+    return;
+
+  entry.filename = get_filename (entry);
 }
 
 void Pulsar::Database::shorten_filename (Entry& entry)
@@ -819,8 +828,6 @@ void Pulsar::Database::shorten_filename (Entry& entry)
 
   if (entry.filename.substr(0, path.length()) == path)
     entry.filename.erase (0, path.length()+1);
-
-  entry.path = path;
 }
 
 //! Add the given Archive to the database
@@ -831,7 +838,14 @@ void Pulsar::Database::add (const Entry& entry) try
 		 entry.filename + " has epoch = 0 (MJD)");
 
   for (unsigned ie=0; ie < entries.size(); ie++) 
-    if (entries[ie] == entry)
+  {
+    if (entries[ie].filename == entry.filename)
+    {
+      cerr << "Pulsar::Database::add ignoring duplicate entry: \n\t"
+           << entry.filename << endl;
+      return;
+    }
+    else if (entries[ie] == entry)
     {
       cerr << "Pulsar::Database::add keeping newest of duplicate entries:\n\t"
            << entries[ie].filename << " and\n\t" << entry.filename << endl;
@@ -840,6 +854,7 @@ void Pulsar::Database::add (const Entry& entry) try
 	entries[ie] = entry;
       return;
     }
+  }
 
   entries.push_back (entry);
 }
@@ -1120,10 +1135,27 @@ Pulsar::FluxCalibrator*
 Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 
   Entry match = best_match (criteria(arch, new CalibratorTypes::Flux));
+
+  if (lastFluxCal.entry == match)
+  {
+    if (Calibrator::verbose > 2)
+      cerr << "Pulsar::Database::generateFluxCalibrator using cached calibrator\n";
+    return lastFluxCal.calibrator;
+  }
+
   Reference::To<Archive> archive = Archive::load( get_filename(match) );
   match_channels(archive,arch);
-  return new FluxCalibrator (archive);
+  
+  Reference::To<FluxCalibrator> fcal = new FluxCalibrator (archive);
 
+  if (cache_last_cal)
+  {
+    if (Calibrator::verbose > 2)
+      cerr << "Pulsar::Database::generateFluxCalibrator caching FluxCalibrator" << endl;
+    lastFluxCal.cache (match, fcal);
+  }
+
+  return fcal.release();
 }
 catch (Error& error)
 {  
@@ -1251,11 +1283,11 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     }
   }
 
-  if (cache_last_cal && lastPolnCal && entry == lastEntry)
+  if (lastPolnCal.entry == entry)
   {
     if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator using cached calibrator\n";
-    return lastPolnCal;
+    return lastPolnCal.calibrator;
   }
 
   if (Calibrator::verbose > 2)
@@ -1301,8 +1333,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   {
     if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator caching PolnCalibrator" << endl;
-    lastEntry = entry;
-    lastPolnCal = ref_cal;
+    lastPolnCal.cache (entry, ref_cal);
   }
 
   return ref_cal.release();
@@ -1334,14 +1365,15 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
   catch (Error& error)
   {
     throw Error (InvalidState, "Pulsar::Database::generateHybridCalibrator",
-		 "No complete parameterization (e.g. pcm output) found");
+		 "No complete parameterization (e.g. pcm output) found \n" +
+                 get_closest_match_report ());
   }
 
-  if (cache_last_cal && lastHybridCal && entry == lastEntry)
+  if (lastHybridCal.entry == entry)
   {
     if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generateHybridCalibrator using cached calibrator\n";
-    return lastHybridCal;
+    return lastHybridCal.calibrator;
   }
 
   Reference::To<Pulsar::HybridCalibrator> hybrid;
@@ -1374,8 +1406,7 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
   {
     if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generateHybridCalibrator caching HybridCalibrator" << endl;
-    lastEntry = entry;
-    lastHybridCal = hybrid;
+    lastHybridCal.cache (entry, hybrid);
   }
 
   return hybrid.release();
@@ -1396,3 +1427,4 @@ string Pulsar::Database::get_path () const
 {
   return path;
 }
+

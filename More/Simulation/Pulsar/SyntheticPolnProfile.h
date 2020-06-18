@@ -71,7 +71,7 @@ namespace Pulsar {
     PolnProfile* get_PolnProfile (unsigned nbin) const;
     
     //! Get the polarimetric profile
-    void get_PolnProfile (PolnProfile*);
+    void get_PolnProfile (PolnProfile*) const;
 
     static void set_Profile (Profile* profile, MEAL::Univariate<MEAL::Scalar>* function);
 

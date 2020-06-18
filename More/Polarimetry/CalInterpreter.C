@@ -141,7 +141,8 @@ string Pulsar::CalInterpreter::load (const string& args)
         
   string filename = arguments[0];
 
-  try {
+  try 
+  {
     // try to load the file as a database
     Database* temp = new Database( filename );
 
@@ -161,7 +162,8 @@ string Pulsar::CalInterpreter::load (const string& args)
     calibrator = 0;
     return response (Good, result);
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     dbase_error = error.get_message();
   }
 

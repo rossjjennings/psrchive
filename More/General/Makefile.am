@@ -166,6 +166,7 @@ libGeneral_la_SOURCES = \
 	Convolve.C \
 	Correlate.C \
 	StrategySet.C \
+	StrategySet_defaults.C \
 	DeleteInterpreter.C \
 	Differentiate.C \
 	DisperseWeight.C \
@@ -270,7 +271,6 @@ libGeneral_la_SOURCES = \
 	WeightInterpreter.C \
 	width.C \
 	WidthEstimator.C
-
 
 ##############################################################################
 #

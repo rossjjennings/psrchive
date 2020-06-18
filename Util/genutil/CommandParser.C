@@ -71,8 +71,8 @@ void CommandParser::script (const vector<string>& cmds)
       throw Error (InvalidState, "CommandParser::script", response);
     cerr << response;
   }
-  if (startCommand)
-    startCommand = false;
+
+  startCommand = false;
 }
 
 string CommandParser::parse (const string& commandargs)

@@ -54,10 +54,16 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 bool Calibration::FluxCalManager::is_constrained () const
 {
   if (on_observations.size() == 0)
+  {
+    not_constrained_reason = "no FluxCal-On observations";
     return false;
+  }
 
   if (subtract_off_from_on && off_observations.size() == 0)
+  {
+    not_constrained_reason = "no FluxCal-Off observations";
     return false;
+  }
 
   return true;
 }

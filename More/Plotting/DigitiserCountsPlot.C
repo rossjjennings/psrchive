@@ -86,7 +86,7 @@ void DigitiserCountsPlot::CheckCounts( const Archive *const_data )
 
   if( !counts )
   {
-    if( verbose > 1 )
+    if( verbose )
       cerr << "Attempted to plot DigitiserCounts on an archive without a DigitiserCounts countsension" << endl;
     return;
   }
@@ -97,7 +97,7 @@ void DigitiserCountsPlot::CheckCounts( const Archive *const_data )
 
   if( npthist == 0 || nlev == 0 || ndigr == 0 )
   {
-    if( verbose > 1 )
+    if( verbose )
       cerr << "Attempted to plot DigitiserCounts on an archive without parameter (npthist,ndigr,nlev)" << endl;
     return;
   }

@@ -46,13 +46,19 @@ namespace Pulsar {
   public:
 
     //! The default implementation of the baseline finding algorithm
-    static Option< Reference::To<ProfileWeightFunction> > default_baseline;
+    /*! The default baseline estimator is the BaselineWindow class */
+    static Configuration::Parameter< Reference::To<ProfileWeightFunction> >& 
+    get_default_baseline();
 
     //! The default implementation of the onpulse finding algorithm
-    static Option< Reference::To<ProfileWeightFunction> > default_onpulse;
+    /*! The default on-pulse estimator is the PeakConsecutive class */
+    static Configuration::Parameter< Reference::To<ProfileWeightFunction> >& 
+    get_default_onpulse();
 
     //! The default implementation of the snr method
-    static Option< Reference::To<SNRatioEstimator> > default_snratio;
+    /*! The default S/N estimator is the PhaseSNR class */
+    static Configuration::Parameter< Reference::To<SNRatioEstimator> >& 
+    get_default_snratio();
 
     //! Default constructor
     StrategySet ();

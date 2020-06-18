@@ -32,6 +32,7 @@ Tempo2::Predictor::Predictor (const Predictor& copy)
 
 Tempo2::Predictor::~Predictor ()
 {
+  // cerr << "Tempo2::Predictor dtor this=" << this << endl;
   T2Predictor_Destroy (&predictor);
 }
 
@@ -39,7 +40,7 @@ Tempo2::Predictor::~Predictor ()
 Pulsar::Predictor* Tempo2::Predictor::clone () const
 {
   if (verbose)
-    cerr << "Tempo2::Predictor::clone" << endl;
+    cerr << "Tempo2::Predictor::clone this=" << this << endl;
   return new Predictor (*this);
 }
 
@@ -82,6 +83,9 @@ long double Tempo2::Predictor::get_segment_length () const
 //! Add the information from the supplied predictor to self
 void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 {
+  if (verbose)
+    cerr << "Tempo2::Predictor::insert this=" << this << " from=" << from << endl;
+
   const Predictor* t2p = dynamic_cast<const Predictor*>(from);
   if (!t2p)
     throw Error (InvalidParam, "Tempo2::Predictor::insert",
@@ -92,12 +96,20 @@ void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 
 void Tempo2::Predictor::keep (const std::vector<MJD>& epochs)
 {
-  //cerr << "Tempo2::Predictor::keep implemented" << endl;
+  if (verbose)
+    cerr << "Tempo2::Predictor::keep nepochs=" << epochs.size() << endl;
+
   vector<long double> mjds (epochs.size());
   for (unsigned i=0; i<mjds.size(); i++)
     mjds[i] = from_MJD (epochs[i]);
 
+  if (verbose)
+    cerr << "Tempo2::Predictor::keep BEFORE nsegments=" << predictor.modelset.cheby.nsegments << endl;
+
   T2Predictor_Keep (&predictor, mjds.size(), &(mjds[0]));
+
+  if (verbose)
+    cerr << "Tempo2::Predictor::keep AFTER nsegments=" << predictor.modelset.cheby.nsegments << endl; 
 }
 
 string Tempo2::Predictor::get_psrname () const

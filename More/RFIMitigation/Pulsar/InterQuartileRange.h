@@ -75,10 +75,10 @@ namespace Pulsar {
       Interface (InterQuartileRange* = 0);
     };
 
-    //! Set the statistical expression
+    //! Set the mathematical expression
     void set_expression (const std::string& exp) { expression = exp; }
 
-    //! Get the statistical expression
+    //! Get the mathematical expression
     std::string get_expression () const { return expression; }
 
     //! Set the profile statistic

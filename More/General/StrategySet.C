@@ -10,28 +10,10 @@
 #include "Pulsar/ArchiveExtension.h"
 
 #include "Pulsar/ProfileStats.h"
-#include "Pulsar/BaselineWindow.h"
-#include "Pulsar/PeakConsecutive.h"
-#include "Pulsar/PhaseSNR.h"
-
-#include "interface_stream.h"
+#include "Pulsar/SNRatioEstimator.h"
 
 using namespace Pulsar;
 using namespace std;
-
-/*!  
-  The default baseline estimator is the BaselineWindow class
-*/
-Pulsar::Option< Reference::To<ProfileWeightFunction> >
-StrategySet::default_baseline
-(
- "Profile::baseline", new Pulsar::BaselineWindow,
-
- "Baseline estimation algorithm",
-
- "Configures the algorithm used to find the off-pulse baseline.\n"
- "Set equal to 'help' to see all possible configurations"
-);
 
 //! The implementation of the baseline finding algorithm
 ProfileWeightFunction* StrategySet::baseline () const
@@ -44,21 +26,6 @@ void StrategySet::set_baseline (ProfileWeightFunction* b)
   get_stats()->set_baseline_estimator(b);
 }
 
-
-/*!  
-  The default on-pulse estimator is the PeakConsecutive class
-*/
-Pulsar::Option< Reference::To<ProfileWeightFunction> >
-StrategySet::default_onpulse
-(
- "Profile::onpulse", new Pulsar::PeakConsecutive,
-
- "On-pulse estimation algorithm",
-
- "Configures the algorithm used to find the on-pulse phase bins.\n"
- "Set equal to 'help' to see all possible configurations"
-);
-
 //! The implementation of the on-pulse finding algorithm
 ProfileWeightFunction* StrategySet::onpulse () const
 {
@@ -69,22 +36,6 @@ void StrategySet::set_onpulse (ProfileWeightFunction* pwf)
 {
   get_stats()->set_onpulse_estimator( pwf );
 }
-
-
-/*!  The SNRatioEstimator::factory method is used to choose and
-     configure the S/N estimation algorithm.
-*/
-Pulsar::Option< Reference::To<SNRatioEstimator> >
-StrategySet::default_snratio
-(
- "Profile::snr", new Pulsar::PhaseSNR,
-
- "Algorithm used to compute S/N",
-
- "The name of the algorithm used to estimate the signal-to-noise ratio\n"
- "of the pulse profile. Possible values: phase, fourier, square, adaptive, \n"
- "and standard <filename.ar>"
-);
 
 //! The implementation of the signal-to-noise ratio calculator
 SNRatioEstimator* StrategySet::snratio () const
@@ -110,7 +61,7 @@ void StrategySet::set_width (WidthEstimator* we)
 
 ProfileStats* StrategySet::get_stats () const
 {
-  if (!stats)
+  if (!stats) try
   {
     stats = new ProfileStats;
 
@@ -119,9 +70,13 @@ ProfileStats* StrategySet::get_stats () const
       each Profile instance must manage its own copy of this resource
     */
 
-    stats -> set_onpulse_estimator( default_onpulse.get_value()->clone() );
-    stats -> set_baseline_estimator( default_baseline.get_value()->clone() );
-    stats -> set_snratio_estimator( default_snratio.get_value()->clone() );
+    stats->set_onpulse_estimator( get_default_onpulse().get_value()->clone() );
+    stats->set_baseline_estimator( get_default_baseline().get_value()->clone() );
+    stats->set_snratio_estimator( get_default_snratio().get_value()->clone() );
+  }
+  catch (Error& error)
+  {
+    throw error += "StrategySet::get_stats";
   }
 
   return stats;
@@ -129,6 +84,7 @@ ProfileStats* StrategySet::get_stats () const
 
 StrategySet::StrategySet ()
 {
+  // cerr << "StrategySet ctor this=" << endl;
 }
 
 StrategySet::StrategySet (const StrategySet& copy)
@@ -193,16 +149,21 @@ class StrategySet::Extension : public Archive::Extension
 //! Returns the strategy manager
 StrategySet* Archive::get_strategy() const
 {
-  if (!strategy)
+  if (!strategy) try
   {
     const StrategySet::Extension* ext = get<StrategySet::Extension>();
     if (ext)
       strategy = ext->get_strategy();
     else
     {
+      // cerr << "Archive::get_strategy creating new StrategySet" << endl;
       strategy = new StrategySet;
       const_cast<Archive*>(this)->add_extension( new StrategySet::Extension(strategy) );
     }
+  }
+  catch (Error& error)
+  {
+    throw error += "Archive::get_strategy";
   }
 
   return strategy;

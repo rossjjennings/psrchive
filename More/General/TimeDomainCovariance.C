@@ -52,9 +52,7 @@ void TimeDomainCovariance::set_rank ( unsigned value )
   else
     throw Error (InvalidState, "TimeDomainCovariance::set_rank",
 		    "Rank can't be changed after it was set");
-  if ( rank < 0 )
-    throw Error (InvalidParam, "TimeDomainCovariance::set_rank",
-		    "Rank can't be negative");
+
   if ( covariance_matrix == NULL )
   {
     covariance_matrix = new double[rank * rank];

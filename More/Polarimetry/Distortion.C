@@ -78,7 +78,7 @@ void Pulsar::Distortion::set_calibrator (Archive* archive)
 
     if (precalibrator->get_transformation_valid(ichan))
     {
-      if (verbose > 2)
+      if (verbose)
 	cerr << "Pulsar::Distortion::set_calibrator ichan=" << ichan << endl;
 
       MEAL::Complex2* xform = precalibrator->get_transformation(ichan);
@@ -90,7 +90,7 @@ void Pulsar::Distortion::set_calibrator (Archive* archive)
 
       // get the precalibrator transformation
       Jones<double> response = xform->evaluate();
-      if (verbose > 2)
+      if (verbose)
 	cerr << "HybridCalibrator response=" << response << endl;
 
       //cerr << "A=" << output_stokes << endl;

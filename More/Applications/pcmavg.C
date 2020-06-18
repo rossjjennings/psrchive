@@ -311,7 +311,8 @@ void pcmavg::process(Pulsar::Archive* archive)
   Reference::To<Pulsar::PolnCalibratorExtension> ext =
     archive->get<Pulsar::PolnCalibratorExtension>();
 
-  if (ext == NULL) {
+  if (!ext)
+  {
     cerr << archive->get_filename() << " is not a pcm file... " << endl;
     return;
   }

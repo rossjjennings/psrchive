@@ -15,7 +15,7 @@
 
 int readepos ( const char *filename, eposhdr_t *eposhdr, eposdata_t *eposdata)
 {
-  int readwri;
+  int readwri = 0;
 
   /* for dealing with filename string */
   unsigned length = 0;

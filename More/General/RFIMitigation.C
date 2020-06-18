@@ -106,7 +106,7 @@ void Pulsar::RFIMitigation::zap_very_specific (Pulsar::Archive* arch,
 					       vector<float> mask, vector<unsigned> subs)
 {
   for (unsigned i = 0; i < subs.size(); i++) {
-    if (subs[i] >= 0 && subs[i] < arch->get_nsubint())
+    if (subs[i] < arch->get_nsubint())
       apply_mask(arch->get_Integration(subs[i]), mask);
   }
 }

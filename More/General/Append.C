@@ -151,7 +151,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
 	"archives have different phase models" << endl;
   }
 
-  if (aligned && equal_ephemerides && equal_models || ignore_phase)
+  if ((aligned && equal_ephemerides && equal_models) || ignore_phase)
   {
     if (Archive::verbose > 2)
       cerr << "Pulsar::Append::append "

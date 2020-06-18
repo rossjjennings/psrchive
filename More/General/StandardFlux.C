@@ -14,7 +14,6 @@
 
 Pulsar::StandardFlux::StandardFlux() 
 {
-  stdprof = NULL;
   stdfac = 0.0;
   sumstd = 0.0;
   sumstd2 = 0.0;
@@ -48,7 +47,7 @@ void Pulsar::StandardFlux::set_standard(const Profile *p)
 
 Estimate<double> Pulsar::StandardFlux::get_flux(const Profile *p)
 {
-  if (stdprof==NULL)
+  if (!stdprof)
     throw Error (InvalidState, "Pulsar::StandardFlux",
         "get_flux() called before standard is set");
 

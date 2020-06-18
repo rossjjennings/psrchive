@@ -114,6 +114,9 @@ namespace Pulsar {
     //! Flux calibrator data for each frequency channel
     std::vector< Reference::To<Policy> > data;
 
+    //! Check on data range and validity
+    void data_range_check (unsigned ichan, const char* method) const;
+
     //! Resize the data vector
     void resize (unsigned nchan, unsigned nreceptor);
 

@@ -10,6 +10,7 @@
 #include "Pulsar/Fourier.h"
 
 #include <algorithm>
+#include <cassert>
 
 using namespace std;
 using namespace Pulsar;
@@ -25,6 +26,9 @@ public:
 
   double get (const Profile* profile)
   { return profile->max(); }
+
+  Maximum* clone () const { return new Maximum(*this); }
+
 };
 
 class Minimum : public ProfileStatistic
@@ -38,6 +42,9 @@ public:
 
   double get (const Profile* profile)
   { return profile->min(); }
+
+  Minimum* clone () const { return new Minimum(*this); }
+
 };
 
 class Range : public ProfileStatistic
@@ -51,6 +58,8 @@ public:
 
   double get (const Profile* profile)
   { return profile->max() - profile->min(); }
+
+  Range* clone () const { return new Range(*this); }
 };
 
 class Mean : public ProfileStatistic
@@ -61,8 +70,11 @@ public:
     add_alias ("average");
     add_alias ("avg");
   }
+
   double get (const Profile* profile)
   { return profile->sum() / profile->get_nbin(); }
+
+  Mean* clone () const { return new Mean(*this); }
 };
 
 class StandardDeviation : public ProfileStatistic
@@ -74,8 +86,11 @@ public:
     add_alias ("stddev");
     add_alias ("sigma");
   }
+
   double get (const Profile* profile)
   { return sqrt( profile->sumsq() / profile->get_nbin() ); }
+
+  StandardDeviation* clone () const { return new StandardDeviation(*this); }
 };
 
 class DeviationCoefficient : public ProfileStatistic
@@ -87,8 +102,11 @@ public:
     add_alias ("modulation");
     add_alias ("beta");
   }
+
   double get (const Profile* profile)
   { return sqrt( profile->sumsq() * profile->get_nbin() ) / profile->sum(); }
+
+  DeviationCoefficient* clone () const { return new DeviationCoefficient(*this); }
 };
 
 double median (vector<float>& amps)
@@ -113,8 +131,11 @@ public:
   {
     add_alias ("median");
   }
+
   double get (const Profile* profile)
   { return median (profile); }
+
+  Median* clone () const { return new Median(*this); }
 };
 
 double madm (const Profile* profile)
@@ -136,8 +157,12 @@ public:
     add_alias ("mdm");
     add_alias ("madm");
   }
+
   double get (const Profile* profile)
   { return madm (profile); }
+
+  MedianAbsoluteDifference* clone () const { return new MedianAbsoluteDifference(*this); }
+
 };
 
 class FirstHarmonic : public ProfileStatistic
@@ -149,12 +174,15 @@ public:
     add_alias ("fft1");
     add_alias ("fundamental");
   }
+
   double get (const Profile* profile)
   { 
     Reference::To<Profile> fft = fourier_transform (profile);
     detect (fft);
     return fft->get_amps()[1];
   }
+
+  FirstHarmonic* clone () const { return new FirstHarmonic(*this); }
 };
 
 class NyquistHarmonic : public ProfileStatistic
@@ -166,12 +194,15 @@ public:
     add_alias ("fftN");
     add_alias ("Nyquist");
   }
+
   double get (const Profile* profile)
   { 
     Reference::To<Profile> fft = fourier_transform (profile);
     detect (fft);
     return fft->get_amps()[fft->get_nbin()-1];
   }
+
+  NyquistHarmonic* clone () const { return new NyquistHarmonic(*this); }
 };
 
 Pulsar::ProfileStatistic::ProfileStatistic (const string& name, 
@@ -183,21 +214,50 @@ Pulsar::ProfileStatistic::ProfileStatistic (const string& name,
 
 #include "identifiable_factory.h"
 
+#if HAVE_PTHREAD
+static ThreadContext* context = new ThreadContext;
+#else
+static ThreadContext* context = 0;
+#endif
+
+static std::vector< Pulsar::ProfileStatistic* >* instances = NULL;
+
+void Pulsar::ProfileStatistic::build ()
+{
+  ThreadContext::Lock lock (context);
+
+  if (instances != NULL)
+    return;
+
+  cerr << "Pulsar::ProfileStatistic::build" << endl;
+ 
+  instances = new std::vector< ProfileStatistic* >;
+  
+  instances->push_back( new Minimum );
+  instances->push_back( new Maximum );
+  instances->push_back( new Range );
+  instances->push_back( new Mean );
+  instances->push_back( new StandardDeviation );
+  instances->push_back( new DeviationCoefficient );
+  instances->push_back( new Median );
+  instances->push_back( new MedianAbsoluteDifference );
+  instances->push_back( new FirstHarmonic );
+  instances->push_back( new NyquistHarmonic );
+
+  cerr << "Pulsar::ProfileStatistic::build instances=" << instances << endl;
+}
+
+
 Pulsar::ProfileStatistic*
 Pulsar::ProfileStatistic::factory (const std::string& name)
 {
-  std::vector< Reference::To<Agent> > instances;
-  instances.push_back( new Advocate<Minimum> );
-  instances.push_back( new Advocate<Maximum> );
-  instances.push_back( new Advocate<Range> );
-  instances.push_back( new Advocate<Mean> );
-  instances.push_back( new Advocate<StandardDeviation> );
-  instances.push_back( new Advocate<DeviationCoefficient> );
-  instances.push_back( new Advocate<Median> );
-  instances.push_back( new Advocate<MedianAbsoluteDifference> );
-  instances.push_back( new Advocate<FirstHarmonic> );
-  instances.push_back( new Advocate<NyquistHarmonic> );
+  cerr << "Pulsar::ProfileStatistic::factory instances=" << instances << endl;
 
-  return identifiable_factory<ProfileStatistic> (instances, name);
+  if (instances == NULL)
+    build ();
+
+  assert (instances != NULL);
+
+  return identifiable_factory<ProfileStatistic> (*instances, name);
 }
 
