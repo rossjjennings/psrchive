@@ -17,6 +17,8 @@
 
 using namespace std;
 
+// #define _DEBUG 1
+
 // defined in More/General/standard_interface.C
 std::string process (TextInterface::Parser* interface, const std::string& txt);
 
@@ -58,9 +60,19 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
 
 std::string Pulsar::InterQuartileRange::get_report () const
 {
-  return string("tested=") + tostring(tot_valid) + " iter=" + tostring(iter)
-           + " high=" + tostring(tot_high) + " low=" + tostring(tot_low)
-           + " %=" + tostring((tot_high+tot_low)*100.0/tot_valid);
+#if _DEBUG
+  cerr << "Pulsar::InterQuartileRange::get_report" << endl;
+#endif
+
+  string ret;
+  if (statistic)
+    ret += "stat=" + statistic->get_identity() + " ";
+
+  ret += "tested=" + tostring(tot_valid) + " iter=" + tostring(iter)
+       + " high=" + tostring(tot_high) + " low=" + tostring(tot_low)
+       + " %=" + tostring((tot_high+tot_low)*100.0/tot_valid);
+
+  return ret;
 }
 
 void Pulsar::InterQuartileRange::once (Archive* archive)
@@ -117,6 +129,10 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
 	profile->stats (&mean, &var);
 	values[valid] = sqrt(var)/mean; // i.e. the modulation index
       }
+
+      if (logarithmic)
+        values[valid] = log10(values[valid]);
+      
       valid ++;
     }
   }
@@ -213,6 +229,10 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
   add( &InterQuartileRange::get_statistic,
        &InterQuartileRange::set_statistic,
        "stat", "Profile statistic" );
+
+  add( &InterQuartileRange::get_logarithmic,
+       &InterQuartileRange::set_logarithmic,
+       "log", "Logarithmic scale" );
 
   add( &InterQuartileRange::get_cutoff_threshold,
        &InterQuartileRange::set_cutoff_threshold,

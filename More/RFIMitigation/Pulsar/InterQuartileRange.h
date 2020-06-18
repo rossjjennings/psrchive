@@ -49,6 +49,9 @@ namespace Pulsar {
     //! Maximum number of iterations before aborting
     unsigned max_iterations;
 
+    //! Take the base 10 logarithm of data
+    bool logarithmic;
+
     //! The statistic to be derived from each profile
     Reference::To<ProfileStatistic> statistic;
     
@@ -83,6 +86,10 @@ namespace Pulsar {
 
     //! Get the profile statistic
     std::string get_statistic () const;
+
+    //! Comput the base 10 logarithm of the data
+    void set_logarithmic (bool flag) { logarithmic = flag; }
+    bool get_logarithmic () const { return logarithmic; }
 
     //! Set the cut-off threshold
     void set_cutoff_threshold (float t)
