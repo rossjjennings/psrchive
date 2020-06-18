@@ -11,6 +11,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Statistics.h"
+#include "Pulsar/ProfileStatistic.h"
 
 #include "ModifyRestore.h"
 
@@ -65,6 +66,19 @@ void Pulsar::ChannelZapMedian::set_iqr_threshold (float t)
 float Pulsar::ChannelZapMedian::get_iqr_threshold () const
 {
   return iqr_threshold;
+}
+
+void Pulsar::ChannelZapMedian::set_statistic (const std::string& name)
+{
+  statistic = ProfileStatistic::factory (name);
+}
+
+std::string Pulsar::ChannelZapMedian::get_statistic () const
+{
+  if (!statistic)
+    return "none";
+
+  return statistic->get_identity();
 }
 
 void Pulsar::ChannelZapMedian::operator () (Archive* archive)
@@ -156,6 +170,10 @@ Pulsar::ChannelZapMedian::Interface::Interface (ChannelZapMedian* instance)
        &ChannelZapMedian::set_expression,
        "exp", "Statistical expression" );
 
+  add( &ChannelZapMedian::get_statistic,
+       &ChannelZapMedian::set_statistic,
+       "stat", "Profile statistic" );
+
   add( &ChannelZapMedian::get_bybin,
        &ChannelZapMedian::set_bybin,
        "bybin", "Run algorithm on spectra for each phase bin" );
@@ -205,7 +223,15 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
     if (integration->get_weight(ichan) == 0)
       mask[ichan] = true;
 
-    if (stats)
+    if (statistic)
+    {
+      Index pol (0, true); // integrate over polarizations
+      Reference::To<const Profile> profile
+        = Pulsar::get_Profile (integration, pol, ichan);
+
+      spectrum[ichan] = statistic->get(profile);
+    }
+    else if (stats)
     {
       stats->set_chan( ichan );
       string value = process( parser, expression );

@@ -17,6 +17,7 @@
 namespace Pulsar {
   
   class Statistics;
+  class ProfileStatistic;
 
   //! Uses a median smoothed spectrum to find birdies and zap them
   class ChannelZapMedian : public ChannelWeight
@@ -85,11 +86,17 @@ namespace Pulsar {
     //! Compute a single zap mask from the total
     bool get_from_total () const { return from_total; }
 
-    //! Set the statistical expression
+    //! Set the mathematical expression
     void set_expression (const std::string& exp) { expression = exp; }
 
-    //! Get the statistical expression
+    //! Get the mathematical expression
     std::string get_expression () const { return expression; }
+
+    //! Set the profile statistic
+    void set_statistic (const std::string&);
+
+    //! Get the profile statistic
+    std::string get_statistic () const;
 
   protected:
 
@@ -123,6 +130,10 @@ namespace Pulsar {
     //! The Statistics estimator used to evaluate the expression
     Reference::To<Statistics> stats;
     Reference::To<TextInterface::Parser> parser;
+
+    //! The statistic to be derived from each profile
+    Reference::To<ProfileStatistic> statistic;
+
   };
   
 }
