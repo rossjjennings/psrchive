@@ -21,11 +21,50 @@ using namespace std;
 //! Default constructor
 Pulsar::ChannelZapMedian::ChannelZapMedian ()
 {
-  cutoff_threshold = 4.0;
+  rms_threshold = 4.0;
+  madm_threshold = 0.0;
+  iqr_threshold = 0.0;
+
   window_size = 21;
   bybin = false;
   from_total = false;
   paz_report = false;
+}
+
+void Pulsar::ChannelZapMedian::set_rms_threshold (float t)
+{
+  rms_threshold = t;
+  madm_threshold = 0.0;
+  iqr_threshold = 0.0;
+}
+
+float Pulsar::ChannelZapMedian::get_rms_threshold () const
+{
+  return rms_threshold;
+}
+
+void Pulsar::ChannelZapMedian::set_madm_threshold (float t)
+{
+  rms_threshold = 0.0;
+  madm_threshold = t;
+  iqr_threshold = 0.0;
+}
+
+float Pulsar::ChannelZapMedian::get_madm_threshold () const
+{
+  return madm_threshold;
+}
+
+void Pulsar::ChannelZapMedian::set_iqr_threshold (float t)
+{
+  rms_threshold = 0.0;
+  madm_threshold = 0.0;
+  iqr_threshold = t;
+}
+
+float Pulsar::ChannelZapMedian::get_iqr_threshold () const
+{
+  return iqr_threshold;
 }
 
 void Pulsar::ChannelZapMedian::operator () (Archive* archive)
@@ -97,9 +136,17 @@ Pulsar::ChannelZapMedian::Interface::Interface (ChannelZapMedian* instance)
        &ChannelZapMedian::set_window_size,
        "window", "Size of median smoothing window" );
 
-  add( &ChannelZapMedian::get_cutoff_threshold,
-       &ChannelZapMedian::set_cutoff_threshold,
-       "cutoff", "Cutoff threshold" );
+  add( &ChannelZapMedian::get_rms_threshold,
+       &ChannelZapMedian::set_rms_threshold,
+       "cutoff", "Threshold times standard deviation" );
+
+  add( &ChannelZapMedian::get_madm_threshold,
+       &ChannelZapMedian::set_madm_threshold,
+       "madm", "Threshold times median absolute deviation" );
+
+  add( &ChannelZapMedian::get_iqr_threshold,
+       &ChannelZapMedian::set_iqr_threshold,
+       "iqr", "Threshold times inter-quartile range" );
 
   add( &ChannelZapMedian::get_from_total,
        &ChannelZapMedian::set_from_total,
@@ -167,7 +214,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
     }
   }
 
-  zap (mask, spectrum, window_size, cutoff_threshold);
+  zap (mask, spectrum, window_size, rms_threshold);
 
   if (bybin)
   {
@@ -184,7 +231,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
 	}
 	spectrum[ichan] = sqrt(polsum);
       }
-      zap (mask, spectrum, window_size, cutoff_threshold);
+      zap (mask, spectrum, window_size, rms_threshold);
     }
   }
 

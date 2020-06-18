@@ -19,7 +19,8 @@ namespace Pulsar {
   class Statistics;
 
   //! Uses a median smoothed spectrum to find birdies and zap them
-  class ChannelZapMedian : public ChannelWeight {
+  class ChannelZapMedian : public ChannelWeight
+  {
     
   public:
     
@@ -30,7 +31,8 @@ namespace Pulsar {
     TextInterface::Parser* get_interface ();
 
     // Text interface to the ChannelZapMedian class
-    class Interface : public TextInterface::To<ChannelZapMedian> {
+    class Interface : public TextInterface::To<ChannelZapMedian>
+    {
     public:
       Interface (ChannelZapMedian* = 0);
     };
@@ -47,11 +49,23 @@ namespace Pulsar {
     //! Get the size of the window over which median will be computed
     unsigned get_window_size () const { return window_size; }
 
-    //! Set the cut-off threshold
-    void set_cutoff_threshold (float t) { cutoff_threshold = t; }
+    //! Set the threshold as multiple of the standard deviation
+    void set_rms_threshold (float t);
 
-    //! Get the cut-off threshold
-    float get_cutoff_threshold () const { return cutoff_threshold; }
+    //! Get the threshold as multiple of the standard deviation
+    float get_rms_threshold () const;
+
+    //! Set the threshold as multiple of the median absolute deviation from the median
+    void set_madm_threshold (float t);
+
+    //! Get the threshold as multiple of the median absolute deviation from the median
+    float get_madm_threshold () const;
+
+    //! Set the threshold as multiple of the inter-quartile range
+    void set_iqr_threshold (float t);
+
+    //! Get the threshold as multiple of the inter-quartile range
+    float get_iqr_threshold () const;
 
     //! Run the algorithm on the spectra of each bin
     void set_bybin (bool t) { bybin = t; }
@@ -82,8 +96,14 @@ namespace Pulsar {
     //! The size of the window over which median will be computed
     unsigned window_size;
 
-    //! The cut-off threshold
-    float cutoff_threshold;
+    //! Threshold as a multiple of the standard deviation
+    float rms_threshold;
+
+    //! Threshold as a multiple of the median absolute deviation from the median
+    float madm_threshold;
+
+    //! Threshold as a multiple of the inter-quartile range
+    float iqr_threshold;
 
     //! Median smooth the spectra of each bin
     bool bybin;
