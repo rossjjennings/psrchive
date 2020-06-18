@@ -1141,7 +1141,7 @@ catch (Error& error)
 Pulsar::FluxCalibrator* 
 Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
 {
-   vector<Pulsar::Database::Entry> oncals;
+  vector<Pulsar::Database::Entry> oncals;
   all_matching (criteria (arch, Signal::FluxCalOn), oncals);
 
   if (!oncals.size())
