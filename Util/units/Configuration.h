@@ -32,7 +32,7 @@ public:
   Configuration (const char* filename = 0);
 
   //! Load the configuration from the specified file
-  void load (const std::string& filename) throw (Error);
+  void load (const std::string& filename);
 
   //! Keyword-value pair
   class Entry;
