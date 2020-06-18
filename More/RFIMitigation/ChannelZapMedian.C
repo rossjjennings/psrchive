@@ -249,7 +249,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
   if (rms_threshold)
     rms_zap (mask, spectrum, window_size, rms_threshold);
   else if (madm_threshold)
-    madm_zap (mask, spectrum, window_size, rms_threshold);
+    madm_zap (mask, spectrum, window_size, madm_threshold);
   else if (iqr_threshold)
     iqr_zap (mask, spectrum, window_size, iqr_threshold);
 
@@ -397,12 +397,12 @@ void madm_zap (vector<bool>& mask, vector<float>& spectrum,
   for (unsigned ichan=0; ichan < nchan; ichan++)
     spectrum[ichan] -= smoothed_spectrum[ichan];
 
-  bool zapped = true;
+  unsigned zapped = 0;
   unsigned round = 1;
 
   vector<float> abs_devs (nchan);
 
-  while (zapped)
+  do
   {
     unsigned valid = 0;
     for (unsigned ichan=0; ichan < nchan; ichan++)
@@ -421,6 +421,8 @@ void madm_zap (vector<bool>& mask, vector<float>& spectrum,
 
     std::nth_element (abs_devs.begin(), abs_devs.begin()+middle, abs_devs.begin()+valid);
 
+    // cerr << "madm=" << abs_devs[middle] << " valid=" << valid << endl;
+
     // abs_devs[middle] = madm
     float cutoff = cutoff_threshold * abs_devs[middle];
 
@@ -428,7 +430,7 @@ void madm_zap (vector<bool>& mask, vector<float>& spectrum,
       cerr << "Pulsar::ChannelZapMedian::weight round " << round
            << " cutoff=" << cutoff << endl;
 
-    zapped = false;
+    zapped = 0;
     round ++;
 
     for (unsigned ichan=0; ichan < nchan; ichan++)
@@ -439,10 +441,13 @@ void madm_zap (vector<bool>& mask, vector<float>& spectrum,
       if (fabs(spectrum[ichan]) > cutoff)
       { 
         mask[ichan] = true;
-        zapped = true;
+        zapped++;
       }
     }
+
+    // cerr << "zapped = " << zapped << endl;
   }
+  while (!zapped);
 }
 
 void iqr_zap (vector<bool>& mask, vector<float>& spectrum,
