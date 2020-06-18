@@ -161,8 +161,14 @@ Pulsar::ChannelZapMedian::Interface::Interface (ChannelZapMedian* instance)
        "bybin", "Run algorithm on spectra for each phase bin" );
 }
 
-void zap (vector<bool>& mask, vector<float>& spectrum,
-	  unsigned window_size, float cutoff_threshold);
+void rms_zap (vector<bool>& mask, vector<float>& spectrum,
+	      unsigned window_size, float cutoff_threshold);
+
+void madm_zap (vector<bool>& mask, vector<float>& spectrum,
+              unsigned window_size, float cutoff_threshold);
+
+void iqr_zap (vector<bool>& mask, vector<float>& spectrum,
+              unsigned window_size, float cutoff_threshold);
 
 //! Set integration weights
 void Pulsar::ChannelZapMedian::weight (Integration* integration)
@@ -191,7 +197,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
   unsigned ipol,  npol = integration->get_npol ();
   unsigned ibin,  nbin = integration->get_nbin ();
 
-  vector<float> spectrum (nchan);
+  vector<float> spectrum (nchan, 0.0);
   vector<bool> mask (nchan, false);
 
   for (ichan=0; ichan < nchan; ichan++)
@@ -214,7 +220,12 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
     }
   }
 
-  zap (mask, spectrum, window_size, rms_threshold);
+  if (rms_threshold)
+    rms_zap (mask, spectrum, window_size, rms_threshold);
+  else if (madm_threshold)
+    madm_zap (mask, spectrum, window_size, rms_threshold);
+  else if (iqr_threshold)
+    iqr_zap (mask, spectrum, window_size, iqr_threshold);
 
   if (bybin)
   {
@@ -231,7 +242,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
 	}
 	spectrum[ichan] = sqrt(polsum);
       }
-      zap (mask, spectrum, window_size, rms_threshold);
+      rms_zap (mask, spectrum, window_size, rms_threshold);
     }
   }
 
@@ -269,13 +280,13 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
   cout << "\"" << endl;
 }
 
-void zap (vector<bool>& mask, vector<float>& spectrum,
-	  unsigned window_size, float cutoff_threshold)
+void rms_zap (vector<bool>& mask, vector<float>& spectrum,
+	     unsigned window_size, float cutoff_threshold)
 {
   vector<float> smoothed_spectrum = spectrum;
     
   fft::median_smooth (smoothed_spectrum, window_size);
-    
+
   double variance = 0.0;
   unsigned total_chan = 0;
   // number of channels when calculating variance
@@ -349,3 +360,132 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
     orig_total_chan = total_chan;
   }
 }
+
+void madm_zap (vector<bool>& mask, vector<float>& spectrum,
+               unsigned window_size, float cutoff_threshold)
+{
+  vector<float> smoothed_spectrum = spectrum;
+  fft::median_smooth (smoothed_spectrum, window_size);
+
+  unsigned nchan = spectrum.size();
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+    spectrum[ichan] -= smoothed_spectrum[ichan];
+
+  bool zapped = true;
+  unsigned round = 1;
+
+  vector<float> abs_devs (nchan);
+
+  while (zapped)
+  {
+    unsigned valid = 0;
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (mask[ichan])
+        continue;
+
+      abs_devs[valid] = fabs(spectrum[ichan]);
+      valid ++;
+    }
+
+    if (valid < 3)
+      return;
+
+    unsigned middle = valid/2;
+
+    std::nth_element (abs_devs.begin(), abs_devs.begin()+middle, abs_devs.begin()+valid);
+
+    // abs_devs[middle] = madm
+    float cutoff = cutoff_threshold * abs_devs[middle];
+
+    if (Pulsar::Integration::verbose)
+      cerr << "Pulsar::ChannelZapMedian::weight round " << round
+           << " cutoff=" << cutoff << endl;
+
+    zapped = false;
+    round ++;
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (mask[ichan])
+        continue;
+
+      if (fabs(spectrum[ichan]) > cutoff)
+      { 
+        mask[ichan] = true;
+        zapped = true;
+      }
+    }
+  }
+}
+
+void iqr_zap (vector<bool>& mask, vector<float>& spectrum,
+             unsigned window_size, float cutoff_threshold)
+{
+  vector<float> smoothed_spectrum = spectrum;
+  fft::median_smooth (smoothed_spectrum, window_size);
+
+  unsigned nchan = spectrum.size();
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+    spectrum[ichan] -= smoothed_spectrum[ichan];
+
+  bool zapped = true;
+  unsigned round = 1;
+
+  vector<float> temp (nchan);
+
+  while (zapped)
+  {
+    unsigned valid = 0;
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (mask[ichan])
+        continue;
+
+      temp[valid] = spectrum[ichan];
+      valid ++;
+    }
+
+    if (valid < 4)
+      return;
+
+    unsigned iq1 = valid/4;
+    unsigned iq3 = (valid*3)/4;
+
+#ifdef _DEBUG
+    cerr << "iQ1=" << iq1 << " iQ3=" << iq3 << endl;
+#endif
+
+    std::sort (temp.begin(), temp.begin()+valid);
+    double Q1 = temp[ iq1 ];
+    double Q3 = temp[ iq3 ];
+
+    double IQR = Q3 - Q1;
+  
+    if (Pulsar::Integration::verbose)
+      cerr << "Pulsar::ChannelZapMedian::weight round " << round
+           << " IQR=" << IQR << endl;
+
+    zapped = false;
+    round ++;
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (mask[ichan])
+        continue;
+
+      if (spectrum[ichan] < Q1 - cutoff_threshold * IQR)
+      {
+        mask[ichan] = true;
+        zapped = true;
+      }
+
+      if (spectrum[ichan] > Q3 + cutoff_threshold * IQR)
+      {
+        mask[ichan] = true;
+        zapped = true;
+      }
+    }
+  }
+}
+
