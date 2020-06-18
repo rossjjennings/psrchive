@@ -776,7 +776,7 @@ int main (int argc, char *argv[]) try
         if (ref)
           ref->set_outlier_threshold (outlier_threshold);
 
-              HybridCalibrator* hyb = 0;
+        HybridCalibrator* hyb = 0;
         hyb = dynamic_cast<HybridCalibrator*> (pcal_engine.get());
         if (hyb)
         {
