@@ -24,7 +24,7 @@ Configuration::Configuration (const char* filename)
   load (filename);
 }
 
-void Configuration::load (const string& filename) throw (Error)
+void Configuration::load (const string& filename)
 {
   DEBUG("Configuration::load filename='" << filename << "'");
 
