@@ -17,7 +17,7 @@ _psrchive_la_LIBADD = $(top_builddir)/More/libpsrmore.la \
 
 SWIG_FLAGS = -Wall -python -I$(top_builddir)/local_include -I$(top_builddir)
 
-./psrchive_wrap.cxx: $(srcdir)/psrchive.i
+./psrchive_wrap.cxx: $(srcdir)/psrchive.i $(top_builddir)/config.h
 	$(SWIG) $(SWIG_FLAGS) $(DEFS) -outcurrentdir $(srcdir)/psrchive.i
 
 #############################################################################
