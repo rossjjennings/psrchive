@@ -47,19 +47,22 @@ public:
 
 };
 
-class Range : public ProfileStatistic
+class PeakToPeak : public ProfileStatistic
 {
 public:
-  Range ()
+  PeakToPeak ()
   : ProfileStatistic ("range", "range of profile amplitudes")
   {
+    // cerr << "PeakToPeak ctor this=" << this << endl;
     add_alias ("peak-to-peak");
   }
+
+  // ~PeakToPeak () { cerr << "PeakToPeak dtor this=" << this << endl; }
 
   double get (const Profile* profile)
   { return profile->max() - profile->min(); }
 
-  Range* clone () const { return new Range(*this); }
+  PeakToPeak* clone () const { return new PeakToPeak(*this); }
 };
 
 class Mean : public ProfileStatistic
@@ -214,28 +217,22 @@ Pulsar::ProfileStatistic::ProfileStatistic (const string& name,
 
 #include "identifiable_factory.h"
 
-#if HAVE_PTHREAD
-static ThreadContext* context = new ThreadContext;
-#else
-static ThreadContext* context = 0;
-#endif
-
 static std::vector< Pulsar::ProfileStatistic* >* instances = NULL;
 
 void Pulsar::ProfileStatistic::build ()
 {
-  ThreadContext::Lock lock (context);
+  // ThreadContext::Lock lock (context);
 
   if (instances != NULL)
     return;
 
-  cerr << "Pulsar::ProfileStatistic::build" << endl;
+  // cerr << "Pulsar::ProfileStatistic::build" << endl;
  
   instances = new std::vector< ProfileStatistic* >;
   
   instances->push_back( new Minimum );
   instances->push_back( new Maximum );
-  instances->push_back( new Range );
+  instances->push_back( new PeakToPeak );
   instances->push_back( new Mean );
   instances->push_back( new StandardDeviation );
   instances->push_back( new DeviationCoefficient );
@@ -244,20 +241,26 @@ void Pulsar::ProfileStatistic::build ()
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
 
-  cerr << "Pulsar::ProfileStatistic::build instances=" << instances << endl;
+  // cerr << "Pulsar::ProfileStatistic::build instances=" << instances << endl;
 }
 
 
 Pulsar::ProfileStatistic*
 Pulsar::ProfileStatistic::factory (const std::string& name)
 {
-  cerr << "Pulsar::ProfileStatistic::factory instances=" << instances << endl;
+  // cerr << "Pulsar::ProfileStatistic::factory instances=" << instances << endl;
 
   if (instances == NULL)
     build ();
 
   assert (instances != NULL);
 
-  return identifiable_factory<ProfileStatistic> (*instances, name);
+  // cerr << "ProfileStatistic::factory instances=" << instances << endl;
+
+  ProfileStatistic* stat = 0;
+  stat = identifiable_factory<ProfileStatistic> (*instances, name);
+
+  // cerr << "Pulsar::ProfileStatistic::factory return=" << stat << endl;
+  return stat;
 }
 
