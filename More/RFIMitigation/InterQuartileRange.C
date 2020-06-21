@@ -26,6 +26,7 @@ Pulsar::InterQuartileRange::InterQuartileRange ()
 {
   cutoff_threshold_max = cutoff_threshold_min = 1.5;
   max_iterations = 15;
+  logarithmic = false;
 }
 
 Pulsar::InterQuartileRange::~InterQuartileRange ()
@@ -38,6 +39,9 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
   tot_high = 0;
   tot_low = 0;
   iter = 0;
+
+  if (Archive::verbose > 1)
+    cerr << "InterQuartileRange::transform archive=" << archive << endl;
   
   while (iter < max_iterations)
   {
