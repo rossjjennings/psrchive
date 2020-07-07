@@ -120,8 +120,8 @@ void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
   float x_res = (x_max-x_min)/nsub;
   float y_res = (y_max-y_min)/nchan;
 
-  float trf[6] = { x_min - 0.5*x_res, x_res, 0.0,
-		   y_min - 0.5*y_res, 0.0, y_res };
+  float trf[6] = { x_min - 0.5f*x_res, x_res, 0.0f,
+		   y_min - 0.5f*y_res, 0.0f, y_res };
 
   cpgimag (plot_array, nsub, nchan,
 	   1, nsub, 1, nchan, 
