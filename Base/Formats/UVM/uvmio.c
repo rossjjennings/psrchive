@@ -55,6 +55,10 @@ int uvm_getheader ( const char* filename,
 		    int* newscan,
 		    uvm_header* hdr )
 {
+  // Truncated filename will result in crash, so just avoid it
+  if (strlen(filename) > UVM_MAX_FILENAME) 
+    return -1;
+
   char f77_filename[UVM_MAX_FILENAME];
   c2fstr (f77_filename, filename, UVM_MAX_FILENAME);
 
