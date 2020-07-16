@@ -8,7 +8,7 @@ c   Joanna Rankin,--February 1995
 c=======================================================================
       integer prgm
       common/P110baseline/ nvals,ival,sigmas(25)
-      character*160 infile,path,file,temp
+      character*80 infile,path,file,temp
       integer fd
       common /fid/ fd
       logical convrt
