@@ -779,4 +779,16 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return result;
     }
 
+    // get phase shift from toa matching (pat -R like)
+    std::vector<double> get_phase_shifts() {
+        std::vector<Tempo::toa> toas;
+        self->get_toas(toas);
+        std::vector<double> result;
+        for (int i=0; i<toas.size(); i++) {
+            result.push_back(toas[i].get_phase_shift());
+        }
+        return result;
+    }
+
+
 }
