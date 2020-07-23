@@ -779,4 +779,20 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return result;
     }
 
+    // get phase shift from toa matching (pat -R like)
+    PyObject *get_phase_shifts() {
+        PyArrayObject *arr;
+        std::vector<Tempo::toa> toas;
+        self->get_toas(toas);
+        npy_intp size[1];
+        size[0] = toas.size();
+
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, size, PyArray_DOUBLE);
+        for (int i=0; i<toas.size(); i++) {
+            ((double*)arr->data)[i] = toas[i].get_phase_shift();
+        }
+        return (PyObject*) arr;
+    }
+
+
 }
