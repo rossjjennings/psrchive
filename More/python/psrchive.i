@@ -48,14 +48,14 @@
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FrontendCorrection.h"
 
-#ifdef HAVE_CONFIG_H
+#if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include "Pulsar/PeakCumulative.h"
 #include "Pulsar/PeakConsecutive.h"
 
-#ifdef HAVE_CFITSIO
+#if HAVE_CFITSIO
 #include <fitsio.h>
 #endif
 
@@ -266,7 +266,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 
 // Some useful free functions 
 
-#ifdef HAVE_CFITSIO
+#if HAVE_CFITSIO
 %inline %{
 
 // Least I/O intensive way to grab observation time
