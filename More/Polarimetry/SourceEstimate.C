@@ -39,9 +39,12 @@ bool Calibration::SourceEstimate::is_constrained () const
 
 void Calibration::SourceEstimate::report_input_failed (std::ostream& out) const
 {
+  string name = "uninitialized";
+  if (source)
+    name = source->get_param_name_prefix();
+
   out << "add data failed " << add_data_failures << " out of "
-      << add_data_attempts << " times for " << source->get_param_name_prefix()
-      << endl;
+      << add_data_attempts << " times for " << name << endl;
 }
 
 /*! Update the best guess of each unknown input state */
