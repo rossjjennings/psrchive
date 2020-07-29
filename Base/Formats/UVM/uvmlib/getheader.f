@@ -8,7 +8,7 @@ c   Joanna Rankin,--February 1995
 c=======================================================================
       integer prgm
       common/P110baseline/ nvals,ival,sigmas(25)
-      character*160 infile,path,file,temp
+      character*80 infile,path,file,temp
       integer fd
       common /fid/ fd
       logical convrt
@@ -31,7 +31,7 @@ c   Find the path if any
 
       call sgiinithack
       call sgiprepfd
-      open(unit=41,file=infile,status='old')
+      open(unit=41,file=infile,status='old',err=100)
       call sgigetfd(fd)
 
 c     write(*,*) path,file
@@ -109,5 +109,8 @@ c        stop "Getheader: ambiguous file name"
       return
    99 write(*,*) "Getheader: header record read error",istat
 c      stop
+      return
+c Go here on file open error
+  100 istat=-1
       return
       end

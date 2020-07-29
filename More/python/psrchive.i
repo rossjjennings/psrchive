@@ -48,14 +48,14 @@
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FrontendCorrection.h"
 
-#ifdef HAVE_CONFIG_H
+#if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include "Pulsar/PeakCumulative.h"
 #include "Pulsar/PeakConsecutive.h"
 
-#ifdef HAVE_CFITSIO
+#if HAVE_CFITSIO
 #include <fitsio.h>
 #endif
 
@@ -266,7 +266,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 
 // Some useful free functions 
 
-#ifdef HAVE_CFITSIO
+#if HAVE_CFITSIO
 %inline %{
 
 // Least I/O intensive way to grab observation time
@@ -778,5 +778,21 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         }
         return result;
     }
+
+    // get phase shift from toa matching (pat -R like)
+    PyObject *get_phase_shifts() {
+        PyArrayObject *arr;
+        std::vector<Tempo::toa> toas;
+        self->get_toas(toas);
+        npy_intp size[1];
+        size[0] = toas.size();
+
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, size, PyArray_DOUBLE);
+        for (int i=0; i<toas.size(); i++) {
+            ((double*)arr->data)[i] = toas[i].get_phase_shift();
+        }
+        return (PyObject*) arr;
+    }
+
 
 }

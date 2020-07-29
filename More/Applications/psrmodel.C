@@ -558,6 +558,8 @@ void psrmodel::plot_data (Pulsar::Archive* data, MEAL::RotatingVectorModel* RVM)
   plotter.plot( data );
 }
 
+#endif
+
 void psrmodel::output_residuals ()
 {
   if (output_QU_residuals)
@@ -607,4 +609,3 @@ void psrmodel::output_residuals ()
   }
 }
 
-#endif
