@@ -274,10 +274,31 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     Some files (like the output of pcm) have no SUBINT HDU.  Therefore, the
     centre frequency and bandwidth are set here with the understanding that 
     they may be reset during load_integrations.
+
+    WvS - 15 Aug 2020
+    Some search mode files can have a messed up HISTORY HDU with an incorrect
+    CTR_FREQ attribute and CTR_FREQ should not over-ride the value stored in 
+    OBSFREQ.  Therefore, set the centre frequency and bandwidth only if they
+    are not already set.
   */
 
-  set_centre_frequency ( last.ctr_freq );
-  set_bandwidth (last.nchan * last.chan_bw);
+  if ( get_centre_frequency() == 0)
+  {
+    set_centre_frequency ( last.ctr_freq );
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory set centre frequency = " 
+           << get_centre_frequency() << endl;
+  }
+
+  if ( get_bandwidth() == 0 )
+  {
+    set_bandwidth (last.nchan * last.chan_bw);
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory set bandwidth = " 
+           << get_bandwidth() << endl;
+  }
 
   /*
     WvS - 07 Feb 2008
