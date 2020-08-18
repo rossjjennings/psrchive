@@ -538,6 +538,7 @@ void usage (bool verbose_usage)
     "                                compare with                                   \n"
     " -b   <bestfilename>            file output from best of SNR vs DM             \n"
     " -bf                            file output for best period/freq/DM/width/NS   \n"
+    " -output-pdm-s/n                save SN as a function of dP-dDM in pdmp_snr.dat\n"
     "                                                                               \n"
     "Selection & configuration options:                                             \n"
     " -g <dev>   Manually specify a plot device                                     \n"
