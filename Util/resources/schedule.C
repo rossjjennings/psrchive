@@ -87,15 +87,32 @@ pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
   return result;
 }
 
+int simulate_semester();
+int simulate_session();
+
+// some constants for conversions
+const double rad2deg = 180.0/M_PI;
+const double rad2hr = 12.0/M_PI;
+
+std::string semester;
+
+Angle start_lst;
+Angle end_lst;
+
+// the Horizon object stores telescope state
+Horizon horizon;
+
+double min_elevation = 0;
+
+vector<source> orig_sources;
+vector<source> sources;
+
+bool press = false;
+bool minimize_slew_time = false;
+bool interactive = false;
+
 int main (int argc, char* argv[]) 
 {
-  // some constants for conversions
-  const double rad2deg = 180.0/M_PI;
-  const double rad2hr = 12.0/M_PI;
-
-  // the Horizon object stores telescope state
-  Horizon horizon;
-
   // the Angle class does useful conversions
   Angle latitude;
   Angle longitude;
@@ -115,8 +132,7 @@ int main (int argc, char* argv[])
   // 10 degrees/minute downwards or 12 degrees/minute upwards in rad/s
   horizon.set_elevation_velocity ( 10 / (rad2deg * 60) );
 
-  double min_elevation = 30.3;
-  bool verbose = false;
+  min_elevation = 30.3;
 
   Angle start_lst;
   start_lst.setWrapPoint( 2*M_PI );
@@ -128,12 +144,8 @@ int main (int argc, char* argv[])
 
   vector<double> lst_density (180, 0.0);
 
-  bool press = false;
-  bool minimize_slew_time = false;
-  bool interactive = false;
-
   int c;
-  while ((c = getopt(argc, argv, "he:il:L:pPs")) != -1)
+  while ((c = getopt(argc, argv, "he:il:L:p:PsS:")) != -1)
   {
     switch (c)
     {
@@ -161,6 +173,8 @@ int main (int argc, char* argv[])
 
     case 'p':
       lst_density.resize (atoi(optarg));
+      cerr << "accumulating LST density in " << 60.0*24.0/lst_density.size() 
+           << " min bins" << endl;
       break;
 
     case 'P':
@@ -170,6 +184,11 @@ int main (int argc, char* argv[])
     case 's':
       minimize_slew_time = true;
       break;
+
+    case 'S':
+      semester = optarg;
+      break;
+
     }
   }
 
@@ -191,9 +210,12 @@ int main (int argc, char* argv[])
 
   cerr << lines.size() << " lines of text loaded from " << filename << endl;
 
-  vector<source> sources (lines.size());
+  sources.resize (lines.size());
+
   for (unsigned i=0; i<lines.size(); i++)
     sources[i].parse( lines[i] );
+
+  orig_sources = sources;
 
   double delta_lst = 2.0 * M_PI / lst_density.size();
 
@@ -272,14 +294,22 @@ int main (int argc, char* argv[])
     sources[i].priority *= min_avg_density;
   }
 
+  if (!semester.empty())
+    return simulate_semester ();
+     
   if (!(end_lst_specified && start_lst_specified))
     return 0;
 
+  return simulate_session ();
+}
+
+int simulate_session ()
+{
   Angle current_lst = start_lst;
 
   double one_minute = 1.0/(60.0*rad2hr);
 
-  double ten_minutes = 1.0/(6.0*rad2hr);
+  double ten_minutes = 10.0 * one_minute;
 
   // assume that it takes some time to start up and slew
   current_lst += ten_minutes;
@@ -291,8 +321,6 @@ int main (int argc, char* argv[])
 
   double max_tsamp4 = 20;
   double max_tsamp16 = 90;
-
-  bool no_more_highres = false;
 
   while ( current_lst < end_lst )
   {
@@ -371,6 +399,9 @@ int main (int argc, char* argv[])
     cerr << "at " << lst.getHMS(0)
          << " " << up.size() << " available sources" << endl;
 
+    if (up.size() == 0)
+      return -1;
+
     unsigned choose_index = 0;
 
     if (interactive)
@@ -434,6 +465,15 @@ int main (int argc, char* argv[])
         break;
       }
 
+    for (unsigned j=0; j<orig_sources.size(); j++)
+      if (orig_sources[j].name == chosen.name)
+      {
+        orig_sources[j].Tint_min -= chosen.Tobs;
+        if (orig_sources[j].Tint_min <= 0)
+          orig_sources.erase (orig_sources.begin() + j);
+        break;
+      }
+
     if (current_pointing)
     {
       current_pointing = chosen.mount;
@@ -453,6 +493,53 @@ int main (int argc, char* argv[])
   return 0;
 }
 
+class session
+{
+  public:
+  float hours;
+  Angle start_lst;
+  session () { start_lst.setWrapPoint( 2*M_PI ); }
+  void parse (string line)
+  {
+    string whitespace = " \t\n";
+    string temp = stringtok (line, whitespace);
+    hours = fromstring<float>(temp);
+
+    temp = stringtok (line, whitespace);
+    start_lst.setHMS (temp.c_str());
+  }
+};
+
+int simulate_semester ()
+{
+  cerr << "Simulating semester file = " << semester << endl;
+
+  vector<string> lines;
+  loadlines (semester, lines);
+
+  cerr << lines.size() << " lines of text loaded from " << semester << endl;
+
+  vector<session> sem;
+  sem.resize (lines.size());
+
+  for (unsigned i=0; i<lines.size(); i++)
+  {
+    sem[i].parse( lines[i] );
+
+    start_lst = sem[i].start_lst;
+    end_lst = start_lst + sem[i].hours / rad2hr;
+
+    sources = orig_sources;
+ 
+    if (simulate_session () < 0)
+    {
+      cerr << "session #" << i << " of " << lines.size() << " failed" << endl;
+      return -1;
+    }
+  }
+
+  return 0;
+}
 
 void source::parse (string line)
 {
