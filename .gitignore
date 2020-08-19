@@ -73,6 +73,7 @@ More/Applications/psrzap
 More/Applications/reslice
 More/Applications/rmfit
 More/Applications/sesdiv
+More/Applications/smint
 More/Applications/spa
 More/MEAL/lmfit
 More/Plotting/pgutil/psrlst
@@ -90,6 +91,8 @@ Util/fft/install_bench
 Util/genutil/getMJD
 Util/pgutil/psrlst
 Util/resources/getHorizon
+Util/resources/getRiseSet
+Util/resources/schedule
 Util/tempo/aopx
 Util/tempo/ephepo
 Util/tempo/ephio.h
