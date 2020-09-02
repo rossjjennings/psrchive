@@ -80,12 +80,12 @@
   all profiles to it </LI>
   </UL>
 
-  For a complete list of the methods defined in each of these base classes,
-  please see the <a href="annotated.html">Compound List</a>.
-
-  More sophisticated operations are generally implemented as separate
-  classes that take one of the Pulsar::Container classes as an input.
+  More sophisticated operations are generally implemented as objects
+  that take one of the Pulsar::Container classes as an input.
   These mostly inherit the Pulsar::Algorithm base class.
+
+  To list the majority of the classes defined by the PSRCHIVE library,
+  please see the <a href="annotated.shtml">Class List</a>.
 
   \section algorithm Algorithm Interface
 
