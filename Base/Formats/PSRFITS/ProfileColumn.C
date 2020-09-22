@@ -11,6 +11,7 @@
 
 #include "psrfitsio.h"
 #include "templates.h"
+#include "RealTimer.h"
 
 #include <float.h>
 #include <math.h>
@@ -149,7 +150,7 @@ void Pulsar::ProfileColumn::create (unsigned start_column)
 int Pulsar::ProfileColumn::get_colnum (const string& name)
 {
   if (!fptr)
-    throw Error (InvalidState, "Pulsar::ProfileColumn::resize",
+    throw Error (InvalidState, "Pulsar::ProfileColumn::get_colnum",
 		 "fitsfile not set");
 
   int status = 0;
@@ -171,31 +172,74 @@ void Pulsar::ProfileColumn::resize ()
 
   int status = 0;
 
+  RealTimer clock;
+  clock.start();
   fits_modify_vector_len (fptr, get_offset_colnum(), nchan*nprof, &status);
+  clock.stop();
+  cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
+       << offset_colname << "," << nchan*nprof << ") took " << clock.get_elapsed() << " sec" << endl;
 
   if (status != 0)
-    throw FITSError (status, "Pulsar::ProfileColumn::modify_vector_len", 
+    throw FITSError (status, "Pulsar::ProfileColumn::resize", 
                      "error resizing " + offset_colname);
 
   if (verbose)
-    cerr << "Pulsar::ProfileColumn::modify_vector_len " << offset_colname 
+    cerr << "Pulsar::ProfileColumn::resize " << offset_colname 
 	 << " resized to " << nchan*nprof << endl;
 
+  clock.start();
   fits_modify_vector_len (fptr, get_scale_colnum(), nchan*nprof, &status);
+  clock.stop();
+  cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
+       << scale_colname << "," << nchan*nprof << ") took " << clock.get_elapsed() << " sec" << endl;
 
   if (status != 0)
-    throw FITSError (status, "Pulsar::ProfileColumn::modify_vector_len", 
+    throw FITSError (status, "Pulsar::ProfileColumn::resize", 
                      "error resizing " + scale_colname);
 
   if (verbose)
-    cerr << "Pulsar::ProfileColumn::modify_vector_len " << scale_colname 
+    cerr << "Pulsar::ProfileColumn::resize " << scale_colname 
 	 << " resized to " << nchan*nprof << endl;
 
-  fits_modify_vector_len (fptr, get_data_colnum(), nbin*nchan*nprof, &status);
+  // number of values to be written
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+
+  nrow = 1;
+
+#if 0 // try resizing a larger number of rows of some maximum size
+
+  // assuming 16-bit word per value
+  const uint64_t bytes_per_value = 2;
+  
+  const uint64_t nbyte = nvalue * bytes_per_value;
+
+  // experimentally determined limit, beyond which CFITSIO becomes inefficient
+  const uint64_t maximum_bytes = 1 << 19;
+
+  if (nbyte > maximum_bytes)
+  {
+    nrow = nbyte / maximum_bytes;
+    if (nbyte % maximum_bytes)
+      nrow ++;
+    nvalue = maximum_bytes / bytes_per_value;
+  }
+
+#endif
+  
+  cerr << "Pulsar::ProfileColumn::resize calling fits_modify_vector_len ("
+       << data_colname << "," << nvalue <<")" << endl;
+
+  clock.start();
+  fits_modify_vector_len (fptr, get_data_colnum(), nvalue, &status);
+  clock.stop();
+  cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
+       << data_colname << "," << nvalue << ") took "
+       << clock.get_elapsed() << " sec" << endl;
+  
   psrfits_update_tdim (fptr, get_data_colnum(), nbin, nchan, nprof);
 
   if (verbose)
-    cerr << "Pulsar::ProfileColumn::modify_vector_len " << data_colname 
+    cerr << "Pulsar::ProfileColumn::resize " << data_colname 
 	 << " resized to " << nbin*nchan*nprof << endl;
 }
 
@@ -226,7 +270,8 @@ void Pulsar::ProfileColumn::unload (int row,
   
   //= pow(2.0,16.0)-1.0;
 
-  unsigned bins_written = 0;
+  vector<float> offsets (prof.size());
+  vector<float> scales (prof.size());
 
   for (unsigned iprof=0; iprof < prof.size(); iprof++)
   {
@@ -237,86 +282,81 @@ void Pulsar::ProfileColumn::unload (int row,
     float max = 0.0;
     minmax (amps, amps+nbin, min, max);
 
-    float offset = 0;
     if (save_signed)
-      offset = 0.5 * (max + min);
+      offsets[iprof] = 0.5 * (max + min);
     else
-      offset = min;
+      offsets[iprof] = min;
 
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
-	   << " offset=" << offset << endl;
-      
-    float scale = 1.0;
+	   << " offset=" << offsets[iprof] << endl;
       
     // Test for dynamic range
     if (fabs(min - max) > (100.0 * FLT_MIN))
-      scale = (max - min) / max_short;
+      scales[iprof] = (max - min) / max_short;
     else if (verbose)
+    {
+      scales[iprof] = 1.0;
       cerr << "Pulsar::ProfileColumn::unload WARNING no range in profile"
 	   << endl;
-      
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
-	   << " scale = " << scale << endl;
-      
-    // Apply the scale factor
-   
-    // 16 bit representation of profile amplitudes
-    vector<int16_t> compressed (nbin);
-   
-    for (unsigned ibin = 0; ibin < nbin; ibin++)
-      compressed[ibin] = int16_t ((amps[ibin]-offset) / scale);
-
-    // Write the offset to file
-
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload writing offset" << endl;
-
-    int status = 0; 
-    fits_write_col (fptr, TFLOAT, offset_colnum, row, iprof + 1, 1, 
-		    &offset, &status);
-      
-    if (status != 0)
-      throw FITSError (status, "Pulsar::ProfileColumn::unload",
-		       "fits_write_col " + offset_colname);
-
-    // Write the scale factor to file
-
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload writing scale fac" << endl;
-
-    fits_write_col (fptr, TFLOAT, scale_colnum, row, iprof + 1, 1, 
-		    &scale, &status);
-      
-    if (status != 0)
-      throw FITSError (status, "Pulsar::ProfileColumn::unload",
-		       "fits_write_col " + scale_colname);
-
-    // Write the data
+    }
     
     if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload writing data" << endl;
+      cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
+	   << " scale = " << scales[iprof] << endl;
+  }
 
-    fits_write_col (fptr, TSHORT, data_colnum, row, bins_written + 1, nbin, 
-		    &(compressed[0]), &status);
+  // offset and scale are one-dimensional arrays
+  vector<unsigned> dims (1, 1);
 
-    if (status != 0)
-      throw FITSError (status, "Pulsar::ProfileColumn::unload",
-		       "fits_write_col DATA");
+  if (verbose)
+    cerr << "Pulsar::ProfileColumn::unload writing offsets" << endl;
+  psrfits_write_col (fptr, offset_colnum, row, offsets, dims);
 
-    bins_written += nbin;
+  if (verbose)
+    cerr << "Pulsar::ProfileColumn::unload writing scales" << endl;
+  psrfits_write_col (fptr, scale_colnum, row, scales, dims);
+
+  // number of values to be written
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+
+  // 16 bit representation of profile amplitudes
+  vector<int16_t> compressed (nvalue);
+   
+  for (unsigned iprof=0; iprof < prof.size(); iprof++)
+  {
+    const unsigned nbin = prof[iprof]->get_nbin();
+    const float* amps = prof[iprof]->get_amps();
+
+    // Apply the offset and scale factor 
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+    {
+      int16_t value = (amps[ibin]-offsets[iprof]) / scales[iprof];
+      compressed[iprof*nbin+ibin] = value;
+    }
 
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof << "written" 
 	   << endl;
-      
   }
+
+  // Write the data
+    
+  if (verbose)
+    cerr << "Pulsar::ProfileColumn::unload writing data" << endl;
+
+  int status = 0;
+  int offset = 1;
+  fits_write_col (fptr, TSHORT, data_colnum, row, offset, nvalue, 
+		  &(compressed[0]), &status);
+
+  if (status != 0)
+    throw FITSError (status, "Pulsar::ProfileColumn::unload",
+		     "fits_write_col DATA");
 }
 
-//! Unload the given vector of profiles
-void Pulsar::ProfileColumn::load (int row, 
-				  const std::vector<Profile*>& prof)
+//! Load the given vector of profiles
+void Pulsar::ProfileColumn::load (int row, const std::vector<Profile*>& prof)
 {
   if (!fptr)
     throw Error (InvalidState, "Pulsar::ProfileColumn::load",
@@ -398,26 +438,26 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
   int status = 0;  
   int counter = 1;
 
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+  vector<T> temparray (nvalue);
+
+  fits_read_col (fptr, FITS_traits<T>::datatype(),
+		 get_data_colnum(), row, counter, nvalue, 
+		 &null, &(temparray[0]), &initflag, &status);
+
+  if (status != 0)
+    throw FITSError( status, "ProfileColumn::load_amps",
+		     "Error reading subint data"
+		     " nprof=%u nchan=%u nbin=%u \n\t"
+		     "colnum=%d firstrow=%d firstelem=%d nelements=%d",
+		     nprof, nchan, nbin,
+		     data_colnum, row, counter, nvalue );
+  
   unsigned index = 0;
-
-  vector<T> temparray (nbin);
-
   for (unsigned iprof = 0; iprof < nprof; iprof++)
   {
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     {
-      fits_read_col (fptr, FITS_traits<T>::datatype(),
-		     get_data_colnum(), row, counter, nbin, 
-		     &null, &(temparray[0]), &initflag, &status);
-
-      if (status != 0)
-	throw FITSError( status, "ProfileColumn::load_amps",
-			 "Error reading subint data"
-			 " iprof=%d/%d ichan=%d/%d\n\t"
-			 "colnum=%d firstrow=%d firstelem=%d nelements=%d",
-			 iprof, nprof, ichan, nchan, 
-			 data_colnum, row, counter, nbin );
-      
       counter += nbin;
 
       float scale = scales[ichan];
@@ -446,19 +486,20 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
 
       prof[index]->resize (nbin);
       float* amps = prof[index]->get_amps();
-      index ++;
 
       unsigned nans = 0;
 
       for (unsigned ibin = 0; ibin < nbin; ibin++)
       {
-	amps[ibin] = temparray[ibin] * scale + offset;
+	amps[ibin] = temparray[index*nbin+ibin] * scale + offset;
 	if (!isfinite(amps[ibin]))
 	{
 	  nans ++;
 	  amps[ibin] = 0.0;
 	}
       }
+
+      index ++;
 
       if (nans)
 	warning << "Pulsar::ProfileColumn::load_amps"

@@ -1063,8 +1063,11 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   // Finished with primary header information
   
   // /////////////////////////////////////////////////////////////////
-    
-  // Move to the Processing History HDU and set more information
+  //  
+  // For optimal CFITSIO performance, HDUs should be unloaded in the
+  // order that they appear in the psrheader.fits template
+  //
+  // /////////////////////////////////////////////////////////////////
   
   const_cast<FITSArchive*>(this)->update_history();
   
@@ -1080,6 +1083,8 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     cerr << "FITSArchive::unload_file finished with processing history" 
 	 << endl;
 
+  unload <ObsDescription> (fptr, "OBSDESCR");
+
   if (ephemeris)
     unload_Parameters (fptr);    
   else
@@ -1087,22 +1092,46 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
 
   unload_Predictor (fptr);
 
-  // Unload some of the other HDU's
-  unload <ObsDescription> (fptr, "OBSDESCR");
+  // /////////////////////////////////////////////////////////////////
+  //  
+  // For optimal CFITSIO performance, HDUs should be unloaded in the
+  // order that they appear in the psrheader.fits template
+  //
+  // /////////////////////////////////////////////////////////////////
   
-  unload <DigitiserStatistics> (fptr, "DIG_STAT");
 
-  unload <DigitiserCounts> (fptr, "DIG_CNTS");
+  // Unload some of the other HDU's
+  
+  unload <CoherentDedispersion> (fptr, "COHDDISP");
 
   unload <Passband> (fptr, "BANDPASS");
-
-  unload <CoherentDedispersion> (fptr, "COHDDISP");
 
   unload <FluxCalibratorExtension> (fptr, "FLUX_CAL");
 
   unload <CalibratorStokes> (fptr, "CAL_POLN");
 
   unload <PolnCalibratorExtension> (fptr, "FEEDPAR");
+
+  unload <CovarianceMatrix> (fptr, "COV_MAT");
+
+  // Write the Spectral Kurtosis integrations to file
+
+  const SpectralKurtosis * ske = 0;
+  if (nsubint > 0)
+    ske = get_Integration (0)->get<SpectralKurtosis>();
+
+  if (ske)
+    unload_sk_integrations (fptr);
+  else
+    delete_hdu (fptr, "SPECKURT");
+
+  // /////////////////////////////////////////////////////////////////
+  //  
+  // For optimal CFITSIO performance, HDUs should be unloaded in the
+  // order that they appear in the psrheader.fits template
+  //
+  // /////////////////////////////////////////////////////////////////
+  
 
   // Unload extra subint parameters.
 
@@ -1116,7 +1145,7 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
 
     unload( fptr, sub_hdr );
   }
-
+  
   // Now write the integrations to file
 
   if (nsubint > 0)
@@ -1124,25 +1153,16 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   else
     delete_hdu (fptr, "SUBINT");
 
-  // Unload the Covariance Matrix Data values
-  const CovarianceMatrix* covar = get<CovarianceMatrix>();
-  if(covar)
-    unload (fptr,covar);
-  else
-    delete_hdu (fptr,"COV_MAT");
-
-  // Write the Spectral Kurtosis integrations to file
-
-  const SpectralKurtosis * ske = 0;
-  if (nsubint > 0)
-    ske = get_Integration (0)->get<SpectralKurtosis>();
-
-  if (ske)
-    unload_sk_integrations (fptr);
-  else
-    delete_hdu (fptr, "SPECKURT");
-
-
+  unload <DigitiserStatistics> (fptr, "DIG_STAT");
+  unload <DigitiserCounts> (fptr, "DIG_CNTS");
+  
+  // /////////////////////////////////////////////////////////////////
+  //  
+  // For optimal CFITSIO performance, HDUs should be unloaded in the
+  // order that they appear in the psrheader.fits template
+  //
+  // /////////////////////////////////////////////////////////////////
+  
   fits_close_file (fptr, &status);
 
   if (status)
