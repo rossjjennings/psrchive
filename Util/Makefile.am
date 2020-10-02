@@ -31,3 +31,11 @@ libpsrutil_la_LIBADD += resources/libresources.la
 
 include $(top_srcdir)/config/Makefile.local
 
+NOW_IN_EPSIC := Basis.h Dirac.h Matrix.h Stokes.h Estimate.h complex_promote.h \
+	BoxMuller.h Jacobi.h Minkowski.h Quaternion.h Traits.h random.h \
+	Conventions.h Jones.h Pauli.h Spinor.h Vector.h PromoteTraits.h
+
+all-local:
+	-for file in $(NOW_IN_EPSIC); do \
+	rm -f $(includedir)/$$file $(top_builddir)/local_include/$$file ; done
+
