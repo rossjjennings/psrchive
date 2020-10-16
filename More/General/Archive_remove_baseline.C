@@ -16,7 +16,7 @@ Archive::remove_baseline_strategy ( new RemoveBaseline::Total,
 
 void Pulsar::Archive::remove_baseline () try
 {
-  remove_baseline_strategy (this); 
+  remove_baseline_strategy (this);
 }
 catch (Error& error)
 {

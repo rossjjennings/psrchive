@@ -28,7 +28,7 @@ Pulsar::PhaseWeight* Pulsar::Integration::baseline () const
   Integration::baseline to find the baseline mask.
 
   This mask is then used to remove the baseline from each of the
-  profiles over all polarizations and frequencies.  If the dispersion
+  profiles over all polarizations and frequencies. If the dispersion
   measure and folding period have been previously set, the baseline
   phase is shifted according to the dispersion relation.
 */
