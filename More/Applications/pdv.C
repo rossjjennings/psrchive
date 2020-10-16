@@ -594,7 +594,7 @@ void FracPol(Pulsar::Archive* archive)
 		 for (vector<float>::iterator it = I_weights.begin(); it != I_weights.end();
 			   ++it) {
 
-			// only sum the bins if it not part of the the stokes I baseline
+			// only sum the bin if it is not part of the stokes I baseline
 			if (!*it) {
 			   // L = linear poln intensity = (U*U + Q*Q)^(1/2)
 			   const float L = sqrt(pow(*U_ptr, 2) + pow(*Q_ptr, 2));
@@ -1371,7 +1371,4 @@ catch (Error& error)
    cerr << error << endl;
    return -1;
 }
-
-
-
 
