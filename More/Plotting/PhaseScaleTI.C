@@ -22,7 +22,7 @@ Pulsar::PhaseScale::Interface::Interface (PhaseScale* instance)
        &PhaseScale::set_units,
        "unit", "Units on phase axis (turn,deg,rad,ms,bin)" );
 
-  add( &PhaseScale::get_origin_norm,
-       &PhaseScale::set_origin_norm,
+  add( &PhaseScale::get_origin,
+       &PhaseScale::set_origin,
        "origin", "Offset of origin on phase axis" );
 }

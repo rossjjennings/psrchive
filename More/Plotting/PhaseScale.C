@@ -14,6 +14,9 @@ using namespace std;
 Pulsar::PhaseScale::PhaseScale ()
 {
   units = Phase::Turns;
+
+  origin = 0;
+  origin_units = units;
   origin_norm = 0;
 }
 
@@ -25,10 +28,15 @@ void Pulsar::PhaseScale::init (const Archive* data)
   // PlotScale::num_indeces
   num_indeces = data->get_nbin();
 
-  float scale = get_scale (data);
+  float origin_scale = get_scale (data, origin_units);
+  origin_norm = origin / origin_scale;
+
+  // cerr << "PhaseScale::init scale=" << origin_scale << " origin=" << origin << endl;
 
   float min = origin_norm;
   float max = 1 + origin_norm;
+
+  float scale = get_scale (data);
 
   min *= scale;
   max *= scale;
@@ -58,14 +66,18 @@ void Pulsar::PhaseScale::get_ordinates (const Archive* data,
     axis[ibin] = scale * (origin_norm + (float(ibin) + 0.5) / axis.size());
 }
 
-
 float Pulsar::PhaseScale::get_scale (const Archive* data) const
+{
+  return get_scale (data, units);
+}
+
+float Pulsar::PhaseScale::get_scale (const Archive* data, Phase::Unit unit) const
 {
   double period_in_seconds = 1.0;
   if (data)
     period_in_seconds = data->get_Integration(0)->get_folding_period();
 
-  switch (units)
+  switch (unit)
     {
     case Phase::Turns:
       return 1.0;
