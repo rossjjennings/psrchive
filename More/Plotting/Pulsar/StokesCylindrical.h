@@ -60,10 +60,12 @@ namespace Pulsar {
     Index isubint;
     Index ichan;
 
-    template<class T> void prepare (T* plot)
+    template<class T> void prepare (T* plot, const Archive* data = 0)
     {
       plot->set_subint (isubint);
       plot->set_chan (ichan);
+      if (data)
+        plot->prepare (data);
     }
 
   };

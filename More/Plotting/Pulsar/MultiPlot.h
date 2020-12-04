@@ -50,10 +50,10 @@ namespace Pulsar {
     void unmanage (FramedPlot*);
 
     //! Derived classes may wish to prepare before plotting
-    virtual void prepare (const Archive*) {}
+    virtual void prepare (const Archive*);
 
     //! Derived classes may wish to prepare before each plot is used
-    virtual void prepare (FramedPlot*) {}
+    virtual void prepare (FramedPlot*) { }
 
     //! Get the frame
     virtual MultiFrame* get_frame () { return &frames; }

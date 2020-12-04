@@ -29,7 +29,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseVsMore.h \
 	Pulsar/MultiFrequency.h					       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
-	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
+	Pulsar/MultiData.h Pulsar/MultiDataPlot.h		       \
 	Pulsar/StokesCovariancePlot.h Pulsar/StokesCrossCovariancePlot.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
@@ -92,7 +92,6 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	PhaseVsHist.C PhaseVsHistTI.C \
 	MoreScale.C \
 	MultiData.C \
-	MultiDataSimple.C \
 	MultiFrequency.C \
 	MultiPlot.C \
 	MultiPhase.C \

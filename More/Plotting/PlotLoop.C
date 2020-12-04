@@ -15,7 +15,7 @@
 
 #include <cpgplot.h>
 
-#define VERBOSE(x) if (Plot::verbose) cerr << x << endl
+#define VERBOSE(x) if (Plot::verbose) std::cerr << x << std::endl
 
 // #define VERBOSE(x) cerr << x << endl
 
@@ -29,9 +29,10 @@ Pulsar::PlotLoop::PlotLoop ()
   stack = false;
 }
 
-//! Set the Plot to be executed
+//! Add a Plot to be executed
 void Pulsar::PlotLoop::add_Plot (Plot* p)
 {
+  VERBOSE("PlotLoop::add_Plot ptr=" << p);
   plots.push_back (p);
 }
 
@@ -39,10 +40,15 @@ void Pulsar::PlotLoop::configure (const std::vector<std::string>& options)
 {
   if (overlay)
     for (unsigned i=0; i<plots.size(); i++)
+    {
+      void* old_ptr = plots[i].ptr();
       plots[i] = MultiData::factory (plots[i]);
+      VERBOSE("PlotLoop::configure ptr=" << old_ptr << "->" << plots[i].ptr());
+    }
 
   if (stack && plots.size())
   {
+    VERBOSE("PlotLoop::configure stack");
     MultiPlot* plot = MultiPlot::factory (plots[0]);
     for (unsigned i=0; i<plots.size(); i++)
       plot->manage (plots[i]);
@@ -59,7 +65,10 @@ void Pulsar::PlotLoop::configure (const std::vector<std::string>& options)
 void Pulsar::PlotLoop::finalize ()
 {
   for (unsigned i=0; i<plots.size(); i++)
+  {
+    VERBOSE("PlotLoop::finalize iplot=" << i);
     plots[i]->finalize ();
+  }
 }
 
 //! Set the Archive to be plotted
@@ -137,6 +146,8 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
     {
       if (!overlay)
         cpgpage ();
+
+      VERBOSE("PlotLoop::plot iplot="<< i <<" ptr="<< (void*) plots[i].ptr());
 
       plots[i]->plot (archives[i]);
     }

@@ -61,8 +61,8 @@ void Pulsar::StokesSpherical::prepare (const Archive* data)
     cerr << "Pulsar::StokesSpherical::prepare" << endl;
 
   prepare( &flux, data );
-  prepare( &orientation );
-  prepare( &ellipticity );
+  prepare( &orientation, data );
+  prepare( &ellipticity, data );
 }
 
 

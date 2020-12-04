@@ -86,6 +86,18 @@ void Pulsar::MultiFrame::set_line_width (int width)
 	   &PlotFrame::set_line_width, line_width );
 }
 
+void Pulsar::MultiFrame::init (const Archive* data)
+{
+  foreach( frames.begin(), frames.end(), 
+	   &PlotFrame::init, data );
+}
+
+void Pulsar::MultiFrame::freeze (bool frozen)
+{
+  foreach( frames.begin(), frames.end(),
+           &PlotFrame::freeze, frozen);
+}
+
 template<typename Iterator, typename GeneratorMemberFunction>
 void foreach (Iterator begin, Iterator end,
 	      GeneratorMemberFunction func)
@@ -99,3 +111,27 @@ void Pulsar::MultiFrame::no_labels ()
   foreach( frames.begin(), frames.end(), 
 	   &PlotFrame::no_labels );
 }
+
+template<typename Iterator, typename UnaryMemberFunction>
+void foreach (Iterator beginA, Iterator endA, Iterator beginB, Iterator endB,
+	      UnaryMemberFunction func)
+{
+  Iterator j = beginB;
+  for (Iterator i = beginA; i != endA; i++, j++)
+    (i->second->*func)(j->second);
+}
+
+void Pulsar::MultiFrame::include (MultiFrame* other)
+{
+  foreach( frames.begin(), frames.end(),
+	   other->frames.begin(), other->frames.end(),
+	   &PlotFrame::include );
+}
+
+void Pulsar::MultiFrame::copy (MultiFrame* other)
+{
+  foreach( frames.begin(), frames.end(),
+	   other->frames.begin(), other->frames.end(),
+	   &PlotFrame::copy );
+}
+

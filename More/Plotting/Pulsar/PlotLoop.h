@@ -27,7 +27,7 @@ namespace Pulsar {
     //! Default constructor
     PlotLoop ();
 
-    //! Set the Plot to be executed
+    //! Add a Plot to be executed
     void add_Plot (Plot*);
 
     //! Configure the plots

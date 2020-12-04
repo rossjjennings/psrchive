@@ -28,6 +28,18 @@ Pulsar::PlotAttributes* Pulsar::MultiPlot::get_attributes ()
   return &frames;
 }
 
+void Pulsar::MultiPlot::prepare (const Archive* data)
+{
+  cerr << "Pulsar::MultiPlot::prepare nplot=" << plots.size() << endl;
+
+  std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
+  for (ptr = plots.begin(); ptr != plots.end(); ptr++)
+  {
+    FramedPlot* plot = ptr->second;
+    plot->prepare (data);
+  }
+}
+
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
   if (verbose)
@@ -201,7 +213,6 @@ void Pulsar::MultiPlot::unmanage (FramedPlot* plot)
       return;
     }
 }
-
 
 #include "Pulsar/MultiPhase.h"
 

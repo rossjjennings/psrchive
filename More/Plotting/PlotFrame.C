@@ -32,6 +32,8 @@ Pulsar::PlotFrame::PlotFrame ()
   transpose = false;
   
   draw_box = true;
+
+  frozen = false;
 }
 
 Pulsar::PlotFrame::~PlotFrame ()
@@ -42,6 +44,9 @@ Pulsar::PlotFrame::~PlotFrame ()
 
 void Pulsar::PlotFrame::init (const Archive* data)
 {
+  if (frozen)
+    return;
+
   get_x_scale(true)->init (data);
   get_y_scale(true)->init (data);
 }
@@ -254,3 +259,24 @@ void Pulsar::PlotFrame::set_viewport (float x0, float x1,
   get_x_scale()->set_viewport( std::pair<float,float> (x0,x1) );
   get_y_scale()->set_viewport( std::pair<float,float> (y0,y1) );
 }
+
+void Pulsar::PlotFrame::include (PlotFrame* frame)
+{
+  get_x_scale()->include( frame->get_x_scale() );
+  get_y_scale()->include( frame->get_y_scale() );
+}
+
+void Pulsar::PlotFrame::copy (PlotFrame* frame)
+{
+  get_x_scale()->copy( frame->get_x_scale() );
+  get_y_scale()->copy( frame->get_y_scale() );
+}
+
+ //! Freeze the frame
+void Pulsar::PlotFrame::freeze (bool f)
+{
+  frozen = f;
+  get_x_scale()->freeze(f);
+  get_y_scale()->freeze(f);
+}
+

@@ -6,13 +6,27 @@
  ***************************************************************************/
 
 #include "Pulsar/MultiData.h"
-#include "Pulsar/MultiDataSimple.h"
+#include "Pulsar/MultiDataPlot.h"
+#include "Pulsar/SimplePlot.h"
+#include "Pulsar/MultiPlot.h"
 
 Pulsar::Plot* Pulsar::MultiData::factory (Plot* plot)
 {
   SimplePlot* simple = dynamic_cast<SimplePlot*>(plot);
   if (simple)
-    return new MultiDataSimple (simple);
+  {
+    cerr << "MultiData::factory plot is a SimplePlot" << endl;
+    return new MultiDataPlot<SimplePlot> (simple);
+  }
+
+  MultiPlot* multi = dynamic_cast<MultiPlot*>(plot);
+  if (multi)
+  {
+    cerr << "MultiData::factory plot is a MultiPlot" << endl;
+    return new MultiDataPlot<MultiPlot> (multi);
+  }
+
+  cerr << "MultiData::factory plot cannot overlay" << endl;
 
   return plot;
 }

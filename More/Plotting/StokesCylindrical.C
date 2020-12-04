@@ -39,10 +39,10 @@ TextInterface::Parser* Pulsar::StokesCylindrical::get_interface ()
   return new Interface (this);
 }
 
-void Pulsar::StokesCylindrical::prepare (const Archive*)
+void Pulsar::StokesCylindrical::prepare (const Archive* data)
 {
-  prepare( &flux );
-  prepare( &orientation );
+  prepare( &flux, data );
+  prepare( &orientation, data );
 }
 
 
