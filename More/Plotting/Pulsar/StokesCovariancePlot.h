@@ -41,14 +41,32 @@ namespace Pulsar {
 		NonOrthogonality,
 		Theta,
 		RegressionCoefficients,
-		ModulationIndex };
+		ModulationIndex,
+		DegreeOfPolarization};
 
     void set_what (What w) { what = w; }
     What get_what () const { return what; }
 
+    //! Set the colour for each value plotted
+    void set_plot_colours (const std::string& plot) { plot_colours = plot; }
+    std::string get_plot_colours () const { return plot_colours; }
+
+    //! Set the line style for each value plotted
+    void set_plot_lines (const std::string& plot) { plot_lines = plot; }
+    std::string get_plot_lines () const { return plot_lines; }
+
+    //! Set the line width for each value plotted
+    void set_plot_widths (const std::string& plot) { plot_widths = plot; }
+    std::string get_plot_widths () const { return plot_widths; }
+
   private:
 
     What what;
+
+    std::string plot_colours;
+    std::string plot_lines;
+    std::string plot_widths;
+
   };
 
   std::ostream& operator << (std::ostream& os, StokesCovariancePlot::What);
