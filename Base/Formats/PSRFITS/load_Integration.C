@@ -181,6 +181,9 @@ try {
   // Set a preliminary epoch to avoid problems loading the polyco
   integ->set_epoch (epoch);
 
+  // Set the gate duty cycle
+  integ->set_gate_duty_cycle (gate_duty_cycle);
+
   // Set the folding period to 0 until one of three possible methods succeeds
   integ->set_folding_period (0.0);
 

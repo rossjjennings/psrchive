@@ -69,6 +69,9 @@ void Pulsar::FITSArchive::init ()
   // on construction, the data have not been loaded from fits file
   loaded_from_fits = false;
 
+  // default fraction of the pulse period recorded (in turns)
+  gate_duty_cycle = 1.0;
+
   read_fptr = 0;
   read_filename.clear();
 }
@@ -167,6 +170,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive)
   chanbw = farchive->chanbw;
   scale_cross_products = farchive->scale_cross_products;
   loaded_from_fits = farchive->loaded_from_fits;
+  gate_duty_cycle = farchive->gate_duty_cycle;
 
   if (verbose > 2)
     cerr << "FITSArchive::copy exit" << endl;

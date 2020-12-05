@@ -62,6 +62,11 @@ namespace Pulsar {
     //! Set the folding period (in seconds)
     virtual void set_folding_period (double seconds) { pfold = seconds; }
 
+    //! Get the fraction of the pulse period recorded (in turns)
+    virtual double get_gate_duty_cycle() const { return gate; }
+    //! Set the fraction of the pulse period recorded (in turns)
+    virtual void set_gate_duty_cycle (double turns) { gate = turns; }
+
   protected:
 
     //! Set the number of pulsar phase bins
@@ -93,6 +98,9 @@ namespace Pulsar {
 
     //! folding period (in seconds)
     double pfold;
+
+    //! gate duty cycle (in turns)
+    double gate;
 
     //! initialize all attributes to null
     void init();

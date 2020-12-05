@@ -215,6 +215,13 @@ namespace Pulsar {
 	to that at the epoch defined by get_epoch. */
     virtual void set_folding_period (double seconds) = 0;
 
+    //! Get the fraction of the pulse period recorded (in turns)
+    virtual double get_gate_duty_cycle() const { return 1.0; }
+    //! Set the fraction of the pulse period recorded (in turns)
+    /*  When gated data are recorded, this is the duty cycle of the
+        recording window */
+    virtual void set_gate_duty_cycle (double turns) { }
+
     //@}
 
 
