@@ -90,7 +90,16 @@ namespace Pulsar {
     //! Initialize the frame
     virtual void init (const Archive*);
 
+    //! Expand to include the x and y scale of another frame
+    virtual void include (PlotFrame*);
+
+    //! Copy another frame
+    virtual void copy (PlotFrame*);
+    
     void hide_axes( void ) { draw_box = false; }
+
+    //! Freeze the frame
+    virtual void freeze (bool f = true);
 
   protected:
 
@@ -105,7 +114,7 @@ namespace Pulsar {
     bool transpose;
     
     bool draw_box;
-
+    bool frozen;
   };
 
 }

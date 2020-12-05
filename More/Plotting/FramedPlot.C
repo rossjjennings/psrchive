@@ -40,3 +40,4 @@ void Pulsar::FramedPlot::set_frame (PlotFrame* f)
 {
   frame = f;
 }
+

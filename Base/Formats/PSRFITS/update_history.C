@@ -89,7 +89,19 @@ void Pulsar::FITSArchive::update_history()
   last.nbin_prd = get_nbin();
 
   if ( get_nsubint() )
-    last.tbin = get_Integration(0)->get_folding_period() / get_nbin();
+  {
+    double gate = get_Integration(0)->get_gate_duty_cycle();
+    last.nbin_prd = round (last.nbin_prd / gate);
+
+    double diff = fabs(last.nbin_prd * gate - last.nbin);
+    if ( diff > 0.01 )
+      warning << "FITSArchive::update_history nbin=" << last.nbin 
+              << " divided by gate=" << gate << " does not result in an integer"
+              << " nbin_prd=" << last.nbin/gate << endl;
+
+    double interval = gate * get_Integration(0)->get_folding_period();
+    last.tbin = interval / get_nbin();
+  }
   else
     last.tbin = 0.0;
 

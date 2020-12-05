@@ -13,6 +13,7 @@ void Pulsar::BasicIntegration::init ()
 {
   npol = nchan = nbin = 0;
   duration = pfold = 0.0;
+  gate = 1.0;
 }
 
 Pulsar::BasicIntegration::BasicIntegration (const BasicIntegration& subint)

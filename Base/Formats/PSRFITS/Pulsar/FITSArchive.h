@@ -316,6 +316,9 @@ namespace Pulsar
        is no FITSHdrExtension in use (as is the case in psrconv) */
     mutable MJD reference_epoch;
 
+    // Gate duty cycle passed on to all sub-integrations
+    mutable double gate_duty_cycle;
+
     // Profile load/unload algorithm
     mutable Reference::To<ProfileColumn> load_dat_io, unload_dat_io;
 

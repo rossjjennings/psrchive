@@ -1,4 +1,4 @@
-/***************************************************************************
+ /**************************************************************************2
  *
  *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
@@ -8,15 +8,16 @@
 #include "Pulsar/SimplePlot.h"
 #include "Pulsar/PlotAnnotation.h"
 #include "Pulsar/HasPen.h"
+#include "pairutil.h"
 
 using namespace std;
 
 void Pulsar::SimplePlot::plot (const Archive* data)
 {
   if (verbose)
-    cerr << "Pulsar::SimplePlot::plot init" << endl;
+    cerr << "Pulsar::SimplePlot::plot init PlotFrame" << endl;
   get_frame()->init (data);
-
+ 
   if (verbose)
     cerr << "Pulsar::SimplePlot::plot prepare" << endl;
   prepare (data);

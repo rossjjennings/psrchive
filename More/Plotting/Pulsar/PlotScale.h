@@ -38,6 +38,9 @@ namespace Pulsar {
     //! Initialize internal attributes according to Archive data
     virtual void init (const Archive*);
 
+    //! Copy another PlotScale
+    void copy (PlotScale* other);
+    
     //! Expand as necessary to include another PlotScale
     void include (PlotScale* other);
 
@@ -52,6 +55,9 @@ namespace Pulsar {
 
     //! Get the minimum and maximum value in the data
     void get_minmax (float& min, float& max) const;
+
+    //! Get the world coordinate range printed on the axis
+    std::pair<float,float> get_minmax () const;
 
     //! Return min and max scaled according to zoom
     void get_range (float& min, float& max) const;
@@ -101,6 +107,9 @@ namespace Pulsar {
     std::pair<float,float> viewport_to_world (const std::pair<float,float>&);
     double viewport_to_world (const double);
 
+    //! Freeze the frame
+    virtual void freeze (bool f = true) { frozen = f; }
+
   protected:
 
     std::pair<float,float> world;
@@ -116,7 +125,7 @@ namespace Pulsar {
     float minval;
     float maxval;
     bool minmaxvalset;
-
+    bool frozen;
   };
 
   

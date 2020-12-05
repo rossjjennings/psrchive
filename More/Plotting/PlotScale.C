@@ -27,6 +27,7 @@ Pulsar::PlotScale::PlotScale () :
   maxval = 1.0;
   minmaxvalset = false;
   num_indeces = 0;
+  frozen = false;
 }
 
 void Pulsar::PlotScale::init (const Archive*)
@@ -36,14 +37,28 @@ void Pulsar::PlotScale::init (const Archive*)
 //! Expand as necessary to include another PlotScale
 void Pulsar::PlotScale::include (PlotScale* other)
 {
+  if (frozen)
+    return;
+
   minval = std::min (minval, other->minval);
   maxval = std::max (maxval, other->maxval);
   minmaxvalset &= other->minmaxvalset;
 }
 
+void Pulsar::PlotScale::copy (PlotScale* other)
+{
+  if (frozen)
+    return;
+
+  *this = *other;
+}
+
 //! Set the minimum and maximum value in the data
 void Pulsar::PlotScale::set_minmax (float min, float max)
 {
+  if (frozen)
+    return;
+
   minval = min;
   maxval = max;
   minmaxvalset = true;
@@ -54,6 +69,11 @@ void Pulsar::PlotScale::get_minmax (float& min, float& max) const
 {
   min = minval;
   max = maxval;
+}
+
+std::pair<float,float> Pulsar::PlotScale::get_minmax () const
+{
+  return std::pair<float,float> (minval, maxval);
 }
 
 void Pulsar::PlotScale::set_range_norm (const std::pair<float,float>& f)

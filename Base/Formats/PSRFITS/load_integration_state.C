@@ -100,6 +100,17 @@ void Pulsar::FITSArchive::load_integration_state (fitsfile* fptr)
     load_state (fptr);
   }
 
+  ProcHistory::row& last = hist->get_last();
+
+  if (last.nbin_prd > last.nbin)
+  {
+    gate_duty_cycle = double(last.nbin) / double(last.nbin_prd);
+    if (verbose > 2)
+      cerr << "FITSArchive::load_integration_state gate_duty_cycle = " << gate_duty_cycle << endl;
+  }
+  else
+    gate_duty_cycle = 1.0;
+
   interpret_scale ();
   interpret_pol_type ();
 }

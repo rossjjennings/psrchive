@@ -61,11 +61,23 @@ namespace Pulsar {
     //! Set no_labels in all sub-plots
     void no_labels ();
 
+    //! Initialize each frame
+    virtual void init (const Archive*);
+
     //! Focus the frame
     virtual void focus (const Archive*);
 
     //! Decorate the frame
     virtual void decorate (const Archive*);
+
+    //! Expand the x and y scales of all sub-plots to include other
+    virtual void include (MultiFrame* other);
+
+    //! Copy the x and y scales
+    virtual void copy (MultiFrame* other);
+
+    //! Freeze all frames
+    virtual void freeze (bool f = true);
 
   protected:
 

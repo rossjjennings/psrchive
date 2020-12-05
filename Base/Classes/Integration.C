@@ -260,6 +260,7 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
   set_epoch ( subint->get_epoch());
   set_duration ( subint->get_duration());
   set_folding_period ( subint->get_folding_period() );
+  set_gate_duty_cycle ( subint->get_gate_duty_cycle() );
 
   if (management)
     parent = subint->parent;

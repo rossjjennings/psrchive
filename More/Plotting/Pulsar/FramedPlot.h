@@ -39,11 +39,13 @@ namespace Pulsar {
     //! Set the frame
     virtual void set_frame (PlotFrame*);
 
+    //! Derived classes must prepare to draw
+    virtual void prepare (const Archive*) {}
+
   protected:
 
     //! The plot frame
     Reference::To<PlotFrame> frame;
-
   };
 
 }

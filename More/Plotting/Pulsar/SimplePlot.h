@@ -43,9 +43,6 @@ namespace Pulsar {
     //! Get the default label for the y axis
     virtual std::string get_ylabel (const Archive*) { return ""; }
 
-    //! Derived classes must prepare to draw
-    virtual void prepare (const Archive*) {}
-
     //! Derived classes must draw in the current viewport
     virtual void draw (const Archive*) = 0;
 

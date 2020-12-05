@@ -29,6 +29,10 @@ Pulsar::Integration::Interface::Interface (Integration* _instance)
        &Integration::set_folding_period, 
        "period", "Folding period (s)" );
 
+  add( &Integration::get_gate_duty_cycle,
+       &Integration::set_gate_duty_cycle,
+       "gate", "Gate duty cycle (turns)" );
+
   // note that explicit casts are required for overloaded methods
 
   VGenerator<double> dgenerator;

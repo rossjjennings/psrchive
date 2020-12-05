@@ -196,7 +196,8 @@ void Pulsar::UVMArchive::load_header (const char* filename)
 
     double interval = header->period * header->samint;
     
-    integration->set_folding_period (interval);
+    integration->set_folding_period (header->period);
+    integration->set_gate_duty_cycle (header->samint);
     integration->set_duration (interval);
     integration->set_epoch (epoch);
     integration->set_centre_frequency(0, centre_frequency);

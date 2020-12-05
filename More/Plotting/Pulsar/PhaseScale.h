@@ -46,6 +46,7 @@ namespace Pulsar {
 
     //! Get the conversion factor from turns to units
     float get_scale (const Archive*) const;
+    float get_scale (const Archive*, Phase::Unit) const;
 
     //! Set the units on the phase axis
     void set_units (Phase::Unit s) { units = s; }
@@ -57,14 +58,22 @@ namespace Pulsar {
     //! Get the world-normalized coordinates of the origin on the phase axis
     float get_origin_norm () const { return origin_norm; }
 
+    void set_origin (float f) { origin = f; origin_units = units; }
+    float get_origin () const { return origin; }
+
   protected:
 
     //! Units on the phase axis
     Phase::Unit units;
 
-    //! Origin on the phase axis
+    //! Units at the time set_origin is called
+    Phase::Unit origin_units;
+
+    //! Origin on the phase axis in world-normalized coordinates
     float origin_norm;
 
+    //! Origin on the phase axis
+    float origin;
   };
 }
 
