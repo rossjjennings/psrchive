@@ -26,7 +26,7 @@ void usage ()
     "  -i         interactive mode \n"
     "  -l lst     start LST \n"
     "  -L lst     end LST \n"
-    "  -p         create lst_density.txt and exit \n"
+    "  -p min     minutes per interval in lst_density.txt \n"
     "  -P         add PRESS-specific constraints \n"
     "  -s         minimize slew time \n"
     "\n"
@@ -134,15 +134,15 @@ int main (int argc, char* argv[])
 
   min_elevation = 30.3;
 
-  Angle start_lst;
   start_lst.setWrapPoint( 2*M_PI );
   bool start_lst_specified = false;
 
-  Angle end_lst;
   end_lst.setWrapPoint( 2*M_PI );
   bool end_lst_specified = false;
 
-  vector<double> lst_density (180, 0.0);
+  double interval = 15.0;  // minutes
+  unsigned lst_bins = 60.0*24.0/interval;
+  vector<double> lst_density (lst_bins, 0.0);
 
   int c;
   while ((c = getopt(argc, argv, "he:il:L:p:PsS:")) != -1)
@@ -172,10 +172,14 @@ int main (int argc, char* argv[])
       break;
 
     case 'p':
-      lst_density.resize (atoi(optarg));
+    {
+      double interval = atof(optarg);
+      unsigned lst_bins = 60.0*24.0/interval;
+      lst_density.resize (lst_bins, 0.0);
       cerr << "accumulating LST density in " << 60.0*24.0/lst_density.size() 
            << " min bins" << endl;
       break;
+    }
 
     case 'P':
       press = true;
@@ -262,6 +266,7 @@ int main (int argc, char* argv[])
 
     unsigned nbin = lst_density.size();
 
+#if 0
     // find the minimum density window in which the source can be observed
     double min_avg_density = 0.0;
     for (double lst1=rise_lst; lst1 <= set_lst; lst1 += delta_lst)
@@ -286,8 +291,27 @@ int main (int argc, char* argv[])
       if (lst >= set_lst)
         break;
     }
+#else
 
-    sources[i].min_avg_density += min_avg_density;
+    // increase the priority of sources that are in higher density parts
+    // of the sky for shorter periods of time
+
+    double sum_density = 0.0;
+    double sum_time = 0.0;
+
+    for (double lst=rise_lst; lst <= set_lst; lst += delta_lst)
+    {
+      unsigned ibin = (lst / (2*M_PI)) * nbin;
+      sum_density += lst_density[ibin%nbin];
+      sum_time += delta_lst * rad2hr;
+      lst += delta_lst;
+    } 
+
+    double min_avg_density = sum_density / sum_time;
+
+#endif
+
+    sources[i].min_avg_density = min_avg_density;
     sout << sources[i].name << " " << sources[i].up_hours 
          << " " << sources[i].min_avg_density << endl;
 
@@ -295,10 +319,25 @@ int main (int argc, char* argv[])
   }
 
   if (!semester.empty())
+  {
+    cerr << "simulating semester=" << semester << endl;
     return simulate_semester ();
-     
-  if (!(end_lst_specified && start_lst_specified))
+  }
+
+  if (!start_lst_specified)
+  {
+    cerr << "start LST not specified" << endl;
     return 0;
+  }
+     
+  if (!end_lst_specified)
+  {
+    cerr << "end LST not specified" << endl;
+    return 0;
+  }
+
+  cerr << "simulating session "
+          "LST start=" << start_lst << " end=" << end_lst << endl;
 
   return simulate_session ();
 }
@@ -321,6 +360,9 @@ int simulate_session ()
 
   double max_tsamp4 = 20;
   double max_tsamp16 = 90;
+
+  cerr << "simulate_session: sources.size=" << sources.size() << endl;
+  cerr << "current_lst=" << current_lst << " end_lst=" << end_lst << endl;
 
   while ( current_lst < end_lst )
   {
