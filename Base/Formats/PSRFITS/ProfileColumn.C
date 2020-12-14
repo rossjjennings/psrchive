@@ -213,18 +213,13 @@ void Pulsar::ProfileColumn::unload (int row,
          << " offset_colnum=" << offset_colnum 
          << " scale_colnum=" << scale_colnum << endl;
 
-  const bool save_signed = true;
+  /*
+    2020 Dec 15 - WvS - for justification of the correct offset and scale
+    calculation, please see old_int16_io.C and new_int16_io.C and the 
+    bug report at https://sourceforge.net/p/psrchive/bugs/440 */
 
-  // due to definition of offset, max_short should be the same when
-  // using either signed or unsigned
-  float max_short;
-
-  if (save_signed)
-    max_short = pow(2.0,15.0)-1.0;
-  else
-    max_short = pow(2.0,16.0)-1.0;
-  
-  //= pow(2.0,16.0)-1.0;
+  double the_min = 1-pow(2,15);
+  double the_max = pow(2,15)-2;
 
   unsigned bins_written = 0;
 
@@ -237,11 +232,7 @@ void Pulsar::ProfileColumn::unload (int row,
     float max = 0.0;
     minmax (amps, amps+nbin, min, max);
 
-    float offset = 0;
-    if (save_signed)
-      offset = 0.5 * (max + min);
-    else
-      offset = min;
+    float offset = (min*the_max -max*the_min) / (the_max - the_min);
 
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
@@ -251,7 +242,7 @@ void Pulsar::ProfileColumn::unload (int row,
       
     // Test for dynamic range
     if (fabs(min - max) > (100.0 * FLT_MIN))
-      scale = (max - min) / max_short;
+      scale = (max - min) / (the_max - the_min);
     else if (verbose)
       cerr << "Pulsar::ProfileColumn::unload WARNING no range in profile"
 	   << endl;
