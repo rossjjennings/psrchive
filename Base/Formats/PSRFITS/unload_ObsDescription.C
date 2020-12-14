@@ -14,8 +14,8 @@ using namespace std;
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const Pulsar::ObsDescription* description)
 {
-  if (verbose)
-    cerr << "unload_ObsDescription entered" << endl;
+  if (verbose > 1)
+    cerr << "unload_ObsDescription entered verbose=" << verbose << endl;
 
-  unload_text (fptr, "OBSDESCR", "DESCR", description, verbose);
+  unload_text (fptr, "OBSDESCR", "DESCR", description, verbose > 1);
 }
