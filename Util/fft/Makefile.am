@@ -57,7 +57,8 @@ bench: ./install_bench ./fft_bench ./fft_speed
 LDADD = libpsrfft.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/third/libthird.la
+	$(top_builddir)/Util/third/libthird.la \
+	$(top_builddir)/Util/epsic/src/libepsic.la
 
 libpsrfft_la_LIBADD = @FFT_LIBS@
 
