@@ -11,7 +11,12 @@
 
 #include "psrfitsio.h"
 #include "templates.h"
+
+#define REPORT_IO_TIMES 0
+
+#if REPORT_IO_TIMES
 #include "RealTimer.h"
+#endif
 
 #include <float.h>
 #include <math.h>
@@ -172,12 +177,18 @@ void Pulsar::ProfileColumn::resize ()
 
   int status = 0;
 
+#if REPORT_IO_TIMES
   RealTimer clock;
   clock.start();
+#endif
+
   fits_modify_vector_len (fptr, get_offset_colnum(), nchan*nprof, &status);
+
+#if REPORT_IO_TIMES
   clock.stop();
   cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
        << offset_colname << "," << nchan*nprof << ") took " << clock.get_elapsed() << " sec" << endl;
+#endif
 
   if (status != 0)
     throw FITSError (status, "Pulsar::ProfileColumn::resize", 
@@ -187,11 +198,17 @@ void Pulsar::ProfileColumn::resize ()
     cerr << "Pulsar::ProfileColumn::resize " << offset_colname 
 	 << " resized to " << nchan*nprof << endl;
 
+#if REPORT_IO_TIMES
   clock.start();
+#endif
+
   fits_modify_vector_len (fptr, get_scale_colnum(), nchan*nprof, &status);
+
+#if REPORT_IO_TIMES
   clock.stop();
   cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
        << scale_colname << "," << nchan*nprof << ") took " << clock.get_elapsed() << " sec" << endl;
+#endif
 
   if (status != 0)
     throw FITSError (status, "Pulsar::ProfileColumn::resize", 
@@ -204,38 +221,22 @@ void Pulsar::ProfileColumn::resize ()
   // number of values to be written
   uint64_t nvalue = nprof * nchan * uint64_t(nbin);
 
-  nrow = 1;
-
-#if 0 // try resizing a larger number of rows of some maximum size
-
-  // assuming 16-bit word per value
-  const uint64_t bytes_per_value = 2;
-  
-  const uint64_t nbyte = nvalue * bytes_per_value;
-
-  // experimentally determined limit, beyond which CFITSIO becomes inefficient
-  const uint64_t maximum_bytes = 1 << 19;
-
-  if (nbyte > maximum_bytes)
-  {
-    nrow = nbyte / maximum_bytes;
-    if (nbyte % maximum_bytes)
-      nrow ++;
-    nvalue = maximum_bytes / bytes_per_value;
-  }
-
-#endif
-  
+#if REPORT_IO_TIMES 
   cerr << "Pulsar::ProfileColumn::resize calling fits_modify_vector_len ("
        << data_colname << "," << nvalue <<")" << endl;
 
   clock.start();
+#endif
+
   fits_modify_vector_len (fptr, get_data_colnum(), nvalue, &status);
+
+#if REPORT_IO_TIMES
   clock.stop();
   cerr << "Pulsar::ProfileColumn::resize fits_modify_vector_len ("
        << data_colname << "," << nvalue << ") took "
        << clock.get_elapsed() << " sec" << endl;
-  
+#endif
+
   psrfits_update_tdim (fptr, get_data_colnum(), nbin, nchan, nprof);
 
   if (verbose)

@@ -14,7 +14,12 @@
 
 #include "FITSError.h"
 #include "psrfitsio.h"
+
+#define REPORT_IO_TIMES 0
+
+#if REPORT_IO_TIMES
 #include "RealTimer.h"
+#endif
 
 using namespace std;
 
@@ -111,19 +116,22 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     psrfits_update_key (ffptr, "NAUX", (int) naux_profile);
   }
   
-  RealTimer clock;
-
   // Set the sizes of the columns which may have changed
-  
   int colnum = 0;
-  
   fits_get_colnum (ffptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
 
+#if REPORT_IO_TIMES
+  RealTimer clock;
   clock.start();
+#endif
+
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
+
+#if REPORT_IO_TIMES
   clock.stop();
   cerr << "FITSArchive::unload_integrations fits_modify_vector_len"
     " (DAT_FREQ) took " << clock.get_elapsed() << " sec" << endl;
+#endif
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
@@ -134,11 +142,18 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
          << nchan << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+
+#if REPORT_IO_TIMES
   clock.start();
+#endif
+
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
+
+#if REPORT_IO_TIMES
   clock.stop();
   cerr << "FITSArchive::unload_integrations fits_modify_vector_len"
     " (DAT_WTS) took " << clock.get_elapsed() << " sec" << endl;
+#endif
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
@@ -163,24 +178,6 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     unload_aux_io->create (unload_dat_io->get_data_colnum() + 1);
   }
 
-  
-  // Insert nsubint rows
-
-  for (unsigned jrow=1; jrow<=nrow; jrow*=2)
-  {
-    // if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations nsubint=" << nsubint
-	 << " jrow=" << jrow << endl;
-
-    clock.start();
-    
-    psrfits_set_rows (ffptr, jrow*nsubint);
-
-    clock.stop();
-    cerr << "FITSArchive::unload_integrations psrfits_set_rows took "
-	 << clock.get_elapsed() << " sec" << endl;
-  }
-  
   // Iterate over all rows, calling the unload_integration function to
   // fill in the next spot in the file.
   
