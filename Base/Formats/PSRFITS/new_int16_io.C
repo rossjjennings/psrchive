@@ -6,6 +6,24 @@ using namespace std;
 
 int main (int argc, char** argv)
 {
+  double val = 1.9999;
+
+  float x = -val;
+  int16_t i = x;
+  cerr << "float x=" << x << " casts to int16_t i=" << i << endl;
+
+  x = val;
+  i = x;
+  cerr << "float x=" << x << " casts to int16_t i=" << i << endl;
+
+  x = -val;
+  i = round(x);
+  cerr << "float x=" << x << " rounds to int16_t i=" << i << endl;
+
+  x = val;
+  i = round(x);
+  cerr << "float x=" << x << " rounds to int16_t i=" << i << endl;
+
   double the_min = 1-pow(2,15);
   double the_max = pow(2,15)-2;
   cerr << "signed: the_min=" << the_min << " the_max=" << the_max << endl;

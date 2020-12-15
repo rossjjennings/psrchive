@@ -216,10 +216,13 @@ void Pulsar::ProfileColumn::unload (int row,
   /*
     2020 Dec 15 - WvS - for justification of the correct offset and scale
     calculation, please see old_int16_io.C and new_int16_io.C and the 
-    bug report at https://sourceforge.net/p/psrchive/bugs/440 */
+    bug report at https://sourceforge.net/p/psrchive/bugs/440 
+  */
 
   double the_min = 1-pow(2,15);
   double the_max = pow(2,15)-2;
+
+  // cerr << "int16_t min=" << the_min << " max=" << the_max << endl;
 
   unsigned bins_written = 0;
 
@@ -232,13 +235,13 @@ void Pulsar::ProfileColumn::unload (int row,
     float max = 0.0;
     minmax (amps, amps+nbin, min, max);
 
-    float offset = (min*the_max -max*the_min) / (the_max - the_min);
+    double offset = (min*the_max -max*the_min) / (the_max - the_min);
 
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
 	   << " offset=" << offset << endl;
       
-    float scale = 1.0;
+    double scale = 1.0;
       
     // Test for dynamic range
     if (fabs(min - max) > (100.0 * FLT_MIN))
@@ -249,15 +252,21 @@ void Pulsar::ProfileColumn::unload (int row,
       
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
-	   << " scale = " << scale << endl;
+	   << " scale=" << scale << endl;
       
     // Apply the scale factor
    
     // 16 bit representation of profile amplitudes
     vector<int16_t> compressed (nbin);
-   
+ 
+    /*
+      2020 Dec 15 - WvS - for justification of the need to round instead of
+      truncate, please see new_int16_io.C and the bug report at 
+      https://sourceforge.net/p/psrchive/bugs/440 
+    */
+  
     for (unsigned ibin = 0; ibin < nbin; ibin++)
-      compressed[ibin] = int16_t ((amps[ibin]-offset) / scale);
+      compressed[ibin] = round ((amps[ibin]-offset) / scale);
 
     // Write the offset to file
 
@@ -265,8 +274,9 @@ void Pulsar::ProfileColumn::unload (int row,
       cerr << "Pulsar::ProfileColumn::unload writing offset" << endl;
 
     int status = 0; 
+    float f_offset = offset;
     fits_write_col (fptr, TFLOAT, offset_colnum, row, iprof + 1, 1, 
-		    &offset, &status);
+		    &f_offset, &status);
       
     if (status != 0)
       throw FITSError (status, "Pulsar::ProfileColumn::unload",
@@ -277,8 +287,9 @@ void Pulsar::ProfileColumn::unload (int row,
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload writing scale fac" << endl;
 
+    float f_scale = scale;
     fits_write_col (fptr, TFLOAT, scale_colnum, row, iprof + 1, 1, 
-		    &scale, &status);
+		    &f_scale, &status);
       
     if (status != 0)
       throw FITSError (status, "Pulsar::ProfileColumn::unload",
