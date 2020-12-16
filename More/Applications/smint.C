@@ -399,8 +399,10 @@ void smint::process (Pulsar::Archive* archive)
       fit (profile_data[ipol]); 
     }
 
+#if HAVE_SPLINTER
     if (!row_by_row)
       unload (archive->get_Integration(0), profile_data);
+#endif
 
     string new_filename = replace_extension (archive->get_filename(), ".smar");
     archive->unload (new_filename);
