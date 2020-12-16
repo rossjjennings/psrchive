@@ -209,6 +209,16 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
     throw FITSError (status, "psrfits_write_col(vector<T>)",
                      "fits_get_colnum (name=%s)", name);
 
+  psrfits_write_col (fptr, colnum, row, data, dims);
+}
+
+template<typename T>
+void psrfits_write_col (fitsfile* fptr, int colnum, int row,
+			const std::vector<T>& data,
+			const std::vector<unsigned>& dims)
+{
+  int status = 0;
+
   if (psrfits_verbose)
     std::cerr << "psrfits_write_col calling fits_modify_vector_len"
       " colnum=" << colnum << " size=" << data.size() << std::endl;
@@ -217,8 +227,8 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
 
   if (status)
     throw FITSError (status, "psrfits_write_col(vector<T>)",
-                     "fits_modify_vector_len (name=%s col=%d size=%u)",
-		     name, colnum, data.size());
+                     "fits_modify_vector_len (col=%d size=%u)",
+		     colnum, data.size());
 
   if (psrfits_verbose)
     std::cerr << "psrfits_write_col calling psrfits_update_tdim" << std::endl;  
@@ -236,8 +246,8 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
 
   if (status)
     throw FITSError (status, "psrfits_write_col(vector<T>)",
-                     "fits_write_col (name=%s type=%s col=%d row=%d size=%u)",
-                     name, fits_datatype_str(FITS_traits<T>::datatype()),
+                     "fits_write_col (type=%s col=%d row=%d size=%u)",
+                     fits_datatype_str(FITS_traits<T>::datatype()),
 		     colnum, row, data.size());
 }
 
@@ -250,13 +260,26 @@ void psrfits_write_col( fitsfile *fptr, const char *name, int row,
   
   fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
   
+  if (status)
+    throw FITSError (status, "psrfits_write_col(T)",
+                     "fits_get_colnum (name=%s)", name);
+
+  psrfits_write_col (fptr, colnum, row, data);
+}
+
+template<typename T>
+void psrfits_write_col( fitsfile *fptr, int colnum, int row, const T& data )
+{
+  int status = 0;
+
   fits_write_col (fptr, FITS_traits<T>::datatype(),
 		  colnum, row,
 		  1, 1,
 		  FITS_void_ptr(data), &status);
 
   if (status)
-    throw FITSError (status, "psrfits_write_col(T)", name);
+    throw FITSError (status, "psrfits_write_col(T)",
+		     "col=%d row=%d", colnum, row);
 }
 
 template<typename T>

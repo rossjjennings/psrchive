@@ -7,7 +7,7 @@
 
 /*
    smint - Smooth and interpolate data, where data might be
-         - MEM/METM model parametersm, including PolnCalibratorExtension
+         - MEM/METM model parameters, including PolnCalibratorExtension
            and CalibratorStokes parameters
          - Pulsar spectrum (e.g. in each phase bin)
 */
@@ -25,6 +25,8 @@
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Profile.h"
+
+#undef HAVE_PGPLOT
 
 #ifdef HAVE_PGPLOT
 #include <cpgplot.h>
@@ -151,10 +153,18 @@ protected:
   void check_reference (Pulsar::Archive* archive, Container* ext);
 
 #if HAVE_SPLINTER
+  
   // unload smoothed model values into container
   template<class Container>
   void unload (Container* ext, vector<set>& data, unsigned ifile);
+
+  void unload (Integration* subint, vector<set>& data);
+  void unload (Integration* subint, set& data, unsigned ipol, unsigned ibin);
+
 #endif
+
+  // unload one row of smoothed model values into container
+  void unload_row (set& dataset, unsigned irow);
 
   // unload text to file
   void unload (const string& filename, const vector<row>& table);
@@ -162,6 +172,15 @@ protected:
   string spline_filename;
   string plot_filename;
 
+  // fit 2-D data using a bunch of 1-D fits
+  bool row_by_row;
+
+  // the current sub-integration when fitting profile data
+  Pulsar::Integration* current_subint;
+
+  // the current polarization when fitting profile data
+  unsigned current_ipol;
+  
   void fit (set&);
 
 #if HAVE_SPLINTER
@@ -199,6 +218,9 @@ smint::smint ()
   freq_order = time_order = 0;
   threshold = 0.001;
   pspline_alpha = 0.0;
+  row_by_row = false;
+
+  current_subint = 0;
 }
 
 
@@ -220,6 +242,9 @@ void smint::add_options (CommandLine::Menu& menu)
   arg = menu.add (time_order, "t", "int");
   arg->set_help ("order of polynomial along time");
 
+  arg = menu.add (row_by_row, "1");
+  arg->set_help ("fit 2-D data using series of 1-D fits");
+  
 #if HAVE_SPLINTER
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Penalized spline (p-spline) fitting options:");
@@ -341,6 +366,12 @@ void smint::process (Pulsar::Archive* archive)
 {
   if (archive->get_nsubint() == 1)
   {
+    if (!archive->get_dedispersed())
+      cerr << "smint: WARNING data are not dedispersed" << endl;
+
+    if (!archive->get_faraday_corrected())
+      cerr << "smint: WARNING data are not corrected for Faraday rotation" << endl;
+
     cerr << "smint::process sub-integration" << endl;
     load (profile_data, archive->get_Integration(0));
     cerr << "smint::process loaded sub-integration" << endl;
@@ -361,10 +392,19 @@ void smint::process (Pulsar::Archive* archive)
       if (plot_device == "")
         plot_filename = "profile_fit_" + idx + ".eps/cps";
 
+      // used in unload_row
+      current_ipol = ipol;
+      
       cerr << "smint::process fit ipol=" << ipol << endl;
       fit (profile_data[ipol]); 
     }
 
+    if (!row_by_row)
+      unload (archive->get_Integration(0), profile_data);
+
+    string new_filename = replace_extension (archive->get_filename(), ".smar");
+    archive->unload (new_filename);
+    
 #if HAVE_PGPLOT
   if (plot_device != "")
     cpgend ();
@@ -376,8 +416,6 @@ void smint::process (Pulsar::Archive* archive)
   FluxCalibratorExtension* fext = archive->get<FluxCalibratorExtension>();
   if (fext)
   {
-    unsigned nchan = fext->get_nchan();
-
     if (fcal_data.size() == 0)
     {
       // smooth only S_cal for each receptor parameters 
@@ -398,8 +436,6 @@ void smint::process (Pulsar::Archive* archive)
   PolnCalibratorExtension* ext = archive->get<PolnCalibratorExtension>();
   if (ext)
   {
-    unsigned nchan = ext->get_nchan();
-
     if (pcal_data.size() == 0)
     {
       /* smooth only receptor parameters 3, 4, 5, 6
@@ -476,7 +512,69 @@ void smint::load (vector<set>& data, Integration* subint)
       }
     }
   }
+
+  current_subint = subint;
 }
+
+
+#if HAVE_SPLINTER
+
+void smint::unload (Integration* subint, vector<set>& data)
+{
+  const unsigned nchan = subint->get_nchan();
+  const unsigned nbin = subint->get_nbin();
+  const unsigned npol = subint->get_npol();
+
+  assert (data.size() == npol);
+  assert (data[0].table.size() == nbin);
+  assert (data[0].table[0].freq.size() <= nchan);
+  
+  cerr << "smint::unload Integration npol=" << npol << " nchan=" << nchan 
+       << " nbin=" << nbin << endl;
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    assert (data[ipol].index == ipol);
+
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+    {
+      assert (data[ipol].table[ibin].x0 == ibin);
+
+      unload (subint, data[ipol], ipol, ibin);
+    }
+  }
+}
+
+void smint::unload (Integration* subint, set& data, unsigned ipol, unsigned ibin)
+{
+  assert (ibin < data.table.size());
+
+  const unsigned nchan = subint->get_nchan();
+
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    if (subint->get_weight(ichan) == 0.0)
+      subint->set_weight(ichan, 1.0);
+
+    unsigned nrow = data.table.size();
+    
+    double xval = subint->get_centre_frequency(ichan);
+    double yval = 0.0;
+    
+    if (nrow == 1 || row_by_row)
+      yval = data.spline1d.evaluate (xval);
+    else
+    {
+      pair<double,double> coord (data.table[ibin].x0, xval);
+      yval = data.spline2d.evaluate ( coord );
+    }
+
+    float* amps = subint->get_Profile(ipol,ichan)->get_amps();
+    amps[ibin] = yval;
+  }
+}
+
+#endif
 
 void smint::fit (set& dataset)
 {
@@ -485,22 +583,33 @@ void smint::fit (set& dataset)
   if (table.size() == 0)
     throw Error (InvalidState, "smint::fit", "empty table");
 
-  if (table.size() == 1)
+  if (table.size() == 1 || row_by_row)
   {
+    cerr << "smint::fit performing " << table.size() << " 1-D fits" << endl;
+    for (unsigned irow=0; irow < table.size(); irow++)
+    {
 #if HAVE_SPLINTER
-    if (pspline_alpha)
-      fit_pspline (dataset.spline1d, table.front().freq, table.front().data);
-    else
+      if (pspline_alpha)
+	{
+	  cerr << "smint::fit 1-D pspline to " << table[irow].freq.size() << " points" << endl;
+	  fit_pspline (dataset.spline1d, table[irow].freq, table[irow].data);
+	}
+      else
 #endif
-      fit_polynomial (table.front().freq, table.front().data);
+	fit_polynomial (table[irow].freq, table[irow].data);
+
+      if (row_by_row)
+	unload_row (dataset, irow);
+    }
   }
-  else if (table.size() > 1)
+  else
   {
     if (!pspline_alpha)
       throw Error (InvalidState, "smint::fit",
                    "2-D smoothing with polynomials not implemented");
 
 #if HAVE_SPLINTER
+    cerr << "smint::fit 2-D pspline" << endl;
     fit_pspline (dataset.spline2d, table);
 #else
     throw Error (InvalidState, "smint::fit",
@@ -508,6 +617,32 @@ void smint::fit (set& dataset)
 #endif
   }
 }
+
+void smint::unload_row (set& dataset, unsigned irow)
+{
+  if (&dataset != &(profile_data[current_ipol]))
+    throw Error (InvalidState, "smint::unload_row",
+		 "fitting row-by-row currently implemented only for pulse profile");
+  
+  vector<row>& table = dataset.table;
+  unsigned ibin = irow;  
+
+#if HAVE_SPLINTER
+  if (pspline_alpha)
+  {
+    cerr << "smint::unload_row ibin=" << ibin
+	 << " nchan=" << table[irow].freq.size()  << endl;
+
+    unload (current_subint, dataset, current_ipol, ibin);
+  }
+  else
+#endif
+  {
+    cerr << "smint::unload_row not implemented for polynomial fits" << endl;
+    // fit_polynomial (table[irow].freq, table[irow].data);
+  }
+}
+
 
 void smint::unload (const string& filename, const vector<row>& table)
 {
@@ -742,6 +877,9 @@ void smint::fit_pspline (SplineSmooth1D& spline,
   if (plot_filename != "")
     cpgopen (plot_filename.c_str());
 
+  if (row_by_row)
+    plot_filename = "";
+  
   unsigned npts = 500;
 
   cpgpage();

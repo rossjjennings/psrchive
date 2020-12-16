@@ -192,7 +192,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
 // ProcHistory I/O routines
 //
 
-void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
+void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr) try
 {
   if (verbose > 2)
     cerr << "FITSArchive::load_ProcHistory entered" << endl;
@@ -430,5 +430,8 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     cerr << "FITSArchive::load_ProcHistory exiting" << endl;
 
 }
-
+catch (Error& error)
+{
+  throw error += "FITSArchive::load_ProcHistory";
+}
 

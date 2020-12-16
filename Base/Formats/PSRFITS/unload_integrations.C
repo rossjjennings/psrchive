@@ -15,6 +15,12 @@
 #include "FITSError.h"
 #include "psrfitsio.h"
 
+#define REPORT_IO_TIMES 0
+
+#if REPORT_IO_TIMES
+#include "RealTimer.h"
+#endif
+
 using namespace std;
 
 void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
@@ -69,13 +75,6 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 			"Spin period in seconds");
   }
 
-  // Insert nsubint rows
-
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
-
-  psrfits_set_rows (ffptr, nsubint);
-
   // Update the header information
   
   string order_name = "TIME";
@@ -116,14 +115,24 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     naux_profile = more->get_size ();
     psrfits_update_key (ffptr, "NAUX", (int) naux_profile);
   }
-
+  
   // Set the sizes of the columns which may have changed
-  
   int colnum = 0;
-  
   fits_get_colnum (ffptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
+
+#if REPORT_IO_TIMES
+  RealTimer clock;
+  clock.start();
+#endif
+
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
-  
+
+#if REPORT_IO_TIMES
+  clock.stop();
+  cerr << "FITSArchive::unload_integrations fits_modify_vector_len"
+    " (DAT_FREQ) took " << clock.get_elapsed() << " sec" << endl;
+#endif
+
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
                      "error resizing DAT_FREQ");
@@ -133,7 +142,18 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
          << nchan << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+
+#if REPORT_IO_TIMES
+  clock.start();
+#endif
+
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
+
+#if REPORT_IO_TIMES
+  clock.stop();
+  cerr << "FITSArchive::unload_integrations fits_modify_vector_len"
+    " (DAT_WTS) took " << clock.get_elapsed() << " sec" << endl;
+#endif
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
@@ -146,6 +166,8 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   setup_dat (ffptr, unload_dat_io);
   unload_dat_io->resize ();
 
+  unsigned nrow = unload_dat_io->get_nrow();
+  
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations dat_io=" << unload_dat_io.ptr()
          << endl;
