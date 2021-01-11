@@ -61,7 +61,7 @@ void Pulsar::Parameters::Lookup::add_path (const string& p)
 string Pulsar::Parameters::Lookup::get_param (const string& param, const string name) const try
 {
   if (!name.length())
-    throw Error (InvalidParam, "Pulsar::Parameters::Lookup::get_param()",
+    throw Error (InvalidParam, "Pulsar::Parameters::Lookup::get_param",
      "empty name");
 
   string psr_name = name;

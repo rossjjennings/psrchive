@@ -89,14 +89,18 @@ Tempo2::Generator::~Generator ()
 }
 
 //! Set the parameters used to generate the predictor
-void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
+void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p) try
 {
   parameters = p;
 
   // lookup optional parameters for Tempo2 generators
   Pulsar::Parameters::Lookup lookup;
 
-  string pulsar = parameters->get_value("PSRJ");
+  string pulsar = parameters->get_value("PSR");
+  if (!pulsar.length())
+    pulsar = parameters->get_value("PSRJ");
+  if (!pulsar.length())
+    pulsar = parameters->get_value("PSRB");
 
   string param = lookup.get_param ("ntcoef", pulsar);
   unsigned ntcoef = atoi (param.c_str());
@@ -113,6 +117,10 @@ void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
   double predlen = atof (param.c_str()) / 86400;
   if (param.compare("*") != 0 && predlen > 0 && predlen < 1)
     set_segment_length (predlen);
+}
+catch (Error& error)
+{
+  throw error += "Tempo2::Generator::set_parameters";
 }
 
 //! Set the range of epochs over which to generate
