@@ -1,5 +1,7 @@
 
       subroutine smooth_mw(pr,nbin,maxwidth,rmsp,kwmax,snrmax,smmax,wk)
+        integer nbin
+        real*4 pr(nbin), wk(nbin)
         call smooth_mmw(pr,nbin,1,maxwidth,rmsp,kwmax,snrmax,smmax,wk)
       end
 
