@@ -110,6 +110,7 @@ vector<source> sources;
 bool press = false;
 bool minimize_slew_time = false;
 bool interactive = false;
+bool observe_once_per_session = false;
 
 int main (int argc, char* argv[]) 
 {
@@ -503,7 +504,10 @@ int simulate_session ()
     for (unsigned j=0; j<sources.size(); j++)
       if (sources[j].name == chosen.name)
       {
-        sources.erase (sources.begin() + j);
+        if (observe_once_per_session)
+          sources.erase (sources.begin() + j);
+        else
+          sources[j].Tint_min -= chosen.Tobs;
         break;
       }
 
