@@ -12,6 +12,7 @@
 #include "Pulsar/ProfileStatistic.h"
 #include "Pulsar/Index.h"
 
+#include <fstream>
 #include <algorithm>
 #include <assert.h>
 
@@ -27,6 +28,8 @@ Pulsar::InterQuartileRange::InterQuartileRange ()
   cutoff_threshold_max = cutoff_threshold_min = 1.5;
   max_iterations = 15;
   logarithmic = false;
+
+  median_nchan = median_nsubint = 0;
 }
 
 Pulsar::InterQuartileRange::~InterQuartileRange ()
@@ -42,13 +45,15 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
 
   if (Archive::verbose > 1)
     cerr << "InterQuartileRange::transform archive=" << archive << endl;
+
+  compute (archive);
   
   while (iter < max_iterations)
   {
 #if _DEBUG
     cerr << "InterQuartileRange::transform iteration=" << iter << endl;
 #endif
-    once (archive);
+    once ();
 
     if (iter == 0)
       tot_valid = valid;
@@ -60,6 +65,8 @@ void Pulsar::InterQuartileRange::transform (Archive* archive)
     if (too_high + too_low == 0)
       break;
   }
+
+  mask (archive);
 }
 
 std::string Pulsar::InterQuartileRange::get_report () const
@@ -79,12 +86,8 @@ std::string Pulsar::InterQuartileRange::get_report () const
   return ret;
 }
 
-void Pulsar::InterQuartileRange::once (Archive* archive)
+void Pulsar::InterQuartileRange::compute (Archive* archive)
 {
-  too_high = 0;
-  too_low = 0; 
-  valid = 0;
-
   Reference::To<ProfileStats> stats;
   Reference::To<TextInterface::Parser> parser;
 
@@ -94,49 +97,84 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
     parser = stats->get_interface ();
   }
 
-  unsigned nchan = archive->get_nchan();
-  unsigned nsubint = archive->get_nsubint();
-  
-  std::vector<float> values (nchan * nsubint);
+  nchan = archive->get_nchan();
+  nsubint = archive->get_nsubint();
+  values.resize (nchan * nsubint);
   
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
 #if _DEBUG
-    cerr << "InterQuartileRange::once isubint=" << isubint << endl;
+    cerr << "InterQuartileRange::compute isubint=" << isubint << endl;
 #endif
 
     Integration* subint = archive->get_Integration( isubint );
     
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      if (subint->get_weight(ichan) == 0)
+      unsigned index = isubint * nchan + ichan;
+
+      values[index].second = subint->get_weight(ichan);
+
+      if (values[index].second == 0)
 	continue;
 
       Index pol (0, true); // integrate over polarizations
       Reference::To<const Profile> profile
 	= Pulsar::get_Profile (subint, pol, ichan);
 
+      float value = 0;
+
       if (statistic)
       {
-        values[valid] = statistic->get(profile);
+        value = statistic->get(profile);
       }
       else if (stats)
       {
 	stats->set_Profile (profile);
 	string value = process( parser, expression );
-	values[valid] = fromstring<float>( value );
+	value = fromstring<float>( value );
       }
       else
       {
 	double mean = 0;
 	double var = 0;
 	profile->stats (&mean, &var);
-	values[valid] = sqrt(var)/mean; // i.e. the modulation index
+	value = sqrt(var)/mean; // i.e. the modulation index
       }
 
       if (logarithmic)
-        values[valid] = log10(values[valid]);
+        value = log10(value);
       
+      values[index].first = value;
+    }
+  }
+}
+
+void Pulsar::InterQuartileRange::once ()
+{
+  too_high = 0;
+  too_low = 0;
+  valid = 0;
+
+  if (median_nchan > 2 || median_nsubint > 2)
+    compute_median ();
+
+  std::vector<float> data (nchan * nsubint, 0.0);
+
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+  {
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      unsigned index = isubint * nchan + ichan;
+
+      if (values[index].second == 0)
+        continue;
+
+      data[valid] = values[index].first;
+
+      if (local_median.size() == values.size())
+        data[valid] -= local_median[index];
+
       valid ++;
     }
   }
@@ -154,7 +192,7 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
     return;
   }
 
-  std::vector<float> val (values.begin(), values.begin()+ valid);
+  data.resize(valid);
     
   unsigned iq1 = valid/4;
   unsigned iq3 = (valid*3)/4;
@@ -163,9 +201,9 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
   cerr << "iQ1=" << iq1 << " iQ3=" << iq3 << endl;
 #endif
 
-  std::sort (val.begin(), val.begin()+valid);
-  double Q1 = val[ iq1 ];
-  double Q3 = val[ iq3 ];
+  std::sort (data.begin(), data.begin()+valid);
+  double Q1 = data[ iq1 ];
+  double Q3 = data[ iq3 ];
 
   double IQR = Q3 - Q1;
 
@@ -173,47 +211,170 @@ void Pulsar::InterQuartileRange::once (Archive* archive)
   cerr << "Q1=" << Q1 << " Q3=" << Q3 << " IQR=" << IQR << endl;
 #endif
 
-  unsigned revisit = 0;
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
-    Integration* subint = archive->get_Integration( isubint );
-    
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      if (subint->get_weight(ichan) == 0)
-	continue;
+      unsigned index = isubint * nchan + ichan;
+
+      if (values[index].second == 0)
+        continue;
+
+      float value = values[index].first;
+
+      if (local_median.size() == values.size())
+        value -= local_median[index];
+
+      bool zap = false;
 
       if (cutoff_threshold_min > 0 &&
-          values[revisit] < Q1 - cutoff_threshold_min * IQR)
+          value < Q1 - cutoff_threshold_min * IQR)
       {
 #ifdef _DEBUG
   cerr << "TOO LOW ichan=" << ichan << endl;
 #endif
 
-	subint->set_weight(ichan, 0);
+	zap = true;
         too_low ++;
       }
 
       if (cutoff_threshold_max > 0 &&
-          values[revisit] > Q3 + cutoff_threshold_max * IQR)
+          value > Q3 + cutoff_threshold_max * IQR)
       {
 #ifdef _DEBUG
   cerr << "TOO HIGH ichan=" << ichan << endl;
 #endif
 
-	subint->set_weight(ichan, 0);
+	zap = true;
         too_high ++;
       }
 
-      revisit ++;
+      if (zap)
+        values[index].second = 0;
     }
   }
 
 #ifdef _DEBUG
   cerr << "too high=" << too_high << " too low=" << too_low << endl;
 #endif
+}
 
-  assert (revisit == valid);
+void Pulsar::InterQuartileRange::compute_median ()
+{
+  local_median.resize (nchan * nsubint);
+
+  std::vector<float> data (median_nchan * median_nsubint, 0.0);
+
+  unsigned half_nchan = median_nchan / 2;
+  unsigned half_nsubint = median_nsubint / 2;
+
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+  {
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      unsigned index = isubint * nchan + ichan;
+
+      if (values[index].second == 0)
+        continue;
+
+      unsigned start_subint = 0;
+      if (isubint > half_nsubint)
+        start_subint = isubint - half_nsubint;
+      unsigned end_subint = start_subint + median_nsubint;
+      if (end_subint > nsubint)
+      {
+        end_subint = nsubint;
+        start_subint = nsubint - median_nsubint;
+      }
+
+      unsigned start_chan = 0;
+      if (ichan > half_nchan)
+        start_chan = ichan - half_nchan;
+      unsigned end_chan = start_chan +  median_nchan;
+      if (end_chan > nchan)
+      {
+        end_chan = nchan;
+        start_chan = nchan - median_nchan;
+      }
+
+      unsigned valid = 0;
+
+#if _DEBUG
+      cerr << "isubint=" << isubint << " ichan=" << ichan 
+           << " ssub=" << start_subint << " esub=" << end_subint
+           << " sch=" << start_chan << " ech=" << end_chan << endl;
+#endif
+
+      for (unsigned jsubint=start_subint; jsubint < end_subint; jsubint++)
+      {
+        for (unsigned jchan=start_chan; jchan < end_chan; jchan++)
+        {
+          unsigned jndex = jsubint * nchan + jchan;
+    
+          if (values[jndex].second == 0)
+            continue;
+
+          data[valid] = values[jndex].first;
+          valid ++;
+        }
+      }
+
+      if (valid < 2)
+      {
+#ifdef _DEBUG
+        cerr << "valid=" << valid << " med=" << data[index] << endl;
+#endif
+        local_median[index] = data[index];
+      }
+      else
+      {
+        unsigned mid = valid / 2;
+        std::nth_element( data.begin(), data.begin()+mid, data.begin()+valid );
+        local_median[index] = data[mid];
+      }
+    }
+  }
+
+  if (median_filename.empty())
+    return;
+
+  ofstream out (median_filename.c_str());
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+  {
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      unsigned index = isubint * nchan + ichan;
+
+      if (values[index].second == 0)
+        continue;
+
+      out << isubint << " " << ichan << " " << values[index].first
+          << " " << local_median[index] << endl;
+    }
+    out << endl;
+  }
+
+  median_filename = "";
+}
+
+void Pulsar::InterQuartileRange::mask (Archive* archive)
+{ 
+  assert (nchan == archive->get_nchan());
+  assert (nsubint == archive->get_nsubint());
+  assert (values.size() == nchan * nsubint);
+
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+  {
+    Integration* subint = archive->get_Integration( isubint );
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      unsigned index = isubint * nchan + ichan;
+
+      if (values[index].second == 0)
+        subint->set_weight (ichan, 0.0);
+    }
+  }
 }
 
 //! Set the profile statistic
@@ -249,6 +410,14 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
   add( &InterQuartileRange::get_statistic,
        &InterQuartileRange::set_statistic,
        "stat", "Profile statistic" );
+
+  add( &InterQuartileRange::get_median_nchan,
+       &InterQuartileRange::set_median_nchan,
+       "medchan", "Median smooth over number of frequency channels");
+
+  add( &InterQuartileRange::get_median_nsubint,
+       &InterQuartileRange::set_median_nsubint,
+       "medsubint", "Median smooth over number of sub-integrations");
 
   add( &InterQuartileRange::get_logarithmic,
        &InterQuartileRange::set_logarithmic,

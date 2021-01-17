@@ -14,6 +14,9 @@
 #include "Pulsar/Transformation.h"
 #include "Pulsar/Archive.h"
 
+#include <vector>
+#include <utility>
+
 namespace Pulsar {
 
   class ProfileStatistic;
@@ -35,7 +38,16 @@ namespace Pulsar {
     unsigned valid;
 
     //! Flag bad sub-integrations and frequency channels using IQR
-    void once (Archive*);
+    void once ();
+
+    //! Compute the local median
+    void compute_median ();
+
+    //! Derive statistics from profile data
+    void compute (Archive*);
+
+    //! Mask bad sub-integrations and frequency channels
+    void mask (Archive*);
 
   protected:
 
@@ -51,6 +63,9 @@ namespace Pulsar {
 
     //! Take the base 10 logarithm of data
     bool logarithmic;
+
+    unsigned median_nchan;
+    unsigned median_nsubint;
 
     //! The statistic to be derived from each profile
     Reference::To<ProfileStatistic> statistic;
@@ -87,9 +102,17 @@ namespace Pulsar {
     //! Get the profile statistic
     std::string get_statistic () const;
 
-    //! Comput the base 10 logarithm of the data
+    //! Compute the base 10 logarithm of the data
     void set_logarithmic (bool flag) { logarithmic = flag; }
     bool get_logarithmic () const { return logarithmic; }
+
+    //! Median smoothing in frequency channel dimension
+    void set_median_nchan (unsigned nchan) { median_nchan = nchan; }
+    unsigned get_median_nchan () const { return median_nchan; }
+
+    //! Median smoothing in sub-integration dimension
+    void set_median_nsubint (unsigned nsubint) { median_nsubint = nsubint; }
+    unsigned get_median_nsubint () const { return median_nsubint; }
 
     //! Set the cut-off threshold
     void set_cutoff_threshold (float t)
@@ -120,6 +143,12 @@ namespace Pulsar {
     unsigned tot_low;
     unsigned iter;
 
+    unsigned nchan;
+    unsigned nsubint;
+    std::vector< std::pair<float,float> > values;
+    std::vector< float > local_median;
+
+    std::string median_filename;
   };
 
 }
