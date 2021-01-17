@@ -96,6 +96,7 @@ public:
   StandardDeviation* clone () const { return new StandardDeviation(*this); }
 };
 
+// https://en.wikipedia.org/wiki/Coefficient_of_variation
 class DeviationCoefficient : public ProfileStatistic
 {     
 public:
@@ -104,6 +105,8 @@ public:
   {
     add_alias ("modulation");
     add_alias ("beta");
+    add_alias ("cv");    // coefficient of variation
+    add_alias ("rsd");   // relative standard deviation
   }
 
   double get (const Profile* profile)
@@ -164,8 +167,112 @@ public:
   double get (const Profile* profile)
   { return madm (profile); }
 
-  MedianAbsoluteDifference* clone () const { return new MedianAbsoluteDifference(*this); }
+  MedianAbsoluteDifference* clone () const 
+  { return new MedianAbsoluteDifference(*this); }
 
+};
+
+void Q1_Q3 (vector<float>& amps, float& Q1, float& Q3)
+{
+  std::sort( amps.begin(), amps.end() );
+  unsigned nbin = amps.size();
+
+  unsigned iQ1 = nbin / 4;
+  unsigned iQ3 = (3 * nbin) / 4;
+
+  Q1 = amps[iQ1];
+  Q3 = amps[iQ3];
+}
+
+double iqr (vector<float>& amps)
+{
+  float Q1=0, Q3=0;
+  Q1_Q3 (amps, Q1, Q3);
+  return Q3 - Q1;
+}
+
+double iqr (const Profile* profile)
+{ 
+  unsigned nbin = profile->get_nbin();
+  vector<float> amps (profile->get_amps(), profile->get_amps() + nbin);
+  return iqr (amps);
+}
+
+class InterQuartileRange : public ProfileStatistic
+{
+public:
+  InterQuartileRange ()
+  : ProfileStatistic ("iqr", "inter-quartile range of profile amps")
+  {
+  }
+
+  double get (const Profile* profile)
+  { return iqr (profile); }
+
+  InterQuartileRange* clone () const 
+  { return new InterQuartileRange(*this); }
+
+};
+
+double qcd (vector<float>& amps)
+{ 
+  float Q1=0, Q3=0;
+  Q1_Q3 (amps, Q1, Q3);
+  return (Q3 - Q1) / (Q3 + Q1); 
+}
+
+double qcd (const Profile* profile)
+{
+  unsigned nbin = profile->get_nbin();
+  vector<float> amps (profile->get_amps(), profile->get_amps() + nbin);
+  return qcd (amps);
+}
+
+// https://en.wikipedia.org/wiki/Quartile_coefficient_of_dispersion
+class QuartileDispersion : public ProfileStatistic
+{
+public:
+  QuartileDispersion ()
+  : ProfileStatistic ("qcd", "quartile coefficient of dispersion")
+  {
+  }
+
+  double get (const Profile* profile)
+  { return qcd (profile); }
+
+  QuartileDispersion* clone () const
+  { return new QuartileDispersion(*this); }
+};
+
+class RelativeIQR : public ProfileStatistic
+{
+public:
+  RelativeIQR ()
+  : ProfileStatistic ("iqr/med", "inter-quartile range divided by median")
+  {
+    add_alias ("reliq");
+  }
+
+  double get (const Profile* profile)
+  { return iqr (profile) / median (profile); }
+
+  RelativeIQR* clone () const
+  { return new RelativeIQR(*this); }
+};
+
+class RobustRange : public ProfileStatistic
+{
+public:
+  RobustRange ()
+  : ProfileStatistic ("robust_range", "range normalized by median")
+  {
+    add_alias ("range/med");
+  }
+
+  double get (const Profile* profile)
+  { return (profile->max() - profile->min()) / median(profile); }
+
+  RobustRange* clone () const { return new RobustRange(*this); }
 };
 
 class FirstHarmonic : public ProfileStatistic
@@ -188,6 +295,28 @@ public:
   FirstHarmonic* clone () const { return new FirstHarmonic(*this); }
 };
 
+class MaxHarmonicRatio : public ProfileStatistic
+{
+public:
+   MaxHarmonicRatio()
+  : ProfileStatistic ("mh1", "maximum ratio with first harmonic")
+  {
+    add_alias ("mhr1");
+    add_alias ("harmonic");
+  }
+
+  double get (const Profile* profile)
+  {
+    Reference::To<Profile> fft = fourier_transform (profile);
+    detect (fft);
+    // start searching for the max at the second harmonic
+    double max = fft->max(2);
+    return max / fft->get_amps()[1];
+  }
+
+  MaxHarmonicRatio* clone () const { return new MaxHarmonicRatio(*this); }
+};
+
 class NyquistHarmonic : public ProfileStatistic
 {
 public:
@@ -208,9 +337,13 @@ public:
   NyquistHarmonic* clone () const { return new NyquistHarmonic(*this); }
 };
 
+static unsigned instance_count = 0;
+
 Pulsar::ProfileStatistic::ProfileStatistic (const string& name, 
                                             const string& description)
 {
+  instance_count ++;
+
   set_identity (name);
   set_description (description);
 }
@@ -229,7 +362,9 @@ void Pulsar::ProfileStatistic::build ()
   // cerr << "Pulsar::ProfileStatistic::build" << endl;
  
   instances = new std::vector< ProfileStatistic* >;
-  
+ 
+  unsigned start_count = instance_count;
+ 
   instances->push_back( new Minimum );
   instances->push_back( new Maximum );
   instances->push_back( new PeakToPeak );
@@ -238,8 +373,15 @@ void Pulsar::ProfileStatistic::build ()
   instances->push_back( new DeviationCoefficient );
   instances->push_back( new Median );
   instances->push_back( new MedianAbsoluteDifference );
+  instances->push_back( new InterQuartileRange );
+  instances->push_back( new QuartileDispersion );
+  instances->push_back( new RelativeIQR );
+  instances->push_back( new RobustRange );
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
+  instances->push_back( new MaxHarmonicRatio );
+
+  assert (instances->size() == instance_count - start_count);
 
   // cerr << "Pulsar::ProfileStatistic::build instances=" << instances << endl;
 }
