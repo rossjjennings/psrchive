@@ -13,6 +13,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/ProfileStatistic.h"
 #include "Pulsar/Index.h"
 
 #include <stdio.h>
@@ -34,10 +35,13 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyZap::set_expression,
        "exp", "Statistical expression" );
 
+  add( &TimeFrequencyZap::get_statistic,
+       &TimeFrequencyZap::set_statistic,
+       "stat", "Profile statistic" );
+
   add( &TimeFrequencyZap::get_cutoff_threshold,
        &TimeFrequencyZap::set_cutoff_threshold,
        "cutoff", "Outlier threshold (# sigma)" );
-
 }
 
 // defined in More/General/standard_interface.C
@@ -139,9 +143,19 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
         Reference::To<const Profile> prof = subint->get_Profile(ipol,ichan);
-        stats.set_Profile(prof);
-        string val = process(parser,expression);
-        stat[idx(isub,ichan,ipol)] = fromstring<float>(val);
+
+        float fval = 0;
+        if (statistic)
+        {
+          fval = statistic->get(prof);
+        }
+        else
+        {
+          stats.set_Profile(prof);
+          string val = process(parser,expression);
+          fval = fromstring<float>(val);
+        }
+        stat[idx(isub,ichan,ipol)] = fval;
       }
     }
   }
@@ -151,7 +165,7 @@ void Pulsar::TimeFrequencyZap::update_mask ()
 {
   std::vector<float> smoothed;
   smoother->smooth(smoothed, stat, mask, freq, time);
-  const unsigned ntot = nsubint * nchan * npol;
+  // const unsigned ntot = nsubint * nchan * npol;
 
 #if 0 
   // Output arrays for debug
@@ -171,4 +185,19 @@ void Pulsar::TimeFrequencyZap::update_mask ()
   masker->update_mask(mask, stat, smoothed, nsubint, nchan, npol);
 }
 
+//! Set the profile statistic
+void Pulsar::TimeFrequencyZap::set_statistic (const std::string& name)
+{
+  statistic = ProfileStatistic::factory (name);
+  regions_from_total = false;
+}
+
+//! Get the profile statistic
+std::string Pulsar::TimeFrequencyZap::get_statistic () const
+{
+  if (!statistic)
+    return "none";
+
+  return statistic->get_identity();
+}
 
