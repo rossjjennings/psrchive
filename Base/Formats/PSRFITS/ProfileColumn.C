@@ -20,6 +20,7 @@
 
 #include <float.h>
 #include <math.h>
+#include <stdint.h>
 
 using namespace std;
 
