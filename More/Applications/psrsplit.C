@@ -49,6 +49,8 @@ protected:
   bool useall_subints;
 
   bool cal_extensions;
+
+  string directory;
 };
 
 int main (int argc, char** argv)
@@ -77,6 +79,9 @@ void psrsplit::add_options (CommandLine::Menu& menu)
   arg = menu.add (nchannel, 'c', "nchannel");
   arg->set_help ("number of channels per output file\n"
 		 "\t\tBy default all the channels are kept");
+
+  arg = menu.add (directory, 'O', "path");
+  arg->set_help ("write files to a new directory");
 
   arg = menu.add (resize_extensions, 'e');
   arg->set_help ("Attempt to strip the extensions in the output archives\n"
@@ -213,6 +218,9 @@ B) after deleting these sub-integrations, the Archive tries to reload them
 
       filename = replace_extension( filename, ext );
 
+      if (!directory.empty())
+        filename = directory + "/" + basename (filename);
+
       cerr << "psrsplit: writing " << filename << endl;
 
       sub_chan_archive->unload ( filename );
@@ -246,7 +254,6 @@ void psrsplit::split_cal_extensions (Pulsar::Archive* archive)
                  "Archive does not contain a calibrator extension");
 
   const unsigned nchan = ext->get_nchan();
-  unsigned ichan_start = 0;
   unsigned ichansplit = 0;
 
   for (unsigned ichan_start = 0; ichan_start < nchan; ichan_start += nchannel)
