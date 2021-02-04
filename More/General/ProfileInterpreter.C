@@ -114,7 +114,7 @@ string Pulsar::ProfileInterpreter::baseline (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // defined in More/General/standard_interface.C
@@ -179,7 +179,7 @@ string Pulsar::ProfileInterpreter::scale (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::cumulative (const string& args) try
@@ -188,7 +188,7 @@ string Pulsar::ProfileInterpreter::cumulative (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::difference (const string& args) try
@@ -206,7 +206,7 @@ string Pulsar::ProfileInterpreter::difference (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::mean (const string& args)
@@ -241,7 +241,7 @@ try {
 
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::extract (const string& args) try
@@ -258,7 +258,7 @@ string Pulsar::ProfileInterpreter::extract (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::subtract (const string& args) try
@@ -268,7 +268,7 @@ string Pulsar::ProfileInterpreter::subtract (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::convolve (const string& args) try
@@ -287,7 +287,7 @@ string Pulsar::ProfileInterpreter::convolve (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::correlate (const string& args) try
@@ -306,7 +306,7 @@ string Pulsar::ProfileInterpreter::correlate (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ProfileInterpreter::empty ()

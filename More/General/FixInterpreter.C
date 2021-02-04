@@ -73,7 +73,7 @@ string Pulsar::FixInterpreter::fluxcal (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -86,7 +86,7 @@ string Pulsar::FixInterpreter::receiver (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -111,7 +111,7 @@ string Pulsar::FixInterpreter::epoch (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ string Pulsar::FixInterpreter::freq (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -209,7 +209,7 @@ string Pulsar::FixInterpreter::pointing (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 #ifdef HAVE_CFITSIO
@@ -224,6 +224,6 @@ string Pulsar::FixInterpreter::psrfits_refmjd (const string& args) try
 }
 catch (Error &error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 #endif

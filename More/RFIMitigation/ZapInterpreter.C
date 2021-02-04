@@ -155,7 +155,7 @@ string Pulsar::ZapInterpreter::median (const string& args) try
   return retval;
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ZapInterpreter::mow (const string& args) try
@@ -196,7 +196,7 @@ string Pulsar::ZapInterpreter::mow (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ZapInterpreter::iqr (const string& args) try
@@ -227,7 +227,7 @@ string Pulsar::ZapInterpreter::iqr (const string& args) try
   return retval;
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ZapInterpreter::tfzap (const string& args) try
@@ -258,7 +258,7 @@ string Pulsar::ZapInterpreter::tfzap (const string& args) try
   return retval;
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ZapInterpreter::extend (const string& args) try
@@ -289,7 +289,7 @@ string Pulsar::ZapInterpreter::extend (const string& args) try
   return retval;
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ZapInterpreter::cal (const string& args)
@@ -446,7 +446,7 @@ string Pulsar::ZapInterpreter::chan (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -480,7 +480,7 @@ string Pulsar::ZapInterpreter::subint (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -535,7 +535,7 @@ string Pulsar::ZapInterpreter::such (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -586,7 +586,7 @@ try {
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -670,7 +670,7 @@ string Pulsar::ZapInterpreter::freq (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -712,5 +712,5 @@ try {
 
 
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }

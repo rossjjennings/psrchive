@@ -42,7 +42,7 @@ string Pulsar::ExtensionInterpreter::add (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ExtensionInterpreter::remove (const string& args) try
@@ -51,7 +51,7 @@ string Pulsar::ExtensionInterpreter::remove (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::ExtensionInterpreter::list (const string& args) try
@@ -72,7 +72,7 @@ string Pulsar::ExtensionInterpreter::list (const string& args) try
   return response (Good, result);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 

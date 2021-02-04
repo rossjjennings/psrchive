@@ -119,7 +119,7 @@ string Pulsar::DeleteInterpreter::chan (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -139,7 +139,7 @@ string Pulsar::DeleteInterpreter::subint (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 #include "Ranges.h"
@@ -194,7 +194,7 @@ string Pulsar::DeleteInterpreter::freq (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -224,7 +224,7 @@ string Pulsar::DeleteInterpreter::cal (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -291,5 +291,5 @@ string Pulsar::DeleteInterpreter::bin (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }

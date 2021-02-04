@@ -47,7 +47,7 @@ string Pulsar::InstallInterpreter::parameters (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::InstallInterpreter::predictor (const string& args) try
@@ -57,7 +57,7 @@ string Pulsar::InstallInterpreter::predictor (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::InstallInterpreter::receiver (const string& args) try
@@ -67,7 +67,7 @@ string Pulsar::InstallInterpreter::receiver (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::InstallInterpreter::empty ()

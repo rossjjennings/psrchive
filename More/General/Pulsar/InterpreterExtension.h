@@ -43,6 +43,9 @@ namespace Pulsar {
     std::string response (Status s, const std::string& text = "")
       { return interpreter->response ((Interpreter::Status)s, text); }
 
+    std::string response (const Error& error)
+      { return interpreter->response (error); }
+
   protected:
 
     friend class Interpreter;
