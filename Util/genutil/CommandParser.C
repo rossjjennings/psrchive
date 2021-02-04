@@ -65,7 +65,7 @@ void CommandParser::script (const vector<string>& cmds)
     }
     else if (first != "init" && first != "end")
     {
-      response = parse(cmds[i]);
+      response = parse (cmds[i]);
     }
     if (fault && abort)
       throw Error (InvalidState, "CommandParser::script", response);
@@ -184,7 +184,7 @@ string CommandParser::parse2 (const string& command, const string& arguments)
       }
       catch (Error& error)
       {
-	if (abort)
+	if (abort && error.get_code() != HelpMessage)
 	  throw error += "CommandParser::parse";
 	else
 	  reply = error.get_message();
