@@ -1,0 +1,50 @@
+//-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2020 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+// psrchive/More/General/Pulsar/ArchiveStatistic.h
+
+#ifndef __ArchiveStatistic_h
+#define __ArchiveStatistic_h
+
+#include "Pulsar/HasArchive.h"
+#include "Identifiable.h"
+
+namespace Pulsar {
+
+
+  //! Commmon statistics that can be derived from an Archive
+  /*! Each statistic can be computed as a function of sub-integration,
+      frequency-channel, and polarization */
+
+  class ArchiveStatistic : public Identifiable, public HasArchive
+  {
+  public:
+
+    //! Create a new instance of ArchiveStatistic based on name
+    static ArchiveStatistic* factory (const std::string& name);
+
+    //! Construct with a name and description
+    ArchiveStatistic (const std::string& name,
+                      const std::string& description);
+
+    //! Derived types define the value returned
+    virtual double get () = 0;
+
+    //! Derived types must also define clone method
+    virtual ArchiveStatistic* clone () const = 0;
+
+  private:
+
+    //! thread-safe build for factory
+    static void build (); 
+  };
+
+}
+
+#endif
+

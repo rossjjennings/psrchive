@@ -12,6 +12,14 @@
 
 using namespace std;
 
+Pulsar::HasArchive::HasArchive ()
+{
+}
+
+Pulsar::HasArchive::~HasArchive ()
+{
+}
+
 void Pulsar::HasArchive::set_Archive (const Archive* est)
 {
 #if _DEBUG

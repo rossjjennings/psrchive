@@ -68,7 +68,7 @@ public:
 class Mean : public ProfileStatistic
 {
 public:
-  Mean () : ProfileStatistic ("mean", "mean profile amplitude")
+  Mean () : ProfileStatistic ("mean", "mean of profile amplitudes")
   {
     add_alias ("average");
     add_alias ("avg");
@@ -94,6 +94,88 @@ public:
   { return sqrt( profile->sumsq() / profile->get_nbin() ); }
 
   StandardDeviation* clone () const { return new StandardDeviation(*this); }
+};
+
+// 
+void central_moments (vector<float>& amps, vector<double>& mu)
+{
+  if (mu.size() == 0)
+    return;
+
+  vector<double> prod (amps.size(), 1.0);
+
+  for (unsigned i=0; i < mu.size(); i++)
+  {
+    double total = 0.0;
+
+    for (unsigned j=0; j < amps.size(); j++)
+    {
+      prod[j] *= amps[j];
+      total += prod[j];
+    }
+
+    mu[i] = total / amps.size();
+
+    if (i == 0)
+    {
+      // subract the mean so that further moments are central
+      for (unsigned j=0; j < amps.size(); j++)
+      {
+        prod[j] -= mu[0];
+        amps[j] = prod[j];
+      }
+    }
+  }
+}
+
+//! Pearson's moment coefficient of skewness
+class Skewness : public ProfileStatistic
+{
+public:
+  Skewness ()
+  : ProfileStatistic ("mu3", "skewness of profile amplitudes")
+  {
+    add_alias ("skewness");
+    add_alias ("skew");
+  }
+
+  double get (const Profile* profile)
+  { 
+    unsigned nbin = profile->get_nbin();
+    vector<float> amps (profile->get_amps(), profile->get_amps() + nbin);
+
+    vector<double> mu (3);
+    central_moments (amps, mu);
+
+    double sigma = sqrt( mu[1] );
+    return mu[2] / pow(sigma,3.0);
+  }
+
+  Skewness* clone () const { return new Skewness(*this); }
+};
+
+//! the fourth standardized moment
+class Kurtosis : public ProfileStatistic
+{
+public:
+  Kurtosis ()
+  : ProfileStatistic ("mu4", "kurtosis of profile amplitudes")
+  {
+    add_alias ("kurtosis");
+    add_alias ("kurt");
+  }
+
+  double get (const Profile* profile)
+  {
+    unsigned nbin = profile->get_nbin();
+    vector<float> amps (profile->get_amps(), profile->get_amps() + nbin);
+
+    vector<double> mu (4);
+    central_moments (amps, mu);
+    return mu[3] / (mu[1]*mu[1]);
+  }
+
+  Kurtosis* clone () const { return new Kurtosis(*this); }
 };
 
 // https://en.wikipedia.org/wiki/Coefficient_of_variation
@@ -172,22 +254,24 @@ public:
 
 };
 
-void Q1_Q3 (vector<float>& amps, float& Q1, float& Q3)
+void Q1_Q2_Q3 (vector<float>& amps, float& Q1, float& Q2, float& Q3)
 {
   std::sort( amps.begin(), amps.end() );
   unsigned nbin = amps.size();
 
   unsigned iQ1 = nbin / 4;
+  unsigned iQ2 = nbin / 2;
   unsigned iQ3 = (3 * nbin) / 4;
 
   Q1 = amps[iQ1];
+  Q2 = amps[iQ2];
   Q3 = amps[iQ3];
 }
 
 double iqr (vector<float>& amps)
 {
-  float Q1=0, Q3=0;
-  Q1_Q3 (amps, Q1, Q3);
+  float Q1=0, Q2=0, Q3=0;
+  Q1_Q2_Q3 (amps, Q1, Q2, Q3);
   return Q3 - Q1;
 }
 
@@ -216,8 +300,8 @@ public:
 
 double qcd (vector<float>& amps)
 { 
-  float Q1=0, Q3=0;
-  Q1_Q3 (amps, Q1, Q3);
+  float Q1=0, Q2=0, Q3=0;
+  Q1_Q2_Q3 (amps, Q1, Q2, Q3);
   return (Q3 - Q1) / (Q3 + Q1); 
 }
 
@@ -242,6 +326,83 @@ public:
 
   QuartileDispersion* clone () const
   { return new QuartileDispersion(*this); }
+};
+
+double qcs (vector<float>& amps)
+{
+  float Q1=0, Q2=0, Q3=0;
+  Q1_Q2_Q3 (amps, Q1, Q2, Q3);
+  return (Q3 + Q1 - 2*Q2) / (Q3 - Q1);
+}
+
+double qcs (const Profile* profile)
+{
+  unsigned nbin = profile->get_nbin();
+  vector<float> amps (profile->get_amps(), profile->get_amps() + nbin);
+  return qcs (amps);
+}
+
+// https://mathworld.wolfram.com/BowleySkewness.html
+class QuartileSkewness: public ProfileStatistic
+{
+public:
+  QuartileSkewness ()
+  : ProfileStatistic ("qcs", "quartile coefficient of skewness")
+  {
+  }
+
+  double get (const Profile* profile)
+  { return qcs (profile); }
+
+  QuartileSkewness* clone () const
+  { return new QuartileSkewness (*this); }
+};
+
+// e.g. N = 4 yields quartiles, N = 10 yields deciles, etc.
+void Ntile (vector<float>& amps, vector<float>& Ntiles)
+{
+  std::sort( amps.begin(), amps.end() );
+  unsigned nbin = amps.size();
+  unsigned N = Ntiles.size() + 1;
+
+  for (unsigned i=0; i < Ntiles.size(); i++)
+  {
+    unsigned itile = (nbin * (i+1)) / N;
+    Ntiles[i] = amps[itile];
+  }
+}
+
+class OctileKurtosis: public ProfileStatistic
+{
+public:
+  OctileKurtosis ()
+  : ProfileStatistic ("ock", "octile coefficient of kurtosis")
+  {
+  }
+
+  double get (const Profile* profile)
+  { 
+    unsigned nbin = profile->get_nbin();
+    vector<float> amps (profile->get_amps(), profile->get_amps() + nbin);
+
+    vector<float> quartile (3);
+    Ntile (amps, quartile);
+
+    float Q1=0, Q2=0, Q3=0;
+    Q1_Q2_Q3 (amps, Q1, Q2, Q3);
+
+    assert (Q1 == quartile[0]);
+    assert (Q2 == quartile[1]);
+    assert (Q3 == quartile[2]);
+
+    vector<float> oct (7);
+    Ntile (amps, oct);
+
+    return ( oct[6]-oct[4] + oct[2]-oct[0] ) / ( oct[5] - oct[1] );
+  }
+
+  OctileKurtosis* clone () const
+  { return new OctileKurtosis (*this); }
 };
 
 class RelativeIQR : public ProfileStatistic
@@ -310,7 +471,7 @@ public:
     Reference::To<Profile> fft = fourier_transform (profile);
     detect (fft);
     // start searching for the max at the second harmonic
-    double max = fft->max(2);
+    double max = fft->max(20);
     return max / fft->get_amps()[1];
   }
 
@@ -359,7 +520,7 @@ void Pulsar::ProfileStatistic::build ()
   if (instances != NULL)
     return;
 
-  // cerr << "Pulsar::ProfileStatistic::build" << endl;
+  cerr << "Pulsar::ProfileStatistic::build" << endl;
  
   instances = new std::vector< ProfileStatistic* >;
  
@@ -370,20 +531,27 @@ void Pulsar::ProfileStatistic::build ()
   instances->push_back( new PeakToPeak );
   instances->push_back( new Mean );
   instances->push_back( new StandardDeviation );
+  instances->push_back( new Skewness );
+  instances->push_back( new Kurtosis );
   instances->push_back( new DeviationCoefficient );
   instances->push_back( new Median );
   instances->push_back( new MedianAbsoluteDifference );
   instances->push_back( new InterQuartileRange );
   instances->push_back( new QuartileDispersion );
+  instances->push_back( new QuartileSkewness );
+  instances->push_back( new OctileKurtosis );
   instances->push_back( new RelativeIQR );
   instances->push_back( new RobustRange );
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
   instances->push_back( new MaxHarmonicRatio );
 
+  cerr << "Pulsar::ProfileStatistic::build instances=" << instances 
+       << " count=" << instance_count << " start=" << start_count 
+       << " size=" << instances->size() << endl;
+
   assert (instances->size() == instance_count - start_count);
 
-  // cerr << "Pulsar::ProfileStatistic::build instances=" << instances << endl;
 }
 
 

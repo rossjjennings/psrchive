@@ -19,7 +19,7 @@
 
 namespace Pulsar {
 
-  class ProfileStatistic;
+  class ArchiveStatistic;
 
   //! Uses the inter-quartile range to find bad channels and sub-integrations
   /*! By default, this algorithm uses the modulation index as the
@@ -68,7 +68,7 @@ namespace Pulsar {
     unsigned median_nsubint;
 
     //! The statistic to be derived from each profile
-    Reference::To<ProfileStatistic> statistic;
+    Reference::To<ArchiveStatistic> statistic;
     
   public:
 

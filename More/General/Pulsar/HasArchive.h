@@ -26,6 +26,12 @@ namespace Pulsar {
 
   public:
 
+    //! Default constructor
+    HasArchive ();
+
+    //! Desctructor
+    ~HasArchive ();
+
     //! Set the instance 
     void set_Archive (const Archive*);
 

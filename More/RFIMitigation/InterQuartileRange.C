@@ -9,7 +9,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
-#include "Pulsar/ProfileStatistic.h"
+#include "Pulsar/ArchiveStatistic.h"
 #include "Pulsar/Index.h"
 
 #include <fstream>
@@ -26,10 +26,11 @@ std::string process (TextInterface::Parser* interface, const std::string& txt);
 Pulsar::InterQuartileRange::InterQuartileRange ()
 {
   cutoff_threshold_max = cutoff_threshold_min = 1.5;
-  max_iterations = 15;
+  max_iterations = 30;
   logarithmic = false;
 
   median_nchan = median_nsubint = 0;
+  median_filename = "test_log_range.txt";
 }
 
 Pulsar::InterQuartileRange::~InterQuartileRange ()
@@ -97,6 +98,9 @@ void Pulsar::InterQuartileRange::compute (Archive* archive)
     parser = stats->get_interface ();
   }
 
+  if (statistic)
+    statistic->set_Archive( archive );
+
   nchan = archive->get_nchan();
   nsubint = archive->get_nsubint();
   values.resize (nchan * nsubint);
@@ -106,6 +110,9 @@ void Pulsar::InterQuartileRange::compute (Archive* archive)
 #if _DEBUG
     cerr << "InterQuartileRange::compute isubint=" << isubint << endl;
 #endif
+
+    if (statistic)
+      statistic->set_subint ( isubint );
 
     Integration* subint = archive->get_Integration( isubint );
     
@@ -119,17 +126,20 @@ void Pulsar::InterQuartileRange::compute (Archive* archive)
 	continue;
 
       Index pol (0, true); // integrate over polarizations
-      Reference::To<const Profile> profile
-	= Pulsar::get_Profile (subint, pol, ichan);
+      Reference::To<const Profile> profile;
 
       float value = 0;
 
       if (statistic)
       {
-        value = statistic->get(profile);
+        statistic->set_chan( ichan );
+        statistic->set_pol( pol );
+        value = statistic->get();
       }
       else if (stats)
       {
+        profile = Pulsar::get_Profile (subint, pol, ichan);
+
 	stats->set_Profile (profile);
 	string value = process( parser, expression );
 	value = fromstring<float>( value );
@@ -380,7 +390,7 @@ void Pulsar::InterQuartileRange::mask (Archive* archive)
 //! Set the profile statistic
 void Pulsar::InterQuartileRange::set_statistic (const std::string& name)
 {
-  statistic = ProfileStatistic::factory (name);
+  statistic = ArchiveStatistic::factory (name);
 }
 
 //! Get the profile statistic

@@ -14,6 +14,7 @@ nobase_include_HEADERS = \
         Pulsar/AdaptiveSmooth.h \
         Pulsar/Algorithm.h \
         Pulsar/ArchiveSort.h \
+	Pulsar/ArchiveStatistic.h \
 	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
         Pulsar/BaselineWindow.h \
@@ -49,6 +50,7 @@ nobase_include_HEADERS = \
         Pulsar/FrequencyIntegrate.h \
 	Pulsar/FscrunchInterpreter.h \
         Pulsar/GaussianBaseline.h \
+	Pulsar/HasArchive.h \
 	Pulsar/HasBaselineEstimator.h \
 	Pulsar/ImageCorrection.h \
 	Pulsar/Index.h \
@@ -130,6 +132,7 @@ libGeneral_la_SOURCES = \
 	Accumulate.C \
         AdaptiveSNR.C \
 	Append.C \
+	ArchiveStatistic.C \
 	ArchiveTemplates.C \
         Archive_append.C \
 	Archive_apply_model.C \
@@ -186,6 +189,7 @@ libGeneral_la_SOURCES = \
 	FrequencyAppend.C \
         FrequencyIntegrate.C \
         GaussianBaseline.C \
+	HasArchive.C \
 	HasBaselineEstimator.C \
 	ImageCorrection.C \
 	Index.C \

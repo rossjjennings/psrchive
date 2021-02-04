@@ -257,6 +257,12 @@ namespace Pulsar {
     //! All methods should return via the response methods
     std::string response (Status status, const std::string& text = "");
 
+    //! Converts an Error into a Status
+    Status get_status (const Error& error);
+
+    //! All methods should return via the response methods
+    std::string response (const Error& error);
+
     //! Parses arguments as a single instance of T
     template<typename T> T setup (const std::string& args);
 

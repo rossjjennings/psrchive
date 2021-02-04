@@ -357,6 +357,19 @@ vector<string> Pulsar::Interpreter::setup (const string& text, bool expand)
   return arguments;
 }
 
+Pulsar::Interpreter::Status Pulsar::Interpreter::get_status (const Error& error)
+{
+  if (error.get_code() == HelpMessage)
+    return Good;
+
+  return Fail;
+}
+
+string Pulsar::Interpreter::response (const Error& error)
+{
+  return response (get_status(error), error.get_message());
+}
+
 /*!
   Eventually, the Interpreter class might filter special arguments
   out of the list before passing the remainder along to the method.
@@ -472,7 +485,7 @@ string Pulsar::Interpreter::load (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::Interpreter::unload (const string& args) try
@@ -571,7 +584,7 @@ string Pulsar::Interpreter::unload (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 //! push a clone of the current stack top onto the stack
@@ -593,7 +606,7 @@ string Pulsar::Interpreter::push (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -623,7 +636,7 @@ string Pulsar::Interpreter::set (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::Interpreter::get (const string& args) try
@@ -639,7 +652,7 @@ string Pulsar::Interpreter::get (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -678,7 +691,7 @@ string Pulsar::Interpreter::clone (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // convert the archive to a new type
@@ -705,7 +718,7 @@ string Pulsar::Interpreter::convert (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -746,8 +759,9 @@ string Pulsar::Interpreter::extract (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
-  return response (Fail, error.get_message());
+catch (Error& error)
+{
+  return response (error);
 }
 
 TextInterface::Parser* Pulsar::Interpreter::get_interface ()
@@ -785,7 +799,7 @@ string Pulsar::Interpreter::edit (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 bool Pulsar::Interpreter::evaluate (const std::string& expression)
@@ -850,7 +864,7 @@ string Pulsar::Interpreter::config (const string& args) try
 
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -866,7 +880,7 @@ string Pulsar::Interpreter::append (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::Interpreter::freq_append (const string& args) try
@@ -893,7 +907,7 @@ string Pulsar::Interpreter::freq_append (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -911,7 +925,7 @@ string Pulsar::Interpreter::shuffle (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -941,7 +955,7 @@ string Pulsar::Interpreter::fscrunch (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -973,7 +987,7 @@ string Pulsar::Interpreter::tscrunch (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -992,7 +1006,7 @@ string Pulsar::Interpreter::pscrunch (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::Interpreter::bscrunch (const string& args) try 
@@ -1020,7 +1034,7 @@ string Pulsar::Interpreter::bscrunch (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -1036,7 +1050,7 @@ string Pulsar::Interpreter::fold (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1053,7 +1067,7 @@ string Pulsar::Interpreter::invint (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -1070,7 +1084,7 @@ string Pulsar::Interpreter::state (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 
@@ -1121,7 +1135,7 @@ string Pulsar::Interpreter::centre (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1157,7 +1171,7 @@ string Pulsar::Interpreter::dedisperse (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1190,7 +1204,7 @@ string Pulsar::Interpreter::defaraday (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1219,7 +1233,7 @@ string Pulsar::Interpreter::scattered_power_correct (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::Interpreter::image_correct (const string& args) try
@@ -1258,7 +1272,7 @@ string Pulsar::Interpreter::image_correct (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1288,7 +1302,7 @@ string Pulsar::Interpreter::weight (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1309,7 +1323,7 @@ string Pulsar::Interpreter::scale (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1333,7 +1347,7 @@ string Pulsar::Interpreter::offset (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -1345,7 +1359,7 @@ string Pulsar::Interpreter::rotate (const string& args) try
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  return response (error);
 }
 
 string Pulsar::Interpreter::dynspec(const string& args) try {
