@@ -35,74 +35,14 @@ TextInterface::Parser* Pulsar::Statistics::get_interface ()
   return new Interface (this);
 }
 
-//! Set the instance from which statistics will be drawn
-void Pulsar::Statistics::set_Archive (const Archive* data)
-{
-  archive = data;
-  stats_setup = false;
-}
-
-const Pulsar::Archive* Pulsar::Statistics::get_Archive () const
-{
-  return archive;
-}
-
-const Pulsar::Integration* Pulsar::Statistics::get_Integration () const
-{
-  integration = Pulsar::get_Integration (archive, isubint);
-  return integration;
-}
-
-const Pulsar::Profile* Pulsar::Statistics::get_Profile () const
-{
-  profile = Pulsar::get_Profile (get_Integration(), ipol, ichan);
-  return profile;
-}
-
-//! Set the sub-integration from which statistics will be drawn
-void Pulsar::Statistics::set_subint (Index _isubint)
-{
-  isubint = _isubint;
-  stats_setup = false;
-}
-
-Pulsar::Index Pulsar::Statistics::get_subint () const
-{
-  return isubint;
-}
-    
-//! Set the frequency channel from which statistics will be drawn
-void Pulsar::Statistics::set_chan (Index _ichan)
-{
-  ichan = _ichan;
-  stats_setup = false;
-}
-
-Pulsar::Index Pulsar::Statistics::get_chan () const
-{
-  return ichan;
-}
-
-//! Set the polarization to plot
-void Pulsar::Statistics::set_pol (Index _ipol)
-{
-  ipol = _ipol;
-  stats_setup = false;
-}
-
-Pulsar::Index Pulsar::Statistics::get_pol () const
-{
-  return ipol;
-}
-
 Pulsar::StrategySet* Pulsar::Statistics::get_strategy () const try
 {
-    return get_Archive()->get_strategy();
+  return get_Archive()->get_strategy();
 }
- catch (Error& error)
-   {
-     throw error += "Pulsar::Statistics::get_strategy";
-   }
+catch (Error& error)
+{
+  throw error += "Pulsar::Statistics::get_strategy";
+}
 
 Phase::Value Pulsar::Statistics::get_peak () const
 {
@@ -235,12 +175,15 @@ void Pulsar::Statistics::setup_stats () try
 
   // avoid recursion - part 2
   // (Plugin::setup might call a function that calls setup_stats)
-  if (stats_setup)
+  if (is_current())
     return;
 
   // avoid recursion - part 1
-  // (Plugin::setup might call a function that calls setup_stats)
-  stats_setup = true;
+  /*
+     Plugin::setup might call a function that calls setup_stats
+     Calling HasArchive::get_Profile makes HasArchive::is_current return true
+  */
+  Reference::To<const Profile> tmp = get_Profile();
 
   for (unsigned i=0; i<plugins.size(); i++)
     plugins[i]->set_setup (false);
@@ -262,6 +205,9 @@ void Pulsar::Statistics::add_plugin (Plugin* plugin)
 {
   plugin->parent = this;
   plugins.push_back(plugin);
-  stats_setup = false;
+
+  // Calling HasArchive::set_Archive makes HasArchive::is_current return false
+  if (archive)
+    set_Archive(archive);
 }
 

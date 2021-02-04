@@ -11,21 +11,18 @@
 #ifndef __Pulsar_Statistics_h
 #define __Pulsar_Statistics_h
 
-#include "Pulsar/Index.h"
+#include "Pulsar/HasArchive.h"
 #include "TextInterface.h"
 #include "PhaseRange.h"
 
 namespace Pulsar {
 
-  class Archive;
-  class Integration;
-  class Profile;
   class ProfileStats;
   class PhaseWeight;
   class StrategySet;
   
   //! Interface to a variety of useful statistics
-  class Statistics : public Reference::Able
+  class Statistics : public Reference::Able, public HasArchive
   {
 
   public:
@@ -33,25 +30,8 @@ namespace Pulsar {
     //! Default constructor
     Statistics (const Archive* = 0);
 
-    //! Set the instance from which statistics will be drawn
-    void set_Archive (const Archive*);
-    //! Get the instance from which statistics will be drawn
-    const Archive* get_Archive () const;
-
     //! Get the strategy manager owned by the Archive
     StrategySet* get_strategy () const;
-
-    //! Set the sub-integration from which statistics will be drawn
-    void set_subint (Index _isubint);
-    Index get_subint () const;
-    
-    //! Set the frequency channel from which statistics will be drawn
-    void set_chan (Index _ichan);
-    Index get_chan () const;
-
-    //! Set the polarization to plot
-    void set_pol (Index _ipol);
-    Index get_pol () const;
 
     //! Get the phase of the pulse peak
     Phase::Value get_peak () const;
@@ -103,20 +83,8 @@ namespace Pulsar {
 
   protected:
 
-    Reference::To<const Archive, false> archive;
-    Index isubint;
-    Index ichan;
-    Index ipol;
-
-    bool stats_setup;
     void setup_stats ();
     mutable Reference::To<ProfileStats> stats;
-
-    const Profile* get_Profile () const;
-    mutable Reference::To<const Profile, false> profile;
-
-    const Integration* get_Integration () const;
-    mutable Reference::To<const Integration, false> integration;
 
     mutable std::vector< Reference::To<Plugin> > plugins;
 
