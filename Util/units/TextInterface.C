@@ -79,8 +79,11 @@ string TextInterface::Parser::process (const string& command)
   }
   catch (Error& error)
   {
-    throw Error (InvalidParam, "TextInterface::Parser::process",
-		 "failed to parse '" + after + "' as '" + param + "'");
+    if (error.get_code() == HelpMessage)
+      throw error;
+    else
+      throw Error (InvalidParam, "TextInterface::Parser::process",
+		   "failed to parse '" + after + "' as '" + param + "'");
   }
 
   return "";
