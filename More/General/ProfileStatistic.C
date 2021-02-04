@@ -520,7 +520,7 @@ void Pulsar::ProfileStatistic::build ()
   if (instances != NULL)
     return;
 
-  cerr << "Pulsar::ProfileStatistic::build" << endl;
+  // cerr << "Pulsar::ProfileStatistic::build" << endl;
  
   instances = new std::vector< ProfileStatistic* >;
  
@@ -546,9 +546,7 @@ void Pulsar::ProfileStatistic::build ()
   instances->push_back( new NyquistHarmonic );
   instances->push_back( new MaxHarmonicRatio );
 
-  cerr << "Pulsar::ProfileStatistic::build instances=" << instances 
-       << " count=" << instance_count << " start=" << start_count 
-       << " size=" << instances->size() << endl;
+  // cerr << "Pulsar::ProfileStatistic::build instances=" << instances << " count=" << instance_count << " start=" << start_count << " size=" << instances->size() << endl; 
 
   assert (instances->size() == instance_count - start_count);
 
