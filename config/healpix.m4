@@ -23,8 +23,8 @@ AC_DEFUN([SWIN_LIB_HEALPIX],
 
   AC_MSG_CHECKING([for HEALPix libary installation])
 
-  HEALPIX_CFLAGS="-I${HEALPIX}/src/cxx/${HEALPIX_TARGET}/include"
-  HEALPIX_LIBS="-L${HEALPIX}/src/cxx/${HEALPIX_TARGET}/lib -lhealpix_cxx -lcxxsupport -lfftpack"
+  HEALPIX_CFLAGS="-I${HEALPIX}/include/healpix_cxx"
+  HEALPIX_LIBS="-L${HEALPIX}/lib -lhealpix_cxx -lsharp -lhealpix"
 
   ac_save_CXXFLAGS="$CXXFLAGS"
   ac_save_LIBS="$LIBS"
