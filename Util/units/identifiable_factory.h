@@ -36,34 +36,40 @@ T* identifiable_factory (C& ptrs, std::string name)
   std::cerr << "identifiable_factory name=" << name << std::endl;
 #endif
 
-  if (name == "help")
-    std::cerr <<
-      "\n\n"
-      "Options:"
-      "\n\n";
-    
-  for (typename C::iterator ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
-    {
-      if (name == "help")
-	{
-	  std::cerr << (*ptr)->get_identity() 
-                    << "\t" << (*ptr)->get_description() << std::endl;
-	}
-      else if ((*ptr)->identify(name))
-	{
-	  return(*ptr)->clone ();
-	}
-    }
+  std::string message;
 
   if (name == "help")
+    message += "\n\n" "Options:" "\n\n";
+
+#ifdef _DEBUG
+  std::cerr << "identifiable_factory ptrs=" << (void*) &ptrs << std::endl;
+#endif
+ 
+  for (typename C::iterator ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
   {
-    std::cerr << std::endl;
-    return 0;
+#ifdef _DEBUG
+    std::cerr << "ptr=" << (void*) (*ptr) << " id=" << (*ptr)->get_identity() << std::endl;
+#endif
+
+    if (name == "help")
+    {
+      message += (*ptr)->get_identity() +"\t"+ (*ptr)->get_description() +"\n";
+    }
+    else if ((*ptr)->identify(name))
+    {
+#ifdef _DEBUG
+      std::cerr << "identifiable_factory calling clone" << std::endl;
+#endif
+      return (*ptr)->clone ();
+    }
   }
 
-  throw Error (InvalidState, std::string(),
+  if (name == "help")
+    throw Error (HelpMessage, "identifiable_factory", message);
+
+  throw Error (InvalidState, "identifiable_factory",
 	       "no instance named '" + name + "'");
 }
   
-  
 #endif
+

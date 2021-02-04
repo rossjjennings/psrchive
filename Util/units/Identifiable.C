@@ -46,7 +46,7 @@ void Identifiable::add_alias (const std::string& name)
 }
 
 //! Returns the identity of the object
-const std::string& Identifiable::get_identity () const
+std::string Identifiable::get_identity () const
 {
   if (identities.size() == 0)
     throw Error (InvalidState, "Identifiable::get_identity",
@@ -61,7 +61,7 @@ void Identifiable::set_description (const std::string& text)
 }
 
 //! Returns the identity of the object
-const std::string& Identifiable::get_description () const
+std::string Identifiable::get_description () const
 {
   return description;
 }

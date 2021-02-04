@@ -99,6 +99,12 @@ void Error::report (ostream& ostr) const
 {
   ostr << endl;
 
+  if (code == HelpMessage)
+  {
+    ostr << message << endl;
+    return;
+  }
+
   // print the list of functions in reverse order
   if (!functions.empty()) {
     ostr << "Error::stack" << endl;
@@ -149,6 +155,7 @@ const char* Error::err2str (ErrorCode code)
     CASESTR(EndOfFile);
     CASESTR(FailedCall);
     CASESTR(FailedSys);
+    CASESTR(HelpMessage);
   default: return "invalid";
   }
 #undef CASESTR

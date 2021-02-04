@@ -36,7 +36,9 @@ enum ErrorCode {
   //! failure of a function called from another lib
   FailedCall,
   //! failure of a system call that sets errno
-  FailedSys
+  FailedSys,
+  //! help message (not an error, but typically cause for abort)
+  HelpMessage
 };
 
 //! A convenient exception handling class

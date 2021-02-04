@@ -25,13 +25,13 @@ class Identifiable : public Reference::Able
   virtual void set_identity (const std::string&);
  
   //! Returns the identity of the object
-  virtual const std::string& get_identity () const;
+  virtual std::string get_identity () const;
 
   //! Set the description of the object
   virtual void set_description (const std::string&);
 
   //! Returns the description of the object
-  virtual const std::string& get_description () const;
+  virtual std::string get_description () const;
 
   //! Add an alias for the object
   virtual void add_alias (const std::string&);
@@ -59,10 +59,10 @@ public:
   bool identify (const std::string& name)
   { return decorated->identify(name); }
 
-  const std::string& get_identity () const
+  std::string get_identity () const
   { return decorated->get_identity (); }
 
-  const std::string& get_description () const
+  std::string get_description () const
   { return decorated->get_description (); }
 
 };
