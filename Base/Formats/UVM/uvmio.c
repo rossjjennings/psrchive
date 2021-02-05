@@ -249,7 +249,7 @@ int cnuvmrec (const char* filename)
 {
   /* for dealing with filename string */
   unsigned i, length = 0;
-  char f77_filename [80];
+  char f77_filename [UVM_MAX_FILENAME];
 
   if (!filename)
     return -1;
@@ -257,7 +257,7 @@ int cnuvmrec (const char* filename)
   /* space-terminate the filename */
   length = strlen (filename);
   strcpy (f77_filename, filename);
-  for (i=length; i<80; i++)
+  for (i=length; i<UVM_MAX_FILENAME; i++)
     f77_filename[i] = ' ';
 
   return F772C(nuvmrec) (f77_filename, length);
