@@ -111,32 +111,32 @@ namespace UnaryStatistics {
   };
   
   // worker function for variance, skewness, kurtosis, etc.
-  void central_moments (vector<double> amps, vector<double>& mu)
+  void central_moments (vector<double> data, vector<double>& mu)
   {
     if (mu.size() == 0)
       return;
 
-    vector<double> prod (amps.size(), 1.0);
+    vector<double> prod (data.size(), 1.0);
 
     for (unsigned i=0; i < mu.size(); i++)
       {
 	double total = 0.0;
 	
-	for (unsigned j=0; j < amps.size(); j++)
+	for (unsigned j=0; j < data.size(); j++)
 	  {
-	    prod[j] *= amps[j];
+	    prod[j] *= data[j];
 	    total += prod[j];
 	  }
 	
-	mu[i] = total / amps.size();
+	mu[i] = total / data.size();
 	
 	if (i == 0)
 	  {
 	    // subract the mean so that further moments are central
-	    for (unsigned j=0; j < amps.size(); j++)
+	    for (unsigned j=0; j < data.size(); j++)
 	      {
 		prod[j] -= mu[0];
-		amps[j] = prod[j];
+		data[j] = prod[j];
 	      }
 	  }
       }
@@ -308,7 +308,7 @@ class InterQuartileRange : public UnaryStatistic
 {
 public:
   InterQuartileRange ()
-  : UnaryStatistic ("iqr", "inter-quartile range of amps")
+  : UnaryStatistic ("iqr", "inter-quartile range of values")
   {
   }
 
@@ -320,10 +320,10 @@ public:
 
 };
 
-double qcd (const vector<double>& amps)
+double qcd (const vector<double>& data)
 { 
   double Q1=0, Q2=0, Q3=0;
-  Q1_Q2_Q3 (amps, Q1, Q2, Q3);
+  Q1_Q2_Q3 (data, Q1, Q2, Q3);
   return (Q3 - Q1) / (Q3 + Q1); 
 }
 
@@ -343,10 +343,10 @@ public:
   { return new QuartileDispersion(*this); }
 };
 
-double qcs (const vector<double>& amps)
+double qcs (const vector<double>& data)
 {
   double Q1=0, Q2=0, Q3=0;
-  Q1_Q2_Q3 (amps, Q1, Q2, Q3);
+  Q1_Q2_Q3 (data, Q1, Q2, Q3);
   return (Q3 + Q1 - 2*Q2) / (Q3 - Q1);
 }
 
@@ -367,16 +367,16 @@ public:
 };
 
 // e.g. N = 4 yields quartiles, N = 10 yields deciles, etc.
-void Ntile (vector<double> amps, vector<double>& Ntiles)
+void Ntile (vector<double> data, vector<double>& Ntiles)
 {
-  std::sort( amps.begin(), amps.end() );
-  unsigned nbin = amps.size();
+  std::sort( data.begin(), data.end() );
+  unsigned nbin = data.size();
   unsigned N = Ntiles.size() + 1;
 
   for (unsigned i=0; i < Ntiles.size(); i++)
   {
     unsigned itile = (nbin * (i+1)) / N;
-    Ntiles[i] = amps[itile];
+    Ntiles[i] = data[itile];
   }
 }
 
