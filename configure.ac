@@ -65,6 +65,7 @@ SWIN_PROG_FIND
 # Checks for programs.
 
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX([11], [noext], [mandatory])
 SWIN_BEST_F77
 
 AC_PROG_CC
