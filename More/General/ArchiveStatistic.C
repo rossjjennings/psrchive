@@ -33,35 +33,15 @@ public:
 
 };
 
-class ProfileStatisticWrapper : public ArchiveStatistic
+class ProfileStatisticWrapper : public Identifiable::Proxy<ArchiveStatistic>
 {
   Reference::To<ProfileStatistic> stat;
 
 public:
-  ProfileStatisticWrapper ()
-  : ArchiveStatistic ("wrap", "wraps a profile statistic")
+  ProfileStatisticWrapper (ProfileStatistic* my_stat)
+  : Identifiable::Proxy<ArchiveStatistic> (my_stat)
   {
-  }
-
-  bool identify (const std::string& name) try
-  {
-    stat = ProfileStatistic::factory (name);
-    return true;
-  }
-  catch (...)
-  {
-    return false;
-  }
-
-  //! Returns the description of the object
-  std::string get_description () const try
-  {
-    ProfileStatistic::factory ("help");
-    return "unexpected";
-  }
-  catch (Error& error)
-  {
-    return error.get_message();
+    stat = my_stat;
   }
 
   double get ()
@@ -69,10 +49,14 @@ public:
 
   ProfileStatisticWrapper* clone () const 
   { return new ProfileStatisticWrapper(*this); }
-
 };
 
 static unsigned instance_count = 0;
+
+Pulsar::ArchiveStatistic::ArchiveStatistic ()
+{
+  instance_count ++;
+}
 
 Pulsar::ArchiveStatistic::ArchiveStatistic (const string& name, 
                                             const string& description)
@@ -100,8 +84,10 @@ void Pulsar::ArchiveStatistic::build ()
  
   unsigned start_count = instance_count;
  
-  instances->push_back( new Maxibum );
-  instances->push_back( new ProfileStatisticWrapper );
+  auto profile_statistics = ProfileStatistic::children ();
+
+  for (auto element : profile_statistics)
+    instances->push_back( new ProfileStatisticWrapper (element) );
 
   assert (instances->size() == instance_count - start_count);
 

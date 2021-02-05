@@ -11,31 +11,35 @@
 #ifndef __ProfileStatistic_h
 #define __ProfileStatistic_h
 
-#include "Identifiable.h"
+#include "UnaryStatistic.h"
 
 namespace Pulsar {
 
   class Profile;
 
   //! Commmon statistics that can be derived from a pulse profile
-  class ProfileStatistic : public Identifiable
+  class ProfileStatistic : public Identifiable::Decorator
   {
   public:
 
     //! Create a new instance of ProfileStatistic based on name
     static ProfileStatistic* factory (const std::string& name);
 
-    //! Construct with a name and description
-    ProfileStatistic (const std::string& name,
-                      const std::string& description);
+    //! Returns a list of available ProfileStatistic children
+    static const std::vector<ProfileStatistic*>& children ();
+
+    //! Construct from a UnaryStatistic
+    ProfileStatistic (UnaryStatistic*);
 
     //! Derived types define the value returned
-    virtual double get (const Profile*) = 0;
+    virtual double get (const Profile*);
 
     //! Derived types must also define clone method
-    virtual ProfileStatistic* clone () const = 0;
+    virtual ProfileStatistic* clone () const;
 
   private:
+
+    Reference::To<UnaryStatistic> stat;
 
     //! thread-safe build for factory
     static void build (); 

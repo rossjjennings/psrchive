@@ -16,13 +16,18 @@
 
 namespace Pulsar {
 
-
   //! Commmon statistics that can be derived from an Archive
   /*! Each statistic can be computed as a function of sub-integration,
       frequency-channel, and polarization */
 
   class ArchiveStatistic : public Identifiable, public HasArchive
   {
+  protected:
+
+    //! Construct without a name and description
+    /*! Available only to derived classes */
+    ArchiveStatistic ();
+
   public:
 
     //! Create a new instance of ArchiveStatistic based on name
