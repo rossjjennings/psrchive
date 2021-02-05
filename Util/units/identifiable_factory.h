@@ -45,7 +45,7 @@ T* identifiable_factory (C& ptrs, std::string name)
   std::cerr << "identifiable_factory ptrs=" << (void*) &ptrs << std::endl;
 #endif
  
-  for (typename C::iterator ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
+  for (auto ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
   {
 #ifdef _DEBUG
     std::cerr << "ptr=" << (void*) (*ptr) << " id=" << (*ptr)->get_identity() << std::endl;

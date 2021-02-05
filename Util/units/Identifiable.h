@@ -38,6 +38,8 @@ class Identifiable : public Reference::Able
 
   class Decorator;
 
+  template<class Parent> class Proxy;
+
  private:
 
   //! Primary identity and aliases
@@ -48,13 +50,14 @@ class Identifiable : public Reference::Able
 
 };
 
-class Identifiable::Decorator : public Identifiable
+template<class Parent>
+class Identifiable::Proxy : public Parent
 {
   Reference::To<Identifiable> decorated;
 
 public:
 
-  Decorator (Identifiable* id) { decorated = id; }
+  Proxy (Identifiable* id) { decorated = id; }
 
   bool identify (const std::string& name)
   { return decorated->identify(name); }
@@ -65,6 +68,12 @@ public:
   std::string get_description () const
   { return decorated->get_description (); }
 
+};
+
+class Identifiable::Decorator : public Identifiable::Proxy<Identifiable>
+{
+public:
+  Decorator (Identifiable* id) : Proxy<Identifiable> (id) { }
 };
 
 
