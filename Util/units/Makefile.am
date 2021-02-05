@@ -51,7 +51,8 @@ include_HEADERS = \
 	TextInterfaceValue.h \
 	TextLoop.h \
         tostring.h \
-        Traits.h
+        Traits.h \
+	UnaryStatistic.h
 
 libunits_la_SOURCES = \
 	Alias.C \
@@ -75,7 +76,8 @@ libunits_la_SOURCES = \
 	TextIndex.C \
         TextInterface.C \
 	TextInterfaceName.C \
-	TextLoop.C
+	TextLoop.C \
+	UnaryStatistic.C
 
 TESTS = test_Alias test_tostring test_Error		\
 	test_Configuration test_HeapTracked test_Reference		\
