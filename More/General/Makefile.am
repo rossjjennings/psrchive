@@ -80,6 +80,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightModifier.h \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
+	Pulsar/PhaseWeightStatistic.h \
         Pulsar/PhaseWeight.h \
 	Pulsar/PhaseWidth.h \
 	Pulsar/ProfileCovariance.h \
@@ -227,6 +228,7 @@ libGeneral_la_SOURCES = \
 	PhaseWeightInterface.C \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
+	PhaseWeightStatistic.C \
         PhaseWeight.C \
 	PhaseWidth.C \
 	ProfileInterpreter.C \

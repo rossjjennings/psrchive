@@ -506,3 +506,29 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
 
   if (Profile::verbose) cerr << "Pulsar::PhaseWeight::stats return" << endl;
 }
+
+void Pulsar::PhaseWeight::get_filtered (vector<float>& out, 
+                                        bool equal, float wt) const
+{
+  unsigned nbin = profile->get_nbin();
+  const float* amps = profile->get_amps();
+
+  out.resize(nbin);
+
+  unsigned iout = 0;
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    if (equal && weight[ibin] != wt)
+      continue;
+
+    if (!equal && weight[ibin] == wt)
+      continue;
+
+    out[iout] = amps[ibin];
+    iout ++;
+  }
+
+  out.resize(iout);
+}
+

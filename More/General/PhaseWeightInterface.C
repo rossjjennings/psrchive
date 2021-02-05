@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/PhaseWeightInterface.h"
+#include "Pulsar/PhaseWeightStatistic.h"
+#include "Functor.h"
 
 Pulsar::PhaseWeight::Interface::Interface (PhaseWeight* instance)
 {
@@ -21,26 +23,13 @@ Pulsar::PhaseWeight::Interface::Interface (PhaseWeight* instance)
   add( &PhaseWeight::get_end_index,
 	"end", "End of the phase region" );
 
-  add( &PhaseWeight::get_weighted_sum,
-       "sum", "Sum of selected phase bins" );
+  auto stats = PhaseWeightStatistic::children ();
 
-  add( &PhaseWeight::get_min,
-       "min", "Minimum of selected phase bins" );
-
-  add( &PhaseWeight::get_max,
-       "max", "Maximum of selected phase bins" );
-
-  add( &PhaseWeight::get_avg,
-       "avg", "Average of selected phase bins" );
-
-  add( &PhaseWeight::get_rms,
-       "rms", "Standard deviation of selected phase bins" );
-
-  add( &PhaseWeight::get_median,
-       "med", "Median of selected phase bins" );
-
-  add( &PhaseWeight::get_median_difference,
-       "mdm", "Median difference from the median" );
+  for (auto element : stats)
+    add( Functor< double(const PhaseWeight*) > (element,
+                                                &PhaseWeightStatistic::get),
+        element->get_identity().c_str(), 
+        element->get_description().c_str() );
 }
 
 

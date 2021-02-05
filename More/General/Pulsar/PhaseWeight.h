@@ -138,6 +138,10 @@ namespace Pulsar {
     //! Return the base address of the weights array
     const float* get_weights() const { return &(weight[0]); }
 
+    //! Return the filtered amplitudes for which weight != val
+    void get_filtered (std::vector<float>& amps, 
+                       bool equal = false, float wt = 0) const;
+
     //! Text interface to methods
     class Interface;
 
