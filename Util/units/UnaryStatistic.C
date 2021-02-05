@@ -269,9 +269,9 @@ class MedianAbsoluteDifference : public UnaryStatistic
 {
 public:
   MedianAbsoluteDifference ()
-  : UnaryStatistic ("mad", "median absolute difference from median")
+  : UnaryStatistic ("mdm", "median absolute difference from median")
   {
-    add_alias ("mdm");
+    add_alias ("mad");
     add_alias ("madm");
   }
 
@@ -462,6 +462,38 @@ public:
   MaxHarmonicRatio* clone () const { return new MaxHarmonicRatio(*this); }
 };
 
+class SpectralEntropy : public UnaryStatistic
+{
+public:
+   SpectralEntropy()
+  : UnaryStatistic ("fte", "spectral entropy")
+  {
+    add_alias ("se");
+    add_alias ("entropy");
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fps;
+    fluctuation_power_spectrum (data, fps);
+
+    unsigned istart = 1; // skip DC
+    
+    double sum = std::accumulate (fps.begin()+istart, fps.end(), 0.0);
+
+    double entropy = 0;
+    for (unsigned i=istart; i < fps.size(); i++)
+      {
+	double p = fps[i] / sum;
+	entropy -= p * log(p);
+      }
+    
+    return entropy;
+  }
+
+  SpectralEntropy* clone () const { return new SpectralEntropy(*this); }
+};
+
 class NyquistHarmonic : public UnaryStatistic
 {
 public:
@@ -517,6 +549,7 @@ void UnaryStatistic::build ()
   instances->push_back( new Minimum );
   instances->push_back( new Maximum );
   instances->push_back( new Range );
+  instances->push_back( new Sum );
   instances->push_back( new Mean );
   instances->push_back( new StandardDeviation );
   instances->push_back( new Skewness );
@@ -531,6 +564,7 @@ void UnaryStatistic::build ()
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
   instances->push_back( new MaxHarmonicRatio );
+  instances->push_back( new SpectralEntropy );
 
   // cerr << "UnaryStatistic::build instances=" << instances << " count=" << instance_count << " start=" << start_count << " size=" << instances->size() << endl; 
 
