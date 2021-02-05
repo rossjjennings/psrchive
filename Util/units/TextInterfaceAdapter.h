@@ -14,8 +14,9 @@
 
 namespace TextInterface
 {
-  //! Base class of Value adapters To avoid the diamond problem and
-  /*! multiple inheritance, the inherited class is a template argument */
+  //! Base class of Value adapters 
+  /*! To avoid the diamond problem and multiple inheritance, 
+      the inherited class is a template argument */
   template<class IsA, class HasA = IsA>
   class AdapterBase : public IsA
   {
