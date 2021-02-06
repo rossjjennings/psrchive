@@ -302,7 +302,10 @@ TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const
   if (help)
   {
     Parser* parser = get_parser(ptr);
-    return "\n" + parser->help();
+    if (parser)
+      return "\n" + parser->help();
+    else
+      return "no text parser available";
   }
 
   if (value)
@@ -370,6 +373,9 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
 #endif
 
   Parser* parser = get_parser(this->instance);
+
+  if (!parser)
+    return false;
 
 #ifdef _DEBUG
   std::cerr << "TextInterface::OptionalInterface::matches"
