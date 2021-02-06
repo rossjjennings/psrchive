@@ -13,6 +13,7 @@
 
 #include "Pulsar/HasArchive.h"
 #include "Identifiable.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
 
@@ -40,6 +41,9 @@ namespace Pulsar {
     //! Derived types define the value returned
     virtual double get () = 0;
 
+    //! Return a text interface that can be used to configure this instance
+    virtual TextInterface::Parser* get_interface () = 0;
+
     //! Derived types must also define clone method
     virtual ArchiveStatistic* clone () const = 0;
 
@@ -48,6 +52,10 @@ namespace Pulsar {
     //! thread-safe build for factory
     static void build (); 
   };
+
+  std::ostream& operator<< (std::ostream&, ArchiveStatistic*);
+
+  std::istream& operator>> (std::istream&, ArchiveStatistic*&);
 
 }
 

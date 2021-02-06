@@ -17,27 +17,12 @@
 using namespace std;
 using namespace Pulsar;
 
-class Maxibum : public ArchiveStatistic
-{     
-public:
-  Maxibum ()
-  : ArchiveStatistic ("max", "maximum profile amplitude")
-  {
-    add_alias ("maximum");
-  }
-
-  double get ()
-  { return get_Profile()->max(); }
-
-  Maxibum* clone () const { return new Maxibum(*this); }
-
-};
-
 class ProfileStatisticWrapper : public Identifiable::Proxy<ArchiveStatistic>
 {
   Reference::To<ProfileStatistic> stat;
 
 public:
+
   ProfileStatisticWrapper (ProfileStatistic* my_stat)
   : Identifiable::Proxy<ArchiveStatistic> (my_stat)
   {
@@ -46,6 +31,8 @@ public:
 
   double get ()
   { return stat->get( get_Profile() ); }
+
+  TextInterface::Parser* get_interface () { return 0; }
 
   ProfileStatisticWrapper* clone () const 
   { return new ProfileStatisticWrapper(*this); }
@@ -112,5 +99,22 @@ Pulsar::ArchiveStatistic::factory (const std::string& name)
 
   // cerr << "Pulsar::ArchiveStatistic::factory return=" << stat << endl;
   return stat;
+}
+
+#include "interface_stream.h"
+
+namespace Pulsar
+{
+  std::ostream& operator<< (std::ostream& ostr,
+                            ArchiveStatistic* stat)
+  {
+    return interface_insertion (ostr, stat);
+  }
+
+  std::istream& operator>> (std::istream& istr,
+                            ArchiveStatistic* &stat)
+  {
+    return interface_extraction (istr, stat);
+  }
 }
 

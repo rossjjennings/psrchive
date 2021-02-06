@@ -96,11 +96,11 @@ namespace Pulsar {
     //! Get the mathematical expression
     std::string get_expression () const { return expression; }
 
-    //! Set the profile statistic
-    void set_statistic (const std::string&);
+    //! Set the statistic
+    void set_statistic (ArchiveStatistic*);
 
-    //! Get the profile statistic
-    std::string get_statistic () const;
+    //! Get the statistic
+    ArchiveStatistic* get_statistic () const;
 
     //! Compute the base 10 logarithm of the data
     void set_logarithmic (bool flag) { logarithmic = flag; }

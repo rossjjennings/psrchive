@@ -387,19 +387,18 @@ void Pulsar::InterQuartileRange::mask (Archive* archive)
   }
 }
 
-//! Set the profile statistic
-void Pulsar::InterQuartileRange::set_statistic (const std::string& name)
+// statistic = ArchiveStatistic::factory (name);
+
+//! Set the statistic
+void Pulsar::InterQuartileRange::set_statistic (ArchiveStatistic* stat)
 {
-  statistic = ArchiveStatistic::factory (name);
+  statistic = stat;
 }
 
-//! Get the profile statistic
-std::string Pulsar::InterQuartileRange::get_statistic () const
+//! Get the statistic
+Pulsar::ArchiveStatistic* Pulsar::InterQuartileRange::get_statistic () const
 {
-  if (!statistic)
-    return "none";
-
-  return statistic->get_identity();
+  return statistic;
 }
 
 //! Get the text interface to the configuration attributes
@@ -419,7 +418,8 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
 
   add( &InterQuartileRange::get_statistic,
        &InterQuartileRange::set_statistic,
-       "stat", "Profile statistic" );
+       &ArchiveStatistic::get_interface,
+       "stat", "Statistic computed for each subint/chan" );
 
   add( &InterQuartileRange::get_median_nchan,
        &InterQuartileRange::set_median_nchan,
