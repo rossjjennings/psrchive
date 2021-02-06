@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libunits.la
 
 include_HEADERS = \
 	Alias.h \
+	BinaryStatistic.h \
         Callback.h \
         Cloude.h \
 	complex_public.h \
@@ -56,6 +57,7 @@ include_HEADERS = \
 
 libunits_la_SOURCES = \
 	Alias.C \
+	BinaryStatistic.C \
         Configuration.C \
         Error.C \
 	Estimate.C \
