@@ -39,5 +39,8 @@ private:
   static void build (); 
 };
 
+// worker function for variance, skewness, kurtosis, etc.
+void central_moments (std::vector<double> data, std::vector<double>& mu);
+
 #endif
 

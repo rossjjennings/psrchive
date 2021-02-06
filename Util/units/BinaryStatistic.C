@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "BinaryStatistic.h"
+#include "UnaryStatistic.h"
 #include "FTransform.h"
 
 #include <algorithm>
@@ -18,22 +19,66 @@ using namespace std;
 
 namespace BinaryStatistics {
 
-  class Maximum : public BinaryStatistic
+  class CrossCorrelation : public BinaryStatistic
   {
   public:
-    Maximum ()
-      : BinaryStatistic ("max", "maximum value")
+    CrossCorrelation ()
+      : BinaryStatistic ("ccc", "cross-correlation coefficient")
       {
-        add_alias ("maximum");
+        add_alias ("ccf");
       }
 
-    double get (const vector<double>& data, const vector<double>& too)
+    double get (const vector<double>& dat1, const vector<double>& dat2)
     {
-      return *std::max_element (data.begin(), data.end());
+      assert (dat1.size() == dat2.size());
+      
+      vector<double> mu1 (2);
+      central_moments (dat1, mu1);
+      // mu1[0] = mean
+      // mu1[1] = variance
+      
+      vector<double> mu2 (2);
+      central_moments (dat1, mu2);
+
+      double coeff = 0.0;
+      for (unsigned i=0; i<dat1.size(); i++)
+	coeff += (dat1[i]-mu1[0]) * (dat2[i]-mu2[0]);
+
+      return coeff / ( dat1.size() * sqrt( mu1[1] * mu2[1] ) );
     }
 
-    Maximum* clone () const { return new Maximum(*this); }
+    CrossCorrelation* clone () const { return new CrossCorrelation(*this); }
+  };
 
+  class ChiSquared : public BinaryStatistic
+  {
+  public:
+    ChiSquared ()
+      : BinaryStatistic ("chi", "variance of difference")
+      {
+
+      }
+
+    double get (const vector<double>& dat1, const vector<double>& dat2)
+    {
+      assert (dat1.size() == dat2.size());
+      
+      vector<double> mu1 (2);
+      central_moments (dat1, mu1);
+      // mu1[0] = mean
+      // mu1[1] = variance
+      
+      vector<double> mu2 (2);
+      central_moments (dat1, mu2);
+
+      double coeff = 0.0;
+      for (unsigned i=0; i<dat1.size(); i++)
+	coeff += (dat1[i] - dat2[i]);
+
+      return coeff / ( dat1.size() * ( mu1[1] + mu2[1] ) );
+    }
+
+    ChiSquared* clone () const { return new ChiSquared(*this); }
   };
 
 
@@ -69,7 +114,8 @@ void BinaryStatistic::build ()
  
   unsigned start_count = instance_count;
  
-  instances->push_back( new Maximum );
+  instances->push_back( new CrossCorrelation );
+  instances->push_back( new ChiSquared );
 
   // cerr << "BinaryStatistic::build instances=" << instances << " count=" << instance_count << " start=" << start_count << " size=" << instances->size() << endl; 
 
