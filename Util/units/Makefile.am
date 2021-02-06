@@ -81,7 +81,7 @@ libunits_la_SOURCES = \
 	TextLoop.C \
 	UnaryStatistic.C
 
-TESTS = test_Alias test_tostring test_Error		\
+TESTS = test_ndIndex test_Alias test_tostring test_Error		\
 	test_Configuration test_HeapTracked test_Reference		\
 	test_circular_Reference test_Registry test_Functor		\
 	test_Callback test_separate test_TextInterface			\
@@ -90,6 +90,7 @@ TESTS = test_Alias test_tostring test_Error		\
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
+test_ndIndex_SOURCES		= test_ndIndex.C
 test_Alias_SOURCES		= test_Alias.C
 test_tostring_SOURCES		= test_tostring.C
 test_Error_SOURCES		= test_Error.C
