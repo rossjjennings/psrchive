@@ -68,6 +68,9 @@ std::istream& interface_extraction (std::istream& istr, T* &e) try
 }
 catch (Error& error)
 {
+  if (error.get_code() == HelpMessage)
+    throw error;
+
   istr.setstate (std::ios::failbit);
   return istr;
 }
