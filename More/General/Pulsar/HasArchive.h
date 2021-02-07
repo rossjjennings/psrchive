@@ -33,7 +33,7 @@ namespace Pulsar {
     ~HasArchive ();
 
     //! Set the instance 
-    void set_Archive (const Archive*);
+    virtual void set_Archive (const Archive*);
 
     //! Get the instance 
     const Archive* get_Archive () const;
