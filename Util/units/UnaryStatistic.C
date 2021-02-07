@@ -16,6 +16,38 @@
 
 using namespace std;
 
+// worker function for variance, skewness, kurtosis, etc.
+void central_moments (vector<double> data, vector<double>& mu)
+{
+  if (mu.size() == 0)
+    return;
+
+  vector<double> prod (data.size(), 1.0);
+
+  for (unsigned i=0; i < mu.size(); i++)
+  {
+    double total = 0.0;
+
+    for (unsigned j=0; j < data.size(); j++)
+    {
+      prod[j] *= data[j];
+      total += prod[j];
+    }
+
+    mu[i] = total / data.size();
+
+    if (i == 0)
+    {
+      // subract the mean so that further moments are central
+      for (unsigned j=0; j < data.size(); j++)
+      {
+        prod[j] -= mu[0];
+        data[j] = prod[j];
+      }
+    }
+  }
+}
+
 namespace UnaryStatistics {
 
   class Maximum : public UnaryStatistic
@@ -109,38 +141,6 @@ namespace UnaryStatistics {
     
     Mean* clone () const { return new Mean(*this); }
   };
-  
-  // worker function for variance, skewness, kurtosis, etc.
-  void central_moments (vector<double> data, vector<double>& mu)
-  {
-    if (mu.size() == 0)
-      return;
-
-    vector<double> prod (data.size(), 1.0);
-
-    for (unsigned i=0; i < mu.size(); i++)
-      {
-	double total = 0.0;
-	
-	for (unsigned j=0; j < data.size(); j++)
-	  {
-	    prod[j] *= data[j];
-	    total += prod[j];
-	  }
-	
-	mu[i] = total / data.size();
-	
-	if (i == 0)
-	  {
-	    // subract the mean so that further moments are central
-	    for (unsigned j=0; j < data.size(); j++)
-	      {
-		prod[j] -= mu[0];
-		data[j] = prod[j];
-	      }
-	  }
-      }
-  }
   
   class StandardDeviation : public UnaryStatistic
   {

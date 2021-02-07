@@ -59,6 +59,8 @@ namespace BinaryStatistics {
 
       }
 
+    double sqr (double x) { return x*x; }
+
     double get (const vector<double>& dat1, const vector<double>& dat2)
     {
       assert (dat1.size() == dat2.size());
@@ -73,7 +75,7 @@ namespace BinaryStatistics {
 
       double coeff = 0.0;
       for (unsigned i=0; i<dat1.size(); i++)
-	coeff += (dat1[i] - dat2[i]);
+	coeff += sqr(dat1[i] - dat2[i]);
 
       return coeff / ( dat1.size() * ( mu1[1] + mu2[1] ) );
     }
