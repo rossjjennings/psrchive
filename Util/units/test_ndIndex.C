@@ -18,7 +18,7 @@ int main ()
   int ncol=4;
   int ndim=3;
 
-  idx^nrow^ncol^ndim;
+  idx*nrow*ncol*ndim;
 
   cerr << "nrow=" << nrow << " ncol=" << ncol << " ndim=" << ndim << endl;
   cerr << "stride=" << idx.stride() << endl;

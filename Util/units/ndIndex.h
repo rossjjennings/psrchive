@@ -11,8 +11,7 @@
 #ifndef __ndIndex_H
 #define __ndIndex_H
 
-#include <stdio.h>
-#include <string>
+#include <inttypes.h>
 
 template<unsigned N> class ndIndex
 {
@@ -25,7 +24,7 @@ template<unsigned N> class ndIndex
 public:
   ndIndex () { offset = 0; }
   //! Set the dimension along this index
-  ndIndex<N-1>& operator^ (uint64_t sz) { ndat = sz; return next; }
+  ndIndex<N-1>& operator* (uint64_t sz) { ndat = sz; return next; }
 
   const ndIndex<N-1>& operator[] (uint64_t idat) const 
   { next.offset = offset + idat * next.stride(); return next; }
@@ -43,7 +42,7 @@ class ndIndex<1>
 
 public:
   ndIndex () { offset = 0; }
-  void operator^ (uint64_t sz) { ndat = sz; }
+  void operator* (uint64_t sz) { ndat = sz; }
   uint64_t operator[] (uint64_t idat) const { return offset + idat; }
   uint64_t stride () const { return ndat; }
 };
