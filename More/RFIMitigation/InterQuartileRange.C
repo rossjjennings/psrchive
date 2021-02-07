@@ -288,24 +288,19 @@ void Pulsar::InterQuartileRange::compute_median ()
         continue;
 
       unsigned start_subint = 0;
+      unsigned end_subint = isubint + half_nsubint + 1;
+
       if (isubint > half_nsubint)
         start_subint = isubint - half_nsubint;
-      unsigned end_subint = start_subint + median_nsubint;
       if (end_subint > nsubint)
-      {
         end_subint = nsubint;
-        start_subint = nsubint - median_nsubint;
-      }
 
       unsigned start_chan = 0;
+      unsigned end_chan = ichan + half_nchan + 1;
       if (ichan > half_nchan)
         start_chan = ichan - half_nchan;
-      unsigned end_chan = start_chan +  median_nchan;
       if (end_chan > nchan)
-      {
         end_chan = nchan;
-        start_chan = nchan - median_nchan;
-      }
 
       unsigned valid = 0;
 
