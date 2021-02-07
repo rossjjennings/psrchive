@@ -15,7 +15,7 @@
 
 namespace Pulsar {
 
-  class ProfileStatistic;
+  class ArchiveStatistic;
 
   //! Plots a single spectrum
   class SpectrumPlot : public PowerSpectra {
@@ -49,9 +49,11 @@ namespace Pulsar {
     void set_expression (const std::string& str) { expression = str; }
     std::string get_expression () const { return expression; }
 
-    //! Set the profile statistic
-    void set_statistic (const std::string&);
-    std::string get_statistic () const;
+    //! Set the statistic
+    void set_statistic (ArchiveStatistic*);
+
+    //! Get the statistic
+    ArchiveStatistic* get_statistic () const;
 
     //! Disable baseline removal
     void preprocess (Archive*);
@@ -60,7 +62,7 @@ namespace Pulsar {
 
     Index ibin;
     std::string expression;
-    Reference::To<ProfileStatistic> statistic;
+    Reference::To<ArchiveStatistic> statistic;
   };
 
 }

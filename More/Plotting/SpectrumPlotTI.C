@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SpectrumPlot.h"
+#include "Pulsar/ArchiveStatistic.h"
 #include "Pulsar/PowerSpectra.h"
 
 Pulsar::SpectrumPlot::Interface::Interface (SpectrumPlot* instance)
@@ -18,7 +20,8 @@ Pulsar::SpectrumPlot::Interface::Interface (SpectrumPlot* instance)
 
   add( &SpectrumPlot::get_statistic,
        &SpectrumPlot::set_statistic,
-       "stat", "Profile statistic to plot" );
+       &ArchiveStatistic::get_interface,
+       "stat", "Statistic computed for each channel" );
 
   add( &SpectrumPlot::get_expression,
        &SpectrumPlot::set_expression,
