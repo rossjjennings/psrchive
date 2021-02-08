@@ -41,6 +41,9 @@ namespace Pulsar {
     //! Form the difference profile
     std::string difference (const std::string& args);
 
+    //! Subract the local mean from the profile
+    std::string detrend (const std::string& args);
+
     //! Form the mean smoothed profile
     std::string mean (const std::string& args);
 

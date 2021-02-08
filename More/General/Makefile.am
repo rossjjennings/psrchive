@@ -27,6 +27,7 @@ nobase_include_HEADERS = \
 	Pulsar/Convolve.h \
 	Pulsar/Correlate.h \
 	Pulsar/DeleteInterpreter.h \
+	Pulsar/Detrend.h \
 	Pulsar/Differentiate.h \
 	Pulsar/DisperseWeight.h \
         Pulsar/DispersionDelay.h \
@@ -172,6 +173,7 @@ libGeneral_la_SOURCES = \
 	StrategySet.C \
 	StrategySet_defaults.C \
 	DeleteInterpreter.C \
+	Detrend.C \
 	Differentiate.C \
 	DisperseWeight.C \
         Dispersion.C \
