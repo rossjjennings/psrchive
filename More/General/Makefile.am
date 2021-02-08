@@ -7,6 +7,7 @@ nobase_include_HEADERS = \
 	find_spike_edges.h \
         model_profile.h \
         morphological_difference.h \
+	UnaryStatistic.h BinaryStatistic.h \
 	Pulsar/Append.h \
 	Pulsar/counter_drift.h \
 	Pulsar/Accumulate.h \
@@ -131,6 +132,7 @@ libGeneral_la_SOURCES = \
 	find_spike_edges.C \
         model_profile.C \
 	morphological_difference.C \
+	UnaryStatistic.C BinaryStatistic.C \
 	Accumulate.C \
         AdaptiveSNR.C \
 	Append.C \

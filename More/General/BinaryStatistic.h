@@ -6,7 +6,7 @@
  *
  ***************************************************************************/
 
-// psrchive/Util/units/BinaryStatistic.h
+// psrchive/More/General/BinaryStatistic.h
 
 #ifndef __BinaryStatistic_h
 #define __BinaryStatistic_h
