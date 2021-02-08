@@ -28,7 +28,10 @@ public:
   BinaryStatistic (const std::string& name, const std::string& description);
 
   //! Derived types define the value returned
-  virtual double get (const std::vector<double>&, const std::vector<double>&) = 0;
+  /*! data1 and data2 must have been normalized such that a 
+    robust estimate of their variance is equal to unity */
+  virtual double get (const std::vector<double>& data1,
+		      const std::vector<double>& data2) = 0;
 
   //! Derived types must also define clone method
   virtual BinaryStatistic* clone () const = 0;
