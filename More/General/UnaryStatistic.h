@@ -6,7 +6,7 @@
  *
  ***************************************************************************/
 
-// psrchive/Util/units/UnaryStatistic.h
+// psrchive/More/General/UnaryStatistic.h
 
 #ifndef __UnaryStatistic_h
 #define __UnaryStatistic_h

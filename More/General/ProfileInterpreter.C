@@ -17,6 +17,7 @@
 
 #include "Pulsar/Accumulate.h"
 #include "Pulsar/Differentiate.h"
+#include "Pulsar/Detrend.h"
 #include "Pulsar/SmoothMean.h"
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothSinc.h"
@@ -77,6 +78,11 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
     ( &ProfileInterpreter::difference,
       "difference", "form the difference profile",
       "usage: difference [phase] \n" );
+
+  add_command
+    ( &ProfileInterpreter::detrend,
+      "detrend", "detrend the profile",
+      "usage: detrend\n" );
 
   add_command
     ( &ProfileInterpreter::extract,
@@ -203,6 +209,15 @@ string Pulsar::ProfileInterpreter::difference (const string& args) try
   }
 
   foreach (get(), new Differentiate(span) );
+  return response (Good);
+}
+catch (Error& error) {
+  return response (error);
+}
+
+string Pulsar::ProfileInterpreter::detrend (const string& args) try
+{
+  foreach (get(), new Detrend);
   return response (Good);
 }
 catch (Error& error) {
