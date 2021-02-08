@@ -52,11 +52,13 @@ namespace BinaryStatistics {
 
   class ChiSquared : public BinaryStatistic
   {
+    bool linear_fit;
+    
   public:
     ChiSquared ()
       : BinaryStatistic ("chi", "variance of difference")
       {
-
+	linear_fit = true;
       }
 
     double sqr (double x) { return x*x; }
@@ -64,20 +66,45 @@ namespace BinaryStatistics {
     double get (const vector<double>& dat1, const vector<double>& dat2)
     {
       assert (dat1.size() == dat2.size());
-      
-      vector<double> mu1 (2);
-      central_moments (dat1, mu1);
-      // mu1[0] = mean
-      // mu1[1] = variance
-      
-      vector<double> mu2 (2);
-      central_moments (dat1, mu2);
+
+      double scale = 1.0;
+      double offset = 0.0;
+
+      if (linear_fit)
+      {
+	double covar = 0.0;
+	double mu_1 = 0.0;
+	double mu_2 = 0.0;
+	double var_2 = 0.0;
+	
+	for (unsigned i=0; i<dat1.size(); i++)
+	{
+	  mu_1 += dat1[i];
+	  mu_2 += dat2[i];
+	  var_2 += dat2[i] * dat2[i];
+	  covar += dat1[i] * dat2[i];
+	}
+	
+	mu_1 /= dat1.size();
+	mu_2 /= dat2.size();
+	covar /= dat1.size();
+	covar -= mu_1 * mu_2;
+	var_2 /= dat2.size();
+	var_2 -= mu_2 * mu_2;
+	
+	scale = covar / var_2;
+
+	for (unsigned i=0; i<dat1.size(); i++)
+	  offset += dat1[i] - scale * dat2[i];
+
+	offset /= dat1.size();
+      }
 
       double coeff = 0.0;
       for (unsigned i=0; i<dat1.size(); i++)
-	coeff += sqr(dat1[i] - dat2[i]);
+	coeff += sqr(dat1[i] - scale * dat2[i] - offset);
 
-      return coeff / ( dat1.size() * ( mu1[1] + mu2[1] ) );
+      return coeff / ( dat1.size() * ( 1 + sqr(scale) ) );
     }
 
     ChiSquared* clone () const { return new ChiSquared(*this); }
