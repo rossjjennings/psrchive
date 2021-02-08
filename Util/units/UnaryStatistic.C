@@ -231,12 +231,13 @@ namespace UnaryStatistics {
     { return new DeviationCoefficient(*this); }
   };
   
-  double median (vector<double> data)
-  {
-    unsigned mid = data.size() / 2;
-    std::nth_element( data.begin(), data.begin()+mid, data.end() );
-    return data[mid];
-  }
+  template<typename T>
+    T median (vector<T> data)
+    {
+      unsigned mid = data.size() / 2;
+      std::nth_element( data.begin(), data.begin()+mid, data.end() );
+      return data[mid];
+    }
 
   class Median : public UnaryStatistic
   {    
@@ -259,7 +260,7 @@ namespace UnaryStatistics {
   {
     double med = median (data);
 
-    for (auto& element : data)
+    for (double& element : data)
       element = fabs( element - med );
 
     return median (data);
@@ -400,14 +401,14 @@ public:
   { return new OctileKurtosis (*this); }
 };
 
-void fluctuation_power_spectrum (const vector<double>& data, vector<float>& fps)
+void power_spectral_density (const vector<double>& data, vector<float>& fps)
 {
   vector<float> copy (data.begin(), data.end());
   fps.resize (data.size() + 2);
   
   FTransform::frc1d (data.size(), &fps[0], &copy[0]);
 
-  const unsigned nbin = data.size() / 2;
+  const unsigned nbin = data.size() / 2 + 1;
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
     float re = fps[ibin*2];
@@ -435,31 +436,89 @@ public:
   double get (const vector<double>& data)
   {
     vector<float> fourier;
-    fluctuation_power_spectrum (data, fourier);
+    power_spectral_density (data, fourier);
     return fourier[1];
   }
 
   FirstHarmonic* clone () const { return new FirstHarmonic(*this); }
 };
 
-class MaxHarmonicRatio : public UnaryStatistic
+
+class SpectralMedian : public UnaryStatistic
 {
 public:
-   MaxHarmonicRatio()
-  : UnaryStatistic ("mh1", "maximum ratio with first harmonic")
+   SpectralMedian()
+  : UnaryStatistic ("ftm", "robust estimate of spectral noise variance")
   {
-    add_alias ("mhr1");
-    add_alias ("harmonic");
   }
 
   double get (const vector<double>& data)
   {
     vector<float> fps;
-    fluctuation_power_spectrum (data, fps);
-    return *std::max_element (fps.begin()+20, fps.end()) / fps[1];
+    power_spectral_density (data, fps);
+    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+
+    // divide by log(2) because spectral power has exponential distribution
+    return median (upper_half) / log(2.0);
   }
 
-  MaxHarmonicRatio* clone () const { return new MaxHarmonicRatio(*this); }
+  SpectralMedian* clone () const { return new SpectralMedian(*this); }
+};
+
+class SumHarmonicOutlier : public UnaryStatistic
+{
+public:
+   SumHarmonicOutlier()
+  : UnaryStatistic ("sho", "sum of harmonic outlier power")
+  {
+    add_alias ("harmout");
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fps;
+    power_spectral_density (data, fps);
+    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+
+    // divide by log(2) because spectral power has exponential distribution
+    double log_mean = log( median (upper_half) / log(2.0) );
+    
+    for (unsigned i=0; i < fps.size(); i++)
+      fps[i] = log(fps[i]);
+
+    double outlier_sum = 0.0;
+    
+    for (unsigned i=0; i+2 < fps.size(); i++)
+    {
+      fps[i] = fps[i+1] - std::max(log_mean, ( fps[i] + fps[i+2] )/2.0);
+      if (fps[i] > log(3))
+	outlier_sum += exp(fps[i]);
+    }
+
+    return outlier_sum;
+  }
+
+  SumHarmonicOutlier* clone () const { return new SumHarmonicOutlier(*this); }
+};
+
+class NyquistHarmonic : public UnaryStatistic
+{
+public:
+  NyquistHarmonic ()
+  : UnaryStatistic ("ftN", "last harmonic of values")
+  { 
+    add_alias ("fftN");
+    add_alias ("Nyquist");
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fourier;
+    power_spectral_density (data, fourier);
+    return fourier.back();
+  }
+
+  NyquistHarmonic* clone () const { return new NyquistHarmonic(*this); }
 };
 
 class SpectralEntropy : public UnaryStatistic
@@ -475,7 +534,7 @@ public:
   double get (const vector<double>& data)
   {
     vector<float> fps;
-    fluctuation_power_spectrum (data, fps);
+    power_spectral_density (data, fps);
 
     unsigned istart = 1; // skip DC
     
@@ -494,32 +553,11 @@ public:
   SpectralEntropy* clone () const { return new SpectralEntropy(*this); }
 };
 
-class NyquistHarmonic : public UnaryStatistic
-{
-public:
-  NyquistHarmonic ()
-  : UnaryStatistic ("ftN", "last harmonic of values")
-  { 
-    add_alias ("fftN");
-    add_alias ("Nyquist");
-  }
-
-  double get (const vector<double>& data)
-  {
-    vector<float> fourier;
-    fluctuation_power_spectrum (data, fourier);
-    return fourier.back();
-  }
-
-  NyquistHarmonic* clone () const { return new NyquistHarmonic(*this); }
-};
-
 } // namespace UnaryStatistics
 
 static unsigned instance_count = 0;
 
-UnaryStatistic::UnaryStatistic (const string& name, 
-					const string& description)
+UnaryStatistic::UnaryStatistic (const string& name, const string& description)
 {
   instance_count ++;
 
@@ -563,8 +601,10 @@ void UnaryStatistic::build ()
   instances->push_back( new OctileKurtosis );
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
-  instances->push_back( new MaxHarmonicRatio );
+  instances->push_back( new SpectralMedian );
+  instances->push_back( new SumHarmonicOutlier );
   instances->push_back( new SpectralEntropy );
+
 
   // cerr << "UnaryStatistic::build instances=" << instances << " count=" << instance_count << " start=" << start_count << " size=" << instances->size() << endl; 
 
