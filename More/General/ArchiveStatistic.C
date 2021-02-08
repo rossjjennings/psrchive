@@ -52,6 +52,11 @@ class BinaryStatisticSummary : public Identifiable::Proxy<ArchiveStatistic>
   ndArray<2,double> temp;
 
   Reference::To<UnaryStatistic> summary;
+  Reference::To<UnaryStatistic> variance;
+
+  //! A robust estimate of standard deviation of each profile
+  std::vector<double> rms;
+
   
 public:
 
@@ -65,6 +70,9 @@ public:
     set_pol (Index(0, true));
 
     summary = UnaryStatistic::factory ("median");
+
+    // median of harmonics in upper half of spectrum
+    variance = UnaryStatistic::factory ("ftm");
   }
 
   void set_Archive (const Archive* arch)
@@ -95,11 +103,14 @@ public:
 
     result * nsubint * nchan;
     temp * nsubint * nsubint;
-    
+
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       set_chan (ichan);
-      
+
+      rms.resize (nsubint, 0.0);
+      unsigned irms=0;
+    
       for (unsigned isubint=0; isubint < nsubint; isubint++)
       {
 	set_subint (isubint);
@@ -114,12 +125,21 @@ public:
 	
 	vector<double> idata (iprof->get_amps(),
 			      iprof->get_amps() + iprof->get_nbin());
-	
+
+	if (irms < isubint)
+	{
+	  irms = isubint;
+	  rms[irms] = sqrt( variance->get (idata) );
+	}
+
+	for (double& element : idata)
+	  element /= rms[isubint];
+
 	for (unsigned jsubint=isubint+1; jsubint < nsubint; jsubint++)
 	{
 	  set_subint (jsubint);
 	  Reference::To<const Profile> jprof = get_Profile ();
-
+	  
 	  if (jprof->get_weight() == 0.0)
 	  {
 	    temp[isubint][jsubint] = temp[jsubint][isubint] = 0.0;
@@ -128,6 +148,15 @@ public:
 
 	  vector<double> jdata (jprof->get_amps(),
 				jprof->get_amps() + jprof->get_nbin());
+
+	  if (irms < jsubint)
+	  {
+	    irms = jsubint;
+	    rms[irms] = sqrt( variance->get (jdata) );
+	  }
+	
+	  for (double& element : jdata)
+	    element /= rms[jsubint];
 
 	  double val = stat->get (idata, jdata);
 
