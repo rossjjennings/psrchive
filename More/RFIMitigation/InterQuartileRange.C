@@ -94,6 +94,9 @@ void Pulsar::InterQuartileRange::compute (Archive* archive)
 
   if (!expression.empty())
   {
+#if _DEBUG
+    cerr << "InterQuartileRange::compute exp=" << expression << endl;
+#endif
     stats = new ProfileStats;
     parser = stats->get_interface ();
   }
@@ -141,8 +144,13 @@ void Pulsar::InterQuartileRange::compute (Archive* archive)
         profile = Pulsar::get_Profile (subint, pol, ichan);
 
 	stats->set_Profile (profile);
-	string value = process( parser, expression );
-	value = fromstring<float>( value );
+	string val = process( parser, expression );
+
+#if _DEBUG
+        cerr << "isubint=" << isubint << " ichan=" << ichan << " txt=" << val << endl;
+#endif
+
+	value = fromstring<float>( val );
       }
       else
       {
@@ -154,7 +162,11 @@ void Pulsar::InterQuartileRange::compute (Archive* archive)
 
       if (logarithmic)
         value = log10(value);
-      
+
+#if _DEBUG
+      cerr << "isubint=" << isubint << " ichan=" << ichan << " val=" << value << endl;
+#endif
+
       values[index].first = value;
     }
   }
@@ -388,6 +400,13 @@ void Pulsar::InterQuartileRange::mask (Archive* archive)
 void Pulsar::InterQuartileRange::set_statistic (ArchiveStatistic* stat)
 {
   statistic = stat;
+  expression = "";
+}
+
+void Pulsar::InterQuartileRange::set_expression (const std::string& exp)
+{
+  expression = exp;
+  statistic = 0;
 }
 
 //! Get the statistic

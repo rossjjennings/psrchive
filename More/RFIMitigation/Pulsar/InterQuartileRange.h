@@ -91,7 +91,7 @@ namespace Pulsar {
     };
 
     //! Set the mathematical expression
-    void set_expression (const std::string& exp) { expression = exp; }
+    void set_expression (const std::string& exp);
 
     //! Get the mathematical expression
     std::string get_expression () const { return expression; }
