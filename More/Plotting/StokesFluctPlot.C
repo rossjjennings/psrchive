@@ -16,6 +16,8 @@
 
 #include <cpgplot.h>
 
+#include<algorithm>
+
 using namespace std;
 
 Pulsar::StokesFluctPlot::StokesFluctPlot ()
