@@ -59,6 +59,12 @@ namespace Pulsar {
       //! Get the cut-off threshold
       float get_cutoff_threshold () const { return masker->get_threshold(); }
 
+      //! Set the list of polns to look at
+      void set_polarizations (const std::string& p) { polns = p; }
+
+      //! Get the list of polns to look at
+      std::string get_polarizations () const { return polns; }
+
     protected:
 
       //! compute the relevant statistic
@@ -79,6 +85,9 @@ namespace Pulsar {
       //! pscrunch first
       bool pscrunch;
 
+      //! The list of polarizations to analyze
+      std::string polns;
+
       //! Method to use for constructing the smoothed stat vs time/freq/pol
       Reference::To<TimeFrequencySmooth> smoother;
 
@@ -96,6 +105,9 @@ namespace Pulsar {
 
       //! num poln in the current archive
       unsigned npol;
+
+      //! List of polarizations to analyze
+      std::vector<unsigned> pol_i;
 
       //! Frequencies
       std::vector<float> freq;

@@ -42,6 +42,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
   add( &TimeFrequencyZap::get_cutoff_threshold,
        &TimeFrequencyZap::set_cutoff_threshold,
        "cutoff", "Outlier threshold (# sigma)" );
+
+  add( &TimeFrequencyZap::get_polarizations,
+       &TimeFrequencyZap::set_polarizations,
+       "pols", "Polarizations to analyze" );
 }
 
 // defined in More/General/standard_interface.C
@@ -52,6 +56,7 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
   expression = "off:rms";
   regions_from_total = true;
   pscrunch = false;
+  polns = ""; // Defaults to all
 
   // TODO make this a config option
   smoother = new DoubleMedian;
@@ -80,7 +85,10 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   // Size arrays
   nchan = data->get_nchan();
   nsubint = data->get_nsubint();
-  npol = data->get_npol();
+  TextInterface::parse_indeces(pol_i, polns, data->get_npol());
+  //npol = data->get_npol();
+  npol = pol_i.size();
+
   freq.resize(nchan*nsubint);
   time.resize(nsubint);
   stat.resize(nchan*nsubint*npol);
@@ -142,7 +150,7 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
 
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
-        Reference::To<const Profile> prof = subint->get_Profile(ipol,ichan);
+        Reference::To<const Profile> prof = subint->get_Profile(pol_i[ipol],ichan);
 
         float fval = 0;
         if (statistic)
