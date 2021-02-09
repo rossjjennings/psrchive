@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,8 @@
 #include "ndArray.h"
 
 #include <iostream>
+#include <cassert>
+
 using namespace std;
 
 int main ()
