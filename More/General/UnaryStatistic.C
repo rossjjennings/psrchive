@@ -443,6 +443,18 @@ public:
   FirstHarmonic* clone () const { return new FirstHarmonic(*this); }
 };
 
+ double robust_variance (const vector<double>& data, vector<float>* fps = 0)
+{
+  vector<float> tmp;
+  if (fps == 0)
+    fps = &tmp;
+  
+  power_spectral_density (data, *fps);
+  vector<double> upper_half (fps->begin() + fps->size()/2, fps->end());
+
+  // divide by log(2) because spectral power has exponential distribution
+  return median (upper_half) / log(2.0);
+}
 
 class SpectralMedian : public UnaryStatistic
 {
@@ -454,12 +466,8 @@ public:
 
   double get (const vector<double>& data)
   {
-    vector<float> fps;
-    power_spectral_density (data, fps);
-    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
-
     // divide by log(2) because spectral power has exponential distribution
-    return median (upper_half) / log(2.0);
+    return robust_variance (data);
   }
 
   SpectralMedian* clone () const { return new SpectralMedian(*this); }
@@ -467,31 +475,31 @@ public:
 
 class SumHarmonicOutlier : public UnaryStatistic
 {
+  float threshold;
+  
 public:
    SumHarmonicOutlier()
   : UnaryStatistic ("sho", "sum of harmonic outlier power")
   {
     add_alias ("harmout");
+    threshold = 2.0;        // standard deviations
   }
 
   double get (const vector<double>& data)
   {
     vector<float> fps;
-    power_spectral_density (data, fps);
-    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+    double log_mean = log( robust_variance(data, &fps) );
 
-    // divide by log(2) because spectral power has exponential distribution
-    double log_mean = log( median (upper_half) / log(2.0) );
-    
     for (unsigned i=0; i < fps.size(); i++)
       fps[i] = log(fps[i]);
 
+    double log_var = log(threshold*threshold);
+ 
     double outlier_sum = 0.0;
-    
     for (unsigned i=0; i+2 < fps.size(); i++)
     {
       fps[i] = fps[i+1] - std::max(log_mean, ( fps[i] + fps[i+2] )/2.0);
-      if (fps[i] > log(3))
+      if (fps[i] > log_var)
 	outlier_sum += exp(fps[i]);
     }
 
@@ -500,6 +508,54 @@ public:
 
   SumHarmonicOutlier* clone () const { return new SumHarmonicOutlier(*this); }
 };
+
+void detrend (vector<double>& data)
+{
+  const unsigned ndat = data.size();
+  
+  vector<double> local_mean (ndat);
+
+  for (unsigned i=0; i<ndat; i++)
+    local_mean[i] = (data[(i+1)%ndat] + data[(i+(ndat-1))%ndat]) / 2.0;
+
+  for (unsigned i=0; i<ndat; i++)
+    data[i] -= local_mean[i];
+}
+
+class SumDetrendedOutlier : public UnaryStatistic
+{
+  float threshold;
+  
+public:
+   SumDetrendedOutlier()
+  : UnaryStatistic ("sdo", "sum of detrended outlier power")
+  {
+    threshold = 2.0;        // standard deviations
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<double> detrended (data.begin(), data.end());
+    detrend (detrended);
+
+    // 0.5 = extra variance due to detrend
+    double var = 1.5 * robust_variance (data);
+
+    double outlier = threshold*threshold*var;
+    double outlier_sum = 0.0;
+    for (unsigned i=0; i < data.size(); i++)
+    {
+      if ( detrended[i]*detrended[i] > outlier)
+	outlier_sum += detrended[i]*detrended[i];
+    }
+
+    return outlier_sum;
+  }
+
+  SumDetrendedOutlier* clone () const { return new SumDetrendedOutlier(*this); }
+};
+
+
 
 class NyquistHarmonic : public UnaryStatistic
 {
@@ -603,6 +659,7 @@ void UnaryStatistic::build ()
   instances->push_back( new NyquistHarmonic );
   instances->push_back( new SpectralMedian );
   instances->push_back( new SumHarmonicOutlier );
+  instances->push_back( new SumDetrendedOutlier );
   instances->push_back( new SpectralEntropy );
 
 
