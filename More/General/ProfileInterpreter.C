@@ -174,7 +174,7 @@ string Pulsar::ProfileInterpreter::scale (const string& args) try
       string text = process( parser, expression );
       float value = fromstring<float>( text );
 
-      cerr << isubint << " " << ichan << " " << text << " " << value << endl;
+      // cerr << isubint << " " << ichan << " " << text << " " << value << endl;
 
       for (unsigned ipol=0; ipol < npol; ipol++)
         subint->get_Profile (ipol, ichan)->scale (value);
