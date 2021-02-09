@@ -473,6 +473,25 @@ public:
   SpectralMedian* clone () const { return new SpectralMedian(*this); }
 };
 
+class MaxUpperHarmonic : public UnaryStatistic
+{
+public:
+   MaxUpperHarmonic()
+  : UnaryStatistic ("mh2", "maximum harmonic in upper half-spectrum")
+  {
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fps;
+    power_spectral_density (data, fps);
+    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+    return *std::max_element (upper_half.begin(), upper_half.end());
+  }
+
+  MaxUpperHarmonic* clone () const { return new MaxUpperHarmonic(*this); }
+};
+
 class SumHarmonicOutlier : public UnaryStatistic
 {
   float threshold;
@@ -657,6 +676,7 @@ void UnaryStatistic::build ()
   instances->push_back( new OctileKurtosis );
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
+  instances->push_back( new MaxUpperHarmonic );
   instances->push_back( new SpectralMedian );
   instances->push_back( new SumHarmonicOutlier );
   instances->push_back( new SumDetrendedOutlier );
