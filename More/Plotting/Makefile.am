@@ -43,6 +43,7 @@ nobase_include_HEADERS = \
 	Pulsar/LinePhasePlot.h					       \
 	Pulsar/DynamicSpectrumPlot.h				       \
 	Pulsar/DynamicSNSpectrumPlot.h				       \
+	Pulsar/DynamicStatSpectrumPlot.h			       \
 	Pulsar/DynamicBaselineSpectrumPlot.h			       \
 	Pulsar/DynamicCalSpectrumPlot.h				       \
 	Pulsar/DynamicWeightSpectrumPlot.h			       \
@@ -110,6 +111,7 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	LinePhasePlot.C LinePhasePlotTI.C \
 	DynamicSpectrumPlot.C DynamicSpectrumPlotTI.C \
 	DynamicSNSpectrumPlot.C DynamicSNSpectrumPlotTI.C \
+	DynamicStatSpectrumPlot.C DynamicStatSpectrumPlotTI.C \
 	DynamicBaselineSpectrumPlot.C DynamicBaselineSpectrumPlotTI.C \
 	DynamicCalSpectrumPlot.C DynamicCalSpectrumPlotTI.C \
 	DynamicWeightSpectrumPlot.C DynamicWeightSpectrumPlotTI.C \

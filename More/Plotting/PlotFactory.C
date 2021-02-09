@@ -32,6 +32,7 @@
 #include "Pulsar/CalibratorSpectrum.h"
 #include "Pulsar/LinePhasePlot.h"
 #include "Pulsar/DynamicSNSpectrumPlot.h"
+#include "Pulsar/DynamicStatSpectrumPlot.h"
 #include "Pulsar/DynamicBaselineSpectrumPlot.h"
 #include "Pulsar/DynamicCalSpectrumPlot.h"
 #include "Pulsar/DynamicWeightSpectrumPlot.h"
@@ -114,6 +115,9 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<DynamicSNSpectrumPlot>
         ( 'j', "dspec", "Dynamic S/N spectrum" ) );
+  
+  add ( new PlotFactory::Advocate<DynamicStatSpectrumPlot>
+        ( 'd', "dstat", "Dynamic statistic spectrum" ) );
   
   add ( new PlotFactory::Advocate<DynamicBaselineSpectrumPlot>
         ( 'r', "offdspec", "Dynamic baseline spectrum" ) );
