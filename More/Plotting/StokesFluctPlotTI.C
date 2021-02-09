@@ -20,6 +20,10 @@ Pulsar::StokesFluctPlot::Interface::Interface (StokesFluctPlot* instance)
        &StokesFluctPlot::set_plot_last_harmonic,
        "last", "Plot the last harmonic marker" );
 
+  add( &StokesFluctPlot::get_harmonic_outliers,
+       &StokesFluctPlot::set_harmonic_outliers,
+       "out", "Plot harmonic outliers" );
+
   add( &StokesFluctPlot::get_plot_values,
        &StokesFluctPlot::set_plot_values,
        "val", "Values to be plotted (IQUVLpS)" );

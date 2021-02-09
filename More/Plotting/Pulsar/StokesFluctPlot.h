@@ -54,6 +54,15 @@ namespace Pulsar {
     void set_signal_to_noise (const bool plot) { signal_to_noise = plot; }
     bool get_signal_to_noise () const { return signal_to_noise; }
 
+    //! Plot the harmonic outliers
+    void set_harmonic_outliers (const bool plot)
+    {
+      harmonic_outliers = plot;
+      if (harmonic_outliers)
+	signal_to_noise = false;
+    }
+    bool get_harmonic_outliers () const { return harmonic_outliers; }
+
     //! Set the colour for each value plotted
     void set_plot_colours (const std::string& plot) { plot_colours = plot; }
     std::string get_plot_colours () const { return plot_colours; }
@@ -71,8 +80,11 @@ namespace Pulsar {
     bool get_plot_fluctuation_phase () const { return plot_fluctuation_phase; }
 
   protected:
- 
+
+    bool plot_log;
     bool signal_to_noise;
+    bool harmonic_outliers;
+    
     std::string plot_values;
     std::string plot_colours;
     std::string plot_lines;

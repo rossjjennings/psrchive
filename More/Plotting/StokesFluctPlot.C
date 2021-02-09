@@ -25,11 +25,10 @@ Pulsar::StokesFluctPlot::StokesFluctPlot ()
   plot_values  = "Ip";
   plot_colours = "123";
   plot_lines   = "111";
-
+  plot_log     = true;
+  
   PlotFrame* frame = get_frame();
 
-  // logarithmic axis
-  frame->get_y_axis()->add_opt ('L');
   // vertical labels
   frame->get_y_axis()->add_opt ('V');
   // exponential notation
@@ -47,6 +46,7 @@ Pulsar::StokesFluctPlot::StokesFluctPlot ()
   below->set_left( PlotLabel::unset );
 
   signal_to_noise = true;
+  harmonic_outliers = false;
 }
 
 TextInterface::Parser* Pulsar::StokesFluctPlot::get_interface ()
@@ -183,6 +183,14 @@ Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
 
 }
 
+template<typename T>
+T median (vector<T> data)
+{
+  unsigned mid = data.size() / 2;
+  std::nth_element( data.begin(), data.begin()+mid, data.end() );
+  return data[mid];
+}
+
 void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 {
   plotter.profiles.resize( plot_values.size() );
@@ -262,15 +270,45 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
       last_significant.find (prof, rms);
       cerr << ipol << ": last harmonic = " << last_significant.get() << endl;
     }
- 
-    float log_noise = log(rms) / log(10.0);
 
-    prof->logarithm (10.0, rms/10.0);
-    prof->offset( -log_noise );
+    if (harmonic_outliers)
+    {
+      float* amps = prof->get_amps();
+      unsigned nbin = prof->get_nbin();
+      
+      vector<float> upper_half (amps + nbin/2, amps + nbin);
 
+      // divide by log(2) because spectral power has exponential distribution
+      double log_mean = log( median (upper_half) / log(2.0) );
+    
+      for (unsigned i=0; i < prof->get_nbin(); i++)
+	amps[i] = log(amps[i]);
+      
+      for (unsigned i=0; i+2 < prof->get_nbin(); i++)
+	amps[i] = amps[i+1] - std::max(log_mean, ( amps[i] + amps[i+2] )/2.0);
+
+      prof->resize( prof->get_nbin()-2 );
+    }    
+    else if (plot_log)
+    {
+      prof->logarithm (10.0, rms/10.0);
+
+      if (signal_to_noise)
+      {
+	float log_noise = log(rms) / log(10.0);
+	prof->offset( -log_noise );
+      }
+      
+      // logarithmic axis
+      frame->get_y_axis()->add_opt ('L');
+    }
+    else if (signal_to_noise)
+      prof->scale( 1.0 / rms );
+    
     plotter.profiles[ipol] = prof;
     plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
     plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
+    
   }
 
   last_harmonic = last_significant.get();
