@@ -14,7 +14,8 @@
 namespace Pulsar
 {
   //! Uses the inter-quartile range to mask bad channels and sub-integrations
-  /*! Implement the masking algorithm described by Morello et al (2019) */
+  /*! Implements an adjustable pair of Tukey's Fences
+      https://en.wikipedia.org/wiki/Outlier#Tukey's_fences */
   class InterQuartileRange : public TimeFrequencyMask
   {
     
@@ -65,11 +66,6 @@ namespace Pulsar
     //! Fraction of IQR
     float cutoff_threshold_max;
     float cutoff_threshold_min;
-
-    unsigned tot_valid;
-    unsigned cut_high;
-    unsigned cut_low;
-
   };
 
 }
