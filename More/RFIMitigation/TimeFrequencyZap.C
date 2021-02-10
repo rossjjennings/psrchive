@@ -50,11 +50,6 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyMask::get_interface,
        "mask", "Algorithm used to mask subints/channels" );
     
-  add( &TimeFrequencyZap::get_masker,
-       &TimeFrequencyZap::set_masker,
-       &TimeFrequencyMask::get_interface,
-       "mask", "Algorithm used to mask subints/channels" );
-
   add( &TimeFrequencyZap::get_cutoff_threshold,
        &TimeFrequencyZap::set_cutoff_threshold,
        "cutoff", "Outlier threshold (# sigma)" );
