@@ -53,6 +53,12 @@ namespace Pulsar {
       //! Get the statistic
       ArchiveStatistic* get_statistic () const;
 
+      //! Set the smoother
+      void set_smoother (TimeFrequencySmooth*);
+
+      //! Get the smoother
+      TimeFrequencySmooth* get_smoother () const;
+
       //! Set the masker
       void set_masker (TimeFrequencyMask*);
 
