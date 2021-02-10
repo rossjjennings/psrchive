@@ -42,6 +42,9 @@ namespace TextInterface
     std::cerr << "TextInterface::factory name=" << name << std::endl;
 #endif
 
+    if (name == "0")
+      return 0;
+    
     Reference::To<T> result;
 
     if (name == "help")
