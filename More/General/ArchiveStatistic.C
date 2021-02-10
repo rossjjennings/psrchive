@@ -52,7 +52,6 @@ class BinaryStatisticSummary : public Identifiable::Proxy<ArchiveStatistic>
   ndArray<2,double> temp;
 
   Reference::To<UnaryStatistic> summary;
-  Reference::To<UnaryStatistic> variance;
 
   //! A robust estimate of standard deviation of each profile
   std::vector<double> rms;
@@ -70,9 +69,6 @@ public:
     set_pol (Index(0, true));
 
     summary = UnaryStatistic::factory ("median");
-
-    // median of harmonics in upper half of spectrum
-    variance = UnaryStatistic::factory ("ftm");
   }
 
   void set_Archive (const Archive* arch)
@@ -129,7 +125,7 @@ public:
 	if (irms < isubint)
 	{
 	  irms = isubint;
-	  rms[irms] = sqrt( variance->get (idata) );
+	  rms[irms] = sqrt( robust_variance (idata) );
 	}
 
 	for (double& element : idata)
@@ -152,7 +148,7 @@ public:
 	  if (irms < jsubint)
 	  {
 	    irms = jsubint;
-	    rms[irms] = sqrt( variance->get (jdata) );
+	    rms[irms] = sqrt( robust_variance (jdata) );
 	  }
 	
 	  for (double& element : jdata)

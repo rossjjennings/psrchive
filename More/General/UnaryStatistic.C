@@ -48,6 +48,55 @@ void central_moments (vector<double> data, vector<double>& mu)
   }
 }
 
+template<typename T>
+T median (vector<T> data)
+{
+  unsigned mid = data.size() / 2;
+  std::nth_element( data.begin(), data.begin()+mid, data.end() );
+  return data[mid];
+}
+
+void power_spectral_density (const vector<double>& data, vector<float>& fps)
+{
+  vector<float> copy (data.begin(), data.end());
+  fps.resize (data.size() + 2);
+  
+  FTransform::frc1d (data.size(), &fps[0], &copy[0]);
+
+  const unsigned nbin = data.size() / 2 + 1;
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    float re = fps[ibin*2];
+    float im = fps[ibin*2+1];
+    fps[ibin] = re*re + im*im;
+  }
+
+  fps.resize (nbin);
+  
+  if (FTransform::get_norm() == FTransform::unnormalized)
+    for (auto& element : fps)
+      element /= data.size();
+}
+
+double median_upper_harmonic (const vector<double>& data,
+			      vector<float>* fps = 0)
+{
+  vector<float> tmp;
+  if (fps == 0)
+    fps = &tmp;
+  
+  power_spectral_density (data, *fps);
+  vector<double> upper_half (fps->begin() + fps->size()/2, fps->end());
+
+  return median (upper_half);
+}
+
+double robust_variance (const vector<double>& data, vector<float>* fps)
+{
+  // divide by log(2) because spectral power has exponential distribution
+  return median_upper_harmonic (data, fps) / log(2.0);
+}
+
 namespace UnaryStatistics {
 
   class Maximum : public UnaryStatistic
@@ -231,14 +280,6 @@ namespace UnaryStatistics {
     { return new DeviationCoefficient(*this); }
   };
   
-  template<typename T>
-    T median (vector<T> data)
-    {
-      unsigned mid = data.size() / 2;
-      std::nth_element( data.begin(), data.begin()+mid, data.end() );
-      return data[mid];
-    }
-
   class Median : public UnaryStatistic
   {    
   public:
@@ -407,28 +448,6 @@ void spectrum (const vector<double>& data, vector<float>& spec)
   spec.resize (data.size() + 2);
   FTransform::frc1d (data.size(), &spec[0], &copy[0]);
 }
-
-void power_spectral_density (const vector<double>& data, vector<float>& fps)
-{
-  vector<float> copy (data.begin(), data.end());
-  fps.resize (data.size() + 2);
-  
-  FTransform::frc1d (data.size(), &fps[0], &copy[0]);
-
-  const unsigned nbin = data.size() / 2 + 1;
-  for (unsigned ibin=0; ibin < nbin; ibin++)
-  {
-    float re = fps[ibin*2];
-    float im = fps[ibin*2+1];
-    fps[ibin] = re*re + im*im;
-  }
-
-  fps.resize (nbin);
-  
-  if (FTransform::get_norm() == FTransform::unnormalized)
-    for (auto& element : fps)
-      element /= data.size();
-}
     
 class FirstHarmonic : public UnaryStatistic
 {
@@ -451,24 +470,6 @@ public:
 };
 
 
-double median_upper_harmonic (const vector<double>& data,
-			      vector<float>* fps = 0)
-{
-  vector<float> tmp;
-  if (fps == 0)
-    fps = &tmp;
-  
-  power_spectral_density (data, *fps);
-  vector<double> upper_half (fps->begin() + fps->size()/2, fps->end());
-
-  return median (upper_half);
-}
-
-double robust_variance (const vector<double>& data, vector<float>* fps = 0)
-{
-  // divide by log(2) because spectral power has exponential distribution
-  return median_upper_harmonic (data, fps) / log(2.0);
-}
 
 class MedianUpperHarmonic : public UnaryStatistic
 {

@@ -39,8 +39,14 @@ private:
   static void build (); 
 };
 
-// worker function for variance, skewness, kurtosis, etc.
+//! worker function for variance, skewness, kurtosis, etc.
 void central_moments (std::vector<double> data, std::vector<double>& mu);
+
+//! worker function for outlier detection
+/*! pass a pointer to vector<float> as the second argument
+  to retain the power spectral density used in this calculation */
+double robust_variance (const std::vector<double>& data,
+			std::vector<float>* psd = 0);
 
 #endif
 
