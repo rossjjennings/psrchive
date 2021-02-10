@@ -154,5 +154,9 @@ Pulsar::SumThreshold::Interface::Interface (SumThreshold* instance)
   add( &SumThreshold::get_threshold,
        &SumThreshold::set_threshold,
        "cutoff", "Outlier threshold [sigma]" );
+
+  add( &SumThreshold::get_nlevel,
+       &SumThreshold::set_nlevel,
+       "nlevel", "Number of flagging levels" );
 }
 
