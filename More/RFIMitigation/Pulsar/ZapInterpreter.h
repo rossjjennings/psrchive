@@ -19,7 +19,6 @@ namespace Pulsar {
 
   class ChannelZapMedian;
   class Mower;
-  class InterQuartileRange;
   class TimeFrequencyZap;
   class ZapExtend;
 
@@ -38,9 +37,6 @@ namespace Pulsar {
 
     //! clean data using the lawn mowing algorithm
     std::string mow (const std::string& args);
-
-    //! zap outliers using the inter-quartile range
-    std::string iqr (const std::string& args);
 
     //! zap outliers using time/freq plane methods
     std::string tfzap (const std::string& args);
@@ -79,10 +75,7 @@ namespace Pulsar {
     //! Mowing algorithm
     Reference::To<Mower> mower;
 
-    //! Inter-quartile range algorithm
-    Reference::To<InterQuartileRange> iq_range;
-    
-    //! Time/Frequency zaping algorithm
+    //! Time/Frequency zapping algorithm
     Reference::To<TimeFrequencyZap> tf_zapper;
     
     //! Zap extender

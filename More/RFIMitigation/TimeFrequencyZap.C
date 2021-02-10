@@ -59,9 +59,17 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyZap::set_cutoff_threshold,
        "cutoff", "Outlier threshold (# sigma)" );
 
+  add( &TimeFrequencyZap::get_max_iterations,
+       &TimeFrequencyZap::set_max_iterations,
+       "iterations", "Maximum number of times to iterate" );
+
   add( &TimeFrequencyZap::get_polarizations,
        &TimeFrequencyZap::set_polarizations,
        "pols", "Polarizations to analyze" );
+  
+  add( &TimeFrequencyZap::get_report,
+       &TimeFrequencyZap::set_report,
+       "report", "Print one-line report to stdout" );
 }
 
 // defined in More/General/standard_interface.C
@@ -79,6 +87,10 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
 
   // TODO this too
   masker = new SumThreshold;
+
+  max_iterations = 1;
+  nmasked = 0;
+  report = false;
 }
 
 void Pulsar::TimeFrequencyZap::transform (Archive* archive)
@@ -129,7 +141,35 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 
   compute_stat();
 
-  update_mask();
+  unsigned iter = 0;
+  unsigned total_masked = 0;
+
+  // kludge to get while loop started
+  nmasked = 1;
+  
+  while (iter < max_iterations && nmasked > 0)
+  {
+    update_mask();
+
+    // nmasked set by update_mask
+    total_masked += nmasked;
+    iter ++;
+  }
+
+  if (report)
+  {
+    string ret;
+    
+    if (statistic)
+      ret += "stat=" + statistic->get_identity() + " ";
+
+    ret += "tested=" + tostring(nonmasked)
+      + " iter=" + tostring(iter)
+      + " masked=" + tostring(total_masked) 
+      + " %=" + tostring((total_masked)*100.0/nonmasked);
+
+    cout << ret << endl;
+  }
 
   // apply mask back to original archive
   for (unsigned isub=0; isub<nsubint; isub++) 
@@ -144,6 +184,8 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 
 void Pulsar::TimeFrequencyZap::compute_stat ()
 {
+  nonmasked = 0;
+  
   // Only use ProfileStats here.  More specialized things could be 
   // implemented in derived classes.
   Reference::To<ProfileStats> stats;
@@ -174,7 +216,9 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
     {
       if (mask[idx(isub,ichan)]==0.0)
         continue;
-
+      else
+	nonmasked ++;
+      
       if (statistic)
 	statistic->set_chan (ichan);
     
@@ -203,8 +247,9 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
 void Pulsar::TimeFrequencyZap::update_mask ()
 {
   std::vector<float> smoothed;
-  smoother->smooth(smoothed, stat, mask, freq, time);
-  // const unsigned ntot = nsubint * nchan * npol;
+
+  if (smoother)
+    smoother->smooth(smoothed, stat, mask, freq, time);
 
 #if 0 
   // Output arrays for debug
@@ -221,7 +266,7 @@ void Pulsar::TimeFrequencyZap::update_mask ()
   fclose(s2);
 #endif
 
-  masker->update_mask(mask, stat, smoothed, nsubint, nchan, npol);
+  nmasked = masker->update_mask(mask, stat, smoothed, nsubint, nchan, npol);
 }
 
 //! Set the statistic

@@ -30,9 +30,10 @@ namespace Pulsar {
       /*! Both data arrays have dims (nsub, nchan, npol), slow to fast.  weight
        * array has dims (nsub, nchan).
        */
-      virtual void update_mask (std::vector<float> &mask, 
-          std::vector<float> &stat, std::vector<float> &model,
-          unsigned nsubint, unsigned nchan, unsigned npol);
+      unsigned update_mask (std::vector<float> &mask, 
+			    std::vector<float> &stat,
+			    std::vector<float> &model,
+			    unsigned nsubint, unsigned nchan, unsigned npol);
 
       void set_nlevel ( int n ) { nlevel = n; }
       int get_nlevel () const { return nlevel; }

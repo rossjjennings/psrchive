@@ -30,7 +30,7 @@ namespace Pulsar {
       //! Returns a list of available TimeFrequencyMask children
       static const std::vector<TimeFrequencyMask*>& children ();
 
-      TimeFrequencyMask() {};
+      TimeFrequencyMask();
 
       //! Update the mask.
       /*! mask is the current weights array.
@@ -39,10 +39,15 @@ namespace Pulsar {
        *  bandpass shape or similar).
        *
        *  mask is nsubint-by-nchan, stat and model are nsubint-by-nchan-by-npol
+       *
+       *  return value is number of points masked
        */
-      virtual void update_mask (std::vector<float> &mask, 
-          std::vector<float> &stat, std::vector<float> &model,
-          unsigned nsubint, unsigned nchan, unsigned npol) = 0;
+      virtual unsigned update_mask (std::vector<float> &mask, 
+				    std::vector<float> &stat,
+				    std::vector<float> &model,
+				    unsigned nsubint,
+				    unsigned nchan,
+				    unsigned npol) = 0;
 
       virtual void set_threshold (float t) { threshold = t; }
       virtual float get_threshold () const { return threshold; }

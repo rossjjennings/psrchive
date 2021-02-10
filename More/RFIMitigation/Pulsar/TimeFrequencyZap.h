@@ -71,11 +71,23 @@ namespace Pulsar {
       //! Get the cut-off threshold
       float get_cutoff_threshold () const { return masker->get_threshold(); }
 
+      //! Set the maximum number of iterations
+      void set_max_iterations (unsigned n) { max_iterations = n; }
+
+      //! Get the maximum number of iterations
+      unsigned get_max_iterations () const { return max_iterations; }
+
       //! Set the list of polns to look at
       void set_polarizations (const std::string& p) { polns = p; }
 
       //! Get the list of polns to look at
       std::string get_polarizations () const { return polns; }
+
+      //! Set flag to print a one-line report
+      void set_report (bool flag = true) { report = flag; }
+
+      //! Get flag to print a one-line report
+      bool get_report () const { return report; }
 
     protected:
 
@@ -143,6 +155,19 @@ namespace Pulsar {
         return nchan*npol*isubint + npol*ichan + ipol;
       }
 
+    //! Maximum number of times to run update_mask
+    unsigned max_iterations;
+
+    //! Print a report on stdout
+    bool report;
+    
+  private:
+    
+    //! Number of subints/chans zapped during update_mask
+    unsigned nmasked;
+
+    //! Number of non-masked subints/chans in input data
+    unsigned nonmasked;
   };
 
 }

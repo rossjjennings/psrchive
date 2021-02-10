@@ -38,9 +38,12 @@ void sumthreshold1(std::vector<float> &data, std::vector<float> &mask,
   std::copy(mask1.begin(), mask1.end(), mask.begin());
 }
 
-void Pulsar::SumThreshold::update_mask (std::vector<float> &mask, 
-    std::vector<float> &stat, std::vector<float> &model,
-    unsigned nsubint, unsigned nchan, unsigned npol)
+unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask, 
+					    std::vector<float> &stat,
+					    std::vector<float> &model,
+					    unsigned nsubint,
+					    unsigned nchan,
+					    unsigned npol)
 {
   const unsigned ntot = nsubint * nchan * npol;
 
@@ -50,7 +53,7 @@ void Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
   for (unsigned i=0; i<ntot; i++)
     if (model[i]!=0.0 && stat[i]!=0.0 && mask[i]!=0.0)
       dattmp.push_back(stat[i]/model[i]);
-  if (dattmp.size()==0) return; // everything is masked
+  if (dattmp.size()==0) return 0; // everything is masked
   std::sort(dattmp.begin(), dattmp.end());
   int qq = dattmp.size() / 4;
   const float rms = 1.35 * (dattmp[3*qq] - dattmp[qq]);
@@ -59,6 +62,8 @@ void Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
   const float x1 = threshold * rms;
   float xn = x1;
 
+  unsigned total_masked = 0;
+  
   for (unsigned ilev=0; ilev<nlevel; ilev++) 
   {
     // Number of points in this level
@@ -131,13 +136,17 @@ void Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
 
     // Copy weights back to original array
     for (unsigned i=0; i<nsubint*nchan; i++)
-      if (mask1[i]==0.0) 
+      if (mask1[i]==0.0 && mask[i] != 0.0)
+      {
+	total_masked ++;
         mask[i] = 0.0;
+      }
 
     // Reduce threshold for next level iteration
     xn /= 1.5;
   }
 
+  return total_masked;
 }
 
 //! Get the text interface to the configuration attributes
