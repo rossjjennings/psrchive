@@ -11,6 +11,8 @@
 #include "interface_factory.h"
 #include "interface_stream.h"
 
+#include <assert.h>
+
 static std::vector< Pulsar::TimeFrequencyMask* >* instances = NULL;
 
 void Pulsar::TimeFrequencyMask::build ()
