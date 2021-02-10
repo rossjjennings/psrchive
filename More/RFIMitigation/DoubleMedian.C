@@ -86,7 +86,6 @@ void Pulsar::DoubleMedian::smooth(std::vector<float> &smoothed,
           wttmp[isub] = weight[idx(isub+isub0, ichan)];
         }
         // Compute the median
-        float datmed = weighted_median(dattmp, wttmp);
         spectrum[idx(0,ichan,ipol)] = weighted_median(dattmp, wttmp);
         specwts[ichan] = std::accumulate(wttmp.begin(),wttmp.end(),0.0);
       }
@@ -121,5 +120,25 @@ void Pulsar::DoubleMedian::smooth(std::vector<float> &smoothed,
     // Move on to next time chunk
     isub0 += sub_per_part;
   }
+}
+
+//! Get the text interface to the configuration attributes
+TextInterface::Parser* Pulsar::DoubleMedian::get_interface ()
+{
+  return new Interface (this);
+}
+
+Pulsar::DoubleMedian::Interface::Interface (DoubleMedian* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &DoubleMedian::get_freq_range,
+       &DoubleMedian::set_freq_range,
+       "freq", "Frequency range (MHz)" );
+
+  add( &DoubleMedian::get_time_range,
+       &DoubleMedian::set_time_range,
+       "time", "Time range (s)" );
 }
 

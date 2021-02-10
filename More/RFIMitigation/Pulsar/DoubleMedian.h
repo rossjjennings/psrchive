@@ -35,6 +35,26 @@ namespace Pulsar {
           std::vector<float> &raw, std::vector<float> &weight,
           std::vector<float> &freqs, std::vector<float> &times);
 
+       void set_freq_range ( float r ) { freq_range = r; }
+       float get_freq_range () const { return freq_range; }
+    
+       void set_time_range ( float r ) { time_range = r; }
+       float get_time_range () const { return time_range; }
+    
+
+      // Text floaterface to the DoubleMedian class
+      class Interface : public TextInterface::To<DoubleMedian> {
+      public:
+        Interface (DoubleMedian* = 0);
+	std::string get_interface_name () const { return "dblmed"; }
+      };
+
+      //! Return a text interface that can be used to configure this instance
+      TextInterface::Parser* get_interface ();
+
+      // Return new instance
+      DoubleMedian* clone () const { return new DoubleMedian(); }
+    
     protected:
 
       float freq_range; // MHz

@@ -24,6 +24,12 @@ namespace Pulsar {
 
     public:
 
+      //! Create a new instance of TimeFrequencySmooth based on name
+      static TimeFrequencySmooth* factory (const std::string& name);
+
+      //! Returns a list of available TimeFrequencySmooth children
+      static const std::vector<TimeFrequencySmooth*>& children ();
+
       TimeFrequencySmooth();
 
       //! Smooth the data given in raw, output to smoothed
@@ -36,6 +42,12 @@ namespace Pulsar {
       virtual void smooth (std::vector<float> &smoothed, 
           std::vector<float> &raw, std::vector<float> &weight,
           std::vector<float> &freqs, std::vector<float> &times) = 0;
+
+      //! Return a text interface that can be used to configure this instance
+      virtual TextInterface::Parser* get_interface () { return 0; }
+
+      //! Derived types must also define clone method
+      virtual TimeFrequencySmooth* clone () const = 0;
 
     protected:
 
@@ -57,8 +69,14 @@ namespace Pulsar {
       unsigned nsub;
       unsigned nchan;
       unsigned npol;
-
+ 
+    private:
+      static void build ();
   };
+
+  std::ostream& operator<< (std::ostream&, TimeFrequencySmooth*);
+
+  std::istream& operator>> (std::istream&, TimeFrequencySmooth*&);
 
 }
 

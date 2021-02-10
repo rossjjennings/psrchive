@@ -40,10 +40,20 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &ArchiveStatistic::get_interface,
        "stat", "Statistic computed for each subint/chan" );
 
+  add( &TimeFrequencyZap::get_smoother,
+       &TimeFrequencyZap::set_smoother,
+       &TimeFrequencySmooth::get_interface,
+       "smooth", "Algorithm used to smooth/detrend statistics" );
+    
   add( &TimeFrequencyZap::get_masker,
        &TimeFrequencyZap::set_masker,
        &TimeFrequencyMask::get_interface,
-       "mask", "Algorithm used to mask channels" );
+       "mask", "Algorithm used to mask subints/channels" );
+    
+  add( &TimeFrequencyZap::get_masker,
+       &TimeFrequencyZap::set_masker,
+       &TimeFrequencyMask::get_interface,
+       "mask", "Algorithm used to mask subints/channels" );
 
   add( &TimeFrequencyZap::get_cutoff_threshold,
        &TimeFrequencyZap::set_cutoff_threshold,
@@ -232,6 +242,18 @@ void Pulsar::TimeFrequencyZap::set_expression (const std::string& exp)
 Pulsar::ArchiveStatistic* Pulsar::TimeFrequencyZap::get_statistic () const
 {
   return statistic;
+}
+
+//! Set the smoother
+void Pulsar::TimeFrequencyZap::set_smoother (TimeFrequencySmooth* smooth)
+{
+  smoother = smooth;
+}
+
+//! Get the smoother
+Pulsar::TimeFrequencySmooth* Pulsar::TimeFrequencyZap::get_smoother () const
+{
+  return smoother;
 }
 
 //! Set the masker

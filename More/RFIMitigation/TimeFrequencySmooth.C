@@ -6,6 +6,12 @@
  ***************************************************************************/
 
 #include "Pulsar/TimeFrequencySmooth.h"
+#include "Pulsar/DoubleMedian.h"
+
+#include "interface_factory.h"
+#include "interface_stream.h"
+
+#include <assert.h>
 
 Pulsar::TimeFrequencySmooth::TimeFrequencySmooth ()
 {
@@ -35,4 +41,49 @@ void Pulsar::TimeFrequencySmooth::check_dimensions(std::vector<float> &smoothed,
 
   smoothed.resize(nsub*nchan*npol);
 }
+
+static std::vector< Pulsar::TimeFrequencySmooth* >* instances = NULL;
+
+void Pulsar::TimeFrequencySmooth::build ()
+{
+  if (instances != NULL)
+    return;
+
+  instances = new std::vector< TimeFrequencySmooth* >;
+ 
+  instances->push_back( new DoubleMedian );
+}
+
+const std::vector<Pulsar::TimeFrequencySmooth*>& 
+Pulsar::TimeFrequencySmooth::children ()
+{
+  if (instances == NULL)
+    build ();
+
+  assert (instances != NULL);
+
+  return *instances;
+}
+
+Pulsar::TimeFrequencySmooth*
+Pulsar::TimeFrequencySmooth::factory (const std::string& name)
+{
+  return TextInterface::factory<TimeFrequencySmooth> (children(), name);
+}
+
+namespace Pulsar
+{
+  std::ostream& operator<< (std::ostream& ostr,
+                            TimeFrequencySmooth* stat)
+  {
+    return interface_insertion (ostr, stat);
+  }
+
+  std::istream& operator>> (std::istream& istr,
+                            TimeFrequencySmooth* &stat)
+  {
+    return interface_extraction (istr, stat);
+  }
+}
+
 
