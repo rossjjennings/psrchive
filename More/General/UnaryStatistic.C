@@ -401,6 +401,13 @@ public:
   { return new OctileKurtosis (*this); }
 };
 
+void spectrum (const vector<double>& data, vector<float>& spec)
+{
+  vector<float> copy (data.begin(), data.end());
+  spec.resize (data.size() + 2);
+  FTransform::frc1d (data.size(), &spec[0], &copy[0]);
+}
+
 void power_spectral_density (const vector<double>& data, vector<float>& fps)
 {
   vector<float> copy (data.begin(), data.end());
@@ -497,6 +504,76 @@ public:
   }
 
   MaxUpperHarmonic* clone () const { return new MaxUpperHarmonic(*this); }
+};
+
+class SpectralPower : public UnaryStatistic
+{
+public:
+   SpectralPower()
+  : UnaryStatistic ("sm2", "total power in upper half-spectrum")
+  {
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fps;
+    spectrum (data, fps);
+    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+
+    vector<double> mu (2);
+    central_moments (upper_half, mu);
+      
+    return mu[1];
+  }
+
+  SpectralPower* clone () const { return new SpectralPower(*this); }
+};
+
+class SpectralSkew : public UnaryStatistic
+{
+public:
+   SpectralSkew()
+  : UnaryStatistic ("sm3", "skew of upper half-spectrum")
+  {
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fps;
+    spectrum (data, fps);
+    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+
+    vector<double> mu (3);
+    central_moments (upper_half, mu);
+      
+    double sigma = sqrt( mu[1] );
+    return mu[2] / pow(sigma,3.0);
+  }
+
+  SpectralSkew* clone () const { return new SpectralSkew(*this); }
+};
+
+class SpectralKurtosis : public UnaryStatistic
+{
+public:
+   SpectralKurtosis()
+  : UnaryStatistic ("sm4", "kurtosis of upper half-spectrum")
+  {
+  }
+
+  double get (const vector<double>& data)
+  {
+    vector<float> fps;
+    spectrum (data, fps);
+    vector<double> upper_half (fps.begin() + fps.size()/2, fps.end());
+
+    vector<double> mu (4);
+    central_moments (upper_half, mu);
+      
+    return mu[3] / (mu[1]*mu[1]);
+  }
+
+  SpectralKurtosis* clone () const { return new SpectralKurtosis(*this); }
 };
 
 class SumHarmonicOutlier : public UnaryStatistic
@@ -717,6 +794,9 @@ void UnaryStatistic::build ()
   instances->push_back( new NyquistHarmonic );
   instances->push_back( new MaxUpperHarmonic );
   instances->push_back( new MedianUpperHarmonic );
+  instances->push_back( new SpectralPower );
+  instances->push_back( new SpectralSkew );
+  instances->push_back( new SpectralKurtosis );
   instances->push_back( new SumHarmonicOutlier );
   instances->push_back( new SumDetrendedOutlier );
   instances->push_back( new SpectralEntropy );
