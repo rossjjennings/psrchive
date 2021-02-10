@@ -37,7 +37,24 @@ public:
     return stat->get( get_Profile() );
   }
 
-  TextInterface::Parser* get_interface () { return 0; }
+  class Interface : public TextInterface::To<ProfileStatisticWrapper>
+  {
+    string name;
+  public:
+
+    std::string get_interface_name () const { return name; }
+
+    //! Default constructor
+    Interface ( ProfileStatisticWrapper* _instance )
+      {
+        if (_instance)
+          set_instance (_instance);
+
+        name = _instance->get_identity ();
+      }
+  };
+
+  TextInterface::Parser* get_interface () { return new Interface(this); }
 
   ProfileStatisticWrapper* clone () const 
   { return new ProfileStatisticWrapper(*this); }
@@ -189,14 +206,18 @@ public:
   
   class Interface : public TextInterface::To<BinaryStatisticSummary>
   {
+    string name;
   public:
 
-    //! Default constructor
-    Interface ( BinaryStatisticSummary* stats )
-      {
-	if (instance)
-	  set_instance (instance);
+    std::string get_interface_name () const { return name; }
 
+    //! Default constructor
+    Interface ( BinaryStatisticSummary* _instance )
+      {
+	if (_instance)
+	  set_instance (_instance);
+
+        name = _instance->get_identity ();
       }
   };
   
