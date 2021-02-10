@@ -47,8 +47,10 @@ namespace TextInterface
     
     Reference::To<T> result;
 
+    std::string message;
+    
     if (name == "help")
-      std::cerr <<
+      message +=
 	"\n\n"
 	"Options:"
 	"\n\n";
@@ -63,16 +65,13 @@ namespace TextInterface
 	}
       else if (name == "help")
 	{
-	  std::cerr << interface->get_interface_name() << std::endl
-		    << interface->help (true, false, "   ") << std::endl;
+	  message += interface->get_interface_name() + "\n"
+	    + interface->help (true, false, "   ") + "\n";
 	}
     }
 
     if (name == "help")
-      {
-	std::cerr << std::endl;
-	exit (0);
-      }
+      throw Error (HelpMessage, std::string(), message);
     
     if (!result)
       throw Error (InvalidState, std::string(),
