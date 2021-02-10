@@ -50,7 +50,7 @@ namespace TextInterface
 	"Options:"
 	"\n\n";
     
-    for (typename C::iterator ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
+    for (auto ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
     {
       Reference::To<TextInterface::Parser> interface = (*ptr)->get_interface();
       if (interface->get_interface_name() == name)
