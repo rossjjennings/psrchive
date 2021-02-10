@@ -443,7 +443,9 @@ public:
   FirstHarmonic* clone () const { return new FirstHarmonic(*this); }
 };
 
- double robust_variance (const vector<double>& data, vector<float>* fps = 0)
+
+double median_upper_harmonic (const vector<double>& data,
+			      vector<float>* fps = 0)
 {
   vector<float> tmp;
   if (fps == 0)
@@ -452,25 +454,30 @@ public:
   power_spectral_density (data, *fps);
   vector<double> upper_half (fps->begin() + fps->size()/2, fps->end());
 
-  // divide by log(2) because spectral power has exponential distribution
-  return median (upper_half) / log(2.0);
+  return median (upper_half);
 }
 
-class SpectralMedian : public UnaryStatistic
+double robust_variance (const vector<double>& data, vector<float>* fps = 0)
 {
-public:
-   SpectralMedian()
-  : UnaryStatistic ("ftm", "robust estimate of spectral noise variance")
+  // divide by log(2) because spectral power has exponential distribution
+  return median_upper_harmonic (data, fps) / log(2.0);
+}
+
+class MedianUpperHarmonic : public UnaryStatistic
+{
+ public:
+ MedianUpperHarmonic()
+   : UnaryStatistic ("ftm", "median harmonic in upper half-spectrum")
   {
   }
 
   double get (const vector<double>& data)
   {
     // divide by log(2) because spectral power has exponential distribution
-    return robust_variance (data);
+    return median_upper_harmonic (data);
   }
 
-  SpectralMedian* clone () const { return new SpectralMedian(*this); }
+  MedianUpperHarmonic* clone () const { return new MedianUpperHarmonic(*this); }
 };
 
 class MaxUpperHarmonic : public UnaryStatistic
@@ -628,6 +635,38 @@ public:
   SpectralEntropy* clone () const { return new SpectralEntropy(*this); }
 };
 
+class CyclicBoxcarPhase : public UnaryStatistic
+{
+  double duty_cycle;
+  
+public:
+   CyclicBoxcarPhase()
+  : UnaryStatistic ("cbp", "best-fit phase of cyclic box car")
+  {
+    duty_cycle = 0.5;
+  }
+
+  double get (const vector<double>& data)
+  {
+    unsigned ndat = data.size();
+    unsigned nbox = ndat * duty_cycle;
+    
+    vector<double> sums (ndat);
+
+    sums[0] = std::accumulate (data.begin(), data.begin()+nbox, 0.0);
+
+    for (unsigned isum=1; isum < ndat; isum++)
+      sums[isum] = sums[isum-1] - data[isum-1] + data[(isum+nbox)%ndat];
+    
+    auto max = std::max_element (sums.begin(), sums.end());
+    unsigned istart_max = max - sums.begin();
+
+    return double( (istart_max + nbox/2) % ndat ) / ndat;
+  }
+
+  CyclicBoxcarPhase* clone () const { return new CyclicBoxcarPhase(*this); }
+};
+
 } // namespace UnaryStatistics
 
 static unsigned instance_count = 0;
@@ -677,11 +716,11 @@ void UnaryStatistic::build ()
   instances->push_back( new FirstHarmonic );
   instances->push_back( new NyquistHarmonic );
   instances->push_back( new MaxUpperHarmonic );
-  instances->push_back( new SpectralMedian );
+  instances->push_back( new MedianUpperHarmonic );
   instances->push_back( new SumHarmonicOutlier );
   instances->push_back( new SumDetrendedOutlier );
   instances->push_back( new SpectralEntropy );
-
+  instances->push_back( new CyclicBoxcarPhase );
 
   // cerr << "UnaryStatistic::build instances=" << instances << " count=" << instance_count << " start=" << start_count << " size=" << instances->size() << endl; 
 
