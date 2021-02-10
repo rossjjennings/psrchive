@@ -7,6 +7,7 @@
 
 #include "Pulsar/TimeFrequencySmooth.h"
 #include "Pulsar/DoubleMedian.h"
+#include "Pulsar/TwoDeeMedian.h"
 
 #include "interface_factory.h"
 #include "interface_stream.h"
@@ -52,6 +53,7 @@ void Pulsar::TimeFrequencySmooth::build ()
   instances = new std::vector< TimeFrequencySmooth* >;
  
   instances->push_back( new DoubleMedian );
+  instances->push_back( new TwoDeeMedian );
 }
 
 const std::vector<Pulsar::TimeFrequencySmooth*>& 

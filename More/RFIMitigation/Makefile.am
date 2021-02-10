@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
 	Pulsar/TimeFrequencyMask.h \
 	Pulsar/TimeFrequencySmooth.h \
 	Pulsar/TimeFrequencyZap.h \
+	Pulsar/TwoDeeMedian.h \
 	Pulsar/ZapExtend.h \
 	Pulsar/ZapInterpreter.h
 
@@ -26,6 +27,7 @@ libRFIMitigation_la_SOURCES = \
 	TimeFrequencyMask.C \
 	TimeFrequencySmooth.C \
 	TimeFrequencyZap.C \
+	TwoDeeMedian.C \
 	ZapExtend.C \
 	ZapInterpreter.C
 
