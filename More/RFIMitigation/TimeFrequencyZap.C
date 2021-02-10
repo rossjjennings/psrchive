@@ -13,7 +13,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
-#include "Pulsar/ProfileStatistic.h"
+#include "Pulsar/ArchiveStatistic.h"
 #include "Pulsar/Index.h"
 
 #include <stdio.h>
@@ -37,7 +37,13 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
 
   add( &TimeFrequencyZap::get_statistic,
        &TimeFrequencyZap::set_statistic,
-       "stat", "Profile statistic" );
+       &ArchiveStatistic::get_interface,
+       "stat", "Statistic computed for each subint/chan" );
+
+  add( &TimeFrequencyZap::get_masker,
+       &TimeFrequencyZap::set_masker,
+       &TimeFrequencyMask::get_interface,
+       "mask", "Algorithm used to mask channels" );
 
   add( &TimeFrequencyZap::get_cutoff_threshold,
        &TimeFrequencyZap::set_cutoff_threshold,
@@ -130,24 +136,38 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
 {
   // Only use ProfileStats here.  More specialized things could be 
   // implemented in derived classes.
-  ProfileStats stats;
-  Reference::To<TextInterface::Parser> parser = stats.get_interface();
-  parser->set_prefix_name(false);
+  Reference::To<ProfileStats> stats;
+  Reference::To<TextInterface::Parser> parser;
 
-  if (regions_from_total) 
+  if (expression != "")
   {
-    stats.select_profile(data->total()->get_Profile(0,0,0));
+    stats = new ProfileStats;
+    parser = stats->get_interface();
+    parser->set_prefix_name(false);
+
+    if (regions_from_total) 
+      stats->select_profile(data->total()->get_Profile(0,0,0));
   }
 
+  if (statistic)
+    statistic->set_Archive (data);
+  
   // Eval expression, fill stats array
   for (unsigned isub=0; isub<nsubint; isub++) 
   {
     Integration* subint = data->get_Integration(isub);
+
+    if (statistic)
+      statistic->set_subint (isub);
+    
     for (unsigned ichan=0; ichan<nchan; ichan++) 
     {
       if (mask[idx(isub,ichan)]==0.0)
         continue;
 
+      if (statistic)
+	statistic->set_chan (ichan);
+    
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
         Reference::To<const Profile> prof = subint->get_Profile(pol_i[ipol],ichan);
@@ -155,11 +175,12 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
         float fval = 0;
         if (statistic)
         {
-          fval = statistic->get(prof);
+	  statistic->set_pol (ipol);
+          fval = statistic->get();
         }
         else
         {
-          stats.set_Profile(prof);
+          stats->set_Profile(prof);
           string val = process(parser,expression);
           fval = fromstring<float>(val);
         }
@@ -193,19 +214,34 @@ void Pulsar::TimeFrequencyZap::update_mask ()
   masker->update_mask(mask, stat, smoothed, nsubint, nchan, npol);
 }
 
-//! Set the profile statistic
-void Pulsar::TimeFrequencyZap::set_statistic (const std::string& name)
+//! Set the statistic
+void Pulsar::TimeFrequencyZap::set_statistic (ArchiveStatistic* stat)
 {
-  statistic = ProfileStatistic::factory (name);
+  statistic = stat;
+  expression = "";
   regions_from_total = false;
 }
 
-//! Get the profile statistic
-std::string Pulsar::TimeFrequencyZap::get_statistic () const
+void Pulsar::TimeFrequencyZap::set_expression (const std::string& exp)
 {
-  if (!statistic)
-    return "none";
-
-  return statistic->get_identity();
+  expression = exp;
+  statistic = 0;
 }
 
+//! Get the statistic
+Pulsar::ArchiveStatistic* Pulsar::TimeFrequencyZap::get_statistic () const
+{
+  return statistic;
+}
+
+//! Set the masker
+void Pulsar::TimeFrequencyZap::set_masker (TimeFrequencyMask* mask)
+{
+  masker = mask;
+}
+
+//! Get the masker
+Pulsar::TimeFrequencyMask* Pulsar::TimeFrequencyZap::get_masker () const
+{
+  return masker;
+}

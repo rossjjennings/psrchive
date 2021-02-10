@@ -139,3 +139,20 @@ void Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
   }
 
 }
+
+//! Get the text interface to the configuration attributes
+TextInterface::Parser* Pulsar::SumThreshold::get_interface ()
+{
+  return new Interface (this);
+}
+
+Pulsar::SumThreshold::Interface::Interface (SumThreshold* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &SumThreshold::get_threshold,
+       &SumThreshold::set_threshold,
+       "cutoff", "Outlier threshold [sigma]" );
+}
+

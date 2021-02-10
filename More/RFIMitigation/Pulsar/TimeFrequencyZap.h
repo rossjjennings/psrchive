@@ -16,7 +16,7 @@
 
 namespace Pulsar {
 
-  class ProfileStatistic;
+  class ArchiveStatistic;
 
   //! Find bad data using a statistic vs time and frequency
   /*! Base class for algorithms that compute a statistic as a function
@@ -42,16 +42,22 @@ namespace Pulsar {
       };
 
       //! Set the statistical expression
-      void set_expression (const std::string& exp) { expression = exp; }
+      void set_expression (const std::string&);
 
       //! Get the statistical expression
       std::string get_expression () const { return expression; }
+    
+      //! Set the statistic
+      void set_statistic (ArchiveStatistic*);
 
-      //! Set the profile statistic
-      void set_statistic (const std::string&);
+      //! Get the statistic
+      ArchiveStatistic* get_statistic () const;
 
-      //! Get the profile statistic
-      std::string get_statistic () const;
+      //! Set the masker
+      void set_masker (TimeFrequencyMask*);
+
+      //! Get the masker
+      TimeFrequencyMask* get_masker () const;
 
       //! Set the cut-off threshold
       void set_cutoff_threshold (float t) { masker->set_threshold(t); }
@@ -77,7 +83,7 @@ namespace Pulsar {
       std::string expression;
 
       //! The statistic to be derived from each profile
-      Reference::To<ProfileStatistic> statistic;
+      Reference::To<ArchiveStatistic> statistic;
 
       //! Use the archive total profile to determine on/off pulse regions
       bool regions_from_total;

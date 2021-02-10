@@ -24,6 +24,12 @@ namespace Pulsar {
 
     public:
 
+      //! Create a new instance of TimeFrequencyMask based on name
+      static TimeFrequencyMask* factory (const std::string& name);
+
+      //! Returns a list of available TimeFrequencyMask children
+      static const std::vector<TimeFrequencyMask*>& children ();
+
       TimeFrequencyMask() {};
 
       //! Update the mask.
@@ -38,16 +44,26 @@ namespace Pulsar {
           std::vector<float> &stat, std::vector<float> &model,
           unsigned nsubint, unsigned nchan, unsigned npol) = 0;
 
-      void set_threshold (float t) { threshold = t; }
-      float get_threshold () const { return threshold; }
+      virtual void set_threshold (float t) { threshold = t; }
+      virtual float get_threshold () const { return threshold; }
+
+      //! Return a text interface that can be used to configure this instance
+      virtual TextInterface::Parser* get_interface () { return 0; }
+
+      //! Derived types must also define clone method
+      virtual TimeFrequencyMask* clone () const = 0;
 
     protected:
 
       float threshold;
 
-
-
+    private:
+      static void build ();
   };
+
+  std::ostream& operator<< (std::ostream&, TimeFrequencyMask*);
+
+  std::istream& operator>> (std::istream&, TimeFrequencyMask*&);
 
 }
 

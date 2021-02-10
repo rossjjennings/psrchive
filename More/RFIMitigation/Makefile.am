@@ -23,6 +23,7 @@ libRFIMitigation_la_SOURCES = \
 	Mower.C \
 	RobustMower.C \
 	SumThreshold.C \
+	TimeFrequencyMask.C \
 	TimeFrequencySmooth.C \
 	TimeFrequencyZap.C \
 	ZapExtend.C \
