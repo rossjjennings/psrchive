@@ -10,9 +10,11 @@
 #
 # This macro tries to link a test program using
 #
+#    -lreadline 
+#
+# If that fails, it then tries:
+#
 #    -lreadline -ltermcap
-#
-#
 #
 # ----------------------------------------------------------
 AC_DEFUN([SWIN_LIB_READLINE],
@@ -22,7 +24,7 @@ AC_DEFUN([SWIN_LIB_READLINE],
   AC_MSG_CHECKING([for GNU readline installation])
 
   READLINE_CFLAGS=""
-  READLINE_LIBS="-lreadline -ltermcap"
+  READLINE_LIBS="-lreadline"
 
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"
@@ -34,6 +36,16 @@ AC_DEFUN([SWIN_LIB_READLINE],
                #include <readline/history.h>],
               [readline(0); rl_completion_matches(0,0);],
               have_readline=yes, have_readline=no)
+
+  if test $have_readline = no; then
+    READLINE_LIBS="-lreadline -ltermcap"
+    LIBS="$ac_save_LIBS $READLINE_LIBS"
+    AC_TRY_LINK([#include <stdio.h>
+                 #include <readline/readline.h>
+                 #include <readline/history.h>],
+                [readline(0); rl_completion_matches(0,0);],
+                have_readline=yes, have_readline=no)
+  fi
 
   AC_MSG_RESULT($have_readline)
 
