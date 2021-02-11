@@ -694,7 +694,7 @@ public:
   double get (const vector<double>& data)
   {
     vector<float> fps;
-    power_spectral_density (data, fps);
+    double med = median_upper_harmonic (data, &fps);
 
     unsigned istart = 1; // skip DC
     
@@ -703,6 +703,9 @@ public:
     double entropy = 0;
     for (unsigned i=istart; i < fps.size(); i++)
       {
+	if (fps[i] < med)
+	  continue;
+	
 	double p = fps[i] / sum;
 	entropy -= p * log(p);
       }
