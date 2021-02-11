@@ -48,14 +48,6 @@ void central_moments (vector<double> data, vector<double>& mu)
   }
 }
 
-template<typename T>
-T median (vector<T> data)
-{
-  unsigned mid = data.size() / 2;
-  std::nth_element( data.begin(), data.begin()+mid, data.end() );
-  return data[mid];
-}
-
 void power_spectral_density (const vector<double>& data, vector<float>& fps)
 {
   vector<float> copy (data.begin(), data.end());
