@@ -33,6 +33,9 @@ Pulsar::ZapExtend::Interface::Interface (ZapExtend* instance)
        &ZapExtend::set_freq_cutoff,
        "fcutoff", "Threshold (0->1) along freq direction" );
 
+  add( &ZapExtend::get_report,
+       &ZapExtend::set_report,
+       "report", "Print one-line report to stdout" );
 }
 
 // defined in More/General/standard_interface.C
@@ -42,6 +45,7 @@ Pulsar::ZapExtend::ZapExtend ()
 {
   time_cutoff = 0.8;
   freq_cutoff = 0.8;
+  report = false;
 }
 
 void Pulsar::ZapExtend::transform (Archive* archive)
@@ -54,24 +58,43 @@ void Pulsar::ZapExtend::transform (Archive* archive)
   tcount.resize(nchan, 0);
   fcount.resize(nsubint, 0);
 
-  for (unsigned isub=0; isub<nsubint; isub++) {
+  unsigned nonzapped = 0;
+  
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
     Integration *subint = archive->get_Integration(isub);
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
-      if (subint->get_weight(ichan) == 0.0) {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      if (subint->get_weight(ichan) == 0.0)
+      {
         tcount[ichan]++;
         fcount[isub]++;
       }
+      else
+	nonzapped ++;
     }
   }
 
-  for (unsigned isub=0; isub<nsubint; isub++) {
+  unsigned zapped = 0;
+  
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
     Integration *subint = archive->get_Integration(isub);
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      if (subint->get_weight(ichan) == 0.0)
+	continue;
+      
       if ( (tcount[ichan] > (time_cutoff*nsubint)) 
-          || (fcount[isub] > (freq_cutoff*nchan)) ) {
+          || (fcount[isub] > (freq_cutoff*nchan)) )
+      {
         subint->set_weight(ichan, 0.0);
+	zapped ++;
       }
     }
   }
 
+  if (report)
+    cout << "extend tested=" << nonzapped << " masked=" << zapped
+	 << " %=" << (zapped*100.0)/nonzapped << endl;
 }

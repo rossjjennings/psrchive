@@ -50,6 +50,12 @@ namespace Pulsar {
       //! Get the cutoff for freq-direction
       float get_freq_cutoff () const { return freq_cutoff; }
 
+      //! Set flag to print a one-line report
+      void set_report (bool flag = true) { report = flag; }
+
+      //! Get flag to print a one-line report
+      bool get_report () const { return report; }
+
     protected:
 
       //! threshold for time-direction
@@ -58,6 +64,7 @@ namespace Pulsar {
       //! threshold for freq-direction
       float freq_cutoff;
 
+      bool report;
   };
 
 }
