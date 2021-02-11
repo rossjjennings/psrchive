@@ -58,6 +58,8 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
     return;
   }
 
+  index.clear();
+
   string::size_type length = name.length();
 
   string range = name;
