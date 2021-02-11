@@ -46,11 +46,6 @@ namespace Pulsar {
 
     //! Derived types must also define clone method
     virtual ArchiveStatistic* clone () const = 0;
-
-  private:
-
-    //! thread-safe build for factory
-    static void build (); 
   };
 
   std::ostream& operator<< (std::ostream&, ArchiveStatistic*);

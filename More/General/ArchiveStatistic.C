@@ -73,7 +73,6 @@ class BinaryStatisticSummary : public Identifiable::Proxy<ArchiveStatistic>
   //! A robust estimate of standard deviation of each profile
   std::vector<double> rms;
 
-  
 public:
 
   BinaryStatisticSummary (BinaryStatistic* my_stat)
@@ -86,6 +85,11 @@ public:
     set_pol (Index(0, true));
 
     summary = UnaryStatistic::factory ("median");
+
+#if _DEBUG
+    cerr << "BinaryStatisticSummary my_stat=" << stat->get_identity()
+	 << " summary=" << summary->get_identity() << endl;
+#endif
   }
 
   void set_Archive (const Archive* arch)
@@ -108,15 +112,20 @@ public:
     return result[isubint][ichan];
   }
 
-  void build ()
+  void build () try
   {
     const Archive* arch = get_Archive();
     unsigned nsubint = arch->get_nsubint();
-    unsigned nchan = arch->get_nsubint();
+    unsigned nchan = arch->get_nchan();
 
     result * nsubint * nchan;
     temp * nsubint * nsubint;
 
+#ifdef _DEBUG
+    cerr << "BinaryStatisticSummary::build nsubint=" << nsubint
+	 << " nchan=" << nchan << endl;
+#endif
+    
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       set_chan (ichan);
@@ -171,6 +180,10 @@ public:
 	  for (double& element : jdata)
 	    element /= rms[jsubint];
 
+#ifdef _DEBUG
+	  cerr << "calling BinaryStatistic::get" << endl;
+#endif
+	  
 	  double val = stat->get (idata, jdata);
 
 	  temp[isubint][jsubint] = temp[jsubint][isubint] = val;
@@ -203,6 +216,10 @@ public:
 
     built = true;
   }
+  catch (Error& error)
+    {
+      cerr << error << endl;
+    }
   
   class Interface : public TextInterface::To<BinaryStatisticSummary>
   {
@@ -249,7 +266,9 @@ Pulsar::ArchiveStatistic::ArchiveStatistic (const string& name,
 
 static std::vector< Pulsar::ArchiveStatistic* >* instances = NULL;
 
-void Pulsar::ArchiveStatistic::build ()
+using namespace Pulsar;
+
+static void instances_build ()
 {
   // ThreadContext::Lock lock (context);
 
@@ -258,7 +277,7 @@ void Pulsar::ArchiveStatistic::build ()
 
   // cerr << "Pulsar::ArchiveStatistic::build" << endl;
  
-  instances = new std::vector< ArchiveStatistic* >;
+  instances = new std::vector< Pulsar::ArchiveStatistic* >;
  
   unsigned start_count = instance_count;
  
@@ -282,7 +301,7 @@ Pulsar::ArchiveStatistic::factory (const std::string& name)
   // cerr << "Pulsar::ArchiveStatistic::factory instances=" << instances << endl;
 
   if (instances == NULL)
-    build ();
+    instances_build ();
 
   assert (instances != NULL);
 
