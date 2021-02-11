@@ -156,9 +156,11 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
     string ret;
     
     if (statistic)
-      ret += "stat=" + statistic->get_identity() + " ";
+      ret += "stat=" + statistic->get_identity();
+    else
+      ret += "exp=" + expression;
 
-    ret += "tested=" + tostring(nonmasked)
+    ret += " tested=" + tostring(nonmasked)
       + " iter=" + tostring(iter)
       + " masked=" + tostring(total_masked) 
       + " %=" + tostring((total_masked)*100.0/nonmasked);
