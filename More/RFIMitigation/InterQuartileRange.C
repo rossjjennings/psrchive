@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <numeric>
 #include <utility>
+#include <cassert>
 
 // #define _DEBUG 1
 
