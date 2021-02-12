@@ -11,6 +11,7 @@
 #include "Pulsar/CalibratorExtension.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/FITSHdrExtension.h"
 
 using namespace std;
 
@@ -132,8 +133,21 @@ Pulsar::Archive* Pulsar::Calibrator::new_solution (const string& arclass) const
   output -> copy (*calibrator);
 
   output -> set_type (Signal::Calibrator);
-  output -> resize (0);
   output -> add_extension (ext);
+
+  output -> resize (0);
+
+  /* After deleting the sub-integrations, there will be no SUBINT table to 
+     override the possibly incorrect values of OBSFREQ, OBSBW, and OBSNCHAN
+     in the FITS header */
+
+  FITSHdrExtension* hdr = output->get<FITSHdrExtension>();
+  if (hdr)
+  {
+    hdr->obsfreq = output->get_centre_frequency();
+    hdr->obsbw = output->get_bandwidth ();
+    hdr->obsnchan = output->get_nchan ();
+  }
 
   return output.release();
 }
