@@ -55,6 +55,8 @@
 #include "Pulsar/PeakCumulative.h"
 #include "Pulsar/PeakConsecutive.h"
 
+#include "Pulsar/ArchiveStatistic.h"
+
 #if HAVE_CFITSIO
 #include <fitsio.h>
 #endif
@@ -240,7 +242,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TextParameters.h"
 %include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
-
 
 %include "Pulsar/BackendCorrection.h"
 %include "Pulsar/FrontendCorrection.h"
@@ -714,6 +715,33 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return (PyObject *)arr;
     }
 
+    // Return statistic as a numpy array
+    PyObject *get_statistic(std::string statname)
+    {
+        PyArrayObject *arr;
+        npy_intp ndims[3];  // nsubint, npol, nchan
+        int ii, jj, kk;
+
+        Reference::To<Pulsar::ArchiveStatistic> stat = Pulsar::ArchiveStatistic::factory(statname);
+        stat->set_Archive(self);
+
+        ndims[0] = self->get_nsubint();
+        ndims[1] = self->get_npol();
+        ndims[2] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(3, ndims, PyArray_FLOAT);
+        for (ii = 0 ; ii < ndims[0] ; ii++)
+            for (jj = 0 ; jj < ndims[1] ; jj++)
+                for (kk = 0 ; kk < ndims[2] ; kk++)
+                {
+                    stat->set_subint(ii);
+                    stat->set_pol(jj);
+                    stat->set_chan(kk);
+              
+                    ((float *)arr->data)[ii*ndims[1]*ndims[2]+jj*ndims[2]+kk] = \
+                        stat->get();
+                }
+        return (PyObject *)arr;
+    }
     // Return a copy of the predictor
     Pulsar::Predictor* get_predictor() {
       return self->get_model()->clone();
