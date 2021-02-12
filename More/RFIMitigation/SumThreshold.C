@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <numeric>
 #include <utility>
+#include <cassert>
 
 Pulsar::SumThreshold::SumThreshold ()
 {
