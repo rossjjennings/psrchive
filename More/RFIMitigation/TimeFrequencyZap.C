@@ -226,7 +226,7 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
         float fval = 0;
         if (statistic)
         {
-	  statistic->set_pol (ipol);
+	  statistic->set_pol (pol_i[ipol]);
           fval = statistic->get();
         }
         else
