@@ -45,22 +45,43 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
 					    unsigned nchan,
 					    unsigned npol)
 {
-  const unsigned ntot = nsubint * nchan * npol;
+  const unsigned ntest = nsubint * nchan;
+  std::vector<float> dattmp (ntest);
+  std::vector<float> xn (npol);
 
-  // Use IQR to get a robust measure of data/model RMS
-  // Does this need to be done differently per poln?
-  std::vector<float> dattmp;
-  for (unsigned i=0; i<ntot; i++)
-    if (model[i]!=0.0 && stat[i]!=0.0 && mask[i]!=0.0)
-      dattmp.push_back(stat[i]/model[i]);
-  if (dattmp.size()==0) return 0; // everything is masked
-  std::sort(dattmp.begin(), dattmp.end());
-  int qq = dattmp.size() / 4;
-  const float rms = 1.35 * (dattmp[3*qq] - dattmp[qq]);
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    unsigned valid = 0;
 
-  // Cutoff for single-pixel
-  const float x1 = threshold * rms;
-  float xn = x1;
+    for (unsigned isub=0; isub<nsubint; isub++)
+    {
+      for (unsigned ichan=0; ichan<nchan; ichan++)
+      {
+        unsigned idat = isub*nchan*npol + ichan*npol + ipol;
+        unsigned imask = isub*nchan + ichan;
+
+        if (mask[imask] == 0.0)
+          continue;
+
+        if (model[idat]!=0.0 && stat[idat]!=0.0 && mask[imask]!=0.0)
+        {
+          dattmp[valid] = stat[idat]/model[idat];
+          valid++;
+        }
+      }
+    }
+
+    if (valid==0) return 0; // everything is masked
+
+    assert (valid <= ntest);
+
+    std::sort(dattmp.begin(), dattmp.begin() + valid);
+    int qq = valid / 4;
+    float rms = 1.35 * (dattmp[3*qq] - dattmp[qq]);
+
+    // Cutoff for single-pixel
+    xn[ipol] = threshold * rms;
+  }
 
   unsigned total_masked = 0;
   
@@ -96,7 +117,7 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
               wttmp[ichan] = 0.0;
             }
           }
-          sumthreshold1(dattmp,wttmp,nwin,1.0+xn);
+          sumthreshold1(dattmp,wttmp,nwin,1.0+xn[ipol]);
           for (unsigned ichan=0; ichan<nchan; ichan++)
             if (wttmp[ichan]==0.0)
               mask1[isub*nchan + ichan] = 0.0;
@@ -126,7 +147,7 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
               wttmp[isub] = 0.0;
             }
           }
-          sumthreshold1(dattmp,wttmp,nwin,1.0+xn);
+          sumthreshold1(dattmp,wttmp,nwin,1.0+xn[ipol]);
           for (unsigned isub=0; isub<nsubint; isub++)
             if (wttmp[isub]==0.0)
               mask1[isub*nchan + ichan] = 0.0;
@@ -143,7 +164,8 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
       }
 
     // Reduce threshold for next level iteration
-    xn /= 1.5;
+    for (unsigned ipol=0; ipol < npol; ipol++)
+      xn[ipol] /= 1.5;
   }
 
   return total_masked;
