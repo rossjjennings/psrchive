@@ -183,12 +183,11 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
       throw Error (InvalidParam, "Pulsar::Database::Entry",
 		   "Archive has no Integrations");
 
-    // assign the tscrunched epoch to the observation
-    MJD epoch;
-    for (unsigned isub=0; isub < nsubint; isub++)
-      epoch += arch.get_Integration(isub)->get_epoch();
+    // assign the midpoint epoch to the observation
+    MJD epoch1 = arch.get_Integration(0)->get_epoch();
+    MJD epochN = arch.get_Integration(nsubint-1)->get_epoch();
 
-    time = epoch / double(nsubint);
+    time = (epoch1 + epochN) / 2;
   }
 
   position = arch.get_coordinates();
