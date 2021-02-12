@@ -94,8 +94,8 @@ unsigned Pulsar::Integrate<C>::Divided::get_nintegrate () const
 
 template<class C>
 void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
-					unsigned& output_ndivide,
-					unsigned& output_nintegrate) const
+					    unsigned& output_ndivide,
+					    unsigned& output_nintegrate) const
 {
   output_ndivide = 1;
   output_nintegrate = input_ndivide;

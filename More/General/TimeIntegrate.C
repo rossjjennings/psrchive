@@ -83,6 +83,13 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     if (Archive::verbose > 2)
       cerr << "Pulsar::TimeIntegrate::transform isub=" << isub << endl;
 
+    if (isub == start && stop == start + 1)
+    {
+      cerr << "Pulsar::TimeIntegrate::transform skipping"
+	" isub=" << isub << " start=" << start << " stop=" << stop << endl;
+      continue;
+    }
+    
     Integration* result = archive->get_Integration (isub);
     
     // //////////////////////////////////////////////////////////////////////

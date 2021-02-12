@@ -116,6 +116,7 @@ nobase_include_HEADERS = \
 	Pulsar/StatisticsInterface.h \
 	Pulsar/Subtract.h \
         Pulsar/SyntheticPolnProfile.h \
+	Pulsar/TargetDuration.h \
 	Pulsar/TimeAppend.h \
 	Pulsar/TimeIntegrate.h \
         Pulsar/Transformation.h \
@@ -273,6 +274,7 @@ libGeneral_la_SOURCES = \
 	Statistics.C \
 	StatisticsInterface.C \
 	Subtract.C \
+	TargetDuration.C \
 	TimeAppend.C \
 	TimeIntegrate.C \
         Transposer.C \

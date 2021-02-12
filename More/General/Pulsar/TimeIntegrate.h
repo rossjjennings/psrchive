@@ -44,26 +44,27 @@ namespace Pulsar {
     //! The frequency integration operation
     void transform (Archive*);
 
-    //! Policy for producing evenly spaced frequency channel ranges
+    //! Policy for producing evenly spaced sub-integration ranges
     class EvenlySpaced;
 
-    //! Policy for producing evenly distributed frequency channel ranges
+    //! Policy for producing evenly distributed sub-integration ranges
     class EvenlyWeighted;
 
+    //! Policy for producing sub-integrations of a specified duration
+    class TargetDuration;
   };
 
   class TimeIntegrate::EvenlySpaced :
     public Integrate<Archive>::EvenlySpaced
   {
-    unsigned get_size (const Archive* sub) { return sub->get_nsubint(); }
+    unsigned get_size (const Archive* arch) { return arch->get_nsubint(); }
   };
 
   class TimeIntegrate::EvenlyWeighted : 
     public Integrate<Archive>::EvenlyWeighted
   {
-    unsigned get_size (const Archive* sub) { return sub->get_nsubint(); }
+    unsigned get_size (const Archive* arch) { return arch->get_nsubint(); }
   };
-
 
 }
 

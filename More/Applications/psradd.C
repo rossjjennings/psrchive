@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002-2010 by Willem van Straten
+ *   Copyright (C) 2002 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -13,6 +13,9 @@
 #include "Pulsar/FrequencyAppend.h"
 #include "Pulsar/PatchTime.h"
 #include "Pulsar/PatchFrequency.h"
+
+#include "Pulsar/TimeIntegrate.h"
+#include "Pulsar/TargetDuration.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -136,9 +139,13 @@ private:
 
   // tscrunch+unload when certain limiting conditions are met
   bool auto_add;
+  
   // enable use of the conditioned unloading without tscrunching
   bool auto_add_tscrunch;
 
+  // partially tscrunch until sub-integrations have this duration
+  double tscrunch_seconds;
+  
   // reset the total to the current archive
   bool reset_total;
 };
@@ -177,6 +184,8 @@ psradd::psradd () : Pulsar::Application ("psradd",
   auto_add = false; 
   auto_add_tscrunch = true;
 
+  tscrunch_seconds = 0.0;
+  
   reset_total = true;
 }
 
@@ -246,6 +255,9 @@ void psradd::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (tscrunch_total, 'T');
   arg->set_help ("Tscrunch result after each new file added");
+
+  arg = menu.add (tscrunch_seconds, "tsub", "seconds");
+  arg->set_help ("Tscrunch subints to this length after each new file added");
 
   // backward compatibility: -s == -T
   menu.add( new CommandLine::Alias( arg, 's' ) );
@@ -334,7 +346,7 @@ void psradd::setup ()
     throw Error (InvalidState, "psradd::setup",
 		 "cannot combine AUTO ADD features with -R option");
 
-  if (auto_add && tscrunch_total)
+  if (auto_add && (tscrunch_total || tscrunch_seconds > 0.0))
     throw Error (InvalidState, "psradd::setup",
 		 "cannot combine AUTO ADD features with -T option\n");
 
@@ -482,11 +494,21 @@ void psradd::process (Pulsar::Archive* archive)
 
     // tscrunch the archive
     total->tscrunch();
-    
-    if (very_verbose)
-      cerr << "psradd: after tscrunch, instance count = " 
-	   << Reference::Able::get_instance_count() << endl;
   }
+  else if (tscrunch_seconds)
+  {
+    if (verbose) cerr << "psradd: tscrunch subints"
+		   " to " << tscrunch_seconds << " seconds" << endl;
+
+    Pulsar::TimeIntegrate operation;
+    Pulsar::TimeIntegrate::TargetDuration policy (tscrunch_seconds);
+    operation.set_range_policy( &policy );
+    operation.transform (total);
+  }
+  
+  if (very_verbose)
+    cerr << "psradd:process returning with instance count = " 
+	 << Reference::Able::get_instance_count() << endl;
 }
 
 void psradd::finalize ()
