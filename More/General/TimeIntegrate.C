@@ -52,7 +52,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
   range_policy->initialize (this, archive);
   unsigned output_nsub = range_policy->get_nrange();
 
-  if (archive_nsub <= 1 || output_nsub >= archive_nsub)
+  if (archive_nsub < 2 || output_nsub >= archive_nsub)
   {
     if (Archive::verbose > 2) 
       cerr << "Pulsar::TimeIntegrate::transform nothing to do" << endl;
@@ -81,12 +81,13 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     range_policy->get_range (isub, start, stop);
 
     if (Archive::verbose > 2)
-      cerr << "Pulsar::TimeIntegrate::transform isub=" << isub << endl;
+      cerr << "Pulsar::TimeIntegrate::transform isub=" << isub 
+	   << " start=" << start << " stop=" << stop << endl;
 
     if (isub == start && stop == start + 1)
     {
-      cerr << "Pulsar::TimeIntegrate::transform skipping"
-	" isub=" << isub << " start=" << start << " stop=" << stop << endl;
+      if (Archive::verbose > 2)
+	cerr << "Pulsar::TimeIntegrate::transform skipping" << endl;
       continue;
     }
     
