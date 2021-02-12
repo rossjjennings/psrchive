@@ -840,8 +840,9 @@ void Pulsar::Database::add (const Entry& entry) try
   {
     if (entries[ie].filename == entry.filename)
     {
-      cerr << "Pulsar::Database::add ignoring duplicate entry: \n\t"
+      cerr << "Pulsar::Database::add replacing current entry: \n\t"
            << entry.filename << endl;
+      entries[ie] = entry;
       return;
     }
     else if (entries[ie] == entry)
