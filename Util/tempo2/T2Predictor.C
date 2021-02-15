@@ -14,6 +14,8 @@
 #include "FilePtr.h"
 #include "Error.h"
 
+#include <math.h>
+
 //#include <vector>
 using namespace std;
 
@@ -80,6 +82,40 @@ long double Tempo2::Predictor::get_segment_length () const
     - predictor.modelset.cheby.segments[0].mjd_start;
 }
 
+void sanity_check (const string& context, const Cheby2D& cheby)
+{
+  const int nx = cheby.nx;
+  const int ny = cheby.ny;
+
+  for (int ix=0; ix < nx; ix++)
+    for (int iy=0; iy < ny; iy++)
+    {
+#if _DEBUG
+      cerr << "ix="<< ix <<" iy="<< iy <<" "<< cheby.coeff[iy*nx+ix] << endl;
+#endif
+
+      if (isnanl (cheby.coeff[iy*nx+ix]))
+        throw Error (InvalidState, context + " sanity check",
+                     "NaN coefficent ix=%d iy=%d", ix, iy);
+
+      if (!finitel (cheby.coeff[iy*nx+ix]))
+        throw Error (InvalidState, context + " sanity check",
+                     "not finite coefficent ix=%d iy=%d", ix, iy);
+    }
+}
+
+void Tempo2::Predictor::sanity_check (const char* context) const
+{
+  string sub_context = context;
+
+  for (unsigned iseg=0; iseg < predictor.modelset.cheby.nsegments; iseg++)
+  {
+    ChebyModel& seg = predictor.modelset.cheby.segments[iseg];
+    ::sanity_check (sub_context + " (phase)", seg.cheby);
+    ::sanity_check (sub_context + " (freq)", seg.frequency_cheby);
+  }
+}
+
 //! Add the information from the supplied predictor to self
 void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 {
@@ -92,6 +128,8 @@ void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 		 "Predictor is not a Tempo2 Predictor");
 
   T2Predictor_Insert (&predictor, &t2p->predictor);
+
+  sanity_check ("Tempo2::Predictor::insert after T2Predictor_Insert");
 }
 
 void Tempo2::Predictor::keep (const std::vector<MJD>& epochs)
@@ -107,6 +145,8 @@ void Tempo2::Predictor::keep (const std::vector<MJD>& epochs)
     cerr << "Tempo2::Predictor::keep BEFORE nsegments=" << predictor.modelset.cheby.nsegments << endl;
 
   T2Predictor_Keep (&predictor, mjds.size(), &(mjds[0]));
+
+  sanity_check ("Tempo2::Predictor::keep after T2Predictor_Keep");
 
   if (verbose)
     cerr << "Tempo2::Predictor::keep AFTER nsegments=" << predictor.modelset.cheby.nsegments << endl; 
@@ -266,7 +306,8 @@ Pulsar::Phase Tempo2::Predictor::phase (const MJD& t) const
 		 "epoch %s not spanned by ChebyModelSet",
 		 t.printdays(20).c_str());
 
-  if (!isfinite(p)) {
+  if (!isfinite(p))
+  {
     Error error (InvalidState, "Tempo2::Predictor::phase",
 		 "T2Predictor_GetPhase result = ");
     error << p;
@@ -302,6 +343,8 @@ void Tempo2::Predictor::load (FILE* fptr)
     throw Error (InvalidParam, "Tempo2::Predictor::load",
                  "failed T2Predictor_FRead");
 
+  sanity_check ("Tempo2::Predictor::load after T2Predictor_FRead");
+
   observing_frequency = 0.5L *
     (T2Predictor_GetStartFreq(&predictor)+T2Predictor_GetEndFreq(&predictor));
 
@@ -312,6 +355,8 @@ void Tempo2::Predictor::load (FILE* fptr)
 
 void Tempo2::Predictor::unload (FILE* fptr) const
 {
+  sanity_check ("Tempo2::Predictor::unload before T2Predictor_FWrite");
+
   T2Predictor_FWrite (&predictor, fptr);
 }
 

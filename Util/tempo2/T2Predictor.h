@@ -99,6 +99,9 @@ namespace Tempo2 {
     //! Unload to an open stream
     void unload (FILE*) const;
 
+    //! Perform a sanity check on the T2Predictor
+    void sanity_check (const char* context) const;
+
   private:
 
     friend class Generator;
