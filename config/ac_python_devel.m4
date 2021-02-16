@@ -39,16 +39,16 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 
 	AC_MSG_RESULT([$python_path])
 	if test -z "$python_path" ; then
-		AC_MSG_ERROR([cannot find Python include path])
-	fi
+		AC_MSG_WARN([cannot find Python include path])
+	else
 
 	# Check for numpy
 	AC_MSG_CHECKING([for Numpy include path])
 	numpy_include=`$PYTHON -c "import numpy; print(numpy.get_include())"`
 	AC_MSG_RESULT([$numpy_include])
 	if test -z "$numpy_include" ; then
-		AC_MSG_ERROR([cannot find Numpy include path])
-	fi
+		AC_MSG_WARN([cannot find Numpy include path])
+	else
 
 	# Output full include path
 	AC_SUBST([PYTHON_CPPFLAGS],["-I$python_path -I$numpy_include"])
@@ -67,8 +67,8 @@ done
 	python_path=`echo $python_path | sed "s,/libpython.*$,,"`
 	AC_MSG_RESULT([$python_path])
 	if test -z "$python_path" ; then
-		AC_MSG_ERROR([cannot find Python library path])
-	fi
+		AC_MSG_WARN([cannot find Python library path])
+	else
         # This seems to fix segfaults on some Mac OSX python versions
         # where python was statically linked.  See discussion in:
         # https://github.com/shogun-toolbox/shogun/issues/4068
@@ -89,5 +89,8 @@ done
                 conf = distutils.sysconfig.get_config_var; \
                 print(conf('LOCALMODLIBS')+' '+conf('LIBS'))"`
 	AC_MSG_RESULT([$PYTHON_EXTRA_LIBS])
+        fi
+        fi
+        fi
 	AC_SUBST(PYTHON_EXTRA_LIBS)
 ])
