@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2020 by Willem van Straten
+ *   Copyright (C) 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,9 +10,6 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
-
-#include "BinaryStatistic.h"
-#include "ndArray.h"
 
 #include <algorithm>
 #include <cassert>
@@ -60,191 +57,6 @@ public:
   { return new ProfileStatisticWrapper(*this); }
 };
 
-class BinaryStatisticSummary : public Identifiable::Proxy<ArchiveStatistic>
-{
-  Reference::To<BinaryStatistic> stat;
-  bool built;
-
-  ndArray<2,double> result;
-  ndArray<2,double> temp;
-
-  Reference::To<UnaryStatistic> summary;
-
-  //! A robust estimate of standard deviation of each profile
-  std::vector<double> rms;
-
-public:
-
-  BinaryStatisticSummary (BinaryStatistic* my_stat)
-    : Identifiable::Proxy<ArchiveStatistic> (my_stat)
-  {
-    stat = my_stat;
-    built = false;
-
-    // by default, sum over polarizations
-    set_pol (Index(0, true));
-
-    summary = UnaryStatistic::factory ("median");
-
-#if _DEBUG
-    cerr << "BinaryStatisticSummary my_stat=" << stat->get_identity()
-	 << " summary=" << summary->get_identity() << endl;
-#endif
-  }
-
-  void set_Archive (const Archive* arch)
-  {
-    if (!archive || archive != arch)
-    {
-      built = false;
-      HasArchive::set_Archive (arch);
-    }
-  }
-  
-  double get ()
-  {
-    if (!built)
-      build ();
-
-    unsigned isubint = get_subint().get_value();
-    unsigned ichan = get_chan().get_value();
-    
-    return result[isubint][ichan];
-  }
-
-  void build () try
-  {
-    const Archive* arch = get_Archive();
-    unsigned nsubint = arch->get_nsubint();
-    unsigned nchan = arch->get_nchan();
-
-    result * nsubint * nchan;
-    temp * nsubint * nsubint;
-
-#ifdef _DEBUG
-    cerr << "BinaryStatisticSummary::build nsubint=" << nsubint
-	 << " nchan=" << nchan << endl;
-#endif
-    
-    for (unsigned ichan=0; ichan < nchan; ichan++)
-    {
-      set_chan (ichan);
-
-      rms.resize (nsubint, 0.0);
-      unsigned irms=0;
-    
-      for (unsigned isubint=0; isubint < nsubint; isubint++)
-      {
-	set_subint (isubint);
-	
-	Reference::To<const Profile> iprof = get_Profile ();
-
-	if (iprof->get_weight() == 0.0)
-	{
-	  result[isubint][ichan] = 0.0;
-	  continue;
-	}
-	
-	vector<double> idata (iprof->get_amps(),
-			      iprof->get_amps() + iprof->get_nbin());
-
-	if (irms < isubint)
-	{
-	  irms = isubint;
-	  rms[irms] = sqrt( robust_variance (idata) );
-	}
-
-	for (double& element : idata)
-	  element /= rms[isubint];
-
-	for (unsigned jsubint=isubint+1; jsubint < nsubint; jsubint++)
-	{
-	  set_subint (jsubint);
-	  Reference::To<const Profile> jprof = get_Profile ();
-	  
-	  if (jprof->get_weight() == 0.0)
-	  {
-	    temp[isubint][jsubint] = temp[jsubint][isubint] = 0.0;
-	    continue;
-	  }
-
-	  vector<double> jdata (jprof->get_amps(),
-				jprof->get_amps() + jprof->get_nbin());
-
-	  if (irms < jsubint)
-	  {
-	    irms = jsubint;
-	    rms[irms] = sqrt( robust_variance (jdata) );
-	  }
-	
-	  for (double& element : jdata)
-	    element /= rms[jsubint];
-
-#ifdef _DEBUG
-	  cerr << "calling BinaryStatistic::get" << endl;
-#endif
-	  
-	  double val = stat->get (idata, jdata);
-
-	  temp[isubint][jsubint] = temp[jsubint][isubint] = val;
-	}
-
-	std::vector<double> data (nsubint-1);
-	unsigned ndat = 0;
-	
-	for (unsigned jsubint=0; jsubint < nsubint; jsubint++)
-	{
-	  if (jsubint == isubint)
-	    continue;
-
-	  if (temp[isubint][jsubint] == 0.0)
-	    continue;
-	  
-	  data[ndat] = temp[isubint][jsubint];
-	  ndat ++;
-	}
-
-	if (ndat == 0)
-	  result[isubint][ichan] = 0.0;
-	else
-	{
-	  data.resize (ndat);
-	  result[isubint][ichan] = summary->get(data);
-	}
-      }
-    }
-
-    built = true;
-  }
-  catch (Error& error)
-    {
-      cerr << error << endl;
-    }
-  
-  class Interface : public TextInterface::To<BinaryStatisticSummary>
-  {
-    string name;
-  public:
-
-    std::string get_interface_name () const { return name; }
-
-    //! Default constructor
-    Interface ( BinaryStatisticSummary* _instance )
-      {
-	if (_instance)
-	  set_instance (_instance);
-
-        name = _instance->get_identity ();
-      }
-  };
-  
-  TextInterface::Parser* get_interface () { return new Interface (this); }
-
-  BinaryStatisticSummary* clone () const
-  {
-    return new BinaryStatisticSummary(*this);
-  }
-};
 
 static unsigned instance_count = 0;
 
@@ -263,6 +75,9 @@ Pulsar::ArchiveStatistic::ArchiveStatistic (const string& name,
 }
 
 #include "identifiable_factory.h"
+
+#include "Pulsar/ArchiveComparisons.h"
+#include "BinaryStatistic.h"
 
 static std::vector< Pulsar::ArchiveStatistic* >* instances = NULL;
 
@@ -287,7 +102,7 @@ static void instances_build ()
 
   auto binary_statistics = BinaryStatistic::children ();
   for (auto element : binary_statistics)
-    instances->push_back( new BinaryStatisticSummary (element) );
+    instances->push_back( new ArchiveComparisons (element) );
 
   assert (instances->size() == instance_count - start_count);
 
