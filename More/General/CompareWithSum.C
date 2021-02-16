@@ -22,7 +22,7 @@ void CompareWithSum::compute (ndArray<2,double>& result)
   {
     (data->*primary) (iprimary);
 
-    Reference::To<const Profile> sum;
+    Reference::To<Profile> sum = 0;
     
     for (unsigned icompare=0; icompare < ncompare; icompare++)
     {
@@ -39,7 +39,7 @@ void CompareWithSum::compute (ndArray<2,double>& result)
       if (!sum)
 	sum = iprof->clone();
       else
-	sum->sum (iprof);
+	sum->average (iprof);
     }
 
     if (!sum)
@@ -49,7 +49,6 @@ void CompareWithSum::compute (ndArray<2,double>& result)
 			    sum->get_amps() + sum->get_nbin());
 
     double rms = sqrt( robust_variance (sumdata) );
-
     for (double& element : sumdata)
       element /= rms;
 	      
