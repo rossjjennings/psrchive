@@ -38,7 +38,7 @@ namespace BinaryStatistics {
       // mu1[1] = variance
       
       vector<double> mu2 (2);
-      central_moments (dat1, mu2);
+      central_moments (dat2, mu2);
 
       double coeff = 0.0;
       for (unsigned i=0; i<dat1.size(); i++)
