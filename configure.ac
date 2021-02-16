@@ -204,10 +204,10 @@ if test x"$enable_shared" == xyes -a x"$enable_python" != xno; then
   SWIG_ENABLE_CXX
   SWIG_PYTHON
 else
-  PYTHON=":"
+  have_python="no"
 fi
 
-AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
+AM_CONDITIONAL([HAVE_PYTHON], [test x"$have_python" == xyes])
 AM_CONDITIONAL([HAVE_SWIG], [test x"$SWIG" != x])
 
 ACX_PTHREAD

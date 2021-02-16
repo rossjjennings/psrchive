@@ -20,6 +20,8 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 	#
 	AC_REQUIRE([AM_PATH_PYTHON])
 
+        have_python=no
+
 	# Check for Python include path
 	AC_MSG_CHECKING([for Python include path])
 	python_path=`echo $PYTHON | sed "s,/bin.*$,,"`
@@ -89,8 +91,10 @@ done
                 conf = distutils.sysconfig.get_config_var; \
                 print(conf('LOCALMODLIBS')+' '+conf('LIBS'))"`
 	AC_MSG_RESULT([$PYTHON_EXTRA_LIBS])
-        fi
-        fi
-        fi
-	AC_SUBST(PYTHON_EXTRA_LIBS)
+        AC_SUBST(PYTHON_EXTRA_LIBS)
+        have_python=yes
+        fi # can find Python library path
+        fi # can find Numpy include path
+        fi # can find Python include path
 ])
+
