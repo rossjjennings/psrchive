@@ -46,6 +46,9 @@ namespace Pulsar {
 	      unsigned iprimary, unsigned icompare,
 	      double value);
 
+    //! Check that necessary attributes have been set
+    void check (const char* context);
+
   public:
 
     CompareWith ();

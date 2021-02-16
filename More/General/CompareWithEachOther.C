@@ -26,6 +26,8 @@ void CompareWithEachOther::set_summary (UnaryStatistic* stat)
 
 void CompareWithEachOther::compute (ndArray<2,double>& result)
 {
+  check ("CompareWithEachOther::compute");
+  
   // reside the temporary ndArray
   temp * ncompare * ncompare;
 
@@ -67,7 +69,7 @@ void CompareWithEachOther::compute (ndArray<2,double>& result)
 
       for (unsigned jcompare=icompare+1; jcompare < ncompare; jcompare++)
       {
-	(data->*compare) (icompare);
+	(data->*compare) (jcompare);
 
 	Reference::To<const Profile> jprof = data->get_Profile ();
 	  
