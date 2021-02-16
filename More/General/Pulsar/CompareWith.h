@@ -13,6 +13,7 @@
 
 #include "Pulsar/HasArchive.h"
 #include "ndArray.h"
+#include "ReferenceAble.h"
 
 class BinaryStatistic;
 class UnaryStatistic;
@@ -21,7 +22,7 @@ namespace Pulsar {
 
   //! Loops over two dimensions of an Archive, comparing profiles
   /*! Uses a BinaryStatistic to compare profiles */
-  class CompareWith
+  class CompareWith : public Reference::Able
   {
   protected:
     

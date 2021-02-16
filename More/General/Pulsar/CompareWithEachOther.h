@@ -12,7 +12,6 @@
 #define __CompareWithEachOther_h
 
 #include "Pulsar/CompareWith.h"
-#include "ndArray.h"
 
 class UnaryStatistic;
 

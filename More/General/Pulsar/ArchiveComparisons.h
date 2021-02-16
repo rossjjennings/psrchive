@@ -36,11 +36,21 @@ namespace Pulsar {
 
     ArchiveComparisons* clone () const;
 
+    const std::string& get_what () const { return what; }
+    void set_what (const std::string& t) { what = t; }
+
+    const std::string& get_way () const { return way; }
+    void set_way (const std::string& t) { way = t; }
+    
   protected:
     
     Reference::To<BinaryStatistic> stat;
-
     ndArray<2,double> result;
+
+    // what to compare
+    std::string what;
+    // dimension along which to compare
+    std::string way;
 
     void build ();
     bool built;

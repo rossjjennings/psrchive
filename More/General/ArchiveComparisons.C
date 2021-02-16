@@ -6,7 +6,9 @@
  ***************************************************************************/
 
 #include "Pulsar/ArchiveComparisons.h"
+
 #include "Pulsar/CompareWithEachOther.h"
+#include "Pulsar/CompareWithSum.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -29,6 +31,9 @@ ArchiveComparisons::ArchiveComparisons (BinaryStatistic* my_stat)
   // by default, sum over polarizations
   set_pol (Index(0, true));
 
+  what = "each";
+  way = "time";
+  
 #if _DEBUG
   cerr << "ArchiveComparisons my_stat=" << stat->get_identity()
        << " summary=" << summary->get_identity() << endl;
@@ -68,14 +73,34 @@ void ArchiveComparisons::build () try
   
   result * nsubint * nchan;
   
-  CompareWithEachOther* compare = new CompareWithEachOther;
+  Reference::To<CompareWith> compare;
   
-  compare->set_statistic (stat);
+  if (what == "each")
+    compare = new CompareWithEachOther;
+  else if (what == "sum")
+    compare = new CompareWithSum;
+  else
+    throw Error (InvalidState, "ArchiveComparisons::build",
+		 "'what' must be 'each' or 'sum'");
+
+  if (way == "time")
+  {
+    compare->set_primary (nchan, &HasArchive::set_chan);
+    compare->set_compare (nsubint, &HasArchive::set_subint);
+    compare->set_transpose (true);
+  }
+  else if (way == "freq")
+  {
+    compare->set_primary (nsubint, &HasArchive::set_subint);
+    compare->set_compare (nchan, &HasArchive::set_chan);
+    compare->set_transpose (false);
+  }
+  else
+    throw Error (InvalidState, "ArchiveComparisons::build",
+		 "way must be 'time' or 'freq'");
+
+compare->set_statistic (stat);
   compare->set_data (this);
-  compare->set_primary (nchan, &HasArchive::set_chan);
-  compare->set_compare (nsubint, &HasArchive::set_subint);
-  compare->set_transpose (true);
-  
   compare->compute (result);
   
   built = true;
@@ -101,6 +126,14 @@ class ArchiveComparisons::Interface
       set_instance (_instance);
     
     name = _instance->get_identity ();
+
+    add( &ArchiveComparisons::get_what,
+	 &ArchiveComparisons::set_what,
+	 "what", "'each' or 'sum'" );
+
+    add( &ArchiveComparisons::get_way,
+	 &ArchiveComparisons::set_way,
+	 "way", "'time' or 'freq'" );
   }
 };
 

@@ -74,8 +74,6 @@ Pulsar::ArchiveStatistic::ArchiveStatistic (const string& name,
   set_description (description);
 }
 
-#include "identifiable_factory.h"
-
 #include "Pulsar/ArchiveComparisons.h"
 #include "BinaryStatistic.h"
 
@@ -109,6 +107,7 @@ static void instances_build ()
   // cerr << "Pulsar::ArchiveStatistic::build instances=" << instances << endl;
 }
 
+#include "interface_factory.h"
 
 Pulsar::ArchiveStatistic*
 Pulsar::ArchiveStatistic::factory (const std::string& name)
@@ -123,7 +122,7 @@ Pulsar::ArchiveStatistic::factory (const std::string& name)
   // cerr << "ArchiveStatistic::factory instances=" << instances << endl;
 
   ArchiveStatistic* stat = 0;
-  stat = identifiable_factory<ArchiveStatistic> (*instances, name);
+  stat = TextInterface::factory<ArchiveStatistic> (*instances, name);
 
   // cerr << "Pulsar::ArchiveStatistic::factory return=" << stat << endl;
   return stat;

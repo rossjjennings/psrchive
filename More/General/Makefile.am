@@ -26,6 +26,7 @@ nobase_include_HEADERS = \
 	Pulsar/Combination.h \
 	Pulsar/CompareWith.h \
 	Pulsar/CompareWithEachOther.h \
+	Pulsar/CompareWithSum.h \
 	Pulsar/Contemporaneity.h \
 	Pulsar/ConvertIsolated.h \
 	Pulsar/Convolve.h \
@@ -175,6 +176,7 @@ libGeneral_la_SOURCES = \
         ChannelSubsetMatch.C \
 	CompareWith.C \
 	CompareWithEachOther.C \
+	CompareWithSum.C \
 	ConvertIsolated.C \
 	Contemporaneity.C \
 	Convolve.C \
