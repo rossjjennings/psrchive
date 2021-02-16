@@ -14,6 +14,7 @@ nobase_include_HEADERS = \
         Pulsar/AdaptiveSNR.h \
         Pulsar/AdaptiveSmooth.h \
         Pulsar/Algorithm.h \
+	Pulsar/ArchiveComparisons.h \
         Pulsar/ArchiveSort.h \
 	Pulsar/ArchiveStatistic.h \
 	Pulsar/ArchiveTemplates.h \
@@ -23,6 +24,9 @@ nobase_include_HEADERS = \
         Pulsar/ChannelWeight.h \
         Pulsar/ColdPlasma.h \
 	Pulsar/Combination.h \
+	Pulsar/CompareWith.h \
+	Pulsar/CompareWithEachOther.h \
+	Pulsar/CompareWithSum.h \
 	Pulsar/Contemporaneity.h \
 	Pulsar/ConvertIsolated.h \
 	Pulsar/Convolve.h \
@@ -137,6 +141,7 @@ libGeneral_la_SOURCES = \
 	Accumulate.C \
         AdaptiveSNR.C \
 	Append.C \
+	ArchiveComparisons.C \
 	ArchiveStatistic.C \
 	ArchiveTemplates.C \
         Archive_append.C \
@@ -169,6 +174,9 @@ libGeneral_la_SOURCES = \
 	BaselineEstimator.C \
         BaselineWindow.C \
         ChannelSubsetMatch.C \
+	CompareWith.C \
+	CompareWithEachOther.C \
+	CompareWithSum.C \
 	ConvertIsolated.C \
 	Contemporaneity.C \
 	Convolve.C \

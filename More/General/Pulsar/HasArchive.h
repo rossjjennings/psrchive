@@ -53,6 +53,12 @@ namespace Pulsar {
     //! Text interface to indeces
     class Interface;
 
+    //! Get the profile defined by the current indeces
+    const Profile* get_Profile () const;
+
+    //! Get the sub-integration defined by the current indeces
+    const Integration* get_Integration () const;
+
   protected:
 
     Reference::To<const Archive, false> archive;
@@ -60,10 +66,8 @@ namespace Pulsar {
     Index ichan;
     Index ipol;
 
-    const Profile* get_Profile () const;
     mutable Reference::To<const Profile, false> profile;
 
-    const Integration* get_Integration () const;
     mutable Reference::To<const Integration, false> integration;
 
     //! Returns true when mutable profile and integration attributes are current
