@@ -93,12 +93,7 @@ void sanity_check (const string& context, const Cheby2D& cheby)
 #if _DEBUG
       cerr << "ix="<< ix <<" iy="<< iy <<" "<< cheby.coeff[iy*nx+ix] << endl;
 #endif
-
-      if (isnanl (cheby.coeff[iy*nx+ix]))
-        throw Error (InvalidState, context + " sanity check",
-                     "NaN coefficent ix=%d iy=%d", ix, iy);
-
-      if (!finitel (cheby.coeff[iy*nx+ix]))
+      if (!isfinite (cheby.coeff[iy*nx+ix]))
         throw Error (InvalidState, context + " sanity check",
                      "not finite coefficent ix=%d iy=%d", ix, iy);
     }
