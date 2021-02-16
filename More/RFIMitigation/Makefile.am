@@ -8,6 +8,7 @@ nobase_include_HEADERS = \
 	Pulsar/LawnMower.h \
 	Pulsar/Mower.h \
 	Pulsar/RobustMower.h \
+	Pulsar/SetThresholds.h \
 	Pulsar/SumThreshold.h \
 	Pulsar/TimeFrequencyMask.h \
 	Pulsar/TimeFrequencySmooth.h \
@@ -23,6 +24,7 @@ libRFIMitigation_la_SOURCES = \
 	LawnMower.C \
 	Mower.C \
 	RobustMower.C \
+	SetThresholds.C \
 	SumThreshold.C \
 	TimeFrequencyMask.C \
 	TimeFrequencySmooth.C \

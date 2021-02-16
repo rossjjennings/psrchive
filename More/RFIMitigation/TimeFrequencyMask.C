@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/TimeFrequencyMask.h"
+
+#include "Pulsar/SetThresholds.h"
 #include "Pulsar/SumThreshold.h"
 #include "Pulsar/InterQuartileRange.h"
 
@@ -28,6 +30,7 @@ void Pulsar::TimeFrequencyMask::build ()
 
   instances = new std::vector< TimeFrequencyMask* >;
  
+  instances->push_back( new SetThresholds );
   instances->push_back( new SumThreshold );
   instances->push_back( new InterQuartileRange );
 }
