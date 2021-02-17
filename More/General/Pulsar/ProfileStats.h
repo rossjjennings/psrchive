@@ -125,7 +125,7 @@ namespace Pulsar
     void set_pulse_width_estimator (const std::string& name);
 
     //! Get the pulse width
-    Phase::Value get_pulse_width () const;
+    ::Phase::Value get_pulse_width () const;
 
     //! Get the text interface of the pulse width estimator
     TextInterface::Parser* get_pulse_width_interface ();
