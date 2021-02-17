@@ -113,10 +113,15 @@ namespace Pulsar {
 		      unsigned chan_offset = 0);
 
       //! compute the relevant statistic
-      virtual void compute_stat();
+      virtual void compute_stat (Archive* data);
 
       //! determine the time/freq mask
       virtual void update_mask();
+
+      //! apply the current mask to the archive
+      void apply_mask (Archive* archive,
+		       unsigned fscrunch_factor = 1,
+		       unsigned chan_offset = 0);
 
       //! The statistical expression
       std::string expression;
@@ -144,9 +149,6 @@ namespace Pulsar {
 
       //! Method to use for constructing the mask
       Reference::To<TimeFrequencyMask> masker;
-
-      //! Copy or reference to the Archive (dedispersed)
-      Reference::To<Archive> data;
 
       //! num channels in the current archive
       unsigned nchan;
@@ -195,9 +197,6 @@ namespace Pulsar {
     
     //! Number of subints/chans zapped during update_mask
     unsigned nmasked;
-
-    //! Number of non-masked subints/chans in input data
-    unsigned nonmasked;
 
     //! The archive that was last cloned and dedispersed
     Reference::To<Archive> last_dedispersed;

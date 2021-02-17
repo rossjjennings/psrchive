@@ -23,6 +23,8 @@
 
 #include <stdio.h>
 
+// #define _DEBUG 1
+
 using namespace std;
 
 // Text interface to TimeFrequencyZap
@@ -166,7 +168,7 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   cerr << "TimeFrequencyZap::transform archive=" << (void*) archive << endl;
 #endif
   
-  data = archive;
+  Reference::To<Archive> data = archive;
   bool cloned = false;
 
   unsigned initial_nonmasked = 0;
@@ -320,17 +322,23 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   // Size arrays
   nchan = data->get_nchan();
   nsubint = data->get_nsubint();
+
   TextInterface::parse_indeces(pol_i, polns, data->get_npol());
   //npol = data->get_npol();
   npol = pol_i.size();
 
+#if _DEBUG
+  cerr << "TimeFrequencyZap::transform nsubint=" << nsubint
+       << " nchan=" << nchan << " npol=" << npol << endl;
+#endif
+  
   freq.resize(nchan*nsubint);
   time.resize(nsubint);
   stat.resize(nchan*nsubint*npol);
   mask.resize(nchan*nsubint);
   MJD ep0 = data->get_Integration(0)->get_epoch();
 
-  // Fill freq and mask arrays from archive, init stat to 0
+  // Fill freq and mask arrays from data, init stat to 0
   for (unsigned isub=0; isub<nsubint; isub++) 
   {
     Integration* subint = data->get_Integration(isub);
@@ -347,12 +355,26 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   }
 
   unsigned iter = 0;
-
+  unsigned nmasked_during_loop = 0;
+  
   do 
   {
-    if (iter == 0 || recompute)
-      compute_stat();
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform iteration=" << iter << endl;
+#endif
 
+    if (iter == 0 || recompute)
+    {
+      if (iter > 0)
+      {
+	apply_mask (data);
+	if (data == archive)
+	  nmasked_during_loop += nmasked;
+      }
+      
+      compute_stat(data);
+    }
+    
     // sets nmasked
     update_mask();
 
@@ -360,36 +382,26 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   }
   while (iter < max_iterations && nmasked > 0);
 
-  // count original archive weights changed to zero
-  nmasked = 0;
-  
-  // apply mask back to original archive
-  for (unsigned isub=0; isub<nsubint; isub++) 
-  {
-    Integration* subint = archive->get_Integration(isub);
-    for (unsigned ichan=0; ichan<nchan; ichan++) 
-    {
-      float wt = mask[idx(isub,ichan)];
-      if (fscrunch_factor > 1 && wt != 0.0)
-      {
-	// change the weights of the original archive only if setting to zero
-	// so that the weights are not set to that of the fscrunched data
-	continue;
-      }
-      for (unsigned jchan=0; jchan < fscrunch_factor; jchan++)
-      {
-	unsigned ch = ichan*fscrunch_factor + jchan + chan_offset;
-	if (wt == 0 && subint->get_weight(ch) != 0)
-	  nmasked ++;
-	subint->set_weight(ch, wt);
-      }
-    }
-  }
+  apply_mask (archive, fscrunch_factor, chan_offset);
+
+  nmasked += nmasked_during_loop;
+
+#if _DEBUG
+  cerr << "TimeFrequencyZap::transform nmasked=" << nmasked << endl;
+#endif
 }
 
-void Pulsar::TimeFrequencyZap::compute_stat ()
+
+
+void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
 {
-  nonmasked = 0;
+#if _DEBUG
+  cerr << "TimeFrequencyZap::compute_stat nsubint=" << nsubint
+       << " nchan=" << nchan << endl;
+#endif
+
+  assert (data->get_nsubint() == nsubint);
+  assert (data->get_nchan() == nchan);
   
   // Only use ProfileStats here.  More specialized things could be 
   // implemented in derived classes.
@@ -421,16 +433,12 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
     {
       if (mask[idx(isub,ichan)]==0.0)
         continue;
-      else
-	nonmasked ++;
-      
+
       if (statistic)
 	statistic->set_chan (ichan);
     
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
-        Reference::To<const Profile> prof = subint->get_Profile(pol_i[ipol],ichan);
-
         float fval = 0;
         if (statistic)
         {
@@ -439,10 +447,18 @@ void Pulsar::TimeFrequencyZap::compute_stat ()
         }
         else
         {
+	  Reference::To<const Profile> prof;
+	  prof = subint->get_Profile(pol_i[ipol],ichan);
+
           stats->set_Profile(prof);
           string val = process(parser,expression);
           fval = fromstring<float>(val);
         }
+
+#if _DEBUG
+	cerr << "isub=" << isub << " ichan=" << ichan << " ipol=" << ipol
+	     << " fval=" << fval << endl;
+#endif
         stat[idx(isub,ichan,ipol)] = fval;
       }
     }
@@ -473,6 +489,46 @@ void Pulsar::TimeFrequencyZap::update_mask ()
 
   nmasked = masker->update_mask(mask, stat, smoothed, nsubint, nchan, npol);
 }
+
+void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
+					   unsigned fscrunch_factor,
+					   unsigned chan_offset)
+{
+#if _DEBUG
+  cerr << "TimeFrequencyZap::apply_mask archive=" << (void*) archive
+       << " fscrunch=" << fscrunch_factor << " chan_offset=" << chan_offset
+       << endl;
+#endif
+  
+  // count weights changed to zero
+  nmasked = 0;
+
+  assert ( nchan * fscrunch_factor + chan_offset <= archive->get_nchan() );
+  
+  // apply mask back to original archive
+  for (unsigned isub=0; isub<nsubint; isub++) 
+  {
+    Integration* subint = archive->get_Integration(isub);
+    for (unsigned ichan=0; ichan<nchan; ichan++) 
+    {
+      float wt = mask[idx(isub,ichan)];
+      if (fscrunch_factor > 1 && wt != 0.0)
+      {
+	// change the weights of the original archive only if setting to zero
+	// so that the weights are not set to that of the fscrunched data
+	continue;
+      }
+      for (unsigned jchan=0; jchan < fscrunch_factor; jchan++)
+      {
+	unsigned ch = ichan*fscrunch_factor + jchan + chan_offset;
+	if (wt == 0 && subint->get_weight(ch) != 0)
+	  nmasked ++;
+	subint->set_weight(ch, wt);
+      }
+    }
+  }
+}
+
 
 //! Set the statistic
 void Pulsar::TimeFrequencyZap::set_statistic (ArchiveStatistic* stat)
