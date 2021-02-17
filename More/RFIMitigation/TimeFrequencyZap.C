@@ -22,6 +22,7 @@
 #include "Pulsar/StandardOptions.h"
 
 #include <stdio.h>
+#include <assert.h>
 
 using namespace std;
 
