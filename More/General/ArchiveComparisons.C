@@ -42,11 +42,8 @@ ArchiveComparisons::ArchiveComparisons (BinaryStatistic* my_stat)
 
 void ArchiveComparisons::set_Archive (const Archive* arch)
 {
-  if (!archive || archive != arch)
-  {
-    built = false;
-    HasArchive::set_Archive (arch);
-  }
+  built = false;
+  HasArchive::set_Archive (arch);
 }
   
 double ArchiveComparisons::get ()
@@ -70,7 +67,12 @@ void ArchiveComparisons::build () try
   const Archive* arch = get_Archive();
   unsigned nsubint = arch->get_nsubint();
   unsigned nchan = arch->get_nchan();
-  
+
+#if _DEBUG
+  cerr << "ArchiveComparisons::build nsubint=" << nsubint 
+       << " nchan=" << nchan << endl;
+#endif
+
   result * nsubint * nchan;
   
   Reference::To<CompareWith> compare;
@@ -99,9 +101,17 @@ void ArchiveComparisons::build () try
     throw Error (InvalidState, "ArchiveComparisons::build",
 		 "way must be 'time' or 'freq'");
 
-compare->set_statistic (stat);
+  Index isubint_restore = get_subint();
+  Index ichan_restore = get_chan();
+  Index ipol_restore = get_pol();
+
+  compare->set_statistic (stat);
   compare->set_data (this);
   compare->compute (result);
+
+  set_subint (isubint_restore);
+  set_chan (ichan_restore);
+  set_pol (ipol_restore);
   
   built = true;
 }

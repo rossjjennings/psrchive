@@ -69,10 +69,16 @@ void CompareWithSum::compute (ndArray<2,double>& result)
 	element /= rms;
 	      
 #ifdef _DEBUG
-      cerr << "calling BinaryStatistic::get" << endl;
+      cerr << "CompareWithSum::compute calling BinaryStatistic::get" << endl;
 #endif
 	
       double val = statistic->get (idata, sumdata);
+
+#if _DEBUG
+      cerr << "CompareWithSum::compute iprim=" << iprimary
+	   << " icomp=" << icompare << " val=" << val << endl;
+#endif
+      
       set (result, iprimary, icompare, val);
     }
   }
