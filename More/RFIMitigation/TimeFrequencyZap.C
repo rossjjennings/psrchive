@@ -420,8 +420,12 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
   }
 
   if (statistic)
+  {
+    // force recomputation of any buffered data
+    statistic->set_Archive (NULL);
     statistic->set_Archive (data);
-  
+  }
+ 
   // Eval expression, fill stats array
   for (unsigned isub=0; isub<nsubint; isub++) 
   {

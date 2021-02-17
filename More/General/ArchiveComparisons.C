@@ -42,7 +42,12 @@ ArchiveComparisons::ArchiveComparisons (BinaryStatistic* my_stat)
 
 void ArchiveComparisons::set_Archive (const Archive* arch)
 {
-  built = false;
+  if (arch == NULL)
+    built = false;
+
+  if (archive && archive != arch)
+    built = false;
+
   HasArchive::set_Archive (arch);
 }
   
