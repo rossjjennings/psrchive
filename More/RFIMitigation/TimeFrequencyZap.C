@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2018 by Paul Demorest
+ *   Copyright (C) 2018 - 2021 by Paul Demorest and Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -206,6 +206,7 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 #endif
       // data weights were likely changed on last call
       copy_weights (dedispersed_clone, data);
+      data = dedispersed_clone;
     }
     else
     {
