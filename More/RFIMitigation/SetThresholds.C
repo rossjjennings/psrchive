@@ -31,7 +31,7 @@ unsigned Pulsar::SetThresholds::update_mask (std::vector<float> &mask,
 {
 #if _DEBUG
   cerr << "SetThresholds::update_mask nsubint=" << nsubint
-       << " nchan=" << nchan << " npol=" << npol << " ntot=" << ntot 
+       << " nchan=" << nchan << " npol=" << npol 
        << " stat.sz=" << stat.size() << " model.sz=" << model.size()
        << " mask.sz=" << mask.size() << endl;
 #endif
@@ -61,7 +61,7 @@ unsigned Pulsar::SetThresholds::update_mask (std::vector<float> &mask,
         if (cutoff_min_set && value < cutoff_min)
         {
 #ifdef _DEBUG
-	  cerr << "TOO LOW isubint=" << isubint 
+	  cerr << "TOO LOW isub=" << isub 
 	       << " ichan=" << ichan << " ipol=" << ipol  << endl;
 #endif
 	  zap = true;
@@ -71,8 +71,9 @@ unsigned Pulsar::SetThresholds::update_mask (std::vector<float> &mask,
         if (cutoff_max_set && value > cutoff_max)
         {
 #ifdef _DEBUG
-	  cerr << "TOO HIGH isubint=" << isubint 
-	       << " ichan=" << ichan << " ipol=" << ipol  << endl;
+	  cerr << "TOO HIGH isub=" << isub 
+	       << " ichan=" << ichan << " ipol=" << ipol
+	       << " val=" << value << endl;
 #endif
 	
 	  zap = true;
