@@ -10,11 +10,16 @@
 #include "Pulsar/TimeFrequencyMask.h"
 #include "Pulsar/DoubleMedian.h"
 #include "Pulsar/SumThreshold.h"
-#include "Pulsar/Integration.h"
+
+#include "Pulsar/ArchiveExpert.h"
+#include "Pulsar/IntegrationExpert.h"
+
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ArchiveStatistic.h"
 #include "Pulsar/Index.h"
+
+#include "Pulsar/StandardOptions.h"
 
 #include <stdio.h>
 
@@ -30,6 +35,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
 {
   if (instance)
     set_instance (instance);
+
+  add( &TimeFrequencyZap::get_jobs,
+       &TimeFrequencyZap::set_jobs,
+       "jobs", "Tasks performed on clone before computing statistic" );
 
   add( &TimeFrequencyZap::get_expression,
        &TimeFrequencyZap::set_expression,
@@ -58,6 +67,14 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyZap::set_max_iterations,
        "iterations", "Maximum number of times to iterate" );
 
+  add( &TimeFrequencyZap::get_fscrunch_factor,
+       &TimeFrequencyZap::set_fscrunch_factor,
+       "fscrunch", "Compute mask after fscrunch by this factor" );
+
+  add( &TimeFrequencyZap::get_recompute,
+       &TimeFrequencyZap::set_recompute,
+       "recompute", "Recompute statistic on each iteration" );
+
   add( &TimeFrequencyZap::get_polarizations,
        &TimeFrequencyZap::set_polarizations,
        "pols", "Polarizations to analyze" );
@@ -75,6 +92,8 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
   expression = "off:rms";
   regions_from_total = true;
   pscrunch = false;
+  fscrunch_factor = 1;
+  
   polns = ""; // Defaults to all
 
   // TODO make this a config option
@@ -84,27 +103,220 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
   masker = new SumThreshold;
 
   max_iterations = 1;
+  recompute = false;
+
   nmasked = 0;
   report = false;
 }
 
-void Pulsar::TimeFrequencyZap::transform (Archive* archive)
+void delete_edges (Pulsar::Archive* data, unsigned delete_nchan)
 {
-  data = archive;
+  unsigned nchan = data->get_nchan();
+  unsigned nsubint = data->get_nsubint();
 
-  if (regions_from_total && !data->get_dedispersed())
+  vector<unsigned> channels (delete_nchan);
+  unsigned half_factor = delete_nchan/2;
+  for (unsigned i=0; i<half_factor; i++)
   {
-    // Need to make sure we are using a dedispersed version of the Archive
-    data = data->clone();
-    data->dedisperse();
+    channels[i] = nchan -i -1;
+    channels[i+half_factor] = half_factor -i -1;
   }
 
+#if _DEBUG
+  cerr << "delete chans:";
+  for (unsigned i=0; i<delete_nchan; i++)
+    cerr << " " << channels[i];
+  cerr << endl;
+#endif
+  
+  assert( channels[delete_nchan-1] == 0 );
+      
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
+    Pulsar::Integration* subint = data->get_Integration(isub);
+    for (unsigned i=0; i<channels.size(); i++)
+    {
+      subint->expert()->remove( channels[i] );
+    }
+    assert (subint->get_nchan() == nchan - delete_nchan );
+  }
+  data->expert()->set_nchan( nchan - delete_nchan );
+}
+
+void copy_weights (Pulsar::Archive* to, const Pulsar::Archive* from)
+{
+  unsigned nsubint = to->get_nsubint();
+  unsigned nchan = to->get_nchan();
+
+  assert (nsubint == from->get_nsubint());
+  assert (nchan == from->get_nchan());
+  
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
+    Pulsar::Integration* sto = to->get_Integration(isub);
+    const Pulsar::Integration* sfrom = from->get_Integration(isub);
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      sto->set_weight(ichan, sfrom->get_weight(ichan));
+  }
+}
+
+void Pulsar::TimeFrequencyZap::transform (Archive* archive)
+{
+#if _DEBUG
+  cerr << "TimeFrequencyZap::transform archive=" << (void*) archive << endl;
+#endif
+  
+  data = archive;
+  bool cloned = false;
+
+  unsigned initial_nonmasked = 0;
+
+  if (report)
+  {
+    unsigned nsubint = data->get_nsubint();
+    unsigned nchan = data->get_nchan();
+  
+    for (unsigned isub=0; isub<nsubint; isub++) 
+    {
+      Integration* subint = data->get_Integration(isub);
+      for (unsigned ichan=0; ichan<nchan; ichan++) 
+	if ( subint->get_weight(ichan) != 0 )
+	  initial_nonmasked ++;
+    }
+  }
+  
+  if ((regions_from_total || fscrunch_factor > 1) && !data->get_dedispersed())
+  {
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform need to dedisperse" << endl;
+#endif
+    // Need to make sure we are using a dedispersed version of the Archive
+
+    /* optimization: when transform is called multiple times on the same
+       archive, it can improve performance to perform this step only once.
+       Therefore, save the dedispersed archive and re-use it if possible. */
+
+    if (last_dedispersed == data)
+    {
+#if _DEBUG
+      cerr << "TimeFrequencyZap::transform re-use dedispersed clone" << endl;
+#endif
+      // data weights were likely changed on last call
+      copy_weights (dedispersed_clone, data);
+    }
+    else
+    {
+#if _DEBUG
+      cerr << "TimeFrequencyZap::transform clone and dedisperse" << endl;
+#endif
+      last_dedispersed = data;
+
+      data = archive->clone();
+      cloned = true;
+      data->dedisperse();
+      dedispersed_clone = data;
+    }
+  }
+  
   if (pscrunch && data->get_npol()!=1) 
   {
-    data = data->clone();
+    if (!cloned)
+      data = archive->clone();
+    cloned = true;
+    
     data->pscrunch();
   }
 
+  if (jobs != "")
+  {
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform jobs='" << jobs << "'" << endl;
+#endif
+    
+    StandardOptions processor;
+    processor.add_job (jobs);
+
+    if (!cloned)
+      data = archive->clone();
+    cloned = true;
+    
+    processor.process ( data );
+    data = processor.result();
+  }
+
+  Reference::To<Archive> backup = data;
+
+  if (fscrunch_factor > 1)
+  {
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform"
+      " fscrunch by " << fscrunch_factor << endl;
+#endif
+    
+    data = backup->clone();
+    data->fscrunch (fscrunch_factor);
+  }
+
+#if _DEBUG
+  cerr << "TimeFrequencyZap::transform performing transformation" << endl;
+#endif
+
+  unsigned total_masked = 0;
+
+  transform (data, archive);
+
+  // nmasked set by transform
+  total_masked += nmasked;
+    
+  if (fscrunch_factor > 1)
+  {
+    // do it again with the fscrunched channel boundaries offset by 0.5*chbw
+    
+    data = backup->clone();
+
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform delete edges" << endl;
+#endif
+    
+    delete_edges (data, fscrunch_factor);
+
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform"
+      " fscrunch by " << fscrunch_factor << endl;
+#endif
+    
+    data->fscrunch (fscrunch_factor);
+
+#if _DEBUG
+    cerr << "TimeFrequencyZap::transform performing transformation" << endl;
+#endif
+    
+    transform (data, archive, fscrunch_factor / 2);
+
+    // nmasked set by transform
+    total_masked += nmasked;
+  }
+
+  if (report)
+  {
+    string ret;
+    
+    if (statistic)
+      ret += "stat=" + statistic->get_identity();
+    else
+      ret += "exp=" + expression;
+
+    ret += " tested=" + tostring(initial_nonmasked)
+      + " masked=" + tostring(total_masked) 
+      + " %=" + tostring((total_masked)*100.0/initial_nonmasked);
+
+    cout << ret << endl;
+  }
+}
+
+void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
+					  unsigned chan_offset)
+{
   // Size arrays
   nchan = data->get_nchan();
   nsubint = data->get_nsubint();
@@ -134,47 +346,43 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
     }
   }
 
-  compute_stat();
-
   unsigned iter = 0;
-  unsigned total_masked = 0;
 
-  // kludge to get while loop started
-  nmasked = 1;
-  
-  while (iter < max_iterations && nmasked > 0)
+  do 
   {
+    if (iter == 0 || recompute)
+      compute_stat();
+
+    // sets nmasked
     update_mask();
 
-    // nmasked set by update_mask
-    total_masked += nmasked;
     iter ++;
   }
+  while (iter < max_iterations && nmasked > 0);
 
-  if (report)
-  {
-    string ret;
-    
-    if (statistic)
-      ret += "stat=" + statistic->get_identity();
-    else
-      ret += "exp=" + expression;
-
-    ret += " tested=" + tostring(nonmasked)
-      + " iter=" + tostring(iter)
-      + " masked=" + tostring(total_masked) 
-      + " %=" + tostring((total_masked)*100.0/nonmasked);
-
-    cout << ret << endl;
-  }
-
+  // count original archive weights changed to zero
+  nmasked = 0;
+  
   // apply mask back to original archive
   for (unsigned isub=0; isub<nsubint; isub++) 
   {
     Integration* subint = archive->get_Integration(isub);
     for (unsigned ichan=0; ichan<nchan; ichan++) 
     {
-      subint->set_weight(ichan, mask[idx(isub,ichan)]);
+      float wt = mask[idx(isub,ichan)];
+      if (fscrunch_factor > 1 && wt != 0.0)
+      {
+	// change the weights of the original archive only if setting to zero
+	// so that the weights are not set to that of the fscrunched data
+	continue;
+      }
+      for (unsigned jchan=0; jchan < fscrunch_factor; jchan++)
+      {
+	unsigned ch = ichan*fscrunch_factor + jchan + chan_offset;
+	if (wt == 0 && subint->get_weight(ch) != 0)
+	  nmasked ++;
+	subint->set_weight(ch, wt);
+      }
     }
   }
 }

@@ -72,16 +72,34 @@ namespace Pulsar {
       float get_cutoff_threshold () const { return masker->get_threshold(); }
 
       //! Set the maximum number of iterations
+      void set_fscrunch_factor (unsigned n) { fscrunch_factor = n; }
+
+      //! Get the maximum number of iterations
+      unsigned get_fscrunch_factor () const { return fscrunch_factor; }
+
+      //! Set the maximum number of iterations
       void set_max_iterations (unsigned n) { max_iterations = n; }
 
       //! Get the maximum number of iterations
       unsigned get_max_iterations () const { return max_iterations; }
+
+      //! Set tasks performed on clone before computing statistic
+      void set_jobs (const std::string& p) { jobs = p; }
+
+      //! Get tasks performed on clone before computing statistic
+      std::string get_jobs () const { return jobs; }
 
       //! Set the list of polns to look at
       void set_polarizations (const std::string& p) { polns = p; }
 
       //! Get the list of polns to look at
       std::string get_polarizations () const { return polns; }
+
+      //! Set flag to recompute the statistic on each iteration
+      void set_recompute (bool flag = true) { recompute = flag; }
+
+      //! Get flag to recompute the statistic on each iteration
+      bool get_recompute () const { return recompute; }
 
       //! Set flag to print a one-line report
       void set_report (bool flag = true) { report = flag; }
@@ -90,6 +108,9 @@ namespace Pulsar {
       bool get_report () const { return report; }
 
     protected:
+    
+      void transform (Archive* data, Archive* archive,
+		      unsigned chan_offset = 0);
 
       //! compute the relevant statistic
       virtual void compute_stat();
@@ -108,6 +129,12 @@ namespace Pulsar {
 
       //! pscrunch first
       bool pscrunch;
+
+      //! Compute mask from fscrunched clone of data (twice)
+      unsigned fscrunch_factor;
+    
+      //! Tasks performed on clone before computing statistic
+      std::string jobs;
 
       //! The list of polarizations to analyze
       std::string polns;
@@ -158,6 +185,9 @@ namespace Pulsar {
     //! Maximum number of times to run update_mask
     unsigned max_iterations;
 
+    //! Recompute the statistic on each iteration
+    bool recompute;
+
     //! Print a report on stdout
     bool report;
     
@@ -168,6 +198,11 @@ namespace Pulsar {
 
     //! Number of non-masked subints/chans in input data
     unsigned nonmasked;
+
+    //! The archive that was last cloned and dedispersed
+    Reference::To<Archive> last_dedispersed;
+    //! The dedispersed clone
+    Reference::To<Archive> dedispersed_clone;
   };
 
 }
