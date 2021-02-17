@@ -102,12 +102,14 @@ namespace BinaryStatistics {
   class ChiSquared : public BinaryStatistic
   {
     bool robust_linear_fit;
-    
+    double max_zap_fraction;
+ 
   public:
     ChiSquared ()
       : BinaryStatistic ("chi", "variance of difference")
       {
 	robust_linear_fit = true;
+        max_zap_fraction = 0.5;
       }
 
     double sqr (double x) { return x*x; }
@@ -121,16 +123,19 @@ namespace BinaryStatistics {
 
       if (robust_linear_fit)
       {
-	unsigned zapped = 1;
-
 	vector<bool> mask (dat1.size(), true);
+
 	unsigned total_zapped = 0;
-	
-	while (zapped)
+        unsigned max_zapped = dat1.size();
+        if (max_zap_fraction)
+	  max_zapped = max_zap_fraction * max_zapped;
+
+        unsigned zapped = 0;
+	do
 	{
 	  linear_fit (scale, offset, dat1, dat2, mask);
 
-	  double sigma = 3.0;
+	  double sigma = 2.0;
 	  double var = 1 + sqr(scale);
 	  double cut = sqr(sigma) * var;
 
@@ -151,8 +156,7 @@ namespace BinaryStatistics {
 
 	  total_zapped += zapped;
 	}
-
-	// cerr << "zapped=" << total_zapped << endl;
+        while (zapped && total_zapped < max_zapped);
       }
       
       double coeff = 0.0;
