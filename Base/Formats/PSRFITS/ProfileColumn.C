@@ -265,8 +265,8 @@ void Pulsar::ProfileColumn::unload (int row,
     bug report at https://sourceforge.net/p/psrchive/bugs/440 
   */
 
-  double the_min = 1-pow(2,15);
-  double the_max = pow(2,15)-2;
+  double the_min = 1-pow(2,15)+16;
+  double the_max = pow(2,15)-2-16;
 
   // cerr << "int16_t min=" << the_min << " max=" << the_max << endl;
 
@@ -336,7 +336,10 @@ void Pulsar::ProfileColumn::unload (int row,
         https://sourceforge.net/p/psrchive/bugs/440
       */
  
-      int16_t value = round( (amps[ibin]-offsets[iprof]) / scales[iprof]);
+      float fvalue = round( (amps[ibin]-offsets[iprof]) / scales[iprof]);
+      fvalue = std::max(fvalue, (float)INT16_MIN);
+      fvalue = std::min(fvalue, (float)INT16_MAX);
+      int16_t value = fvalue;
       compressed[iprof*nbin+ibin] = value;
     }
 
