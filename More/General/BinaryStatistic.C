@@ -98,7 +98,9 @@ namespace BinaryStatistics {
     
     offset = median (diff);
   }
-  
+
+  static double sqr (double x) { return x*x; }
+
   class ChiSquared : public BinaryStatistic
   {
     bool robust_linear_fit;
@@ -111,8 +113,6 @@ namespace BinaryStatistics {
 	robust_linear_fit = true;
         max_zap_fraction = 0.5;
       }
-
-    double sqr (double x) { return x*x; }
 
     double get (const vector<double>& dat1, const vector<double>& dat2)
     {
@@ -169,7 +169,67 @@ namespace BinaryStatistics {
     ChiSquared* clone () const { return new ChiSquared; }
   };
 
+  //! based on Kullback-Leibler divergence
+  class RelativeSpectralEntropy : public BinaryStatistic
+  {
+    double threshold;
+    
+  public:
+    RelativeSpectralEntropy ()
+      : BinaryStatistic ("rse", "Relative Spectral Entropy")
+      {
+	// exponential distribution has a long tail
+	threshold = 9.0; // sigma
 
+        add_alias ("kld");  // Kullback-Leibler divergence
+      }
+
+    double get (const vector<double>& dat1, const vector<double>& dat2)
+    {
+      /* robust_variance returns the variance of dat1; which is the
+	 standard deviation of the exponentially distributed PSD */
+      vector<float> fps1;
+      double cut1 = robust_variance (dat1, &fps1) * threshold;
+
+      vector<float> fps2;
+      double cut2 = robust_variance (dat2, &fps2) * threshold;
+
+      unsigned istart = 1; // skip DC
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      unsigned count = 0;
+      
+      for (unsigned i=istart; i < fps1.size(); i++)
+      {
+	if (fps1[i] < cut1 || fps2[i] < cut2)
+	  continue;
+      
+	sum1 += fps1[i];
+	sum2 += fps2[i];
+	count ++;
+      }
+
+      cerr << "count=" << count << " sum1/sum2=" << sum1/sum2 << endl;
+      
+      double relative_entropy = 0;
+      for (unsigned i=istart; i < fps1.size(); i++)
+      {
+	if (fps1[i] < cut1 || fps2[i] < cut2)
+	  continue;
+	
+	double p = fps1[i] / sum1;
+	double q = fps2[i] / sum2;
+
+	relative_entropy += p * abs(log(p/q));
+      }
+    
+      return relative_entropy;
+    }
+
+    RelativeSpectralEntropy* clone () const
+    { return new RelativeSpectralEntropy; }
+  };
+  
 } // namespace BinaryStatistics
 
 static unsigned instance_count = 0;
@@ -198,6 +258,7 @@ void BinaryStatistic::build ()
  
   instances->push_back( new CrossCorrelation );
   instances->push_back( new ChiSquared );
+  instances->push_back( new RelativeSpectralEntropy );
 
   assert (instances->size() == instance_count - start_count);
 }
