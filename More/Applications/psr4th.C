@@ -82,6 +82,8 @@ protected:
     void histogram_pa (const PolnProfile*);
     void histogram_el (const PolnProfile*);
 
+    void compute_cross_covariance ();
+    
     Matrix<4,4,double> get_covariance (unsigned ibin);
     Matrix<4,4,double> get_cross_covariance (unsigned ibin, unsigned jbin,
 					     unsigned ilag = 0);
@@ -376,48 +378,12 @@ void psr4th::finalize()
   {
     cerr << "psr4th: cross covariance" << endl;
 
-    unsigned nlag = cross_covariance_lags;
     unsigned ichan = 0;
+    results[ichan].compute_cross_covariance();
     
     CrossCovarianceMatrix* matrix = new CrossCovarianceMatrix;
-    matrix->set_nbin (nbin);
-    matrix->set_npol (npol);
-    matrix->set_nlag (nlag);
+    results[ichan].cross_covar.unload (matrix);
     
-    matrix->resize_data();
-
-    vector<double>& data = matrix->get_data();
-    unsigned idat=0;
-    
-    for (unsigned ilag = 0; ilag < nlag; ilag ++)
-    {
-      for (unsigned ibin = 0; ibin < nbin ; ibin ++)
-      {
-	// at lag zero, take only the upper triangle
-	unsigned startbin = (ilag == 0) ? ibin : 0;
-
-	for (unsigned jbin = startbin; jbin < nbin ; jbin ++)
-	{
-	  Matrix<4,4,double> covar;
-	  covar = results[ichan].get_cross_covariance (ibin, jbin, ilag);
-
-	  for (unsigned ipol=0; ipol < npol; ipol++)
-	  {
-	    // on the diagonal, take only the upper triangle
-	    unsigned startpol = (ilag == 0 && ibin == jbin) ? ipol : 0;
-	    
-	    for (unsigned jpol = startpol; jpol < npol ; jpol++)
-	    {
-	      data.at(idat) = covar[ipol][jpol];
-	      idat ++;
-	    }
-	  }
-	}
-      }
-    }
-    
-    assert (idat == data.size());
-
     cerr << "add CrossCovarianceMatrix extension" << endl;
     output->add_extension( matrix );
 
@@ -545,6 +511,21 @@ Matrix<4,4,double> psr4th::result::get_covariance (unsigned ibin)
   return meansq - outer(mean,mean);
 }
 
+void psr4th::result::compute_cross_covariance ()
+{
+  unsigned nbin = cross_covar.get_nbin();
+  unsigned nlag = cross_covar.get_nlag();
+
+  cross_covar.resize();
+  
+  for (unsigned ilag=0; ilag < nlag; ilag++)
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+      for (unsigned jbin=0; jbin < nbin; jbin++)
+	cross_covar.set_cross_covariance (ibin, jbin, ilag,
+					  get_cross_covariance (ibin,
+								jbin,
+								ilag));
+}
 
 Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
 							 unsigned jbin,

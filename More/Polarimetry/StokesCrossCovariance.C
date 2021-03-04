@@ -16,12 +16,16 @@ using namespace Pulsar;
 //
 //
 //
-StokesCrossCovariance::StokesCrossCovariance
-(const CrossCovarianceMatrix* matrix)
+StokesCrossCovariance::StokesCrossCovariance (const CrossCovarianceMatrix* mat)
 {
-  if (!matrix)
-    return;
+  nbin = nlag = 0;
+  
+  if (mat)
+    load (mat);
+}
 
+void StokesCrossCovariance::load (const CrossCovarianceMatrix* matrix)
+{
   nbin = matrix->get_nbin();
   nlag = matrix->get_nlag();
   
@@ -68,6 +72,48 @@ StokesCrossCovariance::StokesCrossCovariance
   }
   
   assert (icov == cross_covariance.size());
+  assert (idat == data.size());
+}
+
+void StokesCrossCovariance::unload (CrossCovarianceMatrix* matrix)
+{
+  unsigned npol = 4;
+  
+  matrix->set_nbin (nbin);
+  matrix->set_npol (npol);
+  matrix->set_nlag (nlag);
+    
+  matrix->resize_data();
+
+  vector<double>& data = matrix->get_data();
+  unsigned idat=0;
+    
+  for (unsigned ilag = 0; ilag < nlag; ilag ++)
+  {
+    for (unsigned ibin = 0; ibin < nbin ; ibin ++)
+    {
+      // at lag zero, take only the upper triangle
+      unsigned startbin = (ilag == 0) ? ibin : 0;
+
+      for (unsigned jbin = startbin; jbin < nbin ; jbin ++)
+      {
+	Matrix<4,4,double> covar = get_cross_covariance (ibin, jbin, ilag);
+
+	for (unsigned ipol=0; ipol < npol; ipol++)
+	{
+	  // on the diagonal, take only the upper triangle
+	  unsigned startpol = (ilag == 0 && ibin == jbin) ? ipol : 0;
+	    
+	  for (unsigned jpol = startpol; jpol < npol ; jpol++)
+	  {
+	    data.at(idat) = covar[ipol][jpol];
+	    idat ++;
+	  }
+	}
+      }
+    }
+  }
+    
   assert (idat == data.size());
 }
 

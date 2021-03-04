@@ -29,6 +29,12 @@ namespace Pulsar {
 
     //! Construct from a CrossCovarianceMatrix object
     StokesCrossCovariance (const CrossCovarianceMatrix* = 0);
+
+    //! Load from a CrossCovarianceMatrix object
+    void load (const CrossCovarianceMatrix*);
+
+    //! Unload to a CrossCovarianceMatrix object
+    void unload (CrossCovarianceMatrix*);
     
     //! Clone operator
     virtual StokesCrossCovariance* clone () const;
