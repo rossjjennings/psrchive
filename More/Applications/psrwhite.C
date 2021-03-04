@@ -81,9 +81,10 @@ psrwhite::psrwhite ()
 
 }
 
-void psrwhite::add_options (CommandLine::Menu& menu) // Could be used to add options in the future
+// Could be used to add options in the future
+void psrwhite::add_options (CommandLine::Menu& menu)
 {
-  CommandLine::Argument* arg;
+  // CommandLine::Argument* arg;
 
   // Transform Profile Amps
   //menu.add ("");
@@ -116,7 +117,7 @@ void psrwhite::transform_data()
   VectorXd amps (nbin); 
   VectorXd profiles_unitvariance (nbin);
   
-  if(verbose > 2)
+  if(verbose)
     cerr << "Archive values obtained and variables allocated" << endl;
 
   // Loop to access the amplitude values in individual pulse profiles
@@ -124,24 +125,24 @@ void psrwhite::transform_data()
     for (unsigned ipol=0; ipol < npol; ipol++)
       for (unsigned ichan=0; ichan < nchan; ichan++)
       {
-          if(verbose > 2)
+          if(verbose)
             cerr << "Entered into Profile" << endl;
           profile = cov_archive->get_Profile (isub, ipol, ichan);
           float *prof_amps = profile->get_amps();  
   
  // Store the profile amps in an Eigen Vector
-            if(verbose > 2)
+            if(verbose)
               cerr << "Storing Profile Amplitudes in Eigen Vector" << endl;
             for(int i=0;i<nbin;i++)         
               amps[i] = prof_amps[i];     
 
  // The transformation of the profile using results of the eigvalue decomposition
-    if (verbose > 2)
+    if (verbose)
       cerr << "Transforming profile using the results of the Eigenvalue decomposition" << endl;
             profiles_unitvariance = inverse * amps;
 
  // Storing the transformed array into prof_amps
-    if(verbose > 2)
+    if(verbose)
       cerr << "Storing the transformed array into eigen vector" << endl;
             for(int j=0;j<nbin;j++)
               prof_amps[j] = profiles_unitvariance[j];         
@@ -154,26 +155,26 @@ void psrwhite::eigenvalue_decomp()
 {
   if(check==0)
   {
-  if(verbose > 2)  
+  if(verbose)  
     cerr << "Entering Eigenvaluedecomposition" << endl;
   unsigned nbin = cov_archive->get_nbin();
   int row = nbin;
   int col = nbin; 
   int count = 0;
        
-    if(verbose > 2)
+    if(verbose)
       cerr << "Variable Allocation and Archive Loading" << endl; 
       
       MatrixXd covariance (row,col); 
             
       Reference::To<Archive> data = Archive::load("covariance.rf"); // Produced by psrpca
-    if(verbose > 2)
+    if(verbose)
       cerr << "FITSArchive Loaded" << endl;         
       
       if( data->get<CrossCovarianceMatrix>() )
       {   
 
-      if(verbose > 2)  
+      if(verbose)  
        cerr << "Found covar" << endl;
 
       CrossCovarianceMatrix* covar = data->get<CrossCovarianceMatrix>();      
@@ -188,7 +189,7 @@ void psrwhite::eigenvalue_decomp()
             }      
       }
 
-    if(verbose > 2)  
+    if(verbose)  
       cerr << "Covariance matrix loaded from FITSArchive. Computing Eigenvalue Decomposition" << endl; 
      
      // EigenValue Decomposition of the Covariance Matrix
@@ -214,7 +215,7 @@ void psrwhite::eigenvalue_decomp()
 
      check=1;
 
-     if(verbose > 2)
+     if(verbose)
      cerr << "Decomposition is done" << endl;  
    }    
 }

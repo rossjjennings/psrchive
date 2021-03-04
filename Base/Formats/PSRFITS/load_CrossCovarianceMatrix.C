@@ -67,7 +67,7 @@ try
   // Set npol 
   covar->set_npol( npol ); 
 
-  covar->resize();
+  covar->resize_data();
   psrfits_read_col (fptr, "DATA", covar->get_data());
     
   if (verbose > 2)

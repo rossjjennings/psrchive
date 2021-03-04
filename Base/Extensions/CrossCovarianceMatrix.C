@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2016 by Aditya Parthasarathy & Willem van Straten
+ *   Copyright (C) 2016 - 2021 by Aditya Parthasarathy & Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -80,9 +80,22 @@ unsigned CrossCovarianceMatrix::get_nlag () const
   return nlag;
 }
 
-void CrossCovarianceMatrix::resize ()
+unsigned CrossCovarianceMatrix::get_ncross (unsigned ilag) const
 {
   unsigned M = npol * nbin;
-  covariance.resize (nlag * M*(M+1)/2);  
+  if (ilag == 0)
+    return (M * (M+1)) / 2;
+  else
+    return M * M;
+}
+
+unsigned CrossCovarianceMatrix::get_ncross_total () const
+{
+  return get_ncross(0) + (nlag - 1) * get_ncross(1);
+}
+
+void CrossCovarianceMatrix::resize_data ()
+{
+  covariance.resize ( get_ncross_total() );
 }
 

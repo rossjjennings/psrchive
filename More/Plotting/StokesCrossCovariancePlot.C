@@ -9,7 +9,7 @@
 #include "Pulsar/StokesCrossCovariance.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/CovarianceMatrix.h"
+#include "Pulsar/CrossCovarianceMatrix.h"
 #include "Pulsar/ProfileStats.h"
 
 #include "pairutil.h"
@@ -52,11 +52,11 @@ void Pulsar::StokesCrossCovariancePlot::get_profiles (const Archive* archive)
   if (verbose)
     cerr << "Pulsar::StokesCrossCovariancePlot::get_profiles" << endl;
 
-  const CovarianceMatrix* matrix = archive->get<CovarianceMatrix>();
+  const CrossCovarianceMatrix* matrix = archive->get<CrossCovarianceMatrix>();
   if (!matrix)
     throw Error (InvalidState,
 		 "Pulsar::StokesCrossCovariancePlot::get_profiles",
-		 "archive does not contain a CovarianceMatrix extension");
+		 "archive does not contain a CrossCovarianceMatrix extension");
 
   stokes_crossed = new StokesCrossCovariance (matrix);
   

@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/StokesCrossCovariance.h"
-#include "Pulsar/CovarianceMatrix.h"
+#include "Pulsar/CrossCovarianceMatrix.h"
 
 #include <assert.h>
 
@@ -16,7 +16,7 @@ using namespace Pulsar;
 //
 //
 //
-StokesCrossCovariance::StokesCrossCovariance (const CovarianceMatrix* matrix)
+StokesCrossCovariance::StokesCrossCovariance (const CrossCovarianceMatrix* matrix)
 {
   if (!matrix)
     return;
@@ -82,10 +82,10 @@ unsigned StokesCrossCovariance::get_icross (unsigned ibin, unsigned jbin) const
   if (jbin < ibin)
     std::swap (ibin, jbin);
       
-  // icross = nbin + nbin-1 + nbin-2 + nbin-3,
-  //          where the number of terms = ibin
-  // then offset by jbin, which starts at ibin
-
+  // icross = 0 + nbin + nbin-1 + nbin-2 + nbin-3,
+  //          where the number of terms = ibin+1
+  //          offset by jbin, which starts at ibin
+  // Although ibin-1 overflows when ibin==0, it is multiplied by 0
   unsigned icross = ibin * nbin - (ibin * (ibin-1) / 2) + (jbin - ibin);
 
   if (icross >= cross_covariance.size())

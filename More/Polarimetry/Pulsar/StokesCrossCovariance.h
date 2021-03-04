@@ -19,15 +19,15 @@
 
 namespace Pulsar {
 
-  class CovarianceMatrix;
+  class CrossCovarianceMatrix;
 
   //! Phase-resolved four-dimensional covariance matrix of Stokes parameters
   class StokesCrossCovariance : public Container {
     
   public:
 
-    //! Construct with the specified number of phase bins
-    StokesCrossCovariance (const CovarianceMatrix*);
+    //! Construct from a CrossCovarianceMatrix object
+    StokesCrossCovariance (const CrossCovarianceMatrix*);
     
     //! Clone operator
     virtual StokesCrossCovariance* clone () const;

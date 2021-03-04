@@ -57,8 +57,14 @@ namespace Pulsar {
     //! Get the number of lags
     unsigned get_nlag () const;
 
-    //! Set the size of the data array according to nbin and npol
-    void resize ();
+    //! Get the number of cross-covariances for the specified lag
+    unsigned get_ncross (unsigned ilag) const;
+
+    //! Get the total number of cross-covariances stored for all lags
+    unsigned get_ncross_total () const;
+  
+    //! Resize the data array according to nbin, npol, and nlag
+    void resize_data ();
     
     //! Get the covariance matrix data
     std::vector<double>& get_data () { return covariance; }
