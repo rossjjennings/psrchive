@@ -38,7 +38,7 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	P236_reference_epoch_correction.C \
 	refmjd_rounding_correction.C \
 	fitsio_psrephem.C fitsio_polyco.C fitsio_tempo.h \
-        unload_CovarianceMatrix.C load_CovarianceMatrix.C
+        unload_CrossCovarianceMatrix.C load_CrossCovarianceMatrix.C
 
 if HAVE_TEMPO2
 libpsrfits_la_SOURCES += unload_T2Predictor.C load_T2Predictor.C

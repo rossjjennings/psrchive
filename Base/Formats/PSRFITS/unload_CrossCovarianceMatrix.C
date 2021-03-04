@@ -1,27 +1,27 @@
 /***************************************************************************
  *
- * // Unload_CovarianceMatrix :: For storing covariance matrix data in COV_MAT PSRFITS Binary Table
+ * // Unload_CrossCovarianceMatrix :: For storing covariance matrix data in COV_MAT PSRFITS Binary Table
  *
  ***************************************************************************/
 
 #include "Pulsar/FITSArchive.h" 
-#include "Pulsar/CovarianceMatrix.h" 
+#include "Pulsar/CrossCovarianceMatrix.h" 
 
 #include "psrfitsio.h" 
 #include <stdlib.h>  
 
 using namespace std;
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const CovarianceMatrix* covar) 
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const CrossCovarianceMatrix* covar) 
 {
   if (verbose > 2)
-    cerr << "FITSArchive::unload CovarianceMatrix entered" << endl;
+    cerr << "FITSArchive::unload CrossCovarianceMatrix entered" << endl;
     
   // Move and Clear existing rows in COV_MAT 
   psrfits_move_hdu (fptr, "COV_MAT");
 
   if (verbose > 2) 
-    cerr << "FITSArchive::unload CovarianceMatrix"
+    cerr << "FITSArchive::unload CrossCovarianceMatrix"
       " nbin=" << covar->get_nbin() << " npol=" << covar->get_npol() << endl;
     
   // Update nbin value in NBIN (COV_MAT)
@@ -34,5 +34,5 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CovarianceMatrix* covar)
   psrfits_write_col (fptr, "DATA", 1, covar->get_data(), dimensions);
 
   if (verbose > 2)       
-    cerr << "FITSArchive::unload CovarianceMatrix exiting" << endl;
+    cerr << "FITSArchive::unload CrossCovarianceMatrix exiting" << endl;
 }

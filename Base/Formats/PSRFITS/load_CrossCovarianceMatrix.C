@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/FITSArchive.h"
-#include "Pulsar/CovarianceMatrix.h"
+#include "Pulsar/CrossCovarianceMatrix.h"
 
 #include "psrfitsio.h"
 #include "FITSError.h"
@@ -15,13 +15,13 @@
 
 using namespace std;
 
-void Pulsar::FITSArchive::load_CovarianceMatrix (fitsfile* fptr) 
+void Pulsar::FITSArchive::load_CrossCovarianceMatrix (fitsfile* fptr) 
 try
 {
   int status = 0;
 
   if (verbose > 2)
-    cerr << "FITSArchive::load_CovarianceMatrix entered" << endl;
+    cerr << "FITSArchive::load_CrossCovarianceMatrix entered" << endl;
    
   // Move to COV_MAT HDU   
   fits_movnam_hdu (fptr, BINARY_TBL, "COV_MAT", 0, &status);
@@ -29,16 +29,16 @@ try
   if (status == BAD_HDU_NUM)
   {
     if (verbose > 2)
-      cerr << "Pulsar::FITSArchive::load_CovarianceMatrix : no COV_MAT HDU"
+      cerr << "Pulsar::FITSArchive::load_CrossCovarianceMatrix : no COV_MAT HDU"
 	   << endl;
     return;
   }
 
   if (status != 0)
-    throw FITSError (status, "FITSArchive::load_CovarianceMatrix",
+    throw FITSError (status, "FITSArchive::load_CrossCovarianceMatrix",
 		     "fits_movnam_hdu COV_MAT");
  
-  Reference::To<CovarianceMatrix> covar = new CovarianceMatrix;
+  Reference::To<CrossCovarianceMatrix> covar = new CrossCovarianceMatrix;
     
   // Get nbin from COV_MAT 
   int nbin = 0;
@@ -47,7 +47,7 @@ try
   if (!nbin)
   {
     if (verbose > 2)
-      cerr << "FITSArchive::load_CovarianceMatrix COV_MAT HDU : contains no data. CovarianceMatrix not loaded" << endl;
+      cerr << "FITSArchive::load_CrossCovarianceMatrix COV_MAT HDU : contains no data. CrossCovarianceMatrix not loaded" << endl;
     return;
   }
   
@@ -61,7 +61,7 @@ try
   if (!npol)
   {
     if (verbose > 2)
-      cerr << "FITSArchive::load_CovarianceMatrix COV_MAT HDU : contains no data. CovarianceMatrix not loaded" << endl;
+      cerr << "FITSArchive::load_CrossCovarianceMatrix COV_MAT HDU : contains no data. CrossCovarianceMatrix not loaded" << endl;
     return;
   }
   // Set npol 
@@ -71,15 +71,15 @@ try
   psrfits_read_col (fptr, "DATA", covar->get_data());
     
   if (verbose > 2)
-    cerr << "FITSArchive::load_CovarianceMatrix : Matrix data read" << endl;
+    cerr << "FITSArchive::load_CrossCovarianceMatrix : Matrix data read" << endl;
 
   add_extension (covar);
 
   if (verbose > 2)
-    cerr << "FITSArchive::load_CovarianceMatrix exiting" << endl;	  
+    cerr << "FITSArchive::load_CrossCovarianceMatrix exiting" << endl;	  
 }
 
 catch (Error& error)
    {
-     throw error += "FITSArchive::load_CovarianceMatrix";
+     throw error += "FITSArchive::load_CrossCovarianceMatrix";
    }

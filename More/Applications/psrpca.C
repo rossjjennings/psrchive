@@ -46,7 +46,7 @@
 #include "toa.h"
 
 #include "Pulsar/TimeDomainCovariance.h"
-#include "Pulsar/CovarianceMatrix.h"
+#include "Pulsar/CrossCovarianceMatrix.h"
 
 #include<gsl/gsl_blas.h>
 #include<gsl/gsl_eigen.h>
@@ -178,8 +178,8 @@ protected:
   unsigned which_pol;
   bool full_stokes_pca;
 
-  //! Covariance Matrix extension
-  Reference::To<CovarianceMatrix> covar;
+  //! Cross-Covariance Matrix extension
+  Reference::To<CrossCovarianceMatrix> covar;
 
   struct CastToDouble
   {
@@ -234,6 +234,12 @@ void psrpca::setup ()
   if ( MeetsMinimumCulaRequirements() != 1 )
     exit(-1);
 #endif
+  if ( !std_archive )
+  {
+    arrival = 0;
+    return;
+  }
+  
   if ( enable_MTM )
   {
     arrival = full_poln = new MatrixTemplateMatching;
@@ -246,6 +252,7 @@ void psrpca::setup ()
     else
       arrival->set_shift_estimator ( ShiftEstimator::factory(algorithm) );
   }
+  
   try
   {
     std_archive->fscrunch();
@@ -383,6 +390,15 @@ void psrpca::process (Archive* archive)
   }
   if ( remove_arch_baseline )
     archive->remove_baseline ();
+
+  if (!std_archive)
+  {
+    std_archive = archive->clone();
+    std_archive -> tscrunch();
+
+    if (arrival)
+      arrival->set_standard (std_archive);
+  }
   if (total_count == 0)
   {
     total = archive;
@@ -404,9 +420,12 @@ void psrpca::finalize ()
 
   evecs_archive = total->clone();
 
-  arrival->set_observation( total );
-  arrival->get_toas( toas );
-
+  if (arrival)
+  {
+    arrival->set_observation( total );
+    arrival->get_toas( toas );
+  }
+  
   if ( remove_std_baseline )
     std_archive -> remove_baseline ();
 
@@ -430,13 +449,18 @@ void psrpca::finalize ()
   
   if ( save_matched )
     total_matched = total->clone();
+
   fit_data( std_prof );
+
   if ( save_matched )
     total_matched->unload ( prefix+"_rotated_scaled.ar" );
 
-  out = fopen( (prefix+"_profiles.dat").c_str(), "w" );
-  gsl_matrix_fprintf( out, profiles, "%g" );
-  fclose( out );
+  if ( profiles )
+  {
+    out = fopen( (prefix+"_profiles.dat").c_str(), "w" );
+    gsl_matrix_fprintf( out, profiles, "%g" );
+    fclose( out );
+  }
   
   if ( full_stokes_pca )
     nbin = 4 * nbin;

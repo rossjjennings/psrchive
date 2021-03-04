@@ -32,7 +32,7 @@
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/CoherentDedispersion.h"
 #include "Pulsar/SpectralKurtosis.h"
-#include "Pulsar/CovarianceMatrix.h" 
+#include "Pulsar/CrossCovarianceMatrix.h" 
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
@@ -734,8 +734,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the parameters from the SUBINT HDU
   load_FITSSUBHdrExtension( read_fptr );
 
-  // Load the Covariance Matrix Data from COV_MAT
-  load_CovarianceMatrix (read_fptr);
+  // Load the Cross Covariance Matrix Data from COV_MAT
+  load_CrossCovarianceMatrix (read_fptr);
 
   // Load the pulsar parameters
   if (get_type() == Signal::Pulsar)
@@ -1116,7 +1116,7 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
 
   unload <PolnCalibratorExtension> (fptr, "FEEDPAR");
 
-  unload <CovarianceMatrix> (fptr, "COV_MAT");
+  unload <CrossCovarianceMatrix> (fptr, "COV_MAT");
 
   // Write the Spectral Kurtosis integrations to file
 

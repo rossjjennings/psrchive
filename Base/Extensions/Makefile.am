@@ -51,7 +51,7 @@ nobase_include_HEADERS = \
         Pulsar/TimeSortedOrder.h \
         Pulsar/TwoBitStats.h \
         Pulsar/WidebandCorrelator.h \
-        Pulsar/CovarianceMatrix.h
+        Pulsar/CrossCovarianceMatrix.h
 
 libExtensions_la_SOURCES = \
         Arecibo.C \
@@ -78,8 +78,8 @@ libExtensions_la_SOURCES = \
 	dspReductionTI.C \
 	Effelsberg.C \
         ExampleExtension.C \
-        CovarianceMatrix.C \
-  Extension_factory.C \
+        CrossCovarianceMatrix.C \
+	Extension_factory.C \
         FeedExtension.C \
         FITSHdrExtension.C \
 	FITSHdrExtensionTI.C \

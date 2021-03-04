@@ -3,8 +3,9 @@
  * // Application to whiten pulse data using Covariance Matrix
  * 
  ***************************************************************************/
+
 // Pulsar 
-#include "Pulsar/CovarianceMatrix.h"
+#include "Pulsar/CrossCovarianceMatrix.h"
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/UnloadOptions.h"
@@ -169,13 +170,13 @@ void psrwhite::eigenvalue_decomp()
     if(verbose > 2)
       cerr << "FITSArchive Loaded" << endl;         
       
-      if( data->get<CovarianceMatrix>() )
+      if( data->get<CrossCovarianceMatrix>() )
       {   
 
       if(verbose > 2)  
        cerr << "Found covar" << endl;
 
-      CovarianceMatrix* covar = data->get<CovarianceMatrix>();      
+      CrossCovarianceMatrix* covar = data->get<CrossCovarianceMatrix>();      
       // Generate the Covariance Matrix from PSRFITS Table     
             for (int i=0; i<row;i++)
             {

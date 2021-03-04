@@ -6,10 +6,10 @@
  *
  ***************************************************************************/
 
-// psrchive/Base/Extensions/Pulsar/CovarianceMatrix.h
+// psrchive/Base/Extensions/Pulsar/CrossCovarianceMatrix.h
 
-#ifndef __CovarianceMatrix_h
-#define __CovarianceMatrix_h
+#ifndef __CrossCovarianceMatrix_h
+#define __CrossCovarianceMatrix_h
 
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Profile.h"
@@ -18,37 +18,44 @@
 
 namespace Pulsar {
 
-  class CovarianceMatrix : public Pulsar::Archive::Extension
+  class CrossCovarianceMatrix : public Pulsar::Archive::Extension
   {
 
   public:
  
     //! Default constructor
-    CovarianceMatrix ();
+    CrossCovarianceMatrix ();
 
     //! Copy constructor
-    CovarianceMatrix (const CovarianceMatrix& extension);  
+    CrossCovarianceMatrix (const CrossCovarianceMatrix& extension);  
 
     //! Assignment operator
-    const CovarianceMatrix& operator= (const CovarianceMatrix& extension);
+    const CrossCovarianceMatrix& operator= (const CrossCovarianceMatrix&);
 
     //!Destructor
-    ~CovarianceMatrix ();
+    ~CrossCovarianceMatrix ();
 
     //! Clone method
-    CovarianceMatrix* clone () const { return new CovarianceMatrix( *this ); }
+    CrossCovarianceMatrix* clone () const 
+    { return new CrossCovarianceMatrix( *this ); }
 
     //! Set the number of phase bins
-    void set_nbin(unsigned nbin);
+    void set_nbin (unsigned);
     
     //! Get the number of phase bins
-    unsigned get_nbin() const;
+    unsigned get_nbin () const;
 
     //! Set the number of polarizations
-    void set_npol(unsigned npol);
+    void set_npol (unsigned);
     
     //! Get the number of polarizations
-    unsigned get_npol() const;
+    unsigned get_npol () const;
+
+    //! Set the number of lags
+    void set_nlag (unsigned);
+
+    //! Get the number of lags
+    unsigned get_nlag () const;
 
     //! Set the size of the data array according to nbin and npol
     void resize ();
@@ -63,7 +70,8 @@ namespace Pulsar {
 
     unsigned nbin;
     unsigned npol;
-    
+    unsigned nlag;
+
     std::vector<double> covariance;
             
   };
