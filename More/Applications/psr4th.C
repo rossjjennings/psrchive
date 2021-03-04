@@ -16,6 +16,7 @@
 #include "Pulsar/CrossCovarianceMatrix.h"
 #include "Pulsar/PhaseResolvedHistogram.h"
 #include "Pulsar/FourthMomentStats.h"
+#include "Pulsar/StokesCrossCovariance.h"
 
 #include "Matrix.h"
 #include "Stokes.h"
@@ -81,10 +82,6 @@ protected:
     void histogram_pa (const PolnProfile*);
     void histogram_el (const PolnProfile*);
 
-    unsigned get_icross (unsigned ibin, unsigned jbin, unsigned ilag) const;
-    unsigned get_ncross (unsigned ilag) const;
-    unsigned get_ncross_total () const;
-    
     Matrix<4,4,double> get_covariance (unsigned ibin);
     Matrix<4,4,double> get_cross_covariance (unsigned ibin, unsigned jbin,
 					     unsigned ilag = 0);
@@ -93,6 +90,9 @@ protected:
 
     Reference::To<PhaseResolvedHistogram> hist_pa;
     Reference::To<PhaseResolvedHistogram> hist_el;
+
+    //! Manages dimensions
+    StokesCrossCovariance cross_covar;
   };
 
   //! Array of results - one for each frequency channel
@@ -308,9 +308,6 @@ void psr4th::result::process (PolnProfile* profile)
     stokes_squared[ibin] += outer(S,S);
   }
 
-  // verify self-consistency of index calculation
-  assert ( get_icross (nbin-1, nbin-1, 0) == get_ncross(0)-1 );
-  
   if (cross_covariance_lags)
   {
     profiles.insert (profiles.begin(), profile);
@@ -325,7 +322,7 @@ void psr4th::result::process (PolnProfile* profile)
 	
 	for (unsigned jbin=startbin; jbin<nbin; jbin++)
 	{
-	  unsigned icross = get_icross (ibin, jbin, ilag);
+	  unsigned icross = cross_covar.get_icross (ibin, jbin, ilag);
 	
 	  Stokes<double> Si = profile->get_Stokes (ibin);
 	  Stokes<double> Sj = profiles[ilag]->get_Stokes (jbin);
@@ -494,8 +491,11 @@ void psr4th::result::set_cross_covariance_lags (unsigned nlag)
   cross_covariance_lags = nlag;
   if (!cross_covariance_lags || stokes.size() == 0)
     return;
-
-  unsigned ncross = get_ncross_total();
+  
+  cross_covar.set_nbin (stokes.size());
+  cross_covar.set_nlag (cross_covariance_lags);
+    
+  unsigned ncross = cross_covar.get_ncross_total();
   
   stokes_crossed.resize( ncross );
   for (unsigned icross=0; icross < ncross; icross++)
@@ -545,43 +545,6 @@ Matrix<4,4,double> psr4th::result::get_covariance (unsigned ibin)
   return meansq - outer(mean,mean);
 }
 
-unsigned psr4th::result::get_icross (unsigned ibin, unsigned jbin,
-				     unsigned ilag) const
-{
-  unsigned nbin = stokes.size();
-
-  if (ilag == 0)
-  {
-    if (jbin < ibin)
-      throw Error (InvalidParam, "psr4th::result::get_icross",
-		   "ilag==0 and jbin=%u < ibin=%u", jbin, ibin);
-
-    // icross = 0 + nbin + nbin-1 + nbin-2 + nbin-3,
-    //          where the number of terms = ibin+1
-    //          offset by jbin, which starts at ibin
-    // Although ibin-1 overflows when ibin==0, it is multiplied by 0
-    return ibin * nbin - ((ibin * (ibin-1)) / 2) + (jbin - ibin);
-  }
-  else
-  {
-    return get_ncross (0) + (ilag - 1) * get_ncross(1) + ibin * nbin + jbin;
-  }
-}
-
-unsigned psr4th::result::get_ncross (unsigned ilag) const
-{
-  unsigned nbin = stokes.size();
-  if (ilag == 0)
-    return (nbin * (nbin+1)) / 2;
-  else
-    return nbin * nbin;
-}
-
-unsigned psr4th::result::get_ncross_total () const
-{
-  unsigned nlag = cross_covariance_lags;
-  return get_ncross(0) + (nlag - 1) * get_ncross(1);
-}
 
 Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
 							 unsigned jbin,
@@ -591,7 +554,7 @@ Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
     throw Error (InvalidState, "psr4th::result::get_cross_covariance",
 		 "count=%u >= ilag=%u", count, ilag);
   
-  unsigned icross = get_icross (ibin, jbin, ilag);
+  unsigned icross = cross_covar.get_icross (ibin, jbin, ilag);
   unsigned nbin = stokes.size();
 
   if (icross >= stokes_crossed.size())

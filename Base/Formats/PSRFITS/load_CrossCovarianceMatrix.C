@@ -47,7 +47,8 @@ try
   if (!nbin)
   {
     if (verbose > 2)
-      cerr << "FITSArchive::load_CrossCovarianceMatrix COV_MAT HDU : contains no data. CrossCovarianceMatrix not loaded" << endl;
+      cerr << "FITSArchive::load_CrossCovarianceMatrix"
+	" COV_MAT HDU contains no data." << endl;
     return;
   }
   
@@ -61,11 +62,18 @@ try
   if (!npol)
   {
     if (verbose > 2)
-      cerr << "FITSArchive::load_CrossCovarianceMatrix COV_MAT HDU : contains no data. CrossCovarianceMatrix not loaded" << endl;
+      cerr << "FITSArchive::load_CrossCovarianceMatrix"
+	" COV_MAT HDU contains no data" << endl;
     return;
   }
+
   // Set npol 
   covar->set_npol( npol ); 
+
+  // NLAG is optional (default to 1 in older files)
+  int nlag = 1;
+  psrfits_read_key (fptr, "NLAG", &nlag, 1, verbose > 2);
+  covar->set_nlag( nlag ); 
 
   covar->resize_data();
   psrfits_read_col (fptr, "DATA", covar->get_data());
@@ -80,6 +88,6 @@ try
 }
 
 catch (Error& error)
-   {
-     throw error += "FITSArchive::load_CrossCovarianceMatrix";
-   }
+{
+  throw error += "FITSArchive::load_CrossCovarianceMatrix";
+}

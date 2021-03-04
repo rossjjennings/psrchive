@@ -27,6 +27,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CrossCovarianceMatrix* c
   // Update nbin value in NBIN (COV_MAT)
   psrfits_update_key (fptr, "NBIN", covar->get_nbin());
   psrfits_update_key (fptr, "NPOL", covar->get_npol());
+  psrfits_update_key (fptr, "NLAG", covar->get_nlag());
 
   vector<unsigned> dimensions;  
     

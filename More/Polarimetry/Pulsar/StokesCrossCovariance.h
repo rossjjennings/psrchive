@@ -21,33 +21,57 @@ namespace Pulsar {
 
   class CrossCovarianceMatrix;
 
-  //! Phase-resolved four-dimensional covariance matrix of Stokes parameters
-  class StokesCrossCovariance : public Container {
+  //! Cross-covariances between the Stokes parameters as a function of lag in turns for all pulse longitude pairs
+  class StokesCrossCovariance : public Container
+  {
     
   public:
 
     //! Construct from a CrossCovarianceMatrix object
-    StokesCrossCovariance (const CrossCovarianceMatrix*);
+    StokesCrossCovariance (const CrossCovarianceMatrix* = 0);
     
     //! Clone operator
     virtual StokesCrossCovariance* clone () const;
 
-    //! Get the number of bins
+    //! Get the number of longitude bins
     unsigned get_nbin () const;
+    void set_nbin (unsigned);
 
+    //! Get the number of lage
+    unsigned get_nlag () const;
+    void set_nlag (unsigned);
+
+    //! Pepare to store
+    void resize ();
+    
     //! Get the Stokes cross covariance for the specified pair of bins
     Matrix<4,4,double> get_cross_covariance (unsigned ibin,
-					     unsigned jbin) const;
+					     unsigned jbin,
+					     unsigned ilag = 0) const;
 
     //! Set the Stokes covariance for the specified bin
     void set_cross_covariance (unsigned ibin, unsigned jbin,
 			       const Matrix<4,4,double>&);
 
+    //! Set the Stokes covariance for the specified bin
+    void set_cross_covariance (unsigned ibin, unsigned jbin, unsigned ilag,
+			       const Matrix<4,4,double>&);
+
+    //! Get the offset for the specified bin pair and lag
+    unsigned get_icross (unsigned ibin, unsigned jbin, unsigned ilag=0) const;
+
+    //! Get the number of cross-covariance matrices for the specified lag
+    unsigned get_ncross (unsigned ilag) const;
+
+    //! Get the total number of cross-covariance matrices
+    unsigned get_ncross_total () const;
+
   protected:
 
     unsigned nbin;
+    unsigned nlag;
 
-    unsigned get_icross (unsigned ibin, unsigned jbin) const;
+    void check (unsigned ibin, unsigned jbin, unsigned ilag, const char*) const;
     
     //! The cross covariance matrix for each phase bin pair
     std::vector< Matrix<4,4,double> > cross_covariance;
