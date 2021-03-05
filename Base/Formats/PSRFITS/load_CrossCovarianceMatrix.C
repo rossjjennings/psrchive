@@ -15,8 +15,7 @@
 
 using namespace std;
 
-void Pulsar::FITSArchive::load_CrossCovarianceMatrix (fitsfile* fptr) 
-try
+void Pulsar::FITSArchive::load_CrossCovarianceMatrix (fitsfile* fptr) try
 {
   int status = 0;
 
@@ -76,10 +75,18 @@ try
   covar->set_nlag( nlag ); 
 
   covar->resize_data();
+
+  if (verbose > 2) 
+    cerr << "FITSArchive::load CrossCovarianceMatrix"
+      " nbin=" << covar->get_nbin() <<
+      " npol=" << covar->get_npol() <<
+      " nlag=" << covar->get_nlag() <<
+      " ndat=" << covar->get_data().size() << endl;
+
   psrfits_read_col (fptr, "DATA", covar->get_data());
     
   if (verbose > 2)
-    cerr << "FITSArchive::load_CrossCovarianceMatrix : Matrix data read" << endl;
+    cerr << "FITSArchive::load_CrossCovarianceMatrix loaded" << endl;
 
   add_extension (covar);
 

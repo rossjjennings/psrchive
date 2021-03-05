@@ -32,10 +32,17 @@ void StokesCrossCovariance::load (const CrossCovarianceMatrix* matrix)
   unsigned npol = matrix->get_npol();
 
   if (npol != 4)
-    throw Error (InvalidState,
-		 "StokesCrossCrossCovariancePlot::get_profiles",
+    throw Error (InvalidState, "StokesCrossCovariance::load",
 		 "CovarianceMatrix::npol=%u != 4", npol);
 
+#if _DEBUG
+  cerr << "StokesCrossCovariance::load"
+    " nbin=" << matrix->get_nbin() <<
+    " npol=" << matrix->get_npol() <<
+    " nlag=" << matrix->get_nlag() <<
+    " ndat=" << matrix->get_data().size() << endl;
+#endif
+  
   const vector<double>& data = matrix->get_data();
   unsigned idat=0;
 
@@ -85,6 +92,14 @@ void StokesCrossCovariance::unload (CrossCovarianceMatrix* matrix)
     
   matrix->resize_data();
 
+#if _DEBUG
+  cerr << "StokesCrossCovariance::unload"
+    " nbin=" << matrix->get_nbin() <<
+    " npol=" << matrix->get_npol() <<
+    " nlag=" << matrix->get_nlag() <<
+    " ndat=" << matrix->get_data().size() << endl;
+#endif
+  
   vector<double>& data = matrix->get_data();
   unsigned idat=0;
     
@@ -229,7 +244,7 @@ void StokesCrossCovariance::set_cross_covariance (unsigned ibin,
 						  const Matrix<4,4,double>& C)
 {
   check (ibin, jbin, ilag, "StokesCrossCovariance::set_cross_covariance");
-  cross_covariance[ get_icross(ibin,jbin) ] = C;
+  cross_covariance[ get_icross(ibin,jbin,ilag) ] = C;
 }
 
 void StokesCrossCovariance::check (unsigned ibin,
@@ -257,4 +272,6 @@ void StokesCrossCovariance::resize ()
   
   // verify self-consistency of index calculations
   assert ( get_icross (nbin-1, nbin-1, 0) == get_ncross(0)-1 );
+
+  assert ( get_icross (nbin-1, nbin-1, nlag-1) == get_ncross_total()-1 );
 }

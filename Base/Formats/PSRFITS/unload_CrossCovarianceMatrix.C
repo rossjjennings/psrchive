@@ -12,7 +12,8 @@
 
 using namespace std;
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const CrossCovarianceMatrix* covar) 
+void Pulsar::FITSArchive::unload (fitsfile* fptr,
+				  const CrossCovarianceMatrix* covar) 
 {
   if (verbose > 2)
     cerr << "FITSArchive::unload CrossCovarianceMatrix entered" << endl;
@@ -22,7 +23,10 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CrossCovarianceMatrix* c
 
   if (verbose > 2) 
     cerr << "FITSArchive::unload CrossCovarianceMatrix"
-      " nbin=" << covar->get_nbin() << " npol=" << covar->get_npol() << endl;
+      " nbin=" << covar->get_nbin() <<
+      " npol=" << covar->get_npol() <<
+      " nlag=" << covar->get_nlag() <<
+      " ndat=" << covar->get_data().size() << endl;
     
   // Update nbin value in NBIN (COV_MAT)
   psrfits_update_key (fptr, "NBIN", covar->get_nbin());
@@ -30,7 +34,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CrossCovarianceMatrix* c
   psrfits_update_key (fptr, "NLAG", covar->get_nlag());
 
   vector<unsigned> dimensions;  
-    
+
   // Write Matrix data into the DATA binary table (COV_MAT)
   psrfits_write_col (fptr, "DATA", 1, covar->get_data(), dimensions);
 

@@ -366,7 +366,6 @@ void psr4th::finalize()
 
   unsigned nbin = output->get_nbin();
   unsigned nchan = output->get_nchan();
-  unsigned npol = 4;
   unsigned nmoment = 10;
 
   std::string filename = "psr4th.ar";
@@ -516,15 +515,38 @@ void psr4th::result::compute_cross_covariance ()
   unsigned nbin = cross_covar.get_nbin();
   unsigned nlag = cross_covar.get_nlag();
 
+#if _DEBUG
+    cerr << "psr4th::result::compute_cross_covariance"
+	 << " nbin=" << nbin << " nlag=" << nlag << endl;
+#endif
+    
   cross_covar.resize();
   
   for (unsigned ilag=0; ilag < nlag; ilag++)
     for (unsigned ibin=0; ibin < nbin; ibin++)
       for (unsigned jbin=0; jbin < nbin; jbin++)
-	cross_covar.set_cross_covariance (ibin, jbin, ilag,
-					  get_cross_covariance (ibin,
-								jbin,
-								ilag));
+      {
+	Matrix<4,4,double> set = get_cross_covariance (ibin, jbin, ilag);
+
+	cross_covar.set_cross_covariance (ibin, jbin, ilag, set);
+
+	Matrix<4,4,double> get;
+	get = cross_covar.get_cross_covariance (ibin, jbin, ilag);
+
+	if (set != get)
+	{
+	  if (ilag > 0 && ibin == 0 && jbin == 0)
+	    cerr << "psr4th::result::compute_cross_covariance ilag=" << ilag
+		 << " ibin=" << ibin << " jbin=" << jbin << " SET != GET\n"
+		 << set << endl << get << endl;
+
+	  throw Error (InvalidState,
+		       "psr4th::result::compute_cross_covariance",
+		       "set != get on ilag=%u ibin=%u jbin=%u",
+		       ilag, ibin, jbin);
+	}
+      }
+
 }
 
 Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
@@ -544,7 +566,7 @@ Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
 		 nbin, ibin, jbin, icross, stokes_crossed.size());
   
   Matrix<4,4,double> meansq = stokes_crossed [icross];
-
+  
   unsigned lag_count = count - ilag;
   meansq /= lag_count;
 

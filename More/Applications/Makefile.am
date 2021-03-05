@@ -12,7 +12,7 @@ bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
 	drifting_subpulses dynamic_spectra psr4th psrtxt2 reslice \
-	smint
+	smint psr4th2txt
 
 pam_SOURCES = pam.C
 
@@ -76,6 +76,7 @@ sesdiv_SOURCES = sesdiv.C
 psrcull_SOURCES = psrcull.C
 
 psr4th_SOURCES = psr4th.C
+psr4th2txt_SOURCES = psr4th2txt.C
 
 psrtxt2_SOURCES = psrtxt2.C
 
