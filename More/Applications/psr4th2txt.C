@@ -12,6 +12,8 @@
 #include "Pulsar/StokesCrossCovariance.h"
 #include "Pulsar/CrossCovarianceMatrix.h"
 
+#include <algorithm>
+
 using namespace std;
 using namespace Pulsar;
 
@@ -36,6 +38,9 @@ protected:
   string pol1_indeces;
   string pol2_indeces;
 
+  bool correlation_coefficient;
+  bool negative_lags;
+  
   //! Add command line options
   void add_options (CommandLine::Menu&);
 };
@@ -63,6 +68,8 @@ protected:
 psr4th2txt::psr4th2txt ()
   : Application ("psr4th2txt", "extract data from Stokes cross-covariances")
 {
+  correlation_coefficient = false;
+  negative_lags = false;
 }
 
 
@@ -78,6 +85,12 @@ void psr4th2txt::add_options (CommandLine::Menu& menu)
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "General options:");
+
+  arg = menu.add (correlation_coefficient, 'c');
+  arg->set_help ("output the correlation coefficient");
+
+  arg = menu.add (negative_lags, 'n');
+  arg->set_help ("output values for the negative lags");
 
   arg = menu.add (lag_indeces, 't', "lag (turns)");
   arg->set_help ("select the sub-integration(s) to output");
@@ -143,34 +156,73 @@ void psr4th2txt::process (Pulsar::Archive* archive)
   
   bool ipol_other = pol1_indeces == "other";
   bool jpol_other = pol2_indeces == "other";
+
+  string sign;
+  
+  if (negative_lags)
+  {
+    std::reverse (ilags.begin(), ilags.end());
+    if (ilags.back() == 0)
+      ilags.resize (ilags.size() - 1);
+    
+    sign = "-";
+  }
   
   for (unsigned ilag=0; ilag < ilags.size(); ilag++)
   {
     for (unsigned ibin=0; ibin < ibins.size(); ibin++)
     {
       if (jbin_other)
-	jbins[0] = ibin;
-      
+	jbins[0] = ibins[ibin];
+
       for (unsigned jbin=0; jbin < jbins.size(); jbin++)
       {
 	if (ibin_other)
-	  ibins[0] = jbin;
-      
-	cout << ilags[ilag] << " " << ibins[ibin] << " " << jbins[jbin];
+	  ibins[0] = jbins[jbin];
 
-	Matrix<4,4,double> c = stokes->get_cross_covariance(ibin,jbin,ilag);
-	  
+	cout << sign << ilags[ilag] << " " << ibins[ibin] << " " << jbins[jbin];
+
+	unsigned i = ibins[ibin];
+	unsigned j = jbins[jbin];
+
+	if (negative_lags)
+	  swap (i, j);
+
+	Matrix<4,4,double> ilag0;
+	Matrix<4,4,double> jlag0;
+	if (correlation_coefficient)
+	{
+	  ilag0 = stokes->get_cross_covariance(i, i, 0);
+	  jlag0 = stokes->get_cross_covariance(j, j, 0);
+	}
+
+	Matrix<4,4,double> c = stokes->get_cross_covariance(i, j, ilags[ilag]);
+
 	for (unsigned ipol=0; ipol < ipols.size(); ipol++)
 	{
 	  if (jpol_other)
-	    jpols[0] = ipol;
+	    jpols[0] = ipols[ipol];
 
 	  for (unsigned jpol=0; jpol < jpols.size(); jpol++)
 	  {
 	    if (ipol_other)
-	      ipols[0] = jpol;
+	      ipols[0] = jpols[jpol];
 
-	    cout << " " << c[ipol][jpol];
+	    unsigned i = ipols[ipol];
+	    unsigned j = jpols[jpol];
+
+	    if (negative_lags)
+	      swap (i, j);
+
+	    double norm = 1.0;
+	    if (correlation_coefficient)
+	    {
+	      double ivar = ilag0[i][i];
+	      double jvar = jlag0[j][j];
+	      norm = 1.0 / sqrt ( ivar * jvar );
+	    }
+	    
+	    cout << " " << c[i][j] * norm;
 	  }
 	}
 
