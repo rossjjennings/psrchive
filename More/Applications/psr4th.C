@@ -18,6 +18,7 @@
 #include "Pulsar/FourthMomentStats.h"
 #include "Pulsar/StokesCrossCovariance.h"
 
+#include "BinaryStatistic.h"
 #include "Matrix.h"
 #include "Stokes.h"
 
@@ -103,6 +104,8 @@ protected:
   Reference::To<Archive> output;
 
   double integration_length;
+
+  unsigned remove_running_mean;
   unsigned histogram_pa;
   unsigned histogram_el;
   float histogram_threshold;
@@ -145,7 +148,8 @@ psr4th::psr4th ()
   histogram_el = 0;
   histogram_threshold = 3.0;
   cross_covariance_lags = 0;
-
+  remove_running_mean = 0;
+  
   total_baseline = each_baseline = report_baseline = false;
   extract_eigenvectors = false;
   smooth_eigenvectors = false;
@@ -184,6 +188,9 @@ void psr4th::add_options (CommandLine::Menu& menu)
   arg = menu.add (each_baseline, "b");
   arg->set_help ("remove the baseline, found from each sub-integration");
 
+  arg = menu.add (remove_running_mean, "m", "nsub");
+  arg->set_help ("remove the running mean of nsub sub-integration");
+  
   arg = menu.add (report_baseline, "r");
   arg->set_help ("report baselines in psr4th_baselines.txt");
 
@@ -260,17 +267,17 @@ void psr4th::process (Archive* archive)
 		 "archive nbin = %u != required nbin = %u",
 		 nbin, output->get_nbin());
 
-  ofstream baselines;
-  if (each_baseline && report_baseline)
-    baselines.open( "psr4th_baselines.txt");
 
-  for (unsigned isub=0; isub < nsub; isub++)
+  if (each_baseline)
   {
-    Reference::To<Integration> subint = archive->get_Integration (isub);
-    integration_length += subint->get_duration ();
+    ofstream baselines;
+    if (report_baseline)
+      baselines.open( "psr4th_baselines.txt");
 
-    if (each_baseline)
+    for (unsigned isub=0; isub < nsub; isub++)
     {
+      Reference::To<Integration> subint = archive->get_Integration (isub);
+
       if (report_baseline)
       {
 	vector< std::vector< Estimate<double> > > mean;
@@ -283,7 +290,46 @@ void psr4th::process (Archive* archive)
       
       subint->remove_baseline();
     }
+  }
 
+  Reference::To<Archive> running_mean;
+  
+  if (remove_running_mean > 1)
+  {
+    running_mean = archive->clone();
+    running_mean->tscrunch (remove_running_mean);
+  }
+
+  unsigned npol = archive->get_npol();
+  
+  for (unsigned isub=0; isub < nsub; isub++)
+  {
+    Reference::To<Integration> subint = archive->get_Integration (isub);
+    integration_length += subint->get_duration ();
+
+    if (running_mean)
+    {
+      unsigned imean = isub / remove_running_mean;
+      if (imean >= running_mean->get_nsubint())
+	imean = running_mean->get_nsubint();
+
+      Reference::To<Integration> msub = running_mean->get_Integration (imean);
+
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+	if (subint->get_weight(ichan) == 0)
+	  continue;
+
+	for (unsigned ipol=0; ipol < npol; ipol++)
+	{
+	  Pulsar::Profile* profile = subint->get_Profile (ipol, ichan);
+	  Pulsar::Profile* mprof = msub->get_Profile (ipol, ichan);
+
+	  profile->diff(mprof);
+	}
+      }
+    }
+    
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       if (subint->get_weight(ichan) == 0)
@@ -325,9 +371,9 @@ void psr4th::result::process (PolnProfile* profile)
 	for (unsigned jbin=startbin; jbin<nbin; jbin++)
 	{
 	  unsigned icross = cross_covar.get_icross (ibin, jbin, ilag);
-	
-	  Stokes<double> Si = profile->get_Stokes (ibin);
-	  Stokes<double> Sj = profiles[ilag]->get_Stokes (jbin);
+
+	  Stokes<double> Si = profiles[ilag]->get_Stokes (ibin);
+	  Stokes<double> Sj = profile->get_Stokes (jbin);
 	
 	  stokes_crossed[icross] += outer(Si,Sj);
 	}
