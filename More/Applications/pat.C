@@ -255,6 +255,7 @@ int main (int argc, char** argv) try
 
   Reference::To<Archive> arch;
   Reference::To<Archive> stdarch;
+  Reference::To<Archive> stdarch_backup;
   Reference::To<Profile> prof;
 
   // Shift estimator configuration options
@@ -511,7 +512,8 @@ int main (int argc, char** argv) try
     if (!full_freq)
       stdarch->fscrunch();
     else if (!stdarch->get_dedispersed())
-	throw Error (InvalidParam, "pat", "Standard wasn't dedispersed. pam -D can do it for you.");
+      throw Error (InvalidParam, "pat", 
+                   "Standard wasn't dedispersed. pam -D can do it for you.");
 
     stdarch->tscrunch();
     
@@ -522,6 +524,8 @@ int main (int argc, char** argv) try
       arrival->preprocess( stdarch );
 
     arrival->set_standard( stdarch );
+
+    stdarch_backup = stdarch;
   }
   catch (Error& error)
   {
@@ -580,9 +584,16 @@ int main (int argc, char** argv) try
     if (full_freq)
     {
       if (stdarch->get_nchan() < arch->get_nchan())
-	arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
+      {
+        stdarch = stdarch_backup;
+        if (stdarch->get_nchan() < arch->get_nchan())
+	  arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
+      }
       else if (stdarch->get_nchan() > arch->get_nchan())
+      {
+        stdarch = stdarch->clone();
 	stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
+      }
     }
 
     if (preprocess)
