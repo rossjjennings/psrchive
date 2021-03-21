@@ -131,6 +131,16 @@ void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
 string get_xrange(const double min, const double max);
 #endif // HAVE_PGPLOT
 
+// someday, these global variables could be attributes
+Reference::To<Archive> stdarch_backup;
+bool full_freq = false;
+bool fscrunch = false;
+bool tscrunch = false;
+bool preprocess = true;
+Pulsar::SmoothSinc* sinc = 0;
+Reference::To<ArrivalTime> arrival = new ArrivalTime;
+
+Archive* load_standard (const string& filename);
 
 void usage ()
 {
@@ -202,18 +212,14 @@ void usage ()
        << endl;
 }
 
-
 int main (int argc, char** argv) try
 {
-  Reference::To<ArrivalTime> arrival = new ArrivalTime;
-
   arrival->set_shift_estimator (new PhaseGradShift);
   
   bool verbose = false;
   bool std_given = false;
   bool std_multiple = false;
   bool gaussian = false;
-  bool full_freq = false;
   bool phase_only = false;
 
   // the matrix template matching algorithm and related flags
@@ -221,9 +227,6 @@ int main (int argc, char** argv) try
   bool choose_maximum_harmonic = false;
   unsigned maximum_harmonic = 0;
 
-  bool fscrunch = false;
-  bool tscrunch = false;
-  bool preprocess = true;
   vector<string> jobs;
 
   bool skip_bad = false;
@@ -238,9 +241,7 @@ int main (int argc, char** argv) try
 
   char *metafile = NULL;
 
-  Pulsar::SmoothSinc* sinc = 0;
-
-  string std,gaussFile;
+  string stdFile,gaussFile;
   string outFormat(""),outFormatFlags;
   string flagsep(" ");
   string tname;
@@ -255,7 +256,6 @@ int main (int argc, char** argv) try
 
   Reference::To<Archive> arch;
   Reference::To<Archive> stdarch;
-  Reference::To<Archive> stdarch_backup;
   Reference::To<Profile> prof;
 
   // Shift estimator configuration options
@@ -279,7 +279,7 @@ int main (int argc, char** argv) try
     case 'a':
       std_given = true;
       std_multiple = true;
-      std = optarg;
+      stdFile = optarg;
 
       /* Break up inputs (e.g. have "10cm.std 20cm.std 50*.std") */
       {
@@ -420,7 +420,7 @@ int main (int argc, char** argv) try
 
     case 's':
       std_given = true;
-      std = optarg;
+      stdFile = optarg;
       break;
 
     case 'T':
@@ -505,33 +505,8 @@ int main (int argc, char** argv) try
     full_poln->set_choose_maximum_harmonic (choose_maximum_harmonic);
   }
 
-  if (!std.empty() && !std_multiple && !gaussian) try
-  {
-    stdarch = Archive::load(std);
-
-    if (!full_freq)
-      stdarch->fscrunch();
-    else if (!stdarch->get_dedispersed())
-      throw Error (InvalidParam, "pat", 
-                   "Standard wasn't dedispersed. pam -D can do it for you.");
-
-    stdarch->tscrunch();
-    
-    if (sinc)
-      Pulsar::foreach (stdarch, sinc);
-    
-    if (preprocess)
-      arrival->preprocess( stdarch );
-
-    arrival->set_standard( stdarch );
-
-    stdarch_backup = stdarch;
-  }
-  catch (Error& error)
-  {
-    cerr << "\n" "Error processing standard profile:" << error << endl;
-    return -1;
-  }
+  if (!stdFile.empty() && !std_multiple && !gaussian)
+    stdarch = load_standard (stdFile);
 
   // Give format information for Tempo2 output 
 
@@ -555,8 +530,8 @@ int main (int argc, char** argv) try
 
   Pulsar::Interpreter* preprocessor = standard_shell();
 
-  for (unsigned i = 0; i < archives.size(); i++) try {
-
+  for (unsigned i = 0; i < archives.size(); i++) try
+  {
     if (verbose)
       cerr << "Loading " << archives[i] << endl;
       
@@ -580,22 +555,6 @@ int main (int argc, char** argv) try
       arch->fscrunch();
     if (tscrunch)
       arch->tscrunch();
-    
-    if (full_freq)
-    {
-      if (stdarch->get_nchan() < arch->get_nchan())
-      {
-        stdarch = stdarch_backup;
-        if (stdarch->get_nchan() < arch->get_nchan())
-	  arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
-      }
-      else if (stdarch->get_nchan() > arch->get_nchan())
-      {
-        stdarch = stdarch->clone();
-	stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
-      }
-    }
-
     if (preprocess)
       arrival->preprocess (arch);
 
@@ -616,21 +575,36 @@ int main (int argc, char** argv) try
 	  jDiff   = j;
 	}
       }
-      stdarch = Archive::load(stdprofiles[jDiff]);
-      stdarch->fscrunch();
-      stdarch->tscrunch();
-      
-      if (sinc)
-	Pulsar::foreach (stdarch, sinc);
-      
-      stdarch->pscrunch ();
-      arrival->set_standard (stdarch);
+      stdarch = load_standard (stdprofiles[jDiff]);
     }
 
-#if HAVE_PGPLOT
-    if (centre_template_peak) {
-      stdarch->centre_max_bin(0.5);
+    bool reset_standard = false;
+    
+    if (full_freq)
+    {
+      if (stdarch->get_nchan() < arch->get_nchan() && stdarch != stdarch_backup)
+      {
+        stdarch = stdarch_backup;
+	reset_standard = true;
+      }
+      
+      if (stdarch->get_nchan() < arch->get_nchan())
+	arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
+      
+      if (stdarch->get_nchan() > arch->get_nchan())
+      {
+        stdarch = stdarch->clone();
+	stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
+	reset_standard = true;
+      }
     }
+
+    if (reset_standard)
+      arrival->set_standard (stdarch);
+    
+#if HAVE_PGPLOT
+    if (centre_template_peak)
+      stdarch->centre_max_bin(0.5);
 #endif
 
     toas.resize (0);
@@ -690,7 +664,7 @@ int main (int argc, char** argv) try
     else
     {
       if (phase_info)
-	compute_dt(arch, toas, std);
+	compute_dt(arch, toas, stdFile);
 
       if (tempo2_output)
       {
@@ -721,6 +695,37 @@ catch (Error& error)
 {
   cerr << error << endl;
   return -1;
+}
+
+
+Archive* load_standard (const string& filename) try
+{
+  Reference::To<Archive> result = Archive::load (filename);
+
+  if (!full_freq)
+    result->fscrunch();
+  else if (!result->get_dedispersed())
+    throw Error (InvalidParam, "pat", 
+		 "Standard is not dedispersed. pam -D can do it for you.");
+
+  result->tscrunch();
+    
+  if (sinc)
+    Pulsar::foreach (result, sinc);
+    
+  if (preprocess)
+    arrival->preprocess( result );
+
+  arrival->set_standard( result );
+  
+  stdarch_backup = result;
+  
+  return result.release();
+}
+catch (Error& error)
+{
+  cerr << "\n" "Error processing standard profile:" << error << endl;
+  throw error;
 }
 
 //! Return the square of x
