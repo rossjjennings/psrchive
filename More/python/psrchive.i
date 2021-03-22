@@ -192,13 +192,22 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %typemap(out) Signal:: ## TYPE {
     $result = PyString_FromString( TYPE ## 2string($1).c_str());
 }
-%typemap(in) Signal:: ## TYPE {
+%typemap(in) Signal:: ## TYPE %{
     try {
-        $1 = Signal::string2 ## TYPE (PyString_AsString($input));
+        // String handling changed between python 2 and 3.
+        // This approach should be OK for 2.7 and 3.3+
+#if PY_VERSION_HEX >= 0x03030000
+        const char *typestr = PyUnicode_AsUTF8($input);
+#else
+        const char *typestr = PyString_AsString($input);
+#endif
+        if (typestr!=NULL) {
+            $1 = Signal::string2 ## TYPE (typestr);
+        }
     } catch (Error &error) {
         SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
     } 
-}
+%}
 %enddef
 %map_enum(State)
 %map_enum(Basis)
