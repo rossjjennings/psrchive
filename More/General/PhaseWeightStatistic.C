@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 using namespace std;
 using namespace Pulsar;
@@ -28,6 +29,9 @@ double Pulsar::PhaseWeightStatistic::get (const PhaseWeight* prof)
 {
   vector<float> tmp;
   prof->get_filtered (tmp, false, 0.0);
+
+  if (tmp.size() == 0)
+    return nan("");
 
   vector<double> data (tmp.begin(), tmp.end());
   return stat->get (data);
