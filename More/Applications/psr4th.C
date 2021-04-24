@@ -60,9 +60,6 @@ protected:
     //! Array of 4x4 fourth moments - one for each pulse phase bin
     std::vector< Matrix<4,4,double> > stokes_squared;
 
-    //! Array of nlag * M * 4x4 cross covariances, where M = nbin*(nbin+1)/2
-    std::vector< Matrix<4,4,double> > stokes_crossed;
-
     std::vector< Stokes<double> > stokes;
 
     //! Last nlag profiles
@@ -94,7 +91,7 @@ protected:
     Reference::To<PhaseResolvedHistogram> hist_pa;
     Reference::To<PhaseResolvedHistogram> hist_el;
 
-    //! Manages dimensions
+    //! Manages array of nlag * nbin * nbin * 4 * 4 cross covariances
     StokesCrossCovariance cross_covar;
   };
 
@@ -370,12 +367,12 @@ void psr4th::result::process (PolnProfile* profile)
 	
 	for (unsigned jbin=startbin; jbin<nbin; jbin++)
 	{
-	  unsigned icross = cross_covar.get_icross (ibin, jbin, ilag);
+	  Matrix<4,4,double>& sum = cross_covar.get_cross_covariance (ibin, jbin, ilag);
 
 	  Stokes<double> Si = profiles[ilag]->get_Stokes (ibin);
 	  Stokes<double> Sj = profile->get_Stokes (jbin);
 	
-	  stokes_crossed[icross] += outer(Si,Sj);
+	  sum += outer(Si,Sj);
 	}
       }
     }
@@ -505,12 +502,8 @@ void psr4th::result::set_cross_covariance_lags (unsigned nlag)
   
   cross_covar.set_nbin (stokes.size());
   cross_covar.set_nlag (cross_covariance_lags);
-    
-  unsigned ncross = cross_covar.get_ncross_total();
-  
-  stokes_crossed.resize( ncross );
-  for (unsigned icross=0; icross < ncross; icross++)
-    stokes_crossed[icross] = 0.0;
+  cross_covar.resize ();
+  cross_covar.set_all (0.0);
 }
     
 void psr4th::result::resize (unsigned nbin)
@@ -603,16 +596,9 @@ Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
     throw Error (InvalidState, "psr4th::result::get_cross_covariance",
 		 "count=%u >= ilag=%u", count, ilag);
   
-  unsigned icross = cross_covar.get_icross (ibin, jbin, ilag);
-  unsigned nbin = stokes.size();
+  Matrix<4,4,double> meansq;
+  meansq = cross_covar.get_cross_covariance (ibin, jbin, ilag);
 
-  if (icross >= stokes_crossed.size())
-    throw Error (InvalidRange, "psr4th::result::get_cross_covariance",
-		 "nbin=%u ibin=%u jbin=%u -> icross=%u >= ncross=%u",
-		 nbin, ibin, jbin, icross, stokes_crossed.size());
-  
-  Matrix<4,4,double> meansq = stokes_crossed [icross];
-  
   unsigned lag_count = count - ilag;
   meansq /= lag_count;
 
