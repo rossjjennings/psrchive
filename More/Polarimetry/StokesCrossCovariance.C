@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *
  *   Copyright (C) 2016 - 2021 by Willem van Straten
@@ -82,6 +83,60 @@ void StokesCrossCovariance::load (const CrossCovarianceMatrix* matrix)
   assert (idat == data.size());
 }
 
+//! Pure virtual base class of a stream of covariances stored in blocks
+class StokesCrossCovariance::Stream : public CrossCovarianceMatrix::Stream
+{
+  StokesCrossCovariance* parent;
+  CrossCovarianceMatrix* to;
+  mutable unsigned ilag;
+  mutable unsigned ibin;
+  mutable unsigned jbin;
+  mutable unsigned ipol;
+  mutable unsigned jpol;
+  mutable unsigned current_offset;
+
+  unsigned nlag;
+  unsigned nbin;
+  unsigned npol;
+  unsigned ncross_total;
+
+ public:
+
+  Stream (StokesCrossCovariance* _parent, CrossCovarianceMatrix* _to) 
+  {
+    parent = _parent;
+    to = _to;
+    ilag = ibin = jbin = ipol = jpol = current_offset = 0;
+    nlag = parent->get_nlag();
+    nbin = parent->get_nbin();
+    npol = 4;
+    ncross_total = to->get_ncross_total();
+  }
+
+  ~Stream ()
+  {
+#if _DEBUG
+    cerr << "StokesCrossCovariance::Stream dtor" << endl;
+
+    cerr << "off=" << current_offset << " ncross=" << ncross_total 
+       << " ilag=" << ilag << " ibin=" << ibin << " jbin=" << jbin 
+       << " ipol=" << ipol << " jpol=" << jpol << endl;
+#endif
+
+    assert (current_offset == ncross_total);
+
+    assert (ilag+1 == nlag);
+    assert (ibin+1 == nbin);
+    assert (jbin+1 == nbin);
+    assert (ipol+1 == npol);
+    assert (jpol == npol);
+  }
+
+  unsigned get_ndat () const { return to->get_ncross_total(); }
+
+  void get_data (unsigned off, unsigned n, double* dat) const;
+};
+
 void StokesCrossCovariance::unload (CrossCovarianceMatrix* matrix)
 {
   unsigned npol = 4;
@@ -89,8 +144,7 @@ void StokesCrossCovariance::unload (CrossCovarianceMatrix* matrix)
   matrix->set_nbin (nbin);
   matrix->set_npol (npol);
   matrix->set_nlag (nlag);
-    
-  matrix->resize_data();
+  matrix->set_stream ( new Stream(this, matrix) );
 
 #if _DEBUG
   cerr << "StokesCrossCovariance::unload"
@@ -99,38 +153,73 @@ void StokesCrossCovariance::unload (CrossCovarianceMatrix* matrix)
     " nlag=" << matrix->get_nlag() <<
     " ndat=" << matrix->get_data().size() << endl;
 #endif
+}
+
+void StokesCrossCovariance::Stream::get_data (unsigned off, unsigned ndat, 
+                                              double* data) const
+{
+  assert (off == current_offset);
+
+#if _DEBUG
+  cerr << "off=" << off << " ilag=" << ilag << " ibin=" << ibin 
+       << " jbin=" << jbin << " ipol=" << ipol << " jpol=" << jpol << endl;
+#endif
+
+  unsigned nlag = parent->get_nlag();
+  unsigned nbin = parent->get_nbin();
+  unsigned npol = 4;
   
-  vector<double>& data = matrix->get_data();
-  unsigned idat=0;
-    
-  for (unsigned ilag = 0; ilag < nlag; ilag ++)
+  unsigned idat = 0;
+
+  bool initialize = false;
+
+  for (; ilag < nlag; ilag ++)
   {
-    for (unsigned ibin = 0; ibin < nbin ; ibin ++)
+    if (initialize)
+      ibin = 0;
+
+    for (; ibin < nbin ; ibin ++)
     {
       // at lag zero, take only the upper triangle
-      unsigned startbin = (ilag == 0) ? ibin : 0;
+      if (initialize)
+        jbin = (ilag == 0) ? ibin : 0;
 
-      for (unsigned jbin = startbin; jbin < nbin ; jbin ++)
+      for (; jbin < nbin ; jbin ++)
       {
-	Matrix<4,4,double> covar = get_cross_covariance (ibin, jbin, ilag);
+	Matrix<4,4,double> covar;
+        covar = parent->get_cross_covariance (ibin, jbin, ilag);
 
-	for (unsigned ipol=0; ipol < npol; ipol++)
+        if (initialize)
+          ipol = 0;
+
+	for (; ipol < npol; ipol++)
 	{
 	  // on the diagonal, take only the upper triangle
-	  unsigned startpol = (ilag == 0 && ibin == jbin) ? ipol : 0;
-	    
-	  for (unsigned jpol = startpol; jpol < npol ; jpol++)
+          if (initialize)
+            jpol = (ilag == 0 && ibin == jbin) ? ipol : 0;
+
+	  for (; jpol < npol ; jpol++)
 	  {
-	    data.at(idat) = covar[ipol][jpol];
+	    data[idat] = covar[ipol][jpol];
+            current_offset ++;
 	    idat ++;
+            if (idat == ndat)
+            {
+              jpol ++;
+              return;
+            }
 	  }
+
+          initialize = true;
 	}
       }
     }
   }
-    
-  assert (idat == data.size());
+
+  throw Error (InvalidState, "StokesCrossCovariance::Stream::get_data", 
+               "unexpected end of loop");
 }
+
 
 //
 //
@@ -225,6 +314,15 @@ StokesCrossCovariance::get_cross_covariance (unsigned ibin,
   return cross_covariance[ get_icross(ibin,jbin,ilag) ];
 }
 
+Matrix<4,4,double>&
+StokesCrossCovariance::get_cross_covariance (unsigned ibin,
+                                             unsigned jbin,
+                                             unsigned ilag)
+{
+  check (ibin, jbin, ilag, "StokesCrossCovariance::get_cross_covariance");
+  return cross_covariance[ get_icross(ibin,jbin,ilag) ];
+}
+
 //
 //
 //
@@ -275,3 +373,11 @@ void StokesCrossCovariance::resize ()
 
   assert ( get_icross (nbin-1, nbin-1, nlag-1) == get_ncross_total()-1 );
 }
+
+void StokesCrossCovariance::set_all (double val)
+{
+  for (unsigned icross=0; icross < cross_covariance.size(); icross++)
+    cross_covariance[icross] = val;
+}
+
+

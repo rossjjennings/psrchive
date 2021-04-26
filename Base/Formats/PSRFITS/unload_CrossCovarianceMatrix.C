@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * // Unload_CrossCovarianceMatrix :: For storing covariance matrix data in COV_MAT PSRFITS Binary Table
+ * unload_CrossCovarianceMatrix :: For storing covariance matrix data in COV_MAT PSRFITS Binary Table
  *
  ***************************************************************************/
 
@@ -33,11 +33,19 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   psrfits_update_key (fptr, "NPOL", covar->get_npol());
   psrfits_update_key (fptr, "NLAG", covar->get_nlag());
 
-  vector<unsigned> dimensions;  
+  // Write Matrix data into the DATA (COV_MAT) column
 
-  // Write Matrix data into the DATA binary table (COV_MAT)
-  psrfits_write_col (fptr, "DATA", 1, covar->get_data(), dimensions);
+  if (covar->has_stream())
+  {
+    psrfits_write_col (fptr, "DATA", 1, covar->get_stream());
+  }
+  else
+  {
+    vector<unsigned> dimensions;  
+    psrfits_write_col (fptr, "DATA", 1, covar->get_data(), dimensions);
+  }
 
   if (verbose > 2)       
     cerr << "FITSArchive::unload CrossCovarianceMatrix exiting" << endl;
 }
+

@@ -212,6 +212,30 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
   psrfits_write_col (fptr, colnum, row, data, dims);
 }
 
+/* when it is not feasible to write a single block of data in one go */
+template<typename Stream>
+void psrfits_write_col (fitsfile* fptr, const char* name, int row,
+                        const Stream* stream)
+{
+  // 
+  // Get the number of the named column
+
+  int colnum = 0;
+  int status = 0;
+
+  if (psrfits_verbose)
+    std::cerr << "psrfits_write_col calling fits_get_colnum"
+      " name='" << name << "'" << std::endl;
+
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_write_col(vector<T>)",
+                     "fits_get_colnum (name=%s)", name);
+
+  psrfits_write_col (fptr, colnum, row, stream);
+}
+
 template<typename T>
 void psrfits_write_col (fitsfile* fptr, int colnum, int row,
 			const std::vector<T>& data,
@@ -230,11 +254,13 @@ void psrfits_write_col (fitsfile* fptr, int colnum, int row,
                      "fits_modify_vector_len (col=%d size=%u)",
 		     colnum, data.size());
 
-  if (psrfits_verbose)
-    std::cerr << "psrfits_write_col calling psrfits_update_tdim" << std::endl;  
-
   if (dims.size() > 1)
+  {
+    if (psrfits_verbose)
+      std::cerr << "psrfits_write_col calling psrfits_update_tdim" << std::endl;
+
     psrfits_update_tdim (fptr, colnum, dims);
+  }
 
   if (psrfits_verbose)
     std::cerr << "psrfits_write_col calling fits_write_col" << std::endl;
@@ -249,6 +275,52 @@ void psrfits_write_col (fitsfile* fptr, int colnum, int row,
                      "fits_write_col (type=%s col=%d row=%d size=%u)",
                      fits_datatype_str(FITS_traits<T>::datatype()),
 		     colnum, row, data.size());
+}
+
+template<typename Stream>
+void psrfits_write_col (fitsfile* fptr, int colnum, int row,
+                        const Stream* stream)
+{
+  int status = 0;
+
+  unsigned ndat = stream->get_ndat();
+
+  if (psrfits_verbose)
+    std::cerr << "psrfits_write_col (Stream) calling fits_modify_vector_len"
+      " colnum=" << colnum << " size=" << ndat << std::endl;
+ 
+  fits_modify_vector_len (fptr, colnum, ndat, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_write_col(vector<T>)",
+                     "fits_modify_vector_len (col=%d size=%u)",
+                     colnum, ndat);
+
+  unsigned nwritten = 0;
+
+  unsigned buffer_size = 1024 * 1024;
+
+  std::vector< typename Stream::Type > tmp ( buffer_size );
+  while (nwritten < ndat)
+  {
+    if (nwritten + buffer_size > ndat)
+      buffer_size = ndat - nwritten;
+
+    stream->get_data (nwritten, buffer_size, &tmp[0] );
+
+    fits_write_col (fptr, FITS_traits< typename Stream::Type >::datatype(),
+                    colnum, row,
+                    nwritten + 1, buffer_size,
+                    &(tmp[0]), &status);
+
+    if (status)
+      throw FITSError (status, "psrfits_write_col(Stream)",
+                     "fits_write_col (type=%s col=%d row=%d size=%u)",
+                     fits_datatype_str(FITS_traits< typename Stream::Type >::datatype()),
+                     colnum, row, buffer_size);
+
+    nwritten += buffer_size;
+  }
 }
 
 template<typename T>

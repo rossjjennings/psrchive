@@ -21,7 +21,8 @@ namespace Pulsar {
 
   class CrossCovarianceMatrix;
 
-  //! Cross-covariances between the Stokes parameters as a function of lag in turns for all pulse longitude pairs
+  //! Cross-covariances between the Stokes parameters 
+  /*! Computed as a function of lag in turns for all pulse longitude pairs */
   class StokesCrossCovariance : public Container
   {
     
@@ -35,6 +36,8 @@ namespace Pulsar {
 
     //! Unload to a CrossCovarianceMatrix object
     void unload (CrossCovarianceMatrix*);
+
+    class Stream;
     
     //! Clone operator
     virtual StokesCrossCovariance* clone () const;
@@ -49,11 +52,19 @@ namespace Pulsar {
 
     //! Pepare to store
     void resize ();
-    
+
+    //! Set all values to specified value
+    void set_all (double val = 0.0);
+ 
     //! Get the Stokes cross covariance for the specified pair of bins
     Matrix<4,4,double> get_cross_covariance (unsigned ibin,
 					     unsigned jbin,
 					     unsigned ilag = 0) const;
+
+    //! Get the Stokes cross covariance for the specified pair of bins
+    Matrix<4,4,double>& get_cross_covariance (unsigned ibin,
+                                              unsigned jbin,
+                                              unsigned ilag = 0);
 
     //! Set the Stokes covariance for the specified bin
     void set_cross_covariance (unsigned ibin, unsigned jbin,

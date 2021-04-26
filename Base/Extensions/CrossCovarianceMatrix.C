@@ -99,3 +99,23 @@ void CrossCovarianceMatrix::resize_data ()
   covariance.resize ( get_ncross_total() );
 }
 
+//! Return true if covariances are stored in a stream of blocks
+bool CrossCovarianceMatrix::has_stream () const
+{
+  return stream;
+}
+
+//! Set the stream of covariances stored in blocks
+void CrossCovarianceMatrix::set_stream (Stream* s)
+{
+  stream = s;
+}
+
+//! Get the stream of covariances stored in blocks
+const CrossCovarianceMatrix::Stream* 
+CrossCovarianceMatrix::get_stream () const
+{
+  return stream;
+}
+
+
