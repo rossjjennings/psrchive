@@ -43,6 +43,14 @@ protected:
   
   //! Add command line options
   void add_options (CommandLine::Menu&);
+
+  unsigned find_max (StokesCrossCovariance* stokes,
+		     unsigned ipol,
+		     unsigned jpol);
+
+  vector<unsigned> ilags;
+  vector<unsigned> ibins;
+  vector<unsigned> jbins;
 };
 
 
@@ -127,6 +135,80 @@ vector<unsigned> indeces (unsigned n, const string& txt)
   return result;
 }
 
+unsigned polindex (char code)
+{
+  switch (code) {
+  case 'I':
+    return 0;
+  case 'Q':
+    return 1;
+  case 'U':
+    return 2;
+  case 'V':
+    return 3;
+  default:
+    throw Error (InvalidState, "polindex", "'%c' not recognized", code);
+  }
+}
+
+unsigned psr4th2txt::find_max (StokesCrossCovariance* stokes,
+			       unsigned ipol,
+			       unsigned jpol)
+{
+  unsigned ibin_max = 0;
+  double val_max = -1.0;
+
+  for (unsigned ilag=0; ilag < ilags.size(); ilag++)
+  {
+    unsigned k = ilags[ilag];
+    if (k == 0)
+      continue;
+
+    // search for ibin over all jbins != ibin
+    for (unsigned ibin=0; ibin < jbins.size(); ibin++)
+    {
+      unsigned i = jbins[ibin];
+
+      for (unsigned jbin=0; jbin < jbins.size(); jbin++)
+      {
+	unsigned j = jbins[jbin];
+
+	if (i == j)
+	  continue;
+	
+	Matrix<4,4,double> ilag0;
+	Matrix<4,4,double> jlag0;
+	if (correlation_coefficient)
+	{
+	  ilag0 = stokes->get_cross_covariance(i, i, 0);
+	  jlag0 = stokes->get_cross_covariance(j, j, 0);
+	}
+
+	Matrix<4,4,double> c = stokes->get_cross_covariance(i, j, k);
+	
+	double norm = 1.0;
+	if (correlation_coefficient)
+	{
+	  double ivar = ilag0[ipol][ipol];
+	  double jvar = jlag0[jpol][jpol];
+	  norm = 1.0 / sqrt ( ivar * jvar );
+	}
+	    
+	double val = fabs(c[ipol][jpol]) * norm;
+	if (val > val_max)
+	  {
+	    val_max = val;
+	    ibin_max = i;
+	  }
+      }
+    }
+  }
+
+  return ibin_max;
+}
+
+
+
 void psr4th2txt::process (Pulsar::Archive* archive)
 {
   const CrossCovarianceMatrix* matrix = archive->get<CrossCovarianceMatrix>();
@@ -138,10 +220,32 @@ void psr4th2txt::process (Pulsar::Archive* archive)
 
   stokes = new StokesCrossCovariance (matrix);
 
+  ilags = indeces (stokes->get_nlag(), lag_indeces);
+  jbins = indeces (stokes->get_nbin(), bin2_indeces);
+
+  if (bin1_indeces.substr(0,3) == "max")
+  {
+    cerr << "searching for ibin with " << bin1_indeces << endl;
+    ibins.resize (1);
+    
+    if (bin1_indeces.length () == 4)
+    {
+      unsigned ipol = polindex (bin1_indeces[3]);
+      cerr << "find_max amp ipol=" << ipol << endl;
+      ibins[0] = archive->get_Profile(0,ipol,0)->find_max_bin();
+    }
+    else if (bin1_indeces.length () == 5)
+    {
+      unsigned ipol = polindex (bin1_indeces[3]);
+      unsigned jpol = polindex (bin1_indeces[4]);
+      cerr << "find_max cov ipol=" << ipol << " jpol=" << jpol << endl;
+      ibins[0] = find_max (stokes, ipol, jpol);
+    }
+  }
+  else
+    ibins = indeces (stokes->get_nbin(), bin1_indeces);
+  
   unsigned npol = 4;
-  vector<unsigned> ilags = indeces (stokes->get_nlag(), lag_indeces);
-  vector<unsigned> ibins = indeces (stokes->get_nbin(), bin1_indeces);
-  vector<unsigned> jbins = indeces (stokes->get_nbin(), bin2_indeces);
   vector<unsigned> ipols = indeces (npol, pol1_indeces);
   vector<unsigned> jpols = indeces (npol, pol2_indeces);
 
@@ -208,21 +312,21 @@ void psr4th2txt::process (Pulsar::Archive* archive)
 	    if (ipol_other)
 	      ipols[0] = jpols[jpol];
 
-	    unsigned i = ipols[ipol];
-	    unsigned j = jpols[jpol];
+	    unsigned ip = ipols[ipol];
+	    unsigned jp = jpols[jpol];
 
 	    if (negative_lags)
-	      swap (i, j);
+	      swap (ip, jp);
 
 	    double norm = 1.0;
 	    if (correlation_coefficient)
 	    {
-	      double ivar = ilag0[i][i];
-	      double jvar = jlag0[j][j];
+	      double ivar = ilag0[ip][ip];
+	      double jvar = jlag0[jp][jp];
 	      norm = 1.0 / sqrt ( ivar * jvar );
 	    }
 	    
-	    cout << " " << c[i][j] * norm;
+	    cout << " " << c[ip][jp] * norm;
 	  }
 	}
 
@@ -244,4 +348,3 @@ int main (int argc, char** argv)
   psr4th2txt program;
   return program.main (argc, argv);
 }
-
