@@ -180,31 +180,48 @@ unsigned psr4th2txt::find_max (StokesCrossCovariance* stokes,
 
 	if (i == j)
 	  continue;
-	
-	Matrix<4,4,double> ilag0;
-	Matrix<4,4,double> jlag0;
-	if (correlation_coefficient)
-	{
-	  ilag0 = stokes->get_cross_covariance(i, i, 0);
-	  jlag0 = stokes->get_cross_covariance(j, j, 0);
-	}
 
-	Matrix<4,4,double> c = stokes->get_cross_covariance(i, j, k);
+        unsigned ib = i;
+        unsigned jb = j;
+        unsigned ip = ipol;
+        unsigned jp = jpol;
+
+        bool also_search_negative_lags = false;
+        bool execute_at_least_once = true;
+
+        while (execute_at_least_once)
+        {
+	  Matrix<4,4,double> ilag0;
+	  Matrix<4,4,double> jlag0;
+	  if (correlation_coefficient)
+	  {
+	    ilag0 = stokes->get_cross_covariance(ib, ib, 0);
+	    jlag0 = stokes->get_cross_covariance(jb, jb, 0);
+	  }
+
+	  Matrix<4,4,double> c = stokes->get_cross_covariance(ib, jb, k);
 	
-	double norm = 1.0;
-	if (correlation_coefficient)
-	{
-	  double ivar = ilag0[ipol][ipol];
-	  double jvar = jlag0[jpol][jpol];
-	  norm = 1.0 / sqrt ( ivar * jvar );
-	}
+	  double norm = 1.0;
+	  if (correlation_coefficient)
+	  {
+	    double ivar = ilag0[ip][ip];
+	    double jvar = jlag0[jp][jp];
+	    norm = 1.0 / sqrt ( ivar * jvar );
+	  }
 	    
-	double val = fabs(c[ipol][jpol]) * norm;
-	if (val > val_max)
+	  double val = fabs(c[ip][jp]) * norm;
+	  if (val > val_max)
 	  {
 	    val_max = val;
 	    ibin_max = i;
 	  }
+
+          if (!also_search_negative_lags)
+            break;
+
+          swap (ib, jb);
+          swap (ip, jp);
+        }
       }
     }
   }
