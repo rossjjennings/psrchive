@@ -105,7 +105,12 @@ void psr4th2txt::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (bin1_indeces, 'i', "longitude bin 1");
   arg->set_help ("select the longitude 1 bin(s) to output");
-
+  arg->set_long_help
+    ("  -i max[X|XY] -> search for longitude bin with maximum value \n"
+     "     X  -> mean of Stokes X \n"
+     "     XY -> absolute value of cross-covariance between Stokes X and Y \n"
+     "  -i other -> longitude 1 equals longitude 2");
+  
   arg = menu.add (bin2_indeces, 'j', "longitude bin 2");
   arg->set_help ("select the longitude 2 bin(s) to output");
 
