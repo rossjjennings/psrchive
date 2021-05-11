@@ -18,6 +18,11 @@ int main (int argc, char** argv) try
 
   Pulsar::Parameters* params =  factory<Pulsar::Parameters> (argv[1]);
 
+  // in days
+  double orbital_period = fromstring<double>( params->get_value("PB") );
+  // in seconds
+  orbital_period *= 24 * 3600;
+ 
   Pulsar::Generator* generator = Pulsar::Generator::factory (params);
 
   /*
@@ -77,7 +82,7 @@ int main (int argc, char** argv) try
     double freq = min_freq + ichan * df;
 
     predictor->set_observing_frequency (freq);
-    
+
     for (unsigned idat=0; idat < ndat; idat++)
     {
       MJD curtime = time + idat * dt;
@@ -87,7 +92,44 @@ int main (int argc, char** argv) try
 
   clock.stop();
 
-  cout << ntot << " phases computed in " << clock << endl;
+  cout << ntot << " tf-phases computed in " << clock << endl;
+
+  predictor->set_observing_frequency (freq);
+
+  double max_diff = 0;
+  double elapsed = 0;
+  ntot = 0;
+  
+  cout << "simulating an orbit of " << orbital_period << " seconds" << endl;
+
+  clock.start();
+  while (elapsed < orbital_period)
+  {
+    double spin_freq = predictor->frequency (time);
+    double phase_per_sample = dt * spin_freq;
+
+    Pulsar::Phase phi0 = predictor->phase (time);
+
+    for (unsigned idat=0; idat < ndat; idat++)
+    {
+      MJD curtime = time + idat * dt;
+      Pulsar::Phase phi1 = predictor->phase (curtime);
+      Pulsar::Phase phi2 = phi0 + idat * phase_per_sample;
+      
+      double diff = (phi2 - phi1).fracturns();
+      if (fabs(diff) > max_diff)
+	max_diff = fabs(diff);
+    }
+
+    elapsed += ndat * dt;
+    time += ndat * dt;
+    ntot += ndat;
+  }
+  clock.stop();
+
+  cout << ntot << " t-phases computed in " << clock << endl;
+
+  cout << "maximum phase difference = " << max_diff << endl;
   
   delete predictor;
 
