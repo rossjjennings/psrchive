@@ -268,6 +268,7 @@ AC_CONFIG_FILES([
 		Util/third/parsifal/Makefile
 		Util/third/star/Makefile
 		Util/third/gnu/Makefile
+		Util/third/gcvspl/Makefile
 		Util/units/Makefile
 		Util/fft/Makefile
 		Util/fft/install_bench
