@@ -52,6 +52,7 @@ include_HEADERS = \
 	RobustStats.h \
 	RunningMedian.h \
         sky_coord.h \
+	SmoothingSpline.h \
 	StraightLine.h \
         strutil.h \
 	SystemCall.h \
@@ -127,6 +128,7 @@ libgenutil_la_SOURCES = \
         sla_MJD.C \
         sla_sky_coord.C \
 	smooth.f \
+	SmoothingSpline.C \
         stringload.C \
         stringprintf.C \
         strutil.C \
