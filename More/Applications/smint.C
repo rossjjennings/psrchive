@@ -26,7 +26,7 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Profile.h"
 
-#undef HAVE_PGPLOT
+// #undef HAVE_PGPLOT
 
 #ifdef HAVE_PGPLOT
 #include <cpgplot.h>
@@ -42,7 +42,9 @@
 #include "MEAL/Polynomial.h"
 #include "MEAL/Axis.h"
 
+#include "UnaryStatistic.h"
 #include "strutil.h"
+#include "SmoothingSpline.h"
 
 #include <fstream>
 
@@ -76,16 +78,25 @@ protected:
   void plot_data (const vector< double >& data_x,
                   const vector< Estimate<double> >& data_y);
 
-  void plot_model (MEAL::Axis<double>& argument,
-                   MEAL::Scalar* scalar,
-                   unsigned npts, double xmin, double xmax);
+  void plot_model (std::pair<MEAL::Axis<double>*, MEAL::Scalar*>& model,
+		   unsigned npts, double xmin, double xmax);
 #endif
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
+  // determine smoothing by minimizing generalized cross-validation
+  bool minimize_gcv;
+  // determine smoothing by minimizing true mean-squared error
+  bool minimize_tmse;
+  // find the median effective number of free parameters
+  bool find_median_nfree;
+
+  double median_nfree;
   double pspline_alpha;
 
+  bool use_smoothing_spline ();
+  
   unsigned freq_order;
   unsigned time_order;
   float threshold;
@@ -96,6 +107,8 @@ protected:
   class row
   {
   public:
+    SmoothingSpline spline1d;
+
     MJD epoch;
     double x0; // coordinate shared by all data in row
     vector< double > freq;
@@ -108,7 +121,6 @@ protected:
   public:
 
 #if HAVE_SPLINTER
-    SplineSmooth1D spline1d;
     SplineSmooth2D spline2d;
 #endif
 
@@ -172,6 +184,10 @@ protected:
   string spline_filename;
   string plot_filename;
 
+  unsigned plot_npts;
+  double plot_xmin;
+  double plot_xmax;
+  
   // fit 2-D data using a bunch of 1-D fits
   bool row_by_row;
 
@@ -183,21 +199,28 @@ protected:
   
   void fit (set&);
 
-#if HAVE_SPLINTER
-
-  void fit_pspline (SplineSmooth1D& spline,
+  void fit_pspline (SmoothingSpline& spline,
                     const vector< double >& data_x,
                     const vector< Estimate<double> >& data_y);
+
+#if HAVE_PGPLOT
+
+  template<class Spline>
+    void setup_and_plot (Spline& spline,
+			 const vector< double >& data_x,
+			 const vector< Estimate<double> >& data_y);
+
+  void plot_model (SmoothingSpline& spline,
+                   unsigned npts, double xmin, double xmax);
+#endif
+
+#if HAVE_SPLINTER
 
   void fit_pspline (SplineSmooth2D& spline, vector<row>& table);
 
 #if HAVE_PGPLOT
-  void plot_model (SplineSmooth1D& spline,
-                   unsigned npts, double xmin, double xmax);
-
   void plot_model (SplineSmooth2D& spline, double x0,
                    unsigned npts, double xmin, double xmax);
-
 #endif
 
 #endif
@@ -219,7 +242,10 @@ smint::smint ()
   threshold = 0.001;
   pspline_alpha = 0.0;
   row_by_row = false;
-
+  minimize_gcv = false;
+  minimize_tmse = false;
+  find_median_nfree = false;
+  median_nfree = 0;
   current_subint = 0;
 }
 
@@ -251,6 +277,15 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (pspline_alpha, 'p', "double");
   arg->set_help ("p-spline smoothing factor 'alpha'");
+
+  arg = menu.add (minimize_gcv, "gcv");
+  arg->set_help ("compute p-spline smoothing by minimizing GCV");
+
+  arg = menu.add (minimize_tmse, "mse");
+  arg->set_help ("compute p-spline smoothing by minimizing true MSE");
+
+  arg = menu.add (find_median_nfree, "mnf");
+  arg->set_help ("compute p-spline smoothing using median nfree");
 #endif
 
 #if HAVE_PGPLOT
@@ -263,6 +298,11 @@ void smint::add_options (CommandLine::Menu& menu)
 
 }
 
+bool smint::use_smoothing_spline ()
+{
+  return minimize_gcv || minimize_tmse || find_median_nfree
+    || pspline_alpha > 0;
+}
 
 /*!
 
@@ -564,7 +604,7 @@ void smint::unload (Integration* subint, set& data, unsigned ipol, unsigned ibin
     double yval = 0.0;
     
     if (nrow == 1 || row_by_row)
-      yval = data.spline1d.evaluate (xval);
+      yval = data.table[ibin].spline1d.evaluate (xval);
     else
     {
       pair<double,double> coord (data.table[ibin].x0, xval);
@@ -585,28 +625,54 @@ void smint::fit (set& dataset)
   if (table.size() == 0)
     throw Error (InvalidState, "smint::fit", "empty table");
 
+  if (find_median_nfree)
+  {
+    vector<double> nfree (table.size());
+    cerr << "smint::fit computing " << table.size() << " nfree values" << endl;
+    for (unsigned irow=0; irow < table.size(); irow++)
+    {
+      SmoothingSpline spline;
+      if (minimize_tmse)
+	spline.set_msre (1.0);
+
+      spline.fit (table[irow].freq, table[irow].data);
+      nfree[irow] = spline.get_fit_effective_nfree ();
+    }
+
+    median_nfree = median (nfree);
+    cerr << "median effective nfree = " << median_nfree << endl;
+  }
+  
   if (table.size() == 1 || row_by_row)
   {
     cerr << "smint::fit performing " << table.size() << " 1-D fits" << endl;
     for (unsigned irow=0; irow < table.size(); irow++)
     {
-#if HAVE_SPLINTER
-      if (pspline_alpha)
-	{
-	  cerr << "smint::fit 1-D pspline to " << table[irow].freq.size() << " points" << endl;
-	  fit_pspline (dataset.spline1d, table[irow].freq, table[irow].data);
-	}
+      if (use_smoothing_spline())
+      {
+	cerr << "smint::fit 1-D pspline to "
+	     << table[irow].freq.size() << " points" << endl;
+	fit_pspline (dataset.table[irow].spline1d,
+		     table[irow].freq, table[irow].data);
+      }
       else
-#endif
+      {
 	fit_polynomial (table[irow].freq, table[irow].data);
-
+      }
+      
       if (row_by_row)
 	unload_row (dataset, irow);
     }
+
+#if HAVE_PGPLOT
+    if (row_by_row)
+      cpgend ();
+#endif
+    
   }
   else
   {
-    if (!pspline_alpha)
+    if (!use_smoothing_spline())
       throw Error (InvalidState, "smint::fit",
                    "2-D smoothing with polynomials not implemented");
 
@@ -623,14 +689,16 @@ void smint::fit (set& dataset)
 void smint::unload_row (set& dataset, unsigned irow)
 {
   if (&dataset != &(profile_data[current_ipol]))
-    throw Error (InvalidState, "smint::unload_row",
-		 "fitting row-by-row currently implemented only for pulse profile");
+  {
+    cerr << "unload row-by-row currently implemented only for pulse profile" << endl;
+    return;
+  }
   
   vector<row>& table = dataset.table;
   unsigned ibin = irow;  
 
 #if HAVE_SPLINTER
-  if (pspline_alpha)
+  if (use_smoothing_spline())
   {
     cerr << "smint::unload_row ibin=" << ibin
 	 << " nchan=" << table[irow].freq.size()  << endl;
@@ -648,6 +716,8 @@ void smint::unload_row (set& dataset, unsigned irow)
 
 void smint::unload (const string& filename, const vector<row>& table)
 {
+  cerr << "smint::unload filename=" << filename << endl;
+  
   ofstream out (filename.c_str());
   for (unsigned irow=0; irow < table.size(); irow++)
   {
@@ -661,8 +731,6 @@ void smint::unload (const string& filename, const vector<row>& table)
     out << endl;
   }
 }
-
-#if HAVE_SPLINTER
 
 template<class Extension>
 void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
@@ -683,12 +751,16 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       xval = channel_frequency[ichan];
-      if (nrow == 1)
-        yval = data[i].spline1d.evaluate (xval);
+      if (nrow == 1 || row_by_row)
+        yval = data[i].table[ifile].spline1d.evaluate (xval);
       else
-      {
+      {	
+#if HAVE_SPLINTER
         pair<double,double> coord (data[i].table[ifile].x0, xval);
         yval = data[i].spline2d.evaluate ( coord );
+#else
+	assert ("there has been an error");
+#endif
       }
 
       ext->set_valid (ichan, true);
@@ -698,10 +770,11 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
   }
 }
 
-#endif
 
 void smint::finalize ()
 {
+  cerr << "smint::finalize" << endl;
+  
   for (unsigned i=0; i < pcal_data.size(); i++)
   {
     string filename = "pcal_data_" + tostring(pcal_data[i].index) + ".txt";
@@ -780,8 +853,8 @@ void smint::finalize ()
     cpgend ();
 #endif
 
-#if HAVE_SPLINTER
-
+  cerr << "smint::finalize unloading smoothed solutions" << endl;
+  
   for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
   {
     string filename = input_filenames[ifile];
@@ -827,84 +900,68 @@ void smint::finalize ()
     archive->unload (new_filename);
   }
 
-#endif
-
 }
 
-#if HAVE_SPLINTER
-
-void smint::fit_pspline (SplineSmooth1D& spline,
-                         const vector< double >& data_x,
-                         const vector< Estimate<double> >& data_y)
-{
-  double xmin = data_x[0];
-  double xmax = xmin;
-
-  double ymin = data_y[0].val;
-  double ymax = ymin;
-
-  unsigned nchan = data_x.size();
-
-  vector<double> slopes(nchan-1);
-  vector<double> errors(nchan-1);
-
-  for (unsigned ichan=1; ichan < nchan; ichan++)
-  {
-    xmin = min(xmin, data_x[ichan]);
-    xmax = max(xmax, data_x[ichan]);
-
-    ymin = min(ymin, data_y[ichan].val);
-    ymax = max(ymax, data_y[ichan].val);
-
-    Estimate<double> delta_y = data_y[ichan] - data_y[ichan-1];
-    double delta_x = data_x[ichan] - data_x[ichan-1];
-    slopes[ichan-1] = fabs (delta_y.val / (delta_x * delta_x * sqrt(delta_y.var)));
-    errors[ichan-1] = sqrt(delta_y.var);
-  }
-
-  // compute the median deviation
-  std::sort (slopes.begin(), slopes.end());
-  std::sort (errors.begin(), errors.end());
-
-  double scale = slopes[nchan/2] * errors[nchan/2]; // (xmax-xmin) / (ymax-ymin);
-
-  double use_alpha = pspline_alpha / ( scale * scale );
-  cerr << "1D: alpha=" << use_alpha << endl;
-
-  spline.set_alpha (use_alpha);
-  spline.set_data (data_x, data_y);
 
 #ifdef HAVE_PGPLOT
 
+template<class Spline>
+void smint::setup_and_plot (Spline& model,
+			    const vector< double >& data_x,
+			    const vector< Estimate<double> >& data_y)
+{
+  cerr << "setup_and_plot filename = " << plot_filename << endl;
+  
   if (plot_filename != "")
     cpgopen (plot_filename.c_str());
 
   if (row_by_row)
     plot_filename = "";
   
-  unsigned npts = 500;
+  plot_npts = 200;
 
   cpgpage();
-
   plot_data (data_x, data_y);
 
   cpgsci(2);
-  cpgslw(3);
 
-  plot_model (spline, npts, xmin, xmax);
+  plot_xmin = *min_element(data_x.begin(), data_x.end());
+  plot_xmax = *max_element(data_x.begin(), data_x.end());
+
+  plot_model (model, plot_npts, plot_xmin, plot_xmax);
 
   if (plot_filename != "")
     cpgend ();
+}
 
+#endif
+
+#if HAVE_SPLINTER
+
+void smint::fit_pspline (SmoothingSpline& spline,
+                         const vector< double >& data_x,
+                         const vector< Estimate<double> >& data_y)
+{
+  if (pspline_alpha)
+    spline.set_smoothing (pspline_alpha);
+
+  if (find_median_nfree)
+    spline.set_effective_nfree (median_nfree);
+
+  if (minimize_tmse)
+    spline.set_msre (1.0);
+
+  spline.fit (data_x, data_y);
+
+#ifdef HAVE_PGPLOT
+  setup_and_plot (spline, data_x, data_y);
 #endif
 
 }
 
 
 void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
-{ 
-  spline.set_alpha (pspline_alpha);
-
+{
   MJD mid_epoch;
   double x0_span = 0.0;
 
@@ -929,6 +986,8 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
   
     cerr << "smint::fit_pspline min=" << min_epoch << " ref=" << mid_epoch << endl;
   }
+    
+  spline.set_alpha (pspline_alpha);
 
   vector< pair<double,double> > data_x;
   vector< Estimate<double> > data_y;
@@ -962,18 +1021,16 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   if (spline_filename != "")
   {
-    unsigned npts = 200;
-
-    double x1del = (xmax-xmin)/(npts-1);
-    double x0del = x0_span/(npts-1);
+    double x1del = (xmax-xmin)/(plot_npts-1);
+    double x0del = x0_span/(plot_npts-1);
     double x0min = -0.5*x0_span;
 
     ofstream out (spline_filename.c_str());
-    for (unsigned i=0; i<npts; i++)
+    for (unsigned i=0; i<plot_npts; i++)
     {
       double x0 = x0min + x0del * double(i);
 
-      for (unsigned j=0; j<npts; j++)
+      for (unsigned j=0; j<plot_npts; j++)
       {
         double x1 = xmin + x1del * double(j);
   
@@ -993,14 +1050,12 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   for (unsigned irow = 0; irow < table.size(); irow++)
   {
-    unsigned npts = 500;
-
     cpgpage();
     plot_data (table[irow].freq, table[irow].data);
 
     cpgsci(2); 
     double x0 = table[irow].x0;
-    plot_model (spline, x0, npts, xmin, xmax);
+    plot_model (spline, x0, plot_npts, xmin, xmax);
   }
 
   if (plot_filename != "")
@@ -1012,7 +1067,8 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
 #endif // HAVE_SPLINTER
 
-void smint::fit_polynomial (const vector< double >& data_x, const vector< Estimate<double> >& data_y)
+void smint::fit_polynomial (const vector< double >& data_x,
+			    const vector< Estimate<double> >& data_y)
 {
   if (freq_order == 0)
     throw Error (InvalidState, "smint::fit_polynomial",
@@ -1028,20 +1084,13 @@ void smint::fit_polynomial (const vector< double >& data_x, const vector< Estima
   for (unsigned i=0; i<data_x.size(); i++)
     axis_x.push_back( argument.get_Value( data_x[i] ) );
 
-  unsigned npts = 500;
-
-  double xmin = *min_element(data_x.begin(), data_x.end());
-  double xmax = *max_element(data_x.begin(), data_x.end());
-
-  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
-
 #ifdef HAVE_PGPLOT
 
-  cpgpage();
-  plot_data (data_x, data_y);
+  std::pair<MEAL::Axis<double>*, MEAL::Scalar*> model;
+  model.first = &argument;
+  model.second = scalar;
 
-  cpgsci(2);
-  plot_model (argument, scalar, npts, xmin, xmax);
+  setup_and_plot (model, data_x, data_y);
 
 #endif
 
@@ -1080,7 +1129,7 @@ void smint::fit_polynomial (const vector< double >& data_x, const vector< Estima
 
 #ifdef HAVE_PGPLOT
   cpgsci(3);
-  plot_model (argument, scalar, npts, xmin, xmax);
+  plot_model (model, plot_npts, plot_xmin, plot_xmax);
 #endif
 
   string model_text;
@@ -1109,10 +1158,12 @@ void smint::plot_data (const vector< double >& data_x,
   cpgbox ("bcinst", 0,0, "bcinst", 0,0);
 }
 
-void smint::plot_model (MEAL::Axis<double>& argument,
-                        MEAL::Scalar* scalar,
+void smint::plot_model (std::pair<MEAL::Axis<double>*, MEAL::Scalar*>& model,
                         unsigned npts, double xmin, double xmax)
 {
+  MEAL::Axis<double>& argument = *(model.first);
+  MEAL::Scalar* scalar = model.second;
+    
   double xdel = (xmax-xmin)/(npts-1);
 
   for (unsigned i=0; i<npts; i++) {
@@ -1132,28 +1183,11 @@ void smint::plot_model (MEAL::Axis<double>& argument,
 
 #if HAVE_SPLINTER
 
-#if 0
-
-  // this should be wrapped in a template
-  unsigned npts = 500;
-
-  double xmin = *min_element(data_x.begin(), data_x.end());
-  double xmax = *max_element(data_x.begin(), data_x.end());
-
-  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
-
-  cpgpage();
-  plot_data (data_x, data_y);
-
-  cpgsci(2);
-  cpgslw(3);
-  plot_model (spline, npts, xmin, xmax);
-
-#endif
-
-void smint::plot_model (SplineSmooth1D& spline,
+void smint::plot_model (SmoothingSpline& spline,
                         unsigned npts, double xmin, double xmax)
 {
+  cerr << "plot_model SplineSmooth1D" << endl;
+  
   double xdel = (xmax-xmin)/(npts-1);
   for (unsigned i=0; i<npts; i++)
   {
