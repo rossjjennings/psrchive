@@ -164,11 +164,11 @@ protected:
   template<typename Container>
   void check_reference (Pulsar::Archive* archive, Container* ext);
 
-#if HAVE_SPLINTER
-  
   // unload smoothed model values into container
   template<class Container>
   void unload (Container* ext, vector<set>& data, unsigned ifile);
+
+#if HAVE_SPLINTER
 
   void unload (Integration* subint, vector<set>& data);
   void unload (Integration* subint, set& data, unsigned ipol, unsigned ibin);
@@ -934,8 +934,6 @@ void smint::setup_and_plot (Spline& model,
 
 #endif
 
-#if HAVE_SPLINTER
-
 void smint::fit_pspline (SmoothingSpline& spline,
                          const vector< double >& data_x,
                          const vector< Estimate<double> >& data_y)
@@ -957,6 +955,7 @@ void smint::fit_pspline (SmoothingSpline& spline,
 
 }
 
+#if HAVE_SPLINTER
 
 void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 {
@@ -1179,8 +1178,6 @@ void smint::plot_model (std::pair<MEAL::Axis<double>*, MEAL::Scalar*>& model,
   }
 }
 
-#if HAVE_SPLINTER
-
 void smint::plot_model (SmoothingSpline& spline,
                         unsigned npts, double xmin, double xmax)
 {
@@ -1199,6 +1196,8 @@ void smint::plot_model (SmoothingSpline& spline,
   }
 
 }
+
+#if HAVE_SPLINTER
 
 void smint::plot_model (SplineSmooth2D& spline, double x0,
                         unsigned npts, double xmin, double xmax)
