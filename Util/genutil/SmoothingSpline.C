@@ -183,6 +183,9 @@ double SmoothingSpline::evaluate (double xval)
 
   double yval = splder ( ider, m, nx, xval, x, c, &current_knot, q);
 
+#if _DEBUG
   cerr << "xval=" << xval << " cur=" << current_knot << " yval=" << yval << endl;
+#endif
+  
   return yval;
 }
