@@ -758,8 +758,6 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 #if HAVE_SPLINTER
         pair<double,double> coord (data[i].table[ifile].x0, xval);
         yval = data[i].spline2d.evaluate ( coord );
-#else
-	assert ("there has been an error");
 #endif
       }
 
