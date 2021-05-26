@@ -160,7 +160,13 @@ void RemoveBaseline::SubtractMean::operate (Profile* profile,
 					    const PhaseWeight* weight)
 {
   weight->set_Profile (profile);
-  profile->offset (-weight->get_mean().val); 
+
+  double mean = weight->get_mean().val;
+
+  if (Profile::verbose)
+    cerr << "RemoveBaseline::SubtractMean::operate mean=" << mean << endl;
+
+  profile->offset (-mean); 
 }
 
 void RemoveBaseline::SubtractMedian::operate (Profile* profile,
