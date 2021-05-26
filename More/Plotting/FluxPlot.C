@@ -12,6 +12,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/ProfileStrategies.h"
+#include "Pulsar/ProfileWeightFunction.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/SmoothMean.h"
@@ -60,6 +63,8 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
   if (peak_zoom)
     auto_scale_phase (plotter.profiles[0], peak_zoom);
 
+  ProfileWeightFunction* baseline = data->get_strategy()->baseline();
+
   if (logarithmic)
   {
     // logarithmic axis
@@ -71,7 +76,7 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     // increase the space between the label and the axis
     frame->get_y_axis()->set_displacement (3.0);
 
-    Reference::To<PhaseWeight> weight = plotter.profiles[0]->baseline();
+    Reference::To<PhaseWeight> weight = baseline->operate(plotter.profiles[0]);
 
     // the standard deviation of an exponential distribution equals its mean
     double rms = weight->get_rms ();
@@ -87,7 +92,7 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
   }
 
   if (baseline_zoom)
-    selection = plotter.profiles[0]->baseline();
+    selection = baseline->operate( plotter.profiles[0] );
 
   if (selection && baseline_zoom)
   {
