@@ -8,19 +8,21 @@ libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
 	GeneratorInterpreter.C Generator_factory.C \
 	ParametersLookup_operator.C toa.C fit.C
 
-bin_PROGRAMS = getHorizon toaio getRiseSet schedule benchmark_Predictor
+bin_PROGRAMS = getHorizon toaio getRiseSet schedule \
+	benchmark_Predictor print_Predictor
 
 getHorizon_SOURCES = getHorizon.C
 toaio_SOURCES = toaio.C
 getRiseSet_SOURCES = getRiseSet.C
 schedule_SOURCES = schedule.C
+benchmark_Predictor_SOURCES = benchmark_Predictor.C
+print_Predictor_SOURCES = print_Predictor.C
 
 check_PROGRAMS = test_Parameters_factory test_Predictor_factory test_Predictor
 
 test_Parameters_factory_SOURCES = test_Parameters_factory.C
 test_Predictor_factory_SOURCES = test_Predictor_factory.C
 test_Predictor_SOURCES = test_Predictor.C
-benchmark_Predictor_SOURCES = benchmark_Predictor.C
 
 #############################################################################
 #
