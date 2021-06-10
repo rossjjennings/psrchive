@@ -88,7 +88,8 @@ namespace Pulsar {
     unsigned nbin;
     unsigned nlag;
 
-    void check (unsigned ibin, unsigned jbin, unsigned ilag, const char*) const;
+    unsigned get_icross_check (unsigned ibin, unsigned jbin, unsigned ilag,
+			       const char*) const;
     
     //! The cross covariance matrix for each phase bin pair
     std::vector< Matrix<4,4,double> > cross_covariance;

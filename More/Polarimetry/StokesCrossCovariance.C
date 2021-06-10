@@ -280,12 +280,6 @@ unsigned StokesCrossCovariance::get_icross (unsigned ibin,
     icross = get_ncross (0) + (ilag - 1) * get_ncross(1) + ibin * nbin + jbin;
   }
 
-  if (icross >= get_ncross_total())
-    throw Error (InvalidRange,
-		 "Pulsar::StokesCrossCovariance::get_icross",
-		 "nbin=%u ibin=%u jbin=%u ilag=%u -> icross=%u >= ncross=%u",
-		 nbin, ibin, jbin, ilag, icross, get_ncross_total());
-
   return icross;
 }
 
@@ -310,8 +304,8 @@ StokesCrossCovariance::get_cross_covariance (unsigned ibin,
 					     unsigned jbin,
 					     unsigned ilag) const
 {
-  check (ibin, jbin, ilag, "StokesCrossCovariance::get_cross_covariance");
-  return cross_covariance[ get_icross(ibin,jbin,ilag) ];
+  unsigned icross = get_icross_check (ibin, jbin, ilag, "get");
+  return cross_covariance[icross];
 }
 
 Matrix<4,4,double>&
@@ -319,8 +313,8 @@ StokesCrossCovariance::get_cross_covariance (unsigned ibin,
                                              unsigned jbin,
                                              unsigned ilag)
 {
-  check (ibin, jbin, ilag, "StokesCrossCovariance::get_cross_covariance");
-  return cross_covariance[ get_icross(ibin,jbin,ilag) ];
+  unsigned icross = get_icross_check (ibin, jbin, ilag, "get");
+  return cross_covariance[icross];
 }
 
 //
@@ -341,26 +335,47 @@ void StokesCrossCovariance::set_cross_covariance (unsigned ibin,
 						  unsigned ilag,
 						  const Matrix<4,4,double>& C)
 {
-  check (ibin, jbin, ilag, "StokesCrossCovariance::set_cross_covariance");
-  cross_covariance[ get_icross(ibin,jbin,ilag) ] = C;
+  unsigned icross = get_icross_check (ibin, jbin, ilag, "set");
+  cross_covariance[ icross ] = C;
 }
 
-void StokesCrossCovariance::check (unsigned ibin,
-				   unsigned jbin,
-				   unsigned ilag,
-				   const char* method) const
+std::string full_method_name (const string& method)
+{
+  return "StokesCrossCovariance::" + method + "_cross_covariance";
+}
+
+unsigned StokesCrossCovariance::get_icross_check (unsigned ibin,
+						  unsigned jbin,
+						  unsigned ilag,
+						  const char* method) const
 {
   if (ibin >= get_nbin())
-    throw Error (InvalidRange, method,
+    throw Error (InvalidRange, full_method_name(method),
 		 "ibin=%d >= nbin=%d", ibin, get_nbin());
 
   if (jbin >= get_nbin())
-    throw Error (InvalidRange, method,
+    throw Error (InvalidRange, full_method_name(method),
 		 "jbin=%d >= nbin=%d", ibin, get_nbin());
 
   if (ilag >= get_nlag())
-    throw Error (InvalidRange, method,
+    throw Error (InvalidRange, full_method_name(method),
 		 "ilag=%d >= nlag=%d", ilag, get_nlag());
+
+  unsigned icross = get_icross (ibin, jbin, ilag);
+  
+  if (icross >= get_ncross_total())
+    throw Error (InvalidRange, full_method_name(method),
+		 "nbin=%u nlag=%u ibin=%u jbin=%u ilag=%u"
+		 " -> icross=%u >= ncross=%u",
+		 nbin, nlag, ibin, jbin, ilag, icross, get_ncross_total());
+
+  if (icross >= cross_covariance.size())
+    throw Error (InvalidRange, full_method_name(method),
+		 "nbin=%u nlag=%u ibin=%u jbin=%u ilag=%u"
+		 " -> icross=%u >= cross_covariance.size=%u",
+		 nbin, nlag, ibin, jbin, ilag, icross, cross_covariance.size());
+
+  return icross;
 }
 
 
