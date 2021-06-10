@@ -1,5 +1,5 @@
 #include "Pulsar/Parameters.h"
-#include "Pulsar/Generator.h"
+#include "T2Generator.h"
 #include "Pulsar/Predictor.h"
 #include "load_factory.h"
 #include "RealTimer.h"
@@ -25,6 +25,14 @@ int main (int argc, char** argv) try
  
   Pulsar::Generator* generator = Pulsar::Generator::factory (params);
 
+  Tempo2::Generator* t2g = dynamic_cast<Tempo2::Generator*> (generator);
+
+  if (t2g)
+  {
+    t2g -> set_time_ncoeff (16);
+    t2g -> set_frequency_ncoeff (2);
+  }
+  
   /*
    * Tempo2 predictor code:
    *
@@ -49,38 +57,43 @@ int main (int argc, char** argv) try
   generator->set_time_span( time, endtime );
 
   // low frequency and large bw/freq exacerbate the Ransom effect
-  double freq = 150;  // hard coded in MHz for now
-  double bw = 150;    // hard coded in MHz for now
+  double freq = 816;  // hard coded in MHz for now
+  double bw = 544;    // hard coded in MHz for now
   generator->set_frequency_span( freq-bw/2, freq+bw/2 );
 
   cerr << "running tempo2 ... please be patient" << endl;
   Pulsar::Predictor* predictor = generator->generate ();
   cerr << "predictor generated" << endl;
+  predictor->unload (stderr);
   
   // advance by 45 minute
   time += 45 * 60.0;
 
   double dt = 1.0;
-
-  RealTimer clock;
-  clock.start();
-
   double elapsed = 0;
   
   cerr << "simulating an orbit of " << orbital_period << " seconds" << endl;
 
-  clock.start();
+  bool first = true;
+  Pulsar::Phase phi0;
+  
   while (elapsed < orbital_period)
   {
-    cout << time.printdays(15);
+    cout << elapsed;
       
     for (int offset=-1; offset <= 1; offset++)
     {
       double f = freq + offset * bw/2.0;
       predictor->set_observing_frequency (f);
       Pulsar::Phase phi = predictor->phase (time);
-      
-      cout << " " << phi;
+
+      if (first)
+      {
+	phi0 = phi;
+	first = false;
+      }
+	
+      cout << " " << phi-phi0;
     }
 
     cout << endl;
@@ -88,7 +101,6 @@ int main (int argc, char** argv) try
     time += dt;
     elapsed += dt;
   }
-  clock.stop();
 
   delete predictor;
 
