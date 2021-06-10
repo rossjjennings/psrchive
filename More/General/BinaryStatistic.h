@@ -42,5 +42,10 @@ private:
   static void build (); 
 };
 
+void linear_fit (double& scale, double& offset,
+		 const std::vector<double>& dat1,
+		 const std::vector<double>& dat2,
+		 const std::vector<bool>* mask = 0);
+
 #endif
 

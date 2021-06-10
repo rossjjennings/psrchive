@@ -17,6 +17,56 @@
 
 using namespace std;
 
+void linear_fit (double& scale, double& offset,
+		 const vector<double>& dat1, const vector<double>& dat2,
+		 const vector<bool>* mask)
+{
+  double covar = 0.0;
+  double mu_1 = 0.0;
+  double mu_2 = 0.0;
+  double var_2 = 0.0;
+  unsigned count = 0;
+    
+  for (unsigned i=0; i<dat1.size(); i++)
+  {
+    if (mask && !(*mask)[i])
+      continue;
+      
+    mu_1 += dat1[i];
+    mu_2 += dat2[i];
+    var_2 += dat2[i] * dat2[i];
+    covar += dat1[i] * dat2[i];
+    
+    count ++;
+  }
+	
+  mu_1 /= count;
+  mu_2 /= count;
+  covar /= count;
+  covar -= mu_1 * mu_2;
+  var_2 /= count;
+  var_2 -= mu_2 * mu_2;
+  
+  scale = covar / var_2;
+  
+  vector<double> diff (count);
+  unsigned idiff = 0;
+  
+  for (unsigned i=0; i<dat1.size(); i++)
+  {
+    if (mask && !(*mask)[i])
+      continue;
+    
+    diff[idiff] = dat1[i] - scale * dat2[i];
+    idiff ++;
+  }
+  
+  assert (idiff == count);
+  
+  offset = median (diff);
+}
+
+
 namespace BinaryStatistics {
 
   class CrossCorrelation : public BinaryStatistic
@@ -49,55 +99,6 @@ namespace BinaryStatistics {
 
     CrossCorrelation* clone () const { return new CrossCorrelation; }
   };
-
-  void linear_fit (double& scale, double& offset,
-		   const vector<double>& dat1, const vector<double>& dat2,
-		   const vector<bool> mask)
-  {
-    double covar = 0.0;
-    double mu_1 = 0.0;
-    double mu_2 = 0.0;
-    double var_2 = 0.0;
-    unsigned count = 0;
-    
-    for (unsigned i=0; i<dat1.size(); i++)
-    {
-      if (!mask[i])
-	continue;
-      
-      mu_1 += dat1[i];
-      mu_2 += dat2[i];
-      var_2 += dat2[i] * dat2[i];
-      covar += dat1[i] * dat2[i];
-
-      count ++;
-    }
-	
-    mu_1 /= count;
-    mu_2 /= count;
-    covar /= count;
-    covar -= mu_1 * mu_2;
-    var_2 /= count;
-    var_2 -= mu_2 * mu_2;
-    
-    scale = covar / var_2;
-
-    vector<double> diff (count);
-    unsigned idiff = 0;
-
-    for (unsigned i=0; i<dat1.size(); i++)
-    {
-      if (!mask[i])
-        continue;
-      
-      diff[idiff] = dat1[i] - scale * dat2[i];
-      idiff ++;
-    }
-
-    assert (idiff == count);
-    
-    offset = median (diff);
-  }
 
   static double sqr (double x) { return x*x; }
 
@@ -133,7 +134,7 @@ namespace BinaryStatistics {
         unsigned zapped = 0;
 	do
 	{
-	  linear_fit (scale, offset, dat1, dat2, mask);
+	  linear_fit (scale, offset, dat1, dat2, &mask);
 
 	  double sigma = 2.0;
 	  double var = 1 + sqr(scale);
