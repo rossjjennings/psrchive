@@ -120,6 +120,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "Minimum::get", "empty vector");
       return *std::min_element (data.begin(), data.end());
     }
     
