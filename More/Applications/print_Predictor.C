@@ -30,7 +30,7 @@ int main (int argc, char** argv) try
   if (t2g)
   {
     t2g -> set_time_ncoeff (16);
-    t2g -> set_frequency_ncoeff (2);
+    t2g -> set_frequency_ncoeff (8);
   }
   
   /*
@@ -57,25 +57,26 @@ int main (int argc, char** argv) try
   generator->set_time_span( time, endtime );
 
   // low frequency and large bw/freq exacerbate the Ransom effect
-  double freq = 816;  // hard coded in MHz for now
-  double bw = 544;    // hard coded in MHz for now
+  double freq = 150;  // hard coded in MHz for now
+  double bw = 150;    // hard coded in MHz for now
   generator->set_frequency_span( freq-bw/2, freq+bw/2 );
 
-  cerr << "running tempo2 ... please be patient" << endl;
+  cerr << "generating predictor ... please be patient" << endl;
   Pulsar::Predictor* predictor = generator->generate ();
   cerr << "predictor generated" << endl;
   predictor->unload (stderr);
   
-  // advance by 45 minute
+  // advance by 45 minutes
   time += 45 * 60.0;
 
-  double dt = 1.0;
+  double dt = 10.0;
   double elapsed = 0;
   
   cerr << "simulating an orbit of " << orbital_period << " seconds" << endl;
 
   bool first = true;
   Pulsar::Phase phi0;
+  double spin_f0;
   
   while (elapsed < orbital_period)
   {
@@ -86,14 +87,17 @@ int main (int argc, char** argv) try
       double f = freq + offset * bw/2.0;
       predictor->set_observing_frequency (f);
       Pulsar::Phase phi = predictor->phase (time);
+      double spin_f = predictor->frequency (time);
 
       if (first)
       {
 	phi0 = phi;
+        spin_f0 = spin_f;
 	first = false;
       }
-	
-      cout << " " << phi-phi0;
+
+      cout << " " << phi-phi0 
+           << " " << std::setprecision(12) << spin_f-spin_f0;
     }
 
     cout << endl;

@@ -190,11 +190,12 @@ psrpol_LDADD = $(LDADD) @HEALPIX_LIBS@ @CFITSIO_LIBS@
 
 endif
 
-TESTS = test_ProfileStatistic_factory
+TESTS = test_ProfileStatistic_factory print_Predictor
 
 check_PROGRAMS = $(TESTS)
 
 test_ProfileStatistic_factory_SOURCES = test_ProfileStatistic_factory.C
+print_Predictor_SOURCES = print_Predictor.C
 
 #############################################################################
 #
