@@ -38,6 +38,10 @@ float variance (float kappa)
 #define F77_vkappa F77_FUNC(vkappa,VKAPPA)
 extern "C" float F77_vkappa (float* kappa);
 
+// defined in bessi0.c
+extern "C" double bessi0 (double);
+
+
 float kappa (float variance)
 {
   float arg = 1 - variance;
@@ -124,12 +128,16 @@ Estimate<double> MEAL::ScaledVonMises::get_concentration () const
 //! Set the width in radiance
 void MEAL::ScaledVonMises::set_width (double width)
 {
-  // express width in turns
-  width /= 2.0*M_PI;
+  // WvS: the following line is incorrect
+  // The kappa function maps the variance in rad^2 to concentration;
+  // however, correcting this method might break existing paas models
+
+  width /= 2.0*M_PI;   // express width in turns
+
   double circular_variance = width*width;
   double _kappa = kappa(circular_variance);
 
-#if 0
+#if 1
   cerr << "MEAL::ScaledVonMises::set_width"
     " width=" << width <<
     " var=" << circular_variance <<
@@ -165,6 +173,15 @@ Estimate<double> MEAL::ScaledVonMises::get_height () const
 	return height.get_value();
 }
 
+
+double MEAL::ScaledVonMises::get_area () const
+{
+  double _kappa = get_concentration().get_value();
+
+  // cerr << "MEAL::ScaledVonMises::get_area concentration=" << _kappa << endl;
+  
+  return 2.0 * M_PI * ::bessi0(_kappa) / ::exp(_kappa);
+}
 
 std::string 
 MEAL::ScaledVonMises::get_name() const

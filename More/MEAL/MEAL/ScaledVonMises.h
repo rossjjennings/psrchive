@@ -58,6 +58,9 @@ namespace MEAL {
     //! Connect the set_abscissa method to the axis value
     //   void set_argument (unsigned dimension, Argument* axis);
 
+    //! Get the area under the curve
+    double get_area () const;
+    
     std::string get_name() const;
 
     //! Parses the values of model parameters and fit flags from a string
