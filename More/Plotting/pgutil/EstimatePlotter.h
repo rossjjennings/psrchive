@@ -89,6 +89,8 @@ class EstimatePlotter {
   //! Plot the specified member of the current data set
   unsigned plot (unsigned index);
 
+  unsigned excise (unsigned index);
+
   //! Plot the current data set in one window
   unsigned plot ();
 
@@ -139,6 +141,10 @@ class EstimatePlotter {
 
   //! Plot error bars
   bool plot_error_bars;
+
+  //! Use the MADM of the logarithm of the error values to excise outliers
+  float log_err_madm_threshold;
+  bool log_err_madm_applied;
   
   std::vector< std::vector<float> > xval;
   std::vector< std::vector<float> > yval;
@@ -173,7 +179,9 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   unsigned ipt = 0, npt = data.size();
   if (npt == 0)
     return;
-  
+
+  log_err_madm_applied = false;
+
   xval.push_back ( std::vector<float>(npt) );
   yval.push_back ( std::vector<float>(npt) );
   yerr.push_back ( std::vector<float>(npt) );
@@ -231,6 +239,8 @@ void EstimatePlotter::add_plot (const std::vector<Xt>& xdata,
     throw Error (InvalidParam, "EstimatePlotter::add_plot (Xt, Yt)",
 		 "xdata.size=%d != ydata.size=%d", npt, ydata.size());
 
+  log_err_madm_applied = false;
+
   xval.push_back ( std::vector<float>(npt) );
   yval.push_back ( std::vector<float>(npt) );
   yerr.push_back ( std::vector<float>(npt) );
@@ -260,6 +270,8 @@ void EstimatePlotter::add_plot
   if (ydata.size() != npt)
     throw Error (InvalidParam, "EstimatePlotter::add_plot (Xt, Yt)",
 		 "xdata.size=%d != ydata.size=%d", npt, ydata.size());
+
+  log_err_madm_applied = false;
 
   xval.push_back ( std::vector<float>(npt) );
   std::vector<float>& x = xval.back();

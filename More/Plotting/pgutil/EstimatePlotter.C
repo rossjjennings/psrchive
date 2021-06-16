@@ -35,6 +35,9 @@ EstimatePlotter::EstimatePlotter ()
   control_viewport = true;
 
   report_mean_on_single_line = false;
+
+  log_err_madm_threshold = 0.0;
+  log_err_madm_applied = false;
 }
 
 //! Set the border used when setting the world coordinates of the viewport
@@ -273,6 +276,20 @@ void EstimatePlotter::set_world (float x1, float x2, float y1, float y2)
 
 unsigned EstimatePlotter::plot ()
 {
+  if (log_err_madm_threshold != 0 && ! log_err_madm_applied)
+  {
+    unsigned excised = 0;
+
+    for (unsigned index=0; index<xval.size(); index++)
+      excised += plot (index);
+
+    if (excised)
+      cerr << "EstimatePlotter::plot warning - excised " 
+           << excised << " outliers" << endl;
+
+    log_err_madm_applied = true;
+  }
+
   unsigned plotted = 0;
 
   for (unsigned index=0; index<xval.size(); index++)
@@ -280,6 +297,59 @@ unsigned EstimatePlotter::plot ()
 
   return plotted;
 }
+
+unsigned EstimatePlotter::excise (unsigned index)
+{
+  unsigned npt = xval[index].size();
+
+  std::vector<float> work (npt);
+  unsigned excised = 0;
+
+  const unsigned ndim = yval.size() / xval.size();
+
+  for (unsigned idim=0; idim < ndim; idim++)
+  {
+    unsigned yndex = index*ndim + idim;
+    unsigned valid = 0;
+
+    for (unsigned ipt=0; ipt<npt; ipt++)
+    {
+      if (yerr[yndex][ipt] > 0)
+      {
+        work[valid] = log (yerr[yndex][ipt]);
+        valid ++;
+      }
+    }
+
+#ifdef _DEBUG
+  cerr << "npt=" << npt << " valid=" << valid << endl;
+#endif
+
+    // find the median value
+    std::nth_element (work.begin(), work.begin()+valid/2, work.begin()+valid);
+    float median = work[ valid/2 ];
+
+    // compute the absolute deviation from the median
+    for (unsigned ipt; ipt < valid; ipt++)
+      work[ipt] = fabs(work[ipt] - median);
+
+    // find the median absolute deviation from the median 
+    std::nth_element (work.begin(), work.begin()+valid/2, work.begin()+valid);
+    float madm = work[ valid/2 ];
+
+    for (unsigned ipt=0; ipt<npt; ipt++)
+    {
+      if (yerr[yndex][ipt] > log_err_madm_threshold * madm)
+      {
+        yerr[yndex][ipt] = 0;
+        excised ++;
+      }
+    }
+  }
+
+  return excised;
+}
+
 
 unsigned EstimatePlotter::plot (unsigned index)
 {
@@ -410,4 +480,5 @@ void EstimatePlotter::clear ()
   yerr.resize(0);
   xrange_set = yrange_set = false;
   viewports_set = false;
+  log_err_madm_applied = false;
 }
