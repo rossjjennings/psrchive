@@ -135,18 +135,29 @@ double Phase::HasUnit::get_as (Unit to, double value, bool round_down) const
 
 std::ostream& Phase::HasUnit::insertion (std::ostream& os) const
 {
-  return os << "%" << unit;
+  if (insert_units)
+    os << "%" << unit;
+
+  return os;
 }
 
 std::istream& Phase::HasUnit::extraction (std::istream& is)
 {
+  unit = Turns;
+  insert_units = false;
+
   if (!is.eof() && is.peek() == '%')
   {
     is.get();
+
+    if (!is.eof() && is.peek() == '.')
+    {
+      is.get();
+      insert_units = false;
+    }
+
     is >> unit;
   }
-  else
-    unit = Turns;
 
   return is;
 }
@@ -167,7 +178,6 @@ std::istream& Phase::operator>> (std::istream& is, Value& v)
 {
   is >> v.value;
 
-  // cerr << "Phase::operator Value::value=" << v.value << endl;
   return v.extraction (is);
 }
 
