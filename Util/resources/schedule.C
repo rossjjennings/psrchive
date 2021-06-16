@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2020 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -29,6 +29,9 @@ void usage ()
     "  -p min     minutes per interval in lst_density.txt \n"
     "  -P         add PRESS-specific constraints \n"
     "  -s         minimize slew time \n"
+    "  -S lst.txt simulate a semester, given LST ranges of sessions\n"
+    "  -c         create LST-balanced list sorted by integration length\n"
+    "  -C hours   cutoff LST-balanced list after specified hours\n"
     "\n"
        << endl;
 }
@@ -53,6 +56,8 @@ public:
   double Tint_min;
   double tsamp_us;
 
+  string text;
+  
   // computed
   double min_avg_density;
   double slewtime;
@@ -72,6 +77,11 @@ bool by_slewtime (const source& a, const source& b)
   return a.slewtime < b.slewtime;
 }
 
+bool by_integration_length (const source& a, const source& b)
+{
+  return a.Tint_min < b.Tint_min;
+}
+
 pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
 {
   vector< pair<double,Mount*> > slew_times;
@@ -89,6 +99,14 @@ pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
 
 int simulate_semester();
 int simulate_session();
+
+void output_lst_density (vector<double>& lst_density,
+			 const vector<source>& sources);
+
+void output_src_density (const vector<double>& lst_density,
+			 vector<source>& sources);
+
+void output_balanced_source_list (vector<source>& sources, float cutoff_hours);
 
 // some constants for conversions
 const double rad2deg = 180.0/M_PI;
@@ -145,8 +163,11 @@ int main (int argc, char* argv[])
   unsigned lst_bins = 60.0*24.0/interval;
   vector<double> lst_density (lst_bins, 0.0);
 
+  bool output_sorted_list = false;
+  float cutoff_hours = 0.0;
+  
   int c;
-  while ((c = getopt(argc, argv, "he:il:L:p:PsS:")) != -1)
+  while ((c = getopt(argc, argv, "hcC:e:il:L:p:PsS:")) != -1)
   {
     switch (c)
     {
@@ -154,6 +175,14 @@ int main (int argc, char* argv[])
       usage ();
       return 0;
 
+    case 'c':
+      output_sorted_list = true;
+      break;
+
+    case 'C':
+      cutoff_hours = atof(optarg);
+      break;
+      
     case 'e':
       min_elevation = atof (optarg);
       break;
@@ -215,110 +244,31 @@ int main (int argc, char* argv[])
 
   cerr << lines.size() << " lines of text loaded from " << filename << endl;
 
-  sources.resize (lines.size());
-
-  for (unsigned i=0; i<lines.size(); i++)
-    sources[i].parse( lines[i] );
-
+  for (unsigned i=0; i<lines.size(); i++) try
+  {
+    source tmp;
+    tmp.parse( lines[i] );
+    sources.push_back(tmp);
+  }
+  catch (Error& error)
+    {
+      cerr << error.get_message() << endl;
+    }
+  
   orig_sources = sources;
 
-  double delta_lst = 2.0 * M_PI / lst_density.size();
-
-  for (unsigned i=0; i<lines.size(); i++)
+  if (lst_density.size())
   {
-    double density = sources[i].Tint_min / ( sources[i].up_hours * 60.0 );
-
-    double rise_lst = sources[i].rise_lst.getRadians();
-    double set_lst = sources[i].set_lst.getRadians();
-
-    if (set_lst < rise_lst)
-      set_lst += 2.0*M_PI;
-
-    unsigned nbin = lst_density.size();
-
-    for (double lst=rise_lst; lst <= set_lst; lst += delta_lst)
-    {
-      unsigned ibin = (lst / (2*M_PI)) * nbin;
-      lst_density[ibin%nbin] += density;
-    }
+    output_lst_density (lst_density, sources);
+    output_src_density (lst_density, sources);
   }
 
-  ofstream out ("lst_density.txt");
-  double integral = 0.0;
-  for (unsigned ibin=0; ibin < lst_density.size(); ibin++)
+  if (output_sorted_list)
   {
-    double lst = ibin * 24.0 / lst_density.size();
-    out << lst << " " << lst_density[ibin] << endl;
-    integral += lst_density[ibin] * delta_lst * rad2hr;
+    output_balanced_source_list (sources, cutoff_hours);
+    return 0;
   }
-
-  // integral /= lst_density.size();
-  cerr << "integral=" << integral << endl;
-
-  ofstream sout ("src_density.txt");
-
-  for (unsigned i=0; i<lines.size(); i++)
-  {
-    double rise_lst = sources[i].rise_lst.getRadians();
-    double set_lst = sources[i].set_lst.getRadians();
-
-    if (set_lst < rise_lst)
-      set_lst += 2.0*M_PI;
-
-    unsigned nbin = lst_density.size();
-
-#if 0
-    // find the minimum density window in which the source can be observed
-    double min_avg_density = 0.0;
-    for (double lst1=rise_lst; lst1 <= set_lst; lst1 += delta_lst)
-    {
-      double sum_density = 0.0;
-      double sum_time = 0.0;
-      double lst2 = lst1 + sources[i].Tint_min / (60 * rad2hr);
-      double lst = lst1;
-      while (lst <= lst2 && lst <= set_lst)
-      {
-        unsigned ibin = (lst / (2*M_PI)) * nbin;
-        sum_density += lst_density[ibin%nbin];
-        sum_time += delta_lst * rad2hr;
-        lst += delta_lst;
-      }
-
-      double avg_density = sum_density / sum_time;
-
-      if (lst1==rise_lst || avg_density < min_avg_density)
-        min_avg_density = avg_density;
-
-      if (lst >= set_lst)
-        break;
-    }
-#else
-
-    // increase the priority of sources that are in higher density parts
-    // of the sky for shorter periods of time
-
-    double sum_density = 0.0;
-    double sum_time = 0.0;
-
-    for (double lst=rise_lst; lst <= set_lst; lst += delta_lst)
-    {
-      unsigned ibin = (lst / (2*M_PI)) * nbin;
-      sum_density += lst_density[ibin%nbin];
-      sum_time += delta_lst * rad2hr;
-      lst += delta_lst;
-    } 
-
-    double min_avg_density = sum_density / sum_time;
-
-#endif
-
-    sources[i].min_avg_density = min_avg_density;
-    sout << sources[i].name << " " << sources[i].up_hours 
-         << " " << sources[i].min_avg_density << endl;
-
-    sources[i].priority *= min_avg_density;
-  }
-
+  
   if (!semester.empty())
   {
     cerr << "simulating semester=" << semester << endl;
@@ -589,6 +539,8 @@ int simulate_semester ()
 
 void source::parse (string line)
 {
+  text = line;
+
   string whitespace = " \t\n";
   name = stringtok (line, whitespace);
 
@@ -616,3 +568,176 @@ void source::parse (string line)
   tsamp_us = fromstring<double>(temp);
 }
 
+double get_lst_density (const source& src)
+{
+  return src.Tint_min / ( src.up_hours * 60.0 );
+}
+
+void add_lst_density (vector<double>& lst_density, const source& src)
+{
+  unsigned nbin = lst_density.size();
+
+  double density = get_lst_density (src);
+
+  double rise_lst = src.rise_lst.getRadians();
+  double set_lst = src.set_lst.getRadians();
+
+  if (set_lst < rise_lst)
+    set_lst += 2.0*M_PI;
+
+  unsigned ibin_rise = round((rise_lst / (2*M_PI)) * nbin);
+  unsigned ibin_set = round((set_lst / (2*M_PI)) * nbin);
+  
+  for (unsigned ibin=ibin_rise; ibin <= ibin_set; ibin++)
+    lst_density[ibin%nbin] += density;
+}
+
+void output_lst_density (vector<double>& lst_density,
+			 const vector<source>& sources)
+{
+  for (unsigned i=0; i<sources.size(); i++)
+    add_lst_density( lst_density, sources[i] );
+    
+  ofstream out ("lst_density.txt");
+
+  unsigned nbin = lst_density.size();
+  double delta_lst = 2.0 * M_PI / nbin;
+
+  double integral = 0.0;
+  for (unsigned ibin=0; ibin < lst_density.size(); ibin++)
+  {
+    double lst = ibin * 24.0 / lst_density.size();
+    out << lst << " " << lst_density[ibin] << endl;
+    integral += lst_density[ibin] * delta_lst * rad2hr;
+  }
+
+  // integral /= lst_density.size();
+  cerr << "integral=" << integral << endl;
+}
+
+void set_src_density (const vector<double>& lst_density, source& src)
+{
+  unsigned nbin = lst_density.size();
+
+  double rise_lst = src.rise_lst.getRadians();
+  double set_lst = src.set_lst.getRadians();
+
+  if (set_lst < rise_lst)
+    set_lst += 2.0*M_PI;
+
+  unsigned ibin_rise = round((rise_lst / (2*M_PI)) * nbin);
+  unsigned ibin_set = round((set_lst / (2*M_PI)) * nbin);
+  
+  double sum_density = 0.0;
+  for (unsigned ibin=ibin_rise; ibin <= ibin_set; ibin++)
+    sum_density += lst_density[ibin%nbin];
+
+  src.min_avg_density = sum_density / (ibin_set - ibin_rise + 1);
+}
+
+void output_src_density (const vector<double>& lst_density,
+			 vector<source>& sources)
+{
+  ofstream out ("src_density.txt");
+
+  for (unsigned i=0; i<sources.size(); i++)
+  {
+    set_src_density (lst_density, sources[i]);
+
+    out << sources[i].name << " " << sources[i].up_hours 
+	<< " " << sources[i].min_avg_density << endl;
+
+    sources[i].priority *= sources[i].min_avg_density;
+  }
+}
+
+double metric (source& src)
+{
+  return sqrt(src.Tint_min) * pow(src.min_avg_density, 3.0);
+}
+
+void output_balanced_source_list (vector<source>& sources, float cutoff_hours)
+{
+  std::sort (sources.begin(), sources.end(), by_integration_length);
+
+  if (cutoff_hours)
+  {
+    double total_hours = 0.0;
+    unsigned count = 0;
+    while (total_hours < cutoff_hours)
+    {
+      total_hours += sources[count].Tint_min / 60.0;      
+      count ++;
+    }
+    cerr << "an unbalanced schedule can fit " << count << " sources in "
+	 << total_hours << " hours" << endl;
+  }
+  
+#ifdef _DEBUG
+  for (unsigned i=0; i < 20; i++)
+    cerr << "IN " << sources[i].text << endl;
+#endif
+  
+  double interval = 15.0;  // minutes
+  unsigned lst_bins = 60.0*24.0/interval;
+  vector<double> lst_density (lst_bins, 0.0);
+
+  vector<source> balanced_sources;
+
+  unsigned next_source = 0;
+  double total_hours = 0.0;
+ 
+  do {
+
+#ifdef _DEBUG
+    cerr << "next=" << next_source << " " << sources[next_source].name << endl;
+    for (unsigned i=0; i < 5; i++)
+      cerr << "REM " << sources[i].text << endl;
+#endif
+    
+    balanced_sources.push_back (sources[next_source]);
+    add_lst_density (lst_density, sources[next_source]);
+
+    total_hours += sources[next_source].Tint_min / 60.0;
+
+    if (cutoff_hours && total_hours > cutoff_hours)
+      break;
+
+    sources.erase (sources.begin() + next_source);
+
+    bool min_set = false;
+    double min_val = 0.0;
+    
+    for (unsigned i=0; i<sources.size(); i++)
+    {
+      set_src_density (lst_density, sources[i]);
+      double val = metric(sources[i]);
+	
+      if (!min_set || val < min_val)
+      {
+	min_val = val;
+	next_source = i;
+	min_set = true;
+      }
+    }
+
+    if (min_set)
+    {
+      source& next = sources[next_source];
+      cerr << "next=" << next_source << " " << next.name
+	   << " Tint_min=" << next.Tint_min
+	   << " val=" << metric(next) << endl;
+
+      source& first = sources[0];
+      cerr << "first " << first.name
+	   << " Tint_min=" << first.Tint_min
+	   << " val=" << metric(first) << endl;
+    }
+  }
+  while (sources.size());
+
+  ofstream out ("balance_sorted.txt");
+  for (unsigned i=0; i<balanced_sources.size(); i++)
+    out << balanced_sources[i].text << endl;
+
+}
