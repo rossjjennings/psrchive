@@ -21,6 +21,7 @@
 #include "BinaryStatistic.h"
 #include "Matrix.h"
 #include "Stokes.h"
+#include "RealTimer.h"
 
 #include <assert.h>
 #include <fstream>
@@ -114,6 +115,7 @@ protected:
 
   bool extract_eigenvectors;
   bool smooth_eigenvectors;
+  bool report_execution_times;
  
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -150,6 +152,7 @@ psr4th::psr4th ()
   total_baseline = each_baseline = report_baseline = false;
   extract_eigenvectors = false;
   smooth_eigenvectors = false;
+  report_execution_times = false;
 }
 
 
@@ -196,6 +199,9 @@ void psr4th::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (smooth_eigenvectors, "smooth");
   arg->set_help ("smooth eigenvectors by maximizing projections");
+
+  arg = menu.add (report_execution_times, "runtime");
+  arg->set_help ("report execution times");
 
   // // add an option that enables the user to set the source name with -name
   // arg = menu.add (scale, "name", "string");
@@ -326,7 +332,11 @@ void psr4th::process (Archive* archive)
 	}
       }
     }
-    
+   
+    RealTimer clock;
+
+    clock.start();
+ 
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       if (subint->get_weight(ichan) == 0)
@@ -337,6 +347,11 @@ void psr4th::process (Archive* archive)
 
       results[ichan].process (profile);
     }
+
+    clock.stop();
+
+    if (report_execution_times)
+      cerr << "subint=" << isub << " time=" << clock << endl;
   }
 }
 
@@ -410,6 +425,9 @@ void psr4th::finalize()
   unsigned nbin = output->get_nbin();
   unsigned nchan = output->get_nchan();
   unsigned nmoment = 10;
+
+  RealTimer clock;
+  clock.start();
 
   std::string filename = "psr4th.ar";
   
@@ -492,6 +510,11 @@ void psr4th::finalize()
   }
 
   output->unload (filename);
+
+  clock.stop();
+  if (report_execution_times)
+    cerr << "output unloaded in " << clock << endl;
+
 }
 
 void psr4th::result::set_cross_covariance_lags (unsigned nlag)

@@ -84,6 +84,9 @@ bool by_integration_length (const source& a, const source& b)
 
 pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
 {
+  Horizon* horizon = dynamic_cast<Horizon*> (mount);
+  // cerr << "best_slew: mount azimuth = " << horizon->get_azimuth() << endl;
+
   vector< pair<double,Mount*> > slew_times;
   slew_times = mount->slew_times (coord);
 
@@ -94,6 +97,8 @@ pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
     if (slew_times[i].first < result.first)
       result = slew_times[i];
   }
+
+  // cerr << "best_slew: result = " << result.first/60.0 << endl;
   return result;
 }
 
@@ -320,7 +325,12 @@ int simulate_session ()
     horizon.set_local_sidereal_time( current_lst.getRadians() );
 
     if (current_pointing)
+    {
+      Horizon* horizon = dynamic_cast<Horizon*> (current_pointing);
+      cerr << "before set_lst azimuth = " << horizon->get_azimuth() << endl;
       current_pointing -> set_local_sidereal_time( current_lst.getRadians() );
+      cerr << "after set_lst azimuth = " << horizon->get_azimuth() << endl;
+    }
 
     vector<source> up;
     for (unsigned i=0; i<sources.size(); i++)
@@ -356,6 +366,9 @@ int simulate_session ()
 
         // there is sufficent disk space
       }
+
+      if (desired_min < 1)
+        continue;
 
       source add = sources[i];
 
@@ -472,9 +485,12 @@ int simulate_session ()
 
     if (current_pointing)
     {
-      current_pointing = chosen.mount;
       Horizon* horizon = dynamic_cast<Horizon*> (current_pointing);
-      cerr << "chosen azimuth = " << horizon->get_azimuth() << endl;
+      cerr << "old azimuth = " << horizon->get_azimuth() << endl;
+
+      current_pointing = chosen.mount;
+      horizon = dynamic_cast<Horizon*> (current_pointing);
+      cerr << "new azimuth = " << horizon->get_azimuth() << endl;
     }
     else
     {
