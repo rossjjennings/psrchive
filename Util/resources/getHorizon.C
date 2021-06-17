@@ -9,6 +9,8 @@
 
 #include "Horizon.h"
 #include "Meridian.h"
+#include "Fixed.h"
+#include "Pauli.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -28,6 +30,8 @@ void usage ()
     "  -m mjd     time (MJD) of observation (start time if -d is used) \n"
     "  -l lst     time (LST) of observation (start time if -d is used) \n"
     "  -M         use Meridian (X-Y) coordinates \n"
+    "  -F         simulate fixed receptors \n"
+    "  -o deg:deg compute delta-parallactic angle for offset antenna \n"
     "  -t site    telescope \n"
     "\n"
        << endl;
@@ -43,6 +47,7 @@ int main (int argc, char* argv[])
 
   Horizon horizon;
   Meridian meridian;
+  Fixed* fixed = 0;
 
   Directional* directional = &horizon;
 
@@ -51,8 +56,10 @@ int main (int argc, char* argv[])
 
   double duration = 0.0;
 
+  string offset;
+
   int c;
-  while ((c = getopt(argc, argv, "hc:d:Ml:m:t:")) != -1)
+  while ((c = getopt(argc, argv, "hc:d:FMl:m:o:t:")) != -1)
   {
     switch (c)
     {
@@ -66,6 +73,10 @@ int main (int argc, char* argv[])
 
     case 'd':
       duration = atof (optarg);
+      break;
+
+    case 'F':
+      fixed = new Fixed;
       break;
 
     case 'M':
@@ -83,6 +94,10 @@ int main (int argc, char* argv[])
 
     case 't':
       telescope = optarg;
+      break;
+
+    case 'o':
+      offset = optarg;
       break;
 
     }
@@ -121,15 +136,27 @@ int main (int argc, char* argv[])
   double rad2deg = 180.0/M_PI;
   double rad2hr = 12.0/M_PI;
 
-  directional->set_source_coordinates( coord );
-  if (use_lst)
-    directional->set_local_sidereal_time( lst/rad2hr );
-  else
-    directional->set_epoch( mjd );
+  Mount* mount = directional;
+  if (fixed)
+    mount = fixed;
 
-  directional->set_observatory_latitude( latitude.getRadians() );
-  directional->set_observatory_longitude( longitude.getRadians() );
+  mount->set_source_coordinates( coord );
+  if (use_lst)
+    mount->set_local_sidereal_time( lst/rad2hr );
+  else
+    mount->set_epoch( mjd );
+
+  mount->set_observatory_latitude( latitude.getRadians() );
+  mount->set_observatory_longitude( longitude.getRadians() );
+
+#if 0
+  Mount* mount2 = 0;
+  if (offset)
+  {
+    mount2 = mount->clone();
   
+  }
+#endif
 
   if (duration)
   {
@@ -138,15 +165,42 @@ int main (int argc, char* argv[])
     {
       double hours = (duration * i) / nsteps;
       if (use_lst)
-	directional->set_local_sidereal_time( (lst + hours)/rad2hr );
+	mount->set_local_sidereal_time( (lst + hours)/rad2hr );
       else
       {
 	MJD cur = mjd + hours * 3600.0;
-	directional->set_epoch( cur );
+	mount->set_epoch( cur );
       }
 
-      cout << hours << " " << directional->get_vertical() * rad2deg
-	   << " " << directional->get_local_sidereal_time() * rad2hr << endl;
+      if (fixed)
+      {
+	complex<double> det;
+	Quaternion<double, Hermitian> herm;
+	Quaternion<double, Unitary> unit;
+
+	Jones<double> J = fixed->get_response();
+
+	polar (det, herm, unit, J);
+
+	Stokes<double> input (2, 1, 0, 0.8);
+	Stokes<double> output = transform (input, J);
+
+	// J = conj(J);
+	// output = transform (output, inv(J));
+
+	cerr << hours << " " << det 
+	     << " " << herm.get_vector()
+	     << " " << unit.get_vector() 
+	     << " " << output.get_vector() << endl;
+
+	cout << hours
+	     << " " << output.get_vector()[0] 
+	     << " " << output.get_vector()[1] 
+	     << " " << output.get_vector()[2] << endl;
+      }
+      else
+	cout << hours << " " << mount->get_vertical() * rad2deg
+	     << " " << mount->get_local_sidereal_time() * rad2hr << endl;
     }
     return 0;
   }
@@ -164,13 +218,20 @@ int main (int argc, char* argv[])
   cout << "\n*** Outputs:\n"
     "GMST: " << mjd.GMST()*rad2hr << " hours "
        << mjd.GMST() << " radians\n"
-    "LST: " << directional->get_local_sidereal_time()*rad2hr << " hours "
-       << directional->get_local_sidereal_time() << " radians\n"
-    "HA: " << directional->get_hour_angle()*rad2hr << " hours "
-       << directional->get_hour_angle() << " radians "
-       << directional->get_hour_angle()*rad2deg << " deg" <<endl;
+    "LST: " << mount->get_local_sidereal_time()*rad2hr << " hours "
+       << mount->get_local_sidereal_time() << " radians\n"
+    "HA: " << mount->get_hour_angle()*rad2hr << " hours "
+       << mount->get_hour_angle() << " radians "
+       << mount->get_hour_angle()*rad2deg << " deg" <<endl;
 
-  if (directional == &horizon)
+  if (fixed)
+  {
+    Jones<double> response = fixed->get_response();
+
+    cerr << response << endl;
+  }
+
+  else if (directional == &horizon)
   {
     cout <<
       "Azimuth: " << horizon.get_azimuth() * rad2deg << " degrees "
