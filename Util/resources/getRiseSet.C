@@ -1,4 +1,4 @@
-/***************************************************************************
+/**************************************************************************
  *
  *   Copyright (C) 2020 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
@@ -19,13 +19,15 @@ using namespace std;
 void usage ()
 {
   cerr <<
-    "getRiseSet - returns azimuth, zenith and parallactic angles\n"
+    "getRiseSet - returns rise and set time of source in LST\n"
     "\n"
     "options:\n"
     "\n"
     "  -c coord   coordinates of source in hh:mm:ss[.fs]<+|->dd:mm:ss[.fs] \n"
     "  -t site    telescope \n"
     "  -e min     minimum elevation \n"
+    "  -l lst     current LST (or start LST) \n"
+    "  -L lst     end LST \n"
     "\n"
        << endl;
 }
@@ -42,11 +44,18 @@ int main (int argc, char* argv[])
   // Parkes by default
   string telescope = "parkes";
 
-  double min_elevation = 0.0;
+  double min_elevation = 30.3;
   bool verbose = false;
- 
+  bool printspan = false;
+
+  Angle start_lst;
+  bool start_lst_specified = false;
+
+  Angle end_lst;
+  bool end_lst_specified = false;
+
   int c;
-  while ((c = getopt(argc, argv, "hc:e:t:")) != -1)
+  while ((c = getopt(argc, argv, "hc:e:l:L:st:")) != -1)
   {
     switch (c)
     {
@@ -62,9 +71,28 @@ int main (int argc, char* argv[])
       min_elevation = atof (optarg);
       break;
 
+    case 's':
+      printspan = true;
+      break;
+
     case 't':
       telescope = optarg;
       break;
+
+    case 'l':
+      start_lst.setHMS(optarg);
+      start_lst_specified = true;
+      break;
+
+    case 'L':
+      end_lst.setHMS(optarg);
+      end_lst_specified = true;
+      break;
+
+    case 'v':
+      verbose = true;
+      break;
+
     }
   }
 
@@ -112,9 +140,9 @@ int main (int argc, char* argv[])
 
   double min_lst = source_lst;
   double max_lst = source_lst + M_PI;
-  double ten_seconds = 10.0 / (3600.0 * rad2hr);
+  double one_second = 1.0 / (3600.0 * rad2hr);
 
-  while ( (max_lst - min_lst) > ten_seconds )
+  while ( (max_lst - min_lst) > one_second )
   {
     double mid_lst = (min_lst + max_lst) * 0.5;
     mount->set_local_sidereal_time( mid_lst );
@@ -133,7 +161,64 @@ int main (int argc, char* argv[])
   lst_set.setWrapPoint( 2*M_PI );
   lst_rise.setWrapPoint( 2*M_PI );
 
-  cout << lst_rise.getHMS() << " " << lst_set.getHMS() << endl;
+  double span = 2 * (max_lst - source_lst);
+
+  if (!start_lst_specified)
+  {
+    cout << lst_rise.getHMS(0) << " " << lst_set.getHMS(0);
+
+    if (printspan)
+      cout << " " << span * rad2hr;
+
+    cout << endl;
+  }
+  else
+  {
+    double x0 = cos(start_lst.getRadians());
+    double y0 = sin(start_lst.getRadians());
+
+    double x1 = cos(source_lst);
+    double y1 = sin(source_lst);
+
+    double angle = atan2 (x1*y0-x0*y1, x0*x1+y0*y1);
+
+    if (fabs(angle) < span*0.5)
+    {
+      if (end_lst_specified)
+        cout << "UP - sets " << (span*.5 - angle) * rad2hr 
+             << " hrs after start of session" << endl;
+      else
+        cout << "UP - sets in " << (span*.5 - angle) * rad2hr << " hrs" << endl;
+    }
+    else
+    {
+      double rises = (span*-.5 - angle);
+      if (rises < 0)
+        rises += 2*M_PI;
+
+      double duration = 0;
+ 
+      if (end_lst_specified)
+      {
+        double x2 = cos(end_lst.getRadians());
+        double y2 = sin(end_lst.getRadians());
+
+        duration = atan2 (x0*y2-x2*y0, x2*x0+y2*y0);
+
+        if (rises > duration)
+          cout << "DOWN" << endl;
+        else
+          cout << "SET - rises " << (duration-rises)*rad2hr 
+               << " hrs before end of session" << endl;
+
+        return 0;
+      }
+
+      
+      cout << "SET - rises in " << rises*rad2hr << " hrs" << endl;
+
+    }
+  }
 
   if (verbose)
   {
