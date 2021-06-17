@@ -67,6 +67,18 @@ bool notset (Reference::To<T>& model)
   return !model || (model->get_infit(0) && model->get_param(0) == 0.0);
 }
 
+template<typename T, typename U>
+double chisq (const Estimate<T,U>& e)
+{
+  return e.val * e.val / e.var;
+}
+
+template<typename T, typename U>
+double chisq (const std::complex< Estimate<T,U> >& z)
+{
+  return chisq(z.real()) + chisq(z.imag());
+}
+
 //! Set the data to which model will be fit
 void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 {
@@ -196,6 +208,32 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
 
+  // search for OPMs
+
+  unsigned nstate = model->get_nstate();
+
+  for (unsigned istate=0; istate < nstate; istate++)
+  {
+    data_x[istate].apply ();
+    complex<double> Lmodel = get_model()->evaluate();
+    
+    double chisq_pos = ::chisq (data_y[istate] - Lmodel);
+    double chisq_neg = ::chisq (data_y[istate] + Lmodel);
+
+    if (chisq_neg < chisq_pos)
+    {
+      MEAL::ComplexRVM* cRVM = get_model();
+
+      cerr << "Pulsar::ComplexRVMFit::set_observation OPM"
+	" istate=" << istate <<
+	" phase=" << cRVM->get_phase(istate)*180/M_PI << " deg"
+	   << endl;
+
+      cRVM->set_linear(istate, -cRVM->get_linear(istate).get_value());
+
+      cerr << "new linear=" << cRVM->get_linear(istate) << endl;
+    }
+  }
   cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
 }
 
@@ -360,12 +398,6 @@ MEAL::ComplexRVM* Pulsar::ComplexRVMFit::get_model ()
     model = new MEAL::ComplexRVM;
 
   return model;
-}
-
-template<typename T, typename U>
-double chisq (const Estimate<T,U>& e)
-{
-  return e.val * e.val / e.var;
 }
 
 //! Fit data to the model
