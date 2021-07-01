@@ -153,7 +153,12 @@ Pulsar::PlotFactory::PlotFactory ()
 	( '4', "fourth", "4x4 covariance of Stokes parameters") );
 
   add ( new PlotFactory::Advocate<StokesCrossCovariancePlot>
-	( 'x', "cross", "cross covariances between Stokes parameters") );
+	( 'x', "cross", "1-D cross covariances between Stokes parameters") );
+
+#if 0
+  add ( new PlotFactory::Advocate<StokesCrossCovarianceImage>
+        ( 'y', "2dcross", "2-D cross covariances between Stokes parameters") );
+#endif
 
   add ( new PlotFactory::Advocate<PhaseVsMore>
 	( 'a', "alt", "Greyscale of auxiliary profiles") );

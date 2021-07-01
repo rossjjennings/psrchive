@@ -128,15 +128,17 @@ int main(int argc, char ** argv) try
 
   kernel.set_rotation_measure (1.0);
 
-  kernel.set_frequency (centrefreq + 0.5*bw/nchan);
+  double bottom_of_band = centrefreq - 0.5*fabs(bw);
+  
+  kernel.set_frequency (bottom_of_band + bw/nchan);
   pa_hi = kernel.get_rotation ();
 
-  kernel.set_frequency (centrefreq - 0.5*bw/nchan);
+  kernel.set_frequency (bottom_of_band);
   pa_lo = kernel.get_rotation ();
 
   delta_PA = fabs(pa_hi - pa_lo);
   cout << "\nWith " << nchan << " frequency channels:\n"
-      "maximum RM:    " << M_PI/delta_PA << endl;
+      "maximum RM (at delta-PA = pi):    " << M_PI/delta_PA << endl;
 
 }
 catch (...)

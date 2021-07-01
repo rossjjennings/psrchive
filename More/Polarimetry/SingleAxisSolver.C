@@ -107,13 +107,17 @@ void Calibration::SingleAxisSolver::init ()
   // decompose the input unit vector
 
   Vector<3, MEAL::ScalarMath> input_vector = input.get_vector();
-  Vector<3, MEAL::ScalarMath> input_parallel = (input_vector * axis) * axis;
+  MEAL::ScalarMath input_p  = input_vector * axis;
+
+  Vector<3, MEAL::ScalarMath> input_parallel = input_p * axis;
   Vector<3, MEAL::ScalarMath> input_perp = input_vector - input_parallel;
 
   // decompose the output unit vector
 
   Vector<3, MEAL::ScalarMath> output_vector = output.get_vector();
-  Vector<3, MEAL::ScalarMath> output_parallel = (output_vector * axis) * axis;
+  MEAL::ScalarMath output_p = output_vector * axis;
+
+  Vector<3, MEAL::ScalarMath> output_parallel = output_p * axis;
   Vector<3, MEAL::ScalarMath> output_perp = output_vector - output_parallel;
 
   // find the rotation
@@ -123,9 +127,6 @@ void Calibration::SingleAxisSolver::init ()
   diff_phase = -0.5 * atan2 (A_sin_2phi, A_cos_2phi);
 
   // find the boost
-  MEAL::ScalarMath input_p = input_vector * axis;
-  MEAL::ScalarMath output_p = output_vector * axis;
-
   MEAL::ScalarMath tanh_2beta 
     = ( input_p * output[0] - output_p * input[0] ) /
       ( input_p * output_p - input[0] * output[0] );

@@ -16,6 +16,8 @@
 #include "psrfitsio.h"
 #include "strutil.h"
 
+#include <string.h>
+
 using namespace std;
 
 void ensure_printable (string& text)
@@ -280,9 +282,13 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr) try
     CTR_FREQ attribute and CTR_FREQ should not over-ride the value stored in 
     OBSFREQ.  Therefore, set the centre frequency and bandwidth only if they
     are not already set.
-  */
 
-  if ( get_centre_frequency() == 0)
+    MJK - 11 Jun 2021
+    The above change breaks jodrell bank data processed with older psrchive versions
+    I'm not sure there is a way to be fully compatable with all types, so lets just
+    try to detect jodrell data from the backend name and go to legacy mode in that case
+  */
+  if ( get_centre_frequency() == 0 || strstr (backend->get_name().c_str(), "Jod"))
   {
     set_centre_frequency ( last.ctr_freq );
 
@@ -291,7 +297,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr) try
            << get_centre_frequency() << endl;
   }
 
-  if ( get_bandwidth() == 0 )
+  if ( get_bandwidth() == 0 || strstr (backend->get_name().c_str(), "Jod"))
   {
     set_bandwidth (last.nchan * last.chan_bw);
 

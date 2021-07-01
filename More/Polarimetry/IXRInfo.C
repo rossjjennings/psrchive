@@ -64,8 +64,9 @@ Pulsar::IXRInfo::get_param (unsigned ichan, unsigned iclass,
 
   vector< Jones<double> > gradient;
   Jones<double> J = xform->evaluate(&gradient);
+  Jones<double> H = J*herm(J) / norm(det(J));
 
-  double cosh_2beta = 0.5 * trace (J*herm(J)).real();
+  double cosh_2beta = 0.5 * trace (H).real();
   double beta = 0.5 * acosh( cosh_2beta );
 
   double cosh_beta = cosh(beta);
@@ -79,10 +80,15 @@ Pulsar::IXRInfo::get_param (unsigned ichan, unsigned iclass,
 
   for (unsigned i=0; i<xform->get_nparam(); i++)
   {
-    /* where H = hermitian, H^2 = J J^dagger
+    /* where H = hermitian, H^2 = J J^dagger / | det J |
        and cosh 2beta = Tr (H^2) / 2 */
 
-    double dbeta_di = trace( gradient[i]*herm(J) + J*herm(gradient[i]) ).real() / ( 4 * sinh(2*beta) );
+    Jones<double> K = gradient[i]*herm(J);
+    Jones<double> L = H * trace(gradient[i]*inv(J)).real();
+
+    cerr << "************* big=" << trace( K+herm(K) ) << " small=" << trace(L) << endl;
+
+    double dbeta_di = trace( (K+herm(K))/norm(det(J)) /* - L */).real() / ( 4 * sinh(2*beta) );
 cerr << "dbeta_d" << i << "=" << dbeta_di << endl;
     double dIXR_di = -2 * dbeta_di / ( sinh_beta * cosh_beta );
 cerr << "dIXR_d" << i << "=" << dIXR_di << endl;

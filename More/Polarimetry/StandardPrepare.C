@@ -45,6 +45,8 @@ void Calibration::StandardPrepare::prepare (Pulsar::Archive* archive)
   archive->convert_state (Signal::Stokes);
   archive->remove_baseline ();
   archive->dedisperse ();
+  // to select phase ranges using pcm -p or pcm -b, it is necessary
+  // to plot data using psrplot -p S -j "FD,centre 0"
   archive->centre (0.0);
 }
 

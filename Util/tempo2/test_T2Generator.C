@@ -9,7 +9,6 @@
 #include "T2Predictor.h"
 #include "Pulsar/TextParameters.h"
 #include "Error.h"
-#include "load_factory.h"
 
 using namespace std;
 using Pulsar::TextParameters;

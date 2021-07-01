@@ -30,12 +30,13 @@ namespace Phase
     Unit unit;
     unsigned nbin;
     double period;
+    bool insert_units;
 
     std::ostream& insertion (std::ostream&) const;
     std::istream& extraction (std::istream&);
 
   public:
-    HasUnit (Unit u = Turns) { nbin=0; period=0; unit=u; }
+    HasUnit (Unit u = Turns) { nbin=0; period=0; unit=u; insert_units = false; }
     
     unsigned get_bin (double value) const;
     double get_as (Unit, double value, bool round_down=false) const;

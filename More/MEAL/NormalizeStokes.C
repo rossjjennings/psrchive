@@ -7,6 +7,8 @@
 #include "MEAL/NormalizeStokes.h"
 #include "MEAL/ScalarMath.h"
 
+using namespace std;
+
 void MEAL::NormalizeStokes::init ()
 {
   invariant = new Invariant;
@@ -61,6 +63,10 @@ void MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
 
   Estimate<double> norm = ::invariant(stokes) + other->get_value();
 
+#ifdef _DEBUG
+  cerr << "MEAL::NormalizeStokes::normalize norm=" << norm << endl;
+#endif
+  
   if ( norm.val < stokes[0].var )
     throw Error (InvalidState, "MEAL::NormalizeStokes::normalize",
 		 "norm=%lf < variance=%lf", norm.val, stokes[0].var);
@@ -84,10 +90,19 @@ void MEAL::NormalizeStokes::normalize (Stokes< Estimate<double> >& stokes,
 {
   Estimate<double> invint = ::invariant (stokes);
 
+#ifdef _DEBUG
+  cerr << "MEAL::NormalizeStokes::normalize invint=" << invint
+       << "tot_det=" << total_determinant << endl;
+#endif
+
   // subtract the determinant of the input from the total
   total_determinant.val -= invint.val;
   total_determinant.var -= invint.var;
-    
+
+#ifdef _DEBUG
+  cerr << "MEAL::NormalizeStokes::normalize remaining tot_det=" << total_determinant << endl;
+#endif
+
   set_other (total_determinant);
   normalize (stokes);
 }
