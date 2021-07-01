@@ -26,6 +26,7 @@ void usage ()
     "  -i         interactive mode \n"
     "  -l lst     start LST \n"
     "  -L lst     end LST \n"
+    "  -m max     maximum number of sources listed in interactive mode \n"
     "  -p min     minutes per interval in lst_density.txt \n"
     "  -P         add PRESS-specific constraints \n"
     "  -s         minimize slew time \n"
@@ -117,6 +118,8 @@ bool minimize_slew_time = false;
 bool interactive = false;
 bool observe_once_per_session = false;
 
+unsigned long maxshow = 10;
+
 int main (int argc, char* argv[]) 
 {
   // the Angle class does useful conversions
@@ -151,7 +154,7 @@ int main (int argc, char* argv[])
   vector<double> lst_density (lst_bins, 0.0);
 
   int c;
-  while ((c = getopt(argc, argv, "he:il:L:p:PsS:")) != -1)
+  while ((c = getopt(argc, argv, "he:il:L:m:p:PsS:")) != -1)
   {
     switch (c)
     {
@@ -175,6 +178,10 @@ int main (int argc, char* argv[])
     case 'L':
       end_lst.setHMS(optarg);
       end_lst_specified = true;
+      break;
+
+    case 'm':
+      maxshow = atoi (optarg);
       break;
 
     case 'p':
@@ -464,7 +471,6 @@ int simulate_session ()
     {
       std::sort (up.begin(), up.end(), by_priority);
 
-      unsigned long maxshow = 10;
       unsigned nshow = std::min( maxshow, up.size() );
 
       cerr << "NAME\t\tRANK\tSLEW" << endl;
