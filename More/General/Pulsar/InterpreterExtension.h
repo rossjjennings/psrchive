@@ -46,6 +46,9 @@ namespace Pulsar {
     std::string response (const Error& error)
       { return interpreter->response (error); }
 
+    TextInterface::Parser* get_interface ()
+      { return interpreter->get_interface (); }
+
   protected:
 
     friend class Interpreter;

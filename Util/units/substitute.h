@@ -37,6 +37,9 @@ std::string substitute (const std::string& text, T* resolver,
 					       &TextInterface::Name::valid) )
 try
 {
+  if (!resolver)
+    throw Error (InvalidState, "substitute", "resolver = NULL");
+
   std::string remain = text;
   std::string result;
 
