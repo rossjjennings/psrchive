@@ -27,6 +27,7 @@
 // #define _DEBUG 1
 
 using namespace std;
+using namespace Pulsar;
 
 // Text interface to TimeFrequencyZap
 TextInterface::Parser* Pulsar::TimeFrequencyZap::get_interface ()
@@ -125,13 +126,14 @@ void delete_edges (Pulsar::Archive* data, unsigned delete_nchan)
     channels[i+half_factor] = half_factor -i -1;
   }
 
-#if _DEBUG
-  cerr << "delete chans:";
-  for (unsigned i=0; i<delete_nchan; i++)
-    cerr << " " << channels[i];
-  cerr << endl;
-#endif
-  
+  if (Archive::verbose > 2)
+  {
+    cerr << "delete chans:";
+    for (unsigned i=0; i<delete_nchan; i++)
+      cerr << " " << channels[i];
+    cerr << endl;
+  }
+ 
   assert( channels[delete_nchan-1] == 0 );
       
   for (unsigned isub=0; isub<nsubint; isub++)
@@ -165,9 +167,8 @@ void copy_weights (Pulsar::Archive* to, const Pulsar::Archive* from)
 
 void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 {
-#if _DEBUG
-  cerr << "TimeFrequencyZap::transform archive=" << (void*) archive << endl;
-#endif
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::transform archive=" << (void*) archive << endl;
   
   Reference::To<Archive> data = archive;
   bool cloned = false;
@@ -190,9 +191,9 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   
   if ((regions_from_total || fscrunch_factor > 1) && !data->get_dedispersed())
   {
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform need to dedisperse" << endl;
-#endif
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform need to dedisperse" << endl;
+
     // Need to make sure we are using a dedispersed version of the Archive
 
     /* optimization: when transform is called multiple times on the same
@@ -201,18 +202,18 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 
     if (last_dedispersed == data)
     {
-#if _DEBUG
-      cerr << "TimeFrequencyZap::transform re-use dedispersed clone" << endl;
-#endif
+      if (Archive::verbose > 2)
+        cerr << "TimeFrequencyZap::transform re-use dedispersed clone" << endl;
+
       // data weights were likely changed on last call
       copy_weights (dedispersed_clone, data);
       data = dedispersed_clone;
     }
     else
     {
-#if _DEBUG
-      cerr << "TimeFrequencyZap::transform clone and dedisperse" << endl;
-#endif
+      if (Archive::verbose > 2)
+        cerr << "TimeFrequencyZap::transform clone and dedisperse" << endl;
+
       last_dedispersed = data;
 
       data = archive->clone();
@@ -233,9 +234,8 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 
   if (jobs != "")
   {
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform jobs='" << jobs << "'" << endl;
-#endif
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform jobs='" << jobs << "'" << endl;
     
     StandardOptions processor;
     processor.add_job (jobs);
@@ -252,18 +252,20 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 
   if (fscrunch_factor > 1)
   {
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform"
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform"
       " fscrunch by " << fscrunch_factor << endl;
-#endif
     
     data = backup->clone();
     data->fscrunch (fscrunch_factor);
+
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform"
+      " after fscrunch, nchan=" << data->get_nchan() << endl;
   }
 
-#if _DEBUG
-  cerr << "TimeFrequencyZap::transform performing transformation" << endl;
-#endif
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::transform performing transformation" << endl;
 
   unsigned total_masked = 0;
 
@@ -272,28 +274,25 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   // nmasked set by transform
   total_masked += nmasked;
     
-  if (fscrunch_factor > 1)
+  if (fscrunch_factor > 1 && fscrunch_factor < archive->get_nchan())
   {
     // do it again with the fscrunched channel boundaries offset by 0.5*chbw
     
     data = backup->clone();
 
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform delete edges" << endl;
-#endif
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform delete edges" << endl;
     
     delete_edges (data, fscrunch_factor);
 
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform"
-      " fscrunch by " << fscrunch_factor << endl;
-#endif
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform"
+        " fscrunch by " << fscrunch_factor << endl;
     
     data->fscrunch (fscrunch_factor);
 
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform performing transformation" << endl;
-#endif
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform performing transformation" << endl;
     
     transform (data, archive, fscrunch_factor / 2);
 
@@ -329,10 +328,9 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   //npol = data->get_npol();
   npol = pol_i.size();
 
-#if _DEBUG
-  cerr << "TimeFrequencyZap::transform nsubint=" << nsubint
-       << " nchan=" << nchan << " npol=" << npol << endl;
-#endif
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::transform nsubint=" << nsubint
+         << " nchan=" << nchan << " npol=" << npol << endl;
   
   freq.resize(nchan*nsubint);
   time.resize(nsubint);
@@ -361,9 +359,8 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   
   do 
   {
-#if _DEBUG
-    cerr << "TimeFrequencyZap::transform iteration=" << iter << endl;
-#endif
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform iteration=" << iter << endl;
 
     if (iter == 0 || recompute)
     {
@@ -388,19 +385,17 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
 
   nmasked += nmasked_during_loop;
 
-#if _DEBUG
-  cerr << "TimeFrequencyZap::transform nmasked=" << nmasked << endl;
-#endif
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::transform nmasked=" << nmasked << endl;
 }
 
 
 
 void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
 {
-#if _DEBUG
-  cerr << "TimeFrequencyZap::compute_stat nsubint=" << nsubint
-       << " nchan=" << nchan << endl;
-#endif
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::compute_stat nsubint=" << nsubint
+         << " nchan=" << nchan << endl;
 
   assert (data->get_nsubint() == nsubint);
   assert (data->get_nchan() == nchan);
@@ -461,10 +456,10 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
           fval = fromstring<float>(val);
         }
 
-#if _DEBUG
-	cerr << "isub=" << isub << " ichan=" << ichan << " ipol=" << ipol
-	     << " fval=" << fval << endl;
-#endif
+        if (Archive::verbose > 2)
+	  cerr << "isub=" << isub << " ichan=" << ichan << " ipol=" << ipol
+	       << " fval=" << fval << endl;
+
         stat[idx(isub,ichan,ipol)] = fval;
       }
     }
@@ -500,11 +495,10 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
 					   unsigned fscrunch_factor,
 					   unsigned chan_offset)
 {
-#if _DEBUG
-  cerr << "TimeFrequencyZap::apply_mask archive=" << (void*) archive
-       << " fscrunch=" << fscrunch_factor << " chan_offset=" << chan_offset
-       << endl;
-#endif
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::apply_mask archive=" << (void*) archive
+         << " fscrunch=" << fscrunch_factor << " chan_offset=" << chan_offset
+         << endl;
   
   // count weights changed to zero
   nmasked = 0;

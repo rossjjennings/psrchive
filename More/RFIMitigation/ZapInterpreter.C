@@ -26,6 +26,7 @@
 #include "TextInterface.h"
 #include "pairutil.h"
 #include "evaluate.h"
+#include "substitute.h"
 #include "Ranges.h"
 
 using namespace std;
@@ -214,7 +215,17 @@ string Pulsar::ZapInterpreter::tfzap (const string& args) try
   {
     if (icmd)
       retval += " ";
-    retval += interface->process (arguments[icmd]);
+
+    try {
+      retval += interface->process (arguments[icmd]);
+    }
+    catch (Error& error) 
+    {
+      // see if expanding any variables helps
+      string arg = ::evaluate( substitute (arguments[icmd], get_interface()) );
+      retval += "'" + arguments[icmd] + "' -> '" + arg + "'";
+      retval += interface->process (arg);
+    }
   }
 
   return retval;
