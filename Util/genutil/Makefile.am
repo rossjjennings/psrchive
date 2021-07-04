@@ -5,6 +5,7 @@ include_HEADERS = \
         Angle.h \
 	Barycentre.h \
 	BatchQueue.h \
+	BinaryStatistic.h \
         Brent.h \
 	BoxMuller.h \
         Cartesian.h \
@@ -64,6 +65,7 @@ include_HEADERS = \
 	ThreadStream.h \
         Types.h \
         typeutil.h \
+	UnaryStatistic.h \
         utc.h \
 	VanVleck.h \
 	VirtualMemory.h \
@@ -76,6 +78,7 @@ libgenutil_la_SOURCES = \
         angleconv.c \
 	Barycentre.C \
 	BatchQueue.C \
+	BinaryStatistic.C \
 	BoxMuller.C \
         Cartesian.C \
 	CommandLine.C \
@@ -140,6 +143,7 @@ libgenutil_la_SOURCES = \
 	ThreadStream.C \
 	time_string.C \
         Types.C \
+	UnaryStatistic.C \
         utc.c \
 	VanVleck.C \
 	VirtualMemory.C \
