@@ -810,7 +810,7 @@ bool Pulsar::Interpreter::evaluate (const std::string& expression)
     cerr << "Pulsar::Interpreter::evaluate expression="
             "'" << evaluate_expression << "'" << endl;
 
-  double value = compute (evaluate_expression);
+  double value = fromstring<double> (::evaluate (evaluate_expression));
 
   if (value == 1)
     return true;
