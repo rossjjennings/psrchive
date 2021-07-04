@@ -21,11 +21,14 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <algorithm>
 
 #include <math.h>
 #include <ctype.h>
 
 using namespace std;
+
+// #define _DEBUG 1
 
 #ifdef _DEBUG
 #define DEBUG(x) cerr << x << endl;
@@ -72,7 +75,7 @@ string evaluate1 (const string& eval, unsigned precision)
 
 string get_command (string& text)
 {
-  const char* commands[] = { "min", "max", "med", "sum", "avg", "rms", 0 };
+  const char* commands[] = { "hash", "min", "max", "med", "sum", "avg", "rms", 0 };
 
   for (const char** cmd = commands; *cmd != 0; cmd++)
   {
@@ -97,6 +100,9 @@ string get_command (string& text)
 
 string evaluate2 (const string& command, string vals, unsigned precision)
 {
+  if (command == "hash")
+    return tostring( std::hash<std::string>{}(vals) );
+
   vector<double> values;
   while (vals.length())
   {
@@ -137,12 +143,82 @@ string evaluate2 (const string& command, string vals, unsigned precision)
     return tostring (result);
 }
 
+string string_comparison (const string& text)
+{
+  string::size_type start;
+  string::size_type end;
+
+  DEBUG("string_comparison text='" << text << "'");
+
+  char quote = '"';
+
+  start = text.find (quote);
+  if (start == string::npos)
+    throw Error (InvalidParam, "string_comparison", 
+                 "first opening quotation mark not found in '" + text + "'");
+
+  end = text.find (quote, start+1);
+  if (start == string::npos)
+    throw Error (InvalidParam, "string_comparison", 
+                 "first closing quotation mark not found in '" + text + "'");
+
+  string left = text.substr (start+1, end-start-1);
+
+  DEBUG("left='" << left << "'");
+
+  start = text.find (quote, end+1);
+  if (start == string::npos)
+    throw Error (InvalidParam, "string_comparison", 
+                 "second opening quotation mark not found in '" + text + "'");
+
+  string oper = text.substr (end+1, start-end-1);
+
+  DEBUG("oper='" << oper << "'");
+
+  end = text.find (quote, start+1);
+  if (start == string::npos)
+    throw Error (InvalidParam, "string_comparison",
+                 "second closing quotation mark not found in '" + text + "'");
+
+  string right = text.substr (start+1, end-start-1);
+
+  DEBUG("right='" << right << "'");
+
+  int result = -1;
+
+  if ( oper.find( "==" ) != string::npos )
+    result = left == right;
+
+  else if ( oper.find( "!=" ) != string::npos )
+    result = left != right;
+
+  else if ( oper.find( "<" ) != string::npos )
+    result = left < right;
+
+  else if ( oper.find( ">" ) != string::npos )
+    result = left > right;
+
+  else
+    throw Error (InvalidParam, "string_comparison",
+                 "unrecognized operator in '" + oper + "'");
+
+  DEBUG("result=" << result);
+
+  return tostring(result);
+}
+
 string evaluate (const string& text, char cstart, char cend) try
 {
   string remain = text;
     
   string::size_type start;
   string::size_type end;
+
+  DEBUG("evaluate text='" << text << "'");
+
+  size_t nquote = std::count(text.begin(), text.end(), '"');
+  if (nquote == 4)
+    return string_comparison (text);
 
   while ( (end = remain.find(cend)) != string::npos &&
 	  (start = remain.rfind(cstart, end)) != string::npos )
@@ -196,6 +272,8 @@ string evaluate (const string& text, char cstart, char cend) try
 
     remain = before + subst + after;
   }
+
+  DEBUG("remain='" << remain << "'");
 
   return remain;
 }
