@@ -29,6 +29,17 @@ find_first_if (const std::string& text, Pred pred, std::string::size_type pos)
     return iter - text.begin();
 }
 
+//! Return last character in text such that pred(c) is true
+template<class Pred> std::string::size_type
+find_last_if (const std::string& text, Pred pred)
+{
+  auto iter = std::find_if (text.rbegin(), text.rend(), pred);
+  if (iter == text.rend())
+    return std::string::npos;
+  else
+    return text.length() - (iter - text.rbegin());
+}
+
 template<class T>
 std::string substitute (const std::string& text, T* resolver,
 			char substitution = '$',

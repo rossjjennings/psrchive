@@ -8,6 +8,7 @@
 #include "evaluate.h"
 #include "ThreadContext.h"
 
+#include "UnaryStatistic.h"
 #include "templates.h"
 #include "Error.h"
 #include "pad.h"
@@ -73,36 +74,37 @@ string evaluate1 (const string& eval, unsigned precision)
     return tostring (value);
 }
 
-string get_command (string& text)
+// make an Adaptable Predicate out of std C isalnum
+static Functor< bool(char) > alnum ( (int(*)(int)) isalnum );
+
+UnaryStatistic* get_command (string& text)
 {
-  const char* commands[] = { "hash", "min", "max", "med", "sum", "avg", "rms", 0 };
+  if (text.empty())
+    return 0;
 
-  for (const char** cmd = commands; *cmd != 0; cmd++)
-  {
-    DEBUG("cmd='" << *cmd << "'");
+  DEBUG ("get_command text='" << text << "'");
 
-    string test = *cmd;
+  string::size_type start = find_last_if (text, std::not1(alnum));
 
-    string::size_type in = text.rfind (test);
-    if (in == string::npos)
-      continue;
+  DEBUG ("get_command start=" << start);
 
-    // ensure that the command occurs at the end of the text
-    if (in + test.length() == text.length())
-    {
-      text = text.substr (0, in);
-      return test;
-    }
-  }
+  // if no non-alphanumeric characters are found,
+  // then the whole string is the command
+  string command = (start == string::npos) ? text : text.substr (start);
 
-  return string();
+  if (command.empty())
+    return 0;
+
+  text = (start == string::npos) ? "" : text.substr (0, start);
+
+  DEBUG ("get_command command='" << command << "'");
+  DEBUG ("get_command remaining text='" << text << "'");
+
+  return UnaryStatistic::factory (command);
 }
 
-string evaluate2 (const string& command, string vals, unsigned precision)
+string evaluate2 (UnaryStatistic* stat, string vals, unsigned precision)
 {
-  if (command == "hash")
-    return tostring( std::hash<std::string>{}(vals) );
-
   vector<double> values;
   while (vals.length())
   {
@@ -113,29 +115,7 @@ string evaluate2 (const string& command, string vals, unsigned precision)
   if (!values.size())
     return string();
 
-  double result = 0.0;
-
-  if (command == "min")
-    result = *std::min_element (values.begin(), values.end());
-
-  else if (command == "max")
-    result = *std::max_element (values.begin(), values.end());
-
-  else if (command == "med")
-  {
-    unsigned mid = values.size() / 2;
-    std::nth_element (values.begin(), values.begin()+mid, values.end());
-    result = values[mid];
-  }
-
-  else if (command == "sum")
-    result = sum (values);
-
-  else if (command == "avg")
-    result = mean (values);
-
-  else if (command == "rms")
-    result = sqrt( variance(values) );
+  double result = stat->get(values);
 
   if (precision)
     return tostring (result, precision);
@@ -235,9 +215,7 @@ string evaluate (const string& text, char cstart, char cend) try
     DEBUG("before='" << before << "'");
 
     // preceding text may be a command
-    string command = get_command (before);
-
-    DEBUG("command='" << command << "'");
+    UnaryStatistic* stat = get_command (before);
 
     end ++;
 
@@ -265,10 +243,10 @@ string evaluate (const string& text, char cstart, char cend) try
 
     string subst;
 
-    if (command.empty())
-      subst = evaluate1 (eval, precision);
+    if (stat)
+      subst = evaluate2 (stat, eval, precision);
     else
-      subst = evaluate2 (command, eval, precision);
+      subst = evaluate1 (eval, precision);
 
     remain = before + subst + after;
   }
