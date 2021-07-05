@@ -6,11 +6,13 @@
 
 using namespace std;
 
-int main () try {
-
+int main () try
+{
   string eval = "test {4.5 + 3.4} this";
+  cerr << "eval='" << eval << "'" << endl;
 
   string result = evaluate (eval);
+  cerr << "result='" << result << "'" << endl;
 
   if (result != "test 7.9 this") {
     cerr << "unexpected result = " << result << endl;
@@ -22,6 +24,17 @@ int main () try {
   result = evaluate (eval);
 
   if (result != "test 7.97") {
+    cerr << "unexpected result = " << result << endl;
+    return -1;
+  }
+
+  eval = "test min{4.5678,3.4}";
+  cerr << "eval='" << eval << "'" << endl;
+
+  result = evaluate (eval);
+  cerr << "result='" << result << "'" << endl;
+
+  if (result != "test 3.4") {
     cerr << "unexpected result = " << result << endl;
     return -1;
   }
