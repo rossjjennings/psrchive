@@ -14,11 +14,11 @@
 // Reception Model and its management
 #include "Pulsar/ReceptionModel.h"
 #include "Pulsar/ReceptionModelSolver.h"
+#include "Pulsar/VariableBackendEstimate.h"
 
 #include "Pulsar/CalibratorType.h"
 #include "Pulsar/MeanPolar.h"
 #include "Pulsar/MeanSingleAxis.h"
-#include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/ProductRule.h"
 #include "MEAL/ChainRule.h"
@@ -208,8 +208,8 @@ namespace Calibration
     //! The algorithm used to solve the measurement equation
     Reference::To< Calibration::ReceptionModel::Solver > solver;
 
-    //! Used to convert MJD to double
-    Calibration::ConvertMJD convert;
+    //! The set of instrumental transformations for each pulsar / epoch
+    std::vector< Reference::To< VariableBackendEstimate > > responses;
 
     //! The signal path experienced by the calibrator
     Reference::To< MEAL::ChainRule<MEAL::Complex2> > pcal_gain_chain;
@@ -237,19 +237,8 @@ namespace Calibration
     //! Temporal variation of response parameters
     std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
 
-    //! The best estimate of the backend
-    Calibration::MeanSingleAxis backend_estimate;
-
-    //! The best estimate of the polar model
-    Calibration::MeanPolar polar_estimate;
-
     //! The basis transformation
     Reference::To<MEAL::Complex2> basis;
-
-    //! The backend variation transformations
-    Reference::To< MEAL::Scalar > gain;
-    Reference::To< MEAL::Scalar > diff_gain;
-    Reference::To< MEAL::Scalar > diff_phase;
 
     void integrate_parameter (MEAL::Scalar* function, double value);
 

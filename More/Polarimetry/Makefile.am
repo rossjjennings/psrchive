@@ -98,6 +98,7 @@ nobase_include_HEADERS = \
 	Pulsar/UnloadJones.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
+	Pulsar/VariableBackendEstimate.h \
 	Pulsar/VariableProjectionCorrection.h \
 	Pulsar/VariableTransformation.h \
 	Pulsar/VariationInfo.h
@@ -208,6 +209,7 @@ libPolarimetry_la_SOURCES = \
 	UnloadJones.C \
         TemplateUncertainty.C \
         TotalCovariance.C \
+	VariableBackendEstimate.C \
 	VariableProjectionCorrection.C \
 	VariableTransformation.C \
 	VariationInfo.C

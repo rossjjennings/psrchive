@@ -73,7 +73,7 @@ namespace Pulsar
     //! Return true if calibrator (e.g. noise diode) data are incorporated
     virtual bool has_cal () const { return calibrator_estimate.size(); }
 
-    //! Retern a new plot information interface for the specified pulsar state
+    //! Return a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
     //! True if noise diode illuminates feed; false if coupled after OMT

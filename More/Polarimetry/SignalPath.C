@@ -621,65 +621,7 @@ SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
   
 }
 
-void SignalPath::set_gain (Univariate<Scalar>* function)
-{
-  if (!built)
-    build ();
 
-  if (constant_pulsar_gain)
-  {
-    if (pcal_gain)
-    {
-      if (verbose)
-	cerr << "SignalPath::set_gain set pcal gain" << endl;
-      pcal_gain_chain->set_constraint (0, function);
-    }
-  }
-  else
-  {
-    BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-    if (!physical)
-      throw Error (InvalidState, "SignalPath::set_gain",
-		   "cannot set gain variation in polar model");
-
-    if (verbose)
-      cerr << "SignalPath::set_gain set physical gain" << endl;
-    physical->set_gain( function );
-  }
-
-  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
-  gain = function;
-}
-
-void SignalPath::set_diff_gain (Univariate<Scalar>* function)
-{
-  if (!built)
-    build ();
-
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    throw Error (InvalidState, "SignalPath::set_diff_gain",
-		 "cannot set gain variation in polar model");
-
-  physical -> set_diff_gain( function );
-  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
-  diff_gain = function;
-}
-
-void SignalPath::set_diff_phase (Univariate<Scalar>* function)
-{
-  if (!built)
-    build ();
-
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    throw Error (InvalidState, "SignalPath::set_diff_phase",
-		 "cannot set diff_phase variation in polar model");
-
-  physical -> set_diff_phase( function );
-  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
-  diff_phase = function;
-}
 
 void SignalPath::set_reference_epoch (const MJD& epoch)
 {
