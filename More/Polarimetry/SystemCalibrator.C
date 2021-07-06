@@ -501,7 +501,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     }
 
     // projection transformation
-    Argument::Value* xform = model[mchan]->projection.new_Value( known );
+    Argument::Value* xform = model[mchan]->get_projection().new_Value( known );
     
     // pulsar signal path
     unsigned path = model[mchan]->get_pulsar_path();
@@ -855,7 +855,9 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       if ( solution->get_nchan() == nchan
 	   && solution->get_transformation_valid (ichan) )
       {
-	integrate_calibrator_solution( solution->get_Archive()->get_type(), ichan,
+	integrate_calibrator_solution( solution->get_Archive()->get_type(),
+				       ichan,
+				       solution->get_epoch (),
 				       solution->get_transformation(ichan) );
       }
     }
@@ -1026,12 +1028,12 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
 
 void Pulsar::SystemCalibrator::integrate_calibrator_solution
 ( 
- Signal::Source source, unsigned ichan,
+ Signal::Source source, unsigned ichan, const MJD& epoch,
  const MEAL::Complex2* transformation
 )
 {
   if (source == Signal::PolnCal)
-    model[ichan]->integrate_calibrator (transformation);
+    model[ichan]->integrate_calibrator (epoch, transformation);
 }
 
 const Pulsar::CalibratorStokes*
@@ -1673,7 +1675,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 	it will be included later, if necessary.
       */
 
-      model[ichan]->projection.set_value( Jones<double>::identity() );
+      model[ichan]->get_projection().set_value( Jones<double>::identity() );
 
       try
       {

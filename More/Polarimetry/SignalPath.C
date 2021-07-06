@@ -13,11 +13,11 @@
 #include "Pulsar/Britton2000.h"
 
 #include "Pulsar/ReceptionModelSolver.h"
+#include "Pulsar/VariableBackendEstimate.h"
 
 #include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Gain.h"
-#include "MEAL/Steps.h"
 #include "MEAL/Value.h"
 #include "MEAL/JonesMueller.h"
 
@@ -53,7 +53,7 @@ SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
   step_after_cal = false;
   constant_pulsar_gain = false;
   refcal_through_frontend = true;
-  
+
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
@@ -77,7 +77,7 @@ void SignalPath::set_response (MEAL::Complex2* x)
 
 //! Allow the specified response parameter to vary as a function of time 
 void SignalPath::set_response_variation (unsigned iparam, 
-                                         Univariate<Scalar>* function)
+					 Univariate<Scalar>* function)
 {
   if (!built)
     build ();
@@ -311,11 +311,14 @@ void SignalPath::build ()
   if (solver)
     equation->set_solver( solver );
 
+  //! Estimate of the backend component of response
+  backend_estimate = new BackendEstimate;
+  backend_estimate -> set_response (response);
+
   built = true;
 }
 
-void
-SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
+void SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
 {
   foreach_pcal = x;
 }
@@ -335,10 +338,7 @@ void SignalPath::add_polncal_backend ()
       pcal_gain = new MEAL::Gain<MEAL::Complex2>;
       pcal_gain_chain = new MEAL::ChainRule<MEAL::Complex2>;
       pcal_gain_chain->set_model( pcal_gain );
-      if (gain)
-	pcal_gain_chain->set_constraint( 0, gain );
     }
-
     pcal_path->add_model( pcal_gain_chain );
   }
 
@@ -384,45 +384,28 @@ void SignalPath::update () try
   if (!built)
     return;
 
-  MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
-  if (polar)
-    polar_estimate.update (polar);
-
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    return;
-
-  Calibration::SingleAxis* backend = physical->get_backend();
-
-  backend_estimate.update (backend);
-
-  if (gain)
-    update_parameter( gain, backend->get_gain().get_value() );
-  else if (pcal_gain)
-    pcal_gain->set_gain( backend->get_gain() );
+  if (backend_estimate)
+    backend_estimate->update();
+  
+  for (unsigned i=0; i<backends.size(); i++)
+    backends[i]->update ();
 
   if (pcal_gain)
+  {
+    BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
+    if (!physical)
+      return;
+
+    Calibration::SingleAxis* backend = physical->get_backend();
+
+    pcal_gain->set_gain( backend->get_gain() );
     backend->set_gain( 1.0 );
-  
-  if (diff_gain)
-    update_parameter( diff_gain, backend->get_diff_gain().get_value() );
-    
-  if (diff_phase)
-    update_parameter( diff_phase, backend->get_diff_phase().get_value() );
+  }
 }
 catch (Error& error)
 {
   throw error += "SignalPath::update";
 }
-
-void SignalPath::update_parameter (MEAL::Scalar* function,
-						   double value)
-{
-  MEAL::Polynomial* polynomial = dynamic_cast<MEAL::Polynomial*>( function );
-  if (polynomial)
-    polynomial->set_param( 0, value );
-}
-
 
 void SignalPath::check_constraints ()
 {
@@ -433,13 +416,11 @@ void SignalPath::check_constraints ()
 
   */
 
-  // Fix final step problem if neccesary
-  if (gain)
-    fix_last_step(gain);
-  if (diff_gain)
-    fix_last_step(diff_gain);
-  if (diff_phase)
-    fix_last_step(diff_phase);
+  /*
+    instead of fix_last_step, it will be necessary to go through the
+    variable gain transformations and ensure that at least one observation
+    has been made along each signal path index
+  */
 }
 
 void SignalPath::fit_gain (bool flag)
@@ -479,38 +460,14 @@ void SignalPath::equal_ellipticities ()
                "don't know how to handle this for the calibrator model");
 }
 
-bool decrement_nfree (MEAL::Scalar* function)
-{
-  MEAL::Steps* steps = dynamic_cast<MEAL::Steps*> (function);
-  if (steps && steps->get_nstep())
-  {
-    steps->remove_step (0);
-    return true;
-  }
-
-  MEAL::Polynomial* poly = dynamic_cast<MEAL::Polynomial*> (function);
-  if (poly && poly->get_nparam() > 1)
-  {
-    poly->resize( poly->get_nparam() - 1 );
-    return true;
-  }
-
-  return false;
-}
-
 //! Attempt to reduce the number of degrees of freedom in the model
 bool SignalPath::reduce_nfree ()
 {
   bool reduced = false;
 
-  if (gain && decrement_nfree (gain))
-    reduced = true;
-
-  if (diff_gain && decrement_nfree (diff_gain))
-    reduced = true;
-
-  if (diff_phase && decrement_nfree (diff_phase))
-    reduced = true;
+  for (unsigned i=0; i < backends.size(); i++)
+    if (backends[i]->reduce_nfree())
+      reduced = true;
 
   return reduced;
 }
@@ -554,74 +511,19 @@ SignalPath::copy_transformation (const MEAL::Complex2* xform)
   }
 }
 
-void 
-SignalPath::integrate_parameter (MEAL::Scalar* function,
-						 double value)
+void SignalPath::integrate_calibrator (const MJD& epoch,
+				       const MEAL::Complex2* xform)
 {
-  MEAL::Steps* steps = dynamic_cast<MEAL::Steps*>( function );
-  if (!steps)
-    return;
+  if (backend_estimate)
+    backend_estimate->integrate (xform);
 
-  unsigned istep = steps->get_step();
-
-  // cerr << "SignalPath set step " << istep << endl;
-
-  steps->set_param( istep, value );
+  for (unsigned i=0; i<backends.size(); i++)
+    if ( backends[i]->spans (epoch) )
+    {
+      backends[i]->integrate (xform);
+      break;
+    }
 }
-
-void 
-SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
-{
-  const MEAL::Polar* polar_solution;
-  polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
-
-  if (polar_solution)
-  {
-    if (verbose)
-      cerr << "SignalPath::integrate_calibrator Polar" << endl;
-    
-    polar_estimate.integrate( polar_solution );
-    return;
-  }
-
-  const Calibration::SingleAxis* sa;
-  sa = dynamic_cast<const Calibration::SingleAxis*>( xform );
-
-  if (sa)
-  {
-    if (verbose)
-      cerr << "SignalPath::integrate_calibrator SingleAxis" << endl;
-    
-    backend_estimate.integrate( sa );
-  
-    if (gain)
-      integrate_parameter( gain, sa->get_gain().get_value() );
-      
-    if (diff_gain)
-      integrate_parameter( diff_gain, sa->get_diff_gain().get_value() );
-      
-    if (diff_phase)
-      integrate_parameter( diff_phase, sa->get_diff_phase().get_value() );
-
-    return;
-  }
-
-  const MEAL::ProductRule<MEAL::Complex2>* product;
-  product = dynamic_cast<const MEAL::ProductRule<MEAL::Complex2>*>( xform );
-  if (product)
-  {
-    if (verbose)
-      cerr << "SignalPath::integrate_calibrator ProductRule" << endl;
-    
-    for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
-      integrate_calibrator( product->get_model(imodel) );
-
-    return;
-  }
-  
-}
-
-
 
 void SignalPath::set_reference_epoch (const MJD& epoch)
 {
@@ -629,103 +531,78 @@ void SignalPath::set_reference_epoch (const MJD& epoch)
   cerr << "SignalPath::set_reference_epoch " << epoch << endl;
 #endif
 
-  MJD current_epoch = convert.get_reference_epoch();
   convert.set_reference_epoch( epoch );
 
-  time.set_value (current_epoch);
-  double offset = convert.get_value();
-
-  if (gain)
-    offset_steps( gain, offset );
-  
-  if (diff_gain)
-    offset_steps( diff_gain, offset );
-  
-  if (diff_phase)
-    offset_steps( diff_phase, offset );
-}
-
-//! Set gain to the univariate function of time
-const MEAL::Scalar* SignalPath::get_gain () const
-{
-  return gain;
-}
-
-//! Set differential gain to the univariate function of time
-const MEAL::Scalar* SignalPath::get_diff_gain () const
-{
-  return diff_gain;
-}
-
-//! Set differential phase to the univariate function of time
-const MEAL::Scalar* SignalPath::get_diff_phase () const
-{
-  return diff_phase;
+  for (unsigned i=0; i < backends.size(); i++)
+    backends[i]->update_reference_epoch ();
 }
 
 //! Add a step to the gain variations
 void SignalPath::add_gain_step (const MJD& mjd)
 {
-  if (!gain)
-    set_gain( new Steps );
-
-  add_step (gain, mjd);
+  add_step (mjd);
+  set_free (0, mjd);
 }
 
 //! Add a step to the differential gain variations
 void SignalPath::add_diff_gain_step (const MJD& mjd)
 {
-  if (!diff_gain)
-    set_diff_gain( new Steps );
-
-  add_step (diff_gain, mjd);
+  add_step (mjd);
+  set_free (1, mjd);
 }
 
 //! Add a step to the differential phase variations
 void SignalPath::add_diff_phase_step (const MJD& mjd)
 {
-  if (!diff_phase)
-    set_diff_phase( new Steps );
-
-  add_step (diff_phase, mjd);
+  add_step (mjd);
+  set_free (2, mjd);
 }
 
-void SignalPath::add_step (Scalar* function, const MJD& mjd)
+void SignalPath::add_step (const MJD& mjd)
 {
-  Steps* steps = dynamic_cast<Steps*> (function);
-  if (!steps)
-    throw Error (InvalidState, "SignalPath::add_step",
-		 "function is not a Steps");
-
-  MJD zero;
-  if (convert.get_reference_epoch() == zero)
-    convert.set_reference_epoch ( mjd );
-
-  time.set_value (mjd);
-  double step = convert.get_value();
-
-  steps->add_step (step);
-}
-
-void SignalPath::offset_steps (Scalar* function, double offset)
-{
-  Steps* steps = dynamic_cast<Steps*> (function);
-  if (!steps)
-    return;
-
-#ifdef _DEBUG
-  cerr << "SignalPath::offset_steps offset=" << offset << " ";
-#endif
-  for (unsigned i=0; i < steps->get_nstep(); i++)
+  if (backends.size() == 0)
   {
-    steps->set_step( i, steps->get_step(i) + offset );
-#ifdef _DEBUG
-    cerr << i << "=" << steps->get_step(i) << " ";
-#endif
+    backends.resize (2);
+    backends[0] = new VariableBackendEstimate (backend_estimate);
+    backends[1] = new VariableBackendEstimate;
+
+    backends[0]->set_end_time (mjd);
+    backends[1]->set_start_time (mjd);
+
+    backend_estimate = 0;
+    return;
   }
-#ifdef _DEBUG
-  cerr << endl;
-#endif
+
+  unsigned in_at = 0;
+  
+  while (in_at < backends.size() - 1)
+  {
+    if (mjd == backends[in_at]->get_end_time())
+      // already inserted
+      return;
+
+    else if (mjd < backends[in_at]->get_end_time())
+      break;
+  }
+
+  VariableBackendEstimate* middle = new VariableBackendEstimate;
+  middle->set_start_time (mjd);
+  
+  // the element that will precede the new one to be inserted
+  VariableBackendEstimate* before = backends[in_at];
+  before->set_end_time (mjd);
+
+  // move the insertion point to follow before
+  in_at ++;
+
+  if (in_at < backends.size())
+  {
+    // the element that will follow the new one to be inserted
+    VariableBackendEstimate* after = backends[in_at];
+    middle->set_end_time( after->get_start_time() );
+  }
+
+  backends.insert (backends.begin()+in_at, middle);  
 }
 
 void SignalPath::add_observation_epoch (const MJD& epoch)
@@ -738,47 +615,8 @@ void SignalPath::add_observation_epoch (const MJD& epoch)
   if (max_epoch == zero || epoch > max_epoch) 
     max_epoch = epoch;
 
-  MJD half_minute (0.0, 30.0, 0.0);
-  time.set_value (min_epoch - half_minute);
-
-  double min_step = convert.get_value();
-
-  if (gain)
-    set_min_step( gain, min_step );
-  
-  if (diff_gain)
-    set_min_step( diff_gain, min_step );
-  
-  if (diff_phase)
-    set_min_step( diff_phase, min_step );
-}
-
-void SignalPath::set_min_step (Scalar* function, double step)
-{
-  Steps* steps = dynamic_cast<Steps*> (function);
-  if (!steps)
-    return;
-
-  if (!steps->get_nstep())
-  {
-#ifdef _DEBUG
-    cerr << "SignalPath::set_min_step add step[0]="
-         << step << endl;
-#endif
-    steps->add_step( step );
-  }
- 
-  else if (step < steps->get_step(0))
-  {
-#ifdef _DEBUG
-    cerr << "SignalPath::set_min_step set step[0]="
-         << step << endl;
-#endif
-    if (step_after_cal)
-      steps->add_step( step);
-    else
-      steps->set_step( 0, step );
-  }
+  for (unsigned i=0; i < backends.size(); i++)
+    backends[i]->add_observation_epoch (epoch);
 }
 
 void SignalPath::add_calibrator_epoch (const MJD& epoch)
@@ -799,10 +637,10 @@ void SignalPath::add_calibrator_epoch (const MJD& epoch)
     add_polncal_backend();
   }
 
-#ifdef _DEBUG
-  cerr << "SignalPath::add_calibrator_epoch epoch="
-       << epoch << endl;
-#endif
+  // Might need to do something about adding steps here
+}
+
+#if 0
 
   MJD half_minute (0.0, 30.0, 0.0);
 
@@ -821,17 +659,8 @@ void SignalPath::add_calibrator_epoch (const MJD& epoch)
     add_step( diff_phase, convert.get_value() );
 }
 
-void SignalPath::add_step (Scalar* function, double step)
-{
-  Steps* steps = dynamic_cast<Steps*> (function);
-  if (steps)
-  {
-#ifdef _DEBUG
-    cerr << "SignalPath::add_step step=" << step << endl;
 #endif
-    steps->add_step (step);
-  }
-}
+
 
 void SignalPath::set_step_after_cal (bool _after)
 {
@@ -843,26 +672,7 @@ void SignalPath::set_refcal_through_frontend (bool flag)
   refcal_through_frontend = flag;
 }
 
-void SignalPath::fix_last_step (Scalar* function)
-{
-  Steps* steps = dynamic_cast<Steps*> (function);
-  if (steps && step_after_cal) 
-  {
-    int nstep = steps->get_nstep();
-    if (nstep > 0)
-    {
-      time.set_value ( max_epoch );
 
-      if (convert.get_value() < steps->get_step(nstep-1))
-      {
-#ifdef _DEBUG
-        cerr << "fix_last_step: removing step " << nstep-1 << endl;
-#endif
-        steps->remove_step(nstep-1);
-      }
-    }
-  }
-}
 
 void SignalPath::engage_time_variations () try
 {
@@ -875,54 +685,8 @@ void SignalPath::engage_time_variations () try
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
     response_chain->set_constraint( ptr->first, ptr->second );
 
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    return;
-
-#ifdef _DEBUG
-  cerr << "before engage nparam = " << physical->get_nparam() << endl;
-#endif
-
-  if (gain) 
-  {
-#ifdef _DEBUG
-    cerr << "engage constant_pulsar_gain=" << constant_pulsar_gain << endl;
-#endif
-
-    if (!constant_pulsar_gain)
-      physical->set_gain( gain );
-    else if (pcal_gain_chain)
-      pcal_gain_chain->set_constraint (0, gain);
-
-  }
-
-  if (pcal_gain)
-  {
-#ifdef _DEBUG
-    cerr << "engage fix physical gain = 1" << endl;
-#endif
-    physical->set_gain( 1.0 );
-  }
-
-  if (diff_gain)
-  {
-#ifdef _DEBUG
-    cerr << "engage diff_gain" << endl;
-#endif
-    physical->set_diff_gain( diff_gain );
-  }
-
-  if (diff_phase)
-  {
-#ifdef _DEBUG
-    cerr << "engage diff_phase" << endl;
-#endif
-    physical->set_diff_phase( diff_phase );
-  }
-
-#ifdef _DEBUG
-  cerr << "after engage nparam = " << physical->get_nparam() << endl;
-#endif
+  for (unsigned i=0; i < backends.size(); i++)
+    backends[i]->engage_time_variations ();
 }
 catch (Error& error)
 {
@@ -952,58 +716,8 @@ try
     response->set_Estimate( ptr->first, ptr->second->estimate() );
   }
 
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    return;
-
-#ifdef _DEBUG
-  cerr << "before disengage nparam = " << physical->get_nparam() << endl;
-#endif
-
-  if (gain)
-  {
-#ifdef _DEBUG
-    cerr << "disengage gain" << endl;
-#endif
-
-    if (!constant_pulsar_gain)
-    {
-      physical->set_gain( zero );
-      physical->set_gain( gain->estimate() );
-    }
-    else if (pcal_gain_chain)
-    {
-      pcal_gain_chain->set_constraint( 0, zero );
-      pcal_gain->set_gain( gain->estimate() );
-    }
-
-  }
-
-  if (pcal_gain)
-    physical->set_gain( pcal_gain->get_gain() );
-
-  if (diff_gain)
-  {
-#ifdef _DEBUG
-    cerr << "disengage diff_gain value=" << diff_gain->estimate() << endl;
-#endif
-    physical->set_diff_gain( zero );
-    physical->set_diff_gain( diff_gain->estimate() );
-  }
-
-  if (diff_phase)
-  {
-#ifdef _DEBUG
-    cerr << "disengage diff_phase value=" << diff_phase->estimate() << endl;
-#endif
-    physical->set_diff_phase( zero );
-    physical->set_diff_phase( diff_phase->estimate() );
-  }
-
-#ifdef _DEBUG
-  cerr << "after disengage nparam = " << physical->get_nparam() << endl;
-#endif
-
+  for (unsigned i=0; i < backends.size(); i++)
+    backends[i]->disengage_time_variations ();
 }
 catch (Error& error)
 {
@@ -1031,7 +745,7 @@ catch (Error& error)
 }
 
 
-void SignalPath::compute_covariance
+void compute_covariance
 ( unsigned index, vector< vector<double> >& covar,
   vector<unsigned>& function_imap, MEAL::Scalar* function )
 {
@@ -1084,29 +798,9 @@ void SignalPath::get_covariance( vector<double>& covar,
   vector< unsigned > imap;
   MEAL::get_imap( get_equation(), xform, imap );
 
-  vector< unsigned > gain_imap;
-  if (gain)
-  {
-    MEAL::get_imap( get_equation(), gain, gain_imap );
-    set_difference (imap, gain_imap);
-  }
-  else if (pcal_gain)
-    MEAL::get_imap( get_equation(), pcal_gain, gain_imap );
-
-  vector< unsigned > diff_gain_imap;
-  if (diff_gain)
-  {
-    MEAL::get_imap( get_equation(), diff_gain, diff_gain_imap );
-    set_difference (imap, diff_gain_imap);
-  }
-
-  vector< unsigned > diff_phase_imap;
-  if (diff_phase)
-  {
-    MEAL::get_imap( get_equation(), diff_phase, diff_phase_imap );
-    set_difference (imap, diff_phase_imap);
-  }
-
+  for (unsigned i=0; i < backends.size(); i++)
+    backends[i]->unmap_variations (imap, get_equation());
+  
   std::map< unsigned, vector< unsigned > > variation_imap;
 
   std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
@@ -1134,17 +828,9 @@ void SignalPath::get_covariance( vector<double>& covar,
 
   assert (xform->get_nparam() == imap.size());
 
-  if (gain)
-    compute_covariance( imap[0], Ctotal, gain_imap, gain );
-  else if (pcal_gain)
-    imap[0] = gain_imap[0];
-
-  if (diff_gain)
-    compute_covariance( imap[1], Ctotal, diff_gain_imap, diff_gain );
-
-  if (diff_phase)
-    compute_covariance( imap[2], Ctotal, diff_phase_imap, diff_phase );
-
+  // TO DO: find a fiducial
+  backends[0]->compute_covariance (imap, Ctotal);
+ 
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
     compute_covariance( imap[ptr->first], Ctotal, variation_imap[ptr->first], ptr->second );
 

@@ -192,7 +192,7 @@ namespace Pulsar
 				    const Calibration::SourceObservation&);
 
     void integrate_calibrator_solution (Signal::Source source,
-					unsigned ichan,
+					unsigned ichan, const MJD&,
 					const MEAL::Complex2*);
 
     //! Handle any integrated flux calibrator data

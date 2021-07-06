@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/BackendEstimate.h"
+#include "Pulsar/MeanSingleAxis.h"
+#include "Pulsar/MeanPolar.h"
 #include "Pulsar/SingleAxis.h"
 #include "MEAL/Polar.h"
 
@@ -13,33 +15,78 @@ using namespace std;
 
 static bool verbose = false;
 
-void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
+//! Set the response that contains the backend
+void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
 {
-  const MEAL::Polar* polar_solution;
-  polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
+  backend = 0;
+  mean = 0;
+  
+  Calibration::SingleAxis* single_axis;
+  single_axis = dynamic_cast<Calibration::SingleAxis*>( xform );
+
+  if (single_axis)
+  {
+    if (verbose)
+      cerr << "BackendEstimate::set_response SingleAxis" << endl;
+
+    backend = single_axis;
+    mean = new MeanSingleAxis;
+    return;
+  }
+  
+  MEAL::Polar* polar_solution;
+  polar_solution = dynamic_cast<MEAL::Polar*>( xform );
 
   if (polar_solution)
   {
     if (verbose)
-      cerr << "BackendEstimate::integrate Polar" << endl;
-    
-    polar_estimate.integrate( polar_solution );
+      cerr << "BackendEstimate::set_response Polar" << endl;
+
+    backend = polar_solution;
+    mean = new MeanPolar;
+
     return;
   }
 
-  const Calibration::SingleAxis* sa;
-  sa = dynamic_cast<const Calibration::SingleAxis*>( xform );
-
-  if (sa)
+  // search for recognized backend component
+  
+  MEAL::ProductRule<MEAL::Complex2>* product;
+  product = dynamic_cast<MEAL::ProductRule<MEAL::Complex2>*>( xform );
+  if (product)
   {
     if (verbose)
-      cerr << "BackendEstimate::integrate SingleAxis" << endl;
+      cerr << "BackendEstimate::set_response ProductRule" << endl;
     
-    estimate.integrate( sa );
-
-    return;
+    for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
+    {
+      set_response( product->get_model(imodel) );
+      if (backend)
+	break;
+    }
   }
 
+  if (!backend)
+    throw Error (InvalidParam, "BackendEstimate::set_response"
+		 "unrecognized transformation");
+}
+
+void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
+{
+  try {
+
+    mean->integrate (xform);
+    return;
+    
+  }
+  catch (Error& error)
+    {
+      if (verbose)
+	cerr << "BackendEstimate::integrate Mean::integrate failed: "
+	     << error.get_message() << endl;
+    }
+
+  // search for recognized backend component
+  
   const MEAL::ProductRule<MEAL::Complex2>* product;
   product = dynamic_cast<const MEAL::ProductRule<MEAL::Complex2>*>( xform );
   if (product)
@@ -48,25 +95,51 @@ void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
       cerr << "BackendEstimate::integrate ProductRule" << endl;
     
     for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
-      integrate( product->get_model(imodel) );
+    {
+      try {
 
-    return;
+	mean->integrate ( product->get_model(imodel) );
+	return;
+    
+      }
+      catch (Error& error)
+      {
+	if (verbose)
+	  cerr << "BackendEstimate::integrate Mean::integrate"
+	    " ProductRule[" << imodel << " failed: "
+	       << error.get_message() << endl;
+      }
+    }
   }
+
+  throw Error (InvalidParam, "BackendEstimate::integrate"
+	       "unrecognized transformation");
+
 }
 
 void Calibration::BackendEstimate::update ()
 {
-  SingleAxis* single = dynamic_cast<SingleAxis*>( backend.get() );
-  if (single)
-  {
-    estimate.update (single);
-    return;
-  }
-
-  MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( backend.get() );
-  if (polar)
-  {
-    polar_estimate.update (polar);
-    return;
-  }
+  mean->update (backend);
 }
+
+bool Calibration::BackendEstimate::spans (const MJD& epoch)
+{
+  cerr << "BackendEstimate::spans epoch=" << epoch
+       << " start=" << start_time
+       << " end=" << end_time << endl;
+  
+  return epoch > start_time && epoch < end_time;
+}
+
+//! update min_time and max_time
+void Calibration::BackendEstimate::add_observation_epoch (const MJD& epoch)
+{
+  MJD zero;
+
+  if (min_time == zero || epoch < min_time) 
+    min_time = epoch;
+
+  if (max_time == zero || epoch > max_time) 
+    max_time = epoch;
+}
+

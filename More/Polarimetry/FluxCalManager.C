@@ -94,8 +94,9 @@ void Calibration::FluxCalManager::add_backend (FluxCalObservation* obs)
 
   if (backend)
   {
-    obs->backend->backend = backend->clone();
-    fcal_path->add_model( obs->backend->backend );
+    MEAL::Complex2* clone = backend->clone(); 
+    obs->backend->set_response (clone);
+    fcal_path->add_model (clone);
   }
 
   fcal_path->add_model ( frontend );
@@ -236,11 +237,7 @@ void FluxCalManager::integrate (Signal::Source type,
 		 "Calibration::FluxCalManager::integrate",
 		 "no flux calibration backend added to signal path");
 
-  const Calibration::SingleAxis* single
-    = dynamic_cast<const Calibration::SingleAxis*> (xform);
-
-  if (single)
-    observations.back()->backend->estimate.integrate (single);
+  observations.back()->backend->integrate (xform);
 }
 
 void FluxCalManager::integrate (const Jones< Estimate<double> >& correct,

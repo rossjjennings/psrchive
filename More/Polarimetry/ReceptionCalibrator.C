@@ -564,7 +564,7 @@ void ReceptionCalibrator::integrate_calibrator_data
 void ReceptionCalibrator::integrate_calibrator_solution
 (
  Signal::Source source,
- unsigned ichan,
+ unsigned ichan, const MJD& epoch,
  const MEAL::Complex2* xform
 )
 {
@@ -574,7 +574,8 @@ void ReceptionCalibrator::integrate_calibrator_solution
       fluxcal[ichan]->integrate (source, xform);
   }
   else
-    SystemCalibrator::integrate_calibrator_solution (source, ichan, xform);
+    SystemCalibrator::integrate_calibrator_solution (source, ichan,
+						     epoch, xform);
 }
 
 
