@@ -1374,15 +1374,23 @@ int actual_main (int argc, char *argv[]) try
   }
 
   if (model->has_valid())
+  {
+    cerr << "pcm: unload model" << endl;
     unloader.unload (model);
+  }
 
   if (print_variation && get_time_variation())
+  {
+    cerr << "pcm: print variation" << endl;
     print_time_variation (model);
+  }
 
 #if HAVE_PGPLOT
 
   if (plot_result) try
   {
+    cerr << "pcm: plot result" << endl;
+
     plot_state (model, "result");
 
     if (get_time_variation())

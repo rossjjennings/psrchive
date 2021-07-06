@@ -21,19 +21,30 @@ static bool verbose = false;
 
 VariableBackendEstimate::VariableBackendEstimate (const BackendEstimate*)
 {
+  psr_response = new MEAL::ProductRule<MEAL::Complex2>;
+  cal_response = new MEAL::ProductRule<MEAL::Complex2>;
+    
   variable_backend = new VariableBackend;
-  BackendEstimate::set_response (variable_backend);
+  set_response (variable_backend);
 }
 
 //! Set the response that contains the backend
 void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
 {
-  VariableBackend* vb = dynamic_cast<VariableBackend*>( xform );
+  VariableBackend* vb = MEAL::extract<VariableBackend>( xform );
   if (!vb)
     throw Error (InvalidParam, "VariableBackendEstimate::set_response",
-		 "xform is not a VariableBackend");
+		 "xform=" + xform->get_name() +
+		 " does not contain a VariableBackend");
 
   variable_backend = vb;
+
+  psr_response->clear();
+  psr_response->add_model (xform);
+
+  cal_response->clear();
+  cal_response->add_model (xform);
+  
   BackendEstimate::set_response (vb->get_backend());
 }
 
@@ -82,6 +93,12 @@ void VariableBackendEstimate::set_diff_phase (Univariate<Scalar>* function)
   diff_phase = function;
 }
 
+void VariableBackendEstimate::update_reference_epoch ()
+{
+  cerr << "WARNING VariableBackendEstimate::update_reference_epoch"
+    " not implemented" << endl;
+}
+
 bool decrement_nfree (MEAL::Scalar* function)
 {
   MEAL::Polynomial* poly = dynamic_cast<MEAL::Polynomial*> (function);
@@ -111,33 +128,53 @@ bool VariableBackendEstimate::reduce_nfree ()
   return reduced;
 }
 
-void VariableBackendEstimate::set_constant_pulsar_gain (bool flag)
+void VariableBackendEstimate::set_psr_constant_gain (bool flag)
 {
   if ( flag )
   {
-    if (!pcal_gain)
-      pcal_gain = new VariableGain;
-
+    if (!cal_gain)
+    {
+      cal_gain = new VariableGain;
+      cal_response->add_model (cal_gain);
+    }
+    
     if (gain)
-      pcal_gain->set_gain_variation (gain);
+      cal_gain->set_gain_variation (gain);
 
-    pcal_gain->set_gain ( variable_backend->get_gain() );
+    cal_gain->set_gain ( variable_backend->get_gain() );
     variable_backend->set_gain_variation (0);
     variable_backend->set_gain (1.0);
     variable_backend->set_infit (0, false);
   }
   else
   {
-    if (pcal_gain)
+    if (cal_gain)
     {
-      variable_backend->set_gain ( pcal_gain->get_gain() );
-      delete pcal_gain;
+      variable_backend->set_gain ( cal_gain->get_gain() );
+      cal_response->remove_model (cal_gain);
+      cal_gain = 0;
     }
     
-    pcal_gain = 0;
-
     if (gain)
       variable_backend->set_gain_variation (gain);
+  }
+}
+
+void VariableBackendEstimate::set_cal_backend_only (bool flag)
+{
+  if (flag)
+  {
+    cal_response->clear ();
+    if (cal_gain)
+      cal_response->add_model (cal_gain);
+    cal_response->add_model (variable_backend);
+  }
+  else
+  {
+    cal_response->clear ();
+    if (cal_gain)
+      cal_response->add_model (cal_gain);
+    cal_response->add_model (psr_response);
   }
 }
 
@@ -153,13 +190,13 @@ void VariableBackendEstimate::engage_time_variations () try
     cerr << "engage constant_pulsar_gain=" << constant_pulsar_gain << endl;
 #endif
 
-    if (!pcal_gain)
-      pcal_gain->set_gain_variation( gain );
+    if (!cal_gain)
+      cal_gain->set_gain_variation( gain );
     else
       variable_backend->set_gain_variation( gain );
   }
 
-  if (pcal_gain)
+  if (cal_gain)
   {
 #ifdef _DEBUG
     cerr << "engage fix variable_backend gain = 1" << endl;
@@ -204,10 +241,10 @@ void VariableBackendEstimate::disengage_time_variations () try
     cerr << "disengage gain" << endl;
 #endif
 
-    if (pcal_gain)
+    if (cal_gain)
     {
-      pcal_gain->set_gain_variation (0);
-      pcal_gain->set_gain( gain->estimate() );
+      cal_gain->set_gain_variation (0);
+      cal_gain->set_gain( gain->estimate() );
     }
     else
     {
@@ -216,8 +253,8 @@ void VariableBackendEstimate::disengage_time_variations () try
     }
   }
 
-  if (pcal_gain)
-    variable_backend->set_gain( pcal_gain->get_gain() );
+  if (cal_gain)
+    variable_backend->set_gain( cal_gain->get_gain() );
 
   if (diff_gain)
   {
@@ -255,8 +292,8 @@ void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap,
     MEAL::get_imap( composite, gain, gain_imap );
     set_difference (imap, gain_imap);
   }
-  else if (pcal_gain)
-    MEAL::get_imap( composite, pcal_gain, gain_imap );
+  else if (cal_gain)
+    MEAL::get_imap( composite, cal_gain, gain_imap );
 
   if (diff_gain)
   {
@@ -277,7 +314,7 @@ void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap,
 {
   if (gain)
     MEAL::covariance( gain, imap[0], gain_imap, C );
-  else if (pcal_gain)
+  else if (cal_gain)
     imap[0] = gain_imap[0];
 
   if (diff_gain)

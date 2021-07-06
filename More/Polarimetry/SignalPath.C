@@ -29,7 +29,7 @@
 
 using namespace std;
 using namespace MEAL;
-using Calibration::SignalPath;
+using namespace Calibration;
 
 // #define _DEBUG 1
 
@@ -132,44 +132,12 @@ void SignalPath::set_constant_pulsar_gain (bool value)
 {
   constant_pulsar_gain = value;
 
-  if (!constant_pulsar_gain)
-    return;
-
-  if (!built)
-    return;
-
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    return;
-
-  Scalar* function 
-    = const_cast<Scalar*>( physical->get_backend()->get_gain_variation() );
-
-  if (function)
-  {
-    if (verbose)
-      cerr << "SignalPath::set_constant_pulsar_gain"
-	" disabling gain variation" << endl;
-      
-    if (pcal_gain)
-    {
-      if (verbose)
-	cerr << "SignalPath::set_constant_pulsar_gain"
-	  " transfer to pcal gain" << endl;
-      pcal_gain_chain->set_constraint (0, function);
-    }
-
-    function = 0;
-    physical->get_backend()->set_gain_variation (function);
-  }
-
-  physical->get_backend()->set_gain (1.0);
-  physical->set_infit (0, false);
+  for (unsigned i=0; i<backends.size(); i++)
+    backends[i]->set_psr_constant_gain (value);
 }
 
 //! Get the measurement equation solver
-Calibration::ReceptionModel*
-SignalPath::get_equation ()
+Calibration::ReceptionModel* SignalPath::get_equation ()
 {
   if (!built)
     build ();
@@ -285,6 +253,11 @@ void SignalPath::build () try
 
   // new MEAL::EvaluationTracer<MEAL::Complex2>( known );
 
+  //! Estimate of the backend component of response
+  backends.resize(1);
+  backends[0] = new_backend ();
+  backends[0] -> set_response (instrument);
+
   // ////////////////////////////////////////////////////////////////////
   //
   // initialize the signal path seen by the pulsar
@@ -292,8 +265,8 @@ void SignalPath::build () try
 
   pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
 
-  *pulsar_path *= instrument;
-  *pulsar_path *= sky;
+  pulsar_path -> add_model( backends[0]->get_psr_response() );
+  pulsar_path -> add_model( sky );
 
   if (!equation)
   {
@@ -313,15 +286,21 @@ void SignalPath::build () try
   if (solver)
     equation->set_solver( solver );
 
-  //! Estimate of the backend component of response
-  backend_estimate = new BackendEstimate;
-  backend_estimate -> set_response (response);
-
   built = true;
 }
 catch (Error& error)
 {
   error += "SignalPath::build";
+}
+
+VariableBackendEstimate* SignalPath::new_backend ()
+{
+  VariableBackendEstimate* backend = new VariableBackendEstimate;
+  
+  backend -> set_psr_constant_gain (constant_pulsar_gain);
+  backend -> set_cal_backend_only (!refcal_through_frontend);
+
+  return backend;
 }
 
 void SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
@@ -337,34 +316,12 @@ void SignalPath::add_polncal_backend ()
   Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
   pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
 
-  if (constant_pulsar_gain)
-  {
-    if (!pcal_gain)
-    {
-      pcal_gain = new MEAL::Gain<MEAL::Complex2>;
-      pcal_gain_chain = new MEAL::ChainRule<MEAL::Complex2>;
-      pcal_gain_chain->set_model( pcal_gain );
-    }
-    pcal_path->add_model( pcal_gain_chain );
-  }
+  pcal_path->add_model( backends[0]->get_cal_response() );
 
   if (foreach_pcal && ReferenceCalibrator_path)
   {
     Reference::To< MEAL::Complex2 > clone = foreach_pcal->clone();
     pcal_path->add_model( clone );
-  }
-
-  if (refcal_through_frontend)
-    pcal_path->add_model( instrument );
-  else
-  {
-    BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-    if (!physical)
-      throw Error (InvalidState, "SignalPath::add_polncal_backend",
-		   "invalid parameterization; "
-		   "cannot couple reference source after backend");
-
-    pcal_path->add_model( physical->get_backend() );
   }
   
   add_transformation ( pcal_path );
@@ -389,24 +346,9 @@ void SignalPath::update () try
 {
   if (!built)
     return;
-
-  if (backend_estimate)
-    backend_estimate->update();
   
   for (unsigned i=0; i<backends.size(); i++)
     backends[i]->update ();
-
-  if (pcal_gain)
-  {
-    BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-    if (!physical)
-      return;
-
-    Calibration::SingleAxis* backend = physical->get_backend()->get_backend();
-
-    pcal_gain->set_gain( backend->get_gain() );
-    backend->set_gain( 1.0 );
-  }
 }
 catch (Error& error)
 {
@@ -520,9 +462,6 @@ SignalPath::copy_transformation (const MEAL::Complex2* xform)
 void SignalPath::integrate_calibrator (const MJD& epoch,
 				       const MEAL::Complex2* xform) try
 {
-  if (backend_estimate)
-    backend_estimate->integrate (xform);
-
   for (unsigned i=0; i<backends.size(); i++)
     if ( backends[i]->spans (epoch) )
     {
@@ -571,18 +510,17 @@ void SignalPath::add_diff_phase_step (const MJD& mjd)
 void SignalPath::add_step (const MJD& mjd)
 {
   if (backends.size() == 0)
+    throw Error (InvalidState, "SignalPath::add_step",
+		 "cannot add step when there are no other backends");
+
+  if (backends.size() == 1)
   {
-    backends.resize (2);
-    backends[0] = new VariableBackendEstimate (backend_estimate);
-    backends[1] = new VariableBackendEstimate;
-
-    backends[0]->set_end_time (mjd);
-    backends[1]->set_start_time (mjd);
-
-    backend_estimate = 0;
-    return;
+    // decouple the original backend from the instrument ...
+    backends[0]->set_response (new VariableBackend);
+    // ... then multiply by the instrument
+    backends[0]->get_psr_response()->add_model (instrument);
   }
-
+  
   unsigned in_at = 0;
   
   while (in_at < backends.size() - 1)
@@ -595,9 +533,10 @@ void SignalPath::add_step (const MJD& mjd)
       break;
   }
 
-  VariableBackendEstimate* middle = new VariableBackendEstimate;
+  VariableBackendEstimate* middle = new_backend ();
   middle->set_start_time (mjd);
-  
+  middle->get_psr_response()->add_model (instrument);
+
   // the element that will precede the new one to be inserted
   VariableBackendEstimate* before = backends[in_at];
   before->set_end_time (mjd);
@@ -680,6 +619,10 @@ void SignalPath::set_step_after_cal (bool _after)
 void SignalPath::set_refcal_through_frontend (bool flag)
 {
   refcal_through_frontend = flag;
+
+  for (unsigned i=0; i<backends.size(); i++)
+    backends[i]->set_cal_backend_only (!flag);
+
 }
 
 

@@ -57,6 +57,9 @@ namespace MEAL {
 
     //! Get the number of components
     unsigned get_nmodel () const { return model.size(); }
+
+    //! Clear all models
+    void clear ();
     
     // ///////////////////////////////////////////////////////////////////
     //
@@ -202,6 +205,13 @@ void MEAL::GroupRule<T>::remove_model (T* x)
     }
 
   throw Error (InvalidState, class_name() + "remove_model", "model not found");
+}
+
+template<class T>
+void MEAL::GroupRule<T>::clear ()
+{
+  composite.clear();
+  model.clear();
 }
 
 template<class T>

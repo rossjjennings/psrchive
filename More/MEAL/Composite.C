@@ -19,12 +19,24 @@ MEAL::Composite::Composite (Function* context)
   : ParameterPolicy (context)
 {
   new ArgumentPolicyAdapter<Composite> (context, this);
+  init ();
+}
 
+void MEAL::Composite::init ()
+{
   nparameters = 0;
   current_model = 0;
   current_index = 0;
   remap_needed = false;
   disable_callbacks = false;
+  component_shares_this = false;
+}
+
+void MEAL::Composite::clear ()
+{
+  maps.clear();
+  models.clear();
+  init ();
 }
 
 //! Return the number of parameters

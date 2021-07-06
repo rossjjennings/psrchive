@@ -11,7 +11,6 @@
 #include "Pulsar/SingleAxis.h"
 
 #include "MEAL/Polar.h"
-#include "MEAL/ChainRule.h"
 
 using namespace std;
 
@@ -24,7 +23,7 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
   mean = 0;
   
   Calibration::SingleAxis* single_axis;
-  single_axis = dynamic_cast<Calibration::SingleAxis*>( xform );
+  single_axis = MEAL::extract<Calibration::SingleAxis>( xform );
 
   if (single_axis)
   {
@@ -37,7 +36,7 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
   }
   
   MEAL::Polar* polar_solution;
-  polar_solution = dynamic_cast<MEAL::Polar*>( xform );
+  polar_solution = MEAL::extract<MEAL::Polar>( xform );
 
   if (polar_solution)
   {
@@ -46,37 +45,7 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
 
     backend = polar_solution;
     mean = new MeanPolar;
-
     return;
-  }
-
-  // search for recognized backend component
-
-  MEAL::ChainRule<MEAL::Complex2>* chain;
-  chain = dynamic_cast<MEAL::ChainRule<MEAL::Complex2>*>( xform );
-  if (chain)
-  {
-    if (verbose)
-      cerr << "BackendEstimate::set_response ChainRule" << endl;
-
-    set_response( chain->get_model () );
-    if (backend)
-      return;
-  }
-  
-  MEAL::ProductRule<MEAL::Complex2>* product;
-  product = dynamic_cast<MEAL::ProductRule<MEAL::Complex2>*>( xform );
-  if (product)
-  {
-    if (verbose)
-      cerr << "BackendEstimate::set_response ProductRule" << endl;
-    
-    for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
-    {
-      set_response( product->get_model(imodel) );
-      if (backend)
-	return;
-    }
   }
 
   if (!backend)

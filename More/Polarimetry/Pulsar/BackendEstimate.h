@@ -104,6 +104,40 @@ namespace Calibration
     void add_observation_epoch (const MJD& epoch);
 
   };
+
+}
+
+#include "MEAL/ChainRule.h"
+#include "MEAL/ProductRule.h"
+
+namespace MEAL
+{
+  template<class Type, class Base>
+  Type* extract (Base* base)
+  {
+    Type* type = dynamic_cast<Type*>( base );
+    if (type)
+      return type;
+      
+    MEAL::ChainRule<Base>* chain;
+    chain = dynamic_cast<MEAL::ChainRule<Base>*>( base );
+    if (chain)
+      return extract<Type> ( chain->get_model() );
+  
+    MEAL::ProductRule<Base>* product;
+    product = dynamic_cast<MEAL::ProductRule<Base>*>( base );
+    if (product)
+    {
+      for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
+      {
+	Type* type = extract<Type> ( product->get_model(imodel) );
+	if (type)
+	  return type;
+      }
+    }
+
+    return 0;
+  }
 }
 
 #endif

@@ -230,16 +230,6 @@ namespace Calibration
     /*! The axis class is used to set this constant for each observation */
     MEAL::Axis< Jones<double> > projection;
 
-    //! The instrumental response experienced by the calibrator
-
-    /*! When the gain component of the response must be held constant for
-      the pulsar observations (e.g. because all observations have been
-      normalized by the invariant interval) it is necessary to include
-      an additional free parameter for the calibrator observations. */
-
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > pcal_gain_chain;
-    Reference::To< MEAL::Gain<MEAL::Complex2> > pcal_gain;
-
     //! ChainRule used to model response parameter variations
     Reference::To< MEAL::ChainRule<MEAL::Complex2> > response_chain;
 
@@ -250,13 +240,13 @@ namespace Calibration
     //! Used to convert MJD to double
     Calibration::ConvertMJD convert;
 
-    //! Estimate of the backend component of response
-    Reference::To<BackendEstimate> backend_estimate;
-    
     //! The set of instrumental backend transformations for each epoch
     /*! This is the new way to handle jumps in the instrumental response
       that apply to both calibrator and pulsar observations. */
     std::vector< Reference::To< VariableBackendEstimate > > backends;
+
+    //! Return a newly constructed and initialized backend
+    VariableBackendEstimate* new_backend ();
 
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_pcal;
@@ -265,11 +255,8 @@ namespace Calibration
     //! The signal path experienced by the pulsar
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
 
-
     //! The Mueller transformation
     Reference::To< MEAL::Real4 > impurity;
-
-
 
     void integrate_parameter (MEAL::Scalar* function, double value);
 
