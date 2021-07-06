@@ -754,8 +754,7 @@ catch (Error& error)
        << error.get_message() << endl;
 }
 
-void SignalPath::get_covariance( vector<double>& covar,
-					      const MJD& epoch )
+void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch )
 {
   vector< vector<double> > Ctotal;
   get_equation()->get_solver()->get_covariance (Ctotal);
@@ -802,7 +801,8 @@ void SignalPath::get_covariance( vector<double>& covar,
   assert (xform->get_nparam() == imap.size());
 
   // TO DO: find a fiducial
-  backends[0]->compute_covariance (imap, Ctotal);
+  if (backends.size())
+    backends[0]->compute_covariance (imap, Ctotal);
  
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
     compute_covariance( imap[ptr->first], Ctotal, variation_imap[ptr->first], ptr->second );
