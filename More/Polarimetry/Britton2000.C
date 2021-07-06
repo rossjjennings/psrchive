@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Britton2000.h"
+#include "Pulsar/SingleAxis.h"
 
 #include "MEAL/Boost1.h"
 #include "MEAL/Rotation1.h"
@@ -147,6 +148,6 @@ const MEAL::Complex2* Calibration::Britton2000::get_frontend () const
 
 void Calibration::Britton2000::set_cyclic (bool flag)
 {
-  BackendFeed::set_cyclic (flag);
+  get_backend()->set_cyclic (flag);
   cerr << "Calibration::Britton2000::set_cyclic" << endl;
 }

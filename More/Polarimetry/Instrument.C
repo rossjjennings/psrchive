@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Instrument.h"
+#include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 
 #include "Pauli.h"
@@ -164,7 +165,7 @@ void Calibration::Instrument::independent_orientations ()
 
 void Calibration::Instrument::set_cyclic (bool flag)
 {
-  BackendFeed::set_cyclic (flag);
+  get_backend()->set_cyclic (flag);
   feed->set_cyclic (flag);
 }
 
