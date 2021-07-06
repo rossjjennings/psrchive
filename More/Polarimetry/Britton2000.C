@@ -64,7 +64,7 @@ class Calibration::Britton2000::Feed
 void Calibration::Britton2000::init (bool iso)
 {
   isolate_degeneracy = iso;
-  add_model( feed = new Feed(isolate_degeneracy) );
+  set_frontend( feed = new Feed(isolate_degeneracy) );
 }
 
 Calibration::Britton2000::Britton2000 (bool iso)
@@ -141,13 +141,3 @@ bool Calibration::Britton2000::get_constant_orientation () const
   return !feed->get_infit (3);
 }
 
-const MEAL::Complex2* Calibration::Britton2000::get_frontend () const
-{
-  return feed;
-}
-
-void Calibration::Britton2000::set_cyclic (bool flag)
-{
-  get_backend()->set_cyclic (flag);
-  cerr << "Calibration::Britton2000::set_cyclic" << endl;
-}

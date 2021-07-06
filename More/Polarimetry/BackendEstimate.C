@@ -9,7 +9,9 @@
 #include "Pulsar/MeanSingleAxis.h"
 #include "Pulsar/MeanPolar.h"
 #include "Pulsar/SingleAxis.h"
+
 #include "MEAL/Polar.h"
+#include "MEAL/ChainRule.h"
 
 using namespace std;
 
@@ -49,6 +51,18 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
   }
 
   // search for recognized backend component
+
+  MEAL::ChainRule<MEAL::Complex2>* chain;
+  chain = dynamic_cast<MEAL::ChainRule<MEAL::Complex2>*>( xform );
+  if (chain)
+  {
+    if (verbose)
+      cerr << "BackendEstimate::set_response ChainRule" << endl;
+
+    set_response( chain->get_model () );
+    if (backend)
+      return;
+  }
   
   MEAL::ProductRule<MEAL::Complex2>* product;
   product = dynamic_cast<MEAL::ProductRule<MEAL::Complex2>*>( xform );
@@ -61,13 +75,13 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
     {
       set_response( product->get_model(imodel) );
       if (backend)
-	break;
+	return;
     }
   }
 
   if (!backend)
-    throw Error (InvalidParam, "BackendEstimate::set_response"
-		 "unrecognized transformation");
+    throw Error (InvalidParam, "BackendEstimate::set_response",
+		 "unrecognized xform=" + xform->get_name());
 }
 
 void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)

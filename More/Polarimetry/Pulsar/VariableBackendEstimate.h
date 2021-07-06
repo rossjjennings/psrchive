@@ -14,6 +14,7 @@
 
 #include "Pulsar/BackendEstimate.h"
 #include "Pulsar/VariableBackend.h"
+#include "Pulsar/VariableGain.h"
 #include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/Scalar.h"
@@ -28,6 +29,7 @@ namespace Calibration
   class VariableBackendEstimate : public BackendEstimate
   {
     Reference::To<VariableBackend> variable_backend;
+    Reference::To<VariableGain> pcal_gain;
     
     //! The backend variation transformations
     Reference::To< MEAL::Scalar > gain;
@@ -50,6 +52,9 @@ namespace Calibration
 
     //! Set the response that contains the backend
     void set_response (MEAL::Complex2* xform);
+
+    //! Set true when the pulsar Stokes parameters have been normalized
+    void set_constant_pulsar_gain (bool = true);
 
     void set_gain (MEAL::Univariate<MEAL::Scalar>*);
     void set_diff_gain (MEAL::Univariate<MEAL::Scalar>*);

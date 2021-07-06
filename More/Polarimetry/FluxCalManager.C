@@ -17,12 +17,12 @@ using Calibration::FluxCalManager;
 
 // #define _DEBUG 1
 
-Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
+Calibration::FluxCalManager::FluxCalManager (SignalPath* path) try
 {
   multiple_source_states = false;
   subtract_off_from_on = false;
   StokesV_may_vary = false;
-  
+
   MEAL::Complex2* response = path->get_transformation();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
@@ -49,6 +49,10 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 
   if (path->has_basis())
     frontend->add_model( path->get_basis() );
+}
+catch (Error& error)
+{
+  throw error += "FluxCalManager (SignalPath*)";
 }
 
 bool Calibration::FluxCalManager::is_constrained () const

@@ -17,10 +17,7 @@ using namespace Calibration;
 void VariableBackend::init ()
 {
   backend = new SingleAxis;
-  backend_chain = new MEAL::ChainRule<MEAL::Complex2>;
-  backend_chain->set_model( backend );
-
-  add_model( backend_chain );
+  set_model( backend );
 }
 
 VariableBackend::VariableBackend ()
@@ -54,6 +51,13 @@ string VariableBackend::get_name () const
 {
   return "VariableBackend";
 }
+
+//! Set cyclical bounds on the differential phase
+void VariableBackend::set_cyclic (bool flag)
+{
+   backend->set_cyclic (flag);
+}
+
 
 //! Get the instrumental gain, \f$ G \f$, in calibrator flux units
 Estimate<double> VariableBackend::get_gain () const
@@ -123,24 +127,24 @@ const SingleAxis* VariableBackend::get_backend () const
 }
 
 //! Set the instrumental gain variation
-void VariableBackend::set_gain (MEAL::Scalar* function)
+void VariableBackend::set_gain_variation (MEAL::Scalar* function)
 {
   gain_variation = function;
-  backend_chain->set_constraint (0, function);
+  set_constraint (0, function);
 }
 
 //! Set the differential gain variation
-void VariableBackend::set_diff_gain (MEAL::Scalar* function)
+void VariableBackend::set_diff_gain_variation (MEAL::Scalar* function)
 {
   diff_gain_variation = function;
-  backend_chain->set_constraint (1, function);
+  set_constraint (1, function);
 }
 
 //! Set the differential phase variation
-void VariableBackend::set_diff_phase (MEAL::Scalar* function)
+void VariableBackend::set_diff_phase_variation (MEAL::Scalar* function)
 {
   diff_phase_variation = function;
-  backend_chain->set_constraint (2, function);
+  set_constraint (2, function);
 }
 
 //! Set the instrumental gain variation

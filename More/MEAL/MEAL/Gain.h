@@ -12,6 +12,7 @@
 #define __MEAL_Gain_H
 
 #include "MEAL/OneParameter.h"
+#include "MEAL/Function.h"
 
 namespace MEAL
 {

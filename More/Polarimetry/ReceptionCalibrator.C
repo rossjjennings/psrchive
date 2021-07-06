@@ -241,12 +241,21 @@ void ReceptionCalibrator::load_calibrators ()
 
   SystemCalibrator::load_calibrators ();
 
+  cerr << "Pulsar::ReceptionCalibrator::load_calibrators "
+    "SystemCalibrator::load_calibrators returns" << endl;
+
   if (!fluxcal.size())
     return;
 
   const unsigned nchan = get_nchan();
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
+    if (!fluxcal.at(ichan))
+    {
+      cerr << "no fluxcal ichan=" << ichan << endl;
+      continue;
+    }
+    
     if (fluxcal.at(ichan)->is_constrained())
       continue;
 
@@ -255,7 +264,8 @@ void ReceptionCalibrator::load_calibrators ()
 
     std::string why = fluxcal.at(ichan)->why_not_constrained();
 
-    cerr << "ichan=" << ichan << " flux calibrator not constrained: " << why << endl;
+    cerr << "ichan=" << ichan << " flux calibrator not constrained: "
+	 << why << endl;
 
     model[ichan]->set_valid (false, why.c_str());
   }
@@ -407,12 +417,23 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
 
   const unsigned nchan = get_nchan();
 
+  if (model.size() != nchan)
+    throw Error (InvalidState,
+		 "ReceptionCalibrator::prepare_calibrator_estimate",
+		 "model.size()=%u != nchan=%u", model.size(), nchan);
+  
   if (fluxcal.size() == 0)
   {
     fluxcal.resize( nchan );
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
+      if (!model[ichan])
+	{
+	  cerr << "no model ichan=" << ichan;
+	  continue;
+	}
+      
       if (!model[ichan]->get_valid())
 	continue;
 
@@ -426,6 +447,8 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
   fluxcal_observation_added.resize( nchan );
   for (unsigned ichan=0; ichan<nchan; ichan++)
     fluxcal_observation_added[ichan] = false;
+
+  cerr << "Pulsar::ReceptionCalibrator::prepare_calibrator_estimate return" << endl;
 }
 
 void ReceptionCalibrator::setup_calibrators ()
@@ -507,6 +530,10 @@ bool ReceptionCalibrator::has_fluxcal () const
 const Calibration::FluxCalManager*
 ReceptionCalibrator::get_fluxcal (unsigned ichan) const
 {
+  if (!fluxcal.at(ichan))
+    throw Error (InvalidState, "ReceptionCalibrator::get_fluxcal",
+		 "fluxcal[%u] is null", ichan);
+  
   return fluxcal.at(ichan);
 }
 

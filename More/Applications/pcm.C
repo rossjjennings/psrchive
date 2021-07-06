@@ -31,6 +31,7 @@
 
 #include "MEAL/Depolarizer.h"
 #include "MEAL/Steps.h"
+#include "MEAL/Polynomial.h"
 
 #include "Pulsar/Interpreter.h"
 

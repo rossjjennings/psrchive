@@ -20,7 +20,7 @@ void Calibration::Instrument::init ()
   feed_chain = new MEAL::ChainRule<MEAL::Complex2>;
   feed_chain->set_model( feed );
 
-  add_model( feed_chain );
+  set_frontend( feed_chain );
 
 #ifdef _DEBUG
   for (unsigned i=0; i<get_nparam(); i++)
@@ -165,7 +165,7 @@ void Calibration::Instrument::independent_orientations ()
 
 void Calibration::Instrument::set_cyclic (bool flag)
 {
-  get_backend()->set_cyclic (flag);
+  BackendFeed::set_cyclic (flag);
   feed->set_cyclic (flag);
 }
 
@@ -184,7 +184,3 @@ const Calibration::Feed* Calibration::Instrument::get_feed () const
   return feed;
 }
 
-const MEAL::Complex2* Calibration::Instrument::get_frontend () const
-{
-  return feed;
-}

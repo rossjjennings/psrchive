@@ -21,6 +21,8 @@
 #include "MEAL/Value.h"
 #include "MEAL/JonesMueller.h"
 
+#include "templates.h"
+
 #include <iostream>
 #include <algorithm>
 #include <assert.h>
@@ -141,7 +143,7 @@ void SignalPath::set_constant_pulsar_gain (bool value)
     return;
 
   Scalar* function 
-    = const_cast<Scalar*>( physical->get_gain_variation() );
+    = const_cast<Scalar*>( physical->get_backend()->get_gain_variation() );
 
   if (function)
   {
@@ -158,10 +160,10 @@ void SignalPath::set_constant_pulsar_gain (bool value)
     }
 
     function = 0;
-    physical->set_gain (function);
+    physical->get_backend()->set_gain_variation (function);
   }
 
-  physical->set_gain (1.0);
+  physical->get_backend()->set_gain (1.0);
   physical->set_infit (0, false);
 }
 
@@ -243,7 +245,7 @@ void SignalPath::add_transformation (MEAL::Complex2* xform)
   equation->add_transformation( combination );
 }
 
-void SignalPath::build ()
+void SignalPath::build () try
 {
   if (built)
     return;
@@ -316,6 +318,10 @@ void SignalPath::build ()
   backend_estimate -> set_response (response);
 
   built = true;
+}
+catch (Error& error)
+{
+  error += "SignalPath::build";
 }
 
 void SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
@@ -396,7 +402,7 @@ void SignalPath::update () try
     if (!physical)
       return;
 
-    Calibration::SingleAxis* backend = physical->get_backend();
+    Calibration::SingleAxis* backend = physical->get_backend()->get_backend();
 
     pcal_gain->set_gain( backend->get_gain() );
     backend->set_gain( 1.0 );
@@ -512,7 +518,7 @@ SignalPath::copy_transformation (const MEAL::Complex2* xform)
 }
 
 void SignalPath::integrate_calibrator (const MJD& epoch,
-				       const MEAL::Complex2* xform)
+				       const MEAL::Complex2* xform) try
 {
   if (backend_estimate)
     backend_estimate->integrate (xform);
@@ -523,6 +529,10 @@ void SignalPath::integrate_calibrator (const MJD& epoch,
       backends[i]->integrate (xform);
       break;
     }
+}
+catch (Error& error)
+{
+  throw error += "SignalPath::integrate_calibrator";
 }
 
 void SignalPath::set_reference_epoch (const MJD& epoch)
@@ -744,43 +754,6 @@ catch (Error& error)
        << error.get_message() << endl;
 }
 
-
-void compute_covariance
-( unsigned index, vector< vector<double> >& covar,
-  vector<unsigned>& function_imap, MEAL::Scalar* function )
-{
-  vector<double> gradient;
-  function->evaluate( &gradient );
-  unsigned nparam = function->get_nparam();
-
-  for (unsigned i=0; i<covar.size(); i++)
-  {
-    assert( covar[index][i] == 0.0 );
-
-    if (i == index) {
-      covar[i][i] = function->estimate().get_variance();
-      continue;
-    }
-
-    double covariance = 0;
-    for (unsigned iparam=0; iparam < nparam; iparam++)
-      covariance += gradient[iparam] * covar[ function_imap[iparam] ][i];
-
-    covar[index][i] = covar[i][index] = covariance;
-  }
-}
-
-// set B to the set-theoretic difference of B and A
-// also known as the relative complement of A in B
-template<typename C1, typename C2>
-void set_difference (C1& B, const C2& A)
-{
-  typename C1::iterator newlast = B.end();
-  for (typename C2::const_iterator it=A.begin(); it != A.end(); it++)
-    newlast = std::remove (B.begin(), newlast, *it);
-  B.erase (newlast, B.end());
-}
-
 void SignalPath::get_covariance( vector<double>& covar,
 					      const MJD& epoch )
 {
@@ -807,7 +780,7 @@ void SignalPath::get_covariance( vector<double>& covar,
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
   {
     MEAL::get_imap( get_equation(), ptr->second, variation_imap[ptr->first] );
-    set_difference (imap, variation_imap[ptr->first]);
+    ::set_difference (imap, variation_imap[ptr->first]);
   }
 
   /*
@@ -820,7 +793,7 @@ void SignalPath::get_covariance( vector<double>& covar,
   if (van04 && van04->has_equal_ellipticities())
   {
     MEAL::get_imap( get_equation(), van04->get_ellipticities(), ell_imap );
-    set_difference (imap, ell_imap);
+    ::set_difference (imap, ell_imap);
     van04->independent_ellipticities();
   }
 

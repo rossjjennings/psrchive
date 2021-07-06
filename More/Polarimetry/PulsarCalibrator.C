@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -20,6 +20,7 @@
 
 #include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/Instrument.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 #include "Pulsar/MeanInstrument.h"
@@ -469,7 +470,7 @@ Functor< bool(Calibration::ReceptionModel*) >
 gimbal_lock( Calibration::Instrument* instrument, unsigned receptor )
 {
   Calibration::Feed* feed = instrument->get_feed();
-  Calibration::SingleAxis* backend = instrument->get_backend();
+  Calibration::SingleAxis* backend = instrument->get_backend()->get_backend();
 
   interface* condition = new interface;
   condition->set_yaw  ( feed->get_orientation_transformation( receptor ) );

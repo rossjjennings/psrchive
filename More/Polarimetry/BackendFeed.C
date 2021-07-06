@@ -6,11 +6,61 @@
  ***************************************************************************/
 
 #include "Pulsar/BackendFeed.h"
+#include "Pulsar/VariableBackend.h"
 
 using namespace std;
+using namespace Calibration;
 
-MEAL::Complex2* Calibration::BackendFeed::get_frontend ()
+void BackendFeed::init ()
 {
-  const BackendFeed* thiz = this;
-  return const_cast<MEAL::Complex2*>( thiz->get_frontend() );
+  backend = new VariableBackend;
+  add_model( backend );
+}
+
+void BackendFeed::set_frontend (MEAL::Complex2* xform)
+{
+  frontend = xform;
+  add_model( frontend );
+}
+
+BackendFeed::BackendFeed ()
+{
+  init ();
+}
+
+BackendFeed::BackendFeed (const BackendFeed& s)
+{
+  init ();
+  operator = (s);
+}
+
+//! Equality Operator
+const BackendFeed& BackendFeed::operator = (const BackendFeed& s)
+{
+  if (&s != this)
+    *backend = *(s.backend);
+  return *this;
+}
+
+BackendFeed::~BackendFeed ()
+{
+  if (verbose)
+    cerr << "BackendFeed::dtor" << endl;
+}
+
+void BackendFeed::set_cyclic (bool flag)
+{
+  backend->set_cyclic (flag);
+  cerr << "BackendFeed::set_cyclic" << endl;
+}
+
+//! Provide access to the backend model
+const VariableBackend* BackendFeed::get_backend () const
+{
+  return backend;
+}
+
+VariableBackend* BackendFeed::get_backend ()
+{
+  return backend;
 }

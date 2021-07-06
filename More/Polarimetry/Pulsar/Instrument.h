@@ -13,6 +13,9 @@
 
 #include "Pulsar/BackendFeed.h"
 
+#include "MEAL/ScalarParameter.h"
+#include "MEAL/ChainRule.h"
+
 namespace Calibration {
 
   class Feed;
@@ -61,8 +64,6 @@ namespace Calibration {
     //! Fix the orientation of the frontend
     void set_constant_orientation (bool);
     
-    const MEAL::Complex2* get_frontend () const;
-
     //! Get the orientation, \f$\theta\f$, of the specified receptor in radians
     Estimate<double> get_orientation (unsigned ireceptor) const;
 

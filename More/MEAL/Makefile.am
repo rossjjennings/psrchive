@@ -141,6 +141,7 @@ libMEAL_la_SOURCES = \
         Boost.C \
 	Boost1.C \
 	BoostUnion.C \
+	ChainRule.C \
         Coherency.C \
 	Complex.C \
 	ComplexCartesian.C \

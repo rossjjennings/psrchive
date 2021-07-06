@@ -52,9 +52,6 @@ namespace Calibration {
     //! Model the orientations of both receptors using the same value
     void equal_orientations ();
 
-    //! Set cyclical limits on the model parameters
-    void set_cyclic (bool);
-
     //! Fix the orientation of the frontend
     void set_constant_orientation (bool);
     bool get_constant_orientation () const;

@@ -11,7 +11,6 @@
 #ifndef __CalibrationVariableBackend_H
 #define __CalibrationVariableBackend_H
 
-#include "MEAL/ProductRule.h"
 #include "MEAL/ChainRule.h"
 #include "MEAL/Complex2.h"
 #include "MEAL/ScalarParameter.h"
@@ -22,14 +21,13 @@
 namespace Calibration {
 
   class SingleAxis;
-  class Feed;
 
   //! Physical parameterization of the instrumental response
 
   /*! Abstract base class of instrumental response parameterizations
    that separate the backend and frontend transformations. */
 
-  class VariableBackend : public MEAL::ProductRule<MEAL::Complex2>
+  class VariableBackend : public MEAL::ChainRule<MEAL::Complex2>
   {
 
   public:
@@ -45,6 +43,9 @@ namespace Calibration {
 
     //! Destructor
     ~VariableBackend ();
+
+    //! Set cyclical bounds on the differential phase
+    void set_cyclic (bool flag = true);
 
     //! Get the instrumental gain, \f$ G \f$, in calibrator flux units
     Estimate<double> get_gain () const;
@@ -69,13 +70,13 @@ namespace Calibration {
     SingleAxis* get_backend ();
 
     //! Set the instrumental gain variation
-    void set_gain (MEAL::Scalar*);
+    void set_gain_variation (MEAL::Scalar*);
 
     //! Set the differential gain variation
-    void set_diff_gain (MEAL::Scalar*);
+    void set_diff_gain_variation (MEAL::Scalar*);
     
     //! Set the differential phase variation
-    void set_diff_phase (MEAL::Scalar*);
+    void set_diff_phase_variation (MEAL::Scalar*);
 
     //! Get the instrumental gain variation
     const MEAL::Scalar* get_gain_variation () const;
@@ -99,9 +100,6 @@ namespace Calibration {
 
     //! SingleAxis model: \f$G\f$, \f$\gamma\f$, and \f$\varphi\f$
     Reference::To<SingleAxis> backend;
-
-    //! ChainRule used to model Backend parameter variations
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > backend_chain;
 
     //! Scalar function used to model gain variation
     Reference::To<MEAL::Scalar> gain_variation;

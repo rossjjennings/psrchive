@@ -1,10 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/MeanInstrument.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/Instrument.h"
 
 void Calibration::MeanInstrument::update (MEAL::Complex2* model) const
@@ -14,7 +16,7 @@ void Calibration::MeanInstrument::update (MEAL::Complex2* model) const
     throw Error (InvalidParam, "Calibration::MeanInstrument::update",
 		 "Complex2 model is not a Instrument");
 
-  single_axis.update (instrument->get_backend());
+  single_axis.update (instrument->get_backend()->get_backend());
   feed.update (instrument->get_feed());
 }
 
@@ -25,7 +27,7 @@ void Calibration::MeanInstrument::integrate (const MEAL::Complex2* model)
     throw Error (InvalidParam, "Calibration::MeanInstrument::update",
 		 "Complex2 model is not a Instrument");
 
-  single_axis.integrate (instrument->get_backend());
+  single_axis.integrate (instrument->get_backend()->get_backend());
   feed.integrate (instrument->get_feed());
 }
 

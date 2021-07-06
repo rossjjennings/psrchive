@@ -7,8 +7,11 @@
 
 #include "Pulsar/VariableBackendEstimate.h"
 #include "Pulsar/SingleAxis.h"
+
 #include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"
+
+#include "templates.h"
 
 using namespace std;
 using namespace MEAL;
@@ -20,6 +23,18 @@ VariableBackendEstimate::VariableBackendEstimate (const BackendEstimate*)
 {
   variable_backend = new VariableBackend;
   BackendEstimate::set_response (variable_backend);
+}
+
+//! Set the response that contains the backend
+void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
+{
+  VariableBackend* vb = dynamic_cast<VariableBackend*>( xform );
+  if (!vb)
+    throw Error (InvalidParam, "VariableBackendEstimate::set_response",
+		 "xform is not a VariableBackend");
+
+  variable_backend = vb;
+  BackendEstimate::set_response (vb->get_backend());
 }
 
 void VariableBackendEstimate::update ()
@@ -48,21 +63,21 @@ void VariableBackendEstimate::update (MEAL::Scalar* function,
 
 void VariableBackendEstimate::set_gain (Univariate<Scalar>* function)
 {
-  variable_backend->set_gain( function );
+  variable_backend->set_gain_variation( function );
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   gain = function;
 }
 
 void VariableBackendEstimate::set_diff_gain (Univariate<Scalar>* function)
 {
-  variable_backend -> set_diff_gain( function );
+  variable_backend -> set_diff_gain_variation( function );
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   diff_gain = function;
 }
 
 void VariableBackendEstimate::set_diff_phase (Univariate<Scalar>* function)
 {
-  variable_backend -> set_diff_phase( function );
+  variable_backend -> set_diff_phase_variation( function );
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   diff_phase = function;
 }
@@ -96,6 +111,36 @@ bool VariableBackendEstimate::reduce_nfree ()
   return reduced;
 }
 
+void VariableBackendEstimate::set_constant_pulsar_gain (bool flag)
+{
+  if ( flag )
+  {
+    if (!pcal_gain)
+      pcal_gain = new VariableGain;
+
+    if (gain)
+      pcal_gain->set_gain_variation (gain);
+
+    pcal_gain->set_gain ( variable_backend->get_gain() );
+    variable_backend->set_gain_variation (0);
+    variable_backend->set_gain (1.0);
+    variable_backend->set_infit (0, false);
+  }
+  else
+  {
+    if (pcal_gain)
+    {
+      variable_backend->set_gain ( pcal_gain->get_gain() );
+      delete pcal_gain;
+    }
+    
+    pcal_gain = 0;
+
+    if (gain)
+      variable_backend->set_gain_variation (gain);
+  }
+}
+
 void VariableBackendEstimate::engage_time_variations () try
 {
 #ifdef _DEBUG
@@ -108,11 +153,10 @@ void VariableBackendEstimate::engage_time_variations () try
     cerr << "engage constant_pulsar_gain=" << constant_pulsar_gain << endl;
 #endif
 
-    if (!constant_pulsar_gain)
-      variable_backend->set_gain( gain );
-    else if (pcal_gain_chain)
-      pcal_gain_chain->set_constraint (0, gain);
-
+    if (!pcal_gain)
+      pcal_gain->set_gain_variation( gain );
+    else
+      variable_backend->set_gain_variation( gain );
   }
 
   if (pcal_gain)
@@ -128,7 +172,7 @@ void VariableBackendEstimate::engage_time_variations () try
 #ifdef _DEBUG
     cerr << "engage diff_gain" << endl;
 #endif
-    variable_backend->set_diff_gain( diff_gain );
+    variable_backend->set_diff_gain_variation( diff_gain );
   }
 
   if (diff_phase)
@@ -136,7 +180,7 @@ void VariableBackendEstimate::engage_time_variations () try
 #ifdef _DEBUG
     cerr << "engage diff_phase" << endl;
 #endif
-    variable_backend->set_diff_phase( diff_phase );
+    variable_backend->set_diff_phase_variation( diff_phase );
   }
 
 #ifdef _DEBUG
@@ -145,38 +189,13 @@ void VariableBackendEstimate::engage_time_variations () try
 }
 catch (Error& error)
 {
-  throw error += "SignalPath::engage_time_variations";
+  throw error += "VariableBackendEstimate::engage_time_variations";
 }
 
-void SignalPath::disengage_time_variations (const MJD& epoch) 
-try
+void VariableBackendEstimate::disengage_time_variations () try
 {
 #ifdef _DEBUG
-  cerr << "DISENGAGE epoch=" << epoch.printdays(16) << endl;
-#endif
-
-  if (!time_variations_engaged)
-    return;
-
-  time_variations_engaged = false;
-
-  time.set_value (epoch);
-
-  Univariate<Scalar>* zero = 0;
-
-  std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
-  for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
-  {
-    response_chain->set_constraint( ptr->first, zero );
-    response->set_Estimate( ptr->first, ptr->second->estimate() );
-  }
-
-  BackendFeed* variable_backend = dynamic_cast<BackendFeed*>( response.get() );
-  if (!variable_backend)
-    return;
-
-#ifdef _DEBUG
-  cerr << "before disengage nparam = " << variable_backend->get_nparam() << endl;
+  cerr << "before disengage nparam=" << variable_backend->get_nparam() << endl;
 #endif
 
   if (gain)
@@ -185,17 +204,16 @@ try
     cerr << "disengage gain" << endl;
 #endif
 
-    if (!constant_pulsar_gain)
+    if (pcal_gain)
     {
-      variable_backend->set_gain( zero );
-      variable_backend->set_gain( gain->estimate() );
-    }
-    else if (pcal_gain_chain)
-    {
-      pcal_gain_chain->set_constraint( 0, zero );
+      pcal_gain->set_gain_variation (0);
       pcal_gain->set_gain( gain->estimate() );
     }
-
+    else
+    {
+      variable_backend->set_gain_variation (0);
+      variable_backend->set_gain( gain->estimate() );
+    }
   }
 
   if (pcal_gain)
@@ -206,7 +224,7 @@ try
 #ifdef _DEBUG
     cerr << "disengage diff_gain value=" << diff_gain->estimate() << endl;
 #endif
-    variable_backend->set_diff_gain( zero );
+    variable_backend->set_diff_gain_variation (0);
     variable_backend->set_diff_gain( diff_gain->estimate() );
   }
 
@@ -215,7 +233,7 @@ try
 #ifdef _DEBUG
     cerr << "disengage diff_phase value=" << diff_phase->estimate() << endl;
 #endif
-    variable_backend->set_diff_phase( zero );
+    variable_backend->set_diff_phase_variation (0);
     variable_backend->set_diff_phase( diff_phase->estimate() );
   }
 
@@ -226,44 +244,45 @@ try
 }
 catch (Error& error)
 {
-  throw error += "SignalPath::disengage_time_variations";
+  throw error += "VariableBackendEstimate::disengage_time_variations";
 }
 
-void unmap_variations (vector<unsigned>& imap, MEAL::Complex2* composite)
+void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap,
+						MEAL::Complex2* composite)
 {
-
   if (gain)
   {
-    MEAL::get_imap( get_equation(), gain, gain_imap );
+    MEAL::get_imap( composite, gain, gain_imap );
     set_difference (imap, gain_imap);
   }
   else if (pcal_gain)
-    MEAL::get_imap( get_equation(), pcal_gain, gain_imap );
+    MEAL::get_imap( composite, pcal_gain, gain_imap );
 
- 
   if (diff_gain)
   {
-    MEAL::get_imap( get_equation(), diff_gain, diff_gain_imap );
+    MEAL::get_imap( composite, diff_gain, diff_gain_imap );
     set_difference (imap, diff_gain_imap);
   }
 
-
   if (diff_phase)
   {
-    MEAL::get_imap( get_equation(), diff_phase, diff_phase_imap );
+    MEAL::get_imap( composite, diff_phase, diff_phase_imap );
     set_difference (imap, diff_phase_imap);
   }
+}
 
 
-   void compute_covariance (vector<unsigned>& imap,  vector< vector<double> >& Ctotal)
-
+void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap,
+						  vector< vector<double> >& C)
+{
   if (gain)
-    compute_covariance( imap[0], Ctotal, gain_imap, gain );
+    MEAL::covariance( gain, imap[0], gain_imap, C );
   else if (pcal_gain)
     imap[0] = gain_imap[0];
 
   if (diff_gain)
-    compute_covariance( imap[1], Ctotal, diff_gain_imap, diff_gain );
+    MEAL::covariance( diff_gain, imap[1], diff_gain_imap, C );
 
   if (diff_phase)
-    compute_covariance( imap[2], Ctotal, diff_phase_imap, diff_phase );
+    MEAL::covariance( diff_phase, imap[2], diff_phase_imap, C );
+}
