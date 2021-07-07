@@ -21,9 +21,9 @@ using namespace Calibration;
 
 VariableBackendEstimate::VariableBackendEstimate (const BackendEstimate*)
 {
-  psr_response = new MEAL::ProductRule<MEAL::Complex2>;
-  cal_response = new MEAL::ProductRule<MEAL::Complex2>;
-    
+  psr_response = new IndexedProduct;
+  cal_response = new IndexedProduct;
+  
   variable_backend = new VariableBackend;
   set_response (variable_backend);
 }

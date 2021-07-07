@@ -12,6 +12,8 @@
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/VariableProjectionCorrection.h"
 
+#include "Pulsar/VariableBackendEstimate.h"
+
 #include "Pulsar/Faraday.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
 
@@ -506,9 +508,18 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
     // projection transformation
     Argument::Value* xform = model[mchan]->get_projection().new_Value( known );
+
+    VariableBackendEstimate* backend = model[mchan]->get_backend (epoch);
+    IndexedProduct* product = backend->get_psr_response ();
+
+    if (!product->has_index())
+    {
+      cerr << "SystemCalibrator call add_psr_path" << endl;
+      model[mchan]->add_psr_path (backend);
+    }
     
     // pulsar signal path
-    unsigned path = model[mchan]->get_pulsar_path();
+    unsigned path = product->get_index ();
     
     // measurement set
     Calibration::CoherencyMeasurementSet measurements (path);
@@ -1002,8 +1013,17 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
     epoch_added[data.ichan] = true;
   }
 
-  measurements.set_transformation_index
-    ( model[data.ichan]->get_polncal_path() );
+  VariableBackendEstimate* backend;
+  backend = model[data.ichan]->get_backend (data.epoch);
+  IndexedProduct* product = backend->get_cal_response ();
+  
+  if (!product->has_index())
+  {
+    cerr << "SystemCalibrator call add_psr_path" << endl;
+    model[data.ichan]->add_cal_path (backend);
+  }
+    
+  measurements.set_transformation_index( product->get_index() );
 
   DEBUG("SystemCalibrator::submit_calibrator_data ichan=" << data.ichan);
 
@@ -1807,24 +1827,23 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
 					      unsigned isubint, unsigned ichan)
 {
   const Integration* integration = data->get_Integration (isubint);
-  ReceptionModel* equation = model[ichan]->get_equation();
+  MJD epoch = integration->get_epoch();
+  VariableBackendEstimate* backend = model[ichan]->get_backend (epoch);
 
-  MEAL::Transformation<Complex2>* signal_path = 0;
-
+  IndexedProduct* product = 0;
+  
   switch ( data->get_type() )
   {
   case Signal::Pulsar:
     if (verbose > 2)
       cerr << "SystemCalibrator::get_transformation Pulsar" << endl;
-    equation->set_transformation_index (model[ichan]->get_pulsar_path());
-    signal_path = equation->get_transformation ();
+    product = backend->get_psr_response ();
     break;
 
   case Signal::PolnCal:
     if (verbose > 2)
       cerr << "SystemCalibrator::get_transformation PolnCal" << endl;
-    equation->set_transformation_index (model[ichan]->get_polncal_path());
-    signal_path = equation->get_transformation ();
+    product = backend->get_cal_response ();
     break;
 
   default:
@@ -1832,7 +1851,12 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
 		 "unknown Archive type for " + data->get_filename() );
     
   }
-
+  
+  ReceptionModel* equation = model[ichan]->get_equation();
+  equation->set_transformation_index (product->get_index ());	
+  MEAL::Transformation<Complex2>* signal_path = 0;
+  signal_path = equation->get_transformation ();
+    
   MEAL::CongruenceTransformation* congruence = 0;
   if (signal_path)
     congruence = dynamic_cast<MEAL::CongruenceTransformation*>(signal_path);

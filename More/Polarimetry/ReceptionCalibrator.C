@@ -382,7 +382,7 @@ ReceptionCalibrator::add_data
     Jones< Estimate<double> > correct;
 
     model[ichan]->get_equation()->set_transformation_index
-      (model[ichan]->get_pulsar_path());
+      (model[ichan]->get_psr_path_index());
 
     correct = inv( model[ichan]->get_pulsar_transformation()->evaluate() );
 

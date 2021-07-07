@@ -24,17 +24,29 @@
 
 namespace Calibration
 {
+  class IndexedProduct : public MEAL::ProductRule<MEAL::Complex2>
+  {
+    int index;
+
+  public:
+    IndexedProduct () { index = -1; }
+
+    bool has_index () const { return index >= 0; }
+    void set_index (unsigned _index) { index = _index; }
+    unsigned get_index () const { return index; }    
+  };
+  
   //! Manages a variable backend and its best estimate
   class VariableBackendEstimate : public BackendEstimate
   {
-    typedef MEAL::ProductRule<MEAL::Complex2> Product;
+
     
     //! The response for pulsar observations
-    Reference::To< Product > psr_response;
-
+    Reference::To< IndexedProduct > psr_response;
+    
     //! The response for calibrator observations
-    Reference::To< Product > cal_response;
-
+    Reference::To< IndexedProduct > cal_response;
+    
     //! The VariableBackend component of the response
     Reference::To<VariableBackend> variable_backend;
 
@@ -65,10 +77,10 @@ namespace Calibration
     void set_response (MEAL::Complex2* xform);
 
     //! Get the response for pulsar observations
-    Product* get_psr_response () { return psr_response; }
+    IndexedProduct* get_psr_response () { return psr_response; }
 
     //! Get the response for calibrator observations
-    Product* get_cal_response () { return cal_response; }
+    IndexedProduct* get_cal_response () { return cal_response; }
 
     //! Get the backend component
     SingleAxis* get_backend () { return variable_backend->get_backend(); }

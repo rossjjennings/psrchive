@@ -139,18 +139,24 @@ namespace Calibration
     //! Solve the measurement equation
     void solve ();
 
-    //! Add a new signal path for the poln calibrator observations
-    void add_polncal_backend ();
+    //! Add a new signal path for pulsar observations
+    void add_psr_path (VariableBackendEstimate*);
+
+    //! Add a new signal path for poln calibrator observations
+    void add_cal_path (VariableBackendEstimate*);
 
     //! Fix the rotation about the line of sight
     void fix_orientation ();
 
     //! Get the index for the signal path experienced by the reference source
-    unsigned get_polncal_path () const { return ReferenceCalibrator_path; }
+    unsigned get_cal_path_index () const;
 
     //! Get the index for the signal path experienced by the pulsar
-    unsigned get_pulsar_path () const { return Pulsar_path; }
+    unsigned get_psr_path_index () const;
 
+    //! Get the backend that span the specified epoch
+    VariableBackendEstimate* get_backend (const MJD& epoch);
+    
     //! Integrate a calibrator solution
     void integrate_calibrator (const MJD& epoch,
 			       const MEAL::Complex2* xform);
@@ -229,7 +235,10 @@ namespace Calibration
     //! The instrumental response multiplied by the basis
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > instrument;
 
-    //! The known transformations from the sky to the receptors
+    //! The transformation from the celestial sphere to the receptors
+    Reference::To<MEAL::Complex2> celestial;
+
+    //! The known transformations from the celestial sphere to the receptors
     /*! The axis class is used to set this constant for each observation */
     MEAL::Axis< Jones<double> > projection;
 
@@ -259,9 +268,6 @@ namespace Calibration
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
-    //! The signal path experienced by the pulsar
-    Reference::To< MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
-
     //! The Mueller transformation
     Reference::To< MEAL::Real4 > impurity;
 
@@ -289,14 +295,6 @@ namespace Calibration
     bool constant_pulsar_gain;
     bool refcal_through_frontend;
     
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! The signal path of the ReferenceCalibrator source
-    unsigned ReferenceCalibrator_path;
-
-    //! The signal path of the Pulsar phase bin sources
-    unsigned Pulsar_path;
-
     MJD min_epoch, max_epoch;
 
   private:

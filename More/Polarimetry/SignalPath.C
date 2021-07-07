@@ -44,9 +44,6 @@ SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
 
   type = _type;
 
-  Pulsar_path = 0;
-  ReferenceCalibrator_path = 0;
-
   valid = true;
   built = false;
 
@@ -180,7 +177,8 @@ SignalPath::get_pulsar_transformation () const
   if (!built)
     const_build ();
 
-  return pulsar_path;
+  throw Error (InvalidState, "SignalPath::get_pulsar_transformation",
+	       "not implemented");
 }
 
 MEAL::Complex2*
@@ -231,6 +229,16 @@ void SignalPath::build () try
   if (built)
     return;
 
+  if (!equation)
+  {
+    if (verbose)
+      cerr << "SignalPath::build new ReceptionModel" << endl;
+    equation = new Calibration::ReceptionModel;
+  }
+
+  if (solver)
+    equation->set_solver( solver );
+  
   if (!response)
   {
     if (verbose)
@@ -258,48 +266,27 @@ void SignalPath::build () try
   if (constant_pulsar_gain)
     instrument->set_infit (0, false);
 
-  //
-  // the known transformation from the sky to the receptors
-  //
-  MEAL::Value<MEAL::Complex2>* sky = new MEAL::Value<MEAL::Complex2>;
-  projection.signal.connect (sky, &MEAL::Value<MEAL::Complex2>::set_value);
+  if (!celestial)
+  {
+    //
+    // use the known transformation from the sky to the receptors
+    //
+    MEAL::Value<MEAL::Complex2>* sky = new MEAL::Value<MEAL::Complex2>;
+    projection.signal.connect (sky, &MEAL::Value<MEAL::Complex2>::set_value);
 
-  // new MEAL::EvaluationTracer<MEAL::Complex2>( known );
+    celestial = sky;
+  }
+  
+  built = true;
+
+  // backends are added after things are built, start with the first one
 
   //! Estimate of the backend component of response
   backends.resize(1);
   backends[0] = new_backend ();
   backends[0] -> set_response (instrument);
 
-  // ////////////////////////////////////////////////////////////////////
-  //
-  // initialize the signal path seen by the pulsar
-  //
-
-  pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
-
-  pulsar_path -> add_model( backends[0]->get_psr_response() );
-  pulsar_path -> add_model( sky );
-
-  if (!equation)
-  {
-    if (verbose)
-      cerr << "SignalPath::build new ReceptionModel" << endl;
-    equation = new Calibration::ReceptionModel;
-  }
-
-  add_transformation ( pulsar_path );
-
-  Pulsar_path = equation->get_transformation_index ();
-
-  if (verbose)
-    cerr << "SignalPath::build pulsar path="
-	 << Pulsar_path << endl;
-
-  if (solver)
-    equation->set_solver( solver );
-
-  built = true;
+  add_psr_path (backends[0]);
 }
 catch (Error& error)
 {
@@ -327,6 +314,69 @@ VariableBackendEstimate* SignalPath::new_backend ()
   return backend;
 }
 
+void SignalPath::add_psr_path (VariableBackendEstimate* backend)
+{
+  if (!built)
+    build ();
+
+  //! Signal path experienced by pulsar signal
+  Reference::To< MEAL::ProductRule<MEAL::Complex2> > psr_path;
+  psr_path = new MEAL::ProductRule<MEAL::Complex2>;
+
+  IndexedProduct* product = backend->get_psr_response();
+  
+  psr_path -> add_model( product );
+  psr_path -> add_model( celestial );
+  
+  add_transformation ( psr_path );
+
+  product->set_index (equation->get_transformation_index ());
+
+  if (verbose)
+    cerr << "SignalPath::add_psr_path index="
+	 << product->get_index() << endl;
+}
+
+void SignalPath::add_cal_path (VariableBackendEstimate* backend)
+{
+  if (!built)
+    build ();
+
+  Reference::To< MEAL::ProductRule<MEAL::Complex2> > cal_path;
+  cal_path = new MEAL::ProductRule<MEAL::Complex2>;
+
+  IndexedProduct* product = backend->get_cal_response();
+    
+  if (foreach_pcal && product->has_index())
+  {
+    Reference::To< MEAL::Complex2 > clone = foreach_pcal->clone();
+    cal_path->add_model( clone );
+  }
+
+  cal_path->add_model( product );
+
+  add_transformation ( cal_path );
+  product->set_index (equation->get_transformation_index ());
+
+  if (verbose)
+    cerr << "SignalPath::add_cal_path index="
+	 << product->get_index() << endl;
+}
+
+//! Get the index for the signal path experienced by the reference source
+unsigned SignalPath::get_cal_path_index () const
+{
+  throw Error (InvalidState, "get_cal_path_index",
+	       "not implemented");
+}
+
+//! Get the index for the signal path experienced by the pulsar
+unsigned SignalPath::get_psr_path_index () const
+{
+  throw Error (InvalidState, "get_psr_path_index",
+	       "not implemented");
+}
+  
 void SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
 {
   foreach_pcal = x;
@@ -354,27 +404,6 @@ void SignalPath::set_diff_phase_variation (MEAL::Univariate<MEAL::Scalar>* func)
 
   for (unsigned i=0; i<backends.size(); i++)
     backends[i]->set_diff_phase_variation (func->clone());
-}
-
-
-void SignalPath::add_polncal_backend ()
-{
-  if (!built)
-    build ();
-
-  Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
-  pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
-
-  if (foreach_pcal && ReferenceCalibrator_path)
-  {
-    Reference::To< MEAL::Complex2 > clone = foreach_pcal->clone();
-    pcal_path->add_model( clone );
-  }
-
-  pcal_path->add_model( backends[0]->get_cal_response() );
-
-  add_transformation ( pcal_path );
-  ReferenceCalibrator_path = equation->get_transformation_index ();
 }
 
 void SignalPath::fix_orientation ()
@@ -512,15 +541,21 @@ SignalPath::copy_transformation (const MEAL::Complex2* xform)
   }
 }
 
-void SignalPath::integrate_calibrator (const MJD& epoch,
-				       const MEAL::Complex2* xform) try
+
+VariableBackendEstimate* SignalPath::get_backend (const MJD& epoch)
 {
   for (unsigned i=0; i<backends.size(); i++)
     if ( backends[i]->spans (epoch) )
-    {
-      backends[i]->integrate (xform);
-      break;
-    }
+      return backends[i];
+
+  throw Error (InvalidParam, "SignalPath::get_backend",
+	       "epoch=" + epoch.printdays(13) + " not spanned");
+}
+
+void SignalPath::integrate_calibrator (const MJD& epoch,
+				       const MEAL::Complex2* xform) try
+{
+  get_backend (epoch)->integrate (xform);
 }
 catch (Error& error)
 {
@@ -613,12 +648,7 @@ void SignalPath::set_free (unsigned iparam, const MJD& mjd)
   MJD use = mjd;
   use += 30; // seconds
 
-  for (unsigned i=0; i < backends.size(); i++)
-    if (backends[i]->spans (use))
-    {
-      backends[i]->get_backend()->set_infit (iparam, true);
-      return;
-    }
+  get_backend(use)->get_backend()->set_infit (iparam, true);
 }
 
 void SignalPath::add_observation_epoch (const MJD& epoch)
@@ -642,41 +672,20 @@ void SignalPath::add_calibrator_epoch (const MJD& epoch)
   if (convert.get_reference_epoch() == zero)
     convert.set_reference_epoch ( epoch );
 
+  VariableBackendEstimate* backend = get_backend (epoch);
+  IndexedProduct* product = backend->get_cal_response();
+  
   // it may be necessary to remove this signal path if
   // the add_data step fails and no other calibrator succeeds
-  if (!get_polncal_path() || foreach_pcal)
+  if (!product->has_index() || foreach_pcal)
   {
     if (verbose)
       cerr << "SignalPath::add_calibrator_epoch"
 	" add_polncal_backend" << endl;
 
-    add_polncal_backend();
+    add_cal_path (backend);
   }
-
-  // Might need to do something about adding steps here
 }
-
-#if 0
-
-  MJD half_minute (0.0, 30.0, 0.0);
-
-  if (step_after_cal)
-    time.set_value( epoch+half_minute );
-  else
-    time.set_value( epoch-half_minute );
-
-  if (gain)
-    add_step( gain, convert.get_value() );
-  
-  if (diff_gain)
-    add_step( diff_gain, convert.get_value() );
-  
-  if (diff_phase)
-    add_step( diff_phase, convert.get_value() );
-}
-
-#endif
-
 
 void SignalPath::set_step_after_cal (bool _after)
 {
@@ -690,8 +699,6 @@ void SignalPath::set_refcal_through_frontend (bool flag)
   for (unsigned i=0; i<backends.size(); i++)
     backends[i]->set_cal_backend_only (!flag);
 }
-
-
 
 void SignalPath::engage_time_variations () try
 {
