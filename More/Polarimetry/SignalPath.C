@@ -599,7 +599,9 @@ void SignalPath::add_diff_phase_step (const MJD& mjd)
 
 void SignalPath::add_step (const MJD& mjd)
 {
+#if _DEBUG
   cerr << "SignalPath::add_step epoch=" << mjd << endl;
+#endif
   
   if (backends.size() == 0)
     throw Error (InvalidState, "SignalPath::add_step",
@@ -611,6 +613,10 @@ void SignalPath::add_step (const MJD& mjd)
     backends[0]->set_response (new VariableBackend);
     // ... then multiply by the instrument
     backends[0]->get_psr_response()->add_model (instrument);
+
+    response->set_infit (0, false);
+    response->set_infit (1, false);
+    response->set_infit (2, false);
   }
   
   unsigned in_at = 0;
@@ -647,9 +653,11 @@ void SignalPath::add_step (const MJD& mjd)
 
   backends.insert (backends.begin()+in_at, middle);
 
+#if _DEBUG
   for (auto backend: backends)
     cerr << "   start=" << backend->get_start_time()
 	 << " end=" << backend->get_end_time() << endl;
+#endif
 }
 
 //! Allow specified parameter to vary freely in step that spans mjd
@@ -677,7 +685,9 @@ void SignalPath::add_observation_epoch (const MJD& epoch)
 
 void SignalPath::add_calibrator_epoch (const MJD& epoch)
 {
+#if _DEBUG
   cerr << "SignalPath::add_calibrator_epoch epoch=" << epoch << endl;
+#endif
   
   MJD zero;
 

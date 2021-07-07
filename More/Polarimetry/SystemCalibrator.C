@@ -519,7 +519,9 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
     if (!product->has_index())
     {
+#if _DEBUG
       cerr << "SystemCalibrator call add_psr_path" << endl;
+#endif
       model[mchan]->add_psr_path (backend);
     }
     
@@ -1024,7 +1026,9 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
   
   if (!product->has_index())
   {
-    cerr << "SystemCalibrator call add_psr_path" << endl;
+#if _DEBUG
+    cerr << "SystemCalibrator call add_cal_path" << endl;
+#endif
     model[data.ichan]->add_cal_path (backend);
   }
     
