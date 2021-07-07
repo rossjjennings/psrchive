@@ -44,6 +44,9 @@ namespace Calibration {
     //! Destructor
     ~VariableBackend ();
 
+    //! Clone operator
+    VariableBackend* clone () const;
+    
     //! Set cyclical bounds on the differential phase
     void set_cyclic (bool flag = true);
 

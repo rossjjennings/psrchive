@@ -49,6 +49,11 @@ VariableBackend::~VariableBackend ()
 #endif
 }
 
+VariableBackend* VariableBackend::clone () const
+{
+  return new VariableBackend (*this);
+}
+
 //! Return the name of the class
 string VariableBackend::get_name () const
 {

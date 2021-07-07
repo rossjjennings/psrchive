@@ -270,6 +270,11 @@ void Pulsar::SystemCalibrator::set_foreach_calibrator (const MEAL::Complex2* x)
   foreach_calibrator = x;
 }
 
+void Pulsar::SystemCalibrator::set_stepeach_calibrator (const Calibration::VariableBackend* x)
+{
+  stepeach_calibrator = x;
+}
+
 void Pulsar::SystemCalibrator::set_gain( Univariate<Scalar>* f )
 {
   gain_variation = f;
@@ -1247,6 +1252,9 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
 
   if (foreach_calibrator)
     model[ichan]->set_foreach_calibrator( foreach_calibrator );
+
+  if (stepeach_calibrator)
+    model[ichan]->set_stepeach_calibrator( stepeach_calibrator );
 
   std::map< unsigned, Reference::To<Univariate<Scalar> > >::iterator ptr;
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)

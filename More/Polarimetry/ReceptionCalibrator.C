@@ -348,7 +348,8 @@ void ReceptionCalibrator::add_pulsar
   standard_data->set_profile( integration->new_PolnProfile (ichan) );
 
   for (unsigned istate=0; istate < pulsar.size(); istate++)
-    add_data (measurements, pulsar.at(istate).at(ichan), ichan);
+    add_data (measurements, pulsar.at(istate).at(ichan),
+	      integration->get_epoch(), ichan);
 
   DEBUG("Pulsar::ReceptionCalibrator::add_pulsar ADD DATA ichan=" << ichan);
 
@@ -359,6 +360,7 @@ void
 ReceptionCalibrator::add_data
 ( vector<Calibration::CoherencyMeasurement>& bins,
   Calibration::SourceEstimate& estimate,
+  const MJD& epoch,
   unsigned ichan )
 {
   estimate.add_data_attempts ++;
@@ -382,9 +384,9 @@ ReceptionCalibrator::add_data
     Jones< Estimate<double> > correct;
 
     model[ichan]->get_equation()->set_transformation_index
-      (model[ichan]->get_psr_path_index());
+      (model[ichan]->get_psr_path_index(epoch));
 
-    correct = inv( model[ichan]->get_pulsar_transformation()->evaluate() );
+    correct = inv( model[ichan]->get_pulsar_transformation(epoch)->evaluate() );
 
     stokes = transform( stokes, correct );
     
@@ -393,7 +395,7 @@ ReceptionCalibrator::add_data
   }
   catch (Error& error)
   {
-    if (verbose > 2)
+    if (verbose > 1)
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
     estimate.add_data_failures ++;

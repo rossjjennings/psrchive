@@ -179,7 +179,8 @@ namespace Pulsar
       \param ichan the frequency channel
     */
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
-		   Calibration::SourceEstimate& estimate, unsigned ichan);
+		   Calibration::SourceEstimate& estimate,
+		   const MJD& epoch, unsigned ichan);
 
     //! Prepare the calibrator estimate
     void prepare_calibrator_estimate (Signal::Source);

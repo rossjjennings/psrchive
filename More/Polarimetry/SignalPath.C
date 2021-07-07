@@ -172,13 +172,12 @@ SignalPath::get_transformation () const
 }
 
 const MEAL::Complex2*
-SignalPath::get_pulsar_transformation () const
+SignalPath::get_pulsar_transformation (const MJD& epoch) const
 {
   if (!built)
     const_build ();
 
-  throw Error (InvalidState, "SignalPath::get_pulsar_transformation",
-	       "not implemented");
+  return get_backend (epoch) -> get_psr_response ();
 }
 
 MEAL::Complex2*
@@ -283,19 +282,19 @@ void SignalPath::build () try
 
   //! Estimate of the backend component of response
   backends.resize(1);
-  backends[0] = new_backend ();
-  backends[0] -> set_response (instrument);
-
-  add_psr_path (backends[0]);
+  backends[0] = new_backend (instrument);
 }
 catch (Error& error)
 {
   error += "SignalPath::build";
 }
 
-VariableBackendEstimate* SignalPath::new_backend ()
+VariableBackendEstimate* SignalPath::new_backend (Complex2* mine)
 {
-  VariableBackendEstimate* backend = new VariableBackendEstimate;
+  if (!mine)
+    mine = stepeach_pcal->clone();
+  
+  VariableBackendEstimate* backend = new VariableBackendEstimate (mine);
   
   backend -> set_psr_constant_gain (constant_pulsar_gain);
   backend -> set_cal_backend_only (!refcal_through_frontend);
@@ -364,22 +363,25 @@ void SignalPath::add_cal_path (VariableBackendEstimate* backend)
 }
 
 //! Get the index for the signal path experienced by the reference source
-unsigned SignalPath::get_cal_path_index () const
+unsigned SignalPath::get_cal_path_index (const MJD& epoch) const
 {
-  throw Error (InvalidState, "get_cal_path_index",
-	       "not implemented");
+  return get_backend(epoch)->get_cal_response()->get_index ();
 }
 
 //! Get the index for the signal path experienced by the pulsar
-unsigned SignalPath::get_psr_path_index () const
+unsigned SignalPath::get_psr_path_index (const MJD& epoch) const
 {
-  throw Error (InvalidState, "get_psr_path_index",
-	       "not implemented");
+  return get_backend(epoch)->get_psr_response()->get_index ();
 }
   
 void SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
 {
   foreach_pcal = x;
+}
+
+void SignalPath::set_stepeach_calibrator (const VariableBackend* backend)
+{
+  stepeach_pcal = backend;
 }
 
 void SignalPath::set_gain_variation (MEAL::Univariate<MEAL::Scalar>* func)
@@ -542,7 +544,7 @@ SignalPath::copy_transformation (const MEAL::Complex2* xform)
 }
 
 
-VariableBackendEstimate* SignalPath::get_backend (const MJD& epoch)
+VariableBackendEstimate* SignalPath::get_backend (const MJD& epoch) const
 {
   for (unsigned i=0; i<backends.size(); i++)
     if ( backends[i]->spans (epoch) )
@@ -597,6 +599,8 @@ void SignalPath::add_diff_phase_step (const MJD& mjd)
 
 void SignalPath::add_step (const MJD& mjd)
 {
+  cerr << "SignalPath::add_step epoch=" << mjd << endl;
+  
   if (backends.size() == 0)
     throw Error (InvalidState, "SignalPath::add_step",
 		 "cannot add step when there are no other backends");
@@ -619,6 +623,8 @@ void SignalPath::add_step (const MJD& mjd)
 
     else if (mjd < backends[in_at]->get_end_time())
       break;
+
+    in_at++;
   }
 
   VariableBackendEstimate* middle = new_backend ();
@@ -639,7 +645,11 @@ void SignalPath::add_step (const MJD& mjd)
     middle->set_end_time( after->get_start_time() );
   }
 
-  backends.insert (backends.begin()+in_at, middle);  
+  backends.insert (backends.begin()+in_at, middle);
+
+  for (auto backend: backends)
+    cerr << "   start=" << backend->get_start_time()
+	 << " end=" << backend->get_end_time() << endl;
 }
 
 //! Allow specified parameter to vary freely in step that spans mjd
@@ -667,6 +677,8 @@ void SignalPath::add_observation_epoch (const MJD& epoch)
 
 void SignalPath::add_calibrator_epoch (const MJD& epoch)
 {
+  cerr << "SignalPath::add_calibrator_epoch epoch=" << epoch << endl;
+  
   MJD zero;
 
   if (convert.get_reference_epoch() == zero)
@@ -674,6 +686,26 @@ void SignalPath::add_calibrator_epoch (const MJD& epoch)
 
   VariableBackendEstimate* backend = get_backend (epoch);
   IndexedProduct* product = backend->get_cal_response();
+
+  // add a step only if the current cal_response has been integrated
+  if (product->has_index() && stepeach_pcal)
+  {
+    if (verbose)
+      cerr << "SignalPath::add_calibrator_epoch adding step at epoch="
+	   << epoch << endl;
+
+    MJD half_minute (0.0, 30.0, 0.0);
+    MJD step_at;
+    if (step_after_cal)
+      step_at = epoch+half_minute;
+    else
+      step_at = epoch-half_minute;
+
+    add_step (step_at);
+
+    backend = get_backend (epoch);
+    product = backend->get_cal_response();
+  }
   
   // it may be necessary to remove this signal path if
   // the add_data step fails and no other calibrator succeeds

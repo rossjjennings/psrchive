@@ -70,8 +70,8 @@ namespace Calibration
 
   public:
 
-    //! Might implement a copy constructor
-    VariableBackendEstimate (const BackendEstimate* copy = 0);
+    //! Construct using the supplied response
+    VariableBackendEstimate (MEAL::Complex2* response = 0);
 
     //! Set the response that contains the backend
     void set_response (MEAL::Complex2* xform);

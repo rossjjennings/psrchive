@@ -30,7 +30,6 @@
 #endif
 
 #include "MEAL/Depolarizer.h"
-#include "MEAL/Steps.h"
 #include "MEAL/Polynomial.h"
 
 #include "Pulsar/Interpreter.h"
@@ -39,6 +38,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/SingleAxis.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/ReflectStokes.h"
 #include "Pulsar/ProjectionCorrection.h"
 
@@ -524,44 +524,54 @@ void add_step (char code, const MJD& mjd)
                "unrecognized PAR code = %c", code);
 }
 
-
-bool gain_foreach_calibrator = false;
-bool diff_gain_foreach_calibrator = false;
-bool diff_phase_foreach_calibrator = false;
-
-bool get_foreach_calibrator ()
+struct flags
 {
-  return gain_foreach_calibrator ||
-    diff_gain_foreach_calibrator ||
-    diff_phase_foreach_calibrator;
-}
+  bool gain;
+  bool diff_gain;
+  bool diff_phase;
 
-void set_foreach_calibrator (char code)
-{
-  switch (code)
+  flags () { gain = diff_gain = diff_phase = false; }
+  
+  bool get () { return gain || diff_gain || diff_phase; }
+
+  void set (char code)
   {
-  case 'g':
-    cerr << "gain" << endl;
-    gain_foreach_calibrator = true;
-    return;
-  case 'b':
-    cerr << "differential gain" << endl;
-    diff_gain_foreach_calibrator = true;
-    return;
-  case 'r':
-    cerr << "differential phase" << endl;
-    diff_phase_foreach_calibrator = true;
-    return;
-  case 'a':
-    cerr << "all backend parameters" << endl;
-    gain_foreach_calibrator = true;
-    diff_gain_foreach_calibrator = true;
-    diff_phase_foreach_calibrator = true;
-    return;
+    switch (code)
+      {
+      case 'g':
+	cerr << "gain" << endl;
+	gain = true;
+	return;
+      case 'b':
+	cerr << "differential gain" << endl;
+	diff_gain = true;
+	return;
+      case 'r':
+	cerr << "differential phase" << endl;
+	diff_phase = true;
+	return;
+      case 'a':
+	cerr << "all backend parameters" << endl;
+	gain = true;
+	diff_gain = true;
+	diff_phase = true;
+	return;
+      }
+    throw Error (InvalidParam, "set",
+		 "unrecognized PAR code = %c", code);
   }
-  throw Error (InvalidParam, "set_foreach_calibrator",
-               "unrecognized PAR code = %c", code);
-}
+
+  void set_infit (Calibration::SingleAxis* xform)
+  {
+    xform->set_infit (0, gain);
+    xform->set_infit (1, diff_gain);
+    xform->set_infit (2, diff_phase);
+  }
+
+};
+
+flags foreach_calibrator;
+flags stepeach_calibrator;
 
 Calibration::ReceptionModel::Solver* new_solver (const string& name)
 {
@@ -967,25 +977,21 @@ int actual_main (int argc, char *argv[]) try
 
     case 'u':
     {
-      cerr << "pcm: using a multiple-step function to model ";
-      MEAL::Steps* steps = new MEAL::Steps;
-      steps->set_param_name_prefix ( get_string(optarg[0]) );
-      set_time_variation( optarg[0], steps );
-      cerr << "pcm: assuming cals are observed ";
-      if (optarg[1]==':')
-      {
-        if (optarg[2]=='A')
-        {
-          step_after_cal = true;
-        }
-      }
-      cerr << (step_after_cal ? "after" : "before") << " pulsars" << endl;
+      cerr << "pcm: at each calibrator, a step in ";
+      stepeach_calibrator.set( optarg[0] );
+
+      if (optarg[1]==':' && optarg[2]=='A')
+	step_after_cal = true;
+
+      cerr << "pcm: assuming cals are observed "
+	   << (step_after_cal ? "after" : "before") << " pulsars" << endl;
+
       break;
     }
 
     case 'U':
       cerr << "pcm: for each calibrator, a unique value of ";
-      set_foreach_calibrator( optarg[0] );
+      foreach_calibrator.set( optarg[0] );
       break;
 
     case 'v':
@@ -1151,19 +1157,23 @@ int actual_main (int argc, char *argv[]) try
       if (diff_phase_variation)
         model->set_diff_phase( diff_phase_variation );
 
-      std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > >::iterator ptr;
-      for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
-        model->set_response_variation( ptr->first, ptr->second );
+      for (auto ptr : response_variation)
+        model->set_response_variation( ptr.first, ptr.second );
 
-      if (get_foreach_calibrator())
+      if (foreach_calibrator.get())
       {
         Reference::To< Calibration::SingleAxis > foreach;
         foreach = new Calibration::SingleAxis;
-        foreach->set_infit (0, gain_foreach_calibrator);
-        foreach->set_infit (1, diff_gain_foreach_calibrator);
-        foreach->set_infit (2, diff_phase_foreach_calibrator);
-
+	foreach_calibrator.set_infit (foreach);
         model->set_foreach_calibrator (foreach);
+      }
+
+      if (stepeach_calibrator.get())
+      {
+        Reference::To< Calibration::VariableBackend > stepeach;
+        stepeach = new Calibration::VariableBackend;
+	stepeach_calibrator.set_infit (stepeach->get_backend());
+        model->set_stepeach_calibrator (stepeach);
       }
 
       for (unsigned i=0; i < gain_steps.size(); i++)
@@ -1889,6 +1899,8 @@ void load_calibrator_database () try
     }
   }
 
+  sort (oncals.begin(), oncals.end());
+  
   for (unsigned i = 0; i < oncals.size(); i++)
   {
     string filename = database->get_filename( oncals[i] );

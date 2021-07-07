@@ -122,6 +122,9 @@ namespace Pulsar
     //! Set the transformation to be cloned for each calibrator
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
 
+    //! Set the VariableBackend step to be cloned for each calibrator
+    virtual void set_stepeach_calibrator (const Calibration::VariableBackend*);
+
     //! Prepare the data for inclusion in the model
     virtual void preprocess (Archive* data);
 
@@ -278,6 +281,9 @@ namespace Pulsar
 
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_calibrator;
+
+    //! Step in backend response at each calibrator observation
+    Reference::To< const Calibration::VariableBackend > stepeach_calibrator;
 
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);

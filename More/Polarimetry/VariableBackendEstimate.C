@@ -19,13 +19,15 @@ using namespace Calibration;
 
 // #define _DEBUG 1
 
-VariableBackendEstimate::VariableBackendEstimate (const BackendEstimate*)
+VariableBackendEstimate::VariableBackendEstimate (MEAL::Complex2* response)
 {
   psr_response = new IndexedProduct;
   cal_response = new IndexedProduct;
   
-  variable_backend = new VariableBackend;
-  set_response (variable_backend);
+  if (!response)
+    response = new VariableBackend;
+  
+  set_response (response);
 }
 
 //! Set the response that contains the backend

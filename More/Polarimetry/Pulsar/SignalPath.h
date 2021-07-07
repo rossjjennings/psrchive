@@ -34,6 +34,7 @@ namespace Calibration
     transformations */
 
   class VariableBackendEstimate;
+  class VariableBackend;
   class BackendEstimate;
   
   class SignalPath : public Reference::Able
@@ -81,6 +82,9 @@ namespace Calibration
 
     //! Set the transformation to be cloned for each calibrator
     void set_foreach_calibrator (const MEAL::Complex2*);
+
+    //! Set the VariableBackend step to be cloned for each calibrator
+    void set_stepeach_calibrator (const VariableBackend*);
 
     //! Set gain to the univariate function of time
     void set_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
@@ -149,13 +153,13 @@ namespace Calibration
     void fix_orientation ();
 
     //! Get the index for the signal path experienced by the reference source
-    unsigned get_cal_path_index () const;
+    unsigned get_cal_path_index (const MJD&) const;
 
     //! Get the index for the signal path experienced by the pulsar
-    unsigned get_psr_path_index () const;
+    unsigned get_psr_path_index (const MJD&) const;
 
     //! Get the backend that span the specified epoch
-    VariableBackendEstimate* get_backend (const MJD& epoch);
+    VariableBackendEstimate* get_backend (const MJD& epoch) const;
     
     //! Integrate a calibrator solution
     void integrate_calibrator (const MJD& epoch,
@@ -184,7 +188,7 @@ namespace Calibration
     void add_transformation (MEAL::Complex2*);
 
     //! Get the full signal path experienced by the pulsar
-    const MEAL::Complex2* get_pulsar_transformation () const;
+    const MEAL::Complex2* get_pulsar_transformation (const MJD&) const;
 
     //! Get the covariance vector at the specified epoch
     void get_covariance( std::vector<double>& covar, const MJD& epoch );
@@ -258,11 +262,13 @@ namespace Calibration
     std::vector< Reference::To< VariableBackendEstimate > > backends;
 
     //! Return a newly constructed and initialized backend
-    VariableBackendEstimate* new_backend ();
+    VariableBackendEstimate* new_backend (MEAL::Complex2* response = 0);
 
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_pcal;
     Reference::To< const MEAL::Complex2 > foreach_fcal;
+
+    Reference::To< const Calibration::VariableBackend > stepeach_pcal;
 
     Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
