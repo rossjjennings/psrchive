@@ -28,10 +28,15 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
   if (single_axis)
   {
     if (verbose)
-      cerr << "BackendEstimate::set_response SingleAxis" << endl;
+      cerr << "BackendEstimate::set_response this=" << this <<
+	" SingleAxis=" << (void*) single_axis << endl;
 
     backend = single_axis;
-    mean = new MeanSingleAxis;
+
+    // don't delete any mean accumulated to date
+    if (!mean || !dynamic_cast<MeanSingleAxis*>( mean.ptr() ))
+      mean = new MeanSingleAxis;
+
     return;
   }
   
@@ -44,20 +49,37 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
       cerr << "BackendEstimate::set_response Polar" << endl;
 
     backend = polar_solution;
-    mean = new MeanPolar;
+
+    // don't delete any mean accumulated to date
+    if (!mean || !dynamic_cast<MeanPolar*>( mean.ptr() ))
+      mean = new MeanPolar;
+    
     return;
   }
 
-  if (!backend)
-    throw Error (InvalidParam, "BackendEstimate::set_response",
-		 "unrecognized xform=" + xform->get_name());
+  throw Error (InvalidParam, "BackendEstimate::set_response",
+	       "unrecognized xform=" + xform->get_name());
 }
 
 void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
 {
+  if (verbose)
+    cerr << "BackendEstimate::integrate this=" << this
+	 << " mean=" << (void*) mean << " xform=" << xform << endl;
+
   try {
 
+    if (verbose)
+      MEAL::Function::very_verbose = true;
+
     mean->integrate (xform);
+
+    if (verbose)
+    {
+      MEAL::Function::very_verbose = false;
+      cerr << "BackendEstimate::integrate ok. this=" << this << endl;
+    }
+      
     return;
     
   }
@@ -102,14 +124,26 @@ void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
 
 void Calibration::BackendEstimate::update ()
 {
+  if (verbose)
+  {
+    cerr << "BackendEstimate::update this=" << this
+	 << " backend=" << (void*) backend << endl;
+
+    MEAL::Function::very_verbose = true;
+  }
+  
   mean->update (backend);
+
+  if (verbose)
+    MEAL::Function::very_verbose = false;
 }
 
 bool Calibration::BackendEstimate::spans (const MJD& epoch)
 {
-  cerr << "BackendEstimate::spans epoch=" << epoch
-       << " start=" << start_time
-       << " end=" << end_time << endl;
+  if (verbose)
+    cerr << "BackendEstimate::spans epoch=" << epoch
+	 << " start=" << start_time
+	 << " end=" << end_time << endl;
   
   return epoch > start_time && epoch < end_time;
 }

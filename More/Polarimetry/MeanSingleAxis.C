@@ -27,6 +27,7 @@ void Calibration::MeanSingleAxis::update (SingleAxis* single_axis) const
 {
   if (MEAL::Function::very_verbose)
     cerr << "Calibration::MeanSingleAxis::update (SingleAxis*)"
+      " this=" << this <<
       "\n  gain=" << mean_gain.get_Estimate() <<
       "\n  diff_gain=" << mean_diff_gain.get_Estimate() <<
       "\n  diff_phase=" << mean_diff_phase.get_Estimate() << endl;
@@ -54,6 +55,13 @@ void Calibration::MeanSingleAxis::integrate (const MEAL::Complex2* model)
 
 void Calibration::MeanSingleAxis::integrate (const SingleAxis* single_axis)
 {
+  if (MEAL::Function::very_verbose)
+    cerr << "Calibration::MeanSingleAxis::integrate (SingleAxis*)"
+      " this=" << this <<
+      "\n  gain=" << single_axis->get_gain () << 
+      "\n  diff_gain=" << single_axis->get_diff_gain () <<
+      "\n  diff_phase=" << single_axis->get_diff_phase () << endl;
+
   mean_gain       += single_axis->get_gain ();
   mean_diff_gain  += single_axis->get_diff_gain ();
   mean_diff_phase += 2.0 * single_axis->get_diff_phase ();

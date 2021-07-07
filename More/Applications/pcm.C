@@ -1378,6 +1378,10 @@ int actual_main (int argc, char *argv[]) try
     cerr << "pcm: unload model" << endl;
     unloader.unload (model);
   }
+  else
+  {
+    cerr << "pcm: no valid solutions to unload" << endl;
+  }
 
   if (print_variation && get_time_variation())
   {

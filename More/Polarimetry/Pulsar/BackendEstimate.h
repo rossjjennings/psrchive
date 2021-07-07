@@ -138,6 +138,37 @@ namespace MEAL
 
     return 0;
   }
+
+  template<class Base>
+  void print (std::ostream& os, Base* base, const std::string& indent = "")
+  {
+    os << indent << (void*) base << " " << base->get_name() << endl;
+      
+    MEAL::ChainRule<Base>* chain;
+    chain = dynamic_cast<MEAL::ChainRule<Base>*>( base );
+    if (chain)
+    {
+      Base* model = chain->get_model();
+      print (os, model, indent + " model ");
+
+      for (unsigned i=0; i < model->get_nparam(); i++)
+	if (chain->has_constraint (i))
+	  print (os, chain->get_constraint(i),
+		 indent + " by[" + tostring(i) + "] ");
+
+      return;
+    }
+
+    MEAL::ProductRule<Base>* product;
+    product = dynamic_cast<MEAL::ProductRule<Base>*>( base );
+    if (product)
+    {
+      for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
+	print (os, product->get_model(imodel), indent + " ");
+
+      return;
+    }
+  }
 }
 
 #endif

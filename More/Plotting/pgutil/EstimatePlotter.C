@@ -331,7 +331,7 @@ unsigned EstimatePlotter::excise (unsigned index)
     float median = work[ valid/2 ];
 
     // compute the absolute deviation from the median
-    for (unsigned ipt; ipt < valid; ipt++)
+    for (unsigned ipt=0; ipt < valid; ipt++)
       work[ipt] = fabs(work[ipt] - median);
 
     // find the median absolute deviation from the median 

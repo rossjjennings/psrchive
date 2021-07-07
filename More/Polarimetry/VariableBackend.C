@@ -14,6 +14,8 @@
 using namespace std;
 using namespace Calibration;
 
+// #define _DEBUG 1
+
 void VariableBackend::init ()
 {
   backend = new SingleAxis;
@@ -42,8 +44,9 @@ VariableBackend::operator = (const VariableBackend& s)
 
 VariableBackend::~VariableBackend ()
 {
-  if (verbose)
-    cerr << "VariableBackend::dtor" << endl;
+#if _DEBUG
+  cerr << "VariableBackend::dtor this=" << this << endl;
+#endif
 }
 
 //! Return the name of the class
@@ -129,6 +132,14 @@ const SingleAxis* VariableBackend::get_backend () const
 //! Set the instrumental gain variation
 void VariableBackend::set_gain_variation (MEAL::Scalar* function)
 {
+#if _DEBUG
+  cerr << "VariableBackend::set_gain_variation this=" << this <<
+  " function=" << (void*) function;
+  if (function)
+    cerr << " " << function->get_name();
+  cerr << endl;
+#endif
+  
   gain_variation = function;
   set_constraint (0, function);
 }
@@ -136,15 +147,45 @@ void VariableBackend::set_gain_variation (MEAL::Scalar* function)
 //! Set the differential gain variation
 void VariableBackend::set_diff_gain_variation (MEAL::Scalar* function)
 {
+#if _DEBUG
+  cerr << "VariableBackend::set_diff_gain_variation this=" << this <<
+  " function=" << (void*) function;
+  if (function)
+    cerr << " " << function->get_name();
+  cerr << endl;
+
+  MEAL::Function::very_verbose = true;
+#endif
+  
+
   diff_gain_variation = function;
   set_constraint (1, function);
+
+#if _DEBUG
+  MEAL::Function::very_verbose = false;
+#endif
+
 }
 
 //! Set the differential phase variation
 void VariableBackend::set_diff_phase_variation (MEAL::Scalar* function)
 {
+#if _DEBUG
+  cerr << "VariableBackend::set_diff_phase_variation this=" << this <<
+  " function=" << (void*) function;
+  if (function)
+    cerr << " " << function->get_name();
+  cerr << endl;
+
+  MEAL::Function::very_verbose = true;
+#endif
+  
   diff_phase_variation = function;
   set_constraint (2, function);
+
+#if _DEBUG
+  MEAL::Function::very_verbose = false;
+#endif
 }
 
 //! Set the instrumental gain variation

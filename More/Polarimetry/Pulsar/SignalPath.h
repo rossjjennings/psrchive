@@ -83,22 +83,25 @@ namespace Calibration
     void set_foreach_calibrator (const MEAL::Complex2*);
 
     //! Set gain to the univariate function of time
-    void set_gain (MEAL::Univariate<MEAL::Scalar>*);
+    void set_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
 
     //! Set differential gain to the univariate function of time
-    void set_diff_gain (MEAL::Univariate<MEAL::Scalar>*);
+    void set_diff_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
 
     //! Set differential phase to the univariate function of time
-    void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
+    void set_diff_phase_variation (MEAL::Univariate<MEAL::Scalar>*);
 
     //! Get the gain function of time
-    const MEAL::Scalar* get_gain () const;
-
+    const MEAL::Scalar* get_gain_variation () const
+    { return gain_variation; }
+    
     //! Get the differential gain function of time
-    const MEAL::Scalar* get_diff_gain () const;
+    const MEAL::Scalar* get_diff_gain_variation () const
+    { return diff_gain_variation; }
 
     //! Get the differential phase function of time
-    const MEAL::Scalar* get_diff_phase () const;
+    const MEAL::Scalar* get_diff_phase_variation () const
+    { return diff_phase_variation; }
 
     //! Add a step if any of the above functions require it
     void add_calibrator_epoch (const MJD&);
@@ -252,6 +255,10 @@ namespace Calibration
     Reference::To< const MEAL::Complex2 > foreach_pcal;
     Reference::To< const MEAL::Complex2 > foreach_fcal;
 
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+
     //! The signal path experienced by the pulsar
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
 
@@ -261,11 +268,6 @@ namespace Calibration
     void integrate_parameter (MEAL::Scalar* function, double value);
 
     void update_parameter (MEAL::Scalar* function, double value);
-
-    void compute_covariance( unsigned index, 
-			     std::vector< std::vector<double> >& covar,
-			     std::vector<unsigned>& function_imap, 
-			     MEAL::Scalar* function );
 
     //! Set the minimum step if Scalar is a Steps
     void set_min_step (MEAL::Scalar* function, double minimum);

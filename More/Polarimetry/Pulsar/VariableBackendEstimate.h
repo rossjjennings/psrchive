@@ -18,7 +18,6 @@
 #include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/Scalar.h"
-#include "MEAL/ChainRule.h"
 #include "MEAL/Univariate.h"
 
 #include <map>
@@ -47,9 +46,9 @@ namespace Calibration
     Reference::To<VariableGain> cal_gain;
     
     //! The backend variation transformations
-    Reference::To< MEAL::Scalar > gain;
-    Reference::To< MEAL::Scalar > diff_gain;
-    Reference::To< MEAL::Scalar > diff_phase;
+    Reference::To< MEAL::Scalar > gain_variation;
+    Reference::To< MEAL::Scalar > diff_gain_variation;
+    Reference::To< MEAL::Scalar > diff_phase_variation;
 
     /*! Mapping between variation transformation indeces
       and measurement equation indeces */
@@ -57,9 +56,6 @@ namespace Calibration
     std::vector< unsigned > diff_gain_imap;
     std::vector< unsigned > diff_phase_imap;
 
-    //! Used to convert MJD to double
-    Calibration::ConvertMJD convert;
-    
   public:
 
     //! Might implement a copy constructor
@@ -73,6 +69,9 @@ namespace Calibration
 
     //! Get the response for calibrator observations
     Product* get_cal_response () { return cal_response; }
+
+    //! Get the backend component
+    SingleAxis* get_backend () { return variable_backend->get_backend(); }
     
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_psr_constant_gain (bool = true);
@@ -80,10 +79,13 @@ namespace Calibration
     //! Set true when the cal signal is coupled after the feed
     void set_cal_backend_only (bool = true);
     
-    void set_gain (MEAL::Univariate<MEAL::Scalar>*);
-    void set_diff_gain (MEAL::Univariate<MEAL::Scalar>*);
-    void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
+    void set_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
+    void set_diff_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
+    void set_diff_phase_variation (MEAL::Univariate<MEAL::Scalar>*);
 
+    //! Used to convert MJD to double
+    Calibration::ConvertMJD convert;
+    
     //! Update the transformation with the current estimate, if possible
     void update ();
 

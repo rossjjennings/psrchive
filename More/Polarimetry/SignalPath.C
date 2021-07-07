@@ -35,7 +35,6 @@ using namespace Calibration;
 
 bool SignalPath::verbose = false;
 
-
 SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
 {
   // ////////////////////////////////////////////////////////////////////
@@ -198,9 +197,23 @@ void SignalPath::const_build () const
 
 void SignalPath::add_transformation (MEAL::Complex2* xform)
 {
+#if _DEBUG
+  cerr << "SignalPath::add_transformation xform=" << xform << endl;
+  MEAL::print(cerr, xform);
+#endif
+  
   if (!impurity)
   {
+#if _DEBUG
+    MEAL::Function::very_verbose = true;
+#endif
+
     equation->add_transformation (xform);
+
+#if _DEBUG
+    MEAL::Function::very_verbose = false;
+#endif
+    
     return;
   }
 
@@ -300,6 +313,17 @@ VariableBackendEstimate* SignalPath::new_backend ()
   backend -> set_psr_constant_gain (constant_pulsar_gain);
   backend -> set_cal_backend_only (!refcal_through_frontend);
 
+  if (gain_variation)
+    backend -> set_gain_variation (gain_variation->clone());
+
+  if (diff_gain_variation)
+    backend -> set_diff_gain_variation (diff_gain_variation->clone());
+  
+  if (diff_phase_variation)
+    backend -> set_diff_phase_variation (diff_phase_variation->clone());
+
+  time.signal.connect (&(backend->convert), &ConvertMJD::set_epoch);
+    
   return backend;
 }
 
@@ -307,6 +331,31 @@ void SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
 {
   foreach_pcal = x;
 }
+
+void SignalPath::set_gain_variation (MEAL::Univariate<MEAL::Scalar>* func)
+{
+  gain_variation = func;
+
+  for (unsigned i=0; i<backends.size(); i++)
+    backends[i]->set_gain_variation (func->clone());
+}
+
+void SignalPath::set_diff_gain_variation (MEAL::Univariate<MEAL::Scalar>* func)
+{
+  diff_gain_variation = func;
+
+  for (unsigned i=0; i<backends.size(); i++)
+    backends[i]->set_diff_gain_variation (func->clone());
+}
+
+void SignalPath::set_diff_phase_variation (MEAL::Univariate<MEAL::Scalar>* func)
+{
+  diff_phase_variation = func;
+
+  for (unsigned i=0; i<backends.size(); i++)
+    backends[i]->set_diff_phase_variation (func->clone());
+}
+
 
 void SignalPath::add_polncal_backend ()
 {
@@ -316,14 +365,14 @@ void SignalPath::add_polncal_backend ()
   Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
   pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
 
-  pcal_path->add_model( backends[0]->get_cal_response() );
-
   if (foreach_pcal && ReferenceCalibrator_path)
   {
     Reference::To< MEAL::Complex2 > clone = foreach_pcal->clone();
     pcal_path->add_model( clone );
   }
-  
+
+  pcal_path->add_model( backends[0]->get_cal_response() );
+
   add_transformation ( pcal_path );
   ReferenceCalibrator_path = equation->get_transformation_index ();
 }
@@ -344,6 +393,10 @@ void SignalPath::fix_orientation ()
 
 void SignalPath::update () try
 {
+#if _DEBUG
+  cerr << "SignalPath::update" << endl;
+#endif
+  
   if (!built)
     return;
   
@@ -554,6 +607,20 @@ void SignalPath::add_step (const MJD& mjd)
   backends.insert (backends.begin()+in_at, middle);  
 }
 
+//! Allow specified parameter to vary freely in step that spans mjd
+void SignalPath::set_free (unsigned iparam, const MJD& mjd)
+{
+  MJD use = mjd;
+  use += 30; // seconds
+
+  for (unsigned i=0; i < backends.size(); i++)
+    if (backends[i]->spans (use))
+    {
+      backends[i]->get_backend()->set_infit (iparam, true);
+      return;
+    }
+}
+
 void SignalPath::add_observation_epoch (const MJD& epoch)
 {
   MJD zero;
@@ -622,7 +689,6 @@ void SignalPath::set_refcal_through_frontend (bool flag)
 
   for (unsigned i=0; i<backends.size(); i++)
     backends[i]->set_cal_backend_only (!flag);
-
 }
 
 
@@ -697,7 +763,7 @@ catch (Error& error)
        << error.get_message() << endl;
 }
 
-void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch )
+void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch ) try
 {
   vector< vector<double> > Ctotal;
   get_equation()->get_solver()->get_covariance (Ctotal);
@@ -713,6 +779,13 @@ void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch )
   vector< unsigned > imap;
   MEAL::get_imap( get_equation(), xform, imap );
 
+#if _DEBUG
+  cerr << "SignalPath::get_covariance before unmapping \n\t"
+    "equation.nparam=" << get_equation()->get_nparam() << "\n\t"
+    "xform.nparam=" << xform->get_nparam() << "\n\t"
+    "imap.size=" << imap.size() << endl;
+#endif
+  
   for (unsigned i=0; i < backends.size(); i++)
     backends[i]->unmap_variations (imap, get_equation());
   
@@ -741,14 +814,26 @@ void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch )
 
   disengage_time_variations (epoch);
 
-  assert (xform->get_nparam() == imap.size());
+#if _DEBUG
+  cerr << "SignalPath::get_covariance after unmapping \n\t"
+    "equation.nparam=" << get_equation()->get_nparam() << "\n\t"
+    "xform.nparam=" << xform->get_nparam() << "\n\t"
+    "imap.size=" << imap.size() << endl;
+#endif
+  
+
+  if (xform->get_nparam() != imap.size())
+    throw Error (InvalidState, "SignalPath::get_covariance",
+		 "nparam=%u != imap.size=%u",
+		 xform->get_nparam(), imap.size());
 
   // TO DO: find a fiducial
   if (backends.size())
     backends[0]->compute_covariance (imap, Ctotal);
  
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
-    compute_covariance( imap[ptr->first], Ctotal, variation_imap[ptr->first], ptr->second );
+    MEAL::covariance( ptr->second, imap[ptr->first],
+		      variation_imap[ptr->first], Ctotal );
 
   if (van04 && ell_imap.size() == 1)
   {
@@ -784,8 +869,9 @@ void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch )
     }
   }
 
-  if (count != ncovar)
-    throw Error( InvalidState, "SignalPath::get_covariance",
-		 "count=%u != ncovar=%u", count, ncovar );
-  
+  assert (count == ncovar);
+}
+catch (Error& error)
+{
+  throw error += "SignalPath::get_covariance";
 }

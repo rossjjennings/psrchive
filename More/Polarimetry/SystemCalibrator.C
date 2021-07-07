@@ -1235,13 +1235,13 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
   }
 
   if (gain_variation)
-    model[ichan]->set_gain( gain_variation->clone() );
+    model[ichan]->set_gain_variation( gain_variation->clone() );
 
   if (diff_gain_variation)
-    model[ichan]->set_diff_gain( diff_gain_variation->clone() );
+    model[ichan]->set_diff_gain_variation( diff_gain_variation->clone() );
   
   if (diff_phase_variation)
-    model[ichan]->set_diff_phase( diff_phase_variation->clone() );
+    model[ichan]->set_diff_phase_variation( diff_phase_variation->clone() );
 
   for (unsigned i=0; i < gain_steps.size(); i++)
     model[ichan]->add_gain_step (gain_steps[i]);
@@ -1424,7 +1424,7 @@ float Pulsar::SystemCalibrator::get_reduced_chisq (unsigned ichan) const
   return chisq/free;
 }
 
-void Pulsar::SystemCalibrator::solve ()
+void Pulsar::SystemCalibrator::solve () try
 {
   ReceptionModel::Solver::report_chisq = true;
 
@@ -1542,7 +1542,7 @@ void Pulsar::SystemCalibrator::solve ()
   }
   catch (Error& error)
   {
-    if (verbose)
+    // if (verbose)
       cerr << "SystemCalibrator::solve get_covariance error"
 	         << error << endl;
     model[ichan]->set_valid( false, error.get_message().c_str() );
@@ -1552,6 +1552,10 @@ void Pulsar::SystemCalibrator::solve ()
   transformation.resize (0);
 
   is_solved = true;
+}
+catch (Error& error)
+{
+  throw error += "SystemCalibrator::solve";
 }
 
 void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
