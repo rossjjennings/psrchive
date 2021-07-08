@@ -26,8 +26,17 @@ VariableBackendEstimate::VariableBackendEstimate (MEAL::Complex2* response)
   
   if (!response)
     response = new VariableBackend;
+
+  cal_backend_only = false;
   
   set_response (response);
+}
+
+void disable_gain (VariableBackend* variable_backend)
+{
+  variable_backend->set_gain_variation (0);
+  variable_backend->set_gain (1.0);
+  variable_backend->set_infit (0, false);
 }
 
 //! Set the response that contains the backend
@@ -51,7 +60,17 @@ void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
   psr_response->add_model (xform);
 
   cal_response->clear();
-  cal_response->add_model (xform);
+
+  if (cal_gain)
+  {
+    cal_response->add_model (cal_gain);
+    disable_gain (vb);
+  }
+  
+  if (cal_backend_only)
+    cal_response->add_model (vb);
+  else
+    cal_response->add_model (psr_response);
 
   if (gain_variation)
   {
@@ -212,13 +231,11 @@ void VariableBackendEstimate::set_psr_constant_gain (bool flag)
       cal_response->add_model (cal_gain);
     }
     
+    cal_gain->set_gain ( variable_backend->get_gain() );
+    disable_gain (variable_backend);
+
     if (gain_variation)
       cal_gain->set_gain_variation (gain_variation);
-
-    cal_gain->set_gain ( variable_backend->get_gain() );
-    variable_backend->set_gain_variation (0);
-    variable_backend->set_gain (1.0);
-    variable_backend->set_infit (0, false);
   }
   else
   {
@@ -236,20 +253,16 @@ void VariableBackendEstimate::set_psr_constant_gain (bool flag)
 
 void VariableBackendEstimate::set_cal_backend_only (bool flag)
 {
+  cal_response->clear ();
+  if (cal_gain)
+    cal_response->add_model (cal_gain);
+
   if (flag)
-  {
-    cal_response->clear ();
-    if (cal_gain)
-      cal_response->add_model (cal_gain);
     cal_response->add_model (variable_backend);
-  }
   else
-  {
-    cal_response->clear ();
-    if (cal_gain)
-      cal_response->add_model (cal_gain);
     cal_response->add_model (psr_response);
-  }
+
+  cal_backend_only = flag;
 }
 
 void VariableBackendEstimate::engage_time_variations () try
@@ -275,7 +288,7 @@ void VariableBackendEstimate::engage_time_variations () try
 #ifdef _DEBUG
     cerr << "engage fix variable_backend gain = 1" << endl;
 #endif
-    variable_backend->set_gain( 1.0 );
+    disable_gain (variable_backend);
   }
 
   if (diff_gain_variation)
@@ -363,6 +376,8 @@ catch (Error& error)
 void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap,
 						MEAL::Complex2* composite) try
 {
+  MEAL::get_imap( composite, get_backend(), backend_imap );
+      
   if (gain_variation)
   {
     MEAL::get_imap( composite, gain_variation, gain_imap );
@@ -394,10 +409,17 @@ void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap,
 						  vector< vector<double> >& C)
 try
 {
+  SingleAxis* backend = get_backend();
+  
+  for (unsigned iparam=0; iparam < backend->get_nparam(); iparam++)
+    if (backend->get_infit(iparam))
+      imap[iparam] = backend_imap[iparam];
+
+  if (cal_gain)
+    imap[0] = gain_imap[0];
+  
   if (gain_variation)
     MEAL::covariance( gain_variation, imap[0], gain_imap, C );
-  else if (cal_gain)
-    imap[0] = gain_imap[0];
 
   if (diff_gain_variation)
     MEAL::covariance( diff_gain_variation, imap[1], diff_gain_imap, C );

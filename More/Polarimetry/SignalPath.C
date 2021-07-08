@@ -57,6 +57,7 @@ SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
 
 void SignalPath::copy (SignalPath* other)
 {
+  cerr << "SignalPath::copy this=" << this << " other=" << other << endl;
   equation->copy_fit( other->equation );
 }
 
@@ -326,10 +327,10 @@ void SignalPath::add_psr_path (VariableBackendEstimate* backend)
   
   psr_path -> add_model( product );
   psr_path -> add_model( celestial );
-  
+
   add_transformation ( psr_path );
 
-  product->set_index (equation->get_transformation_index ());
+  product->set_index ( equation->get_transformation_index () );
 
   if (verbose)
     cerr << "SignalPath::add_psr_path index="
@@ -416,7 +417,7 @@ void SignalPath::fix_orientation ()
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     throw Error (InvalidState, "SignalPath::fix_orientation",
-		 "cannot fix orientation when response=" + response->get_name());
+		 "cannot fix orientation of response=" + response->get_name());
 
   // fix the orientation of the first receptor
   physical->set_constant_orientation (true);
@@ -433,6 +434,32 @@ void SignalPath::update () try
   
   for (unsigned i=0; i<backends.size(); i++)
     backends[i]->update ();
+
+  if (backends.size() == 1)
+    return;
+
+  // integrate all of the backends into the primary response
+  BackendEstimate mean;
+  mean.set_response (response);
+
+  for (unsigned i=0; i<backends.size(); i++)
+    mean.integrate (backends[i]->get_backend ());
+
+  mean.update();
+
+  // gain, diff_gain, diff_phase that yield identity matrices
+  double identity [3] = { 1.0, 0.0, 0.0 };
+
+  for (unsigned iparam=0; iparam < 3; iparam++)
+  {
+    if (response->get_infit (iparam))
+    {
+      for (unsigned i=0; i<backends.size(); i++)
+	backends[i]->get_backend()->set_param ( iparam, identity[iparam] );
+    }
+    else
+      response->set_param ( iparam, identity[iparam] );
+  }
 }
 catch (Error& error)
 {
@@ -506,6 +533,7 @@ bool SignalPath::reduce_nfree ()
 
 void copy_param (MEAL::Function* to, const MEAL::Function* from)
 {
+  cerr << "copy_param" << endl;
   unsigned nparam = to->get_nparam ();
 
   if (nparam != from->get_nparam())
@@ -517,9 +545,10 @@ void copy_param (MEAL::Function* to, const MEAL::Function* from)
 }
 
 
-void 
-SignalPath::copy_transformation (const MEAL::Complex2* xform)
+void SignalPath::copy_transformation (const MEAL::Complex2* xform)
 {
+  cerr << "SignalPath::copy_transformation" << endl;
+  
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
   {
@@ -609,14 +638,26 @@ void SignalPath::add_step (const MJD& mjd)
 
   if (backends.size() == 1)
   {
+#if _DEBUG
+    cerr << "SignalPath::add_step extracting instrument from first backend"
+	 << endl;
+#endif
+    
+    MEAL::Complex2* clone = stepeach_pcal->clone();
+  
     // decouple the original backend from the instrument ...
-    backends[0]->set_response (new VariableBackend);
+    backends[0]->set_response (clone);
     // ... then multiply by the instrument
     backends[0]->get_psr_response()->add_model (instrument);
 
-    response->set_infit (0, false);
-    response->set_infit (1, false);
-    response->set_infit (2, false);
+    /* for each free parameter of clone, disable fit flags in the response
+       (without enabling any flags that are already disabled) */
+
+    for (unsigned i=0; i<clone->get_nparam(); i++)
+    {
+      if (clone->get_infit(i))
+	response->set_infit (i, false);
+    }
   }
   
   unsigned in_at = 0;
@@ -704,12 +745,14 @@ void SignalPath::add_calibrator_epoch (const MJD& epoch)
       cerr << "SignalPath::add_calibrator_epoch adding step at epoch="
 	   << epoch << endl;
 
-    MJD half_minute (0.0, 30.0, 0.0);
-    MJD step_at;
+    double half_minute = 30.0; // seconds
+    
+    MJD step_at = epoch;
+    
     if (step_after_cal)
-      step_at = epoch+half_minute;
+      step_at += half_minute;
     else
-      step_at = epoch-half_minute;
+      step_at -= half_minute;
 
     add_step (step_at);
 
@@ -792,10 +835,27 @@ catch (Error& error)
   throw error += "SignalPath::disengage_time_variations";
 }
 
+#include "MEAL/CongruenceTransformation.h"
+
 void SignalPath::solve () try
 {
   engage_time_variations ();
 
+#if _DEBUG
+  cerr << "SignalPath::solve" << endl;
+  
+  for (unsigned i=0; i<backends.size(); i++)
+  {
+    MEAL::Complex2* xform = backends[i]->get_psr_response();
+    cerr << " backend=" << i << " psr response" << endl;
+    MEAL::print (cerr, xform);
+    
+    xform = backends[i]->get_cal_response();
+    cerr << " backend=" << i << " cal response" << endl;
+    MEAL::print (cerr, xform);
+  }
+#endif
+  
   get_equation()->solve();
 
   if (impurity)
@@ -812,6 +872,28 @@ catch (Error& error)
        << error.get_message() << endl;
 }
 
+//! return the backend with the maximum weight
+VariableBackendEstimate* SignalPath::max_weight_backend ()
+{
+  VariableBackendEstimate* backend = 0; 
+  float maxweight = 0.0;
+
+  for (unsigned i=0; i<backends.size(); i++)
+  {
+    if (backends[i]->get_weight() > maxweight)
+      {
+	maxweight = backends[i]->get_weight();
+	backend = backends[i];
+      }
+  }
+
+  if (!backend)
+    throw Error (InvalidState, "SignalPath::get_max_weight_backend",
+		 "no backend has weight greater than zero");
+
+  return backend;
+}
+  
 void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch ) try
 {
   vector< vector<double> > Ctotal;
@@ -834,7 +916,7 @@ void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch ) try
     "xform.nparam=" << xform->get_nparam() << "\n\t"
     "imap.size=" << imap.size() << endl;
 #endif
-  
+
   for (unsigned i=0; i < backends.size(); i++)
     backends[i]->unmap_variations (imap, get_equation());
   
@@ -870,16 +952,22 @@ void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch ) try
     "imap.size=" << imap.size() << endl;
 #endif
   
-
   if (xform->get_nparam() != imap.size())
     throw Error (InvalidState, "SignalPath::get_covariance",
 		 "nparam=%u != imap.size=%u",
 		 xform->get_nparam(), imap.size());
 
-  // TO DO: find a fiducial
-  if (backends.size())
-    backends[0]->compute_covariance (imap, Ctotal);
- 
+  VariableBackendEstimate* fiducial = max_weight_backend();
+  fiducial->compute_covariance (imap, Ctotal);
+
+  if (backends.size() > 1)
+  {
+    SingleAxis* backend = fiducial->get_backend ();
+    for (unsigned iparam=0; iparam<backend->get_nparam(); iparam++)
+      if (!response->get_infit(iparam))
+	response->set_param ( iparam, backend->get_param(iparam) );
+  }
+  
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)
     MEAL::covariance( ptr->second, imap[ptr->first],
 		      variation_imap[ptr->first], Ctotal );

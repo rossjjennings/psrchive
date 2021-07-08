@@ -20,7 +20,6 @@ static bool verbose = false;
 void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
 {
   backend = 0;
-  mean = 0;
   
   Calibration::SingleAxis* single_axis;
   single_axis = MEAL::extract<Calibration::SingleAxis>( xform );
@@ -33,6 +32,15 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
 
     backend = single_axis;
 
+#if _DEBUG
+    if (mean)
+      {
+	cerr << "before condition" << endl;
+	mean->update (single_axis);
+	MEAL::print (cerr, single_axis);
+      }
+#endif
+    
     // don't delete any mean accumulated to date
     if (!mean || !dynamic_cast<MeanSingleAxis*>( mean.ptr() ))
       mean = new MeanSingleAxis;

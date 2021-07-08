@@ -27,29 +27,31 @@ namespace Calibration
   class IndexedProduct : public MEAL::ProductRule<MEAL::Complex2>
   {
     int index;
-
+    
   public:
     IndexedProduct () { index = -1; }
 
     bool has_index () const { return index >= 0; }
     void set_index (unsigned _index) { index = _index; }
-    unsigned get_index () const { return index; }    
+    unsigned get_index () const { return index; }
+
   };
   
   //! Manages a variable backend and its best estimate
   class VariableBackendEstimate : public BackendEstimate
   {
-
-    
     //! The response for pulsar observations
     Reference::To< IndexedProduct > psr_response;
     
     //! The response for calibrator observations
     Reference::To< IndexedProduct > cal_response;
-    
+
     //! The VariableBackend component of the response
     Reference::To<VariableBackend> variable_backend;
 
+    //! The calibrator is transformed by only the variable_backend
+    bool cal_backend_only;
+    
     //! Instrumental gain experienced only by the calibrator
     /*! If the instrumental gain must be held constant for the pulsar
       observations (e.g. because all observations have been normalized
@@ -67,7 +69,8 @@ namespace Calibration
     std::vector< unsigned > gain_imap;
     std::vector< unsigned > diff_gain_imap;
     std::vector< unsigned > diff_phase_imap;
-
+    std::vector< unsigned > backend_imap;
+    
   public:
 
     //! Construct using the supplied response

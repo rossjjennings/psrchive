@@ -158,9 +158,12 @@ namespace Calibration
     //! Get the index for the signal path experienced by the pulsar
     unsigned get_psr_path_index (const MJD&) const;
 
-    //! Get the backend that span the specified epoch
+    //! Get the backend that spans the specified epoch
     VariableBackendEstimate* get_backend (const MJD& epoch) const;
-    
+
+    //! Get the backend with the maximum weight
+    VariableBackendEstimate* max_weight_backend ();
+  
     //! Integrate a calibrator solution
     void integrate_calibrator (const MJD& epoch,
 			       const MEAL::Complex2* xform);

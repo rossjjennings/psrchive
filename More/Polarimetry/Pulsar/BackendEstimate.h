@@ -74,7 +74,11 @@ namespace Calibration
     //! The maximum observation time
     MJD max_time;
 
+    float weight;
+
   public:
+
+    BackendEstimate () { weight = 0.0; }
 
     //! The index of the SignalPath in which this backend is a component
     unsigned path_index;
@@ -103,6 +107,8 @@ namespace Calibration
     //! update min_time and max_time
     void add_observation_epoch (const MJD& epoch);
 
+    void add_weight (float amount) { weight += amount; }
+    float get_weight () const { return weight; }
   };
 
 }
@@ -168,6 +174,11 @@ namespace MEAL
 
       return;
     }
+
+    for (unsigned i=0; i<base->get_nparam(); i++)
+      os << indent << " " << i << " " << base->get_param (i)
+	 << " " << base->get_infit(i) << endl;
+    
   }
 }
 

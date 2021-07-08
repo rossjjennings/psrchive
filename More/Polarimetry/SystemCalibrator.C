@@ -552,7 +552,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     }
     
     model[mchan]->add_observation_epoch (epoch);
-    
+    backend->add_weight (1.0);
   }
   catch (Error& error)
   {
@@ -1037,6 +1037,8 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
   DEBUG("SystemCalibrator::submit_calibrator_data ichan=" << data.ichan);
 
   model[data.ichan]->get_equation()->add_data (measurements);
+
+  backend->add_weight (1.0);
 }
 
 void Pulsar::SystemCalibrator::integrate_calibrator_data
