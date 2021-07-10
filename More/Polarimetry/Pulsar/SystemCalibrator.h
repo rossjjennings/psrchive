@@ -303,15 +303,17 @@ namespace Pulsar
     //! Create the calibrator estimate
     virtual void create_calibrator_estimate ();
 
+    std::vector< std::vector<Calibration::SourceObservation> > calibrator_data;
+
+    // submit all calibrator data
+    virtual void submit_calibrator_data ();
+
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 					 const Calibration::SourceObservation&);
 
-    virtual void integrate_calibrator_data (const Jones< Estimate<double> >&,
-					    const Calibration::SourceObservation&);
+    virtual void integrate_calibrator_data (const Calibration::SourceObservation&);
 
-    virtual void integrate_calibrator_solution (Signal::Source source,
-						unsigned ichan, const MJD&,
-						const MEAL::Complex2*);
+    virtual void integrate_calibrator_solution (const Calibration::SourceObservation&);
 
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();

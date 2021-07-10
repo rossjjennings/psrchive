@@ -25,6 +25,12 @@ namespace Pulsar {
     //! Construct from an single PolnCal Pulsar::Archive
     SingleAxisCalibrator (const Archive* archive);
 
+    //! Copy constructor
+    SingleAxisCalibrator (const SingleAxisCalibrator&);
+
+    //! Clone operator
+    SingleAxisCalibrator* clone () const;
+
     //! Destructor
     ~SingleAxisCalibrator ();
 

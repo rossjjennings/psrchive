@@ -12,15 +12,29 @@
 #include "Estimate.h"
 
 using namespace std;
+using namespace Pulsar;
 
-//! Construct from an single PolnCal Pulsar::Archive
-Pulsar::SingleAxisCalibrator::SingleAxisCalibrator (const Archive* archive) 
+//! Construct from an single PolnCal Archive
+SingleAxisCalibrator::SingleAxisCalibrator (const Archive* archive) 
   : ReferenceCalibrator (archive)
 {
-  type = Pulsar::Calibrator::Type::factory (this);
+  type = Calibrator::Type::factory (this);
 }
 
-Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
+//! Copy constructor
+SingleAxisCalibrator::SingleAxisCalibrator (const SingleAxisCalibrator& other)
+  : ReferenceCalibrator (other)  
+{
+  type = Calibrator::Type::factory (this);
+}
+
+//! Clone operator
+SingleAxisCalibrator* SingleAxisCalibrator::clone () const
+{
+  return new SingleAxisCalibrator (*this);
+}
+
+SingleAxisCalibrator::~SingleAxisCalibrator ()
 {
   // destructors must be defined in .C file so that the Reference::To
   // desctructor can delete forward declared objects
@@ -28,7 +42,7 @@ Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
 
 //! Return the system response as determined by the SingleAxis
 ::MEAL::Complex2*
-Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
+SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 				     const vector<Estimate<double> >& sky)
 {
   Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
@@ -36,13 +50,13 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
   if ( !source_set || source.size() != 4 )
   {
     if (verbose > 2)
-      cerr << "Pulsar::SingleAxisCalibrator::solve" << endl;
+      cerr << "SingleAxisCalibrator::solve" << endl;
     model->solve (source);
     return model.release();
   }
 
   if (verbose > 2)
-    cerr << "Pulsar::SingleAxisCalibrator::solve reference source=" 
+    cerr << "SingleAxisCalibrator::solve reference source=" 
          << reference_source << endl;
 
   // Convert the coherency vectors into Stokes parameters.
@@ -61,24 +75,24 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 
 
 
-Pulsar::SingleAxisCalibrator::Info::Info (const PolnCalibrator* cal) 
+SingleAxisCalibrator::Info::Info (const PolnCalibrator* cal) 
   : PolnCalibrator::Info (cal)
 {
 }
 
-string Pulsar::SingleAxisCalibrator::Info::get_title () const
+string SingleAxisCalibrator::Info::get_title () const
 {
   return "Polar Decomposition of Complex Gains";
 }
 
 //! Return the number of parameter classes
-unsigned Pulsar::SingleAxisCalibrator::Info::get_nclass () const
+unsigned SingleAxisCalibrator::Info::get_nclass () const
 {
   return 3; 
 }
 
 //! Return the name of the specified class
-string Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
+string SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
@@ -93,7 +107,7 @@ string Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 } 
   
 //! Return the number of parameters in the specified class
-unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
+unsigned SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
 {
   if (iclass < 3)
     return 1;
@@ -101,7 +115,7 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
 }
 
 Estimate<float>
-Pulsar::SingleAxisCalibrator::Info::get_param (unsigned ichan, 
+SingleAxisCalibrator::Info::get_param (unsigned ichan, 
 					       unsigned iclass,
 					       unsigned iparam) const
 {
@@ -124,8 +138,8 @@ Pulsar::SingleAxisCalibrator::Info::get_param (unsigned ichan,
 
 
 
-Pulsar::SingleAxisCalibrator::Info* 
-Pulsar::SingleAxisCalibrator::get_Info () const
+SingleAxisCalibrator::Info* 
+SingleAxisCalibrator::get_Info () const
 {
   return new SingleAxisCalibrator::Info (this);
 }

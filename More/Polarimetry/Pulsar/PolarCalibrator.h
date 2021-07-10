@@ -24,6 +24,12 @@ namespace Pulsar {
     //! Construct from an single PolnCal Pulsar::Archive
     PolarCalibrator (const Archive* archive);
 
+    //! Copy constructor
+    PolarCalibrator (const PolarCalibrator&);
+
+    //! Clone operator
+    PolarCalibrator* clone () const;
+
     //! Destructor
     ~PolarCalibrator ();
 

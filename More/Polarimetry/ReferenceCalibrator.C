@@ -25,23 +25,24 @@
 #include <assert.h>
 
 using namespace std;
+using namespace Pulsar;
 
 Pulsar::Option<bool>
-Pulsar::ReferenceCalibrator::smooth_bandpass
+ReferenceCalibrator::smooth_bandpass
 ("ReferenceCalibrator::smooth_bandpass", false);
 
-Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
+ReferenceCalibrator::~ReferenceCalibrator ()
 {
 }
 
 //! Filter access to the calibrator
-void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
+void ReferenceCalibrator::set_calibrator (const Archive* archive)
 {
   if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator::set_calibrator" << endl;
+    cerr << "ReferenceCalibrator::set_calibrator" << endl;
 
   if ( !archive->type_is_cal() )
-    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::set_calibrator",
+    throw Error (InvalidParam, "ReferenceCalibrator::set_calibrator",
 		 "Archive='" + archive->get_filename() + "' is not a Cal");
   
   // Here the decision is made about full stokes or dual band observations.
@@ -55,7 +56,7 @@ void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
   bool calibratable = fullStokes || state == Signal::PPQQ;
 
   if (!calibratable)
-    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::set_calibrator", 
+    throw Error (InvalidParam, "ReferenceCalibrator::set_calibrator", 
 		 "Archive='" + archive->get_filename() + "'\n\t"
 		 "invalid state=" + State2string(state));
 #endif
@@ -82,18 +83,25 @@ void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
   PolnCalibrator::set_calibrator (archive);
 }
 
-Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
+ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   : PolnCalibrator (archive)
 {
   if (!archive)
-    throw Error (InvalidState, "Pulsar::ReferenceCalibrator", "no Archive");
-
-  if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator archive nchan="
-	 << archive->get_nchan() << endl;
+    throw Error (InvalidState, "ReferenceCalibrator", "no Archive");
 
   set_calibrator (archive);
-  requested_nchan = get_calibrator()->get_nchan();
+  init ();
+}
+
+void ReferenceCalibrator::init ()
+{
+  const Archive* archive = get_calibrator();
+  
+  if (verbose > 2)
+    cerr << "ReferenceCalibrator archive nchan="
+	 << archive->get_nchan() << endl;
+
+  requested_nchan = archive->get_nchan();
 
   outlier_threshold = 0.0;
   
@@ -102,13 +110,23 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
     Pauli::basis().set_basis( get_Receiver()->get_basis() );    
     Stokes<double> cal = get_Receiver()->get_reference_source ();
     if (verbose > 2)
-      cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
+      cerr << "ReferenceCalibrator reference source " << cal << endl;
     set_reference_source (cal);
   }
 }
 
+//! Copy constructor
+ReferenceCalibrator::ReferenceCalibrator (const ReferenceCalibrator& other)
+{
+  set_calibrator( other.get_calibrator() );
+  init ();
+
+  outlier_threshold = other.outlier_threshold;
+  requested_nchan = other.requested_nchan;
+}
+
 //! Set the Stokes parameters of the reference source
-void Pulsar::ReferenceCalibrator::set_reference_source
+void ReferenceCalibrator::set_reference_source
  (const Stokes< Estimate<double> >& stokes)
 {
   reference_source = stokes;
@@ -117,7 +135,7 @@ void Pulsar::ReferenceCalibrator::set_reference_source
 
 //! Get the Stokes parameters of the reference source
 Stokes< Estimate<double> >
-Pulsar::ReferenceCalibrator::get_reference_source () const
+ReferenceCalibrator::get_reference_source () const
 {
   if (source_set)
     return reference_source;
@@ -126,7 +144,7 @@ Pulsar::ReferenceCalibrator::get_reference_source () const
 }
 
 //! Set the number of frequency channels in the response array
-void Pulsar::ReferenceCalibrator::set_nchan (unsigned nchan)
+void ReferenceCalibrator::set_nchan (unsigned nchan)
 {
   if (requested_nchan == nchan)
     return;
@@ -162,7 +180,7 @@ void distribute_variance (vector<Estimate<double> >& to,
   \retval cal_hi the mean levels of the calibrator hi state
   \retval cal_lo the mean levels of the calibrator lo state
 */
-void Pulsar::ReferenceCalibrator::get_levels
+void ReferenceCalibrator::get_levels
 (const Integration* integration, unsigned request_nchan,
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo,
@@ -170,18 +188,18 @@ void Pulsar::ReferenceCalibrator::get_levels
 {
   if (!integration)
     throw Error (InvalidState,
-                 "Pulsar::ReferenceCalibrator::get_levels",
+                 "ReferenceCalibrator::get_levels",
                  "no calibrator Integration");
 
   unsigned nchan = integration->get_nchan();
 
   if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator::get_levels Integration"
+    cerr << "ReferenceCalibrator::get_levels Integration"
       " nchan=" << nchan << " required nchan=" << request_nchan << endl;
 
   if (request_nchan == 0)
     throw Error (InvalidParam,
-                 "Pulsar::ReferenceCalibrator::get_levels",
+                 "ReferenceCalibrator::get_levels",
                  "requested number of frequency channels == 0");
 
   Reference::To<Integration> clone;
@@ -212,7 +230,7 @@ void Pulsar::ReferenceCalibrator::get_levels
     unsigned window = unsigned (integration->get_nchan() * median_smoothing);
 
     if (verbose > 2)
-      cerr << "Pulsar::ReferenceCalibrator::get_levels median window = "
+      cerr << "ReferenceCalibrator::get_levels median window = "
 	   << window << " channels" << endl;
 
     // even a 3-window sort can zap a single channel birdie
@@ -239,7 +257,7 @@ void Pulsar::ReferenceCalibrator::get_levels
     hi[ipol].resize (request_nchan);
 
     if (verbose > 2)
-      cerr << "Pulsar::ReferenceCalibrator::get_levels interpolate from "
+      cerr << "ReferenceCalibrator::get_levels interpolate from "
 	   << cal_lo[ipol].size() << " to " << lo[ipol].size() << endl;
 
     fft::interpolate (lo[ipol], cal_lo[ipol]);
@@ -253,20 +271,21 @@ void Pulsar::ReferenceCalibrator::get_levels
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::ReferenceCalibrator::get_levels";
+  throw error += "ReferenceCalibrator::get_levels";
 }
 
 /*! This method takes care of averaging the calibrator levels from multiple
   sub-integrations */
-void Pulsar::ReferenceCalibrator::get_levels
-(const Archive* archive, unsigned request_nchan,
+void ReferenceCalibrator::get_levels
+(const Archive* archive, Index subint,
+ unsigned request_nchan,
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo,
  double outlier_threshold)
 {
   if (!archive)
     throw Error (InvalidState,
-		 "Pulsar::ReferenceCalibrator::get_levels",
+		 "ReferenceCalibrator::get_levels",
 		 "no calibrator Archive");
 
   unsigned nsub = archive->get_nsubint();
@@ -274,10 +293,21 @@ void Pulsar::ReferenceCalibrator::get_levels
   unsigned nchan = archive->get_nchan();
 
   if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator::get_levels nsub=" << nsub 
+    cerr << "ReferenceCalibrator::get_levels nsub=" << nsub 
 	 << " npol=" << npol << " nchan=" << nchan << endl;
 
   nchan = request_nchan;
+
+  unsigned isub = 0;
+  if (!subint.get_integrate())
+    isub = subint.get_value ();
+  
+  if (!subint.get_integrate() || nsub == 0)
+  {
+    const Integration* integration = archive->get_Integration(isub);
+    get_levels (integration, nchan, cal_hi, cal_lo, outlier_threshold);
+    return;
+  }
 
   // the mean calibrator hi and lo levels from the PolnCal archive
   vector<vector<MeanEstimate<double> > > total_hi;
@@ -286,69 +316,67 @@ void Pulsar::ReferenceCalibrator::get_levels
   for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = archive->get_Integration(isub);
-
     get_levels (integration, nchan, cal_hi, cal_lo, outlier_threshold);
 
-    if (nsub > 1)
+    if (isub == 0)
     {
-      if (isub == 0)
-      {
-	total_hi.resize (cal_hi.size());
-	total_lo.resize (cal_lo.size());
-	for (unsigned ipol=0; ipol<npol; ipol++)
-	{
-	  total_hi[ipol].resize (nchan);
-	  total_lo[ipol].resize (nchan);
-	}
-      }
+      total_hi.resize (cal_hi.size());
+      total_lo.resize (cal_lo.size());
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
-	for (unsigned ichan=0; ichan<nchan; ichan++)
-	{
-	  total_hi[ipol][ichan] += cal_hi[ipol][ichan];
-	  total_lo[ipol][ichan] += cal_lo[ipol][ichan];
-	}
+	total_hi[ipol].resize (nchan);
+	total_lo[ipol].resize (nchan);
       }
     }
-
-  }
-
-  if (nsub > 1)
-  {
+    
     for (unsigned ipol=0; ipol<npol; ipol++)
     {
       for (unsigned ichan=0; ichan<nchan; ichan++)
       {
-	cal_hi[ipol][ichan] = total_hi[ipol][ichan].get_Estimate();
-	cal_lo[ipol][ichan] = total_lo[ipol][ichan].get_Estimate();
+	total_hi[ipol][ichan] += cal_hi[ipol][ichan];
+	total_lo[ipol][ichan] += cal_lo[ipol][ichan];
       }
+    }
+  }
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      cal_hi[ipol][ichan] = total_hi[ipol][ichan].get_Estimate();
+      cal_lo[ipol][ichan] = total_lo[ipol][ichan].get_Estimate();
     }
   }
 }
 
-void Pulsar::ReferenceCalibrator::get_levels 
+void ReferenceCalibrator::get_levels 
 (unsigned nchan,
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo) const
 {
-  get_levels (get_calibrator(), nchan, cal_hi, cal_lo, outlier_threshold);
+  get_levels (get_calibrator(),
+	      subint, nchan,
+	      cal_hi, cal_lo,
+	      outlier_threshold);
 }
 
 
-void Pulsar::ReferenceCalibrator::calculate_transformation ()
+void ReferenceCalibrator::calculate_transformation ()
 {
   // the calibrator hi and lo levels from the PolnCal archive
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
-  get_levels (get_calibrator(), requested_nchan, cal_hi, cal_lo,
+  get_levels (get_calibrator(),
+	      subint, requested_nchan,
+	      cal_hi, cal_lo,
 	      outlier_threshold);
 
   unsigned npol = get_calibrator()->get_npol();
   unsigned nchan = requested_nchan;
 
   if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+    cerr << "ReferenceCalibrator::calculate_transformation"
       " npol=" << npol << " nchan=" << nchan << endl;
 
   baseline.resize (nchan);
@@ -362,7 +390,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
     if (verbose > 2)
-      cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+      cerr << "ReferenceCalibrator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
     for (unsigned ipol=0; ipol<npol; ++ipol)
@@ -379,7 +407,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
     if (cal_AA.val <= 0 || cal_BB.val <= 0)
     {
       if (verbose > 2)
-	cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+	cerr << "ReferenceCalibrator::calculate_transformation"
 	  " ichan=" << ichan << " bad levels" << endl;
       bad = true;
     }
@@ -410,7 +438,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
       if (inv.get_value() < cutoff)
       {
 	if (verbose)
-	  cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+	  cerr << "ReferenceCalibrator::calculate_transformation"
 	    " ichan=" << ichan << "\n  invariant=" << inv.get_value()
 	       << " < cutoff=" << cutoff << 
 	    " (threshold=" << det_threshold 
@@ -440,13 +468,13 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 
   }
   catch (Error& error) {
-    cerr << "Pulsar::ReferenceCalibrator::calculate_transformation error"
+    cerr << "ReferenceCalibrator::calculate_transformation error"
       " ichan=" << ichan << "\n  " << error.get_message() << endl;
     transformation[ichan] = 0;
   }
 
   if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator::calculate_transformation exit"
+    cerr << "ReferenceCalibrator::calculate_transformation exit"
 	 << endl;
 }
 
@@ -456,23 +484,23 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 #include "Pulsar/OffPulseCalibrator.h"
 #include "Pulsar/CalibratorTypes.h"
 
-Pulsar::ReferenceCalibrator* 
-Pulsar::ReferenceCalibrator::factory (const Calibrator::Type* type,
+ReferenceCalibrator* 
+ReferenceCalibrator::factory (const Calibrator::Type* type,
 					const Archive* archive)
 {
   if ( type->is_a<CalibratorTypes::Hybrid>() ||
        type->is_a<CalibratorTypes::SingleAxis>() )
-    return new Pulsar::SingleAxisCalibrator (archive);
+    return new SingleAxisCalibrator (archive);
 
   else if ( type->is_a<CalibratorTypes::van02_EqA1>() )
-    return new Pulsar::PolarCalibrator (archive);
+    return new PolarCalibrator (archive);
 
   else if ( type->is_a<CalibratorTypes::DoP>() )
-    return new Pulsar::DoPCalibrator (archive);
+    return new DoPCalibrator (archive);
 
   else if ( type->is_a<CalibratorTypes::OffPulse>() )
-    return new Pulsar::OffPulseCalibrator (archive);
+    return new OffPulseCalibrator (archive);
 
-  throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::factory",
+  throw Error (InvalidParam, "ReferenceCalibrator::factory",
 	       "unknown type=" + type->get_name());
 }

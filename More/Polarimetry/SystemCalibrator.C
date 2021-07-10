@@ -375,7 +375,7 @@ catch (Error& error)
 }
 
 void Pulsar::SystemCalibrator::prepare (const Archive* data) try
-{
+{  
   if (verbose)
     cerr << "SystemCalibrator::prepare"
             " filename=" << data->get_filename() << endl;
@@ -398,7 +398,12 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
   load_calibrators ();
 
   if (verbose)
-    cerr << "SystemCalibrator::prepare load_calibrators completed" << endl;
+    cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
+
+  submit_calibrator_data ();
+
+  if (verbose)
+    cerr << "SystemCalibrator::prepare calibrator data submited" << endl;
 
 }
 catch (Error& error)
@@ -725,8 +730,8 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
 }
 
 //! Add the ReferenceCalibrator observation to the set of constraints
-void 
-Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try 
+void Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
+  try 
 {
   unsigned nchan = get_nchan ();
 
@@ -784,7 +789,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
   // ensure that model array is large enough
   check_ichan ("add_calibrator", nchan - 1);
 
-  Reference::To<const PolnCalibrator> solution = p;
+  Reference::To<PolnCalibrator> solution = p->clone();
 
   if (flux_calibrator)
   {
@@ -799,13 +804,13 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
     solution = hybrid_cal;
   }
   
-  for (unsigned isub=0; isub<nsub; isub++) try
+  for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = cal->get_Integration (isub);
 
-    MJD epoch = integration->get_epoch();
+    solution->set_subint (isub);
 
-    // add_epoch( epoch );
+    MJD epoch = integration->get_epoch();
 
     if (verbose)
       cerr << "SystemCalibrator::add_calibrator"
@@ -816,6 +821,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
     
     string identifier = cal->get_filename() + " " + tostring(isub);
 
+    calibrator_data.push_back ( vector<SourceObservation>() );
+    
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
       if (integration->get_weight (ichan) == 0 || !model[ichan]->get_valid())
@@ -838,93 +845,120 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
       SourceObservation data;
 
+      data.name = cal->get_source();
+      data.identifier = identifier;
       data.source = source;
       data.epoch = epoch;
       data.ichan = ichan;
-
+      
       // convert to Stokes parameters
       data.observation = coherency( convert (calibtor) );
       data.baseline = coherency( convert (baseline) );
 
-      try
+      if ( solution->get_transformation_valid (ichan) )
       {
-	Calibration::CoherencyMeasurementSet measurements;
-
-        calibrator_estimate[ichan].add_data_attempts ++;
-
-	measurements.set_identifier( identifier );
-	measurements.add_coordinate( model[ichan]->time.new_Value(epoch) );
-
-        // convert to CoherencyMeasurement format
-        Calibration::CoherencyMeasurement 
-	  state (calibrator_estimate[ichan].input_index);
-
-	state.set_stokes( data.observation );
-        measurements.push_back( state );
-
 	if (verbose > 2)
 	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " submit_calibrator_data" << endl;
-	
-	submit_calibrator_data( measurements, data );
+	       << ichan << " saving response" << endl;
 
-        if ( solution->get_transformation_valid (ichan) )
-	{
-	  if (verbose > 2)
-	    cerr << "SystemCalibrator::add_calibrator ichan="
-		 << ichan << " integrate_calibrator_data" << endl;
-
-          integrate_calibrator_data( solution->get_response(ichan), data );
-	}
-      }
-      catch (Error& error)
-      {
-        cerr << "SystemCalibrator::add_calibrator ichan="
-             << ichan << " integrate_calibrator_data error\n" << error << endl;
-
-        calibrator_estimate[ichan].add_data_failures ++;
-
-	continue;
+	data.response = solution->get_response(ichan);
       }
 
       if ( solution->get_nchan() == nchan
-	   && solution->get_transformation_valid (ichan) ) try
+	   && solution->get_transformation_valid (ichan) )
       {
 	if (verbose > 2)
 	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " integrate_calibrator_solution" << endl;
-
-	integrate_calibrator_solution( solution->get_Archive()->get_type(),
-				       ichan,
-				       solution->get_epoch (),
-				       solution->get_transformation(ichan) );
+	       << ichan << " saving transformation" << endl;
+	
+	data.xform = solution->get_transformation(ichan);
       }
-      catch (Error& error)
-      {
-        cerr << "SystemCalibrator::add_calibrator ichan="
-             << ichan << " integrate_calibrator_solution error\n"
-	     << error << endl;
 
-        calibrator_estimate[ichan].add_data_failures ++;
-
-	continue;
-      }
+      calibrator_data.back().push_back (data);
     }
   }
-  catch (Error& error) 
+}
+catch (Error& error)
+{
+  throw error += "SystemCalibrator::add_calibrator";
+}
+
+
+void Pulsar::SystemCalibrator::submit_calibrator_data () try 
+{
+  unsigned nsub = calibrator_data.size();
+  
+  if (verbose > 2)
+    cerr << "SystemCalibrator::add_calibrator nsub=" << nsub << endl;
+
+  if (!nsub)
+    return;
+
+  for (unsigned isub=0; isub<nsub; isub++)
   {
-    cerr << "SystemCalibrator::add_calibrator isub="
-	 << isub << " error\n"
-	 << error << endl;
-	   
-    throw error +=
-      "SystemCalibrator::add_calibrator (ReferenceCalibrator*)";
-  } 
+    unsigned nchan = calibrator_data[isub].size();
+    unsigned ichan = 0;
+    
+    for (unsigned jchan=0; jchan<nchan; jchan++) try
+    {
+      SourceObservation& data = calibrator_data[isub][jchan];
+      
+      ichan = data.ichan;
+      
+      CoherencyMeasurementSet measurements;
+
+      calibrator_estimate[ichan].add_data_attempts ++;
+
+      measurements.set_identifier( data.identifier );
+      measurements.add_coordinate( model[ichan]->time.new_Value(data.epoch) );
+
+      // convert to CoherencyMeasurement format
+      CoherencyMeasurement state (calibrator_estimate[ichan].input_index);
+
+      state.set_stokes( data.observation );
+      measurements.push_back( state );
+
+      if (verbose > 2)
+	cerr << "SystemCalibrator::submit_calibrator_data ichan="
+	     << ichan << " submit_calibrator_data" << endl;
+	
+      submit_calibrator_data( measurements, data );
+
+      Jones< Estimate<double> > zero (0.0);
+
+      if ( data.response != zero )
+      {
+	if (verbose > 2)
+	  cerr << "SystemCalibrator::submit_calibrator_data ichan="
+	       << ichan << " integrate_calibrator_data" << endl;
+      
+	integrate_calibrator_data( data );
+      }
+
+      if ( data.xform )
+      {
+	if (verbose > 2)
+	  cerr << "SystemCalibrator::submit_calibrator_data ichan="
+	       << ichan << " integrate_calibrator_solution" << endl;
+
+	integrate_calibrator_solution( data );
+      }
+    }
+    catch (Error& error)
+    {
+      cerr << "SystemCalibrator::submit_calibrator_data ichan="
+	   << ichan << " integrate_calibrator_solution error\n"
+	   << error << endl;
+
+      calibrator_estimate[ichan].add_data_failures ++;
+      
+      continue;
+    }
+  }
 }
 catch (Error& error) 
 {
-  throw error +=
-    "SystemCalibrator::add_calibrator (ReferenceCalibrator*)";
+  throw error += "SystemCalibrator::submit_calibrator_data ()";
 }
 
 
@@ -1000,7 +1034,7 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
 
 void Pulsar::SystemCalibrator::submit_calibrator_data 
 (
- Calibration::CoherencyMeasurementSet& measurements,
+ CoherencyMeasurementSet& measurements,
  const SourceObservation& data
  )
 {
@@ -1042,23 +1076,20 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
 }
 
 void Pulsar::SystemCalibrator::integrate_calibrator_data
-(
- const Jones< Estimate<double> >& correct,
- const SourceObservation& data
- )
+( const SourceObservation& data )
 {
   Jones< Estimate<double> > zero (0.0);
-  if (correct == zero)
+  if (data.response == zero)
     throw Error (InvalidState,
                  "SystemCalibrator::integrate_calibrator_data",
                  "Jones matrix equals zero");
 
-  Jones< Estimate<double> > apply = invert_basis * correct;
+  Jones< Estimate<double> > apply = invert_basis * data.response;
 
   if (verbose)
     cerr << "SystemCalibrator::integrate_calibrator_data"
             "\n\tinvert_basis=" << invert_basis << 
-            "\n\tcorrect=" << correct << endl;
+            "\n\tcorrect=" << data.response << endl;
 
   Stokes< Estimate<double> > observed = data.observation;
   
@@ -1098,19 +1129,20 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
 }
 
 void Pulsar::SystemCalibrator::integrate_calibrator_solution
-( 
- Signal::Source source, unsigned ichan, const MJD& epoch,
- const MEAL::Complex2* transformation
-)
+ ( const SourceObservation& data )
 {
-  if (!model[ichan])
+  if (!model[data.ichan])
     throw Error (InvalidState,
 		 "SystemCalibrator::integrate_calibrator_solution",
-		 "model[%u] is null", ichan);
+		 "model[%u] is null", data.ichan);
   
-  if (source == Signal::PolnCal) try
+  if (data.source == Signal::PolnCal) try
   {
-    model[ichan]->integrate_calibrator (epoch, transformation);
+    if (verbose > 2)
+      cerr << "SystemCalibrator::integrate_calibrator_solution"
+	" SignalPath::integrate_calibrator ichan=" << data.ichan << endl;
+    
+    model[data.ichan]->integrate_calibrator (data.epoch, data.xform);
   }
   catch (Error& error)
   {

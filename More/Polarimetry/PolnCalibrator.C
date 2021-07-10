@@ -50,9 +50,12 @@ void Pulsar::PolnCalibrator::init ()
   do_backend_correction = true;
   built = false;
   observation_nchan = 0;
+
+  // by default construct from all sub-integrations
+  subint.set_integrate (true);
 }
 
-/*! 
+/*!
   If a Pulsar::Archive is provided, and if it contains a
   PolnCalibratorExtension, then the constructed instance can be
   used to calibrate other Pulsar::Archive instances.
@@ -71,8 +74,6 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
   poln_extension = archive->get<PolnCalibratorExtension>();
   if (poln_extension)
     extension = poln_extension;
-
-  set_calibrator (archive);
 
   filenames.push_back( archive->get_filename() );
 }
@@ -112,6 +113,12 @@ void Pulsar::PolnCalibrator::set_calibrator (const Archive* archive)
   observation_nchan = 0;
 
   Calibrator::set_calibrator (archive);
+}
+
+void Pulsar::PolnCalibrator::set_subint (unsigned isub)
+{
+  subint.set_value (isub);
+  set_calibrator ( get_Archive() );
 }
 
 //! Copy constructor

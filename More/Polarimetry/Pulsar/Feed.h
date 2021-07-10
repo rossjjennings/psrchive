@@ -59,7 +59,7 @@ namespace Calibration {
     void load (const std::string& filename);
 
     //! Parse a feed parameter from a line of text
-    void parse (std::string line);
+    void parse (const std::string& line);
 
     // ///////////////////////////////////////////////////////////////////
     //

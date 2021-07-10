@@ -189,15 +189,12 @@ namespace Pulsar
     void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 				 const Calibration::SourceObservation&);
 
-    void integrate_calibrator_data (const Jones< Estimate<double> >&,
-				    const Calibration::SourceObservation&);
+    void integrate_calibrator_data (const Calibration::SourceObservation&);
 
-    void integrate_calibrator_solution (Signal::Source source,
-					unsigned ichan, const MJD&,
-					const MEAL::Complex2*);
+    void integrate_calibrator_solution (const Calibration::SourceObservation&);
 
     //! Handle any integrated flux calibrator data
-    void load_calibrators ();
+    void submit_calibrator_data ();
 
     //! Ensure that the pulsar observation can be added to the data set
     void match (const Archive*);

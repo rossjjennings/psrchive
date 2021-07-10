@@ -74,6 +74,9 @@ namespace Calibration
   {
   public:
 
+    //! Source name
+    std::string name;
+    
     //! Source code
     Signal::Source source; 
 
@@ -83,12 +86,21 @@ namespace Calibration
     //! Frequency channel
     unsigned ichan;
 
+    //! Identifier
+    std::string identifier;
+    
     //! The observed Stokes parameters
     Stokes< Estimate<double> > observation;
 
     //! The baseline
     Stokes< Estimate<double> > baseline;
 
+    //! Estimate of response at time of observation
+    Jones< Estimate<double> > response;
+
+    //! Model of response at time of observation
+    Reference::To< const MEAL::Complex2 > xform;
+    
   };
 
 }

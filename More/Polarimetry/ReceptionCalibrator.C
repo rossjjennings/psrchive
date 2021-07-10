@@ -231,18 +231,12 @@ void ReceptionCalibrator::init_model (unsigned ichan)
     model[ichan] -> fix_orientation ();
 }
 
-void ReceptionCalibrator::load_calibrators ()
+void ReceptionCalibrator::submit_calibrator_data ()
 {
   if (verbose > 2)
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators" << endl;
+    cerr << "Pulsar::ReceptionCalibrator::submit_calibrator_data" << endl;
 
-  if (calibrator_filenames.size() == 0)
-    return;
-
-  SystemCalibrator::load_calibrators ();
-
-  cerr << "Pulsar::ReceptionCalibrator::load_calibrators "
-    "SystemCalibrator::load_calibrators returns" << endl;
+  SystemCalibrator::submit_calibrator_data ();
 
   if (!fluxcal.size())
     return;
@@ -449,12 +443,12 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
   fluxcal_observation_added.resize( nchan );
   for (unsigned ichan=0; ichan<nchan; ichan++)
     fluxcal_observation_added[ichan] = false;
-
-  cerr << "Pulsar::ReceptionCalibrator::prepare_calibrator_estimate return" << endl;
 }
 
 void ReceptionCalibrator::setup_calibrators ()
 {
+  cerr << "ReceptionCalibrator::setup_calibrators" << endl;
+  
   for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
     setup_poln_calibrator (calibrator_estimate[ichan]);
 
@@ -558,6 +552,10 @@ void ReceptionCalibrator::submit_calibrator_data
 
   if (fluxcal[data.ichan])
   {
+    if (verbose > 2)
+      cerr << "ReceptionCalibrator::submit_calibrator_data fluxcal ichan="
+	   << data.ichan << endl;
+    
     if (!fluxcal_observation_added[data.ichan])
       fluxcal[data.ichan]->add_observation (data.source);
 
@@ -570,41 +568,41 @@ void ReceptionCalibrator::submit_calibrator_data
 
 
 void ReceptionCalibrator::integrate_calibrator_data
-(
- const Jones< Estimate<double> >& correct,
- const Calibration::SourceObservation& data
- )
+(const Calibration::SourceObservation& data)
 {
   Jones< Estimate<double> > use;
   if (previous)
     use = previous->get_response (data.ichan);
   else
-    use = correct;
+    use = data.response;
 
   if (data.source == Signal::FluxCalOn || data.source == Signal::FluxCalOff)
   {
+    if (verbose > 2)
+      cerr << "ReceptionCalibrator::integrate_calibrator_data fluxcal ichan="
+	   << data.ichan << endl;
+    
     if (fluxcal[data.ichan])
       fluxcal[data.ichan]->integrate (use, data);
   }
-
-  SystemCalibrator::integrate_calibrator_data (use, data);
+  else
+    SystemCalibrator::integrate_calibrator_data (data);
 }
 
 void ReceptionCalibrator::integrate_calibrator_solution
-(
- Signal::Source source,
- unsigned ichan, const MJD& epoch,
- const MEAL::Complex2* xform
-)
+(const Calibration::SourceObservation& data)
 {
-  if (source == Signal::FluxCalOn || source == Signal::FluxCalOff)
+  if (data.source == Signal::FluxCalOn || data.source == Signal::FluxCalOff)
   {
-    if (fluxcal[ichan])
-      fluxcal[ichan]->integrate (source, xform);
+    if (verbose > 2)
+      cerr << "ReceptionCalibrator::integrate_calibrator_solution fluxcal"
+	" ichan=" << data.ichan << endl;
+
+    if (fluxcal[data.ichan])
+      fluxcal[data.ichan]->integrate (data.source, data.xform);
   }
   else
-    SystemCalibrator::integrate_calibrator_solution (source, ichan,
-						     epoch, xform);
+    SystemCalibrator::integrate_calibrator_solution (data);
 }
 
 
