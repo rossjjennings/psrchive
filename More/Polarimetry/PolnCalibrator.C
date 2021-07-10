@@ -115,9 +115,9 @@ void Pulsar::PolnCalibrator::set_calibrator (const Archive* archive)
   Calibrator::set_calibrator (archive);
 }
 
-void Pulsar::PolnCalibrator::set_subint (unsigned isub)
+void Pulsar::PolnCalibrator::set_subint (const Index& isub)
 {
-  subint.set_value (isub);
+  subint = isub;
   set_calibrator ( get_Archive() );
 }
 

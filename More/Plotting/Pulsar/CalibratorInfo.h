@@ -63,6 +63,11 @@ namespace Pulsar {
     void set_outlier_threshold (float t) { outlier_threshold = t; }
     float get_outlier_threshold () const { return outlier_threshold; }
 
+    //! Set the sub-integration Idex
+    void set_subint (const Index& isub) { subint = isub; }
+    //! Get the sub-integration Idex
+    Index get_subint () const { return subint; }
+
   protected:
 
     //! Separate panels for each class of calibrator parameters
@@ -91,6 +96,11 @@ namespace Pulsar {
 
     //! threshold used to detect outliers when creating SingleAxis calibrator
     float outlier_threshold;
+
+    // Sub-integration from which to derive a solution
+    Index subint;
+    
+
   };
 
 }

@@ -13,6 +13,8 @@
 
 #include "Pulsar/FrequencyPlot.h"
 #include "Pulsar/Calibrator.h"
+#include "Pulsar/Index.h"
+
 #include "EstimatePlotter.h"
 
 namespace Pulsar {
@@ -54,8 +56,14 @@ namespace Pulsar {
     //! Get the outlier threshold
     float get_outlier_threshold () const { return outlier_threshold; }
 
+    //! Set the sub-integration Idex
+    void set_subint (const Index& isub) { subint = isub; }
+    //! Get the sub-integration Idex
+    Index get_subint () const { return subint; }
+
     //! Return the Calibrator::Info from the Archive
-    static Calibrator::Info* get_Info (const Archive*, float outlier_threshold);
+    static Calibrator::Info* get_Info (const Archive*, Index subint,
+				       float outlier_threshold);
 
   protected:
 
@@ -73,6 +81,9 @@ namespace Pulsar {
     // Flag set to true when data are managed externally (disables prepare)
     bool managed;
 
+    // Sub-integration from which to derive a solution
+    Index subint;
+    
     // Threshold used to detect outliers when creating a SingleAxis calibrator
     float outlier_threshold;
   };

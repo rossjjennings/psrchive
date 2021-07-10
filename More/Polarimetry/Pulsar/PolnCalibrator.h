@@ -55,7 +55,7 @@ namespace Pulsar {
     void set_calibrator (const Archive* archive);
 
     //! Set the sub-integration index
-    void set_subint (unsigned isub);
+    void set_subint (const Index& isub);
 
     // ///////////////////////////////////////////////////////////////////
     //

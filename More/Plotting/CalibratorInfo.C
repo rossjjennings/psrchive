@@ -29,6 +29,7 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
   constant_gain = false;
 
   outlier_threshold = 0.0;
+  subint.set_integrate( true );
 }
 
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
@@ -56,7 +57,7 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     info = new ConstantGainInfo (new FluxCalibrator(data));
 
   else
-    info = CalibratorParameter::get_Info (data, outlier_threshold);
+    info = CalibratorParameter::get_Info (data, subint, outlier_threshold);
 
   get_frame()->get_label_above()->set_centre("$file\n"+info->get_title());
 
@@ -173,5 +174,9 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
   add( &CalibratorInfo::get_constant_gain,
        &CalibratorInfo::set_constant_gain,
        "gain", "Plot constant gain flux calibrator information");
+
+  add( &CalibratorInfo::get_subint,
+       &CalibratorInfo::set_subint,
+       "subint", "Sub-integration from which to derive calibrator" );
 
 }
