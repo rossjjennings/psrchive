@@ -60,7 +60,9 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 
   set_initial_guess = true;
   guess_physical_calibrator_stokes = false;
-  
+
+  calibrator_data_submitted = false;
+    
   is_prepared = false;
   is_solved = false;
   has_pulsar = false;
@@ -397,14 +399,16 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
 
   load_calibrators ();
 
+  if (!calibrator_data_submitted)
+  { 
+    if (verbose)
+      cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
+
+    submit_calibrator_data ();
+  }
+  
   if (verbose)
-    cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
-
-  submit_calibrator_data ();
-
-  if (verbose)
-    cerr << "SystemCalibrator::prepare calibrator data submited" << endl;
-
+    cerr << "SystemCalibrator::prepare done" << endl;
 }
 catch (Error& error)
 {
@@ -898,7 +902,12 @@ void Pulsar::SystemCalibrator::submit_calibrator_data () try
   {
     unsigned nchan = calibrator_data[isub].size();
     unsigned ichan = 0;
-    
+
+    if (nchan && verbose > 2)
+      cerr << "SystemCalibrator::submit_calibrator_data isub="
+	   << isub << " submit_calibrator_data source="
+	   << calibrator_data[isub][0].source << endl;
+
     for (unsigned jchan=0; jchan<nchan; jchan++) try
     {
       SourceObservation& data = calibrator_data[isub][jchan];
@@ -955,6 +964,8 @@ void Pulsar::SystemCalibrator::submit_calibrator_data () try
       continue;
     }
   }
+
+  calibrator_data_submitted = true;
 }
 catch (Error& error) 
 {

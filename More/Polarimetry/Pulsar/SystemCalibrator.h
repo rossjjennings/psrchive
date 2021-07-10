@@ -308,6 +308,8 @@ namespace Pulsar
     // submit all calibrator data
     virtual void submit_calibrator_data ();
 
+    bool calibrator_data_submitted;
+    
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 					 const Calibration::SourceObservation&);
 
