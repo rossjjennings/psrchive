@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "MEAL/ChainRule.h"
+#include <cassert>
 
 using namespace std;
 
