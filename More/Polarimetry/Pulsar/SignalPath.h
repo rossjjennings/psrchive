@@ -119,6 +119,10 @@ namespace Calibration
     //! Add a step to the differential phase variations
     void add_diff_phase_step (const MJD&);
 
+    //! Insert a step into the instrumental response at the specified time
+    void add_step (const MJD& mjd,
+		   Calibration::VariableBackend* backend = 0);
+
     //! Record the epochs of observations
     void add_observation_epoch (const MJD&);
 
@@ -289,9 +293,6 @@ namespace Calibration
 
     //! Offset the steps if Scalar is a Steps
     void offset_steps (MEAL::Scalar* function, double offset);
-
-    //! Insert a step into the instrumental response as a function of time
-    void add_step (const MJD& mjd);
 
     //! Allow specified parameter to vary freely in step that spans mjd
     void set_free (unsigned iparam, const MJD& mjd);

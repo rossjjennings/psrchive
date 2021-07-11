@@ -6,14 +6,16 @@
  ***************************************************************************/
 
 #include "Pulsar/RobustStepFinder.h"
+#include "Pulsar/VariableBackend.h"
 #include "UnaryStatistic.h"
 
+using namespace Calibration;
 using namespace Pulsar;
 using namespace std;
 
 typedef std::vector<Calibration::SourceObservation> ObsVector;
 
-double get_chi (const ObsVector& A, const ObsVector& B)
+double get_chi (const ObsVector& A, const ObsVector& B, Index pol)
 {
   auto Aptr = A.begin();
   auto Bptr = B.begin();
@@ -37,7 +39,17 @@ double get_chi (const ObsVector& A, const ObsVector& B)
     const Stokes< Estimate<double> >& Astokes = Aptr->observation;
     const Stokes< Estimate<double> >& Bstokes = Bptr->observation;
 
-    const unsigned npol = 4;
+    // do all four Stokes at once ...
+    unsigned npol = 4;
+    unsigned ipol = 0;
+
+    // ... or do a specific Stokes parameter
+    if (!pol.get_integrate())
+    {
+      ipol = pol.get_value();
+      npol = ipol + 1;
+    }
+    
     for (unsigned ipol=0; ipol < npol; ipol++)
     {
       double diff = fabs(Astokes[ipol].val - Bstokes[ipol].val);
@@ -58,49 +70,49 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
 
   unsigned nsubint = data.size();
 
-  unsigned ncross = nsubint * (nsubint - 1) / 2;
+  // compute chi for all Stokes at once
+  Index pol;
+  pol.set_integrate (true);
 
-  vector<double> chisq (ncross);
-  unsigned icross = 0;
+  unsigned isub=0;
 
-  for (unsigned isub=0; isub < nsubint; isub++)
+  while (isub+1 < nsubint)
   {
-    ObsVector& idata = data[isub];
+    if (data[isub][0].source != Signal::PolnCal)
+    {
+      isub ++;
+      continue;
+    }
     
-    for (unsigned jsub=isub+1; jsub < nsubint; jsub++)
-    {
-      ObsVector& jdata = data[jsub];
+    unsigned jsub = isub+1;
       
-      chisq[icross] = get_chi (idata, jdata);
-      cerr << chisq[icross] << " ";
-
-      icross ++;
-    }
-
-    cerr << endl;
-  }
-
-  cerr << "ncross=" << ncross << " icross=" << icross << endl;
-
-  float threshold = 1.6;
-
-  string indent = "i";
-
-  icross = 0;
-  for (unsigned isub=0; isub < nsubint; isub++)
-  {
-    cerr << indent;
-    for (unsigned jsub=isub+1; jsub < nsubint; jsub++)
-    {
-      if (chisq[icross] < threshold)
-	cerr << "1";
+    while (jsub < nsubint)
+      if (data[jsub][0].source == Signal::PolnCal)
+	break;
       else
-	cerr << "0";
+	jsub ++;
 
-      icross ++;
+    if (jsub >= nsubint)
+      break;
+
+    double chi = get_chi (data[isub], data[jsub], pol);
+
+    // cerr << "isub=" << isub << " jsub=" << jsub << " chi=" << chi << endl;
+    
+    if (chi > step_threshold)
+    {
+      cerr << "RobustStepFinder::process isub=" << isub
+	   << " chi=" << chi
+	   << " > threshold=" << step_threshold << endl;
+
+      if (calibrator->get_step_after_cal())
+	calibrator->add_step (data[isub][0].epoch + 30.0,
+			      new VariableBackend);
+      else
+	calibrator->add_step (data[jsub][0].epoch - 30.0,
+			      new VariableBackend);
     }
-    cerr << endl;
-    indent = " " + indent;
-  }
 
+    isub = jsub;
+  }
 }

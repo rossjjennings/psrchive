@@ -626,7 +626,8 @@ void SignalPath::add_diff_phase_step (const MJD& mjd)
   set_free (2, mjd);
 }
 
-void SignalPath::add_step (const MJD& mjd)
+void SignalPath::add_step (const MJD& mjd,
+			   Calibration::VariableBackend* backend)
 {
 #if _DEBUG
   cerr << "SignalPath::add_step epoch=" << mjd << endl;
@@ -642,20 +643,24 @@ void SignalPath::add_step (const MJD& mjd)
     cerr << "SignalPath::add_step extracting instrument from first backend"
 	 << endl;
 #endif
-    
-    MEAL::Complex2* clone = stepeach_pcal->clone();
+    if (!backend)
+      backend = stepeach_pcal->clone();
   
     // decouple the original backend from the instrument ...
-    backends[0]->set_response (clone);
+    backends[0]->set_response (backend);
+
+    // so that the next use of backend is unique
+    backend = backend->clone();
+    
     // ... then multiply by the instrument
     backends[0]->get_psr_response()->add_model (instrument);
 
-    /* for each free parameter of clone, disable fit flags in the response
+    /* for each free parameter of backend, disable fit flags in the response
        (without enabling any flags that are already disabled) */
 
-    for (unsigned i=0; i<clone->get_nparam(); i++)
+    for (unsigned i=0; i<backend->get_nparam(); i++)
     {
-      if (clone->get_infit(i))
+      if (backend->get_infit(i))
 	response->set_infit (i, false);
     }
   }
@@ -674,7 +679,11 @@ void SignalPath::add_step (const MJD& mjd)
     in_at++;
   }
 
-  VariableBackendEstimate* middle = new_backend ();
+  MEAL::Complex2* xform = 0;
+  if (backend)
+    xform = backend;
+
+  VariableBackendEstimate* middle = new_backend (xform);
   middle->set_start_time (mjd);
   middle->get_psr_response()->add_model (instrument);
 

@@ -60,8 +60,6 @@ ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
   normalize_by_invariant = false;
   independent_gains = false;
 
-  step_after_cal = false;
-  
   multiple_flux_calibrators = false;
   model_fluxcal_on_minus_off = false;
   
@@ -127,11 +125,6 @@ void ReceptionCalibrator::set_normalize_by_invariant (bool set)
   normalize_by_invariant = set;
   if (standard_data)
     standard_data->set_normalize (normalize_by_invariant);
-}
-
-void ReceptionCalibrator::set_step_after_cal (bool flag)
-{
-  step_after_cal = flag;
 }
 
 /*!

@@ -123,6 +123,14 @@ namespace Pulsar
     //! Add a step to the differential phase variations
     virtual void add_diff_phase_step (const MJD&);
 
+    //! Add a VariableBackend step at the specified MJD
+    virtual void add_step (const MJD&, Calibration::VariableBackend*);
+
+    //! Apply time steps afer cals
+    void set_step_after_cal (bool val = true) { step_after_cal = val; }
+    bool get_step_after_cal () const { return step_after_cal; }
+
+    //! Prepare the data for inclusion in the model
     //! Set the transformation to be cloned for each calibrator
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
 
@@ -326,7 +334,7 @@ namespace Pulsar
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();
 
-    Reference::To<StepFinder> changepoint_detector;
+    Reference::To<StepFinder> step_finder;
     
     //! Ensure that the pulsar observation can be added to the data set
     virtual void match (const Archive*);
@@ -349,6 +357,9 @@ namespace Pulsar
 
     //! Epoch of the last observation
     MJD end_epoch;
+    
+    //! Apply time step after rather than before cals
+    bool step_after_cal;
 
     //! Normalize pulsar Stokes parameters by the invariant interval
     bool normalize_by_invariant;

@@ -85,8 +85,9 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 
   projection = new VariableProjectionCorrection;
 
-  changepoint_detector = new RobustStepFinder;
-  
+  step_finder = new RobustStepFinder;
+  step_after_cal = false;
+
   if (archive)
     set_calibrator (archive);
 }
@@ -312,6 +313,18 @@ void Pulsar::SystemCalibrator::add_diff_phase_step (const MJD& mjd)
   diff_phase_steps.push_back (mjd);
 }
 
+//! Add a VariableBackend step at the specified MJD
+void Pulsar::SystemCalibrator::add_step (const MJD& mjd,
+					 Calibration::VariableBackend* backend)
+{
+  if (model.size() == 0)
+    throw Error (InvalidState, "SystemCalibrator::add_step",
+		 "model not initialized");
+
+  for (unsigned i=0; i<model.size(); i++)
+    model[i]->add_step (mjd, backend->clone());
+}
+
 void Pulsar::SystemCalibrator::preprocess (Archive* data)
 {
   if (!data)
@@ -406,9 +419,13 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
 
   if (!calibrator_data_submitted)
   {
-    if (changepoint_detector)
-      changepoint_detector->process (this);
-	
+    cerr << "not yet submitted" << endl;
+
+    if (step_finder)
+      step_finder->process (this);
+
+    cerr << "about to submit" << endl;
+    
     if (verbose)
       cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
 
