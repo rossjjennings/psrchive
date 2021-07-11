@@ -69,12 +69,27 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
   std::vector< ObsVector >& data = get_calibrator_data (calibrator);
 
   unsigned nsubint = data.size();
+  unsigned isub=0;
+  unsigned erased = 0;
+  while (isub < nsubint)
+  {
+    if (data[isub].size() == 0)
+    {
+      cerr << "RobustStepFinder::process removing empty subint=" 
+           << isub + erased << endl;
+      data.erase (data.begin() + isub);
+      nsubint --;
+      erased ++;
+    }
+    else
+      isub ++;
+  }
 
   // compute chi for all Stokes at once
   Index pol;
   pol.set_integrate (true);
 
-  unsigned isub=0;
+  isub=0;
 
   while (isub+1 < nsubint)
   {
