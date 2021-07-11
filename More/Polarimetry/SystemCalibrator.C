@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/RobustStepFinder.h"
+
 #include "Pulsar/SystemCalibrator.h"
 #include "Pulsar/ReceptionModelSolver.h"
 
@@ -13,6 +15,7 @@
 #include "Pulsar/VariableProjectionCorrection.h"
 
 #include "Pulsar/VariableBackendEstimate.h"
+#include "Pulsar/SystemCalibratorStepFinder.h"
 
 #include "Pulsar/Faraday.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
@@ -81,6 +84,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   outlier_threshold = 0.0;
 
   projection = new VariableProjectionCorrection;
+
+  changepoint_detector = new RobustStepFinder;
   
   if (archive)
     set_calibrator (archive);
@@ -400,7 +405,10 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
   load_calibrators ();
 
   if (!calibrator_data_submitted)
-  { 
+  {
+    if (changepoint_detector)
+      changepoint_detector->process (this);
+	
     if (verbose)
       cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
 

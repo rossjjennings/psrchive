@@ -77,6 +77,7 @@ nobase_include_HEADERS = \
 	Pulsar/ReceptionModelSolveMEAL.h \
         Pulsar/ReferenceCalibrator.h \
         Pulsar/ReflectStokes.h \
+	Pulsar/RobustStepFinder.h \
 	Pulsar/RotatingVectorModelOptions.h \
         Pulsar/SignalPath.h \
         Pulsar/Simulation.h \
@@ -94,6 +95,7 @@ nobase_include_HEADERS = \
 	Pulsar/StepsInfo.h \
 	Pulsar/StokesCovariance.h Pulsar/StokesCrossCovariance.h \
         Pulsar/SystemCalibrator.h \
+	Pulsar/SystemCalibratorStepFinder.h \
 	Pulsar/SystemCalibratorUnloader.h \
 	Pulsar/UnloadJones.h \
         Pulsar/TemplateUncertainty.h \
@@ -190,6 +192,7 @@ libPolarimetry_la_SOURCES = \
 	ReceptionModelSolveMEAL.C \
         ReferenceCalibrator.C \
         ReflectStokes.C \
+	RobustStepFinder.C \
 	RotatingVectorModelOptions.C \
         SignalPath.C \
         Simulation.C \

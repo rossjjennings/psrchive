@@ -33,6 +33,7 @@ namespace Pulsar
     calibrators that determine both the instrumental response and the
     input Stokes parameters of the reference signal.
   */
+
   class SystemCalibrator : public PolnCalibrator
   {
 
@@ -40,6 +41,9 @@ namespace Pulsar
 
     typedef Calibration::ReceptionModel::Solver Solver;
 
+    //! Base class of algorithms that detect steps in instrumental response
+    class StepFinder;
+    
     //! Construct with optional processed calibrator Archive
     SystemCalibrator (Archive* archive = 0);
 
@@ -263,17 +267,19 @@ namespace Pulsar
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;
 
+    typedef MEAL::Univariate<MEAL::Scalar> UniScalar;
+    
     //! Temporal variation of response parameters
-    std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
+    std::map< unsigned, Reference::To<UniScalar> > response_variation;
 
     //! Time variation of absolute gain
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
+    Reference::To<UniScalar> gain_variation;
 
     //! Time variation of differential gain
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
+    Reference::To<UniScalar> diff_gain_variation;
 
     //! Time variation of differential phase
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+    Reference::To<UniScalar> diff_phase_variation;
 
     std::vector<MJD> gain_steps;
     std::vector<MJD> diff_gain_steps;
@@ -320,6 +326,8 @@ namespace Pulsar
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();
 
+    Reference::To<StepFinder> changepoint_detector;
+    
     //! Ensure that the pulsar observation can be added to the data set
     virtual void match (const Archive*);
 
