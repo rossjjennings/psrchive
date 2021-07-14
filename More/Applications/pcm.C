@@ -9,6 +9,9 @@
 #include <config.h>
 #endif
 
+#include "Pulsar/Application.h"
+// #include "Pulsar/StandardOptions.h"
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/CalibratorTypes.h"
 
@@ -62,90 +65,35 @@
 using namespace std;
 using namespace Pulsar;
 
-void usage ()
+//! Polarimetric Calibration Modelling
+class pcm: public Pulsar::Application
 {
-  cout << "pcm - polarimetric calibration model \n"
-    "Usage: pcm [options] [filenames] \n"
-    "\n"
-    "  -h         this help page \n"
-    "  -V level   set verbosity level [0->4] \n"
-    "\n"
-    "  -A archive set the output archive class name \n"
-    "  -O fname   set cal solution output filename (default=pcm.fits)\n"
-    "  -N         do not unload calibrated data files\n"
-    "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
-    "  -m model   receiver model name: e.g. bri00e19 or van04e18 [default]\n"
-    "  -l solver  solver: MEAL [default] of GSL \n"
-    "  -I fname   load impurity transformation from file \n"
-    "  -P fname   load projection transformations from file \n"
-    "  -x         estimate calibrator Stokes parameter using fluxcal solution \n"
-    "  -y         always trust the Pointing::feed_angle attribute \n"
-    "  -Z         ignore the sky coordinates of PolnCal observations \n"
-    "\n"
-    "  -C meta    filename with list of calibrator files \n"
-    "  -d dbase   filename of Calibration Database \n"
-    "  -M meta    filename with list of pulsar files \n"
-    "  -W meta2   filename with list of other data files to be calibrated \n"
-    "  -j job     preprocessing job \n"
-    "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
-    "  -K sigma       Reject outliers when computing CAL levels \n"
-    "\n"
-    "MEM: Measurement Equation Modeling \n"
-    "  -- observations of an unknown source as in van Straten (2004)\n"
-    "\n"
-    "  -t nproc   solve using nproc threads \n"
-    "\n"
-    "  -U PAR     model PAR with a unique value for each CAL \n"
-    "  -u PAR[:W] model PAR with a step at each CAL \n"
-    "  -i PAR:MJD model PAR with a step at the given epoch (MJD) \n"
-    "  -o PAR:N   model PAR as N degree polyomial \n"
-    "             where PAR is one of \n"
-    "               g = absolute gain \n"
-    "               b = differential gain \n"
-    "               r = differential phase \n"
-    "               a = all of the above \n"
-    "             and where W can be one of \n"
-    "               A = cals are observed after pulsars \n"
-    "               B = cals are observed before pulsars (default) \n"
-    "\n"
-    "  -B choose  set the phase bin selection policy: int, pol, orth, inv \n"
-    "             separate multiple policies with commas \n"
-    "  -c archive choose best input states from archive \n"
-    "\n"
-    "  -b bin     add phase bin to constraints \n"
-    "  -n nbin    set the number of phase bins to choose as input states \n"
-    "  -p pA,pB   set the phase window from which to choose input states \n"
-    "\n"
-    "  -a align   set the threshold for testing input data phase alignment \n"
-    "  -g         unique absolute gain for each pulsar observation [DEVEL]\n"
-    "  -r         enforce physically realizable Stokes parameters [DEVEL]\n"
-    "  -s         normalize Stokes parameters by total invariant interval \n"
-    "\n"
-    "  -F days    use flux calibrators within days of pulsar data mid-time\n"
-    "  -L hours   use reference sources within hours of pulsar data mid-time\n"
-    "  -Q         reference source coupled after frontend \n"
-    "\n"
-    "  Constraints on degeneracy under commutation \n"
-    "  -- See " PSRCHIVE_HTTP "/manuals/pcm/degeneracy.shtml \n"
-    "\n"
-    "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
-    "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
-    "  -k         assume that the receptors have equal ellipticities \n"
-    "  -Y         model the difference between FluxCal-On and FluxCal-Off \n"
-    "  -f         model each FluxCal with unique Stokes parameters \n"
-    "\n"
-    "METM: Measurement Equation Template Matching\n"
-    "  -- observations of a known source as in van Straten (2013) \n"
-    "\n"
-    "  -S fname   filename of calibrated standard \n"
-    "  -G         Fscrunch data to match number of channels of standard \n"
-    "  -H         allow software to choose the number of harmonics \n"
-    "  -n nbin    set the number of harmonics to use as input states \n"
-    "  -1         solve independently for each observation \n"
-    "  -z         share a single phase shift estimate b/w all observations \n"
-    "\n"
-    "See " PSRCHIVE_HTTP "/manuals/pcm for more details\n"
-       << endl;
+public:
+
+  //! Default constructor
+  pcm ();
+
+  //! Verify setup
+  void setup ();
+
+  //! Process the given archive
+  void process (Pulsar::Archive*);
+
+  //! Unload the total
+  void finalize ();
+
+  //! Set the verbosity level
+  void set_verbosity (int level);
+  
+protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
+};
+
+pcm::pcm () : Pulsar::Application ("pcm", 
+				   "polarimetric calibration modelling")
+{
 }
 
 // Construct a calibrator model for MEM mode
@@ -415,15 +363,14 @@ bool physical_coherency = false;
 float retry_chisq = 0.0;
 float invalid_chisq = 0.0;
 
-int actual_main (int argc, char *argv[]);
-
-int main (int argc, char *argv[])
+int main (int argc, char **argv)
 {
 #ifdef _DEBUG
   size_t in = Reference::Able::get_instance_count();
 #endif
 
-  int ret = actual_main (argc, argv);
+  pcm program;
+  int ret = program.main (argc, argv);
 
 #ifdef _DEBUG
   size_t out = Reference::Able::get_instance_count();
@@ -700,35 +647,151 @@ Reference::To<Pulsar::FluxCalibrator> flux_cal;
 
 void load_calibrator_database ();
 
-int actual_main (int argc, char *argv[]) try
+// Number of threads used to solve equations
+unsigned nthread = 0;
+
+// name of file containing list of Archive filenames
+char* metafile = NULL;
+
+// name of file containing list of filenames to be calibrated
+char* calibrate_these = NULL;
+
+// name of file from which phase bins will be chosen
+char* binfile = NULL;
+
+// name of least squares minimization algorithm
+char* least_squares = NULL;
+
+// name of file containing MEAL::Function text interface commands
+vector<string> equation_configuration;
+
+bool unload_each_calibrated = true;
+bool fscrunch_data_to_template = false;
+
+string unload_path;
+
+void pcm::set_verbosity (int level)
 {
-  unloader.set_program ( "pcm" );
-  unloader.set_filename( "pcm.fits" );
+  verbose = true;
 
-  // Number of threads used to solve equations
-  unsigned nthread = 0;
+  if (level > 4)
+    Calibration::ReceptionModel::very_verbose = true;
 
-  // name of file containing list of Archive filenames
-  char* metafile = NULL;
+  if (level > 3) 
+    Calibration::ReceptionModel::verbose = true;
 
-  // name of file containing list of filenames to be calibrated
-  char* calibrate_these = NULL;
+  if (level > 2)
+    Calibration::SignalPath::verbose = true;
 
-  // name of file from which phase bins will be chosen
-  char* binfile = NULL;
+  if (level > 1)
+    Pulsar::Archive::set_verbosity (level-1);
 
-  // name of least squares minimization algorithm
-  char* least_squares = NULL;
+  Pulsar::Calibrator::verbose = level;
+}
 
-  // name of file containing MEAL::Function text interface commands
-  vector<string> equation_configuration;
+//! Add command line options
+void pcm::add_options (CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
 
-  bool unload_each_calibrated = true;
-  bool fscrunch_data_to_template = false;
+  //! Remove the -q, -v and -V (quiet, verbose and very verbose) options
+  arg = menu.find ("q");
+  if (arg)
+    menu.remove (arg);
+  
+  arg = menu.find ("v");
+  if (arg)
+    menu.remove (arg);
+  
+  arg = menu.find ("V");
+  if (arg)
+    menu.remove (arg);
 
-  string unload_path;
+  arg = menu.add (this, &pcm::set_verbosity, 'V', "level");
+  arg->set_help ("set verbosity level [0->4]");
+  
+  menu.add ("\n" "Output options:");
 
-  int gotc = 0;
+  arg = menu.add (&unloader, &SystemCalibrator::Unloader::set_archive_class,
+		  'A', "class");
+  arg->set_help ("set the output archive class name");
+  
+#if 0
+    "\n"
+    "  -O fname   set cal solution output filename (default=pcm.fits)\n"
+    "  -N         do not unload calibrated data files\n"
+    "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
+    "  -m model   receiver model name: e.g. bri00e19 or van04e18 [default]\n"
+    "  -l solver  solver: MEAL [default] of GSL \n"
+    "  -I fname   load impurity transformation from file \n"
+    "  -P fname   load projection transformations from file \n"
+    "  -x         estimate calibrator Stokes parameter using fluxcal solution \n"
+    "  -y         always trust the Pointing::feed_angle attribute \n"
+    "  -Z         ignore the sky coordinates of PolnCal observations \n"
+    "\n"
+    "  -C meta    filename with list of calibrator files \n"
+    "  -d dbase   filename of Calibration Database \n"
+    "  -M meta    filename with list of pulsar files \n"
+    "  -W meta2   filename with list of other data files to be calibrated \n"
+    "  -j job     preprocessing job \n"
+    "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
+    "  -K sigma       Reject outliers when computing CAL levels \n"
+    "\n"
+    "MEM: Measurement Equation Modeling \n"
+    "  -- observations of an unknown source as in van Straten (2004)\n"
+    "\n"
+    "  -t nproc   solve using nproc threads \n"
+    "\n"
+    "  -U PAR     model PAR with a unique value for each CAL \n"
+    "  -u PAR[:W] model PAR with a step at each CAL \n"
+    "  -i PAR:MJD model PAR with a step at the given epoch (MJD) \n"
+    "  -o PAR:N   model PAR as N degree polyomial \n"
+    "             where PAR is one of \n"
+    "               g = absolute gain \n"
+    "               b = differential gain \n"
+    "               r = differential phase \n"
+    "               a = all of the above \n"
+    "             and where W can be one of \n"
+    "               A = cals are observed after pulsars \n"
+    "               B = cals are observed before pulsars (default) \n"
+    "\n"
+    "  -B choose  set the phase bin selection policy: int, pol, orth, inv \n"
+    "             separate multiple policies with commas \n"
+    "  -c archive choose best input states from archive \n"
+    "\n"
+    "  -b bin     add phase bin to constraints \n"
+    "  -n nbin    set the number of phase bins to choose as input states \n"
+    "  -p pA,pB   set the phase window from which to choose input states \n"
+    "\n"
+    "  -a align   set the threshold for testing input data phase alignment \n"
+    "  -g         unique absolute gain for each pulsar observation [DEVEL]\n"
+    "  -r         enforce physically realizable Stokes parameters [DEVEL]\n"
+    "  -s         normalize Stokes parameters by total invariant interval \n"
+    "\n"
+    "  -F days    use flux calibrators within days of pulsar data mid-time\n"
+    "  -L hours   use reference sources within hours of pulsar data mid-time\n"
+    "  -Q         reference source coupled after frontend \n"
+    "\n"
+    "  Constraints on degeneracy under commutation \n"
+    "  -- See " PSRCHIVE_HTTP "/manuals/pcm/degeneracy.shtml \n"
+    "\n"
+    "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
+    "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
+    "  -k         assume that the receptors have equal ellipticities \n"
+    "  -Y         model the difference between FluxCal-On and FluxCal-Off \n"
+    "  -f         model each FluxCal with unique Stokes parameters \n"
+    "\n"
+    "METM: Measurement Equation Template Matching\n"
+    "  -- observations of a known source as in van Straten (2013) \n"
+    "\n"
+    "  -S fname   filename of calibrated standard \n"
+    "  -G         Fscrunch data to match number of channels of standard \n"
+    "  -H         allow software to choose the number of harmonics \n"
+    "  -n nbin    set the number of harmonics to use as input states \n"
+    "  -1         solve independently for each observation \n"
+    "  -z         share a single phase shift estimate b/w all observations \n"
+    "\n"
+    "See " PSRCHIVE_HTTP "/manuals/pcm for more details\n"
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:F:fGgHhI:i:J:j:K:kL:l:"
@@ -743,7 +806,6 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'A':
-      unloader.set_archive_class( optarg );
       break;
 
     case 'a':
@@ -1028,22 +1090,7 @@ int actual_main (int argc, char *argv[]) try
 
     case 'V':
     {
-      int level = atoi (optarg);
-      verbose = true;
 
-      if (level > 4)
-        Calibration::ReceptionModel::very_verbose = true;
-
-      if (level > 3) 
-        Calibration::ReceptionModel::verbose = true;
-
-      if (level > 2)
-        Calibration::SignalPath::verbose = true;
-
-      if (level > 1)
-        Pulsar::Archive::set_verbosity (level-1);
-
-      Pulsar::Calibrator::verbose = level;
 
       break;
     }
@@ -1060,33 +1107,22 @@ int actual_main (int argc, char *argv[]) try
       cout << "Unrecognised option" << endl;
     }
   }
+#endif
+}
 
+void pcm::setup ()
+{
   if (!template_filename && phmin == phmax && !binfile)
-  {
-    cerr << "pcm: In MEM mode, at least one of the following options"
+    throw Error (InvalidState, "pcm",
+      "In MEM mode, at least one of the following options"
       " must be specified:\n"
       " -p min,max  Choose constraints from the specified pulse phase range \n"
-      " -c archive  Choose optimal constraints from the specified archive \n"
-         << endl;
-    return -1;
-  }
+      " -c archive  Choose optimal constraints from the specified archive");
+
 
   if (!template_filename && fscrunch_data_to_template)
-  {
-    cerr << "pcm: In MEM mode, the -G option is not supported" << endl;
-    return -1;
-  }
-
-  if (metafile)
-    stringfload (&filenames, metafile);
-  for (int ai=optind; ai<argc; ai++)
-    dirglob (&filenames, argv[ai]);
-
-  if (filenames.empty())
-  {
-    cerr << "pcm: no archives were specified" << endl;
-    return -1;
-  }
+    throw Error (InvalidState, "pcm",
+		 "In MEM mode, the -G option is not supported");
 
   // assumes that sorting by filename also sorts by epoch
   sort (filenames.begin(), filenames.end());
@@ -1104,213 +1140,206 @@ int actual_main (int argc, char *argv[]) try
     prepare = mult;
   }
 
-  Reference::To<Pulsar::SystemCalibrator> model;
-  Reference::To<Pulsar::Archive> total;
-  Reference::To<Pulsar::Archive> archive;
+  unloader.set_program ( "pcm" );
+  unloader.set_filename( "pcm.fits" );
+}
 
-  cerr << "pcm: loading archives" << endl;
+  
+Reference::To<Pulsar::SystemCalibrator> model;
+Reference::To<Pulsar::Archive> total;
+Reference::To<Pulsar::Archive> archive;
 
-  for (unsigned i = 0; i < filenames.size(); i++) try
+void configure_model (Pulsar::SystemCalibrator* model)
+{
+  model->set_nthread (nthread);
+  model->set_report_projection (true);
+  model->set_outlier_threshold (outlier_threshold);
+
+  model->set_report_initial_state (prefit_report);
+  model->set_report_input_data (input_data);
+  model->set_report_input_failed (failed_report);
+
+  if (response)
+    model->set_response( response );
+
+  if (impurity)
+    model->set_impurity( impurity );
+
+  if (projection)
+    model->set_projection( projection );
+
+  if (gain_variation)
+    model->set_gain( gain_variation );
+
+  if (diff_gain_variation)
+    model->set_diff_gain( diff_gain_variation );
+
+  if (diff_phase_variation)
+    model->set_diff_phase( diff_phase_variation );
+
+  for (auto ptr : response_variation)
+    model->set_response_variation( ptr.first, ptr.second );
+
+  if (foreach_calibrator.get())
   {
-    archive = load (filenames[i]);
+    Reference::To< Calibration::SingleAxis > foreach;
+    foreach = new Calibration::SingleAxis;
+    foreach_calibrator.set_infit (foreach);
+    model->set_foreach_calibrator (foreach);
+  }
+  
+  if (stepeach_calibrator.get())
+  {
+    Reference::To< Calibration::VariableBackend > stepeach;
+    stepeach = new Calibration::VariableBackend;
+    stepeach_calibrator.set_infit (stepeach->get_backend());
+    model->set_stepeach_calibrator (stepeach);
+  }
 
-    if (archive->get_type() == Signal::Pulsar)
-    {
-      if (verbose)
-        cerr << "pcm: preparing pulsar data" << endl;
+  for (unsigned i=0; i < gain_steps.size(); i++)
+    model->add_gain_step (gain_steps[i]);
+  
+  for (unsigned i=0; i < diff_gain_steps.size(); i++)
+    model->add_diff_gain_step (diff_gain_steps[i]);
 
-      prepare->prepare (archive);
-    }
+  for (unsigned i=0; i < diff_phase_steps.size(); i++)
+    model->add_diff_phase_step (diff_phase_steps[i]);
 
-    if (!model) try
-    {
-      cerr << "pcm: creating model" << endl;
+  if (least_squares)
+    model->set_solver( new_solver(least_squares) );
 
-      if (template_filename)
-        model = matrix_template_matching (template_filename);
-      else
-        model = measurement_equation_modeling (binfile, archive->get_nbin());
+  model->get_solver()->set_verbosity( solver_verbosity );
 
-      model->set_nthread (nthread);
-      model->set_report_projection (true);
-      model->set_outlier_threshold (outlier_threshold);
+  if (retry_chisq)
+    model->set_retry_reduced_chisq( retry_chisq );
 
-      model->set_report_initial_state (prefit_report);
-      model->set_report_input_data (input_data);
-      model->set_report_input_failed (failed_report);
+  if (invalid_chisq)
+    model->set_invalid_reduced_chisq( invalid_chisq );
 
-      if (response)
-        model->set_response( response );
+  model->set_equation_configuration( equation_configuration );
+}
 
-      if (impurity)
-        model->set_impurity( impurity );
+void check_phase (Pulsar::Archive* archive)
+{
+  Reference::To<Pulsar::Archive> temp = archive->total();
+  Estimate<double> shift = temp->get_Profile(0,0,0)->shift (*phase_std);
 
-      if (projection)
-        model->set_projection( projection );
+  double abs_shift = fabs( shift.get_value() );
+  
+  if ( auto_alignment_threshold &&
+       abs_shift > auto_alignment_threshold * shift.get_error() )
+  {
+    cerr << "pcm: phase shifting observation to match reference" << endl;
+    archive->rotate_phase( shift.get_value() );
+  }
 
-      if (gain_variation)
-        model->set_gain( gain_variation );
+  else if ( alignment_threshold &&
+	    abs_shift > 1.0 / phase_std->get_nbin() &&
+	    abs_shift > alignment_threshold * shift.get_error() )
+  {
+    /* if the shift is greater than 1 phase bin and significantly
+       more than the error, then there may be a problem */
 
-      if (diff_gain_variation)
-        model->set_diff_gain( diff_gain_variation );
+    Error error (InvalidParam, "pcm");
+    error <<
+      "ERROR apparent phase shift between input archives\n"
+      "\tshift = " << shift.get_value() << " +/- " << shift.get_error () <<
+      "  =  " << int(shift.get_value() * phase_std->get_nbin()) <<
+      " phase bins";
+    
+    throw error;
+  }
+}
 
-      if (diff_phase_variation)
-        model->set_diff_phase( diff_phase_variation );
+void pcm::process (Pulsar::Archive* archive)
+{
+  if (archive->get_type() == Signal::Pulsar)
+  {
+    if (verbose)
+      cerr << "pcm: preparing pulsar data" << endl;
 
-      for (auto ptr : response_variation)
-        model->set_response_variation( ptr.first, ptr.second );
+    prepare->prepare (archive);
+  }
 
-      if (foreach_calibrator.get())
-      {
-        Reference::To< Calibration::SingleAxis > foreach;
-        foreach = new Calibration::SingleAxis;
-	foreach_calibrator.set_infit (foreach);
-        model->set_foreach_calibrator (foreach);
-      }
+  if (!model)
+  {
+    cerr << "pcm: creating model" << endl;
 
-      if (stepeach_calibrator.get())
-      {
-        Reference::To< Calibration::VariableBackend > stepeach;
-        stepeach = new Calibration::VariableBackend;
-	stepeach_calibrator.set_infit (stepeach->get_backend());
-        model->set_stepeach_calibrator (stepeach);
-      }
+    if (template_filename)
+      model = matrix_template_matching (template_filename);
+    else
+      model = measurement_equation_modeling (binfile, archive->get_nbin());
 
-      for (unsigned i=0; i < gain_steps.size(); i++)
-        model->add_gain_step (gain_steps[i]);
+    configure_model (model);  
+  }
 
-      for (unsigned i=0; i < diff_gain_steps.size(); i++)
-        model->add_diff_gain_step (diff_gain_steps[i]);
+  /*
+    test for phase shift only if phase_std is not from current archive.
+    this test will fail if binfile is a symbollic link.
+  */
+  if (phase_std && (binfile==NULL || archive->get_filename() != binfile))
+  {
+    if (verbose)
+      cerr << "pcm: creating checking phase" << endl;
 
-      for (unsigned i=0; i < diff_phase_steps.size(); i++)
-        model->add_diff_phase_step (diff_phase_steps[i]);
+    check_phase (archive);
+  }
 
-      if (least_squares)
-        model->set_solver( new_solver(least_squares) );
+  if ((alignment_threshold || auto_alignment_threshold) && !phase_std)
+  {
+    cerr << "pcm: creating phase reference" << endl;
 
-      model->get_solver()->set_verbosity( solver_verbosity );
+    // store an fscrunched and tscrunched clone for phase reference
+    Reference::To<Archive> temp = archive->total();
+    phase_std = temp->get_Profile (0,0,0);
+  }
 
-      if (retry_chisq)
-        model->set_retry_reduced_chisq( retry_chisq );
+  if (fscrunch_data_to_template &&
+      model->get_nchan() != archive->get_nchan())
+  {
+    cerr << "pcm: frequency integrating data (nchan=" << archive->get_nchan()
+	 << ") to match calibrator (nchan=" << model->get_nchan()
+	 << ")" << endl;
+    archive->fscrunch_to_nchan (model->get_nchan());
+  }
 
-      if (invalid_chisq)
-        model->set_invalid_reduced_chisq( invalid_chisq );
+  cerr << "pcm: adding observation" << endl;
 
-      model->set_equation_configuration( equation_configuration );
+  model->preprocess( archive );
+  model->add_observation( archive );
 
-    }
-    catch (Error& error)
-    {
-      cerr << "pcm: ERROR while creating model\n" << error << endl;
-      return -1;
-    }
+  if (archive->get_type() != Signal::Pulsar)
+    return;
+      
+  if (verbose)
+    cerr << "pcm: calibrate with current best guess" << endl;
 
-    /*
-      test for phase shift only if phase_std is not from current archive.
-      this test will fail if binfile is a symbollic link.
-    */
-    if (phase_std && (binfile==NULL || archive->get_filename() != binfile)) try
-    {
-      if (verbose)
-        cerr << "pcm: creating checking phase" << endl;
+  model->precalibrate (archive);
 
-      Reference::To<Pulsar::Archive> temp = archive->total();
-      Estimate<double> shift = temp->get_Profile(0,0,0)->shift (*phase_std);
-
-      double abs_shift = fabs( shift.get_value() );
-
-      if ( auto_alignment_threshold &&
-           abs_shift > auto_alignment_threshold * shift.get_error() )
-      {
-        cerr << "pcm: phase shifting observation to match reference" << endl;
-        archive->rotate_phase( shift.get_value() );
-      }
-
-      else if ( alignment_threshold &&
-                abs_shift > 1.0 / phase_std->get_nbin() &&
-                abs_shift > alignment_threshold * shift.get_error() )
-      {
-
-        /* if the shift is greater than 1 phase bin and significantly
-           more than the error, then there may be a problem */
-
-        cerr << endl <<
-          "pcm: ERROR apparent phase shift between input archives\n"
-          "\tshift = " << shift.get_value() << " +/- " << shift.get_error () <<
-          "  =  " << int(shift.get_value() * phase_std->get_nbin()) <<
-          " phase bins" << endl << endl;
-
-        archive = 0;
-        continue;
-      }
-    }
-    catch (Error& error)
-    {
-      cerr << "pcm: ERROR while testing phase shift\n" << error << endl;
-      archive = 0;
-      continue;
-    }
-
-    if ((alignment_threshold || auto_alignment_threshold) && !phase_std)
-    {
-      cerr << "pcm: creating phase reference" << endl;
-
-      // store an fscrunched and tscrunched clone for phase reference
-      Reference::To<Archive> temp = archive->total();
-      phase_std = temp->get_Profile (0,0,0);
-    }
-
-    if (fscrunch_data_to_template &&
-        model->get_nchan() != archive->get_nchan())
-    {
-      cerr << "pcm: frequency integrating data (nchan=" << archive->get_nchan()
-           << ") to match calibrator (nchan=" << model->get_nchan()
-           << ")" << endl;
-      archive->fscrunch_to_nchan (model->get_nchan());
-    }
-
-    cerr << "pcm: adding observation" << endl;
-
-    model->preprocess( archive );
-    model->add_observation( archive );
-
-    if (archive->get_type() == Signal::Pulsar)
-    {
-      if (verbose)
-        cerr << "pcm: calibrate with current best guess" << endl;
-
-      model->precalibrate (archive);
-
-      if (solve_each)
-      {
-        string newname = replace_extension (filenames[i], ".calib");
-        archive->unload (newname);    
-        cerr << "pcm: unloaded " << newname << endl;
-      }
-
-      if (verbose)
-        cerr << "pcm: add to total" << endl;
+  if (solve_each)
+  {
+    string oldname = archive->get_filename();
+    string newname = replace_extension (oldname, ".calib");
+    archive->unload (newname);    
+    cerr << "pcm: unloaded " << newname << endl;
+  }
 
 #if 0
-      if (!total)
-        total = archive;
-      else
-        total->append (archive);
+  if (verbose)
+    cerr << "pcm: add to total" << endl;
 
-      total->tscrunch ();
+  if (!total)
+    total = archive;
+  else
+    total->append (archive);
+    
+  total->tscrunch ();
 #endif
 
-    }
+}
 
-    archive = 0;
-  }
-  catch (Error& error)
-  {
-    cerr << "pcm: error while handling " << filenames[i] << endl;
-    cerr << error << endl;
-    archive = 0;
-  }
-
+void pcm::finalize ()
+{
   if (solve_each)
   {
     if (total)
@@ -1318,7 +1347,7 @@ int actual_main (int argc, char *argv[]) try
       cerr << "pcm: writing total calibrated pulsar archive" << endl;
       total->unload ("total.ar");
     }
-    return 0;
+    return;
   }
 
   if (total)
@@ -1380,7 +1409,7 @@ int actual_main (int argc, char *argv[]) try
   catch (Error& error)
   {
     cerr << error << endl;
-    return -1;
+    return;
   }
 
   if (model->has_valid())
@@ -1537,13 +1566,6 @@ int actual_main (int argc, char *argv[]) try
 #endif // HAVE_PGPLOT
 
   cerr << "pcm: finished" << endl;
-
-  return 0;
-}
-catch (Error& error)
-{
-  cerr << "pcm: error" << error << endl;
-  return -1;
 }
 
 
