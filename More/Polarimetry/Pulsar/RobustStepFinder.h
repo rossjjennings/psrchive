@@ -23,8 +23,9 @@ namespace Pulsar
   public:
 
     //! Default constructor
-    RobustStepFinder () { step_threshold = 1.7; }
-    
+    RobustStepFinder (float threshold = 1.7) { step_threshold = threshold; }
+
+    void set_step_threshold (float val) { step_threshold = val; }
     void process (SystemCalibrator*);
 
   };

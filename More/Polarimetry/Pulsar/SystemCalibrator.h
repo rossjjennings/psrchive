@@ -206,6 +206,12 @@ namespace Pulsar
     //! Get the threshold used to reject outliers when computing levels
     float get_outlier_threshold () const { return outlier_threshold; }
 
+    //! Set the algorithm used to automatically insert steps in response
+    void set_step_finder (StepFinder*);
+
+    //! Get the algorithm used to automatically insert steps in response
+    StepFinder* get_step_finder ();
+
     //! Solve equation for each frequency
     virtual void solve ();
     

@@ -5,8 +5,6 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/RobustStepFinder.h"
-
 #include "Pulsar/SystemCalibrator.h"
 #include "Pulsar/ReceptionModelSolver.h"
 
@@ -44,14 +42,15 @@
 #include <assert.h>
 
 using namespace std;
+using namespace Pulsar;
 using namespace Calibration;
 
 /*! 
-  If a Pulsar::Archive is provided, and if it contains a
+  If a Archive is provided, and if it contains a
   SystemCalibratorExtension, then the constructed instance can be
-  used to calibrate other Pulsar::Archive instances.
+  used to calibrate other Archive instances.
 */
-Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
+SystemCalibrator::SystemCalibrator (Archive* archive)
 {
   normalize_by_invariant = false;
 
@@ -85,14 +84,13 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 
   projection = new VariableProjectionCorrection;
 
-  step_finder = new RobustStepFinder;
   step_after_cal = false;
 
   if (archive)
     set_calibrator (archive);
 }
 
-void Pulsar::SystemCalibrator::set_calibrator (const Archive* archive)
+void SystemCalibrator::set_calibrator (const Archive* archive)
 {
   if (!archive)
     return;
@@ -103,25 +101,25 @@ void Pulsar::SystemCalibrator::set_calibrator (const Archive* archive)
   calibrator_stokes = archive->get<const CalibratorStokes>();
 }
 
-void Pulsar::SystemCalibrator::set_projection (VariableTransformation* _projection)
+void SystemCalibrator::set_projection (VariableTransformation* _projection)
 {
   projection = _projection;
 }
 
-void Pulsar::SystemCalibrator::set_normalize_by_invariant (bool flag)
+void SystemCalibrator::set_normalize_by_invariant (bool flag)
 {
   normalize_by_invariant = flag;
 }
 
 //! Return true if least squares minimization solvers are available
-bool Pulsar::SystemCalibrator::has_solver () const
+bool SystemCalibrator::has_solver () const
 {
   return true;
 }
 
 //! Return the transformation for the specified channel
 const Calibration::ReceptionModel::Solver* 
-Pulsar::SystemCalibrator::get_solver (unsigned ichan) const
+SystemCalibrator::get_solver (unsigned ichan) const
 {
   check_ichan ("get_solver", ichan);
   return model[ichan]->get_equation()->get_solver();
@@ -129,19 +127,19 @@ Pulsar::SystemCalibrator::get_solver (unsigned ichan) const
 
 //! Return the transformation for the specified channel
 Calibration::ReceptionModel::Solver* 
-Pulsar::SystemCalibrator::get_solver (unsigned ichan)
+SystemCalibrator::get_solver (unsigned ichan)
 {
   assert (ichan < model.size());
   return model[ichan]->get_equation()->get_solver();
 }
 
 void 
-Pulsar::SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
+SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
 {
   solver = s;
 }
 
-Calibration::ReceptionModel::Solver* Pulsar::SystemCalibrator::get_solver ()
+Calibration::ReceptionModel::Solver* SystemCalibrator::get_solver ()
 {
   if (!solver)
     solver = Calibration::ReceptionModel::new_default_Solver ();
@@ -150,35 +148,47 @@ Calibration::ReceptionModel::Solver* Pulsar::SystemCalibrator::get_solver ()
 }
 
 //! Copy constructor
-Pulsar::SystemCalibrator::SystemCalibrator (const SystemCalibrator& calibrator)
+SystemCalibrator::SystemCalibrator (const SystemCalibrator& calibrator)
 {
 }
 
 //! Destructor
-Pulsar::SystemCalibrator::~SystemCalibrator ()
+SystemCalibrator::~SystemCalibrator ()
 {
 }
 
-Pulsar::Calibrator::Info*
-Pulsar::SystemCalibrator::get_Info () const
+//! Set the algorithm used to automatically insert steps in response
+void SystemCalibrator::set_step_finder (StepFinder* finder)
+{
+  step_finder = finder;
+}
+
+//! Get the algorithm used to automatically insert steps in response
+SystemCalibrator::StepFinder* SystemCalibrator::get_step_finder ()
+{
+  return step_finder;
+}
+
+Calibrator::Info*
+SystemCalibrator::get_Info () const
 {
   export_prepare ();
 
   return PolnCalibrator::get_Info ();
 }
 
-void Pulsar::SystemCalibrator::set_refcal_through_frontend (bool flag)
+void SystemCalibrator::set_refcal_through_frontend (bool flag)
 {
   refcal_through_frontend = flag;
 }
 
 
-MJD Pulsar::SystemCalibrator::get_epoch () const
+MJD SystemCalibrator::get_epoch () const
 {
   return 0.5 * (start_epoch + end_epoch);
 }
 
-void Pulsar::SystemCalibrator::add_epoch (const MJD& epoch)
+void SystemCalibrator::add_epoch (const MJD& epoch)
 {
   if (epoch < start_epoch || start_epoch == MJD::zero)
     start_epoch = epoch;
@@ -187,7 +197,7 @@ void Pulsar::SystemCalibrator::add_epoch (const MJD& epoch)
 }
 
 //! Get the total number of input polarization states
-unsigned Pulsar::SystemCalibrator::get_nstate () const
+unsigned SystemCalibrator::get_nstate () const
 {
   unsigned nstate = 0;
 
@@ -198,7 +208,7 @@ unsigned Pulsar::SystemCalibrator::get_nstate () const
 }
 
 //! Return true if the state index is a pulsar
-unsigned Pulsar::SystemCalibrator::get_state_is_pulsar (unsigned istate) const
+unsigned SystemCalibrator::get_state_is_pulsar (unsigned istate) const
 {
   if (!calibrator_estimate.size())
     return true;
@@ -207,20 +217,20 @@ unsigned Pulsar::SystemCalibrator::get_state_is_pulsar (unsigned istate) const
 }
 
 //! Get the number of pulsar polarization states in the model
-unsigned Pulsar::SystemCalibrator::get_nstate_pulsar () const
+unsigned SystemCalibrator::get_nstate_pulsar () const
 {
   return 0;
 }
     
 //! Retern a new plot information interface for the specified pulsar state
-Pulsar::Calibrator::Info* 
-Pulsar::SystemCalibrator::new_info_pulsar (unsigned istate) const
+Calibrator::Info* 
+SystemCalibrator::new_info_pulsar (unsigned istate) const
 {
   throw Error (InvalidState, "SystemCalibrator::new_info_pulsar",
 	       "not implemented");
 }
 
-unsigned Pulsar::SystemCalibrator::get_nchan () const
+unsigned SystemCalibrator::get_nchan () const
 {
   unsigned nchan = 0;
 
@@ -244,7 +254,7 @@ unsigned Pulsar::SystemCalibrator::get_nchan () const
   return nchan;
 }
 
-unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
+unsigned SystemCalibrator::get_ndata (unsigned ichan) const
 {
   check_ichan ("get_ndata", ichan);
   return model[ichan]->get_equation()->get_ndata ();
@@ -252,7 +262,7 @@ unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
 
 using namespace MEAL;
 
-void Pulsar::SystemCalibrator::set_response( MEAL::Complex2* f )
+void SystemCalibrator::set_response( MEAL::Complex2* f )
 {
   response = f;
   type = new_CalibratorType (response);
@@ -262,59 +272,59 @@ void Pulsar::SystemCalibrator::set_response( MEAL::Complex2* f )
 	 << response->get_name() << " type=" << type->get_name() << endl;
 }
 
-void Pulsar::SystemCalibrator::set_response_variation( unsigned iparam,
+void SystemCalibrator::set_response_variation( unsigned iparam,
                                                        Univariate<Scalar>* f )
 {
   response_variation[iparam] = f;
 }
 
-void Pulsar::SystemCalibrator::set_impurity( MEAL::Real4* f )
+void SystemCalibrator::set_impurity( MEAL::Real4* f )
 {
   impurity = f;
 }
 
-void Pulsar::SystemCalibrator::set_foreach_calibrator (const MEAL::Complex2* x)
+void SystemCalibrator::set_foreach_calibrator (const MEAL::Complex2* x)
 {
   foreach_calibrator = x;
 }
 
-void Pulsar::SystemCalibrator::set_stepeach_calibrator (const Calibration::VariableBackend* x)
+void SystemCalibrator::set_stepeach_calibrator (const Calibration::VariableBackend* x)
 {
   stepeach_calibrator = x;
 }
 
-void Pulsar::SystemCalibrator::set_gain( Univariate<Scalar>* f )
+void SystemCalibrator::set_gain( Univariate<Scalar>* f )
 {
   gain_variation = f;
 }
 
-void Pulsar::SystemCalibrator::set_diff_gain( Univariate<Scalar>* f )
+void SystemCalibrator::set_diff_gain( Univariate<Scalar>* f )
 {
   diff_gain_variation = f;
 }
 
-void Pulsar::SystemCalibrator::set_diff_phase( Univariate<Scalar>* f )
+void SystemCalibrator::set_diff_phase( Univariate<Scalar>* f )
 {
   diff_phase_variation = f;
 }
 
-void Pulsar::SystemCalibrator::add_gain_step (const MJD& mjd)
+void SystemCalibrator::add_gain_step (const MJD& mjd)
 {
   gain_steps.push_back (mjd);
 }
 
-void Pulsar::SystemCalibrator::add_diff_gain_step (const MJD& mjd)
+void SystemCalibrator::add_diff_gain_step (const MJD& mjd)
 {
   diff_gain_steps.push_back (mjd);
 }
 
-void Pulsar::SystemCalibrator::add_diff_phase_step (const MJD& mjd)
+void SystemCalibrator::add_diff_phase_step (const MJD& mjd)
 {
   diff_phase_steps.push_back (mjd);
 }
 
 //! Add a VariableBackend step at the specified MJD
-void Pulsar::SystemCalibrator::add_step (const MJD& mjd,
+void SystemCalibrator::add_step (const MJD& mjd,
 					 Calibration::VariableBackend* backend)
 {
   if (model.size() == 0)
@@ -325,7 +335,7 @@ void Pulsar::SystemCalibrator::add_step (const MJD& mjd,
     model[i]->add_step (mjd, backend->clone());
 }
 
-void Pulsar::SystemCalibrator::preprocess (Archive* data)
+void SystemCalibrator::preprocess (Archive* data)
 {
   if (!data)
     return;
@@ -350,7 +360,7 @@ void Pulsar::SystemCalibrator::preprocess (Archive* data)
 }
 
 //! Add the observation to the set of constraints
-void Pulsar::SystemCalibrator::add_observation (const Archive* data) try
+void SystemCalibrator::add_observation (const Archive* data) try
 {
   if (!data)
     return;
@@ -366,7 +376,7 @@ catch (Error& error)
 }
 
 //! Add the specified pulsar observation to the set of constraints
-void Pulsar::SystemCalibrator::add_pulsar (const Archive* data) try
+void SystemCalibrator::add_pulsar (const Archive* data) try
 {
   if (verbose)
     cerr << "SystemCalibrator::add_pulsar"
@@ -394,7 +404,7 @@ catch (Error& error)
   throw error += "SystemCalibrator::add_pulsar";
 }
 
-void Pulsar::SystemCalibrator::prepare (const Archive* data) try
+void SystemCalibrator::prepare (const Archive* data) try
 {  
   if (verbose)
     cerr << "SystemCalibrator::prepare"
@@ -443,7 +453,7 @@ catch (Error& error)
 
 //! Add the specified pulsar observation to the set of constraints
 void 
-Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
+SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 {
   const Integration* integration = data->get_Integration (isub);
   unsigned nchan = integration->get_nchan ();
@@ -606,7 +616,7 @@ catch (Error& error)
 }
 
 //! Add the specified pulsar observation to the set of constraints
-void Pulsar::SystemCalibrator::match (const Archive* data)
+void SystemCalibrator::match (const Archive* data)
 {
   if (!has_calibrator())
     throw Error (InvalidState, "SystemCalibrator::match",
@@ -619,17 +629,17 @@ void Pulsar::SystemCalibrator::match (const Archive* data)
 		 "'" + get_calibrator()->get_filename() + reason);
 }
 
-void Pulsar::SystemCalibrator::set_calibrators (const vector<string>& n)
+void SystemCalibrator::set_calibrators (const vector<string>& n)
 {
   calibrator_filenames = n;
 }
 
-void Pulsar::SystemCalibrator::set_flux_calibrator (const FluxCalibrator* fluxcal)
+void SystemCalibrator::set_flux_calibrator (const FluxCalibrator* fluxcal)
 {
   flux_calibrator = fluxcal;
 }
 
-void Pulsar::SystemCalibrator::load_calibrators ()
+void SystemCalibrator::load_calibrators ()
 {
   if (calibrator_filenames.size() == 0)
     return;
@@ -641,7 +651,7 @@ void Pulsar::SystemCalibrator::load_calibrators ()
 	   << calibrator_filenames[ifile] << endl;
 
     Reference::To<Archive> archive;
-    archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
+    archive = Archive::load(calibrator_filenames[ifile]);
     add_calibrator (archive);    
   }
   catch (Error& error)
@@ -711,7 +721,7 @@ void Pulsar::SystemCalibrator::load_calibrators ()
 }
 
 //! Add the specified pulsar observation to the set of constraints
-void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
+void SystemCalibrator::add_calibrator (const Archive* data)
 {
   if (!has_pulsar)
   {
@@ -760,7 +770,7 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
 }
 
 //! Add the ReferenceCalibrator observation to the set of constraints
-void Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
+void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
   try 
 {
   unsigned nchan = get_nchan ();
@@ -914,7 +924,7 @@ catch (Error& error)
 }
 
 
-void Pulsar::SystemCalibrator::submit_calibrator_data () try 
+void SystemCalibrator::submit_calibrator_data () try 
 {
   unsigned nsub = calibrator_data.size();
   
@@ -999,7 +1009,7 @@ catch (Error& error)
 }
 
 
-void Pulsar::SystemCalibrator::init_estimates
+void SystemCalibrator::init_estimates
 ( std::vector<SourceEstimate>& estimate, unsigned ibin )
 {
   unsigned nchan = get_nchan ();
@@ -1032,7 +1042,7 @@ void Pulsar::SystemCalibrator::init_estimates
   }
 }
 
-void Pulsar::SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
+void SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
 {
   if (verbose > 2)
     cerr << "SystemCalibrator::prepare_calibrator_estimate" << endl;
@@ -1041,7 +1051,7 @@ void Pulsar::SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
     create_calibrator_estimate();
 }
 
-void Pulsar::SystemCalibrator::create_calibrator_estimate ()
+void SystemCalibrator::create_calibrator_estimate ()
 {
   if (verbose)
     cerr << "SystemCalibrator::create_calibrator_estimate" << endl;
@@ -1069,7 +1079,7 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
     }
 }
 
-void Pulsar::SystemCalibrator::submit_calibrator_data 
+void SystemCalibrator::submit_calibrator_data 
 (
  CoherencyMeasurementSet& measurements,
  const SourceObservation& data
@@ -1112,7 +1122,7 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
   backend->add_weight (1.0);
 }
 
-void Pulsar::SystemCalibrator::integrate_calibrator_data
+void SystemCalibrator::integrate_calibrator_data
 ( const SourceObservation& data )
 {
   Jones< Estimate<double> > zero (0.0);
@@ -1165,7 +1175,7 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
   calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
 
-void Pulsar::SystemCalibrator::integrate_calibrator_solution
+void SystemCalibrator::integrate_calibrator_solution
  ( const SourceObservation& data )
 {
   if (!model[data.ichan])
@@ -1188,8 +1198,8 @@ void Pulsar::SystemCalibrator::integrate_calibrator_solution
 }
 
 
-const Pulsar::CalibratorStokes*
-Pulsar::SystemCalibrator::get_CalibratorStokes () const
+const CalibratorStokes*
+SystemCalibrator::get_CalibratorStokes () const
 {
   if (calibrator_stokes)
     return calibrator_stokes;
@@ -1232,7 +1242,7 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
   return calibrator_stokes;
 }
 
-void Pulsar::SystemCalibrator::create_model () try
+void SystemCalibrator::create_model () try
 {
   // this requirement could be made optional if necessary
   if (!has_Receiver())
@@ -1303,7 +1313,7 @@ catch (Error& error)
   throw error += "SystemCalibrator::create_model";
 }
 
-void Pulsar::SystemCalibrator::init_model (unsigned ichan)
+void SystemCalibrator::init_model (unsigned ichan)
 {
   if (verbose > 2)
     cerr << "SystemCalibrator::init_model ichan=" << ichan << endl;
@@ -1375,24 +1385,24 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
 
 //! Return the SignalPath for the specified channel
 const Calibration::SignalPath*
-Pulsar::SystemCalibrator::get_model (unsigned ichan) const
+SystemCalibrator::get_model (unsigned ichan) const
 {
   check_ichan ("get_model", ichan);
   return model[ichan];
 }
 
-void Pulsar::SystemCalibrator::set_nthread (unsigned nthread)
+void SystemCalibrator::set_nthread (unsigned nthread)
 {
   queue.resize (nthread);
 }
 
 void
-Pulsar::SystemCalibrator::set_equation_configuration (const vector<string>& c)
+SystemCalibrator::set_equation_configuration (const vector<string>& c)
 {
   equation_configuration = c;
 }
 
-void Pulsar::SystemCalibrator::configure ( MEAL::Function* equation ) try
+void SystemCalibrator::configure ( MEAL::Function* equation ) try
 {
   if (equation_configuration.size() == 0)
     return;
@@ -1413,7 +1423,7 @@ catch (Error& error)
   exit (-1);
 }
 
-void Pulsar::SystemCalibrator::close_input_failed ()
+void SystemCalibrator::close_input_failed ()
 {
   for (unsigned ichan=0; ichan < input_failed.size(); ichan++)
   {
@@ -1423,7 +1433,7 @@ void Pulsar::SystemCalibrator::close_input_failed ()
   input_failed.resize(0);
 }
 
-void Pulsar::SystemCalibrator::print_input_failed 
+void SystemCalibrator::print_input_failed 
      (const std::vector<Calibration::SourceEstimate>& sources)
 {
   unsigned nchan = sources.size();
@@ -1446,7 +1456,7 @@ void Pulsar::SystemCalibrator::print_input_failed
     sources[ichan].report_input_failed (*(input_failed[ichan]));
 }
 
-void Pulsar::SystemCalibrator::solve_prepare ()
+void SystemCalibrator::solve_prepare ()
 {
   if (is_prepared)
     return;
@@ -1512,7 +1522,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
   is_prepared = true;
 }
 
-float Pulsar::SystemCalibrator::get_reduced_chisq (unsigned ichan) const
+float SystemCalibrator::get_reduced_chisq (unsigned ichan) const
 {
   check_ichan ("get_reduced_chisq", ichan);
 
@@ -1527,7 +1537,7 @@ float Pulsar::SystemCalibrator::get_reduced_chisq (unsigned ichan) const
   return chisq/free;
 }
 
-void Pulsar::SystemCalibrator::solve () try
+void SystemCalibrator::solve () try
 {
   ReceptionModel::Solver::report_chisq = true;
 
@@ -1661,7 +1671,7 @@ catch (Error& error)
   throw error += "SystemCalibrator::solve";
 }
 
-void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
+void SystemCalibrator::resolve (unsigned ichan) try
 {
   unsigned nchan = get_nchan ();
 
@@ -1739,17 +1749,17 @@ catch (Error& error)
   throw error += "SystemCalibrator::resolve";
 }
 
-bool Pulsar::SystemCalibrator::get_prepared () const
+bool SystemCalibrator::get_prepared () const
 {
   return is_prepared;
 }
 
-bool Pulsar::SystemCalibrator::get_solved () const
+bool SystemCalibrator::get_solved () const
 {
   return is_solved;
 }
 
-bool Pulsar::SystemCalibrator::has_valid () const
+bool SystemCalibrator::has_valid () const
 {
   unsigned nchan = model.size();
   
@@ -1761,7 +1771,7 @@ bool Pulsar::SystemCalibrator::has_valid () const
 }
 
 /*! Retrieves the transformation from the standard model in each channel */
-void Pulsar::SystemCalibrator::calculate_transformation ()
+void SystemCalibrator::calculate_transformation ()
 {
   unsigned nchan = get_nchan ();
 
@@ -1779,7 +1789,7 @@ void Pulsar::SystemCalibrator::calculate_transformation ()
 }
 
 //! Calibrate the polarization of the given archive
-void Pulsar::SystemCalibrator::precalibrate (Archive* data)
+void SystemCalibrator::precalibrate (Archive* data)
 {
   if (verbose > 2)
     cerr << "SystemCalibrator::precalibrate" << endl;
@@ -1906,7 +1916,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
 
 MEAL::Complex2* 
-Pulsar::SystemCalibrator::get_transformation (const Archive* data,
+SystemCalibrator::get_transformation (const Archive* data,
 					      unsigned isubint, unsigned ichan)
 {
   const Integration* integration = data->get_Integration (isubint);
@@ -1956,8 +1966,8 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
   return congruence->get_transformation();
 }
 
-Pulsar::Archive*
-Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
+Archive*
+SystemCalibrator::new_solution (const string& class_name) const try
 {
   if (verbose > 2) cerr << "SystemCalibrator::new_solution"
     " create CalibratorStokes Extension" << endl;
@@ -1975,7 +1985,7 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
 
   if (has_Receiver())
   {
-    Pulsar::Receiver* rcvr = get_Receiver()->clone();
+    Receiver* rcvr = get_Receiver()->clone();
 
     /*
       WvS - 14 May 2012
@@ -2003,38 +2013,37 @@ catch (Error& error)
   throw error += "SystemCalibrator::new_solution";
 }
 
-void Pulsar::SystemCalibrator::set_retry_reduced_chisq (float reduced_chisq)
+void SystemCalibrator::set_retry_reduced_chisq (float reduced_chisq)
 {
   retry_chisq = reduced_chisq;
 }
 
-void Pulsar::SystemCalibrator::set_invalid_reduced_chisq (float reduced_chisq)
+void SystemCalibrator::set_invalid_reduced_chisq (float reduced_chisq)
 {
   invalid_chisq = reduced_chisq;
 }
 
-void Pulsar::SystemCalibrator::set_report_projection (bool flag)
+void SystemCalibrator::set_report_projection (bool flag)
 {
   report_projection = flag;
 }
 
-void Pulsar::SystemCalibrator::set_report_initial_state (bool flag)
+void SystemCalibrator::set_report_initial_state (bool flag)
 {
   report_initial_state = flag;
 }
 
-void Pulsar::SystemCalibrator::set_report_input_data (bool flag)
+void SystemCalibrator::set_report_input_data (bool flag)
 {
   report_input_data = flag;
 }
 
-void Pulsar::SystemCalibrator::set_report_input_failed (bool flag)
+void SystemCalibrator::set_report_input_failed (bool flag)
 {
   report_input_failed = flag;
 }
 
-void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)
-const
+void SystemCalibrator::check_ichan (const char* name, unsigned ichan) const
 {
   if (ichan >= model.size())
     throw Error (InvalidRange, "SystemCalibrator::" + string(name),

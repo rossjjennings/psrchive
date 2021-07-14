@@ -18,6 +18,7 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/RobustStepFinder.h"
 
 #include "Pulsar/ManualVariableTransformation.h"
 #include "Pulsar/ManualPolnCalibrator.h"
@@ -1145,6 +1146,9 @@ void configure_model (Pulsar::SystemCalibrator* model)
   model->set_nthread (nthread);
   model->set_report_projection (true);
   model->set_outlier_threshold (outlier_threshold);
+
+  if (step_threshold)
+    model->set_step_finder( new RobustStepFinder (step_threshold) );
 
   model->set_report_initial_state (prefit_report);
   model->set_report_input_data (input_data);
