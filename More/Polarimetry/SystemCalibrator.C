@@ -419,12 +419,13 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
 
   if (!calibrator_data_submitted)
   {
-    cerr << "not yet submitted" << endl;
-
     if (step_finder)
-      step_finder->process (this);
+    {
+      if (verbose)
+        cerr << "SystemCalibrator::prepare finding steps" << endl;
 
-    cerr << "about to submit" << endl;
+      step_finder->process (this);
+    }
     
     if (verbose)
       cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
