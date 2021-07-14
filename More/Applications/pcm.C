@@ -133,6 +133,10 @@ protected:
   void add_options (CommandLine::Menu&);
 
   void set_alignment_threshold (const string& arg);
+  void load_calibrator_database ();
+  void get_span ();
+  vector<MJD> get_mjds ();
+  void print_time_variation (SystemCalibrator* model);
 
 };
 
@@ -146,14 +150,14 @@ pcm::pcm () : Pulsar::Application ("pcm",
 }
 
 // Construct a calibrator model for MEM mode
-SystemCalibrator* measurement_equation_modeling (const char* binname,
+SystemCalibrator* measurement_equation_modeling (const string& binname,
                                                  unsigned nbin);
 
 // Construct a calibrator model for METM mode
 SystemCalibrator* matrix_template_matching (const string& stdname);
 
 // Plot the various components of the model
-void plot_state (SystemCalibrator* model, const std::string& state);
+void plot_state (SystemCalibrator* model, const string& state);
 
 // Print the variations of the Jones matrices
 void print_time_variation (SystemCalibrator* model);
@@ -435,7 +439,7 @@ Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
 //! Temporal variation of response parameters
-std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
+map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
 
 bool get_time_variation ()
 {
@@ -487,9 +491,9 @@ void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
                "unrecognized PAR code = %c", code);
 }
 
-std::vector<MJD> gain_steps;
-std::vector<MJD> diff_gain_steps;
-std::vector<MJD> diff_phase_steps;
+vector<MJD> gain_steps;
+vector<MJD> diff_gain_steps;
+vector<MJD> diff_phase_steps;
 
 void add_step (char code, const MJD& mjd)
 {
@@ -582,7 +586,7 @@ Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
 // preprocessing jobs
 vector<string> jobs;
 
-Pulsar::Archive* load (const std::string& filename)
+Pulsar::Archive* load (const string& filename)
 {
   if (verbose)
     cerr << "pcm: loading " << filename << endl;
@@ -661,9 +665,6 @@ void pcm::enable_diagnostic (const string& name)
 // names of files containing a Calibration Database
 vector<string> cal_dbase_filenames;
 
-// names of files containing data
-vector <string> filenames;
-
 // name of file containing the calibrated template
 string template_filename;
 
@@ -685,7 +686,7 @@ float outlier_threshold = 0.0;
 float step_threshold = 0.0;
 
 // name of file containing list of calibrator Archive filenames
-char* calfile = NULL;
+string calfile;
 
 /* Flux calibrator solution from which first guess of calibrator Stokes
    parameters will be derived */
@@ -696,17 +697,14 @@ void load_calibrator_database ();
 // Number of threads used to solve equations
 unsigned nthread = 0;
 
-// name of file containing list of Archive filenames
-char* metafile = NULL;
-
 // name of file containing list of filenames to be calibrated
-char* calibrate_these = NULL;
+string calibrate_these;
 
 // name of file from which phase bins will be chosen
-char* binfile = NULL;
+string binfile;
 
 // name of least squares minimization algorithm
-char* least_squares = NULL;
+string least_squares;
 
 // name of file containing MEAL::Function text interface commands
 vector<string> equation_configuration;
@@ -922,9 +920,6 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg = menu.add (this, &pcm::add_calibrator_database, 'd', "file");
   arg->set_help ("add file to list of calibrator databases");
 
-  arg = menu.add (metafile, 'M', "file");
-  arg->set_help ("filename with list of pulsar files");
-
   arg = menu.add (calibrate_these, 'W', "file");
   arg->set_help ("filename with list of other data files to be calibrated");
 
@@ -1104,7 +1099,7 @@ void pcm::setup ()
 
   bool mem_mode = template_filename.empty();
   
-  if (mem_mode && phmin == phmax && !binfile)
+  if (mem_mode && phmin == phmax && binfile.empty())
     throw Error (InvalidState, "pcm",
       "In MEM mode, at least one of the following options"
       " must be specified:\n"
@@ -1118,7 +1113,7 @@ void pcm::setup ()
   if (!mem_mode)
     alignment_threshold = 0.0;
 
-  if (calfile)
+  if (!calfile.empty())
     stringfload (&calibrator_filenames, calfile);
 
   load_calibrator_database();
@@ -1196,7 +1191,7 @@ void configure_model (Pulsar::SystemCalibrator* model)
   for (unsigned i=0; i < diff_phase_steps.size(); i++)
     model->add_diff_phase_step (diff_phase_steps[i]);
 
-  if (least_squares)
+  if (!least_squares.empty())
     model->set_solver( new_solver(least_squares) );
 
   model->get_solver()->set_verbosity( solver_verbosity );
@@ -1268,7 +1263,7 @@ void pcm::process (Pulsar::Archive* archive)
     test for phase shift only if phase_std is not from current archive.
     this test will fail if binfile is a symbollic link.
   */
-  if (phase_std && (binfile==NULL || archive->get_filename() != binfile))
+  if (phase_std && (binfile.empty() || archive->get_filename() != binfile))
   {
     if (verbose)
       cerr << "pcm: creating checking phase" << endl;
@@ -1461,7 +1456,7 @@ void pcm::finalize ()
 
 #endif // HAVE_PGPLOT
 
-  if (calibrate_these)
+  if (!calibrate_these.empty())
   {
     filenames.clear();
     stringfload (&filenames, calibrate_these);
@@ -1502,7 +1497,7 @@ void pcm::finalize ()
       cout << "New file " << newname << " unloaded" << endl;
     }
 
-    if (!calibrate_these && archive->get_type() == Signal::Pulsar)
+    if (calibrate_these.empty() && archive->get_type() == Signal::Pulsar)
     {
       if (verbose)
         cerr << "pcm: correct and add to calibrated total" << endl;
@@ -1562,7 +1557,7 @@ void pcm::finalize ()
 
 using namespace Pulsar;
 
-SystemCalibrator* measurement_equation_modeling (const char* binfile,
+SystemCalibrator* measurement_equation_modeling (const string& binfile,
                                                  unsigned nbin) try
 {
   ReceptionCalibrator* model = new ReceptionCalibrator (model_type);
@@ -1652,7 +1647,7 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   // archive from which pulse phase bins will be chosen
   Reference::To<Pulsar::Archive> autobin;
 
-  if (binfile) try 
+  if (!binfile.empty()) try 
   {
     // archive from which pulse phase bins will be chosen
     Reference::To<Pulsar::Archive> autobin;
@@ -1746,7 +1741,7 @@ SystemCalibrator* matrix_template_matching (const string& stdname)
 static MJD start_time;
 static MJD end_time;
 
-void get_span ()
+void pcm::get_span ()
 {
   Pulsar::Profile::no_amps = true;
 
@@ -1795,7 +1790,7 @@ void get_span ()
 
    ********************************************************************** */
 
-void load_calibrator_database () try
+void pcm::load_calibrator_database () try
 {
   if (!cal_dbase_filenames.size())
     return;
@@ -1857,7 +1852,7 @@ void load_calibrator_database () try
     cerr << "pcm: no PolnCal observations found; closest match was \n\n"
          << database->get_closest_match_report () << endl;
 
-    if (must_have_cals && !calfile)
+    if (must_have_cals && calfile.empty())
     {
       cerr << "pcm: cannot continue (disable this check with -)" << endl;
       exit (-1);
@@ -1930,7 +1925,7 @@ catch (Error& error)
 #include "Pulsar/Integration.h"
 
 // collect MJD of each subint of each file into one vector
-vector<MJD> get_mjds ()
+vector<MJD> pcm::get_mjds ()
 {
   vector<MJD> all_mjds;
   Pulsar::Profile::no_amps = true;
@@ -1956,7 +1951,7 @@ vector<MJD> get_mjds ()
   return all_mjds;
 }
 
-void flat (std::ostream& output, const Jones<double>& J)
+void flat (ostream& output, const Jones<double>& J)
 {
   output << J.j00.real() << " " << J.j00.imag() << " "
          << J.j01.real() << " " << J.j01.imag() << " "
@@ -1964,11 +1959,11 @@ void flat (std::ostream& output, const Jones<double>& J)
          << J.j11.real() << " " << J.j11.imag();
 }
 
-void print_time_variation (SystemCalibrator* model)
+void pcm::print_time_variation (SystemCalibrator* model)
 {
-  std::string filename = "temporal_variation.txt";
+  string filename = "temporal_variation.txt";
 
-  std::ofstream output (filename.c_str());
+  ofstream output (filename.c_str());
 
   cerr << "pcm: printing temporal variation to " << filename << endl;
 
@@ -2025,7 +2020,7 @@ void print_time_variation (SystemCalibrator* model)
 
 #if HAVE_PGPLOT
 
-void plot_state (SystemCalibrator* model, const std::string& state) try
+void plot_state (SystemCalibrator* model, const string& state) try
 {
   using namespace Pulsar;
 
