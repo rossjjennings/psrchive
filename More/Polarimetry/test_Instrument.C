@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Instrument.h"
+#include "Pulsar/VariableBackend.h"
 #include "MEAL/Polynomial.h"
 
 using namespace std;
@@ -52,7 +53,7 @@ int main () try {
 
   Polynomial* polynomial = new Polynomial(3);
 
-  instrument.set_gain( polynomial );
+  instrument.get_backend()->set_gain_variation( polynomial );
 
   if (instrument.get_nparam() != nparam + 3) {
     cerr << "Chain Rule error map" << endl;
@@ -72,7 +73,7 @@ int main () try {
 
   banner ("set gain to zero");
 
-  instrument.set_gain( zero );
+  instrument.get_backend()->set_gain_variation( zero );
 
   if (instrument.get_nparam() != nparam) {
     cerr << "Chain Rule error unmap" << endl;
