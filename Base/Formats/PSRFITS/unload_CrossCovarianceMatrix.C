@@ -38,6 +38,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   if (covar->has_stream())
   {
     psrfits_write_col (fptr, "DATA", 1, covar->get_stream());
+    covar->get_stream()->verify_end_of_data ();
   }
   else
   {
