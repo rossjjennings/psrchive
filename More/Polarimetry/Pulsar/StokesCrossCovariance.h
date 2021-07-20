@@ -68,11 +68,11 @@ namespace Pulsar {
 
     //! Set the Stokes covariance for the specified bin
     void set_cross_covariance (unsigned ibin, unsigned jbin,
-			       const Matrix<4,4,double>&);
+			       const Matrix<4,4,double>&, bool lock = false);
 
     //! Set the Stokes covariance for the specified bin
     void set_cross_covariance (unsigned ibin, unsigned jbin, unsigned ilag,
-			       const Matrix<4,4,double>&);
+			       const Matrix<4,4,double>&, bool lock = false);
 
     //! Get the offset for the specified bin pair and lag
     unsigned get_icross (unsigned ibin, unsigned jbin, unsigned ilag=0) const;
@@ -93,6 +93,7 @@ namespace Pulsar {
     
     //! The cross covariance matrix for each phase bin pair
     std::vector< Matrix<4,4,double> > cross_covariance;
+    std::vector< bool > locked;
   };
 
 }
