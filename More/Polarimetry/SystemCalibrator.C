@@ -452,8 +452,7 @@ catch (Error& error)
 }
 
 //! Add the specified pulsar observation to the set of constraints
-void 
-SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
+void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 {
   const Integration* integration = data->get_Integration (isub);
   unsigned nchan = integration->get_nchan ();

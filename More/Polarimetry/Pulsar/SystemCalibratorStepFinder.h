@@ -24,6 +24,11 @@ protected:
   std::vector< std::vector<Calibration::SourceObservation> >&
   get_calibrator_data (SystemCalibrator* sc) { return sc->calibrator_data; }
 
+  std::vector< std::vector<Calibration::CoherencyMeasurementSet> >&
+  get_pulsar_data (SystemCalibrator* sc) { return sc->pulsar_data; }
+
+  Reference::Vector<Calibration::SignalPath>&
+  get_model (SystemCalibrator* sc) { return sc->model; }
 };
 
 

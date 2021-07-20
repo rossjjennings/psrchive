@@ -13,6 +13,8 @@
 
 #include "Pulsar/CoherencyMeasurement.h"
 #include "MEAL/Argument.h"
+#include "MJD.h"
+#include "Types.h"
 
 namespace Calibration {
 
@@ -40,10 +42,34 @@ namespace Calibration {
     void set_coordinates () const;
 
     //! Set the identifier
-    void set_identifier (const std::string&);
+    void set_identifier (const std::string& val) { identifier = val; }
 
     //! Get the identifier
-    const std::string get_identifier () const;
+    const std::string& get_identifier () const { return identifier; }
+
+    //! Set the name
+    void set_name (const std::string& val) { name = val; }
+
+    //! Get the name
+    const std::string& get_name () const { return name; }
+
+    //! Set the source
+    void set_source (Signal::Source val) { source = val; }
+
+    //! Get the source
+    Signal::Source get_source () const { return source; }
+
+    //! Set the epoch
+    void set_epoch (const MJD& val) { epoch = val; }
+
+    //! Get the epoch
+    const MJD& get_epoch () const { return epoch; }
+
+    //! Set the channel index
+    void set_ichan (unsigned val) { ichan = val; }
+
+    //! Get the channel index
+    unsigned get_ichan () const { return ichan; }
 
   protected:
 
@@ -55,6 +81,18 @@ namespace Calibration {
 
     //! The identifier
     std::string identifier;
+
+    //! Source name
+    std::string name;
+    
+    //! Source code
+    Signal::Source source; 
+
+    //! Epoch of the observation
+    MJD epoch;
+
+    //! Frequency channel
+    unsigned ichan;
 
   };
 

@@ -323,8 +323,9 @@ namespace Pulsar
     //! Create the calibrator estimate
     virtual void create_calibrator_estimate ();
 
+    //! Calibrator data loaded but not submitted or integrated
     std::vector< std::vector<Calibration::SourceObservation> > calibrator_data;
-
+    
     // submit all calibrator data
     virtual void submit_calibrator_data ();
 
@@ -344,6 +345,9 @@ namespace Pulsar
     
     //! Ensure that the pulsar observation can be added to the data set
     virtual void match (const Archive*);
+
+    //! Pulsar data loaded but not submitted or integrated
+    std::vector< std::vector<Calibration::CoherencyMeasurementSet> > pulsar_data;
 
     //! Add the data from the specified sub-integration
     virtual void add_pulsar (const Archive* data, unsigned isub);

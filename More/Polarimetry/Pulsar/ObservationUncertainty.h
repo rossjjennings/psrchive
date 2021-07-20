@@ -27,6 +27,12 @@ namespace Calibration {
     //! Construct with the uncertainty of the observation
     ObservationUncertainty (const Stokes<double>& variance);
 
+    //! Return a copy constructed clone of self
+    ObservationUncertainty* clone () const;
+
+    //! Add the uncertainty of another instance
+    virtual void add (const Uncertainty*);
+
     //! Set the uncertainty of the observation
     virtual void set_variance (const Stokes<double>&);
 
