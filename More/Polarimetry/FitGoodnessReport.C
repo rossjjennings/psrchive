@@ -42,7 +42,10 @@ void Calibration::FitGoodnessReport::report (ostream& os)
       {
 	if (data[jstate].get_input_index() != input)
 	  continue;
-      
+
+	// set the independent variables for this measurement
+	data[jstate].set_coordinates();
+
 	Stokes< Estimate<float> > datum = data[jstate].get_stokes();
       
 	Stokes<double> ms = coherency( model->evaluate() );

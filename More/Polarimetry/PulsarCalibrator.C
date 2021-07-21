@@ -360,8 +360,6 @@ void Pulsar::PulsarCalibrator::add_pulsar
   // that must be incorporated into the equation maintained by PolnProfileFit
   //
 
-  mtm[ichan]->set_measurement_set( measurements );
-
   if (solve_each)
   {
     if (verbose > 2) cerr << "Pulsar::PulsarCalibrator::add_pulsar"
@@ -382,7 +380,8 @@ void Pulsar::PulsarCalibrator::add_pulsar
 	   << measurements.get_transformation_index() << endl;
 
     get_data_call ++;
-    mtm[ichan]->add_observation( integration->new_PolnProfile (ichan) );
+    mtm[ichan]->add_observation( measurements,
+				 integration->new_PolnProfile (ichan) );
   }
   catch (Error& error)
   {

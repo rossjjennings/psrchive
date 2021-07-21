@@ -12,7 +12,6 @@
 #define __Calibration_CoherencyMeasurementSet_H
 
 #include "Pulsar/CoherencyMeasurement.h"
-#include "MEAL/Argument.h"
 #include "MJD.h"
 #include "Types.h"
 
@@ -77,7 +76,7 @@ namespace Calibration {
     //! Index of the transformation through which the measurements are made
     unsigned transformation_index;
 
-    //! The coordinates of the measurement
+    //! The coordinates shared by all measurements in the set
     std::vector< Reference::To<MEAL::Argument::Value> > coordinates;
 
     //! The identifier

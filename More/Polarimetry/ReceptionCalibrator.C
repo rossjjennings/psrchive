@@ -394,7 +394,9 @@ void ReceptionCalibrator::integrate_pulsar_data
 {
   unsigned mchan = data.get_ichan();
   MJD epoch = data.get_epoch();
-  
+
+  data.set_coordinates();
+
   for (unsigned i=0; i < data.size(); i++)
   {
     unsigned index = data[i].get_input_index();
@@ -412,12 +414,14 @@ void ReceptionCalibrator::integrate_pulsar_data
 {
   estimate.add_data_attempts ++;
 
+  data.set_coordinates();
+
   /* Correct the stokes parameters using the current best estimate of
      the instrument and the parallactic angle rotation before adding
      them to best estimate of the input state */
     
   unsigned path = model[mchan]->get_psr_path_index(epoch);
-  
+
   model[mchan]->get_equation()->set_transformation_index (path);
 
   Jones< Estimate<double> > correct;

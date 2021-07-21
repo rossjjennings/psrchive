@@ -97,7 +97,7 @@ static int model_fdf (const gsl_vector* x, void* data,
   {
     const CoherencyMeasurementSet& mset = model->get_data (iset);
 
-    // set the independent variables for this set of measurements
+    // set the common independent variables for this set of measurements
     mset.set_coordinates();
 
     // set the signal path through which these measurements were observed
@@ -105,6 +105,9 @@ static int model_fdf (const gsl_vector* x, void* data,
 
     for (unsigned istate=0; istate<mset.size(); istate++)
     {
+      // set the independent variables for this measurement
+      mset[istate].set_coordinates();
+
       model->set_input_index( mset[istate].get_input_index() );
 
       Jones<double> result = model->evaluate (grad_ptr);

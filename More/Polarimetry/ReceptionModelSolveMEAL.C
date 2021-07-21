@@ -104,15 +104,19 @@ float lmcoff (// input
   if (Calibration::ReceptionModel::verbose)
     cerr << "Calibration::ReceptionModel::lmcoff set abscissa" << endl;
 
-  // set the independent variables for this set of measurements
+  // set the common independent variables for this set of measurements
   data.set_coordinates();
   // set the signal path through which these measurements were observed
   model.set_transformation_index (data.get_transformation_index());
 
   double chisq = 0.0;
   for (unsigned ist=0; ist<data.size(); ist++)
+  {
+    // set the independent variables for this measurement
+    data[ist].set_coordinates();
     chisq += lmcoff (model, data[ist], ignored, gradient, alpha, beta);
-
+  }
+  
   return chisq;
 }
 

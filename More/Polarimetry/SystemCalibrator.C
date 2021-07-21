@@ -550,7 +550,6 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     measurements.set_identifier( identifier );
     measurements.add_coordinate( time );
     measurements.add_coordinate( xform );
-    measurements.set_coordinates();
 
     measurements.set_ichan( ichan );
     measurements.set_epoch( epoch );
@@ -1018,9 +1017,11 @@ void SystemCalibrator::submit_pulsar_data () try
       if (verbose > 2)
 	cerr << "SystemCalibrator::submit_pulsar_data ichan="
 	     << ichan << " submit_pulsar_data" << endl;
-	
+
+      // add pulsar data constraints to measurement equation
       submit_pulsar_data( data );
 
+      // add pulsar data to mean estimate used as initial guess
       integrate_pulsar_data( data );
     }
     catch (Error& error)

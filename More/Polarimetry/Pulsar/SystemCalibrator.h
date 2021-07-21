@@ -353,16 +353,19 @@ namespace Pulsar
     //! Add the data from the specified sub-integration
     virtual void add_pulsar (const Archive* data, unsigned isub);
 
-    //! Derived types must define how pulsar data are incorporated
+    //! Add pulsar data constraints to coherency measurement set
+    /*! Derived types must define how pulsar data are incorporated */
     virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
 			     const Integration*, unsigned ichan) = 0;
 
+    //! add pulsar data to mean estimate used as initial guess
     virtual void integrate_pulsar_data
     (const Calibration::CoherencyMeasurementSet&) { }
 
-    // integrate pulsar data into measurement equation
+    //! add all pulsar data constraints to measurement equation
     virtual void submit_pulsar_data ();
 
+    //! add the given pulsar observations to measurement equation constraints
     virtual void submit_pulsar_data (Calibration::CoherencyMeasurementSet&);
 
     //! The calibrators to be loaded after first pulsar observation

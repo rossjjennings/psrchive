@@ -12,33 +12,34 @@
 #include <assert.h>
 
 using namespace std;
+using namespace Calibration;
 
-Calibration::CoherencyMeasurement::CoherencyMeasurement (unsigned index)
+CoherencyMeasurement::CoherencyMeasurement (unsigned index)
 {
   nconstraint = 0;
   input_index = index;
 }
 
 //! Set the index of the input to which the measurement corresponds
-void Calibration::CoherencyMeasurement::set_input_index (unsigned index)
+void CoherencyMeasurement::set_input_index (unsigned index)
 {
   input_index = index;
 }
 
 //! Get the index of the input to which the measurement corresponds
-unsigned Calibration::CoherencyMeasurement::get_input_index () const
+unsigned CoherencyMeasurement::get_input_index () const
 {
   return input_index;
 }
 
 //! Get the number of constraints provided by this measurement
-unsigned Calibration::CoherencyMeasurement::get_nconstraint () const
+unsigned CoherencyMeasurement::get_nconstraint () const
 {
   return nconstraint;
 }
 
 //! Set the measured Stokes parameters
-void Calibration::CoherencyMeasurement::set_stokes
+void CoherencyMeasurement::set_stokes
 (const Stokes< Estimate<double> >& stokes)
 {
   Stokes<double> val;
@@ -57,7 +58,7 @@ void Calibration::CoherencyMeasurement::set_stokes
 
 //! Get the measured Stokes parameters
 Stokes< Estimate<double> > 
-Calibration::CoherencyMeasurement::get_stokes () const
+CoherencyMeasurement::get_stokes () const
 {
   Stokes< Estimate<double> > result;
   Stokes< double > val = coherency (rho);
@@ -72,7 +73,7 @@ Calibration::CoherencyMeasurement::get_stokes () const
 
 //! Get the measured complex Stokes parameters
 Stokes< std::complex< Estimate<double> > > 
-Calibration::CoherencyMeasurement::get_complex_stokes () const
+CoherencyMeasurement::get_complex_stokes () const
 {
   Stokes< std::complex< Estimate<double> > > result;
   Stokes< std::complex<double> > val = complex_coherency (rho);
@@ -93,7 +94,7 @@ Calibration::CoherencyMeasurement::get_complex_stokes () const
 }
 
 //! Set the measured complex Stokes parameters
-void Calibration::CoherencyMeasurement::set_stokes
+void CoherencyMeasurement::set_stokes
 (const Stokes< complex<double> >& stokes, const Stokes<double>& var)
 {
   rho = convert (stokes);
@@ -106,7 +107,7 @@ void Calibration::CoherencyMeasurement::set_stokes
 }
 
 //! Set the measured complex Stokes parameters and the variance functions
-void Calibration::CoherencyMeasurement::set_stokes
+void CoherencyMeasurement::set_stokes
 (const Stokes< complex<double> >& stokes, const Uncertainty* var)
 {
   uncertainty = var;
@@ -119,45 +120,45 @@ void Calibration::CoherencyMeasurement::set_stokes
 }
 
 //! Get the measured coherency matrix
-Jones<double> Calibration::CoherencyMeasurement::get_coherency () const
+Jones<double> CoherencyMeasurement::get_coherency () const
 {
   return rho;
 }
 
 //! Given a coherency matrix, return the difference
-double Calibration::CoherencyMeasurement::get_weighted_norm
+double CoherencyMeasurement::get_weighted_norm
 (const Jones<double>& matrix) const
 {
   if (!uncertainty)
     throw Error (InvalidState,
-		 "Calibration::CoherencyMeasurement::get_weighted_norm",
+		 "CoherencyMeasurement::get_weighted_norm",
 		 "Uncertainty policy not set");
 
   return uncertainty->get_weighted_norm (matrix);
 }
 
 //! Given a coherency matrix, return the weighted conjugate matrix
-Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
+Jones<double> CoherencyMeasurement::get_weighted_conjugate
 (const Jones<double>& matrix) const try
 {
   if (!uncertainty)
     throw Error (InvalidState,
-		 "Calibration::CoherencyMeasurement::get_weighted_conjugate",
+		 "CoherencyMeasurement::get_weighted_conjugate",
 		 "Uncertainty policy not set");
 
   return uncertainty->get_weighted_conjugate (matrix);
 }
 catch (Error& error)
 {
-  throw error += "Calibration::CoherencyMeasurement::get_weighted_conjugate";
+  throw error += "CoherencyMeasurement::get_weighted_conjugate";
 }
 
-void Calibration::CoherencyMeasurement::get_weighted_components
+void CoherencyMeasurement::get_weighted_components
 (const Jones<double>& matrix, std::vector<double>& components) const
 {
   if (!uncertainty)
     throw Error (InvalidState,
-		 "Calibration::CoherencyMeasurement::get_weighted_component",
+		 "CoherencyMeasurement::get_weighted_component",
 		 "Uncertainty policy not set");
 
   Stokes< complex<double> > wc = uncertainty->get_weighted_components (matrix);
@@ -179,6 +180,19 @@ void Calibration::CoherencyMeasurement::get_weighted_components
 
   if (index != nconstraint)
     throw Error (InvalidState,
-		 "Calibration::CoherencyMeasurement::get_weighted_component",
+		 "CoherencyMeasurement::get_weighted_component",
 		 "index=%u != nconstraint=%u", index, nconstraint);
 }
+
+//! Add an independent variable
+void CoherencyMeasurement::add_coordinate (MEAL::Argument::Value* x)
+{
+  coordinates.push_back (x);
+}
+
+void CoherencyMeasurement::set_coordinates () const
+{
+  for (unsigned ic=0; ic<coordinates.size(); ic++)
+    coordinates[ic]->apply();
+}
+

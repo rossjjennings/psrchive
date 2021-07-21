@@ -11,6 +11,7 @@
 #ifndef __Calibration_CoherencyMeasurement_H
 #define __Calibration_CoherencyMeasurement_H
 
+#include "MEAL/Argument.h"
 #include "Reference.h"
 #include "Estimate.h"
 #include "Stokes.h"
@@ -74,7 +75,16 @@ namespace Calibration {
     //! The uncertainty of the measurement
     const Uncertainty* get_uncertainty () const { return uncertainty; }
 
+    //! Add an independent variable
+    void add_coordinate (MEAL::Argument::Value* abscissa);
+
+    //! Apply the independent variables
+    void set_coordinates () const;
+
   protected:
+
+    //! The coordinates of the measurement
+    std::vector< Reference::To<MEAL::Argument::Value> > coordinates;
 
     //! Index of the input to which the measurement corresponds
     unsigned input_index;
