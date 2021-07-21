@@ -19,7 +19,8 @@
 namespace Calibration {
 
   //! A CoherencyMeasurement set and their coordinates
-  class CoherencyMeasurementSet : public std::vector<CoherencyMeasurement> {
+  class CoherencyMeasurementSet : public std::vector<CoherencyMeasurement>
+  {
 
   public:
 
@@ -32,7 +33,7 @@ namespace Calibration {
     //! Set the transformation through which the measurements are made
     void set_transformation_index (unsigned index);
 
-    //! Set the transformation through which the measurements are made
+    //! Get the transformation through which the measurements are made
     unsigned get_transformation_index () const;
 
     //! Add an independent variable

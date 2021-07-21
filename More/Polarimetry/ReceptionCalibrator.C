@@ -200,6 +200,9 @@ void ReceptionCalibrator::initial_observation (const Archive* data)
 
   assert( pulsar.size() == phase_bins.size() );
 
+  cerr << "ReceptionCalibrator::initial_observation"
+    " initialize pulsar source estimates" << endl;
+
   // initialize any previously added states
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     init_estimates ( pulsar[istate], phase_bins[istate] );
@@ -321,6 +324,8 @@ void Pulsar::ReceptionCalibrator::match (const Archive* data)
 {
   check_ready ("Pulsar::ReceptionCalibrator::match", false);
 
+  cerr << "ReceptionCalibrator::match" << endl;
+  
   if (!has_calibrator())
     initial_observation (data);
 
@@ -337,20 +342,15 @@ void ReceptionCalibrator::add_pulsar
   for (unsigned istate=0; istate < pulsar.size(); istate++)
     add_data (measurements, pulsar.at(istate).at(ichan),
 	      integration->get_epoch(), ichan);
-
-  DEBUG("Pulsar::ReceptionCalibrator::add_pulsar ADD DATA ichan=" << ichan);
-
-  model[ichan]->get_equation()->add_data (measurements);
 }
 
-void
-ReceptionCalibrator::add_data
+
+void ReceptionCalibrator::add_data
 ( vector<Calibration::CoherencyMeasurement>& bins,
   Calibration::SourceEstimate& estimate,
   const MJD& epoch,
   unsigned ichan )
 {
-  estimate.add_data_attempts ++;
   get_data_call ++;
 
   unsigned ibin = estimate.phase_bin;
@@ -364,30 +364,78 @@ ReceptionCalibrator::add_data
     state.set_stokes( stokes );
     bins.push_back ( state );
 
-    /* Correct the stokes parameters using the current best estimate of
-       the instrument and the parallactic angle rotation before adding
-       them to best estimate of the input state */
-    
-    Jones< Estimate<double> > correct;
-
-    model[ichan]->get_equation()->set_transformation_index
-      (model[ichan]->get_psr_path_index(epoch));
-
-    correct = inv( model[ichan]->get_pulsar_transformation(epoch)->evaluate() );
-
-    stokes = transform( stokes, correct );
-    
-    estimate.estimate.integrate( stokes );
-
   }
   catch (Error& error)
   {
-    if (verbose > 1)
+    // if (verbose > 1)
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
-    estimate.add_data_failures ++;
+
     get_data_fail ++;
   }
+}
+
+Calibration::SourceEstimate& ReceptionCalibrator::get_estimate (unsigned index,
+								unsigned ichan)
+{
+  for (unsigned istate=0; istate < pulsar.size(); istate++)
+  {
+    Calibration::SourceEstimate& estimate = pulsar.at(istate).at(ichan);
+    if (estimate.input_index == index)
+      return estimate;
+  }
+
+  throw Error (InvalidParam, "ReceptionCalibrator::get_estimate",
+	       "no match for index=%u ichan=%u", index, ichan);
+}
+      
+void ReceptionCalibrator::integrate_pulsar_data
+(const Calibration::CoherencyMeasurementSet& data)
+{
+  unsigned mchan = data.get_ichan();
+  MJD epoch = data.get_epoch();
+  
+  for (unsigned i=0; i < data.size(); i++)
+  {
+    unsigned index = data[i].get_input_index();
+    Calibration::SourceEstimate& estimate = get_estimate (index, mchan);
+
+    integrate_pulsar_data (data[i], estimate, epoch, mchan);
+  }
+}
+
+void ReceptionCalibrator::integrate_pulsar_data
+(const Calibration::CoherencyMeasurement& data,
+ Calibration::SourceEstimate& estimate,
+ const MJD& epoch,
+ unsigned mchan) try
+{
+  estimate.add_data_attempts ++;
+
+  /* Correct the stokes parameters using the current best estimate of
+     the instrument and the parallactic angle rotation before adding
+     them to best estimate of the input state */
+    
+  unsigned path = model[mchan]->get_psr_path_index(epoch);
+  
+  model[mchan]->get_equation()->set_transformation_index (path);
+
+  Jones< Estimate<double> > correct;
+  correct = inv( model[mchan]->get_pulsar_transformation(epoch)->evaluate() );
+
+  Stokes< Estimate<double> > stokes = data.get_stokes();
+  stokes = transform( stokes, correct );
+    
+  estimate.estimate.integrate( stokes );
+}
+catch (Error& error)
+{
+  unsigned ibin = estimate.phase_bin;
+
+  // if (verbose > 1)
+  cerr << "Pulsar::ReceptionCalibrator::add_data mchan=" << mchan 
+       << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
+  estimate.add_data_failures ++;  
 }
 
 void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)

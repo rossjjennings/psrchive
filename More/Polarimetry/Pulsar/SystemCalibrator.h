@@ -323,14 +323,15 @@ namespace Pulsar
     //! Create the calibrator estimate
     virtual void create_calibrator_estimate ();
 
+    //! Flag set when data have been integrated with measurement equation
+    bool data_submitted;
+
     //! Calibrator data loaded but not submitted or integrated
     std::vector< std::vector<Calibration::SourceObservation> > calibrator_data;
     
     // submit all calibrator data
     virtual void submit_calibrator_data ();
 
-    bool calibrator_data_submitted;
-    
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 					 const Calibration::SourceObservation&);
 
@@ -355,6 +356,14 @@ namespace Pulsar
     //! Derived types must define how pulsar data are incorporated
     virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
 			     const Integration*, unsigned ichan) = 0;
+
+    virtual void integrate_pulsar_data
+    (const Calibration::CoherencyMeasurementSet&) { }
+
+    // integrate pulsar data into measurement equation
+    virtual void submit_pulsar_data ();
+
+    virtual void submit_pulsar_data (Calibration::CoherencyMeasurementSet&);
 
     //! The calibrators to be loaded after first pulsar observation
     std::vector<std::string> calibrator_filenames;
