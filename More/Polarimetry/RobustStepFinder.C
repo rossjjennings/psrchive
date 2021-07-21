@@ -88,7 +88,14 @@ void get_chi (vector<double>& chi,
   Stokes< std::complex<double> > Schi = error->get_weighted_components (diff);
   
   for (unsigned ipol=0; ipol < npol; ipol++)
-    chi.push_back( Schi[ipol].real() + Schi[ipol].imag() );
+  {
+#if _DEBUG
+    cerr << ipol
+	 << " " << fabs(Schi[ipol].real())
+	 << " " << fabs(Schi[ipol].imag()) << endl;
+#endif
+    chi.push_back( fabs(Schi[ipol].real()) + fabs(Schi[ipol].imag()) );
+  }
 }
 
 void get_chi (vector<double>& chi,
@@ -150,40 +157,46 @@ double get_chi (const SetVector& A, const SetVector& B, Index pol)
 }
 
 
+template<typename Container>
+unsigned erase_empty (Container& container)
+{
+  unsigned erased = 0;
+  unsigned idat = 0;
+  
+  while (idat < container.size())
+  {
+    if (container[idat].size() == 0)
+    {
+#if _DEBUG
+      cerr << "RobustStepFinder::process removing empty sub-container at " 
+           << idat + erased << endl;
+#endif
+      container.erase (container.begin() + idat);
+      erased ++;
+    }
+    else
+      idat ++;
+  }
 
+  return erased;
+}
 
 void RobustStepFinder::process (SystemCalibrator* calibrator)
 {
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
 
   Reference::Vector< SignalPath >& model = get_model (calibrator);
 
   bool step_after_cal = calibrator->get_step_after_cal();
-  
   unsigned nchan = calibrator->get_nchan();
   
-  unsigned nsubint = caldata.size();
+  unsigned cal_erased = erase_empty (caldata);
+  unsigned psr_erased = erase_empty (psrdata);
+
+  unsigned nsubint = psrdata.size();
   unsigned isub=0;
-  unsigned erased = 0;
-
-  while (isub < nsubint)
-  {
-    if (caldata[isub].size() == 0)
-    {
-#if _DEBUG
-      cerr << "RobustStepFinder::process removing empty subint=" 
-           << isub + erased << endl;
-#endif
-      caldata.erase (caldata.begin() + isub);
-      nsubint --;
-      erased ++;
-    }
-    else
-      isub ++;
-  }
-
+  
   // compute chi for all Stokes at once
   Index pol;
   pol.set_integrate (true);
@@ -194,26 +207,11 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
 
   while (isub+1 < nsubint)
   {
-    if (caldata[isub][0].source != Signal::PolnCal)
-    {
-      isub ++;
-      continue;
-    }
-    
     unsigned jsub = isub+1;
       
-    while (jsub < nsubint)
-      if (caldata[jsub][0].source == Signal::PolnCal)
-	break;
-      else
-	jsub ++;
+    double chi = get_chi (psrdata[isub], psrdata[jsub], pol);
 
-    if (jsub >= nsubint)
-      break;
-
-    double chi = get_chi (caldata[isub], caldata[jsub], pol);
-
-    // cerr << "isub=" << isub << " jsub=" << jsub << " chi=" << chi << endl;
+    cerr << "isub=" << isub << " jsub=" << jsub << " chi=" << chi << endl;
     
     if (chi > step_threshold)
     {
@@ -224,16 +222,18 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
       if (step_after_cal)
       {
         cerr << "RobustStepFinder::process adding step after "
-             << caldata[isub][0].identifier << endl;
+             << psrdata[isub][0].get_identifier() << endl;
 	jump[isub] = true;
       }
       else
       {
         cerr << "RobustStepFinder::process adding step before "
-             << caldata[jsub][0].identifier << endl;
+             << psrdata[jsub][0].get_identifier() << endl;
 	jump[jsub] = true;
       }
     }
+
+    isub ++;
   }
 
   bool jump_needed = false;
@@ -258,8 +258,8 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
     for (unsigned isub=0; isub < nsubint; isub++)
     {
       unsigned jchan = 0;
-      for (; jchan < caldata[isub].size(); jchan++)
-	if (caldata[isub][jchan].ichan == ichan)
+      for (; jchan < psrdata[isub].size(); jchan++)
+	if (psrdata[isub][jchan].get_ichan() == ichan)
 	{
 	  observed[isub] = true;
 	  observed_total ++;

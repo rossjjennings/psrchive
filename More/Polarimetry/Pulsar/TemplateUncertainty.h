@@ -28,6 +28,9 @@ namespace Calibration {
     //! Clone operator
     TemplateUncertainty* clone () const;
 
+    //! Add the uncertainty of another instance
+    void add (const Uncertainty*);
+
     //! Set the uncertainty of the observation
     void set_variance (const Stokes<double>& var);
 
