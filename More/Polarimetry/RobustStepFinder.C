@@ -285,30 +285,28 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
 	continue;
       }
 
-      if (cals_between.size() > 1)
-      {
-	cerr << "RobustStepFinder::process " << cals_between.size()
-	     << " CALs found - no jump" << endl;
-	continue;
-      }
+      unsigned ical = cals_between.front();
+      unsigned jcal = cals_between.back();
+      
+      MJD ical_epoch = caldata[ical][0].epoch;
+      string ical_id = caldata[ical][0].get_identifier();
 
-      unsigned ical = cals_between[0];
-      MJD cal_epoch = caldata[ical][0].epoch;
-      string cal_id = caldata[ical][0].get_identifier();
+      MJD jcal_epoch = caldata[jcal][0].epoch;
+      string jcal_id = caldata[jcal][0].get_identifier();
 
       MJD step_epoch;
       
       if (step_after_cal)
       {
         cerr << "RobustStepFinder::process adding step after "
-             << cal_id << endl;
-	step_epoch = cal_epoch + 30.0;
+             << jcal_id << endl;
+	step_epoch = jcal_epoch + 30.0;
       }
       else
       {
         cerr << "RobustStepFinder::process adding step before "
-             << cal_id << endl;
-	step_epoch = cal_epoch - 30.0;
+             << ical_id << endl;
+	step_epoch = ical_epoch - 30.0;
       }
 
       cerr << "RobustStepFinder::process step epoch=" << step_epoch << endl;
