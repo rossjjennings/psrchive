@@ -201,32 +201,17 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
 
-  Reference::Vector< SignalPath >& model = get_model (calibrator);
-
-  bool step_after_cal = calibrator->get_step_after_cal();
-  unsigned nchan = calibrator->get_nchan();
-  
-  unsigned cal_erased = erase_empty (caldata);
-  unsigned psr_erased = erase_empty (psrdata);
+  erase_empty (caldata);
+  erase_empty (psrdata);
 
   unsigned nsubint = psrdata.size();
-  unsigned isub=0;
   
   // compute chi for all Stokes at once
   Index pol;
   pol.set_integrate (true);
 
-  isub=0;
-
-  unsigned ncross = nsubint * depth;
-  
-  vector<double> chi (ncross, 0.0);
-  vector<bool> consistent (ncross, true);
-  unsigned icross = 0;
-
   // count of consistent sub-integrations before this one
   vector<unsigned> before (nsubint, 0);
-
   // count of consistent sub-integrations after this one
   vector<unsigned> after (nsubint, 0);
 
@@ -236,22 +221,29 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
     
     for (unsigned jsub=isub+1; jsub < jmax; jsub++)
     {
-      chi[icross] = get_chi (psrdata[isub], psrdata[jsub], pol);
-      consistent[icross] = chi[icross] < step_threshold;
+      double chi = get_chi (psrdata[isub], psrdata[jsub], pol);
 
-      if (consistent[icross])
+      // if isub is consistent with jsub ...
+      if (chi < step_threshold)
       {
+	// ... add to the count of consistent sub-integrations before
+	// all sub-integrations after and including jsub
 	for (unsigned ksub=jsub; ksub < jmax; ksub++)
 	  before[ksub] ++;
+
+	// ... add to the count of consistent sub-integrations after
+	// all sub-integrations before jsub
 	for (unsigned ksub=isub; ksub < jsub; ksub++)
 	  after[ksub] ++;
       }
-      
-      icross ++;
     }
   }
 
+  vector<MJD> steps;
+
+  bool step_after_cal = calibrator->get_step_after_cal();
   unsigned good = (depth * (depth+1)) / 2;
+  
   for (unsigned isub=depth; isub+depth < nsubint; isub++)
   {
     if (before[isub] == good && after[isub] == 0)
@@ -319,9 +311,56 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
 	step_epoch = cal_epoch - 30.0;
       }
 
-      // model[ichan]->add_step (step_epoch, new VariableBackend);
-
+      cerr << "RobustStepFinder::process step epoch=" << step_epoch << endl;
+      
+      steps.push_back (step_epoch);
     }
   }
 
+  if (!steps.size())
+    return;
+  
+  unsigned nchan = calibrator->get_nchan();
+
+  vector< vector<MJD> > mjds ( nchan, vector<MJD> (nsubint) );
+  for (unsigned isub=0; isub < nsubint; isub++)
+    for (unsigned jchan=0; jchan < psrdata[isub].size(); jchan++)
+    {
+      unsigned ichan = psrdata[isub][jchan].get_ichan();
+      mjds[ichan][isub] = psrdata[isub][jchan].get_epoch();
+    }
+
+  Reference::Vector< SignalPath >& model = get_model (calibrator);
+    
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    unsigned istep = 0;
+    unsigned isub = 0;
+    unsigned nbefore = 0;  // count of observations before step
+
+    MJD zero (0.0);
+    
+    while (isub < nsubint && istep < steps.size())
+    {
+      if (mjds[ichan][isub] == zero)
+      {
+	isub++;
+	// ignore
+      }
+      else if (mjds[ichan][isub] < steps[istep])
+      {
+	isub++;
+	nbefore++;
+      }
+      else
+      {
+	// igore steps with no preceding obs
+	if (nbefore)
+	  model[ichan]->add_step (steps[istep], new VariableBackend);
+
+	nbefore = 0;
+	istep++;
+      }
+    }
+  }
 }
