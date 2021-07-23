@@ -117,10 +117,17 @@ class StokesCrossCovariance::Stream : public CrossCovarianceMatrix::Stream
   {
 #if _DEBUG
     cerr << "StokesCrossCovariance::Stream dtor" << endl;
+#endif
+    verify_end_of_data ();
+  }
 
-    cerr << "off=" << current_offset << " ncross=" << ncross_total 
-       << " ilag=" << ilag << " ibin=" << ibin << " jbin=" << jbin 
-       << " ipol=" << ipol << " jpol=" << jpol << endl;
+  void verify_end_of_data () const
+  {
+#if _DEBUG
+    cerr << "StokesCrossCovariance::Stream::verify_end_of_data \n"
+	 << " off=" << current_offset << " ncross=" << ncross_total
+	 << " ilag=" << ilag << " ibin=" << ibin << " jbin=" << jbin
+	 << " ipol=" << ipol << " jpol=" << jpol << endl;
 #endif
 
     assert (current_offset == ncross_total);
@@ -198,16 +205,15 @@ void StokesCrossCovariance::Stream::get_data (unsigned off, unsigned ndat,
           if (initialize)
             jpol = (ilag == 0 && ibin == jbin) ? ipol : 0;
 
-	  for (; jpol < npol ; jpol++)
+	  while (jpol < npol)
 	  {
 	    data[idat] = covar[ipol][jpol];
             current_offset ++;
 	    idat ++;
+	    jpol ++;
+
             if (idat == ndat)
-            {
-              jpol ++;
               return;
-            }
 	  }
 
           initialize = true;
@@ -322,9 +328,10 @@ StokesCrossCovariance::get_cross_covariance (unsigned ibin,
 //
 void StokesCrossCovariance::set_cross_covariance (unsigned ibin,
 						  unsigned jbin,
-						  const Matrix<4,4,double>& C)
+						  const Matrix<4,4,double>& C,
+						  bool lock)
 {
-  set_cross_covariance (ibin, jbin, 0, C);
+  set_cross_covariance (ibin, jbin, 0, C, lock);  
 }
 
 //
@@ -333,10 +340,20 @@ void StokesCrossCovariance::set_cross_covariance (unsigned ibin,
 void StokesCrossCovariance::set_cross_covariance (unsigned ibin,
 						  unsigned jbin,
 						  unsigned ilag,
-						  const Matrix<4,4,double>& C)
+						  const Matrix<4,4,double>& C,
+						  bool lock)
 {
   unsigned icross = get_icross_check (ibin, jbin, ilag, "set");
+
+  if (locked[icross])
+    throw Error (InvalidState,
+		 "StokesCrossCovariance::set_cross_covariance",
+		 "icross=%u ibin=%u jbin=%u, ilag=%u already locked",
+		 icross, ibin, jbin, ilag);
+  
   cross_covariance[ icross ] = C;
+
+  locked[icross] = lock;
 }
 
 std::string full_method_name (const string& method)
@@ -381,12 +398,15 @@ unsigned StokesCrossCovariance::get_icross_check (unsigned ibin,
 
 void StokesCrossCovariance::resize ()
 {
-  cross_covariance.resize (get_ncross_total());
+  unsigned ncross_total = get_ncross_total();
+  
+  cross_covariance.resize (ncross_total);
+  locked.resize (ncross_total, false);
   
   // verify self-consistency of index calculations
   assert ( get_icross (nbin-1, nbin-1, 0) == get_ncross(0)-1 );
 
-  assert ( get_icross (nbin-1, nbin-1, nlag-1) == get_ncross_total()-1 );
+  assert ( get_icross (nbin-1, nbin-1, nlag-1) == ncross_total-1 );
 }
 
 void StokesCrossCovariance::set_all (double val)
