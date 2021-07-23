@@ -383,8 +383,12 @@ void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap,
     MEAL::get_imap( composite, gain_variation, gain_imap );
     set_difference (imap, gain_imap);
   }
-  else if (cal_gain)
+  else if (cal_gain && get_cal_response()->has_index())
+  {
+    // cal_gain = calibrator observations modelled with own gain xform
+    // get_cal_response()->has_index() = cal signal path integrated in M.E.
     MEAL::get_imap( composite, cal_gain, gain_imap );
+  }
 
   if (diff_gain_variation)
   {
@@ -400,7 +404,6 @@ void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap,
 }
 catch (Error& error)
 {
-  MEAL::print (cerr, composite);
   throw error += "VariableBackendEstimate::unmap_variations";
 }
 
