@@ -83,12 +83,18 @@ namespace Calibration
     //! Epoch of the observation
     MJD epoch;
 
+    void set_epoch (const MJD& mjd) { epoch = mjd; }
+    const MJD& get_epoch () const { return epoch; }
+    
     //! Frequency channel
     unsigned ichan;
 
     //! Identifier
     std::string identifier;
-    
+
+    void set_identifier (const std::string& mjd) { identifier = mjd; }
+    const std::string& get_identifier () const { return identifier; }
+
     //! The observed Stokes parameters
     Stokes< Estimate<double> > observation;
 

@@ -1622,7 +1622,8 @@ void SystemCalibrator::solve () try
 {
   ReceptionModel::Solver::report_chisq = true;
 
-  cerr << "SystemCalibrator::solve calling solve_prepare" << endl;
+  if (verbose > 1)
+    cerr << "SystemCalibrator::solve calling solve_prepare" << endl;
   
   solve_prepare ();
 

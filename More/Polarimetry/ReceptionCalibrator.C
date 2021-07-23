@@ -254,8 +254,9 @@ void ReceptionCalibrator::submit_calibrator_data ()
 
     std::string why = fluxcal.at(ichan)->why_not_constrained();
 
-    cerr << "ichan=" << ichan << " flux calibrator not constrained: "
-	 << why << endl;
+    if (verbose > 1)
+      cerr << "ichan=" << ichan << " flux calibrator not constrained: "
+	   << why << endl;
 
     model[ichan]->set_valid (false, why.c_str());
   }
@@ -492,7 +493,8 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
 
 void ReceptionCalibrator::setup_calibrators ()
 {
-  cerr << "ReceptionCalibrator::setup_calibrators" << endl;
+  if (verbose > 1)
+    cerr << "ReceptionCalibrator::setup_calibrators" << endl;
   
   for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
     setup_poln_calibrator (calibrator_estimate[ichan]);
