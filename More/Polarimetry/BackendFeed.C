@@ -50,8 +50,10 @@ BackendFeed::~BackendFeed ()
 
 void BackendFeed::set_cyclic (bool flag)
 {
+  if (verbose)
+    cerr << "BackendFeed::set_cyclic" << endl;
+
   backend->set_cyclic (flag);
-  cerr << "BackendFeed::set_cyclic" << endl;
 }
 
 //! Provide access to the backend model

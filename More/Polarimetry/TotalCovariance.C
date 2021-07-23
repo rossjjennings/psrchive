@@ -4,19 +4,35 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TotalCovariance.h"
 #include "MEAL/StokesCovariance.h"
 
 #include <iostream>
-using namespace std;
 
-Calibration::TotalCovariance::TotalCovariance ()
+using namespace std;
+using namespace Calibration;
+
+TotalCovariance::TotalCovariance ()
 {
   observation_covariance_set = false;
 }
 
+//! Clone operator
+TotalCovariance* TotalCovariance::clone () const
+{
+  return new TotalCovariance (*this);
+}
+
+//! Add the uncertainty of another instance
+void TotalCovariance::add (const Uncertainty* other)
+{
+  const TotalCovariance* like = dynamic_cast<const TotalCovariance*> (other);
+  cerr << "TotalCovariance::add not implemented" << endl;
+}
+
 //! Set the uncertainty of the observation
-void Calibration::TotalCovariance::set_covariance 
+void TotalCovariance::set_covariance 
 (const Matrix<4,4,double>& covar)
 {
   observation_covariance = covar;
@@ -25,7 +41,7 @@ void Calibration::TotalCovariance::set_covariance
 }
 
 //! Set the optimizing transformation
-void Calibration::TotalCovariance::set_optimizing_transformation 
+void TotalCovariance::set_optimizing_transformation 
 (const Matrix<4,4,double>& opt)
 {
   optimizer = opt;
@@ -34,7 +50,7 @@ void Calibration::TotalCovariance::set_optimizing_transformation
 
 
 //! Given a coherency matrix, return the difference
-double Calibration::TotalCovariance::get_weighted_norm
+double TotalCovariance::get_weighted_norm
 (const Jones<double>& matrix) const
 {
   if (!built)
@@ -46,7 +62,7 @@ double Calibration::TotalCovariance::get_weighted_norm
 
 
 //! Given a coherency matrix, return the weighted conjugate matrix
-Jones<double> Calibration::TotalCovariance::get_weighted_conjugate
+Jones<double> TotalCovariance::get_weighted_conjugate
 (const Jones<double>& matrix) const try
 {
   if (!built)
@@ -59,11 +75,11 @@ Jones<double> Calibration::TotalCovariance::get_weighted_conjugate
 }
 catch (Error& error)
 {
-  throw error += "Calibration::TotalCovariance::get_weighted_conjugate";
+  throw error += "TotalCovariance::get_weighted_conjugate";
 }
 
 
-void Calibration::TotalCovariance::build ()
+void TotalCovariance::build ()
 {
   MEAL::StokesCovariance compute;
   compute.set_transformation (optimizer * Mueller(transformation->evaluate()));

@@ -196,6 +196,15 @@ namespace Pulsar
     void add_pulsar (Calibration::CoherencyMeasurementSet&,
 		     const Integration*, unsigned ichan);
 
+    Calibration::SourceEstimate& get_estimate (unsigned index,
+					       unsigned ichan);
+
+    void integrate_pulsar_data (const Calibration::CoherencyMeasurementSet&);
+
+    void integrate_pulsar_data (const Calibration::CoherencyMeasurement&,
+				Calibration::SourceEstimate&,
+				const MJD& epoch, unsigned ichan);
+      
     //! Prepare the measurement equations for fitting
     void solve_prepare ();
 

@@ -36,6 +36,16 @@ Calibration::TemplateUncertainty::clone () const
   return new TemplateUncertainty (*this);
 }
 
+//! Add the uncertainty of another instance
+void Calibration::TemplateUncertainty::add (const Uncertainty* other)
+{
+  const TemplateUncertainty* like
+    = dynamic_cast<const TemplateUncertainty*> (other);
+
+  observation_variance += like->observation_variance;
+  built = false;
+}
+
 //! Set the uncertainty of the observation
 void Calibration::TemplateUncertainty::set_variance
 ( const Stokes<double>& var )
@@ -111,6 +121,7 @@ Stokes< complex<double> >
 Calibration::TemplateUncertainty::get_weighted_components
 ( const Jones<double>& matrix ) const
 {
+  check_build ();
   return ObservationUncertainty::get_weighted_components (matrix);
 }
 

@@ -63,7 +63,7 @@ SystemCalibrator::SystemCalibrator (Archive* archive)
   set_initial_guess = true;
   guess_physical_calibrator_stokes = false;
 
-  calibrator_data_submitted = false;
+  data_submitted = false;
     
   is_prepared = false;
   is_solved = false;
@@ -406,7 +406,7 @@ catch (Error& error)
 
 void SystemCalibrator::prepare (const Archive* data) try
 {  
-  if (verbose)
+  // if (verbose)
     cerr << "SystemCalibrator::prepare"
             " filename=" << data->get_filename() << endl;
 
@@ -426,22 +426,6 @@ void SystemCalibrator::prepare (const Archive* data) try
     cerr << "SystemCalibrator::prepare load_calibrators" << endl;
 
   load_calibrators ();
-
-  if (!calibrator_data_submitted)
-  {
-    if (step_finder)
-    {
-      if (verbose)
-        cerr << "SystemCalibrator::prepare finding steps" << endl;
-
-      step_finder->process (this);
-    }
-    
-    if (verbose)
-      cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
-
-    submit_calibrator_data ();
-  }
   
   if (verbose)
     cerr << "SystemCalibrator::prepare done" << endl;
@@ -452,8 +436,7 @@ catch (Error& error)
 }
 
 //! Add the specified pulsar observation to the set of constraints
-void 
-SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
+void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 {
   const Integration* integration = data->get_Integration (isub);
   unsigned nchan = integration->get_nchan ();
@@ -513,6 +496,8 @@ SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     cerr << "SystemCalibrator::add_pulsar identifier="
 	 << identifier << endl;
 
+  pulsar_data.push_back ( vector<CoherencyMeasurementSet>() );
+
   for (unsigned ichan=0; ichan<nchan; ichan++) try
   {
     if (integration->get_weight (ichan) == 0)
@@ -558,29 +543,17 @@ SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
     // projection transformation
     Argument::Value* xform = model[mchan]->get_projection().new_Value( known );
-
-    VariableBackendEstimate* backend = model[mchan]->get_backend (epoch);
-    IndexedProduct* product = backend->get_psr_response ();
-
-    if (!product->has_index())
-    {
-#if _DEBUG
-      cerr << "SystemCalibrator call add_psr_path" << endl;
-#endif
-      model[mchan]->add_psr_path (backend);
-    }
-    
-    // pulsar signal path
-    unsigned path = product->get_index ();
     
     // measurement set
-    Calibration::CoherencyMeasurementSet measurements (path);
+    Calibration::CoherencyMeasurementSet measurements;
     
     measurements.set_identifier( identifier );
     measurements.add_coordinate( time );
     measurements.add_coordinate( xform );
-    measurements.set_coordinates();
-    
+
+    measurements.set_ichan( ichan );
+    measurements.set_epoch( epoch );
+    measurements.set_name( data->get_source() );
     try
     {
       if (verbose > 2)
@@ -595,9 +568,8 @@ SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 	cerr << "SystemCalibrator::add_pulsar ichan=" << ichan
 	     << "error" << error << endl;
     }
-    
-    model[mchan]->add_observation_epoch (epoch);
-    backend->add_weight (1.0);
+
+    pulsar_data.back().push_back (measurements);
   }
   catch (Error& error)
   {
@@ -618,6 +590,8 @@ catch (Error& error)
 //! Add the specified pulsar observation to the set of constraints
 void SystemCalibrator::match (const Archive* data)
 {
+  cerr << "SystemCalibrator::match" << endl;
+  
   if (!has_calibrator())
     throw Error (InvalidState, "SystemCalibrator::match",
 		 "No Archive containing pulsar data has yet been added");
@@ -1000,8 +974,6 @@ void SystemCalibrator::submit_calibrator_data () try
       continue;
     }
   }
-
-  calibrator_data_submitted = true;
 }
 catch (Error& error) 
 {
@@ -1009,12 +981,98 @@ catch (Error& error)
 }
 
 
+void SystemCalibrator::submit_pulsar_data () try 
+{
+  unsigned nsub = pulsar_data.size();
+  
+  if (verbose > 2)
+    cerr << "SystemCalibrator::submit_pulsar_data nsub=" << nsub << endl;
+
+  if (!nsub)
+    return;
+
+  for (unsigned isub=0; isub<nsub; isub++)
+  {
+    unsigned nchan = pulsar_data[isub].size();
+    unsigned ichan = 0;
+
+    if (verbose > 2)
+      cerr << "SystemCalibrator::submit_pulsar_data isub="
+	   << isub << " nchan=" << nchan << endl;
+
+    if (nchan == 0)
+      continue;
+
+    if (nchan && verbose > 2)
+      cerr << "SystemCalibrator::submit_pulsar_data isub="
+	   << isub << " name="
+	   << pulsar_data[isub][0].get_name() << endl;
+
+    for (unsigned jchan=0; jchan<nchan; jchan++) try
+    {
+      CoherencyMeasurementSet& data = pulsar_data[isub][jchan];
+      
+      ichan = data.get_ichan();
+      
+      if (verbose > 2)
+	cerr << "SystemCalibrator::submit_pulsar_data ichan="
+	     << ichan << " submit_pulsar_data" << endl;
+
+      // add pulsar data constraints to measurement equation
+      submit_pulsar_data( data );
+
+      // add pulsar data to mean estimate used as initial guess
+      integrate_pulsar_data( data );
+    }
+    catch (Error& error)
+    {
+      cerr << "SystemCalibrator::submit_pulsar_data ichan="
+	   << ichan << " error\n"
+	   << error << endl;
+      continue;
+    }
+  }
+}
+catch (Error& error) 
+{
+  throw error += "SystemCalibrator::submit_pulsar_data ()";
+}
+
+void SystemCalibrator::submit_pulsar_data
+( Calibration::CoherencyMeasurementSet& measurements)
+{
+  unsigned mchan = measurements.get_ichan();
+  MJD epoch = measurements.get_epoch();
+  
+  VariableBackendEstimate* backend = model[mchan]->get_backend (epoch);
+  IndexedProduct* product = backend->get_psr_response ();
+
+  if (!product->has_index())
+  {
+#if _DEBUG
+    cerr << "SystemCalibrator::submit_pulsar_data call add_psr_path" << endl;
+#endif
+    model[mchan]->add_psr_path (backend);
+  }
+    
+  measurements.set_transformation_index (product->get_index ());
+    
+  DEBUG("Pulsar::ReceptionCalibrator::submit_pulsar_data chan=" << mchan);
+  model[mchan]->get_equation()->add_data (measurements);
+
+  model[mchan]->add_observation_epoch (epoch);
+  backend->add_weight (1.0);
+}
+
 void SystemCalibrator::init_estimates
 ( std::vector<SourceEstimate>& estimate, unsigned ibin )
 {
   unsigned nchan = get_nchan ();
   unsigned nbin = get_calibrator()->get_nbin ();
 
+  if (verbose > 2)
+    cerr << "SystemCalibrator::init_estimates ibin=" << ibin << endl;
+    
   if (ibin >= nbin)
     throw Error (InvalidRange, "SystemCalibrator::init_estimate",
 		 "phase bin=%d >= nbin=%d", ibin, nbin);
@@ -1461,6 +1519,29 @@ void SystemCalibrator::solve_prepare ()
   if (is_prepared)
     return;
 
+  if (!data_submitted)
+  {
+    if (step_finder)
+    {
+      if (verbose)
+        cerr << "SystemCalibrator::prepare finding steps" << endl;
+
+      step_finder->process (this);
+    }
+    
+    if (verbose)
+      cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
+
+    submit_calibrator_data ();
+
+    if (verbose)
+      cerr << "SystemCalibrator::prepare submit_calibrator_data" << endl;
+
+    submit_pulsar_data ();
+
+    data_submitted = true;
+  }
+    
   if (report_input_failed)
     print_input_failed (calibrator_estimate);
   
@@ -1541,6 +1622,9 @@ void SystemCalibrator::solve () try
 {
   ReceptionModel::Solver::report_chisq = true;
 
+  if (verbose > 1)
+    cerr << "SystemCalibrator::solve calling solve_prepare" << endl;
+  
   solve_prepare ();
 
   unsigned nchan = get_nchan ();
