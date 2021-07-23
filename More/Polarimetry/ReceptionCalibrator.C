@@ -325,7 +325,8 @@ void Pulsar::ReceptionCalibrator::match (const Archive* data)
 {
   check_ready ("Pulsar::ReceptionCalibrator::match", false);
 
-  cerr << "ReceptionCalibrator::match" << endl;
+  if (verbose > 1)
+    cerr << "ReceptionCalibrator::match" << endl;
   
   if (!has_calibrator())
     initial_observation (data);

@@ -406,7 +406,7 @@ catch (Error& error)
 
 void SystemCalibrator::prepare (const Archive* data) try
 {  
-  // if (verbose)
+  if (verbose)
     cerr << "SystemCalibrator::prepare"
             " filename=" << data->get_filename() << endl;
 
@@ -590,7 +590,8 @@ catch (Error& error)
 //! Add the specified pulsar observation to the set of constraints
 void SystemCalibrator::match (const Archive* data)
 {
-  cerr << "SystemCalibrator::match" << endl;
+  if (verbose)
+    cerr << "SystemCalibrator::match" << endl;
   
   if (!has_calibrator())
     throw Error (InvalidState, "SystemCalibrator::match",
