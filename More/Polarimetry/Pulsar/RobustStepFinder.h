@@ -41,7 +41,8 @@ namespace Pulsar
     template<typename Container>
     void count_consistent (const Container& container,
 			   std::vector<unsigned>& before,
-			   std::vector<unsigned>& after);
+			   std::vector<unsigned>& after,
+			   bool wedge);
 
     template<typename Container>
     void remove_inconsistent (Container& container,

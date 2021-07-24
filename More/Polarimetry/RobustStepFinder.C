@@ -216,7 +216,8 @@ double get_chi (const SetVector& A, const SetVector& B, Index pol)
 template<typename Container>
 void RobustStepFinder::count_consistent (const Container& container,
 					 vector<unsigned>& before,
-					 vector<unsigned>& after)
+					 vector<unsigned>& after,
+					 bool wedge)
 {
   before.clear();
   after.clear();
@@ -241,15 +242,23 @@ void RobustStepFinder::count_consistent (const Container& container,
       // if isub is consistent with jsub ...
       if (chi < step_threshold)
       {
-	// ... add to the count of consistent sub-integrations before
-	// all sub-integrations after and including jsub
-	for (unsigned ksub=jsub; ksub < jmax; ksub++)
-	  before[ksub] ++;
+	if (wedge)
+	{
+	  // ... add to the count of consistent sub-integrations before
+	  // all sub-integrations after and including jsub
+	  for (unsigned ksub=jsub; ksub < jmax; ksub++)
+	    before[ksub] ++;
 
-	// ... add to the count of consistent sub-integrations after
-	// all sub-integrations before jsub
-	for (unsigned ksub=isub; ksub < jsub; ksub++)
-	  after[ksub] ++;
+	  // ... add to the count of consistent sub-integrations after
+	  // all sub-integrations before jsub
+	  for (unsigned ksub=isub; ksub < jsub; ksub++)
+	    after[ksub] ++;
+	}
+	else
+	{
+	  after[isub] ++;
+	  before[jsub] ++;
+	}
       }
     }
   }
@@ -288,22 +297,26 @@ void RobustStepFinder::remove_inconsistent (Container& container,
 
 void RobustStepFinder::remove_outliers ()
 {
+  bool wedge = false;
+  
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
-  count_consistent (psrdata, psr_before, psr_after);
+  count_consistent (psrdata, psr_before, psr_after, wedge);
   remove_inconsistent (psrdata, psr_before, psr_after);
   
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  count_consistent (caldata, cal_before, cal_after);
+  count_consistent (caldata, cal_before, cal_after, wedge);
   remove_inconsistent (caldata, cal_before, cal_after);
 }
 
 void RobustStepFinder::insert_steps ()
 {
+  bool wedge = true;
+
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
-  count_consistent (psrdata, psr_before, psr_after);
+  count_consistent (psrdata, psr_before, psr_after, wedge);
 
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  count_consistent (caldata, cal_before, cal_after);
+  count_consistent (caldata, cal_before, cal_after, wedge);
 
   vector<MJD> steps;
   find_steps (steps);
