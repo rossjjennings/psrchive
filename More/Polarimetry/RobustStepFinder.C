@@ -273,15 +273,23 @@ void RobustStepFinder::remove_inconsistent (Container& container,
 
   assert (before.size() == nsubint);
   assert (after.size() == nsubint);
- 
+
+#if _DEBUG 
   cerr << "RobustStepFinder::remove_inconsistent" << endl;
-  for (unsigned i=0; i<nsubint; i++)
-    cerr << i << " before=" << before[i] << " after=" << after[i] << endl;
+#endif
+
+  unsigned min_threshold = depth - 1;
+
+  unsigned before_min = 0;
+  unsigned after_min = min_threshold;
 
   unsigned isub=0;
-  while (isub < nsubint)
+  while (isub < container.size())
   {
-    if (before[isub] == 0 && after[isub] == 0)
+    cerr << isub << " before=" << before[isub] << " after=" << after[isub]
+         << " min before=" << before_min << " after=" << after_min << endl;
+
+    if (before[isub] < before_min && after[isub] < after_min)
     {
       cerr << "RobustStepFinder::remove_inconsistent removing outlier \n\t"
 	   << container[isub][0].get_identifier() << endl;
@@ -292,6 +300,12 @@ void RobustStepFinder::remove_inconsistent (Container& container,
     }
     else
       isub++;
+
+    if (before_min < min_threshold)
+      before_min ++;
+
+    if (isub + min_threshold >= container.size() && after_min > 0)
+      after_min --;
   }
 }
 
