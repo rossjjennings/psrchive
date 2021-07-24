@@ -56,7 +56,7 @@ void RobustStepFinder::process (SystemCalibrator* _calibrator)
   insert_steps ();
 }
 
-double get_chi (const ObsVector& A, const ObsVector& B, Index pol)
+double get_chi (const ObsVector& A, const ObsVector& B, vector<unsigned>& pol)
 {
   auto Aptr = A.begin();
   auto Bptr = B.begin();
@@ -80,19 +80,9 @@ double get_chi (const ObsVector& A, const ObsVector& B, Index pol)
     const Stokes< Estimate<double> >& Astokes = Aptr->observation;
     const Stokes< Estimate<double> >& Bstokes = Bptr->observation;
 
-    // do all four Stokes at once ...
-    unsigned npol = 4;
-    unsigned ipol = 0;
-
-    // ... or do a specific Stokes parameter
-    if (!pol.get_integrate())
+    for (unsigned jpol=0; jpol < pol.size(); jpol++)
     {
-      ipol = pol.get_value();
-      npol = ipol + 1;
-    }
-    
-    for (unsigned ipol=0; ipol < npol; ipol++)
-    {
+      unsigned ipol = pol[jpol];
       double diff = fabs(Astokes[ipol].val - Bstokes[ipol].val);
       double err = sqrt(Astokes[ipol].var + Bstokes[ipol].var);
       chi.push_back( diff / err);
@@ -109,19 +99,8 @@ double get_chi (const ObsVector& A, const ObsVector& B, Index pol)
 
 void get_chi (vector<double>& chi,
 	      const CoherencyMeasurement& A,
-	      const CoherencyMeasurement& B, Index pol)
+	      const CoherencyMeasurement& B, vector<unsigned>& pol)
 {
-  // do all four Stokes at once ...
-  unsigned npol = 4;
-  unsigned ipol = 0;
-
-  // ... or do a specific Stokes parameter
-  if (!pol.get_integrate())
-  {
-    ipol = pol.get_value();
-    npol = ipol + 1;
-  }
-
   Reference::To<const CoherencyMeasurement::Uncertainty> error;
   error = A.get_uncertainty();
 
@@ -139,9 +118,10 @@ void get_chi (vector<double>& chi,
   Jones<double> diff = A.get_coherency() - B.get_coherency();
  
   Stokes< std::complex<double> > Schi = error->get_weighted_components (diff);
-  
-  for (unsigned ipol=0; ipol < npol; ipol++)
+
+  for (unsigned jpol=0; jpol < pol.size(); jpol++)
   {
+    unsigned ipol = pol[jpol];
 #if _DEBUG
     cerr << ipol
 	 << " " << fabs(Schi[ipol].real())
@@ -155,7 +135,7 @@ void get_chi (vector<double>& chi,
 
 void get_chi (vector<double>& chi,
 	      const CoherencyMeasurementSet& A,
-	      const CoherencyMeasurementSet& B, Index pol)
+	      const CoherencyMeasurementSet& B, vector<unsigned>& pol)
 {
   auto Aptr = A.begin();
   auto Bptr = B.begin();
@@ -181,7 +161,7 @@ void get_chi (vector<double>& chi,
   }
 }
     
-double get_chi (const SetVector& A, const SetVector& B, Index pol)
+double get_chi (const SetVector& A, const SetVector& B, vector<unsigned>& pol)
 {
   auto Aptr = A.begin();
   auto Bptr = B.begin();
@@ -227,17 +207,13 @@ void RobustStepFinder::count_consistent (const Container& container,
   before.resize (nsubint, 0);
   after.resize (nsubint, 0);
 
-  // compute chi for all Stokes at once
-  Index pol;
-  pol.set_integrate (true);
-
   for (unsigned isub=0; isub < nsubint; isub++)
   {
     unsigned jmax = std::min (nsubint, isub+depth+1);
     
     for (unsigned jsub=isub+1; jsub < jmax; jsub++)
     {
-      double chi = get_chi (container[isub], container[jsub], pol);
+      double chi = get_chi (container[isub], container[jsub], compare);
 
       // if isub is consistent with jsub ...
       if (chi < step_threshold)
@@ -309,10 +285,21 @@ void RobustStepFinder::remove_inconsistent (Container& container,
   }
 }
 
+vector<unsigned> all_four ()
+{
+  vector<unsigned> pol (4);
+  for (unsigned i=0; i<4; i++)
+    pol[i] = i;
+  return pol;
+}
+
 void RobustStepFinder::remove_outliers ()
 {
   bool wedge = false;
-  
+
+  // search for outliers using all four Stokes parameters
+  compare = all_four ();
+
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   count_consistent (psrdata, psr_before, psr_after, wedge);
   remove_inconsistent (psrdata, psr_before, psr_after);
@@ -324,8 +311,27 @@ void RobustStepFinder::remove_outliers ()
 
 void RobustStepFinder::insert_steps ()
 {
-  bool wedge = true;
+  Reference::To<VariableBackend> xform = new VariableBackend;
+  
+  // search for steps using all four Stokes parameters
+  compare = all_four ();
+  insert_steps (xform);
 
+  // search for steps in differential phase only
+  compare.resize (2);
+  compare[0] = 2;
+  compare[1] = 3;
+
+  // disable fits in gain and differential gain
+  xform->set_infit (0, false);
+  xform->set_infit (1, false);
+  insert_steps (xform);
+}
+
+void RobustStepFinder::insert_steps (VariableBackend* backend)
+{
+  bool wedge = true;
+  
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   count_consistent (psrdata, psr_before, psr_after, wedge);
 
@@ -338,7 +344,7 @@ void RobustStepFinder::insert_steps ()
   if (!steps.size())
     return;
 
-  insert_steps (steps);
+  insert_steps (steps, backend);
 }
 
 void RobustStepFinder::find_steps (vector<MJD>& steps)
@@ -425,7 +431,7 @@ void RobustStepFinder::find_steps (vector<MJD>& steps)
   }
 }
 
-void RobustStepFinder::insert_steps (vector<MJD>& steps)
+void RobustStepFinder::insert_steps (vector<MJD>& steps, VariableBackend* xform)
 {
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   unsigned nsubint = psrdata.size();
@@ -466,7 +472,7 @@ void RobustStepFinder::insert_steps (vector<MJD>& steps)
       {
 	// igore steps with no preceding obs
 	if (nbefore)
-	  model[ichan]->add_step (steps[istep], new VariableBackend);
+	  model[ichan]->add_step (steps[istep], xform->clone());
 
 	nbefore = 0;
 	istep++;

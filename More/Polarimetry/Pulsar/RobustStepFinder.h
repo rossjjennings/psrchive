@@ -26,18 +26,21 @@ namespace Pulsar
     //! The calibrator on which operations are performed
     SystemCalibrator* calibrator;
 
-    // count of consistent sub-integrations before each pulsar sub-integration
+    //! count of consistent sub-integrations before each pulsar sub-integration
     std::vector<unsigned> psr_before;
     
-    // count of consistent sub-integrations after each pulsar sub-integration
+    //! count of consistent sub-integrations after each pulsar sub-integration
     std::vector<unsigned> psr_after;
 
-    // count of consistent sub-integrations before each CAL sub-integration
+    //! count of consistent sub-integrations before each CAL sub-integration
     std::vector<unsigned> cal_before;
     
-    // count of consistent sub-integrations after each CAL sub-integration
+    //! count of consistent sub-integrations after each CAL sub-integration
     std::vector<unsigned> cal_after;
 
+    //! Stokes parameters used during consistency comparisons
+    std::vector<unsigned> compare;
+    
     template<typename Container>
     void count_consistent (const Container& container,
 			   std::vector<unsigned>& before,
@@ -50,9 +53,18 @@ namespace Pulsar
 			      std::vector<unsigned>& after);
 
     void remove_outliers ();
-    
+
+    //! Search for steps using counts of consistent pulsar sub-integrations
     void find_steps (std::vector<MJD>& steps);
-    void insert_steps (std::vector<MJD>& steps);
+
+    //! Insert steps using the specified transfrom
+    void insert_steps (std::vector<MJD>& steps,
+		       Calibration::VariableBackend* xform);
+
+    //! Search for steps and insert using the specified transform
+    void insert_steps (Calibration::VariableBackend* xform);
+
+    //! Search for and insert steps in gain, then phase
     void insert_steps ();
  
   public:
