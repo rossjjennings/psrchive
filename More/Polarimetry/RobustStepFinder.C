@@ -9,6 +9,8 @@
 #include "Pulsar/VariableBackend.h"
 #include "UnaryStatistic.h"
 
+#include <cassert>
+
 using namespace Calibration;
 using namespace Pulsar;
 using namespace std;
@@ -262,7 +264,11 @@ void RobustStepFinder::remove_inconsistent (Container& container,
 
   assert (before.size() == nsubint);
   assert (after.size() == nsubint);
-  
+ 
+  cerr << "RobustStepFinder::remove_inconsistent" << endl;
+  for (unsigned i=0; i<nsubint; i++)
+    cerr << i << " before=" << before[i] << " after=" << after[i] << endl;
+
   unsigned isub=0;
   while (isub < nsubint)
   {
