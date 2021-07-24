@@ -16,6 +16,44 @@ using namespace std;
 typedef vector<Calibration::SourceObservation> ObsVector;
 typedef vector<Calibration::CoherencyMeasurementSet> SetVector;
 
+template<typename Container>
+unsigned remove_empty (Container& container)
+{
+  unsigned erased = 0;
+  unsigned idat = 0;
+  
+  while (idat < container.size())
+  {
+    if (container[idat].size() == 0)
+    {
+#if _DEBUG
+      cerr << "RobustStepFinder::process removing empty sub-container at " 
+           << idat + erased << endl;
+#endif
+      container.erase (container.begin() + idat);
+      erased ++;
+    }
+    else
+      idat ++;
+  }
+
+  return erased;
+}
+
+void RobustStepFinder::process (SystemCalibrator* _calibrator)
+{
+  calibrator = _calibrator;
+
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+
+  remove_empty (caldata);
+  remove_empty (psrdata);
+  
+  remove_outliers ();
+  insert_steps ();
+}
+
 double get_chi (const ObsVector& A, const ObsVector& B, Index pol)
 {
   auto Aptr = A.begin();
@@ -172,48 +210,23 @@ double get_chi (const SetVector& A, const SetVector& B, Index pol)
 }
 
 
+
 template<typename Container>
-unsigned erase_empty (Container& container)
+void RobustStepFinder::count_consistent (const Container& container,
+					 vector<unsigned>& before,
+					 vector<unsigned>& after)
 {
-  unsigned erased = 0;
-  unsigned idat = 0;
+  before.clear();
+  after.clear();
   
-  while (idat < container.size())
-  {
-    if (container[idat].size() == 0)
-    {
-#if _DEBUG
-      cerr << "RobustStepFinder::process removing empty sub-container at " 
-           << idat + erased << endl;
-#endif
-      container.erase (container.begin() + idat);
-      erased ++;
-    }
-    else
-      idat ++;
-  }
-
-  return erased;
-}
-
-void RobustStepFinder::process (SystemCalibrator* calibrator)
-{
-  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
-
-  erase_empty (caldata);
-  erase_empty (psrdata);
-
-  unsigned nsubint = psrdata.size();
+  unsigned nsubint = container.size();
   
+  before.resize (nsubint, 0);
+  after.resize (nsubint, 0);
+
   // compute chi for all Stokes at once
   Index pol;
   pol.set_integrate (true);
-
-  // count of consistent sub-integrations before this one
-  vector<unsigned> before (nsubint, 0);
-  // count of consistent sub-integrations after this one
-  vector<unsigned> after (nsubint, 0);
 
   for (unsigned isub=0; isub < nsubint; isub++)
   {
@@ -221,7 +234,7 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
     
     for (unsigned jsub=isub+1; jsub < jmax; jsub++)
     {
-      double chi = get_chi (psrdata[isub], psrdata[jsub], pol);
+      double chi = get_chi (container[isub], container[jsub], pol);
 
       // if isub is consistent with jsub ...
       if (chi < step_threshold)
@@ -238,19 +251,80 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
       }
     }
   }
+}
+
+template<typename Container>
+void RobustStepFinder::remove_inconsistent (Container& container,
+					    vector<unsigned>& before,
+					    vector<unsigned>& after)
+{
+  unsigned nsubint = container.size();
+
+  assert (before.size() == nsubint);
+  assert (after.size() == nsubint);
+  
+  unsigned isub=0;
+  while (isub < nsubint)
+  {
+    if (before[isub] == 0 && after[isub] == 0)
+    {
+      cerr << "RobustStepFinder::remove_inconsistent removing outlier \n\t"
+	   << container[isub][0].get_identifier() << endl;
+      
+      container.erase (container.begin()+isub);
+      before.erase (before.begin()+isub);
+      after.erase (after.begin()+isub);
+    }
+    else
+      isub++;
+  }
+}
+
+void RobustStepFinder::remove_outliers ()
+{
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  count_consistent (psrdata, psr_before, psr_after);
+  remove_inconsistent (psrdata, psr_before, psr_after);
+  
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  count_consistent (caldata, cal_before, cal_after);
+  remove_inconsistent (caldata, cal_before, cal_after);
+}
+
+void RobustStepFinder::insert_steps ()
+{
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  count_consistent (psrdata, psr_before, psr_after);
+
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  count_consistent (caldata, cal_before, cal_after);
 
   vector<MJD> steps;
+  find_steps (steps);
 
+  if (!steps.size())
+    return;
+
+  insert_steps (steps);
+}
+
+void RobustStepFinder::find_steps (vector<MJD>& steps)
+{
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  
+  unsigned nsubint = psrdata.size();
+  
   bool step_after_cal = calibrator->get_step_after_cal();
   unsigned good = (depth * (depth+1)) / 2;
   
   for (unsigned isub=depth; isub+depth < nsubint; isub++)
   {
-    if (before[isub] == good && after[isub] == 0)
+    if (psr_before[isub] == good && psr_after[isub] == 0)
     {
       cerr << "RobustStepFinder::process isub=" << isub 
-	   << " before=" << before[isub]
-	   << " after=" << after[isub] << endl;
+	   << " before=" << psr_before[isub]
+	   << " after=" << psr_after[isub] << endl;
 
       unsigned jsub = isub+1;
       
@@ -285,39 +359,44 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
 	continue;
       }
 
-      unsigned ical = cals_between.front();
-      unsigned jcal = cals_between.back();
-      
-      MJD ical_epoch = caldata[ical][0].epoch;
-      string ical_id = caldata[ical][0].get_identifier();
-
-      MJD jcal_epoch = caldata[jcal][0].epoch;
-      string jcal_id = caldata[jcal][0].get_identifier();
-
       MJD step_epoch;
       
       if (step_after_cal)
       {
-        cerr << "RobustStepFinder::process adding step after "
-             << jcal_id << endl;
-	step_epoch = jcal_epoch + 30.0;
+	unsigned ical = cals_between.back();
+	MJD cal_epoch = caldata[ical][0].epoch;
+	string cal_id = caldata[ical][0].get_identifier();
+	
+	cerr << "RobustStepFinder::process adding step after "
+             << cal_id << endl;
+      
+	step_epoch = cal_epoch + 30.0;
       }
       else
       {
+	unsigned ical = cals_between.front();
+	MJD cal_epoch = caldata[ical][0].epoch;
+	string cal_id = caldata[ical][0].get_identifier();
+
         cerr << "RobustStepFinder::process adding step before "
-             << ical_id << endl;
-	step_epoch = ical_epoch - 30.0;
+             << cal_id << endl;
+	step_epoch = cal_epoch - 30.0;
       }
 
+#if _DEBUG
       cerr << "RobustStepFinder::process step epoch=" << step_epoch << endl;
+#endif
       
       steps.push_back (step_epoch);
     }
   }
+}
 
-  if (!steps.size())
-    return;
-  
+void RobustStepFinder::insert_steps (vector<MJD>& steps)
+{
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  unsigned nsubint = psrdata.size();
+
   unsigned nchan = calibrator->get_nchan();
 
   vector< vector<MJD> > mjds ( nchan, vector<MJD> (nsubint) );
@@ -362,3 +441,4 @@ void RobustStepFinder::process (SystemCalibrator* calibrator)
     }
   }
 }
+

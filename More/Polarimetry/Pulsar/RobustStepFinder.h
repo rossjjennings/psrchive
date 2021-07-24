@@ -22,7 +22,38 @@ namespace Pulsar
 
     //! Number of mutually consistent points required on either side of step
     unsigned depth;
+
+    //! The calibrator on which operations are performed
+    SystemCalibrator* calibrator;
+
+    // count of consistent sub-integrations before each pulsar sub-integration
+    std::vector<unsigned> psr_before;
     
+    // count of consistent sub-integrations after each pulsar sub-integration
+    std::vector<unsigned> psr_after;
+
+    // count of consistent sub-integrations before each CAL sub-integration
+    std::vector<unsigned> cal_before;
+    
+    // count of consistent sub-integrations after each CAL sub-integration
+    std::vector<unsigned> cal_after;
+
+    template<typename Container>
+    void count_consistent (const Container& container,
+			   std::vector<unsigned>& before,
+			   std::vector<unsigned>& after);
+
+    template<typename Container>
+    void remove_inconsistent (Container& container,
+			      std::vector<unsigned>& before,
+			      std::vector<unsigned>& after);
+
+    void remove_outliers ();
+    
+    void find_steps (std::vector<MJD>& steps);
+    void insert_steps (std::vector<MJD>& steps);
+    void insert_steps ();
+ 
   public:
 
     //! Default constructor
@@ -33,6 +64,7 @@ namespace Pulsar
     }
 
     void set_step_threshold (float val) { step_threshold = val; }
+    
     void process (SystemCalibrator*);
 
   };
