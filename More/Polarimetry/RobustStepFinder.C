@@ -47,15 +47,99 @@ void RobustStepFinder::process (SystemCalibrator* _calibrator)
   calibrator = _calibrator;
 
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
-
   remove_empty (caldata);
+
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   remove_empty (psrdata);
-  
+
+  remove_extra_calibrators ();
   remove_outliers ();
   insert_steps ();
 }
 
+void RobustStepFinder::remove_extra_calibrators ()
+{
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+
+  unsigned ical = 0;
+
+  vector<unsigned> before;
+  vector<MJD> epochs;
+  
+  for (unsigned ipsr=0; ipsr < psrdata.size(); ipsr++)
+  {
+    MJD psr_epoch = psrdata[ipsr][0].get_epoch();
+
+    while (ical < caldata.size() && caldata[ical][0].get_epoch() < psr_epoch)
+    {
+      before.push_back (ical);
+      epochs.push_back (caldata[ical][0].get_epoch());
+      ical ++;
+    }
+    
+    if (before.size())
+    {
+      MJD five_minutes (0, 5 * 60, 0);
+
+      unsigned ibefore = 0;
+      
+      while (ibefore+1 < epochs.size())
+      {
+	if (epochs[ibefore+1] - epochs[ibefore] > five_minutes)
+        {
+	  cerr << "RobustStepFinder::remove_extra_calibrators gap="
+	       << epochs[ibefore+1] - epochs[ibefore] << endl;
+
+	  unsigned ical_offset = ical - epochs.size();
+	  
+	  if (calibrator->get_step_after_cal())
+	  {
+	    cerr << "RobustStepFinder::remove_extra_calibrators keeping "
+		 << ibefore << " sub-integrations before gap" << endl;
+
+	    ical_offset += ibefore+1;
+	    
+	    while (ibefore+1 < epochs.size())
+	    {
+	      epochs.erase (epochs.begin() + ibefore+1);
+
+	      cerr << "RobustStepFinder::remove_extra_calibrators removing "
+		   << caldata[ical_offset][0].get_identifier();
+
+	      caldata.erase (caldata.begin() + ical_offset);
+	    }
+	  }
+	  else
+	  {
+	    cerr << "RobustStepFinder::remove_extra_calibrators keeping "
+		 << epochs.size() - (ibefore+1)
+		 << " sub-integrations after gap" << endl;
+
+	    while (ibefore+1 > 0)
+	    {
+	      epochs.erase (epochs.begin());
+
+	      cerr << "RobustStepFinder::remove_extra_calibrators removing "
+		   << caldata[ical_offset][0].get_identifier();
+	      
+	      caldata.erase (caldata.begin() + ical_offset);
+
+	      ibefore --;
+	    }
+
+	    assert (ibefore == 0);
+	  }
+	}
+      } // end while
+
+      before.clear();
+      epochs.clear();
+    }
+  }
+}
+
+  
 vector<unsigned> all_four ()
 {
   vector<unsigned> pol (4);
@@ -95,6 +179,9 @@ void RobustStepFinder::insert_steps ()
   compare = all_four ();
 
   bool wedge = true;
+
+  cerr << "RobustStepFinder::insert_steps searching pulsar data"
+       << endl;
   
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   count_consistent (psrdata, psr_before, psr_after, wedge);
@@ -104,15 +191,18 @@ void RobustStepFinder::insert_steps ()
 
   if (psr_steps.size())
     insert_steps (psr_steps, backend);
-  
-  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  count_consistent (caldata, cal_before, cal_after, wedge);
 
   // search for steps in differential phase only
   compare.resize (2);
   compare[0] = 2;
   compare[1] = 3;
 
+  cerr << "RobustStepFinder::insert_steps searching calibrator data"
+       << endl;
+
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  count_consistent (caldata, cal_before, cal_after, wedge);
+  
   vector<MJD> cal_steps;
   find_steps_calibrator (cal_steps);
 
@@ -275,8 +365,6 @@ double get_chi (const SetVector& A, const SetVector& B, vector<unsigned>& pol)
 
   return median (chi);
 }
-
-
 
 template<typename Container>
 void RobustStepFinder::count_consistent (const Container& container,
@@ -449,7 +537,7 @@ bool RobustStepFinder::align_to_cal (MJD& i_epoch, string& i_id,
     
   for (unsigned ical=0; ical < caldata.size(); ical++)
   {
-    MJD cal_epoch = caldata[ical][0].epoch;
+    MJD cal_epoch = caldata[ical][0].get_epoch();
     if (cal_epoch > i_epoch && cal_epoch < j_epoch)
     {
       string cal_id = caldata[ical][0].get_identifier();
@@ -467,11 +555,11 @@ bool RobustStepFinder::align_to_cal (MJD& i_epoch, string& i_id,
   }
     
   unsigned ical = between.back();
-  i_epoch = caldata[ical][0].epoch;
+  i_epoch = caldata[ical][0].get_epoch();
   i_id = caldata[ical][0].get_identifier();
       
   unsigned jcal = between.front();
-  j_epoch = caldata[jcal][0].epoch;
+  j_epoch = caldata[jcal][0].get_epoch();
   j_id = caldata[jcal][0].get_identifier();
 
   return true;
