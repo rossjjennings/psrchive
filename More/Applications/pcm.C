@@ -696,7 +696,7 @@ Reference::To<Pulsar::FluxCalibrator> flux_cal;
 void load_calibrator_database ();
 
 // Number of threads used to solve equations
-unsigned nthread = 0;
+unsigned nthread = 1;
 
 // name of file containing list of filenames to be calibrated
 string calibrate_these;
