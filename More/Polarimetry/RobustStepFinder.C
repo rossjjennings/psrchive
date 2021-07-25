@@ -369,30 +369,6 @@ void RobustStepFinder::remove_inconsistent (Container& container,
       after_min --;
   }
 }
-
-
-
-
-void RobustStepFinder::insert_steps (VariableBackend* backend)
-{
-  bool wedge = true;
-  
-  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
-  count_consistent (psrdata, psr_before, psr_after, wedge);
-
-  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  count_consistent (caldata, cal_before, cal_after, wedge);
-
-  vector<MJD> steps;
-  find_steps_pulsar (steps);
-
-  if (!steps.size())
-    return;
-
-  insert_steps (steps, backend);
-}
-
-
       
 void RobustStepFinder::find_steps_pulsar (vector<MJD>& steps)
 {

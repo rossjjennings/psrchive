@@ -79,9 +79,6 @@ namespace Pulsar
     void insert_steps (std::vector<MJD>& steps,
 		       Calibration::VariableBackend* xform);
 
-    //! Search for steps and insert using the specified transform
-    void insert_steps (Calibration::VariableBackend* xform);
-
     //! Search for and insert steps in instrumental response
     void insert_steps ();
  
