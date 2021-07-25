@@ -54,8 +54,26 @@ namespace Pulsar
 
     void remove_outliers ();
 
+    //! Search for steps using counts of consistent sub-integrations
+    void find_steps (std::vector<unsigned>& steps,
+		     const std::vector<unsigned>& before,
+		     const std::vector<unsigned>& after);
+
+    template<class Container>
+    void add_steps (std::vector<MJD>& steps,
+		    std::vector<unsigned>& step_sub,
+		    Container& data,
+		    bool align_to_cal = 0);
+
+    // adjust epochs and ids to align to data in container
+    bool align_to_cal (MJD& i_epoch, std::string& i_id,
+		       MJD& j_epoch, std::string& j_id);
+      
     //! Search for steps using counts of consistent pulsar sub-integrations
-    void find_steps (std::vector<MJD>& steps);
+    /*! Steps are aligned to epochs of calibrator sub-integrations */
+
+    void find_steps_pulsar (std::vector<MJD>& steps);
+    void find_steps_calibrator (std::vector<MJD>& steps);
 
     //! Insert steps using the specified transfrom
     void insert_steps (std::vector<MJD>& steps,
@@ -64,7 +82,7 @@ namespace Pulsar
     //! Search for steps and insert using the specified transform
     void insert_steps (Calibration::VariableBackend* xform);
 
-    //! Search for and insert steps in gain, then phase
+    //! Search for and insert steps in instrumental response
     void insert_steps ();
  
   public:

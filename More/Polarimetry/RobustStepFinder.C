@@ -56,6 +56,91 @@ void RobustStepFinder::process (SystemCalibrator* _calibrator)
   insert_steps ();
 }
 
+vector<unsigned> all_four ()
+{
+  vector<unsigned> pol (4);
+  for (unsigned i=0; i<4; i++)
+    pol[i] = i;
+  return pol;
+}
+
+void RobustStepFinder::remove_outliers ()
+{
+  bool wedge = false;
+
+  // search for outliers using all four Stokes parameters
+  compare = all_four ();
+
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  count_consistent (psrdata, psr_before, psr_after, wedge);
+  remove_inconsistent (psrdata, psr_before, psr_after);
+  
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  count_consistent (caldata, cal_before, cal_after, wedge);
+  remove_inconsistent (caldata, cal_before, cal_after);
+}
+
+template <class Container, class Element>
+  bool found (const Container& container, const Element& element)
+{
+  return std::find (container.begin(),
+		    container.end(), element) != container.end();
+}
+	    
+void RobustStepFinder::insert_steps ()
+{
+  Reference::To<VariableBackend> backend = new VariableBackend;
+  
+  // search for steps using all four Stokes parameters
+  compare = all_four ();
+
+  bool wedge = true;
+  
+  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  count_consistent (psrdata, psr_before, psr_after, wedge);
+
+  vector<MJD> psr_steps;
+  find_steps_pulsar (psr_steps);
+
+  if (psr_steps.size())
+    insert_steps (psr_steps, backend);
+  
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+  count_consistent (caldata, cal_before, cal_after, wedge);
+
+  // search for steps in differential phase only
+  compare.resize (2);
+  compare[0] = 2;
+  compare[1] = 3;
+
+  vector<MJD> cal_steps;
+  find_steps_calibrator (cal_steps);
+
+  unsigned ical=0;
+  while (ical < cal_steps.size())
+  {
+    if (found (psr_steps, cal_steps[ical]))
+    {
+      cerr << "RobustStepFinder::insert_steps"
+	" remove CAL step already in PSR steps at MJD="
+	   << cal_steps[ical] << endl;
+
+      cal_steps.erase (cal_steps.begin() + ical);
+    }
+    else
+      ical ++;
+  }
+  
+  if (!cal_steps.size())
+    return;
+  
+  // disable fits in gain and differential gain
+  backend->set_infit (0, false);
+  backend->set_infit (1, false);
+
+  insert_steps (cal_steps, backend);
+}
+
 double get_chi (const ObsVector& A, const ObsVector& B, vector<unsigned>& pol)
 {
   auto Aptr = A.begin();
@@ -285,48 +370,8 @@ void RobustStepFinder::remove_inconsistent (Container& container,
   }
 }
 
-vector<unsigned> all_four ()
-{
-  vector<unsigned> pol (4);
-  for (unsigned i=0; i<4; i++)
-    pol[i] = i;
-  return pol;
-}
 
-void RobustStepFinder::remove_outliers ()
-{
-  bool wedge = false;
 
-  // search for outliers using all four Stokes parameters
-  compare = all_four ();
-
-  vector< SetVector >& psrdata = get_pulsar_data (calibrator);
-  count_consistent (psrdata, psr_before, psr_after, wedge);
-  remove_inconsistent (psrdata, psr_before, psr_after);
-  
-  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  count_consistent (caldata, cal_before, cal_after, wedge);
-  remove_inconsistent (caldata, cal_before, cal_after);
-}
-
-void RobustStepFinder::insert_steps ()
-{
-  Reference::To<VariableBackend> xform = new VariableBackend;
-  
-  // search for steps using all four Stokes parameters
-  compare = all_four ();
-  insert_steps (xform);
-
-  // search for steps in differential phase only
-  compare.resize (2);
-  compare[0] = 2;
-  compare[1] = 3;
-
-  // disable fits in gain and differential gain
-  xform->set_infit (0, false);
-  xform->set_infit (1, false);
-  insert_steps (xform);
-}
 
 void RobustStepFinder::insert_steps (VariableBackend* backend)
 {
@@ -339,7 +384,7 @@ void RobustStepFinder::insert_steps (VariableBackend* backend)
   count_consistent (caldata, cal_before, cal_after, wedge);
 
   vector<MJD> steps;
-  find_steps (steps);
+  find_steps_pulsar (steps);
 
   if (!steps.size())
     return;
@@ -347,86 +392,134 @@ void RobustStepFinder::insert_steps (VariableBackend* backend)
   insert_steps (steps, backend);
 }
 
-void RobustStepFinder::find_steps (vector<MJD>& steps)
+
+      
+void RobustStepFinder::find_steps_pulsar (vector<MJD>& steps)
 {
+  vector<unsigned> step_sub;
+  find_steps (step_sub, psr_before, psr_after);
+
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
+  add_steps (steps, step_sub, psrdata, true);
+}
+
+void RobustStepFinder::find_steps_calibrator (vector<MJD>& steps)
+{
+  vector<unsigned> step_sub;
+  find_steps (step_sub, cal_before, cal_after);
+
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
-  
-  unsigned nsubint = psrdata.size();
-  
-  bool step_after_cal = calibrator->get_step_after_cal();
+  add_steps (steps, step_sub, caldata, false);
+}
+
+template<class Container>
+void RobustStepFinder::add_steps (vector<MJD>& steps,
+				  vector<unsigned>& step_sub,
+				  Container& data,
+				  bool align)
+{
+  for (unsigned ksub=0; ksub<step_sub.size(); ksub++)
+  {
+    unsigned isub = step_sub[ksub];
+    unsigned jsub = isub+1;
+      
+    MJD i_epoch = data[isub][0].get_epoch();
+    string i_id = data[isub][0].get_identifier();
+      
+    MJD j_epoch = data[jsub][0].get_epoch();
+    string j_id = data[jsub][0].get_identifier();
+
+    cerr << "RobustStepFinder::add_steps searching for CAL between \n\t"
+	 << "MJD1=" << i_epoch << " id=" << i_id << "\n\t"
+	 << "MJD2=" << j_epoch << " id=" << j_id << endl;
+
+    if (align)
+    {
+      bool aligned = align_to_cal (i_epoch, i_id, j_epoch, j_id);
+      if (!aligned)
+	continue;
+    }
+
+    MJD step_epoch;
+    
+    if (calibrator->get_step_after_cal())
+    {
+      cerr << "RobustStepFinder::add_steps adding step after "
+	   << i_id << endl;
+      step_epoch = i_epoch + 30.0;
+    }
+    else
+    {
+      cerr << "RobustStepFinder::add_steps adding step before "
+	   << j_id << endl;
+      step_epoch = j_epoch - 30.0;
+    }
+    
+#if _DEBUG
+    cerr << "RobustStepFinder::add_steps step epoch="
+	 << step_epoch << endl;
+#endif
+    
+    steps.push_back (step_epoch);
+  }
+}
+
+bool RobustStepFinder::align_to_cal (MJD& i_epoch, string& i_id,
+				     MJD& j_epoch, string& j_id)
+{
+  vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+
+  vector<unsigned> between;
+    
+  for (unsigned ical=0; ical < caldata.size(); ical++)
+  {
+    MJD cal_epoch = caldata[ical][0].epoch;
+    if (cal_epoch > i_epoch && cal_epoch < j_epoch)
+    {
+      string cal_id = caldata[ical][0].get_identifier();
+      cerr << "RobustStepFinder::align found CAL at \n\t"
+	   << "MJD=" << cal_epoch << " id=" << cal_id << endl;
+	  
+      between.push_back (ical);
+    }
+  }
+    
+  if (between.size() == 0)
+  {
+    cerr << "RobustStepFinder::align no CAL found - no jump" << endl;
+    return false;
+  }
+    
+  unsigned ical = between.back();
+  i_epoch = caldata[ical][0].epoch;
+  i_id = caldata[ical][0].get_identifier();
+      
+  unsigned jcal = between.front();
+  j_epoch = caldata[jcal][0].epoch;
+  j_id = caldata[jcal][0].get_identifier();
+
+  return true;
+}
+
+
+
+
+void RobustStepFinder::find_steps (vector<unsigned>& steps,
+				   const vector<unsigned>& before,
+				   const vector<unsigned>& after)
+{
+  unsigned nsubint = before.size();
   unsigned good = (depth * (depth+1)) / 2;
-  
+
   for (unsigned isub=depth; isub+depth < nsubint; isub++)
   {
-    if (psr_before[isub] == good && psr_after[isub] == 0)
+    if (before[isub] == good && after[isub] == 0)
     {
-      cerr << "RobustStepFinder::process isub=" << isub 
-	   << " before=" << psr_before[isub]
-	   << " after=" << psr_after[isub] << endl;
+      cerr << "RobustStepFinder::find_steps step after isub=" << isub 
+	   << " before=" << before[isub]
+	   << " after=" << after[isub] << endl;
 
-      unsigned jsub = isub+1;
-      
-      MJD i_epoch = psrdata[isub][0].get_epoch();
-      string i_id = psrdata[isub][0].get_identifier();
-      
-      MJD j_epoch = psrdata[jsub][0].get_epoch();
-      string j_id = psrdata[jsub][0].get_identifier();
-
-      cerr << "RobustStepFinder::process searching for CAL between \n\t"
-	   << "MJD1=" << i_epoch << " id=" << i_id << "\n\t"
-	   << "MJD2=" << j_epoch << " id=" << j_id << endl;
-
-      vector<unsigned> cals_between;
-      
-      for (unsigned ical=0; ical < caldata.size(); ical++)
-      {
-	MJD cal_epoch = caldata[ical][0].epoch;
-	if (cal_epoch > i_epoch && cal_epoch < j_epoch)
-	{
-	  string cal_id = caldata[ical][0].get_identifier();
-	  cerr << "RobustStepFinder::process found CAL at \n\t"
-	       << "MJD=" << cal_epoch << " id=" << cal_id << endl;
-
-	  cals_between.push_back (ical);
-	}
-      }
-
-      if (cals_between.size() == 0)
-      {
-	cerr << "RobustStepFinder::process no CAL found - no jump" << endl;
-	continue;
-      }
-
-      MJD step_epoch;
-      
-      if (step_after_cal)
-      {
-	unsigned ical = cals_between.back();
-	MJD cal_epoch = caldata[ical][0].epoch;
-	string cal_id = caldata[ical][0].get_identifier();
-	
-	cerr << "RobustStepFinder::process adding step after "
-             << cal_id << endl;
-      
-	step_epoch = cal_epoch + 30.0;
-      }
-      else
-      {
-	unsigned ical = cals_between.front();
-	MJD cal_epoch = caldata[ical][0].epoch;
-	string cal_id = caldata[ical][0].get_identifier();
-
-        cerr << "RobustStepFinder::process adding step before "
-             << cal_id << endl;
-	step_epoch = cal_epoch - 30.0;
-      }
-
-#if _DEBUG
-      cerr << "RobustStepFinder::process step epoch=" << step_epoch << endl;
-#endif
-      
-      steps.push_back (step_epoch);
+      steps.push_back (isub);
     }
   }
 }
