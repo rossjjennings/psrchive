@@ -84,8 +84,10 @@ void RobustStepFinder::remove_extra_calibrators ()
     
     if (before.size())
     {
+#if _DEBUG
       cerr << "RobustStepFinder::remove_extra_calibrators testing " 
            << before.size() << " calibrator epochs" << endl;
+#endif
 
       unsigned removed = 0;
       unsigned ibefore = 0;
@@ -100,8 +102,8 @@ void RobustStepFinder::remove_extra_calibrators ()
           unsigned after_ical = before[ibefore+1] - removed;
 
 	  cerr << "RobustStepFinder::remove_extra_calibrators gap="
-	       << diff << " minutes between" << endl
-               << caldata[before_ical][0].get_identifier() << " and\n"
+	       << diff << " minutes between \n\t"
+               << caldata[before_ical][0].get_identifier() << " and\n\t"
                << caldata[after_ical][0].get_identifier() << endl;
 
 	  if (calibrator->get_step_after_cal())
@@ -115,7 +117,7 @@ void RobustStepFinder::remove_extra_calibrators ()
 	    {
 	      epochs.erase (epochs.begin() + ibefore+1);
 
-	      cerr << "RobustStepFinder::remove_extra_calibrators removing "
+	      cerr << "RobustStepFinder::remove_extra_calibrators removing \n\t"
 		   << caldata[ical_offset][0].get_identifier() << endl;
 
 	      caldata.erase (caldata.begin() + ical_offset);
@@ -135,7 +137,7 @@ void RobustStepFinder::remove_extra_calibrators ()
 	      epochs.erase (epochs.begin());
               before.erase (before.begin());
 
-	      cerr << "RobustStepFinder::remove_extra_calibrators removing "
+	      cerr << "RobustStepFinder::remove_extra_calibrators removing \n\t"
 		   << caldata[ical_offset][0].get_identifier() << endl;
 	      
 	      caldata.erase (caldata.begin() + ical_offset);
