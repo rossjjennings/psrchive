@@ -15,6 +15,8 @@ using namespace Calibration;
 using namespace Pulsar;
 using namespace std;
 
+// #define _DEBUG 1
+
 typedef vector<Calibration::SourceObservation> ObsVector;
 typedef vector<Calibration::CoherencyMeasurementSet> SetVector;
 
@@ -312,11 +314,6 @@ void get_chi (vector<double>& chi,
   for (unsigned jpol=0; jpol < pol.size(); jpol++)
   {
     unsigned ipol = pol[jpol];
-#if _DEBUG
-    cerr << ipol
-	 << " " << fabs(Schi[ipol].real())
-	 << " " << fabs(Schi[ipol].imag()) << endl;
-#endif
     chi.push_back( fabs(Schi[ipol].real()) );
     if (Schi[ipol].imag() != 0.0)
       chi.push_back( fabs(Schi[ipol].imag()) );
@@ -398,7 +395,7 @@ void RobustStepFinder::count_consistent (const Container& container,
   for (unsigned isub=0; isub < nsubint; isub++)
   {
     unsigned jmax = std::min (nsubint, isub+depth+1);
-    
+ 
     for (unsigned jsub=isub+1; jsub < jmax; jsub++)
     {
       double chi = get_chi (container[isub], container[jsub], compare);
@@ -416,7 +413,7 @@ void RobustStepFinder::count_consistent (const Container& container,
 	  // ... add to the count of consistent sub-integrations after
 	  // all sub-integrations before jsub
 	  for (unsigned ksub=isub; ksub < jsub; ksub++)
-	    after[ksub] ++;
+            after[ksub] ++;
 	}
 	else
 	{
@@ -596,16 +593,16 @@ void RobustStepFinder::find_steps (vector<unsigned>& steps,
   unsigned nsubint = before.size();
   unsigned good = (depth * (depth+1)) / 2;
 
-  for (unsigned isub=depth; isub+depth < nsubint; isub++)
+  for (unsigned isub=1; isub+2 < nsubint; isub++)
   {
 
 #if _DEBUG
     cerr << isub << " before=" << before[isub] << " after=" << after[isub] << endl;
 #endif
 
-    if (before[isub] == good && after[isub] == 0)
+    if (after[isub] < 2)
     {
-      cerr << "RobustStepFinder::find_steps step after isub=" << isub 
+      cerr << "RobustStepFinder::find_steps isub=" << isub 
 	   << " before=" << before[isub]
 	   << " after=" << after[isub] << endl;
 
