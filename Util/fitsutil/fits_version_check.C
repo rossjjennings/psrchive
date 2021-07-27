@@ -18,7 +18,7 @@ void fits_version_check (bool verbose)
     float version = 0.0;
     fits_get_version (&version);
 
-    float lib_version = CFITSIO_MAJOR + CFITSIO_MINOR/ceil(log10(CFITSIO_MINOR));
+    float lib_version = CFITSIO_MAJOR + CFITSIO_MINOR/pow(10,ceil(log10(CFITSIO_MINOR)));
 
     if (verbose)
         cerr << "fits_version_check:"
