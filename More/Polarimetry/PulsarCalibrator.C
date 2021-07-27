@@ -362,6 +362,8 @@ void Pulsar::PulsarCalibrator::add_pulsar
 
   if (solve_each)
   {
+    mtm[ichan]->set_measurement_set( measurements );
+
     if (verbose > 2) cerr << "Pulsar::PulsarCalibrator::add_pulsar"
       " solving ichan=" << ichan << endl;
 
