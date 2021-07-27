@@ -714,6 +714,7 @@ bool unload_each_calibrated = true;
 bool fscrunch_data_to_template = false;
 
 string unload_path;
+string output_filename = "pcm.fits";
 
 void pcm::set_verbosity (int level)
 {
@@ -907,8 +908,12 @@ void pcm::add_options (CommandLine::Menu& menu)
 		  'A', "class");
   arg->set_help ("set the output archive class name");
 
-  arg = menu.add (unload_path, 'O', "fname");
-  arg->set_help ("set cal solution output filename (default=pcm.fits)");
+  arg = menu.add (unload_path, 'O', "path");
+  arg->set_help ("set directory to which outputs are written");
+
+  arg = menu.add (output_filename, "out", "fname");
+  arg->set_help ("set cal solution output filename "
+		 "(default=" + output_filename + ")");
 
   arg = menu.add (unload_each_calibrated, 'N');
   arg->set_help ("do not unload calibrated data files");
@@ -1128,7 +1133,7 @@ void pcm::setup ()
   }
 
   unloader.set_program ( "pcm" );
-  unloader.set_filename( "pcm.fits" );
+  unloader.set_filename( output_filename );
 }
 
   
