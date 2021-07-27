@@ -103,6 +103,7 @@ namespace Pulsar {
 
       virtual unsigned get_ndat () const = 0;
       virtual void get_data (unsigned off, unsigned n, double*) const = 0;
+      virtual void verify_end_of_data () const = 0;
   };
 
 }

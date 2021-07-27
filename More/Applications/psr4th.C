@@ -382,7 +382,8 @@ void psr4th::result::process (PolnProfile* profile)
 	
 	for (unsigned jbin=startbin; jbin<nbin; jbin++)
 	{
-	  Matrix<4,4,double>& sum = cross_covar.get_cross_covariance (ibin, jbin, ilag);
+	  Matrix<4,4,double>& sum
+	    = cross_covar.get_cross_covariance (ibin, jbin, ilag);
 
 	  Stokes<double> Si = profiles[ilag]->get_Stokes (ibin);
 	  Stokes<double> Sj = profile->get_Stokes (jbin);
@@ -585,12 +586,16 @@ void psr4th::result::compute_cross_covariance ()
   cross_covar.resize();
   
   for (unsigned ilag=0; ilag < nlag; ilag++)
+  {
     for (unsigned ibin=0; ibin < nbin; ibin++)
-      for (unsigned jbin=0; jbin < nbin; jbin++)
+    {
+      unsigned startbin = (ilag == 0) ? ibin : 0;
+      for (unsigned jbin=startbin; jbin < nbin; jbin++)
       {
 	Matrix<4,4,double> set = get_cross_covariance (ibin, jbin, ilag);
 
-	cross_covar.set_cross_covariance (ibin, jbin, ilag, set);
+	bool lock = true;
+	cross_covar.set_cross_covariance (ibin, jbin, ilag, set, lock);
 
 	Matrix<4,4,double> get;
 	get = cross_covar.get_cross_covariance (ibin, jbin, ilag);
@@ -607,8 +612,9 @@ void psr4th::result::compute_cross_covariance ()
 		       "set != get on ilag=%u ibin=%u jbin=%u",
 		       ilag, ibin, jbin);
 	}
-      }
-
+      } // for each column
+    } // for each row
+  } // for each lag
 }
 
 Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
