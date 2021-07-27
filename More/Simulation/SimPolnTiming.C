@@ -22,6 +22,8 @@
 #include "Pulsar/PhaseWeight.h"
 
 #include "Pulsar/Instrument.h"
+#include "Pulsar/VariableBackend.h"
+
 #include "model_profile.h"
 
 #include "MEAL/Polar.h"
@@ -635,7 +637,7 @@ Pulsar::SimPolnTiming::Result Pulsar::SimPolnTiming::one_step ()
       if (diff_gain) {
 	double beta = 0.5 * log (1+diff_gain);
 	cerr << "Setting beta=" << beta << endl;
-	inst->set_diff_gain (beta);
+	inst->get_backend()->set_diff_gain (beta);
 	xform = true;
       }
       

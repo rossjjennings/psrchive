@@ -16,13 +16,11 @@
 #include "Pulsar/ReceptionModelSolver.h"
 
 #include "Pulsar/CalibratorType.h"
-#include "Pulsar/MeanPolar.h"
-#include "Pulsar/MeanSingleAxis.h"
 #include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/ProductRule.h"
 #include "MEAL/ChainRule.h"
-#include "MEAL/Polynomial.h"
+#include "MEAL/Univariate.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Axis.h"
 #include "MEAL/Real4.h"
@@ -32,9 +30,13 @@ namespace Calibration
   //! Manages multiple signal path transformations in a reception model
 
   /*! As in Table 1 of van Straten (2004), different types of
-    observations will experience different polarimetric
+    observations are subjected to different polarimetric
     transformations */
 
+  class VariableBackendEstimate;
+  class VariableBackend;
+  class BackendEstimate;
+  
   class SignalPath : public Reference::Able
   {
   public:
@@ -52,10 +54,12 @@ namespace Calibration
     void set_response (MEAL::Complex2*);
 
     //! Allow the specified response parameter to vary as a function of time
-    void set_response_variation (unsigned iparam, MEAL::Univariate<MEAL::Scalar>*);
+    void set_response_variation (unsigned iparam,
+				 MEAL::Univariate<MEAL::Scalar>*);
 
     //! Get the specified response parameter temporal variation function
-    const MEAL::Univariate<MEAL::Scalar>* get_response_variation (unsigned iparam) const;
+    const MEAL::Univariate<MEAL::Scalar>*
+    get_response_variation (unsigned iparam) const;
 
     //! Include an impurity transformation
     void set_impurity (MEAL::Real4*);
@@ -79,23 +83,29 @@ namespace Calibration
     //! Set the transformation to be cloned for each calibrator
     void set_foreach_calibrator (const MEAL::Complex2*);
 
+    //! Set the VariableBackend step to be cloned for each calibrator
+    void set_stepeach_calibrator (const VariableBackend*);
+
     //! Set gain to the univariate function of time
-    void set_gain (MEAL::Univariate<MEAL::Scalar>*);
+    void set_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
 
     //! Set differential gain to the univariate function of time
-    void set_diff_gain (MEAL::Univariate<MEAL::Scalar>*);
+    void set_diff_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
 
     //! Set differential phase to the univariate function of time
-    void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
+    void set_diff_phase_variation (MEAL::Univariate<MEAL::Scalar>*);
 
     //! Get the gain function of time
-    const MEAL::Scalar* get_gain () const;
-
+    const MEAL::Scalar* get_gain_variation () const
+    { return gain_variation; }
+    
     //! Get the differential gain function of time
-    const MEAL::Scalar* get_diff_gain () const;
+    const MEAL::Scalar* get_diff_gain_variation () const
+    { return diff_gain_variation; }
 
     //! Get the differential phase function of time
-    const MEAL::Scalar* get_diff_phase () const;
+    const MEAL::Scalar* get_diff_phase_variation () const
+    { return diff_phase_variation; }
 
     //! Add a step if any of the above functions require it
     void add_calibrator_epoch (const MJD&);
@@ -108,6 +118,10 @@ namespace Calibration
 
     //! Add a step to the differential phase variations
     void add_diff_phase_step (const MJD&);
+
+    //! Insert a step into the instrumental response at the specified time
+    void add_step (const MJD& mjd,
+		   Calibration::VariableBackend* backend = 0);
 
     //! Record the epochs of observations
     void add_observation_epoch (const MJD&);
@@ -133,20 +147,30 @@ namespace Calibration
     //! Solve the measurement equation
     void solve ();
 
-    //! Add a new signal path for the poln calibrator observations
-    void add_polncal_backend ();
+    //! Add a new signal path for pulsar observations
+    void add_psr_path (VariableBackendEstimate*);
+
+    //! Add a new signal path for poln calibrator observations
+    void add_cal_path (VariableBackendEstimate*);
 
     //! Fix the rotation about the line of sight
     void fix_orientation ();
 
     //! Get the index for the signal path experienced by the reference source
-    unsigned get_polncal_path () const { return ReferenceCalibrator_path; }
+    unsigned get_cal_path_index (const MJD&) const;
 
     //! Get the index for the signal path experienced by the pulsar
-    unsigned get_pulsar_path () const { return Pulsar_path; }
+    unsigned get_psr_path_index (const MJD&) const;
 
+    //! Get the backend that spans the specified epoch
+    VariableBackendEstimate* get_backend (const MJD& epoch) const;
+
+    //! Get the backend with the maximum weight
+    VariableBackendEstimate* max_weight_backend ();
+  
     //! Integrate a calibrator solution
-    void integrate_calibrator (const MEAL::Complex2* xform);
+    void integrate_calibrator (const MJD& epoch,
+			       const MEAL::Complex2* xform);
 
     //! Get the measurement equation
     Calibration::ReceptionModel* get_equation ();
@@ -171,16 +195,13 @@ namespace Calibration
     void add_transformation (MEAL::Complex2*);
 
     //! Get the full signal path experienced by the pulsar
-    const MEAL::Complex2* get_pulsar_transformation () const;
+    const MEAL::Complex2* get_pulsar_transformation (const MJD&) const;
 
     //! Get the covariance vector at the specified epoch
     void get_covariance( std::vector<double>& covar, const MJD& epoch );
 
     //! The time axis
     MEAL::Axis<MJD> time;
-
-    //! The known transformations from the sky to the receptors
-    MEAL::Axis< Jones<double> > projection;
 
     //! Deactivate time variations and set the Instrument to the given epoch
     void disengage_time_variations (const MJD& epoch);
@@ -197,68 +218,75 @@ namespace Calibration
     void set_valid (bool f, const char* reason = 0);
     bool get_valid () const { return valid; }
 
+    MEAL::Axis< Jones<double> >& get_projection () { return projection; }
+
  protected:
 
     //! validity flag
     bool valid;
 
-    //! ReceptionModel
+    //! The measurement equation
     Reference::To< Calibration::ReceptionModel > equation;
 
     //! The algorithm used to solve the measurement equation
     Reference::To< Calibration::ReceptionModel::Solver > solver;
 
+    //! The instrumental response to be modelled
+    
+    /*! All signal paths include this transformation, which is the
+      response to be modeled and output as a solution.  All other
+      transformations deal with variations as a function of time,
+      variations between signals of different types, etc. */
+    
+    Reference::To< MEAL::Complex2 > response;
+
+    //! The basis correction computed by the BasisCorrection class
+    Reference::To<MEAL::Complex2> basis;
+
+    //! The instrumental response multiplied by the basis
+    Reference::To< MEAL::ProductRule<MEAL::Complex2> > instrument;
+
+    //! The transformation from the celestial sphere to the receptors
+    Reference::To<MEAL::Complex2> celestial;
+
+    //! The known transformations from the celestial sphere to the receptors
+    /*! The axis class is used to set this constant for each observation */
+    MEAL::Axis< Jones<double> > projection;
+
+    //! ChainRule used to model response parameter variations
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > response_chain;
+
+    //! Temporal variation of response parameters
+    typedef Reference::To<MEAL::Univariate<MEAL::Scalar> > ScalarReference;
+    std::map< unsigned, ScalarReference > response_variation;
+
     //! Used to convert MJD to double
     Calibration::ConvertMJD convert;
 
-    //! The signal path experienced by the calibrator
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > pcal_gain_chain;
-    Reference::To< MEAL::Gain<MEAL::Complex2> > pcal_gain;
+    //! The set of instrumental backend transformations for each epoch
+    /*! This is the new way to handle jumps in the instrumental response
+      that apply to both calibrator and pulsar observations. */
+    std::vector< Reference::To< VariableBackendEstimate > > backends;
+
+    //! Return a newly constructed and initialized backend
+    VariableBackendEstimate* new_backend (MEAL::Complex2* response = 0);
 
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_pcal;
     Reference::To< const MEAL::Complex2 > foreach_fcal;
 
-    //! The signal path experienced by the pulsar
-    Reference::To< MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
+    Reference::To< const Calibration::VariableBackend > stepeach_pcal;
 
-    //! The response multiplied by the basis
-    Reference::To< MEAL::ProductRule<MEAL::Complex2> > instrument;
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
     //! The Mueller transformation
     Reference::To< MEAL::Real4 > impurity;
 
-    //! The instrumental response
-    Reference::To< MEAL::Complex2 > response;
-
-    //! ChainRule used to model instrumental response parameter variations
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > response_chain;
-
-    //! Temporal variation of response parameters
-    std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
-
-    //! The best estimate of the backend
-    Calibration::MeanSingleAxis backend_estimate;
-
-    //! The best estimate of the polar model
-    Calibration::MeanPolar polar_estimate;
-
-    //! The basis transformation
-    Reference::To<MEAL::Complex2> basis;
-
-    //! The backend variation transformations
-    Reference::To< MEAL::Scalar > gain;
-    Reference::To< MEAL::Scalar > diff_gain;
-    Reference::To< MEAL::Scalar > diff_phase;
-
     void integrate_parameter (MEAL::Scalar* function, double value);
 
     void update_parameter (MEAL::Scalar* function, double value);
-
-    void compute_covariance( unsigned index, 
-			     std::vector< std::vector<double> >& covar,
-			     std::vector<unsigned>& function_imap, 
-			     MEAL::Scalar* function );
 
     //! Set the minimum step if Scalar is a Steps
     void set_min_step (MEAL::Scalar* function, double minimum);
@@ -266,11 +294,8 @@ namespace Calibration
     //! Offset the steps if Scalar is a Steps
     void offset_steps (MEAL::Scalar* function, double offset);
 
-    //! Add a step if Scalar is a Steps
-    void add_step (MEAL::Scalar* function, double step);
-
-    //! Insert a step into the Scalar, which must be a Steps
-    void add_step (MEAL::Scalar* function, const MJD& mjd);
+    //! Allow specified parameter to vary freely in step that spans mjd
+    void set_free (unsigned iparam, const MJD& mjd);
 
     //! Remove the last step if there is no data there
     void fix_last_step (MEAL::Scalar* function);
@@ -280,14 +305,6 @@ namespace Calibration
     bool constant_pulsar_gain;
     bool refcal_through_frontend;
     
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! The signal path of the ReferenceCalibrator source
-    unsigned ReferenceCalibrator_path;
-
-    //! The signal path of the Pulsar phase bin sources
-    unsigned Pulsar_path;
-
     MJD min_epoch, max_epoch;
 
   private:

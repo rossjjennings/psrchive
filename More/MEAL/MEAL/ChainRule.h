@@ -73,7 +73,8 @@ namespace MEAL {
 
     //! Set the Function to be constrained by Scalar ordinates
     void set_model (T* model);
-
+    T* get_model () { return model; }
+    
     //! Set the Scalar instance used to constrain the specified parameter
     void set_constraint (unsigned iparam, Scalar* scalar);
     bool has_constraint (unsigned iparam);
@@ -108,6 +109,13 @@ namespace MEAL {
     Composite composite;
 
   };
+
+  /*! Utility for computing the covariances of parameters
+    constrained using ChainRule */
+
+  void covariance ( Scalar* function, unsigned index, 
+		    std::vector<unsigned>& imap,
+		    std::vector< std::vector<double> >& covar);
 
 }
 

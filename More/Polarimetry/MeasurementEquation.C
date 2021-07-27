@@ -14,7 +14,7 @@ using namespace std;
 Calibration::MeasurementEquation::MeasurementEquation () 
   : composite (this), inputs (&composite), xforms (&composite)
 {
-  // set_verbose(true);
+  set_verbose(true);
 }
 
 Calibration::MeasurementEquation::~MeasurementEquation ()

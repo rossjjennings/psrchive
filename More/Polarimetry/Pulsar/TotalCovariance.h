@@ -24,6 +24,12 @@ namespace Calibration {
     //! Default constructor
     TotalCovariance ();
 
+    //! Clone operator
+    TotalCovariance* clone () const;
+
+    //! Add the uncertainty of another instance
+    void add (const Uncertainty*);
+
     //! Set the covariances of the observed Stokes parameters
     void set_covariance (const Matrix<4,4,double>& opt);
 

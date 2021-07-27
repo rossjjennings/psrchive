@@ -277,6 +277,7 @@ AC_CONFIG_FILES([
 		Util/fitsutil/Makefile
 		Util/tempo/Makefile
 		Util/tempo2/Makefile
+		Util/stat/Makefile
 		Util/resources/Makefile
 		Base/Makefile
 		Base/Classes/Makefile

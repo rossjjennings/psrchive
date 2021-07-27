@@ -26,7 +26,7 @@ namespace Pulsar {
     //! Get the value of the index
     unsigned get_value () const { return index; }
     //! Set the value of the index
-    void set_value (unsigned value) { index = value; }
+    void set_value (unsigned value) { index = value; integrate = false; }
 
     //! Get the integrate flag
     bool get_integrate () const { return integrate; }

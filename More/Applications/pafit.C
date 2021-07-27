@@ -4,10 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ReceptionModel.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/MeanCoherency.h"
 #include "Pulsar/Instrument.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/Parallactic.h"
 #include "MEAL/Coherency.h"
 #include "MEAL/Axis.h"
@@ -243,8 +245,10 @@ int main (int argc, char** argv)
       "\nStokes U: " << source.get_Estimate(2) << 
       "\nStokes V: " << source.get_Estimate(3) << 
       "\n\nReceiver parameters:"
-      "\nDifferential gain:        " << system.get_diff_gain () <<
-      "\nDifferential phase:       " << system.get_diff_phase () <<
+      "\nDifferential gain:        " << system.get_backend()->get_diff_gain ()
+	 <<
+      "\nDifferential phase:       " << system.get_backend()->get_diff_phase ()
+	 <<
       "\nDifferential orientation: " << system.get_orientation (1) <<
       "\nReceptor ellipticities:   " << system.get_ellipticity (0) <<
       "\n" << endl;

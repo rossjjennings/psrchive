@@ -99,6 +99,9 @@ namespace MEAL {
     //! Remove the Projection from the composite mapping
     void unmap (Projection* model);
 
+    //! Clear all models
+    void clear ();
+    
     //! Get the mapping for the given Function
     void get_imap (const Function* model,
 		   std::vector<unsigned>::iterator& imap) const;
@@ -142,6 +145,9 @@ namespace MEAL {
 
     //! Flag set when this is shared by Function passed to add_component
     mutable bool component_shares_this;
+
+    //! Initialize the above variables in constructor and clear
+    void init ();
 
     //! Recursive function does the work for map
     void add_component (Function*, std::vector<unsigned>& imap);

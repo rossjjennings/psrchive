@@ -12,6 +12,8 @@
 #define __Pulsar_PolnCalibrator_H
 
 #include "Pulsar/Calibrator.h"
+#include "Pulsar/Index.h"
+
 #include "MEAL/LeastSquares.h"
 #include "MEAL/Complex2.h"
 
@@ -51,6 +53,9 @@ namespace Pulsar {
 
     //! Set the calibrator archive used to define basic attributes
     void set_calibrator (const Archive* archive);
+
+    //! Set the sub-integration index
+    void set_subint (const Index& isub);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -174,6 +179,9 @@ namespace Pulsar {
     //! Derived classes may be able to shrink the transformation array
     virtual unsigned get_maximum_nchan () const;
 
+    //! The sub-integration from which to construct a solution
+    Index subint;
+    
   private:
 
     //! Build the response array

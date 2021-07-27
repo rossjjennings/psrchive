@@ -33,6 +33,7 @@ namespace Pulsar
     calibrators that determine both the instrumental response and the
     input Stokes parameters of the reference signal.
   */
+
   class SystemCalibrator : public PolnCalibrator
   {
 
@@ -40,6 +41,9 @@ namespace Pulsar
 
     typedef Calibration::ReceptionModel::Solver Solver;
 
+    //! Base class of algorithms that detect steps in instrumental response
+    class StepFinder;
+    
     //! Construct with optional processed calibrator Archive
     SystemCalibrator (Archive* archive = 0);
 
@@ -73,7 +77,7 @@ namespace Pulsar
     //! Return true if calibrator (e.g. noise diode) data are incorporated
     virtual bool has_cal () const { return calibrator_estimate.size(); }
 
-    //! Retern a new plot information interface for the specified pulsar state
+    //! Return a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
     //! True if noise diode illuminates feed; false if coupled after OMT
@@ -119,8 +123,19 @@ namespace Pulsar
     //! Add a step to the differential phase variations
     virtual void add_diff_phase_step (const MJD&);
 
+    //! Add a VariableBackend step at the specified MJD
+    virtual void add_step (const MJD&, Calibration::VariableBackend*);
+
+    //! Apply time steps afer cals
+    void set_step_after_cal (bool val = true) { step_after_cal = val; }
+    bool get_step_after_cal () const { return step_after_cal; }
+
+    //! Prepare the data for inclusion in the model
     //! Set the transformation to be cloned for each calibrator
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
+
+    //! Set the VariableBackend step to be cloned for each calibrator
+    virtual void set_stepeach_calibrator (const Calibration::VariableBackend*);
 
     //! Prepare the data for inclusion in the model
     virtual void preprocess (Archive* data);
@@ -191,6 +206,12 @@ namespace Pulsar
     //! Get the threshold used to reject outliers when computing levels
     float get_outlier_threshold () const { return outlier_threshold; }
 
+    //! Set the algorithm used to automatically insert steps in response
+    void set_step_finder (StepFinder*);
+
+    //! Get the algorithm used to automatically insert steps in response
+    StepFinder* get_step_finder ();
+
     //! Solve equation for each frequency
     virtual void solve ();
     
@@ -260,17 +281,19 @@ namespace Pulsar
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;
 
+    typedef MEAL::Univariate<MEAL::Scalar> UniScalar;
+    
     //! Temporal variation of response parameters
-    std::map< unsigned, Reference::To<MEAL::Univariate<MEAL::Scalar> > > response_variation;
+    std::map< unsigned, Reference::To<UniScalar> > response_variation;
 
     //! Time variation of absolute gain
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
+    Reference::To<UniScalar> gain_variation;
 
     //! Time variation of differential gain
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
+    Reference::To<UniScalar> diff_gain_variation;
 
     //! Time variation of differential phase
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+    Reference::To<UniScalar> diff_phase_variation;
 
     std::vector<MJD> gain_steps;
     std::vector<MJD> diff_gain_steps;
@@ -278,6 +301,9 @@ namespace Pulsar
 
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_calibrator;
+
+    //! Step in backend response at each calibrator observation
+    Reference::To< const Calibration::VariableBackend > stepeach_calibrator;
 
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
@@ -297,28 +323,50 @@ namespace Pulsar
     //! Create the calibrator estimate
     virtual void create_calibrator_estimate ();
 
+    //! Flag set when data have been integrated with measurement equation
+    bool data_submitted;
+
+    //! Calibrator data loaded but not submitted or integrated
+    std::vector< std::vector<Calibration::SourceObservation> > calibrator_data;
+    
+    // submit all calibrator data
+    virtual void submit_calibrator_data ();
+
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 					 const Calibration::SourceObservation&);
 
-    virtual void integrate_calibrator_data (const Jones< Estimate<double> >&,
-					    const Calibration::SourceObservation&);
+    virtual void integrate_calibrator_data (const Calibration::SourceObservation&);
 
-    virtual void integrate_calibrator_solution (Signal::Source source,
-						unsigned ichan,
-						const MEAL::Complex2*);
+    virtual void integrate_calibrator_solution (const Calibration::SourceObservation&);
 
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();
 
+    Reference::To<StepFinder> step_finder;
+    
     //! Ensure that the pulsar observation can be added to the data set
     virtual void match (const Archive*);
+
+    //! Pulsar data loaded but not submitted or integrated
+    std::vector< std::vector<Calibration::CoherencyMeasurementSet> > pulsar_data;
 
     //! Add the data from the specified sub-integration
     virtual void add_pulsar (const Archive* data, unsigned isub);
 
-    //! Derived types must define how pulsar data are incorporated
+    //! Add pulsar data constraints to coherency measurement set
+    /*! Derived types must define how pulsar data are incorporated */
     virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
 			     const Integration*, unsigned ichan) = 0;
+
+    //! add pulsar data to mean estimate used as initial guess
+    virtual void integrate_pulsar_data
+    (const Calibration::CoherencyMeasurementSet&) { }
+
+    //! add all pulsar data constraints to measurement equation
+    virtual void submit_pulsar_data ();
+
+    //! add the given pulsar observations to measurement equation constraints
+    virtual void submit_pulsar_data (Calibration::CoherencyMeasurementSet&);
 
     //! The calibrators to be loaded after first pulsar observation
     std::vector<std::string> calibrator_filenames;
@@ -331,6 +379,9 @@ namespace Pulsar
 
     //! Epoch of the last observation
     MJD end_epoch;
+    
+    //! Apply time step after rather than before cals
+    bool step_after_cal;
 
     //! Normalize pulsar Stokes parameters by the invariant interval
     bool normalize_by_invariant;

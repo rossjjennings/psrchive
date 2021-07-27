@@ -1,18 +1,20 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ObservationUncertainty.h"
 #include "Pauli.h"
 
 using namespace std;
+using namespace Calibration;
 
 template<typename T> T sqr (T x) { return x*x; }
 
 //! Given a coherency matrix, return the difference
-double Calibration::ObservationUncertainty::get_weighted_norm
+double ObservationUncertainty::get_weighted_norm
 (const Jones<double>& matrix) const
 {
   Stokes< complex<double> > stokes = complex_coherency( matrix );
@@ -26,7 +28,7 @@ double Calibration::ObservationUncertainty::get_weighted_norm
 }
 
 //! Given a coherency matrix, return the weighted conjugate matrix
-Jones<double> Calibration::ObservationUncertainty::get_weighted_conjugate
+Jones<double> ObservationUncertainty::get_weighted_conjugate
 ( const Jones<double>& matrix ) const try
 {
   Stokes< complex<double> > stokes = complex_coherency( matrix );
@@ -42,11 +44,11 @@ Jones<double> Calibration::ObservationUncertainty::get_weighted_conjugate
 }
 catch (Error& error)
 {
-  throw error += "Calibration::ObservationUncertainty::get_weighted_conjugate";
+  throw error += "ObservationUncertainty::get_weighted_conjugate";
 }
 
 Stokes< complex<double> >
-Calibration::ObservationUncertainty::get_weighted_components
+ObservationUncertainty::get_weighted_components
 ( const Jones<double>& matrix ) const
 {
   Stokes< complex<double> > stokes = complex_coherency( matrix );
@@ -60,7 +62,7 @@ Calibration::ObservationUncertainty::get_weighted_components
 }
 
 //! Set the uncertainty of the observation
-void Calibration::ObservationUncertainty::set_variance
+void ObservationUncertainty::set_variance
 ( const Stokes< complex<double> >& variance )
 {
   for (unsigned ipol=0; ipol < 4; ipol++)
@@ -69,7 +71,7 @@ void Calibration::ObservationUncertainty::set_variance
 }
 
 //! Set the uncertainty of the observation
-void Calibration::ObservationUncertainty::set_variance
+void ObservationUncertainty::set_variance
 ( const Stokes<double>& variance )
 {
   for (unsigned ipol=0; ipol < 4; ipol++)
@@ -79,7 +81,7 @@ void Calibration::ObservationUncertainty::set_variance
 
 //! Return the variance of each Stokes parameter
 Stokes< std::complex<double> > 
-Calibration::ObservationUncertainty::get_variance () const
+ObservationUncertainty::get_variance () const
 {
   Stokes< std::complex<double> > result;
 
@@ -100,9 +102,46 @@ Calibration::ObservationUncertainty::get_variance () const
 }
 
 //! Construct with the uncertainty of the observation
-Calibration::ObservationUncertainty::ObservationUncertainty
-( const Stokes<double>& variance )
+ObservationUncertainty::ObservationUncertainty (const Stokes<double>& var)
 {
-  set_variance (variance);
+  set_variance (var);
 }
 
+//! Return a copy constructed clone of self
+ObservationUncertainty* ObservationUncertainty::clone () const
+{
+  return new ObservationUncertainty (*this);
+}
+
+complex<double> getvar (const complex<double>& inv_var)
+{
+  double revar = 0.0;
+  double imvar = 0.0;
+  
+  if (inv_var.real() != 0)
+    revar = 1.0 / inv_var.real();
+  if (inv_var.imag() != 0)
+    imvar = 1.0 / inv_var.imag();
+
+  return complex<double> (revar, imvar);
+}
+		     
+//! Add the uncertainty of another instance
+void ObservationUncertainty::add (const Uncertainty* other)
+{
+  const ObservationUncertainty* like
+    = dynamic_cast<const ObservationUncertainty*> (other);
+  
+  if (!like)
+    throw Error (InvalidParam, "ObservationUncertainty::add",
+		 "other Uncertainty is not an ObservationUncertainty");
+
+  for (unsigned ipol=0; ipol < 4; ipol++)
+  {
+    complex<double> var = getvar(inv_variance[ipol]);
+    var += getvar(like->inv_variance[ipol]);
+    
+    inv_variance[ipol] = complex<double>( 1.0 / var.real(),
+					  1.0 / var.imag() );
+  }
+}

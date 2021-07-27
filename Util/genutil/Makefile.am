@@ -5,7 +5,6 @@ include_HEADERS = \
         Angle.h \
 	Barycentre.h \
 	BatchQueue.h \
-	BinaryStatistic.h \
         Brent.h \
 	BoxMuller.h \
         Cartesian.h \
@@ -17,7 +16,6 @@ include_HEADERS = \
 	Directional.h \
 	DirectoryLock.h \
         dirutil.h \
-	evaluate.h \
 	ExponentialDistribution.h \
 	extutil.h \
 	f77util.h \
@@ -65,7 +63,6 @@ include_HEADERS = \
 	ThreadStream.h \
         Types.h \
         typeutil.h \
-	UnaryStatistic.h \
         utc.h \
 	VanVleck.h \
 	VirtualMemory.h \
@@ -78,7 +75,6 @@ libgenutil_la_SOURCES = \
         angleconv.c \
 	Barycentre.C \
 	BatchQueue.C \
-	BinaryStatistic.C \
 	BoxMuller.C \
         Cartesian.C \
 	CommandLine.C \
@@ -97,7 +93,6 @@ libgenutil_la_SOURCES = \
         endian.c \
         errscale.c \
 	expand.C \
-	evaluate.C \
 	ExponentialDistribution.C \
 	f77util.c \
 	filesize.c \
@@ -143,7 +138,6 @@ libgenutil_la_SOURCES = \
 	ThreadStream.C \
 	time_string.C \
         Types.C \
-	UnaryStatistic.C \
         utc.c \
 	VanVleck.C \
 	VirtualMemory.C \
@@ -167,7 +161,7 @@ bin_PROGRAMS = getMJD
 
 getMJD_SOURCES = getMJD.C
 
-TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
+TESTS = test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_sum test_NormalDistribution			\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
@@ -181,7 +175,6 @@ if HAVE_GSL
 check_PROGRAMS += test_SplineFit
 endif
 
-test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
 test_Angle_SOURCES		= test_Angle.C
@@ -213,8 +206,7 @@ test_PhaseRange_SOURCES		= test_PhaseRange.C
 
 LDADD = libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/third/libthird.la \
-	$(top_builddir)/Util/fft/libpsrfft.la
+	$(top_builddir)/Util/third/libthird.la
 
 include $(top_srcdir)/config/Makefile.include
 

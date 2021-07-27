@@ -11,6 +11,7 @@
 #ifndef __Calibration_CoherencyMeasurement_H
 #define __Calibration_CoherencyMeasurement_H
 
+#include "MEAL/Argument.h"
 #include "Reference.h"
 #include "Estimate.h"
 #include "Stokes.h"
@@ -71,7 +72,19 @@ namespace Calibration {
     void get_weighted_components (const Jones<double>&,
 				  std::vector<double>& components) const;
 
+    //! The uncertainty of the measurement
+    const Uncertainty* get_uncertainty () const { return uncertainty; }
+
+    //! Add an independent variable
+    void add_coordinate (MEAL::Argument::Value* abscissa);
+
+    //! Apply the independent variables
+    void set_coordinates () const;
+
   protected:
+
+    //! The coordinates of the measurement
+    std::vector< Reference::To<MEAL::Argument::Value> > coordinates;
 
     //! Index of the input to which the measurement corresponds
     unsigned input_index;
@@ -91,9 +104,16 @@ namespace Calibration {
   };
 
   //! Estimates the uncertainty of a CoherencyMeasurement
-  class CoherencyMeasurement::Uncertainty : public Reference::Able {
+  class CoherencyMeasurement::Uncertainty : public Reference::Able
+  {
   public:
 
+    //! Return a copy constructed clone of self
+    virtual Uncertainty* clone () const = 0;
+
+    //! Add the uncertainty of another instance
+    virtual void add (const Uncertainty*) = 0;
+    
     //! Given a coherency matrix, return the weighted norm
     virtual 
     double
@@ -102,14 +122,16 @@ namespace Calibration {
     //! Given a coherency matrix, return the weighted conjugate matrix
     virtual 
     Jones<double>
-    get_weighted_conjugate (const Jones<double>&)const = 0;
+    get_weighted_conjugate (const Jones<double>&) const = 0;
 
     virtual 
     Stokes< std::complex<double> > 
     get_weighted_components (const Jones<double>&) const = 0;
 
     //! Return the variance of each Stokes parameter
-    virtual Stokes< std::complex<double> > get_variance () const = 0;
+    virtual
+    Stokes< std::complex<double> >
+    get_variance () const = 0;
 
   };
 }

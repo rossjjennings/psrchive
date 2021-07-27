@@ -12,15 +12,29 @@
 #include "Pauli.h"
 
 using namespace std;
+using namespace Pulsar;
 
-//! Construct from an single PolnCal Pulsar::Archive
-Pulsar::PolarCalibrator::PolarCalibrator (const Archive* archive) 
+//! Construct from an single PolnCal Archive
+PolarCalibrator::PolarCalibrator (const Archive* archive) 
   : ReferenceCalibrator (archive)
 {
   type = Calibrator::Type::factory (this);
 }
 
-Pulsar::PolarCalibrator::~PolarCalibrator ()
+//! Copy constructor
+PolarCalibrator::PolarCalibrator (const PolarCalibrator& other)
+  : ReferenceCalibrator (other)
+{
+  type = Calibrator::Type::factory (this);
+}
+
+//! Clone operator
+PolarCalibrator* PolarCalibrator::clone () const
+{
+  return new PolarCalibrator (*this);
+}
+
+PolarCalibrator::~PolarCalibrator ()
 {
 }
 
@@ -94,20 +108,20 @@ void solve (MEAL::Polar* polar,
 
 //! Return the system response as determined by the Polar Transformation
 ::MEAL::Complex2*
-Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
+PolarCalibrator::solve (const vector<Estimate<double> >& source,
 				const vector<Estimate<double> >& sky)
 {
   if ( source.size() != 4 || sky.size() != 4 )
-    throw Error (InvalidParam, "Pulsar::PolarCalibrator::solve",
+    throw Error (InvalidParam, "PolarCalibrator::solve",
 		 "source.size=%d or sky.size=%d != 4", 
 		 source.size(), sky.size());
 
   if (source_set)
-    throw Error (InvalidState, "Pulsar::PolarCalibrator::solve",
+    throw Error (InvalidState, "PolarCalibrator::solve",
 		 "arbitrary reference source not yet implemented");
 
   if (verbose > 2)
-    cerr << "Pulsar::PolarCalibrator::solve" << endl;
+    cerr << "PolarCalibrator::solve" << endl;
 
   // Convert the coherency vectors into Stokes parameters.  
   Stokes< Estimate<double> > s_source = coherency( convert(source) );
@@ -125,24 +139,24 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
 }
 
 
-Pulsar::PolarCalibrator::Info::Info (const PolnCalibrator* cal) 
+PolarCalibrator::Info::Info (const PolnCalibrator* cal) 
   : PolnCalibrator::Info (cal)
 {
 }
 
-string Pulsar::PolarCalibrator::Info::get_title () const
+string PolarCalibrator::Info::get_title () const
 {
   return "Polar Decomposition of Jones Matrix";
 }
 
 //! Return the number of parameter classes
-unsigned Pulsar::PolarCalibrator::Info::get_nclass () const
+unsigned PolarCalibrator::Info::get_nclass () const
 {
   return 3; 
 }
 
 //! Return the name of the specified class
-string Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
+string PolarCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
@@ -157,7 +171,7 @@ string Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
 }
   
 //! Return the number of parameters in the specified class
-unsigned Pulsar::PolarCalibrator::Info::get_nparam (unsigned iclass) const
+unsigned PolarCalibrator::Info::get_nparam (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
@@ -187,7 +201,7 @@ const Estimate<T,U> sinc (const Estimate<T,U>& u)
 
 //! Return the estimate of the specified parameter
 Estimate<float> 
-Pulsar::PolarCalibrator::Info::get_param (unsigned ichan, unsigned iclass,
+PolarCalibrator::Info::get_param (unsigned ichan, unsigned iclass,
 					  unsigned iparam) const
 {
   if( ! calibrator->get_transformation_valid (ichan) )
@@ -201,7 +215,7 @@ Pulsar::PolarCalibrator::Info::get_param (unsigned ichan, unsigned iclass,
     ( calibrator->get_transformation (ichan) );
 
   if (!polar)
-    throw Error (InvalidState, "Pulsar::PolarCalibrator::Info::get_param",
+    throw Error (InvalidState, "PolarCalibrator::Info::get_param",
 		 "transformation[%d] is not an Polar", ichan);
 
   const MEAL::Rotation* rotation = polar->get_rotation_transformation();
@@ -222,8 +236,7 @@ Pulsar::PolarCalibrator::Info::get_param (unsigned ichan, unsigned iclass,
   return Estimate<float> (val, var);
 }
 
-Pulsar::PolarCalibrator::Info*
-Pulsar::PolarCalibrator::get_Info () const
+PolarCalibrator::Info* PolarCalibrator::get_Info () const
 {
   return new PolarCalibrator::Info (this);
 }

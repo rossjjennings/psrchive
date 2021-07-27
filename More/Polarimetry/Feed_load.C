@@ -20,8 +20,10 @@ void Calibration::Feed::load (const string& filename)
 
 
 //! Parses the values of model parameters and fit flags from a string
-void Calibration::Feed::parse (string line)
+void Calibration::Feed::parse (const string& input)
 {
+  string line = input;
+  
   // the key should be the name of the parameter to be set
   string key = stringtok (line, " \t");
 

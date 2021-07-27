@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -20,6 +20,7 @@
 
 #include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/Instrument.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 #include "Pulsar/MeanInstrument.h"
@@ -359,10 +360,10 @@ void Pulsar::PulsarCalibrator::add_pulsar
   // that must be incorporated into the equation maintained by PolnProfileFit
   //
 
-  mtm[ichan]->set_measurement_set( measurements );
-
   if (solve_each)
   {
+    mtm[ichan]->set_measurement_set( measurements );
+
     if (verbose > 2) cerr << "Pulsar::PulsarCalibrator::add_pulsar"
       " solving ichan=" << ichan << endl;
 
@@ -381,7 +382,8 @@ void Pulsar::PulsarCalibrator::add_pulsar
 	   << measurements.get_transformation_index() << endl;
 
     get_data_call ++;
-    mtm[ichan]->add_observation( integration->new_PolnProfile (ichan) );
+    mtm[ichan]->add_observation( measurements,
+				 integration->new_PolnProfile (ichan) );
   }
   catch (Error& error)
   {
@@ -469,7 +471,7 @@ Functor< bool(Calibration::ReceptionModel*) >
 gimbal_lock( Calibration::Instrument* instrument, unsigned receptor )
 {
   Calibration::Feed* feed = instrument->get_feed();
-  Calibration::SingleAxis* backend = instrument->get_backend();
+  Calibration::SingleAxis* backend = instrument->get_backend()->get_backend();
 
   interface* condition = new interface;
   condition->set_yaw  ( feed->get_orientation_transformation( receptor ) );

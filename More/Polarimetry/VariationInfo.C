@@ -31,11 +31,11 @@ try
   switch (which)
   {
   case Gain:
-    return model->get_gain();
+    return model->get_gain_variation();
   case Boost:
-    return model->get_diff_gain();
+    return model->get_diff_gain_variation();
   case Rotation:
-    return model->get_diff_phase();
+    return model->get_diff_phase_variation();
   default:
     return 0;
   }

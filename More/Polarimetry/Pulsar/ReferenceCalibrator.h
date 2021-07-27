@@ -23,7 +23,10 @@ namespace Pulsar {
   class Integration;
 
   //! Calibrators derived from reference source observations
-  class ReferenceCalibrator : public PolnCalibrator {
+  class ReferenceCalibrator : public PolnCalibrator
+  {
+
+    void init ();
     
   public:
 
@@ -36,6 +39,12 @@ namespace Pulsar {
 
     //! Construct from an single PolnCal Pulsar::Archive
     ReferenceCalibrator (const Archive* archive);
+
+    //! Copy constructor
+    ReferenceCalibrator (const ReferenceCalibrator&);
+
+    //! Clone operator
+    virtual ReferenceCalibrator* clone () const = 0;
 
     //! Destructor
     ~ReferenceCalibrator ();
@@ -58,7 +67,8 @@ namespace Pulsar {
                      std::vector<std::vector<Estimate<double> > >& lo) const;
 
     //! Return the mean levels of the calibrator hi and lo states
-    static void get_levels (const Archive* archive, unsigned nchan,
+    static void get_levels (const Archive* archive,
+			    Index subint, unsigned nchan,
 		            std::vector<std::vector<Estimate<double> > >& hi,
 		            std::vector<std::vector<Estimate<double> > >& lo,
 			    double outlier_threshold);

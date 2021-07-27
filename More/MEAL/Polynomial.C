@@ -117,7 +117,7 @@ void MEAL::Polynomial::print_parameters (string& text,
 void MEAL::Polynomial::calculate (double& result, std::vector<double>* grad)
 {
   double x = get_abscissa() - x_0;
-
+  
   result = 0;
 
   if (grad)
@@ -125,7 +125,8 @@ void MEAL::Polynomial::calculate (double& result, std::vector<double>* grad)
 
   double xpower = 1.0;
 
-  for (unsigned ig=0; ig<get_nparam(); ig++) {
+  for (unsigned ig=0; ig<get_nparam(); ig++)
+  {
     result += get_param(ig) * xpower;
     if (grad)
       (*grad)[ig] = xpower;

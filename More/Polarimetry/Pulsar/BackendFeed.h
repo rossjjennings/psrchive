@@ -12,18 +12,12 @@
 #define __CalibrationBackendFeed_H
 
 #include "MEAL/ProductRule.h"
-#include "MEAL/ChainRule.h"
 #include "MEAL/Complex2.h"
-#include "MEAL/ScalarParameter.h"
-
-#include "Estimate.h"
-#include "Stokes.h"
 
 namespace Calibration {
 
-  class SingleAxis;
-  class Feed;
-
+  class VariableBackend;
+  
   //! Physical parameterization of the instrumental response
 
   /*! Abstract base class of instrumental response parameterizations
@@ -31,10 +25,20 @@ namespace Calibration {
 
   class BackendFeed : public MEAL::ProductRule<MEAL::Complex2>
   {
+  private:
+    
+    void init ();
 
+    Reference::To<VariableBackend> backend;
+    Reference::To<MEAL::Complex2> frontend;
+    
+  protected:
+
+    void set_frontend (MEAL::Complex2*);
+    
   public:
 
-    //! Default Constructor
+    //! Default constructor
     BackendFeed ();
 
     //! Copy Constructor
@@ -46,87 +50,19 @@ namespace Calibration {
     //! Destructor
     ~BackendFeed ();
 
-    //! Set cyclical limits on the model parameters
-    virtual void set_cyclic (bool flag = true);
-
     //! Fix the orientation of the frontend
     virtual void set_constant_orientation (bool flag = true) = 0;
-    
-    //! Get the instrumental gain, \f$ G \f$, in calibrator flux units
-    Estimate<double> get_gain () const;
 
-    //! Get the differential gain, \f$ \gamma \f$, in hyperbolic radians
-    Estimate<double> get_diff_gain () const;
-    
-    //! Get the differential phase, \f$ \phi \f$, in radians
-    Estimate<double> get_diff_phase () const;
+    //! Set cyclical bounds on angular quantities
+    virtual void set_cyclic (bool flag);
 
-    //! Set the instrumental gain, \f$ G \f$, in calibrator flux units
-    void set_gain (const Estimate<double>& gain);
+    //! Provide access to the backend model
+    const VariableBackend* get_backend () const;
+    VariableBackend* get_backend ();
 
-    //! Set the differential gain, \f$ \gamma \f$, in hyperbolic radians
-    void set_diff_gain (const Estimate<double>& gamma);
-    
-    //! Set the differential phase, \f$ \phi \f$, in radians
-    void set_diff_phase (const Estimate<double>& phi);
-
-    //! Provide access to the SingleAxis model
-    const SingleAxis* get_backend () const;
-    SingleAxis* get_backend ();
-
-    //! Provide access to the Feed model
-    virtual const MEAL::Complex2* get_frontend () const = 0;
-    virtual MEAL::Complex2* get_frontend ();
-
-    //! Set the instrumental gain variation
-    void set_gain (MEAL::Scalar*);
-
-    //! Set the differential gain variation
-    void set_diff_gain (MEAL::Scalar*);
-    
-    //! Set the differential phase variation
-    void set_diff_phase (MEAL::Scalar*);
-
-    //! Get the instrumental gain variation
-    const MEAL::Scalar* get_gain_variation () const;
-
-    //! Get the differential gain variation
-    const MEAL::Scalar* get_diff_gain_variation () const;
-    
-    //! Get the differential phase variation
-    const MEAL::Scalar* get_diff_phase_variation () const;
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Model implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
-    //! Return the name of the class
-    std::string get_name () const;
-
-  protected:
-
-    //! SingleAxis model: \f$G\f$, \f$\gamma\f$, and \f$\varphi\f$
-    Reference::To<SingleAxis> backend;
-
-    //! ChainRule used to model Backend parameter variations
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > backend_chain;
-
-    //! Scalar function used to model gain variation
-    Reference::To<MEAL::Scalar> gain_variation;
-
-    //! Scalar function used to model differential gain variation
-    Reference::To<MEAL::Scalar> diff_gain_variation;
-
-    //! Scalar function used to model differential phase variation
-    Reference::To<MEAL::Scalar> diff_phase_variation;
-
-  private:
-
-    //! Initialize function used by constructors
-    void init ();
-
+    //! Provide access to the frontend model
+    const MEAL::Complex2* get_frontend () const { return frontend; }
+    MEAL::Complex2* get_frontend () { return frontend; }
   };
 
 }

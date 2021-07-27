@@ -14,6 +14,7 @@
 #include "Pulsar/SingleAxisSolver.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/BackendFeed.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/BasisCorrection.h"
 
 #include "Pulsar/Integration.h"
@@ -33,9 +34,9 @@ void feed_only (MEAL::Complex2* xform, double diff_gain = 0.0)
     throw Error (InvalidState, "keep_only_feed",
 		 "transformation is not a BackendFeed");
 
-  feed->set_gain( 1.0 );
-  feed->set_diff_gain( diff_gain );
-  feed->set_diff_phase( 0.0 );
+  feed->get_backend()->set_gain( 1.0 );
+  feed->get_backend()->set_diff_gain( diff_gain );
+  feed->get_backend()->set_diff_phase( 0.0 );
 }
 
 void Pulsar::Distortion::set_calibrator (Archive* archive)

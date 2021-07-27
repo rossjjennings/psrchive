@@ -60,8 +60,6 @@ ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
   normalize_by_invariant = false;
   independent_gains = false;
 
-  step_after_cal = false;
-  
   multiple_flux_calibrators = false;
   model_fluxcal_on_minus_off = false;
   
@@ -127,11 +125,6 @@ void ReceptionCalibrator::set_normalize_by_invariant (bool set)
   normalize_by_invariant = set;
   if (standard_data)
     standard_data->set_normalize (normalize_by_invariant);
-}
-
-void ReceptionCalibrator::set_step_after_cal (bool flag)
-{
-  step_after_cal = flag;
 }
 
 /*!
@@ -207,6 +200,9 @@ void ReceptionCalibrator::initial_observation (const Archive* data)
 
   assert( pulsar.size() == phase_bins.size() );
 
+  cerr << "ReceptionCalibrator::initial_observation"
+    " initialize pulsar source estimates" << endl;
+
   // initialize any previously added states
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     init_estimates ( pulsar[istate], phase_bins[istate] );
@@ -231,15 +227,12 @@ void ReceptionCalibrator::init_model (unsigned ichan)
     model[ichan] -> fix_orientation ();
 }
 
-void ReceptionCalibrator::load_calibrators ()
+void ReceptionCalibrator::submit_calibrator_data ()
 {
   if (verbose > 2)
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators" << endl;
+    cerr << "Pulsar::ReceptionCalibrator::submit_calibrator_data" << endl;
 
-  if (calibrator_filenames.size() == 0)
-    return;
-
-  SystemCalibrator::load_calibrators ();
+  SystemCalibrator::submit_calibrator_data ();
 
   if (!fluxcal.size())
     return;
@@ -247,6 +240,12 @@ void ReceptionCalibrator::load_calibrators ()
   const unsigned nchan = get_nchan();
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
+    if (!fluxcal.at(ichan))
+    {
+      cerr << "no fluxcal ichan=" << ichan << endl;
+      continue;
+    }
+    
     if (fluxcal.at(ichan)->is_constrained())
       continue;
 
@@ -255,7 +254,9 @@ void ReceptionCalibrator::load_calibrators ()
 
     std::string why = fluxcal.at(ichan)->why_not_constrained();
 
-    cerr << "ichan=" << ichan << " flux calibrator not constrained: " << why << endl;
+    if (verbose > 1)
+      cerr << "ichan=" << ichan << " flux calibrator not constrained: "
+	   << why << endl;
 
     model[ichan]->set_valid (false, why.c_str());
   }
@@ -324,6 +325,9 @@ void Pulsar::ReceptionCalibrator::match (const Archive* data)
 {
   check_ready ("Pulsar::ReceptionCalibrator::match", false);
 
+  if (verbose > 1)
+    cerr << "ReceptionCalibrator::match" << endl;
+  
   if (!has_calibrator())
     initial_observation (data);
 
@@ -338,20 +342,17 @@ void ReceptionCalibrator::add_pulsar
   standard_data->set_profile( integration->new_PolnProfile (ichan) );
 
   for (unsigned istate=0; istate < pulsar.size(); istate++)
-    add_data (measurements, pulsar.at(istate).at(ichan), ichan);
-
-  DEBUG("Pulsar::ReceptionCalibrator::add_pulsar ADD DATA ichan=" << ichan);
-
-  model[ichan]->get_equation()->add_data (measurements);
+    add_data (measurements, pulsar.at(istate).at(ichan),
+	      integration->get_epoch(), ichan);
 }
 
-void
-ReceptionCalibrator::add_data
+
+void ReceptionCalibrator::add_data
 ( vector<Calibration::CoherencyMeasurement>& bins,
   Calibration::SourceEstimate& estimate,
+  const MJD& epoch,
   unsigned ichan )
 {
-  estimate.add_data_attempts ++;
   get_data_call ++;
 
   unsigned ibin = estimate.phase_bin;
@@ -365,30 +366,82 @@ ReceptionCalibrator::add_data
     state.set_stokes( stokes );
     bins.push_back ( state );
 
-    /* Correct the stokes parameters using the current best estimate of
-       the instrument and the parallactic angle rotation before adding
-       them to best estimate of the input state */
-    
-    Jones< Estimate<double> > correct;
-
-    model[ichan]->get_equation()->set_transformation_index
-      (model[ichan]->get_pulsar_path());
-
-    correct = inv( model[ichan]->get_pulsar_transformation()->evaluate() );
-
-    stokes = transform( stokes, correct );
-    
-    estimate.estimate.integrate( stokes );
-
   }
   catch (Error& error)
   {
-    if (verbose > 2)
+    // if (verbose > 1)
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
-    estimate.add_data_failures ++;
+
     get_data_fail ++;
   }
+}
+
+Calibration::SourceEstimate& ReceptionCalibrator::get_estimate (unsigned index,
+								unsigned ichan)
+{
+  for (unsigned istate=0; istate < pulsar.size(); istate++)
+  {
+    Calibration::SourceEstimate& estimate = pulsar.at(istate).at(ichan);
+    if (estimate.input_index == index)
+      return estimate;
+  }
+
+  throw Error (InvalidParam, "ReceptionCalibrator::get_estimate",
+	       "no match for index=%u ichan=%u", index, ichan);
+}
+      
+void ReceptionCalibrator::integrate_pulsar_data
+(const Calibration::CoherencyMeasurementSet& data)
+{
+  unsigned mchan = data.get_ichan();
+  MJD epoch = data.get_epoch();
+
+  data.set_coordinates();
+
+  for (unsigned i=0; i < data.size(); i++)
+  {
+    unsigned index = data[i].get_input_index();
+    Calibration::SourceEstimate& estimate = get_estimate (index, mchan);
+
+    integrate_pulsar_data (data[i], estimate, epoch, mchan);
+  }
+}
+
+void ReceptionCalibrator::integrate_pulsar_data
+(const Calibration::CoherencyMeasurement& data,
+ Calibration::SourceEstimate& estimate,
+ const MJD& epoch,
+ unsigned mchan) try
+{
+  estimate.add_data_attempts ++;
+
+  data.set_coordinates();
+
+  /* Correct the stokes parameters using the current best estimate of
+     the instrument and the parallactic angle rotation before adding
+     them to best estimate of the input state */
+    
+  unsigned path = model[mchan]->get_psr_path_index(epoch);
+
+  model[mchan]->get_equation()->set_transformation_index (path);
+
+  Jones< Estimate<double> > correct;
+  correct = inv( model[mchan]->get_pulsar_transformation(epoch)->evaluate() );
+
+  Stokes< Estimate<double> > stokes = data.get_stokes();
+  stokes = transform( stokes, correct );
+    
+  estimate.estimate.integrate( stokes );
+}
+catch (Error& error)
+{
+  unsigned ibin = estimate.phase_bin;
+
+  // if (verbose > 1)
+  cerr << "Pulsar::ReceptionCalibrator::add_data mchan=" << mchan 
+       << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
+  estimate.add_data_failures ++;  
 }
 
 void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
@@ -407,12 +460,23 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
 
   const unsigned nchan = get_nchan();
 
+  if (model.size() != nchan)
+    throw Error (InvalidState,
+		 "ReceptionCalibrator::prepare_calibrator_estimate",
+		 "model.size()=%u != nchan=%u", model.size(), nchan);
+  
   if (fluxcal.size() == 0)
   {
     fluxcal.resize( nchan );
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
+      if (!model[ichan])
+	{
+	  cerr << "no model ichan=" << ichan;
+	  continue;
+	}
+      
       if (!model[ichan]->get_valid())
 	continue;
 
@@ -430,6 +494,9 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
 
 void ReceptionCalibrator::setup_calibrators ()
 {
+  if (verbose > 1)
+    cerr << "ReceptionCalibrator::setup_calibrators" << endl;
+  
   for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
     setup_poln_calibrator (calibrator_estimate[ichan]);
 
@@ -507,6 +574,10 @@ bool ReceptionCalibrator::has_fluxcal () const
 const Calibration::FluxCalManager*
 ReceptionCalibrator::get_fluxcal (unsigned ichan) const
 {
+  if (!fluxcal.at(ichan))
+    throw Error (InvalidState, "ReceptionCalibrator::get_fluxcal",
+		 "fluxcal[%u] is null", ichan);
+  
   return fluxcal.at(ichan);
 }
 
@@ -529,6 +600,10 @@ void ReceptionCalibrator::submit_calibrator_data
 
   if (fluxcal[data.ichan])
   {
+    if (verbose > 2)
+      cerr << "ReceptionCalibrator::submit_calibrator_data fluxcal ichan="
+	   << data.ichan << endl;
+    
     if (!fluxcal_observation_added[data.ichan])
       fluxcal[data.ichan]->add_observation (data.source);
 
@@ -541,40 +616,41 @@ void ReceptionCalibrator::submit_calibrator_data
 
 
 void ReceptionCalibrator::integrate_calibrator_data
-(
- const Jones< Estimate<double> >& correct,
- const Calibration::SourceObservation& data
- )
+(const Calibration::SourceObservation& data)
 {
   Jones< Estimate<double> > use;
   if (previous)
     use = previous->get_response (data.ichan);
   else
-    use = correct;
+    use = data.response;
 
   if (data.source == Signal::FluxCalOn || data.source == Signal::FluxCalOff)
   {
+    if (verbose > 2)
+      cerr << "ReceptionCalibrator::integrate_calibrator_data fluxcal ichan="
+	   << data.ichan << endl;
+    
     if (fluxcal[data.ichan])
       fluxcal[data.ichan]->integrate (use, data);
   }
-
-  SystemCalibrator::integrate_calibrator_data (use, data);
+  else
+    SystemCalibrator::integrate_calibrator_data (data);
 }
 
 void ReceptionCalibrator::integrate_calibrator_solution
-(
- Signal::Source source,
- unsigned ichan,
- const MEAL::Complex2* xform
-)
+(const Calibration::SourceObservation& data)
 {
-  if (source == Signal::FluxCalOn || source == Signal::FluxCalOff)
+  if (data.source == Signal::FluxCalOn || data.source == Signal::FluxCalOff)
   {
-    if (fluxcal[ichan])
-      fluxcal[ichan]->integrate (source, xform);
+    if (verbose > 2)
+      cerr << "ReceptionCalibrator::integrate_calibrator_solution fluxcal"
+	" ichan=" << data.ichan << endl;
+
+    if (fluxcal[data.ichan])
+      fluxcal[data.ichan]->integrate (data.source, data.xform);
   }
   else
-    SystemCalibrator::integrate_calibrator_solution (source, ichan, xform);
+    SystemCalibrator::integrate_calibrator_solution (data);
 }
 
 

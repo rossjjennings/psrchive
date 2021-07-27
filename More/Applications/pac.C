@@ -36,6 +36,7 @@
 #include "Pulsar/ProjectionCorrection.h"
 #include "Pulsar/ReflectStokes.h"
 #include "Pulsar/BackendFeed.h"
+#include "Pulsar/VariableBackend.h"
 
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Feed.h"
@@ -193,8 +194,6 @@ int main (int argc, char *argv[]) try
   char whitespace[5] = " \n\t";
 
   string command = "pac ";
-
-  string::size_type index;
 
   string optarg_str;
 
@@ -963,8 +962,8 @@ void keep_only_feed( PolnCalibrator* cal )
                    "PolnCalibrator at ichan=%u is not a "
                    "BackendFeed transformation", ichan);
 
-    feed->set_gain( 1.0 );
-    feed->set_diff_gain( 0.0 );
-    feed->set_diff_phase( 0.0 );
+    feed->get_backend()->set_gain( 1.0 );
+    feed->get_backend()->set_diff_gain( 0.0 );
+    feed->get_backend()->set_diff_phase( 0.0 );
   }
 }

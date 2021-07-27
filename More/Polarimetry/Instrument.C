@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Instrument.h"
+#include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 
 #include "Pauli.h"
@@ -19,7 +20,7 @@ void Calibration::Instrument::init ()
   feed_chain = new MEAL::ChainRule<MEAL::Complex2>;
   feed_chain->set_model( feed );
 
-  add_model( feed_chain );
+  set_frontend( feed_chain );
 
 #ifdef _DEBUG
   for (unsigned i=0; i<get_nparam(); i++)
@@ -183,7 +184,3 @@ const Calibration::Feed* Calibration::Instrument::get_feed () const
   return feed;
 }
 
-const MEAL::Complex2* Calibration::Instrument::get_frontend () const
-{
-  return feed;
-}

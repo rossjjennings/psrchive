@@ -120,9 +120,6 @@ namespace Pulsar
     //! Normalize each Stokes vector by the mean on-pulse invariant 
     void set_normalize_by_invariant (bool set = true);
 
-    //! Apply time steps afer cals
-    void set_step_after_cal (bool _after = true);
-
     //! Solve equation for each frequency
     void solve ();
     
@@ -155,9 +152,6 @@ namespace Pulsar
     //! The number of channels that may be simultaneously solved
     unsigned nthread;
 
-    //! Apply time step after rather than before cals
-    bool step_after_cal;
-
     //! Set the initial guesses and update the reference epoch
     void initialize ();
 
@@ -179,7 +173,8 @@ namespace Pulsar
       \param ichan the frequency channel
     */
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
-		   Calibration::SourceEstimate& estimate, unsigned ichan);
+		   Calibration::SourceEstimate& estimate,
+		   const MJD& epoch, unsigned ichan);
 
     //! Prepare the calibrator estimate
     void prepare_calibrator_estimate (Signal::Source);
@@ -188,15 +183,12 @@ namespace Pulsar
     void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 				 const Calibration::SourceObservation&);
 
-    void integrate_calibrator_data (const Jones< Estimate<double> >&,
-				    const Calibration::SourceObservation&);
+    void integrate_calibrator_data (const Calibration::SourceObservation&);
 
-    void integrate_calibrator_solution (Signal::Source source,
-					unsigned ichan,
-					const MEAL::Complex2*);
+    void integrate_calibrator_solution (const Calibration::SourceObservation&);
 
     //! Handle any integrated flux calibrator data
-    void load_calibrators ();
+    void submit_calibrator_data ();
 
     //! Ensure that the pulsar observation can be added to the data set
     void match (const Archive*);
@@ -204,6 +196,15 @@ namespace Pulsar
     void add_pulsar (Calibration::CoherencyMeasurementSet&,
 		     const Integration*, unsigned ichan);
 
+    Calibration::SourceEstimate& get_estimate (unsigned index,
+					       unsigned ichan);
+
+    void integrate_pulsar_data (const Calibration::CoherencyMeasurementSet&);
+
+    void integrate_pulsar_data (const Calibration::CoherencyMeasurement&,
+				Calibration::SourceEstimate&,
+				const MJD& epoch, unsigned ichan);
+      
     //! Prepare the measurement equations for fitting
     void solve_prepare ();
 

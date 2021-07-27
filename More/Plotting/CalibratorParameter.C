@@ -21,7 +21,9 @@
 using namespace std;
 
 Pulsar::Calibrator::Info* 
-Pulsar::CalibratorParameter::get_Info (const Archive* data, float threshold)
+Pulsar::CalibratorParameter::get_Info (const Archive* data,
+				       Index subint,
+				       float threshold)
 {
   Reference::To<Calibrator> calibrator;
 
@@ -47,7 +49,9 @@ Pulsar::CalibratorParameter::get_Info (const Archive* data, float threshold)
     ReferenceCalibrator* ref = new Pulsar::SingleAxisCalibrator (data);
     if (threshold)
       ref->set_outlier_threshold (threshold);
-	
+
+    ref->set_subint (subint);
+    
     calibrator = ref;
   }
 
@@ -69,13 +73,15 @@ Pulsar::CalibratorParameter::CalibratorParameter ()
   managed = false;
 
   outlier_threshold = 0.0;
+
+  subint.set_integrate( true );
 }
 
 
 void Pulsar::CalibratorParameter::prepare (const Archive* data)
 {
   if (!managed)
-    prepare ( get_Info(data, outlier_threshold), data );
+    prepare ( get_Info(data, subint, outlier_threshold), data );
 }
 
 void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
@@ -159,6 +165,10 @@ public:
     add( &CalibratorParameter::get_class,
 	 &CalibratorParameter::set_class,
 	 "class", "Class of model parameters to plot" );
+
+    add( &CalibratorParameter::get_subint,
+	 &CalibratorParameter::set_subint,
+	 "subint", "Sub-integration from which to derive calibrator" );
 
   }
 };
