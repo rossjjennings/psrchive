@@ -15,16 +15,18 @@ using namespace std;
 
 void fits_version_check (bool verbose)
 {
-  float version = 0.0;
-  fits_get_version (&version);
+    float version = 0.0;
+    fits_get_version (&version);
 
-  if (verbose)
-    cerr << "fits_version_check:"
-      " library=" << version <<
-      " header=" << CFITSIO_VERSION << endl;
+    float lib_version = CFITSIO_MAJOR + CFITSIO_MINOR/ceil(log10(CFITSIO_MINOR));
 
-  if ( fabs(version - CFITSIO_VERSION) > 1e-4)
-    throw Error (InvalidState, "fits_version_check",
-		 "CFITSIO version mismatch: library=%f header=%f",
-		 version, CFITSIO_VERSION);
+    if (verbose)
+        cerr << "fits_version_check:"
+            " library=" << version <<
+            " header=" << lib_version << endl;
+
+    if ( fabs(version - lib_version) > 1e-4)
+        throw Error (InvalidState, "fits_version_check",
+                "CFITSIO version mismatch: library=%f header=%f",
+                version, lib_version);
 }
