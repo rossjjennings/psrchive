@@ -164,15 +164,6 @@ void SignalPath::set_equation (Calibration::ReceptionModel* e)
 
 //! Get the signal path experienced by the pulsar
 const MEAL::Complex2*
-SignalPath::get_transformation () const
-{
-  if (!built)
-    const_build ();
-
-  return response;
-}
-
-const MEAL::Complex2*
 SignalPath::get_pulsar_transformation (const MJD& epoch) const
 {
   if (!built)
@@ -181,8 +172,18 @@ SignalPath::get_pulsar_transformation (const MJD& epoch) const
   return get_backend (epoch) -> get_psr_response ();
 }
 
-MEAL::Complex2*
-SignalPath::get_transformation ()
+const MEAL::Complex2* SignalPath::get_transformation () const
+{
+  if (!built)
+    const_build ();
+
+  if (solution_response)
+    return solution_response;
+  else
+    return response;
+}
+
+MEAL::Complex2* SignalPath::get_transformation ()
 {
   const SignalPath* thiz = this;
   return const_cast<MEAL::Complex2*>( thiz->get_transformation() );
@@ -972,9 +973,10 @@ void SignalPath::get_covariance( vector<double>& covar, const MJD& epoch ) try
   if (backends.size() > 1)
   {
     SingleAxis* backend = fiducial->get_backend ();
+    solution_response = response->clone ();
     for (unsigned iparam=0; iparam<backend->get_nparam(); iparam++)
-      if (!response->get_infit(iparam))
-	response->set_param ( iparam, backend->get_param(iparam) );
+      if (!solution_response->get_infit(iparam))
+	solution_response->set_param ( iparam, backend->get_param(iparam) );
   }
   
   for (ptr = response_variation.begin(); ptr != response_variation.end(); ptr++)

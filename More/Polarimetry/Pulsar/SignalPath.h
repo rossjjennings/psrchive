@@ -284,6 +284,11 @@ namespace Calibration
     //! The Mueller transformation
     Reference::To< MEAL::Real4 > impurity;
 
+    //! The instrumental response returned by get_transformation
+    /*! Place holder for fiducial solution when there are 
+      multiple signal paths. */
+    Reference::To< MEAL::Complex2 > solution_response;
+
     void integrate_parameter (MEAL::Scalar* function, double value);
 
     void update_parameter (MEAL::Scalar* function, double value);
