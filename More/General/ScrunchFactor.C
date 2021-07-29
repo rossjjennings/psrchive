@@ -11,6 +11,8 @@
 using namespace std;
 using namespace Pulsar;
 
+const ScrunchFactor ScrunchFactor::none (0);
+
 std::istream& Pulsar::operator >> (std::istream& is, ScrunchFactor& factor)
 {
   unsigned temp;
@@ -39,6 +41,27 @@ std::ostream& Pulsar::operator << (std::ostream& os, const ScrunchFactor& factor
 
   return os;
 }
+
+unsigned Pulsar::ScrunchFactor::get_nresult (unsigned size) const
+{
+  if (n_result)
+    return n_result;
+  else if (n_scrunch)
+    return size / n_scrunch;
+  else
+    return size;
+}
+
+unsigned Pulsar::ScrunchFactor::get_nscrunch (unsigned size) const
+{
+  if (n_scrunch)
+    return n_scrunch;
+  else if (n_result)
+    return size / n_result;
+  else
+    return 1;
+}
+
 
 #if 0
 

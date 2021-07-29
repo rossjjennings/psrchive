@@ -25,8 +25,11 @@ namespace Pulsar {
 
   public:
 
+    //! Useful for passing default = disabled
+    static const ScrunchFactor none;
+    
     //! Default constructor
-    ScrunchFactor () { n_result = 1; n_scrunch = 0; }
+    ScrunchFactor (unsigned nresult = 1) { set_nresult (nresult); }
 
     //! Get the number of elements to scrunch to
     unsigned get_nresult () const { return n_result; }
@@ -38,6 +41,17 @@ namespace Pulsar {
     //! Set the number of elements to be integrated
     void set_nscrunch (unsigned value) { n_scrunch = value; n_result = 0; }
 
+    //! Return true if scrunch should be performed
+    bool scrunch_enabled () const { return n_scrunch || n_result; }
+
+    //! Disable scrunching
+    void disable_scrunch () { n_scrunch = n_result = 0; }
+
+    //! Return the number of elements after scrunch
+    unsigned get_nresult (unsigned size) const;
+
+    //! Return the number of elements to be integrated
+    unsigned get_nscrunch (unsigned size) const;
   };
 
   std::ostream& operator << (std::ostream& os, const ScrunchFactor&);

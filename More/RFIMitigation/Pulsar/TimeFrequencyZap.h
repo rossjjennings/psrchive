@@ -13,6 +13,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/TimeFrequencySmooth.h"
 #include "Pulsar/TimeFrequencyMask.h"
+#include "Pulsar/ScrunchFactor.h"
 
 namespace Pulsar {
 
@@ -72,10 +73,10 @@ namespace Pulsar {
       float get_cutoff_threshold () const { return masker->get_threshold(); }
 
       //! Set the maximum number of iterations
-      void set_fscrunch_factor (unsigned n) { fscrunch_factor = n; }
+      void set_fscrunch (const ScrunchFactor& f) { fscrunch_factor = f; }
 
       //! Get the maximum number of iterations
-      unsigned get_fscrunch_factor () const { return fscrunch_factor; }
+      const ScrunchFactor get_fscrunch () const { return fscrunch_factor; }
 
       //! Set the maximum number of iterations
       void set_max_iterations (unsigned n) { max_iterations = n; }
@@ -120,7 +121,7 @@ namespace Pulsar {
 
       //! apply the current mask to the archive
       void apply_mask (Archive* archive,
-		       unsigned fscrunch_factor = 1,
+		       const ScrunchFactor& fscrunch = ScrunchFactor::none,
 		       unsigned chan_offset = 0);
 
       //! The statistical expression
@@ -136,7 +137,7 @@ namespace Pulsar {
       bool pscrunch;
 
       //! Compute mask from fscrunched clone of data (twice)
-      unsigned fscrunch_factor;
+      ScrunchFactor fscrunch_factor;
     
       //! Tasks performed on clone before computing statistic
       std::string jobs;
