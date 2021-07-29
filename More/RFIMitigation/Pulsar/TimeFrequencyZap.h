@@ -72,10 +72,10 @@ namespace Pulsar {
       //! Get the cut-off threshold
       float get_cutoff_threshold () const { return masker->get_threshold(); }
 
-      //! Set the maximum number of iterations
+      //! Set the frequency scrunch factor
       void set_fscrunch (const ScrunchFactor& f) { fscrunch_factor = f; }
 
-      //! Get the maximum number of iterations
+      //! Get the frequency scrunch factor
       const ScrunchFactor get_fscrunch () const { return fscrunch_factor; }
 
       //! Set the maximum number of iterations

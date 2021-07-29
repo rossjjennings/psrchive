@@ -35,14 +35,17 @@ namespace Pulsar {
     //! Set the number of pulsar phase bins
     void set_nbin (unsigned numbins)
     { instance->set_nbin (numbins); }
+    unsigned get_nbin () const { return instance->get_nbin(); }
 
     //! Set the number of frequency channels
     void set_nchan (unsigned numchan)
     { instance->set_nchan (numchan); }
-
+    unsigned get_nchan () const { return instance->get_nchan(); }
+    
     //! Set the number of polarization measurements
     void set_npol (unsigned numpol)
     { instance->set_npol (numpol); }
+    unsigned get_npol () const { return instance->get_npol(); }
 
     //! Set the dimensions of the data container
     void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0)

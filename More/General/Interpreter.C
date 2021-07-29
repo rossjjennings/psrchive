@@ -1251,17 +1251,35 @@ string Pulsar::Interpreter::weight (const string& args) try
   if (!weight_policy && !arguments.size())
     return response (Fail, "please specify weighting scheme");
 
-  if (arguments.size() == 1 && arguments[0] == "time")
+  string policy;
+  
+  if (arguments.size())
+  {
+    policy = arguments[0];
+    arguments.erase (arguments.begin());
+  }
+
+  if (policy == "time")
     weight_policy = new DurationWeight;
 
-  else if (arguments.size() == 1 && arguments[0] == "snr")
+  else if (policy == "snr")
     weight_policy = new SNRWeight;
+  
+  else if (policy == "std")
+  {
+    if (!arguments.size())
+      return response (Fail, "please specify filename of standard");
 
-  else if (arguments.size() == 2 && arguments[0] == "std")
-    weight_policy = new StandardSNRWeight (arguments[1]);
-
-  else if (arguments.size())
-    return response (Fail, "unrecognized weighting scheme '" + args + "'");
+    weight_policy = new StandardSNRWeight (arguments[0]);
+    arguments.erase (arguments.begin());
+  }
+  
+  if (arguments.size())
+  {
+    Reference::To<TextInterface::Parser> parser;
+    parser = weight_policy->get_interface();
+    parser->process (arguments);
+  }
 
   (*weight_policy)( get() );
 
