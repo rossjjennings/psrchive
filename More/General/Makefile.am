@@ -103,6 +103,7 @@ nobase_include_HEADERS = \
 	Pulsar/RiseFall.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
+	Pulsar/ScrunchFactor.h \
         Pulsar/SimPolnTiming.h \
         Pulsar/Smooth.h \
         Pulsar/SmoothMean.h \
@@ -265,6 +266,7 @@ libGeneral_la_SOURCES = \
 	RiseFall.C \
         RFIMitigation.C \
         ScatteredPowerCorrection.C \
+	ScrunchFactor.C \
         Smooth.C \
         SmoothMean.C \
         SmoothMedian.C \
