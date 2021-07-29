@@ -32,6 +32,7 @@
 #include "Pulsar/StandardFlux.h"
 
 #include "Pulsar/FrequencyAppend.h"
+#include "Pulsar/ScrunchFactor.h"
 
 #include "strutil.h"
 #include "substitute.h"
@@ -934,23 +935,12 @@ catch (Error& error)
 //
 string Pulsar::Interpreter::fscrunch (const string& args) try
 {
-  bool scrunch_by = false;
-  string temp = args;
+  ScrunchFactor factor;
 
-  if (args[0] == 'x')
-  {
-    scrunch_by = true;
-    temp.erase (0,1);
-  }
-
-  unsigned scrunch = setup<unsigned> (temp, 0);
+  if (args.length())
+    factor = fromstring<ScrunchFactor> (args);
   
-  if (!scrunch)
-    get() -> fscrunch();
-  else if (scrunch_by)
-    get() -> fscrunch (scrunch);
-  else
-    get() -> fscrunch_to_nchan (scrunch);
+  Pulsar::fscrunch (get(), factor);
   
   return response (Good);
 }
@@ -966,23 +956,12 @@ catch (Error& error) {
 //
 string Pulsar::Interpreter::tscrunch (const string& args) try
 {
-  bool scrunch_by = false;
-  string temp = args;
+  ScrunchFactor factor;
 
-  if (args[0] == 'x')
-  {
-    scrunch_by = true;
-    temp.erase (0,1);
-  }
-
-  unsigned scrunch = setup<unsigned> (temp, 0);
+  if (args.length())
+    factor = fromstring<ScrunchFactor> (args);
   
-  if (!scrunch)
-    get() -> tscrunch();
-  else if (scrunch_by)
-    get() -> tscrunch (scrunch);
-  else
-    get() -> tscrunch_to_nsub (scrunch);
+  Pulsar::tscrunch (get(), factor);
   
   return response (Good);
 }
@@ -1011,24 +990,12 @@ catch (Error& error)
 
 string Pulsar::Interpreter::bscrunch (const string& args) try 
 {
-  bool scrunch_by = false;
-  string temp = args;
+  ScrunchFactor factor;
 
-  if (args[0] == 'x')
-  {
-    scrunch_by = true;
-    temp.erase (0,1);
-  }
-
-  unsigned scrunch = setup<unsigned> (temp, 0);
+  if (args.length())
+    factor = fromstring<ScrunchFactor> (args);
   
-  if (!scrunch)
-    return response (Fail, "invalid bscrunch argument");
-
-  if (scrunch_by)
-    get() -> bscrunch (scrunch);
-  else
-    get() -> bscrunch_to_nbin (scrunch);
+  Pulsar::bscrunch (get(), factor);
 
   return response (Good);
 }

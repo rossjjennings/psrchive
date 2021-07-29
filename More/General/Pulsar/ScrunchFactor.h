@@ -26,7 +26,7 @@ namespace Pulsar {
   public:
 
     //! Default constructor
-    ScrunchFactor () { n_result = n_scrunch = 0; }
+    ScrunchFactor () { n_result = 1; n_scrunch = 0; }
 
     //! Get the number of elements to scrunch to
     unsigned get_nresult () const { return n_result; }
@@ -59,17 +59,25 @@ namespace Pulsar {
 
 //! Integrate frequency channels
 template<class Container, class getN, class doScrunch>
-void scrunch (Container* container, getN get_size, doScrunch scrunch, const Pulsar::ScrunchFactor& factor)
+void scrunch (Container* container, getN get_size, doScrunch scrunch,
+	      const Pulsar::ScrunchFactor& factor)
 {
   if (factor.get_nresult())
   {
-    (container->*scrunch) ( factor.get_nresult() );
+    unsigned size = (container->*get_size) ();
+    unsigned new_size = factor.get_nresult();
+    
+    if (size % new_size)
+      throw Error (InvalidParam, "scrunch (ScrunchFactor) template",
+		   "requested size=%u modulo current size=%u is non-zero",
+		   new_size, size);
+
+    unsigned nscrunch = size / new_size;
+    (container->*scrunch) ( nscrunch );
   }
   else if (factor.get_nscrunch())
   {
-    unsigned size = (container->*get_size) ();
-    unsigned new_size = size / factor.get_nscrunch();
-    (container->*scrunch) ( new_size );
+    (container->*scrunch) ( factor.get_nscrunch() );
   }
   else
     throw Error (InvalidState, "scrunch (ScrunchFactor) template",

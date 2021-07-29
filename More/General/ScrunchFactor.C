@@ -11,7 +11,7 @@
 using namespace std;
 using namespace Pulsar;
 
-std::istream& operator >> (std::istream& is, ScrunchFactor& factor)
+std::istream& Pulsar::operator >> (std::istream& is, ScrunchFactor& factor)
 {
   unsigned temp;
 
@@ -30,7 +30,7 @@ std::istream& operator >> (std::istream& is, ScrunchFactor& factor)
   return is;
 }
 
-std::ostream& operator << (std::ostream& os, const ScrunchFactor& factor)
+std::ostream& Pulsar::operator << (std::ostream& os, const ScrunchFactor& factor)
 {
   if (factor.get_nresult())
     os << factor.get_nresult();
