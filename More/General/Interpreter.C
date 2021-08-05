@@ -805,7 +805,7 @@ catch (Error& error)
 
 bool Pulsar::Interpreter::evaluate (const std::string& expression)
 {
-  evaluate_expression = substitute (expression, get_interface());
+  evaluate_expression = "{" + substitute (expression, get_interface()) + "}";
 
   if (VERBOSE)
     cerr << "Pulsar::Interpreter::evaluate expression="
