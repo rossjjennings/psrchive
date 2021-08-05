@@ -271,7 +271,6 @@ void smint::add_options (CommandLine::Menu& menu)
   arg = menu.add (row_by_row, "1");
   arg->set_help ("fit 2-D data using series of 1-D fits");
   
-#if HAVE_SPLINTER
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Penalized spline (p-spline) fitting options:");
 
@@ -286,7 +285,6 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (find_median_nfree, "mnf");
   arg->set_help ("compute p-spline smoothing using median nfree");
-#endif
 
 #if HAVE_PGPLOT
   // add a blank line and a header to the output of -h
