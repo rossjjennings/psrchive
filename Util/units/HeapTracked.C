@@ -33,11 +33,19 @@ static pthread_mutex_t heap_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 // list of addresses that have been dynamically allocated on the heap
-static vector<const void*> heap_addresses;
+static vector<const void*>* heap_addresses_ptr = 0;
+
+static vector<const void*>& heap_addresses ()
+{
+  if (!heap_addresses_ptr)
+    heap_addresses_ptr = new vector<const void*> ();
+
+  return *heap_addresses_ptr;
+}
 
 size_t Reference::HeapTracked::get_heap_queue_size ()
 {
-  return heap_addresses.size();
+  return heap_addresses().size();
 }
 
 bool Reference::verbose = false;
@@ -63,7 +71,7 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
        << " ptr=" << ptr << endl;
 #endif
 
-  heap_addresses.push_back (ptr);
+  heap_addresses().push_back (ptr);
 
   UNLOCK_HEAP
 
@@ -121,11 +129,11 @@ bool Reference::HeapTracked::__is_on_heap () const
 
   LOCK_HEAP
 
-  it = std::find( heap_addresses.begin(), heap_addresses.end(), raw_address );
+  it = std::find( heap_addresses().begin(), heap_addresses().end(), raw_address );
 
-  if ( it != heap_addresses.end() )
+  if ( it != heap_addresses().end() )
   {
-    heap_addresses.erase (it);
+    heap_addresses().erase (it);
     __heap_state = is_on_heap;
 
 #ifdef _DEBUG
