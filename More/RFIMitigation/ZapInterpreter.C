@@ -126,6 +126,13 @@ string Pulsar::ZapInterpreter::median (const string& args) try
   bool expand = false;
   vector<string> arguments = setup (args, expand);
 
+#if _DEBUG
+  cerr << "Pulsar::ZapInterpreter::median";
+  for (unsigned i=0; i<arguments.size(); i++)
+    cerr << " arg[" << i << "]=" << arguments[i];
+  cerr << endl;
+#endif
+
   if (!zap_median)
     zap_median = new ChannelZapMedian;
 
