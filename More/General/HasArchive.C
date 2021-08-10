@@ -12,6 +12,8 @@
 
 using namespace std;
 
+// #define _DEBUG 1
+
 Pulsar::HasArchive::HasArchive ()
 {
 }
@@ -31,6 +33,10 @@ void Pulsar::HasArchive::set_Archive (const Archive* est)
 
   integration = 0;
   profile = 0;
+
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_Archive this=" << this << " done" << endl;
+#endif
 }
 
 const Pulsar::Archive* Pulsar::HasArchive::get_Archive () const
@@ -55,9 +61,18 @@ const Pulsar::Profile* Pulsar::HasArchive::get_Profile () const
 //! Set the sub-integration from which statistics will be drawn
 void Pulsar::HasArchive::set_subint (Index _isubint)
 {
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_subint this=" << this
+         << " index=" << _isubint << endl;
+#endif
+
   isubint = _isubint;
   integration = 0;
   profile = 0;
+
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_subint this=" << this << " done" << endl;
+#endif
 }
 
 Pulsar::Index Pulsar::HasArchive::get_subint () const
@@ -68,8 +83,17 @@ Pulsar::Index Pulsar::HasArchive::get_subint () const
 //! Set the frequency channel from which statistics will be drawn
 void Pulsar::HasArchive::set_chan (Index _ichan)
 {
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_chan this=" << this
+         << " index=" << _ichan << endl;
+#endif
+
   ichan = _ichan;
   profile = 0;
+
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_chan this=" << this << " done" << endl;
+#endif
 }
 
 Pulsar::Index Pulsar::HasArchive::get_chan () const
@@ -80,8 +104,17 @@ Pulsar::Index Pulsar::HasArchive::get_chan () const
 //! Set the polarization to plot
 void Pulsar::HasArchive::set_pol (Index _ipol)
 {
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_pol this=" << this
+         << " index=" << _ipol << endl;
+#endif
+
   ipol = _ipol;
   profile = 0;
+
+#if _DEBUG
+    cerr << "Pulsar::HasArchive::set_pol this=" << this << " done" << endl;
+#endif
 }
 
 Pulsar::Index Pulsar::HasArchive::get_pol () const
