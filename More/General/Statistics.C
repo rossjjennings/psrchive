@@ -183,7 +183,7 @@ void Pulsar::Statistics::setup_stats () try
      Plugin::setup might call a function that calls setup_stats
      Calling HasArchive::get_Profile makes HasArchive::is_current return true
   */
-  Reference::To<const Profile> tmp = get_Profile();
+  get_Profile();
 
   for (unsigned i=0; i<plugins.size(); i++)
     plugins[i]->set_setup (false);
