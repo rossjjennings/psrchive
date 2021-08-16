@@ -480,10 +480,12 @@ void Pulsar::Profile::bscrunch (unsigned nscrunch) try
     cerr << "  Scrunch factor = " << nscrunch << endl;
   }
   
-  if (nscrunch < 2)
-    throw Error (InvalidParam, "",
-		 "nscrunch cannot be less than two");
-  
+  if (nscrunch == 0)
+    throw Error (InvalidParam, "", "nscrunch cannot be zero");
+
+  if (nscrunch == 1)  // do nothing
+    return;
+
   unsigned nbin = get_nbin();
   float* amps = get_amps();
 
