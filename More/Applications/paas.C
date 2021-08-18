@@ -14,6 +14,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Index.h"
 
 #include "Error.h"
 #include "dirutil.h"
@@ -76,6 +77,8 @@ void plot (ComponentModel& model, unsigned npts,
 void plot_difference (ComponentModel& model, const Profile *profile,
 		      bool line_plot);
 
+Index ipol;
+
 int main (int argc, char** argv) try
 {
   // the multiple component model
@@ -102,7 +105,9 @@ int main (int argc, char** argv) try
   
   float xmin=0.0, xmax=0.0;
 
-  const char* args = "hb:r:w:c:fF:it:d:DlLj:Ws:SCpR:az:PV";
+  ipol.set_integrate (true);
+  
+  const char* args = "ab:c:Cd:DfF:hiI:j:lLpPr:R:s:St:Vw:Wz:";
   int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
@@ -112,6 +117,10 @@ int main (int argc, char** argv) try
       usage ();
       return 0;
 
+    case 'I':
+      ipol = fromstring<Index>(optarg);
+      break;
+      
     case 'r':
       model_filename_in = optarg;
       break;
@@ -232,7 +241,7 @@ int main (int argc, char** argv) try
   // preprocess0
   archive->fscrunch();
   archive->tscrunch();
-  archive->pscrunch();
+  // archive->pscrunch();
 
   // phase up as requested
   if (centre_model)
@@ -253,7 +262,10 @@ int main (int argc, char** argv) try
     xmin = 0.0;
     xmax = gate;
   }
-  
+
+  Reference::To<const Profile> constprofile = get_Profile (archive, 0, ipol, 0);
+  Reference::To<Profile> profile = constprofile->clone();
+    
   // load from file if specified
   if (!model_filename_in.empty())
   {
@@ -264,7 +276,7 @@ int main (int argc, char** argv) try
     if (align)
     {
       cerr << "paas: roughly aligning model to data" << endl;
-      model.align(archive->get_Integration(0)->get_Profile(0,0));
+      model.align( profile );
     }
   }
 
@@ -290,8 +302,8 @@ int main (int argc, char** argv) try
 
   if (model.get_report_absolute_phases ())
   {
-    cerr << "paas: align profile to model (report absolute phases)" << endl;    
-    model.align_to_model (archive->get_Integration(0)->get_Profile(0,0));
+    cerr << "paas: align profile to model (report absolute phases)" << endl;
+    model.align_to_model ( profile );
   }
   
   while (iterate)
@@ -304,7 +316,7 @@ int main (int argc, char** argv) try
       // set fit flags
       model.set_infit(fit_flags.c_str());
       // fit
-      model.fit(archive->get_Integration(0)->get_Profile(0,0));
+      model.fit( profile );
 
       cerr << "paas: reduced chisq=" << model.get_chisq() / model.get_nfree()
 	   << endl;
@@ -320,7 +332,7 @@ int main (int argc, char** argv) try
 
       cpgpage();
 
-      Profile *prof = scrunched->get_Integration(0)->get_Profile(0,0);
+      Reference::To<const Profile> prof = get_Profile (archive, 0, ipol, 0);
       float ymin = prof->min();
       float ymax = prof->max();
       float extra = 0.05*(ymax-ymin);
