@@ -26,19 +26,24 @@
 #include <stdio.h>
 #include <iomanip>
 
+using namespace Pulsar;
 using namespace MEAL;
 using namespace std;
 
 // #define _DEBUG
 
-void Pulsar::ComponentModel::init ()
+void ComponentModel::init ()
 {
+  gate = 1.0;
+  
   fit_derivative = false;
   log_height = false;
   retain_memory = false;
   fix_widths = false;
   fit_primary_first = false;
+  
   report_absolute_phases = false;
+  report_widths = false;
   
   zap_height_ratio = 0.0;
   zap_concentration_ratio = 0.0;
@@ -46,91 +51,91 @@ void Pulsar::ComponentModel::init ()
   threshold = 1e-3;
 }
 
-Pulsar::ComponentModel::ComponentModel ()
+ComponentModel::ComponentModel ()
 {
   init ();
 }
 
-Pulsar::ComponentModel::ComponentModel (const std::string& filename)
+ComponentModel::ComponentModel (const std::string& filename)
 {
   init ();
   load (filename.c_str());
 }
 
-MEAL::Univariate<MEAL::Scalar>* Pulsar::ComponentModel::get_model ()
+MEAL::Univariate<MEAL::Scalar>* ComponentModel::get_model ()
 {
   if (!model)
     build ();
   return model;
 }
 
-void Pulsar::ComponentModel::fix_relative_phases ()
+void ComponentModel::fix_relative_phases ()
 {
   if (phase)
     return;
 
   if (model)
-    throw Error (InvalidState, "Pulsar::ComponentModel::fix_relative_phases",
+    throw Error (InvalidState, "ComponentModel::fix_relative_phases",
 		 "cannot fix relative phases after model is built");
 
   phase = new ScalarParameter (0.0);
   phase->set_value_name ("phase");
 }
 
-void Pulsar::ComponentModel::set_report_absolute_phases (bool flag)
+void ComponentModel::set_report_absolute_phases (bool flag)
 {
   if (flag)
     fix_relative_phases ();
 
   if (!flag && phase)
-    throw Error (InvalidState, "Pulsar::ComponentModel::set_report_absolute_phases",
+    throw Error (InvalidState, "ComponentModel::set_report_absolute_phases",
 		 "cannot unfix absolute phases after model is built");
 
   report_absolute_phases = flag;
 }
 
-void Pulsar::ComponentModel::set_log_height (bool flag)
+void ComponentModel::set_log_height (bool flag)
 {
   if (components.size() != 0)
-    throw Error (InvalidState, "Pulsar::ComponentModel::set_log_height",
+    throw Error (InvalidState, "ComponentModel::set_log_height",
 		 "cannot change interpretation of height after components have been added");
 
   log_height = flag;
 }
 
-void Pulsar::ComponentModel::set_retain_memory (bool flag)
+void ComponentModel::set_retain_memory (bool flag)
 {
   if (model)
-    throw Error (InvalidState, "Pulsar::ComponentModel::set_retain_memory",
+    throw Error (InvalidState, "ComponentModel::set_retain_memory",
 		 "cannot change flag to retain memory after model is built");
 
   retain_memory = flag;
 }
 
-void Pulsar::ComponentModel::set_fix_widths (bool flag)
+void ComponentModel::set_fix_widths (bool flag)
 {
   if (model)
-    throw Error (InvalidState, "Pulsar::ComponentModel::set_fix_widths",
+    throw Error (InvalidState, "ComponentModel::set_fix_widths",
 		 "cannot change flag to fix widths after model is built");
 
   fix_widths = flag;
 }
 
-void Pulsar::ComponentModel::set_fit_primary_first (bool flag)
+void ComponentModel::set_fit_primary_first (bool flag)
 {
   fit_primary_first = flag;
 }
 
 //! Return the shift estimate
-Estimate<double> Pulsar::ComponentModel::get_shift () const try
+Estimate<double> ComponentModel::get_shift () const try
 {
   if (verbose)
-    cerr << "Pulsar::ComponentModel::get_shift" << endl;
+    cerr << "ComponentModel::get_shift" << endl;
 
   if (backup.size() == components.size())
   {
     if (verbose)
-      cerr << "Pulsar::ComponentModel::get_shift restore backup" << endl;
+      cerr << "ComponentModel::get_shift restore backup" << endl;
 
     for (unsigned i=0; i<components.size(); i++)
     {
@@ -146,7 +151,7 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
     if (fit_primary_first)
     {
 #if _DEBUG
-      cerr << "Pulsar::ComponentModel::get_shift fitting primary first" << endl;
+      cerr << "ComponentModel::get_shift fitting primary first" << endl;
 #endif
       if (backup.size() == components.size())
       for (unsigned i=1; i<components.size(); i++)
@@ -186,36 +191,36 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
   }
   catch (Error& error)
   {
-    throw error += "Pulsar::ComponentModel::get_shift";
+    throw error += "ComponentModel::get_shift";
   }
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::get_shift phase="
+    cerr << "ComponentModel::get_shift phase="
 	 << phase->get_value() << " rad" << endl;
 
   return phase->get_Estimate(0) / (2*M_PI);
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::ComponentModel::get_shift";
+  throw error += "ComponentModel::get_shift";
 }
 
-double Pulsar::ComponentModel::get_absolute_phase () const
+double ComponentModel::get_absolute_phase () const
 {
   if (!phase)
-    throw Error (InvalidState, "Pulsar::ComponentModel::get_absolute_phase",
+    throw Error (InvalidState, "ComponentModel::get_absolute_phase",
 		 "absolute phase not initialized");
   
   return phase->get_value().val;
 }
 
-void Pulsar::ComponentModel::load (const char *fname)
+void ComponentModel::load (const char *fname)
 {
   clear();
 
   FILE *f = fopen(fname, "r");
   if (!f)
-    throw Error (FailedSys, "Pulsar::ComponentModel::load",
+    throw Error (FailedSys, "ComponentModel::load",
 		 "fopen (%s)", fname);
   
   char line[1024];
@@ -238,32 +243,32 @@ void Pulsar::ComponentModel::load (const char *fname)
 	comments[iline] = line;
       else if (line == string("log height\n"))
       {
-	cerr << "Pulsar::ComponentModel::load logarithm of height" << endl;
+	cerr << "ComponentModel::load logarithm of height" << endl;
 	set_log_height (true);
       }
       else if (line == string ("fix relative phases\n"))
       {
-	cerr << "Pulsar::ComponentModel::load fix relative phases" << endl;
+	cerr << "ComponentModel::load fix relative phases" << endl;
 	fix_relative_phases ();
       }
       else if (line == string ("fix widths\n"))
       {
-	cerr << "Pulsar::ComponentModel::load fix widths" << endl;
+	cerr << "ComponentModel::load fix widths" << endl;
 	set_fix_widths (true);
       }
       else if (line == string ("fit primary first\n"))
       {
-	cerr << "Pulsar::ComponentModel::load fit primary first" << endl;
+	cerr << "ComponentModel::load fit primary first" << endl;
 	set_fit_primary_first (true);
       }
       else if (line == string ("retain memory\n"))
       {
-	cerr << "Pulsar::ComponentModel::load retain memory" << endl;
+	cerr << "ComponentModel::load retain memory" << endl;
 	set_retain_memory (true);
       }
       else if (line == string ("report absolute phases\n"))
       {
-	cerr << "Pulsar::ComponentModel::load report absolute phases" << endl;
+	cerr << "ComponentModel::load report absolute phases" << endl;
 	set_report_absolute_phases (true);
       }
       // don't forget to add a matching line to ComponentModel::unload
@@ -279,12 +284,20 @@ void Pulsar::ComponentModel::load (const char *fname)
 			      &centre, &concentration, &height, &name_start);
 
 	if (scanned !=3)
-	  throw Error (InvalidState, "Pulsar::ComponentModel::load", 
+	  throw Error (InvalidState, "ComponentModel::load", 
 		       "Could not parse file");
 
 	components.push_back( new ScaledVonMises (log_height) );
 	components[components.size()-1]->set_centre(centre * 2*M_PI);
-	components[components.size()-1]->set_concentration(concentration);
+	if (concentration > 1.0)
+	  components[components.size()-1]->set_concentration(concentration);
+	else
+	{
+	  components[components.size()-1]->set_width(concentration * 2*M_PI);
+	  double test = components[components.size()-1]->get_width() / (2*M_PI);
+
+	  cerr << "width set=" << concentration << " get=" << test << endl;
+	}
 	components[components.size()-1]->set_height(height);
 	component_names.push_back(line+name_start);
       }
@@ -294,11 +307,11 @@ void Pulsar::ComponentModel::load (const char *fname)
   fclose(f);
 }
 
-void Pulsar::ComponentModel::unload (const char *fname) const
+void ComponentModel::unload (const char *fname) const
 {
   FILE *f = fopen(fname, "w");
   if (!f)
-    throw Error (FailedSys, "Pulsar::ComponentModel::unload",
+    throw Error (FailedSys, "ComponentModel::unload",
 		 "fopen (%s)", fname);
 
   double phase_offset = 0;
@@ -333,9 +346,13 @@ void Pulsar::ComponentModel::unload (const char *fname) const
       fputs(comment_it->second.c_str(), f);
     else if (icomp < components.size())
     {
+      double kappa_or_sigma = components[icomp]->get_concentration().val;
+      if (report_widths)
+	kappa_or_sigma = components[icomp]->get_width () / (2*M_PI);
+      
       fprintf(f, "%12lg %12lg %12lg %s\n", 
 	      (components[icomp]->get_centre().val - phase_offset) / (2*M_PI),
-	      components[icomp]->get_concentration().val,
+	      kappa_or_sigma,
 	      components[icomp]->get_height().val,
 	      component_names[icomp].c_str());
       icomp++;
@@ -347,13 +364,13 @@ void Pulsar::ComponentModel::unload (const char *fname) const
   fclose(f);
 }
 
-void Pulsar::ComponentModel::add_component (double centre,
+void ComponentModel::add_component (double centre,
 					    double concentration, 
 					    double height,
 					    const char *name)
 {
   if (log_height && height <= 0)
-    throw Error (InvalidParam, "Pulsar::ComponentModel::add_component",
+    throw Error (InvalidParam, "ComponentModel::add_component",
 		 "log_height==true and height=%f", height);
   
   components.push_back( new ScaledVonMises (log_height) );
@@ -365,40 +382,40 @@ void Pulsar::ComponentModel::add_component (double centre,
   model = 0;
 }
 
-void Pulsar::ComponentModel::check (const char* method, unsigned icomp) const
+void ComponentModel::check (const char* method, unsigned icomp) const
 {
   if (icomp >= components.size())
-    throw Error (InvalidParam, "Pulsar::ComponentModel::" + string(method),
+    throw Error (InvalidParam, "ComponentModel::" + string(method),
 		 "icomponent=%u >= ncomponent=%u",
 		 icomp, components.size());
 }
 
-void Pulsar::ComponentModel::remove_component (unsigned icomp)
+void ComponentModel::remove_component (unsigned icomp)
 {
   check ("remove_component", icomp);
   components.erase (components.begin()+icomp);
 }
 
-ScaledVonMises* Pulsar::ComponentModel::get_component (unsigned icomp)
+ScaledVonMises* ComponentModel::get_component (unsigned icomp)
 {
   check ("get_component", icomp);
   return components[icomp];
 }
 
-unsigned Pulsar::ComponentModel::get_ncomponents() const
+unsigned ComponentModel::get_ncomponents() const
 {
   return components.size();
 }
 
 /*! rotates the profile to match the phase of the model */
-void Pulsar::ComponentModel::align_to_model (Profile *profile)
+void ComponentModel::align_to_model (Profile *profile)
 {
   double the_phase = 0;
   double the_scale = 0;
   get_best_alignment (profile, the_phase, the_scale);
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::align_to_model"
+    cerr << "ComponentModel::align_to_model"
       " phase=" << the_phase << endl;
   
   profile->rotate_phase (the_phase);
@@ -406,32 +423,32 @@ void Pulsar::ComponentModel::align_to_model (Profile *profile)
 }
 
 /* returns the phase shift and scale that aligns the profile with the model */
-void Pulsar::ComponentModel::get_best_alignment (const Profile* profile, double& the_phase, double& the_scale)
+void ComponentModel::get_best_alignment (const Profile* profile, double& the_phase, double& the_scale)
 {
   Profile modelprof (profile->get_nbin());
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::get_best_alignment calling evaluate" << endl;
+    cerr << "ComponentModel::get_best_alignment calling evaluate" << endl;
   
   evaluate (modelprof.get_amps(), modelprof.get_nbin());
 
   Estimate<double> shift = profile->shift (modelprof);
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::get_best_alignment shift=" << shift << endl;
+    cerr << "ComponentModel::get_best_alignment shift=" << shift << endl;
 
   the_phase = shift.get_value();
 
   the_scale = profile->sum() / modelprof.sum();
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::get_best_alignment scale=" << the_scale << endl;
+    cerr << "ComponentModel::get_best_alignment scale=" << the_scale << endl;
 }
 
-void Pulsar::ComponentModel::align (const Profile *profile)
+void ComponentModel::align (const Profile *profile)
 {
   if (verbose)
-    cerr << "Pulsar::ComponentModel::align (model to data)" << endl;
+    cerr << "ComponentModel::align (model to data)" << endl;
 
   double the_phase = 0;
   double the_scale = 0;
@@ -446,7 +463,7 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   if (phase)
   {
     if (verbose)
-      cerr << "Pulsar::ComponentModel::align increment phase by "
+      cerr << "ComponentModel::align increment phase by "
 	   << the_phase << " turns" << endl;
     phase->set_value (phase->get_value() + the_phase * 2*M_PI);
     return;
@@ -466,12 +483,12 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   }
 }
 
-void Pulsar::ComponentModel::freeze (unsigned icomponent) const
+void ComponentModel::freeze (unsigned icomponent) const
 {
   check ("freeze", icomponent);
 
   if (backup.size() != components.size())
-    throw Error (InvalidState, "Pulsar::ComponentModel::unfreeze",
+    throw Error (InvalidState, "ComponentModel::unfreeze",
                  "should not freeze without backup");
 
   unsigned nparam = components[icomponent]->get_nparam();
@@ -479,12 +496,12 @@ void Pulsar::ComponentModel::freeze (unsigned icomponent) const
     components[icomponent]->set_infit (iparam, false);
 }
 
-void Pulsar::ComponentModel::unfreeze (unsigned icomponent) const
+void ComponentModel::unfreeze (unsigned icomponent) const
 {
   check ("unfreeze", icomponent);
 
   if (backup.size() != components.size())
-    throw Error (InvalidState, "Pulsar::ComponentModel::unfreeze",
+    throw Error (InvalidState, "ComponentModel::unfreeze",
 		 "cannot unfreeze without backup");
 
   unsigned nparam = components[icomponent]->get_nparam();
@@ -492,14 +509,14 @@ void Pulsar::ComponentModel::unfreeze (unsigned icomponent) const
     components[icomponent]->set_infit (ip, backup[icomponent]->get_infit(ip));
 }
 
-void Pulsar::ComponentModel::set_infit (unsigned icomponent,
+void ComponentModel::set_infit (unsigned icomponent,
 					unsigned iparam,
 					bool infit)
 {
   check ("set_infit", icomponent);
 
   if (iparam > 2)
-    throw Error(InvalidParam, "Pulsar::ComponentModel::set_infit",
+    throw Error(InvalidParam, "ComponentModel::set_infit",
 		"Parameter index out of range");
 
   components[icomponent]->set_infit (iparam, infit);
@@ -510,7 +527,7 @@ bool get_boolean (char c)
   return c=='1' || c=='t' || c=='T' || c=='y' || c=='Y';
 }
 
-void Pulsar::ComponentModel::set_infit (const char *fitstring)
+void ComponentModel::set_infit (const char *fitstring)
 {
   int ic=0, nc=strlen(fitstring);
 
@@ -525,13 +542,13 @@ void Pulsar::ComponentModel::set_infit (const char *fitstring)
       components[icomp]->set_infit(iparam, fit);
 
       if (verbose)
-	cerr << "Pulsar::ComponentModel::set_infit icomp=" << icomp
+	cerr << "ComponentModel::set_infit icomp=" << icomp
 	     << " iparam=" << iparam << " fit=" << fit << endl;
       ic++;
     }
 }
 
-void Pulsar::ComponentModel::build () const
+void ComponentModel::build () const
 {
   if (model)
     return;
@@ -569,7 +586,7 @@ void Pulsar::ComponentModel::build () const
   if (phase)
   {
     if (verbose)
-      cerr << "Pulsar::ComponentModel::build single phase" << endl;
+      cerr << "ComponentModel::build single phase" << endl;
 
     backup.resize (components.size());
 
@@ -604,7 +621,7 @@ void Pulsar::ComponentModel::build () const
 
       // verify that iparam=icomp*3 corresponds to component centre
       if (chain->get_param_name(icomp*3) != "centre")
-	throw Error (InvalidState, "Pulsar::ComponentModel::build",
+	throw Error (InvalidState, "ComponentModel::build",
 		     "iparam=%u name='%s'", icomp*3,
 		     sum->get_param_name(icomp*3).c_str());
 
@@ -614,7 +631,7 @@ void Pulsar::ComponentModel::build () const
 }
 
 
-void Pulsar::ComponentModel::fit (const Profile *profile) try
+void ComponentModel::fit (const Profile *profile) try
 {
   build ();
 
@@ -647,7 +664,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
     mean = baseline->get_mean().get_value();
 
     if (verbose)
-      cerr << "Pulsar::ComponentModel::fit mean=" << mean
+      cerr << "ComponentModel::fit mean=" << mean
 	   << " variance=" << variance << endl;
 
     // copy data
@@ -665,7 +682,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
 
   for (unsigned i=0; i < nbin; i++)
   {
-    double radians = (i+0.5)/nbin * 2*M_PI;
+    double radians = (i+0.5) * gate / nbin * 2*M_PI;
 
     xval.push_back( argument.get_Value(radians) );
     yval.push_back( Estimate<double>(data[i], variance) );
@@ -677,7 +694,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
     if (model->get_infit(i))
     {
       if (nfree == 0)
-	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
+	throw Error (InvalidState, "ComponentModel::fit",
 		     "more free parameters than data");
       nfree --;
     }
@@ -815,25 +832,25 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
     double variance = covar[iparam][iparam];
 
     if (verbose)
-      cerr << "Pulsar::ComponentModel::fit"
+      cerr << "ComponentModel::fit"
 	" variance[" << iparam << "]=" << variance << endl;
 
     if (!finite(variance))
       throw Error (InvalidState, 
-		   "Pulsar::ComponentModel::fit",
+		   "ComponentModel::fit",
 		   "non-finite variance "
 		   + model->get_param_name(iparam));
 
     if (!model->get_infit(iparam) && variance != 0)
       throw Error (InvalidState,
-		   "Pulsar::ComponentModel::fit",
+		   "ComponentModel::fit",
 		   "non-zero unfit variance "
 		   + model->get_param_name(iparam)
 		   + " = " + tostring(variance) );
 
     if (variance < 0)
       throw Error (InvalidState,
-		   "Pulsar::ComponentModel::fit",
+		   "ComponentModel::fit",
 		   "invalid variance " + model->get_param_name(iparam)
 		   + " = " + tostring(variance) );
 
@@ -855,7 +872,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
 }
 catch (Error& error)
 {
-    cerr << "Pulsar::ComponentModel::fit exception caught: " << error << endl;
+    cerr << "ComponentModel::fit exception caught: " << error << endl;
 
     for (unsigned icomp=0; icomp < components.size(); icomp++)
 	cerr << "\t" << icomp
@@ -863,10 +880,10 @@ catch (Error& error)
 	     << " concentration=" << components[icomp]->get_concentration ()
 	     << " height=" << components[icomp]->get_height() << endl;
 
-    throw error += "Pulsar::ComponentModel::fit";
+    throw error += "ComponentModel::fit";
 }
 
-void Pulsar::ComponentModel::evaluate (float *vals,
+void ComponentModel::evaluate (float *vals,
 				       unsigned nvals, int icomp_selected) 
 {
   double phase_offset = 0;
@@ -874,7 +891,7 @@ void Pulsar::ComponentModel::evaluate (float *vals,
     phase_offset = phase->get_value().val;
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::evaluate"
+    cerr << "ComponentModel::evaluate"
       " phase_offset=" << phase_offset/(2*M_PI) << " turns" << endl;
   
   //Construct the summed model
@@ -896,20 +913,18 @@ void Pulsar::ComponentModel::evaluate (float *vals,
 
   for (unsigned i=0; i < nvals; i++)
   { 
-    argument.set_value( (i+0.5)/nvals * 2*M_PI + phase_offset );
+    argument.set_value( (i+0.5) * gate / nvals * 2*M_PI + phase_offset );
     vals[i] = m.evaluate();
   }
 }
 
-void Pulsar::ComponentModel::clear()
+void ComponentModel::clear()
 {
   components.clear();
   component_names.clear();
   comments.clear();
   model = 0;
 }
-
-using Pulsar::ComponentModel;
 
 // Text interface to the ComponentModel class
 class Interface : public TextInterface::To<ComponentModel>

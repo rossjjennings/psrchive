@@ -125,15 +125,9 @@ Estimate<double> MEAL::ScaledVonMises::get_concentration () const
   return concentration.get_value ();
 } 
 
-//! Set the width in radiance
+//! Set the width in radians
 void MEAL::ScaledVonMises::set_width (double width)
 {
-  // WvS: the following line is incorrect
-  // The kappa function maps the variance in rad^2 to concentration;
-  // however, correcting this method might break existing paas models
-
-  width /= 2.0*M_PI;   // express width in turns
-
   double circular_variance = width*width;
   double _kappa = kappa(circular_variance);
 
@@ -147,7 +141,7 @@ void MEAL::ScaledVonMises::set_width (double width)
   concentration.set_value ( _kappa );
 }
 
-//! Get the width
+//! Get the width in radians
 double MEAL::ScaledVonMises::get_width () const
 {
   double kappa = concentration.get_value().val;

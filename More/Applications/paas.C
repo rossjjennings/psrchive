@@ -41,6 +41,7 @@ void usage ()
   cout << "Options:  \n" 
     "  -r filename   Read model from file        [Default: use empty model]\n"
     "  -w filename   Write model to file         [Default: paas.m] \n"
+    "  -S            Report width as standard deviation instead of concentration \n"
     "  -c \"a b c\"    Add component (a=centre, b=concentration, d=height)\n"
     "  -f            Fit model to pulse profile  \n"
     "  -L            log(height) -> force all component heights to be > 0 \n"
@@ -99,9 +100,9 @@ int main (int argc, char** argv) try
   float rotate_amount = 0.0;
   bool align = false;
   
-  float xmin=0.0, xmax=1.0;
+  float xmin=0.0, xmax=0.0;
 
-  const char* args = "hb:r:w:c:fF:it:d:DlLj:Ws:CpR:az:PV";
+  const char* args = "hb:r:w:c:fF:it:d:DlLj:Ws:SCpR:az:PV";
   int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
@@ -165,6 +166,10 @@ int main (int argc, char** argv) try
       std_filename = optarg;
       break;
 
+    case 'S':
+      model.set_report_widths (true);
+      break;
+      
     case 'C':
       centre_model = true;
       break;
@@ -240,6 +245,15 @@ int main (int argc, char** argv) try
   
   archive->remove_baseline();
 
+  double gate = archive->get_Integration(0)->get_gate_duty_cycle();
+  model.set_gate_duty_cycle (gate);
+  
+  if (xmin == xmax)
+  {
+    xmin = 0.0;
+    xmax = gate;
+  }
+  
   // load from file if specified
   if (!model_filename_in.empty())
   {
@@ -323,7 +337,7 @@ int main (int argc, char** argv) try
       vector<float> xvals(npts);
       cpgsci(4);
       for (i=0; i < npts; i++)
-	xvals[i] = i/((double)npts);
+	xvals[i] = i * gate / npts;
       if (line_plot)
 	cpgline(npts, &xvals[0], prof->get_amps());
       else
@@ -540,8 +554,10 @@ void plot (ComponentModel& model, unsigned npts,
 
   model.evaluate (&yvals[0], npts, icomp_selected);
 
+  double gate = model.get_gate_duty_cycle ();
+  
   for (unsigned i=0; i < npts; i++)
-    xvals[i] = i/((double)npts);
+    xvals[i] = i * gate / npts;
 
   //plot
   if (line_plot)
@@ -553,7 +569,8 @@ void plot (ComponentModel& model, unsigned npts,
 void plot_difference (ComponentModel& model, const Profile *profile,
 		      bool line_plot) 
 {
-
+  double gate = model.get_gate_duty_cycle ();
+  
   // evaluate
   unsigned i, npts = profile->get_nbin();
   vector<float> xvals(npts);
@@ -563,7 +580,7 @@ void plot_difference (ComponentModel& model, const Profile *profile,
 
   for (i=0; i < npts; i++)
   { 
-    xvals[i] = i/((double)npts);
+    xvals[i] = i * gate / npts;
     yvals[i] =  profile->get_amps()[i]- yvals[i];
   }
 

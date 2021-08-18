@@ -41,6 +41,12 @@ namespace Pulsar
     //! Load model from file
     ComponentModel (const std::string& filename);
 
+    //! Get the fraction of the pulse period modelled (in turns)
+    double get_gate_duty_cycle() const { return gate; }
+    
+    //! Set the fraction of the pulse period modelled (in turns)
+    virtual void set_gate_duty_cycle (double turns) { gate = turns; }
+
     //! Return the shift estimate
     Estimate<double> get_shift () const;
 
@@ -82,6 +88,9 @@ namespace Pulsar
 
     void set_report_absolute_phases (bool flag=true);
     bool get_report_absolute_phases () const { return report_absolute_phases; }
+
+    void set_report_widths (bool flag=true) { report_widths = flag; }
+    bool get_report_widths () const { return report_widths; }
 
     // Manipulation
     /*! \param centre the centre of the component in turns of pulse phase
@@ -155,6 +164,8 @@ namespace Pulsar
     mutable Reference::To< MEAL::ScalarParameter > phase;
     mutable Reference::To< MEAL::Univariate<MEAL::Scalar> > model;
 
+    double gate;
+    
     bool fit_derivative;
     float threshold;
 
@@ -163,6 +174,7 @@ namespace Pulsar
     bool fix_widths;
     bool fit_primary_first;
     bool report_absolute_phases;
+    bool report_widths;
     
     float zap_height_ratio;
     float zap_concentration_ratio;
