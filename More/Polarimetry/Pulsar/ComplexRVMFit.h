@@ -40,6 +40,12 @@ namespace Pulsar
     //! Default constructor
     ComplexRVMFit ();
 
+    //! Get the fraction of the pulse period modelled (in turns)
+    double get_gate_duty_cycle() const { return gate; }
+    
+    //! Set the fraction of the pulse period modelled (in turns)
+    virtual void set_gate_duty_cycle (double turns) { gate = turns; }
+
     //! Add a range of pulse phase containing an orthogonally polarized mode
     /*! Must be called before set_observation */
     void add_opm (const range& radians);
@@ -106,6 +112,9 @@ namespace Pulsar
 
   protected:
 
+    // fraction of pulse period stored in pulse profile
+    double gate;
+    
     void check_parameters ();
 
     Reference::To<const PolnProfile> data;

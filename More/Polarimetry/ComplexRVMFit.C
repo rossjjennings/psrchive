@@ -30,6 +30,8 @@ bool Pulsar::ComplexRVMFit::verbose = false;
 
 Pulsar::ComplexRVMFit::ComplexRVMFit()
 {
+  gate = 1.0;
+  
   threshold = 3.0;
   chisq_map = false;
   
@@ -106,7 +108,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   const unsigned nbin = data->get_nbin();
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-    double phase = (ibin + 0.5)*2*M_PI / nbin;
+    double phase = (ibin + 0.5) * gate * 2*M_PI / nbin;
 
     if (is_included(phase) ||
 	(!is_excluded(phase) && linear[ibin].real().get_variance() > 0))
@@ -266,7 +268,7 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
     if ( linear[ibin].real().get_error() == 0.0 )
       mask[ibin] = 0.0;
 
-    double phase = (ibin + 0.5)*2*M_PI / nbin;
+    double phase = (ibin + 0.5) * gate * 2*M_PI / nbin;
     if (is_excluded(phase) && !is_included(phase))
       mask[ibin] = 0.0;
 
@@ -319,14 +321,21 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 	max_angle = angle;
       }
   }
+
   
-  double phi_per_bin = 2*M_PI / nbin;
-  
+  double phi_per_bin = gate * 2*M_PI / nbin;
+
   peak_phase = (max_bin + 0.5) * phi_per_bin;
   delpsi_delphi = 0.5 * atan2(im[max_bin],re[max_bin]) / phi_per_bin;
   
   std::complex< Estimate<double> > L0 = linear[max_bin];
   peak_pa = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
+
+  cerr << "ComplexRVMFit::find_delpsi_delphi_max gate=" << gate
+       << " phi_per_bin=" << phi_per_bin
+       << "\n\t delpsi_delphi=" << delpsi_delphi
+       << "\n\t peak_phase=" << peak_phase*180/M_PI << " deg"
+       << "\n\t peak_pa=" << peak_pa*180/M_PI << " deg" << endl;
 }
 				      
 

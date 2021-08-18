@@ -97,6 +97,8 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   if (verbose)
     cerr << "Pulsar::AnglePlot::draw scale ptr=" << get_scale() << endl;
 
+  double gate = data->get_Integration(0)->get_gate_duty_cycle ();
+    
   std::vector<float> phases;
   get_scale()->get_ordinates (data, phases);
 
@@ -179,7 +181,7 @@ void Pulsar::AnglePlot::draw (const Archive *data)
 	for (unsigned ibin=0; ibin < phases.size(); ibin++)
 	{
 	  double x = phases[ibin]+xoff;
-	  float y = model (x*2*M_PI/x_scale) * 180/M_PI + yoff * 180;
+	  float y = model (x*gate*2*M_PI/x_scale) * 180/M_PI + yoff * 180;
 
 	  if (fabs(y-ylast) > 120)
 	    start_new_line = true;

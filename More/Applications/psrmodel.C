@@ -436,7 +436,12 @@ void psrmodel::process (Pulsar::Archive* data)
   data->convert_state(Signal::Stokes);
   data->remove_baseline();
 
-  Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
+  Reference::To<Integration> subint = data->get_Integration(0);
+
+  cerr << "psrmodel::process gate=" << subint->get_gate_duty_cycle () << endl;
+  rvmfit->set_gate_duty_cycle (subint->get_gate_duty_cycle ());
+  
+  Reference::To<PolnProfile> p = subint->new_PolnProfile(0);
   rvmfit->set_observation (p);
 
   MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
