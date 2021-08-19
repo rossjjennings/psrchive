@@ -177,7 +177,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     Choose a reasonable first guess for alpha and zeta
       
     Use Equation 5 of Everett & Weisberg (2001) and choose
-    a solution on the ellipse defined by alpha = 90
+    alpha = 90 (most probable by geometry)
 
     */
 
