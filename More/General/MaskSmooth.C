@@ -79,7 +79,7 @@ unsigned Pulsar::MaskSmooth::get_bins () const
 void Pulsar::MaskSmooth::set_masked_bins (unsigned nbin)
 {
   masked_bins = nbin;
-  masked_bins = 0;
+  masked_fraction = 0;
 }
 
 unsigned Pulsar::MaskSmooth::get_masked_bins () const
@@ -99,18 +99,18 @@ void Pulsar::MaskSmooth::calculate (PhaseWeight* weight)
   if (iwindow == 0)
     iwindow = nbin * turns;
 
-  unsigned imasked = masked_bins;
-  if (imasked == 0)
-    imasked = iwindow * masked_fraction;
+  unsigned max_masked_neighbours = masked_bins;
+  if (max_masked_neighbours == 0)
+    max_masked_neighbours = iwindow * masked_fraction;
 
-  if (imasked == 0)
-    imasked = 1;
+  if (max_masked_neighbours == 0)
+    max_masked_neighbours = 1;
 
   unsigned ihalf = iwindow / 2;
 
 #ifdef _DEBUG
   cerr << "Pulsar::MaskSmooth::calculate ihalf=" << ihalf 
-       << " imasked=" << imasked << endl;
+       << " max_masked_neighbours=" << max_masked_neighbours << endl;
 #endif
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
@@ -148,7 +148,7 @@ void Pulsar::MaskSmooth::calculate (PhaseWeight* weight)
     cerr << "a:" << nmasked << " ";
 #endif
 
-    if (nmasked < imasked)
+    if (nmasked < max_masked_neighbours)
     {
 #ifdef _DEBUG
       cerr << endl;
