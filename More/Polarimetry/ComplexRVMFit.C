@@ -177,25 +177,15 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     Choose a reasonable first guess for alpha and zeta
       
     Use Equation 5 of Everett & Weisberg (2001) and choose
-    a solution on the ellipse defined by
-
-    (sin(beta)/guess_beta)^2 + (sin(alpha)/guess_alpha)^2 = 1
-
-    guess_beta and guess_alpha are the lengths of the ellipse axes
+    a solution on the ellipse defined by alpha = 90
 
     */
 
-    double scale_beta = guess_beta * delpsi_delphi;
-    double numerator = guess_alpha*guess_alpha + scale_beta*scale_beta;
-    double sinsq_beta = guess_alpha * guess_beta / numerator;
+    double sin_alpha = 1.0;
+    double sin_beta = - sin_alpha / delpsi_delphi;
     
-    // cerr << "sinsq_beta=" << sinsq_beta << endl;
-
-    double beta = asin( sqrt(sinsq_beta) );
-    double alpha = abs(delpsi_delphi) * beta;
-
-    if (delpsi_delphi > 0)
-      beta *= -1;
+    double beta = asin( sin_beta );
+    double alpha = asin( sin_alpha );
 
     if (verbose)
       cerr << "Pulsar::ComplexRVMFit::set_observation"
