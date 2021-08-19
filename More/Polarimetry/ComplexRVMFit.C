@@ -22,7 +22,8 @@
 //#define _DEBUG 1
 #include "debug.h"
 
-#include <assert.h>
+#include <cassert>
+#include <fstream>
 
 using namespace std;
 
@@ -262,6 +263,14 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
     im[ibin] = cross.imag().get_value();
   }
 
+#if _DEBUG
+  {
+    std::ofstream out ("reim.txt");
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+      out << re[ibin] << " " << im[ibin] << endl;
+  }
+#endif
+  
   PhaseWeight mask (nbin, 1.0);
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
@@ -300,6 +309,8 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 #if _DEBUG
   for (unsigned ibin=0; ibin < nbin; ibin++)
     cerr << "smimag: " << ibin << " " << im[ibin] << endl;
+
+  std::ofstream out ("reimphi.txt");  
 #endif
 
   int max_bin = -1;
@@ -307,22 +318,24 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-
+    if (mask[ibin] == 0)
+      continue;
+    
     double angle = fabs( atan2 (im[ibin], re[ibin]) );
     
 #if _DEBUG
-      cerr << "angle: " << ibin << " " << angle
-	   << " " << im[ibin] << " " << re[ibin] << " " << mask[ibin] << endl;
+    out << ibin << " " << im[ibin] << " " << re[ibin] << " " << angle << endl;
+    cerr << "angle: " << ibin << " " << angle
+	 << " " << im[ibin] << " " << re[ibin] << " " << mask[ibin] << endl;
 #endif
     
-    if ( (max_bin < 0 || angle > max_angle) && mask[ibin] > 0 )
-      {
-	max_bin = ibin;
-	max_angle = angle;
-      }
+    if (max_bin < 0 || angle > max_angle) 
+    {
+      max_bin = ibin;
+      max_angle = angle;
+    }
   }
 
-  
   double phi_per_bin = gate * 2*M_PI / nbin;
 
   peak_phase = (max_bin + 0.5) * phi_per_bin;
@@ -331,11 +344,13 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
   std::complex< Estimate<double> > L0 = linear[max_bin];
   peak_pa = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
 
+#if _DEBUG
   cerr << "ComplexRVMFit::find_delpsi_delphi_max gate=" << gate
        << " phi_per_bin=" << phi_per_bin
        << "\n\t delpsi_delphi=" << delpsi_delphi
        << "\n\t peak_phase=" << peak_phase*180/M_PI << " deg"
        << "\n\t peak_pa=" << peak_pa*180/M_PI << " deg" << endl;
+#endif
 }
 				      
 
