@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "MEAL/ComplexRVM.h"
-#include "MEAL/RotatingVectorModel.h"
+#include "MEAL/RVM.h"
 
 #include "MEAL/ChainRule.h"
 #include "MEAL/VectorRule.h"
@@ -16,12 +16,12 @@
 
 using namespace std;
 
-void MEAL::ComplexRVM::init ()
+void MEAL::ComplexRVM::set_rvm (RVM* new_rvm)
 {
   if (verbose)
     cerr << "MEAL::ComplexRVM::init" << endl;
 
-  rvm = new RotatingVectorModel;
+  rvm = new_rvm;
 
   ScalarMath N = *(rvm->get_north());
   ScalarMath E = *(rvm->get_east ());
@@ -36,12 +36,15 @@ void MEAL::ComplexRVM::init ()
   phase->set_constraint( 0, Q.get_expression() );
   phase->set_constraint( 1, U.get_expression() );
 
-  gain = new VectorRule<Complex>;
-
   // gain->set_verbose (true);
-
+  clear ();
   add_model (gain);
   add_model (phase);
+}
+
+void MEAL::ComplexRVM::init ()
+{
+  gain = new VectorRule<Complex>;
 }
 
 class MEAL::ComplexRVM::State
@@ -87,7 +90,7 @@ string MEAL::ComplexRVM::get_name () const
 }
 
 //! Return the rotating vector model
-MEAL::RotatingVectorModel* MEAL::ComplexRVM::get_rvm ()
+MEAL::RVM* MEAL::ComplexRVM::get_rvm ()
 {
   return rvm;
 }

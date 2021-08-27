@@ -20,6 +20,8 @@
 namespace MEAL
 {
   class ComplexRVM;
+  class OrthoRVM;
+  class RotatingVectorModel;  
 }
 
 typedef std::pair<double,double> range;
@@ -117,6 +119,11 @@ namespace Pulsar
     
     void check_parameters ();
 
+    void init (MEAL::RotatingVectorModel*);
+    void init (MEAL::OrthoRVM*);
+
+    void check_parameters (MEAL::RotatingVectorModel*);
+    
     Reference::To<const PolnProfile> data;
     Reference::To<MEAL::ComplexRVM> model;
 
@@ -162,6 +169,8 @@ namespace Pulsar
     bool chisq_map;
 
     double max_L;
+
+    bool auto_detect_opm;
   };
 }
 

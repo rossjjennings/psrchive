@@ -30,6 +30,7 @@
 #include "Pulsar/RotatingVectorModelOptions.h"
 
 #include "MEAL/ComplexRVM.h"
+#include "MEAL/OrthoRVM.h"
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ScalarParameter.h"
 
@@ -60,6 +61,9 @@ public:
   //! Produce a chi-sqared map
   void map_chisq ();
 
+  //! Use the orthometric parameterization of the RVM
+  void use_ortho ();
+  
   //! Verify setup
   void setup ();
 
@@ -86,6 +90,12 @@ protected:
   // complex rotating vector model
   Reference::To<ComplexRVMFit> rvmfit;
 
+  // orthometric parameterization
+  Reference::To<MEAL::OrthoRVM> ortho;
+
+  // original parameterization
+  Reference::To<MEAL::RotatingVectorModel> orig;
+    
   // perform a global search over first guesses in alpha and zeta
   string global_search;
   unsigned nalpha;
@@ -125,7 +135,7 @@ protected:
   void set_plot_options(const std::string& arg);
 
   // Plot data with model
-  void plot_data (Pulsar::Archive* data, MEAL::RotatingVectorModel* model);
+  void plot_data (Pulsar::Archive* data, MEAL::RVM* model);
   
   // Extra config options for the profile plot
   vector<string> plot_config;
@@ -252,9 +262,16 @@ range range_deg_to_rad (const std::string& arg)
   return result;
 }
 
+void psrmodel::use_ortho ()
+{
+  rvmfit->get_model()->set_rvm ( ortho );
+}
+
 void psrmodel::add_options (CommandLine::Menu& menu)
 {
-  MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
+  orig = new MEAL::RotatingVectorModel;
+  rvmfit->get_model()->set_rvm (orig);
+  
   fit_rvm = true;
 
   CommandLine::Argument* arg;
@@ -304,10 +321,25 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   menu.add ("");
 
   RotatingVectorModelOptions rvm_options;
-  rvm_options.set_model (RVM);
+  rvm_options.set_model (orig);
   rvm_options.set_fit (true);
   rvm_options.add_options (menu);
 
+  menu.add ("\n" "Orthometric Rotating Vector Model options:");
+  
+  ortho = new MEAL::OrthoRVM;
+  
+  arg = menu.add (this, &psrmodel::use_ortho, "ortho");
+  arg->set_help ("use orthometric parameterization");
+
+  arg = menu.add (ortho->inverse_slope.get(),
+		  &MEAL::ScalarParameter::set_value, 'k', "degrees");
+  arg->set_help ("kappa: inverse of steepest slope");
+
+  arg = menu.add (ortho->inverse_slope.get(),
+		  &MEAL::ScalarParameter::set_fit, 'K', false);
+  arg->set_help ("hold kappa constant");
+  
   menu.add ("\n" "chi^2 map options:");
 
   arg = menu.add (global_search, 's', "NxM");
@@ -387,6 +419,9 @@ void psrmodel::setup ()
     throw Error (InvalidState, "psrmodel",
 		 "please use -r (can only do RVM fit for now)");
 
+  ortho->line_of_sight->set_value ( orig->line_of_sight->get_value() );
+  ortho->line_of_sight->set_fit ( orig->line_of_sight->get_fit() );
+    
   if (!global_search.empty())
   {
     const char* str = global_search.c_str();
@@ -410,12 +445,12 @@ void psrmodel::setup ()
 static const double deg = 180/M_PI;
 
 template<class T>
-string state (T& model)
+string state (T& model, double scale = deg)
 {
   ostringstream os;
 
   os << ((model->get_infit(0))? "[fit]":"[fix]")
-     << " = " << deg*model->get_param(0);
+     << " = " << scale*model->get_param(0);
 
   return os.str();
 }
@@ -444,9 +479,15 @@ void psrmodel::process (Pulsar::Archive* data)
   Reference::To<PolnProfile> p = subint->new_PolnProfile(0);
   rvmfit->set_observation (p);
 
-  MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
+  MEAL::RVM* rvm = rvmfit->get_model()->get_rvm();
 
-  if (nalpha && nzeta)
+  MEAL::RotatingVectorModel* orig_rvm = 0;
+  orig_rvm = dynamic_cast<MEAL::RotatingVectorModel*> (rvm);
+
+  MEAL::OrthoRVM* ortho_rvm = 0;
+  ortho_rvm = dynamic_cast<MEAL::OrthoRVM*> (rvm);
+
+  if (orig_rvm && nalpha && nzeta)
   {
     cerr << "psrmodel: performing search of chi^2 map" << endl;
 
@@ -455,27 +496,36 @@ void psrmodel::process (Pulsar::Archive* data)
   else
   {
     cerr << "psrmodel: solving with initial guess: \n"
-      "psi_0 " << state(RVM->reference_position_angle) << " deg\n";
+      "psi_0  " << state(rvm->reference_position_angle) << " deg\n"
+      "phi_0  " << state(rvm->magnetic_meridian) << " deg\n";
 
-    if (RVM->impact)
-      cerr << "beta  " << state(RVM->impact) << " deg\n";
-    else
-      cerr << "zeta  " << state(RVM->line_of_sight) << " deg\n";
+    if (orig_rvm)
+    {
+      if (orig_rvm->impact)
+	cerr << "beta   " << state(orig_rvm->impact) << " deg\n";
+      else
+	cerr << "zeta   " << state(orig_rvm->line_of_sight) << " deg\n";
 
-    cerr <<
-      "alpha " << state(RVM->magnetic_axis) << " deg\n"
-      "phi_0 " << state(RVM->magnetic_meridian) << " deg"
-	 << endl;
+      cerr   << "alpha  " << state(orig_rvm->magnetic_axis) << " deg"
+		 << endl;
+    }
 
+    if (ortho_rvm)
+    {
+      cerr <<
+	"zeta   " << state(ortho_rvm->line_of_sight) << " deg\n"
+	"kappa  " << state(ortho_rvm->inverse_slope, 1) << endl;
+    }
+	
 #if HAVE_PGPLOT
-  if (plot_guess)
-  {
-    plot_data (data, RVM);
-    cerr << "Hit <ENTER> to continue" << endl;
-    getchar();
-  }
+    if (plot_guess)
+    {
+      plot_data (data, rvm);
+      cerr << "Hit <ENTER> to continue" << endl;
+      getchar();
+    }
 #endif
-
+    
     rvmfit->solve();
   }
 
@@ -485,30 +535,39 @@ void psrmodel::process (Pulsar::Archive* data)
        << endl;
 
   cerr <<
-    "psi_0=" << deg*RVM->reference_position_angle->get_value() << " deg\n";
+    "psi_0=" << deg*rvm->reference_position_angle->get_value() << " deg\n"
+    "phi_0=" << deg*rvm->magnetic_meridian->get_value() << " deg\n";
 
-  if (RVM->impact)
-    cerr << "beta =" << deg*RVM->impact->get_value() << " deg\n";
-  else
-    cerr << "zeta =" << deg*RVM->line_of_sight->get_value() << " deg\n";
-
-  cerr <<
-    "alpha=" << deg*RVM->magnetic_axis->get_value() << " deg\n"
-    "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
+  if (orig_rvm)
+  {
+    if (orig_rvm->impact)
+      cerr << "beta =" << deg*orig_rvm->impact->get_value() << " deg\n";
+    else
+      cerr << "zeta =" << deg*orig_rvm->line_of_sight->get_value() << " deg\n";
+ 
+    cerr << "alpha=" << deg*orig_rvm->magnetic_axis->get_value() << " deg\n"
 	     << endl;
+  }
 
+  if (ortho_rvm)
+  {
+    cerr <<
+      "zeta =" << deg*ortho_rvm->line_of_sight->get_value() << " deg\n"
+      "kappa=" << ortho_rvm->inverse_slope->get_value() << endl;
+  }
+      
   output_residuals();
 
 #if HAVE_PGPLOT
   if (plot_result)
-    plot_data (data, RVM);
+    plot_data (data, rvm);
 #endif
 
 }
 
 #if HAVE_PGPLOT
 
-void psrmodel::plot_data (Pulsar::Archive* data, MEAL::RotatingVectorModel* RVM)
+void psrmodel::plot_data (Pulsar::Archive* data, MEAL::RVM* rvm)
 {
   StokesCylindrical plotter;
 
@@ -526,27 +585,38 @@ void psrmodel::plot_data (Pulsar::Archive* data, MEAL::RotatingVectorModel* RVM)
   {
     StokesPlot* flux = plotter.get_flux();
     char label[256];
-    sprintf(label, 
-	    "\\\\ga=%.1f\xB0\n"
-	    "\\\\g%c=%.1f\xB0\n"
-	    "\\\\gf=%.1f\xB0\n"
-	    "\\\\gq=%.1f\xB0", 
-	    deg*RVM->magnetic_axis->get_value().get_value(),
-	    RVM->impact ? 'b' : 'z', 
-	    RVM->impact ? 
-            deg*RVM->impact->get_value().get_value() :
-            deg*RVM->line_of_sight->get_value().get_value(),
-	    deg*RVM->magnetic_meridian->get_value().get_value(),
-	    deg*RVM->reference_position_angle->get_value().get_value());
+
+    MEAL::RotatingVectorModel* orig_rvm = 0;
+    orig_rvm = dynamic_cast<MEAL::RotatingVectorModel*> (rvm);
+    if (orig_rvm)
+    {
+      sprintf(label, 
+	      "\\\\ga=%.1f\xB0\n"
+	      "\\\\g%c=%.1f\xB0\n"
+	      "\\\\gf=%.1f\xB0\n"
+	      "\\\\gq=%.1f\xB0", 
+	      deg*orig_rvm->magnetic_axis->get_value().get_value(),
+	      orig_rvm->impact ? 'b' : 'z', 
+	      orig_rvm->impact ? 
+	      deg*orig_rvm->impact->get_value().get_value() :
+	      deg*orig_rvm->line_of_sight->get_value().get_value(),
+	      deg*orig_rvm->magnetic_meridian->get_value().get_value(),
+	      deg*orig_rvm->reference_position_angle->get_value().get_value());
+    }
     flux->get_frame()->get_label_below()->set_right(label);
   }
   
   if (plot_pa_lines)
   {
-    pa->add_annotation(new line(line::Horizontal,
-				deg*RVM->reference_position_angle->get_value().get_value(),2,1));
-    pa->add_annotation(new line(line::Vertical,
-				deg*RVM->magnetic_meridian->get_value().get_value(),2,1));
+    double psi = deg*rvm->reference_position_angle->get_value().get_value();
+    for (unsigned i=0; i<2; i++)
+    {
+      pa->add_annotation(new line(line::Horizontal, psi, 2,1));
+      psi += 180;
+    }
+
+    double phi = deg*rvm->magnetic_meridian->get_value().get_value();
+    pa->add_annotation(new line(line::Vertical, phi, 2,1));
   }
   
   if (proper_motion.length()) 

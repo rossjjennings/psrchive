@@ -11,9 +11,8 @@
 #ifndef __RotatingVectorModel_H
 #define __RotatingVectorModel_H
 
-#include "MEAL/Scalar.h"
+#include "MEAL/RVM.h"
 #include "MEAL/SumRule.h"
-#include "MEAL/Univariate.h"
 
 namespace MEAL {
 
@@ -21,7 +20,7 @@ namespace MEAL {
 
   //! The Rotating Vector Model (RVM) of Radhakrishnan & Cooke
   /*! The abscissa to this model is the pulsar rotational phase in radians */
-  class RotatingVectorModel : public Univariate<Scalar>
+  class RotatingVectorModel : public RVM
   {
 
   public:
@@ -38,18 +37,11 @@ namespace MEAL {
     //! Destructor
     ~RotatingVectorModel ();
 
-    //! psi0: position angle at magnetic meridian
-    /*! effectively rotation of pulsar about the line of sight */
-    Reference::To<ScalarParameter> reference_position_angle;
-
     //! zeta: colatitude of line of sight with respect to spin axis
     Reference::To<ScalarParameter> line_of_sight;
 
     //! alpha: colatitude of magnetic axis with respect to spin axis
     Reference::To<ScalarParameter> magnetic_axis;
-
-    //! phi0: longitude of the magnetic merdian
-    Reference::To<ScalarParameter> magnetic_meridian;
 
     //! beta: colatitude of line of sight with respect to magnetic axis
     Reference::To<ScalarParameter> impact;
@@ -66,21 +58,10 @@ namespace MEAL {
     //! Return the name of the class
     std::string get_name () const;
 
-    //! Get the projection onto North
-    Scalar* get_north () { return north; }
-    //! Get the projection onto East
-    Scalar* get_east () { return east; }
-
   private:
 
     void calculate (double&, std::vector<double>*) {}
     void init ();
-
-    // the magnetic field line projected onto North
-    Reference::To<Scalar> north;
-
-    // the magnetic field line projected onto East
-    Reference::To<Scalar> east;
 
     // the answer
     Reference::To<Scalar> expression;

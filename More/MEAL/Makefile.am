@@ -63,6 +63,7 @@ nobase_include_HEADERS = \
 	MEAL/Null.h \
         MEAL/OneParameter.h \
 	MEAL/OrthogonalModes.h \
+	MEAL/OrthoRVM.h \
         MEAL/ParameterPolicy.h \
 	MEAL/ParameterTracer.h \
         MEAL/Parameters.h \
@@ -83,6 +84,7 @@ nobase_include_HEADERS = \
         MEAL/Rotation.h \
 	MEAL/Rotation1.h \
         MEAL/RuleMath.h \
+	MEAL/RVM.h \
         MEAL/Scalar.h \
         MEAL/ScalarAbsolute.h \
         MEAL/ScalarArgument.h \
@@ -177,6 +179,7 @@ libMEAL_la_SOURCES = \
 	Null.C \
         OneParameter.C \
 	OrthogonalModes.C \
+	OrthoRVM.C \
         ParameterPolicy.C \
 	ParameterTracer.C \
         Parameters.C \

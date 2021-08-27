@@ -14,6 +14,8 @@
 
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/RotatingVectorModel.h"
+#include "MEAL/OrthoRVM.h"
+
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/LevenbergMarquardt.h"
 
@@ -42,6 +44,8 @@ Pulsar::ComplexRVMFit::ComplexRVMFit()
   guess_alpha = 0.5;
   guess_beta = 0.25;
   guess_smooth = 3;
+
+  auto_detect_opm = false;
 }
 
 void Pulsar::ComplexRVMFit::set_threshold (float sigma)
@@ -80,6 +84,60 @@ template<typename T, typename U>
 double chisq (const std::complex< Estimate<T,U> >& z)
 {
   return chisq(z.real()) + chisq(z.imag());
+}
+
+void Pulsar::ComplexRVMFit::init (MEAL::RotatingVectorModel* rvm)
+{
+  if (!rvm)
+    return;
+  
+  if ((notset( rvm->line_of_sight ) || notset( rvm->impact ))
+      && notset( rvm->magnetic_axis ))
+  {
+    cerr << "Pulsar::ComplexRVMFit::set_observation using"
+      " delpsi_delphi=" << delpsi_delphi << endl;
+
+    /*
+
+    Choose a reasonable first guess for alpha and zeta
+      
+    Use Equation 5 of Everett & Weisberg (2001) and choose
+    alpha = 90 (most probable by geometry)
+
+    */
+
+    double sin_alpha = 1.0;
+    double sin_beta = - sin_alpha / delpsi_delphi;
+    
+    double beta = asin( sin_beta );
+    double alpha = asin( sin_alpha );
+
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::set_observation"
+	" alpha=" << alpha << " beta=" << beta << endl;
+
+    rvm->magnetic_axis->set_param (0, alpha);
+
+    if (rvm->impact)
+      rvm->impact->set_param (0, beta);
+    else
+      rvm->line_of_sight->set_param (0, alpha+beta);
+  }
+}
+
+void Pulsar::ComplexRVMFit::init (MEAL::OrthoRVM* rvm)
+{
+  if (!rvm)
+    return;
+
+  if (notset( rvm->inverse_slope ))
+    rvm->inverse_slope->set_param (0, 1.0/delpsi_delphi);
+
+  // start with most probable value as first guess
+  if (notset( rvm->line_of_sight ))
+    rvm->line_of_sight->set_param (0, M_PI/2);
+  
+  // rvm->line_of_sight->set_infit (0, false);
 }
 
 //! Set the data to which model will be fit
@@ -122,7 +180,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       if ( L > max_L )
 	max_L = L;
 
-      if (is_opm(phase))
+      if (auto_detect_opm && is_opm(phase))
       {
 	if (verbose)
 	  cerr << "Pulsar::ComplexRVMFit::set_observation OPM at "
@@ -148,58 +206,31 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       " PA=" << peak_pa*180/M_PI << " deg;"
       " dpsi/dphi=" << delpsi_delphi << endl;
   
-  MEAL::RotatingVectorModel* RVM = get_model()->get_rvm();
+  MEAL::RVM* rvm = get_model()->get_rvm();
 
-  if (notset( RVM->reference_position_angle ))
+  if (notset( rvm->reference_position_angle ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " psi0=" << peak_pa*180/M_PI << endl;
 
-    RVM->reference_position_angle->set_param (0, peak_pa);
+    rvm->reference_position_angle->set_param (0, peak_pa);
   }
 
-  if (notset( RVM->magnetic_meridian ))
+  if (notset( rvm->magnetic_meridian ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " phi0=" << peak_phase*180/M_PI << endl;
 
-    RVM->magnetic_meridian->set_param (0, peak_phase);
+    rvm->magnetic_meridian->set_param (0, peak_phase);
   }
 
-  if ((notset( RVM->line_of_sight ) || notset( RVM->impact ))
-      && notset( RVM->magnetic_axis ))
-  {
-    cerr << "Pulsar::ComplexRVMFit::set_observation using"
-      " delpsi_delphi=" << delpsi_delphi << endl;
-
-    /*
-
-    Choose a reasonable first guess for alpha and zeta
-      
-    Use Equation 5 of Everett & Weisberg (2001) and choose
-    alpha = 90 (most probable by geometry)
-
-    */
-
-    double sin_alpha = 1.0;
-    double sin_beta = - sin_alpha / delpsi_delphi;
-    
-    double beta = asin( sin_beta );
-    double alpha = asin( sin_alpha );
-
-    if (verbose)
-      cerr << "Pulsar::ComplexRVMFit::set_observation"
-	" alpha=" << alpha << " beta=" << beta << endl;
-
-    RVM->magnetic_axis->set_param (0, alpha);
-
-    if (RVM->impact)
-      RVM->impact->set_param (0, beta);
-    else
-      RVM->line_of_sight->set_param (0, alpha+beta);
-  }
-
+  init( dynamic_cast<MEAL::RotatingVectorModel*> (rvm) );
+  init( dynamic_cast<MEAL::OrthoRVM*> (rvm) );
+  
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
+
+  if (!auto_detect_opm)
+    return;
 
   // search for OPMs
 
@@ -227,7 +258,9 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       cerr << "new linear=" << cRVM->get_linear(istate) << endl;
     }
   }
-  cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
+
+  cerr << "Pulsar::ComplexRVMFit::set_observation " 
+       << count << " bins" << endl;
 }
 
 
@@ -477,6 +510,9 @@ void Pulsar::ComplexRVMFit::solve ()
   fit.result (*model, covariance);
 
   nfree = 2 * model->get_nstate();
+
+  cerr << "ComplexRVMFit::solve nconstraint=" << nfree << endl;
+
   for (unsigned iparm=0; iparm < model->get_nparam(); iparm++)
   {
     if (model->get_infit(iparm))
@@ -488,6 +524,9 @@ void Pulsar::ComplexRVMFit::solve ()
 
     model->set_variance (iparm, 2.0*covariance[iparm][iparm]);
   }
+
+  cerr << "ComplexRVMFit::solve nfree=" << nfree << endl;
+
 }
 
 // ensure that phi lies on 0 -> 2*PI
@@ -498,36 +537,21 @@ double twopi (double phi)
   return s*(phi-floor(phi));
 }
 
-void Pulsar::ComplexRVMFit::check_parameters ()
+
+void Pulsar::ComplexRVMFit::check_parameters (MEAL::RotatingVectorModel* rvm)
 {
-  MEAL::ComplexRVM* cRVM = get_model();
-  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
+  if (!rvm)
+    return;
+  
+  double PA0 = rvm->reference_position_angle->get_param(0);
+  double phi0 = rvm->magnetic_meridian->get_param(0);
 
-  const unsigned nstate = cRVM->get_nstate();
-
-  double total_linear = 0.0;
-  unsigned negative_count = 0;
-  for (unsigned i=0; i<nstate; i++)
-  {
-    if (verbose)
-      cerr << "Pulsar::ComplexRVMFit::check_parameters L[" << i << "]="
-           << cRVM->get_linear(i).get_value() << endl;
-
-    total_linear += cRVM->get_linear(i).get_value();
-
-    if (cRVM->get_linear(i).get_value() <= 0)
-      negative_count ++;
-  }
-
-  double alpha = RVM->magnetic_axis->get_param(0);
+  double alpha = rvm->magnetic_axis->get_param(0);
   double zeta = 0.0;
-  if (RVM->impact)
-    zeta = RVM->impact->get_param(0) + alpha;
+  if (rvm->impact)
+    zeta = rvm->impact->get_param(0) + alpha;
   else
-    zeta = RVM->line_of_sight->get_param(0);
-
-  double PA0 = RVM->reference_position_angle->get_param(0);
-  double phi0 = RVM->magnetic_meridian->get_param(0);
+    zeta = rvm->line_of_sight->get_param(0);
 
   if (verbose)
     cerr << "Pulsar::ComplexRVMFit::check_parameters initial result:\n"
@@ -535,21 +559,6 @@ void Pulsar::ComplexRVMFit::check_parameters ()
             "  zeta=" << zeta*180/M_PI << " deg \n"
             "  alpha=" << alpha*180/M_PI << " deg \n"
             "  phi0=" << phi0*180/M_PI << " deg" << endl;
-
-  if (total_linear < 0.0)
-  {
-    if (verbose)
-      cerr << "Pulsar::ComplexRVMFit::check_parameters negative gain" << endl;
-
-    for (unsigned i=0; i<nstate; i++)
-      cRVM->set_linear(i,-cRVM->get_linear(i).get_value());
-
-    // shift the reference P.A. by 90 degrees
-    PA0 += M_PI/2;
-  }
-
-  // ensure that PA0 lies on -pi/2 -> pi/2
-  PA0 = atan ( tan(PA0) );
 
   // ensure that alpha lies on 0 -> pi
   alpha = twopi (alpha);
@@ -577,13 +586,54 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   // ensure that phi0 lies on 0 -> 2pi
   phi0 = twopi (phi0);
 
-  RVM->magnetic_axis->set_param(0, alpha);
-  if (RVM->impact)
-    RVM->impact->set_param(0, zeta - alpha);
+  rvm->magnetic_axis->set_param(0, alpha);
+  if (rvm->impact)
+    rvm->impact->set_param(0, zeta - alpha);
   else
-    RVM->line_of_sight->set_param(0, zeta);
-  RVM->magnetic_meridian->set_param(0, phi0);
-  RVM->reference_position_angle->set_param (0, PA0);
+    rvm->line_of_sight->set_param(0, zeta);
+  rvm->magnetic_meridian->set_param(0, phi0);
+}
+
+void Pulsar::ComplexRVMFit::check_parameters ()
+{
+  MEAL::ComplexRVM* cRVM = get_model();
+
+  const unsigned nstate = cRVM->get_nstate();
+
+  double total_linear = 0.0;
+  unsigned negative_count = 0;
+  for (unsigned i=0; i<nstate; i++)
+  {
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::check_parameters L[" << i << "]="
+           << cRVM->get_linear(i).get_value() << endl;
+
+    total_linear += cRVM->get_linear(i).get_value();
+
+    if (cRVM->get_linear(i).get_value() <= 0)
+      negative_count ++;
+  }
+
+  MEAL::RVM* rvm = cRVM->get_rvm();
+  double PA0 = rvm->reference_position_angle->get_param(0);
+  
+  if (total_linear < 0.0)
+  {
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::check_parameters negative gain" << endl;
+
+    for (unsigned i=0; i<nstate; i++)
+      cRVM->set_linear(i,-cRVM->get_linear(i).get_value());
+
+    // shift the reference P.A. by 90 degrees
+    PA0 += M_PI/2;
+  }
+
+  // ensure that PA0 lies on -pi/2 -> pi/2
+  PA0 = atan ( tan(PA0) );
+  rvm->reference_position_angle->set_param (0, PA0);
+  
+  check_parameters ( dynamic_cast<MEAL::RotatingVectorModel*> (rvm) );
 }
 
 double Pulsar::ComplexRVMFit::evaluate (double rad)
@@ -645,7 +695,9 @@ void Pulsar::ComplexRVMFit::get_psi_residuals
 void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 {
   MEAL::ComplexRVM* cRVM = get_model();
-  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
+  MEAL::RotatingVectorModel* rvm = 0;
+
+  rvm = dynamic_cast<MEAL::RotatingVectorModel*> (cRVM->get_rvm());
 
   const unsigned nstate = cRVM->get_nstate();
   if (!nstate)
@@ -662,7 +714,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
   if (map_beta)
     range_zeta = range_beta;
 
-  RVM->use_impact (map_beta);
+  rvm->use_impact (map_beta);
 
   double step_alpha = M_PI/nalpha;
   double step_zeta = M_PI/nzeta;
@@ -704,11 +756,11 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
   if (chisq_map)
   {
     // disable fits for alpha and zeta/beta
-    RVM->magnetic_axis->set_infit (0, false);
-    if (RVM->impact)
-      RVM->impact->set_infit (0, false);
+    rvm->magnetic_axis->set_infit (0, false);
+    if (rvm->impact)
+      rvm->impact->set_infit (0, false);
     else
-      RVM->line_of_sight->set_infit (0, false);
+      rvm->line_of_sight->set_infit (0, false);
 
     chisq_surface.resize (nalpha * nzeta);
   }
@@ -733,29 +785,29 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
       }
 
       cerr << "alpha=" << alpha;
-      RVM->magnetic_axis->set_value (alpha);
+      rvm->magnetic_axis->set_value (alpha);
 
       if (map_beta)
       {
 	cerr << " beta=" << zeta << endl;
-	RVM->impact->set_value (zeta);
+	rvm->impact->set_value (zeta);
       }
       else
       {
 	cerr << " zeta=" << zeta << endl;
-	RVM->line_of_sight->set_value (zeta);
+	rvm->line_of_sight->set_value (zeta);
       }
 
       // ensure that each attempt starts with the same guess
 #if 1
-      RVM->magnetic_meridian->set_value (peak_phase);
-      RVM->reference_position_angle->set_value (peak_pa);
+      rvm->magnetic_meridian->set_value (peak_phase);
+      rvm->reference_position_angle->set_value (peak_pa);
       for (unsigned i=0; i<nstate; i++)
 	cRVM->set_linear(i, linear[i]);
 #else
       // start each attempt with the values from the best fit
-      RVM->magnetic_meridian->set_value (best_phi0);
-      RVM->reference_position_angle->set_value (best_psi0);
+      rvm->magnetic_meridian->set_value (best_phi0);
+      rvm->reference_position_angle->set_value (best_psi0);
       for (unsigned i=0; i<nstate; i++)
 	cRVM->set_linear(i, best_linear[i]);
 #endif
@@ -776,8 +828,8 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 	best_alpha = alpha;
 	best_zeta = zeta;
 
-	best_phi0 = RVM->magnetic_meridian->get_value ().val;
-	best_psi0 = RVM->reference_position_angle->get_value ().val;
+	best_phi0 = rvm->magnetic_meridian->get_value ().val;
+	best_psi0 = rvm->reference_position_angle->get_value ().val;
 	for (unsigned i=0; i<nstate; i++)
 	  best_linear[i] = cRVM->get_linear(i).get_value();
       }
@@ -821,16 +873,16 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 
   cerr << "BEST chisq=" << best_chisq << endl;
 
-  RVM->magnetic_axis->set_value (best_alpha);
+  rvm->magnetic_axis->set_value (best_alpha);
 
   if (map_beta)
-    RVM->impact->set_value (best_zeta);
+    rvm->impact->set_value (best_zeta);
   else
-    RVM->line_of_sight->set_value (best_zeta);
+    rvm->line_of_sight->set_value (best_zeta);
 
   // ensure that each attempt starts with the same guess
-  RVM->magnetic_meridian->set_value (peak_phase);
-  RVM->reference_position_angle->set_value (peak_pa);
+  rvm->magnetic_meridian->set_value (peak_phase);
+  rvm->reference_position_angle->set_value (peak_pa);
   for (unsigned i=0; i<nstate; i++)
     cRVM->set_linear(i, linear[i]);
 

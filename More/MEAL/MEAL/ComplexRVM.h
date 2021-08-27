@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -17,8 +17,9 @@
 namespace MEAL {
 
   template<typename> class VectorRule;
-  class RotatingVectorModel;
-
+  
+  class RVM;
+  
   //! Rotating Vector Model of Stokes Q and U as a function of pulse phase
   class ComplexRVM : public ProductRule<Complex>
   {
@@ -38,8 +39,9 @@ namespace MEAL {
     ~ComplexRVM ();
 
     //! Return the rotating vector model
-    RotatingVectorModel* get_rvm ();
-
+    RVM* get_rvm ();
+    void set_rvm (RVM*);
+    
     //! Add a state: phase in radians, L is first guess of linear polarization
     void add_state (double phase, double L);
     //! Set the current state for which the model will be evaluated
@@ -72,7 +74,7 @@ namespace MEAL {
 
   private:
 
-    Reference::To<RotatingVectorModel> rvm;
+    Reference::To<RVM> rvm;
     Reference::To< VectorRule<Complex> > gain;
 
     class State;
