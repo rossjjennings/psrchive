@@ -47,7 +47,7 @@ namespace MEAL {
     Reference::To<ScalarParameter> impact;
 
     //! Switch to using impact as a free parameter
-    void use_impact (bool);
+    void use_impact (bool flag = true);
 
     // ///////////////////////////////////////////////////////////////////
     //

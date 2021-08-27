@@ -96,7 +96,8 @@ namespace Pulsar
     void set_range_zeta (const range& r) { range_zeta = r; }
     void set_range_beta (const range& r) { range_beta = r; }
 
-    void global_search (unsigned nalpha, unsigned nzeta);
+    void search_2D (unsigned nalpha, unsigned nzeta);
+    void search_1D (unsigned nzeta);
 
     //! Evaluate the model at the specified pulse longitude (in radians)
     double evaluate (double phi_radians);

@@ -97,7 +97,7 @@ protected:
   Reference::To<MEAL::RotatingVectorModel> orig;
     
   // perform a global search over first guesses in alpha and zeta
-  string global_search;
+  string search_2D;
   unsigned nalpha;
   unsigned nzeta;
 
@@ -342,7 +342,7 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   
   menu.add ("\n" "chi^2 map options:");
 
-  arg = menu.add (global_search, 's', "NxM");
+  arg = menu.add (search_2D, 's', "NxM");
   arg->set_help ("map an NxM grid in alpha X zeta/beta");
 
   arg = menu.add (this, &psrmodel::map_chisq, 'x');
@@ -419,26 +419,29 @@ void psrmodel::setup ()
     throw Error (InvalidState, "psrmodel",
 		 "please use -r (can only do RVM fit for now)");
 
-  ortho->line_of_sight->set_value ( orig->line_of_sight->get_value() );
-  ortho->line_of_sight->set_fit ( orig->line_of_sight->get_fit() );
-    
-  if (!global_search.empty())
+  if (orig->line_of_sight)
   {
-    const char* str = global_search.c_str();
+    ortho->line_of_sight->set_value ( orig->line_of_sight->get_value() );
+    ortho->line_of_sight->set_fit ( orig->line_of_sight->get_fit() );
+  }
+  
+  if (!search_2D.empty())
+  {
+    const char* str = search_2D.c_str();
     char separator = 0;
 
     if ( sscanf (str, "%u%c%u", &nalpha, &separator, &nzeta) == 3 )
       {}
-    else if ( sscanf (str, "%u", &nalpha) == 1 )
-    {
-      // avoid alpha == zeta pole crossing
-      nzeta = nalpha - 1;
-    }
+    else if ( sscanf (str, "%u", &nzeta) == 1 )
+      { nalpha = 0; }
     else
       throw Error (InvalidState, "psrmodel",
 		   "cannot parse chi^2 map dimensions from '%s'", str);
 
-    cerr << "psrmodel: search " << nalpha << "X" << nzeta << " grid" << endl;
+    if (nalpha)
+      cerr << "psrmodel: search " << nalpha << "X" << nzeta << " grid" << endl;
+    else
+      cerr << "psrmodel: search " << nzeta << " line" << endl;
   }
 }
 
@@ -487,11 +490,15 @@ void psrmodel::process (Pulsar::Archive* data)
   MEAL::OrthoRVM* ortho_rvm = 0;
   ortho_rvm = dynamic_cast<MEAL::OrthoRVM*> (rvm);
 
-  if (orig_rvm && nalpha && nzeta)
+  if (nalpha && nzeta)
   {
-    cerr << "psrmodel: performing search of chi^2 map" << endl;
-
-    rvmfit->global_search (nalpha, nzeta);
+    cerr << "psrmodel: performing 2-D search of chi^2 map" << endl;
+    rvmfit->search_2D (nalpha, nzeta);
+  }
+  else if (nzeta)
+  {
+    cerr << "psrmodel: performing 1-D search of chi^2 map" << endl;
+    rvmfit->search_1D (nzeta); 
   }
   else
   {
@@ -506,8 +513,7 @@ void psrmodel::process (Pulsar::Archive* data)
       else
 	cerr << "zeta   " << state(orig_rvm->line_of_sight) << " deg\n";
 
-      cerr   << "alpha  " << state(orig_rvm->magnetic_axis) << " deg"
-		 << endl;
+      cerr << "alpha  " << state(orig_rvm->magnetic_axis) << " deg" << endl;
     }
 
     if (ortho_rvm)
