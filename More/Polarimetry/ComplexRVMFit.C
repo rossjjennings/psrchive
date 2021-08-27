@@ -92,33 +92,31 @@ void Pulsar::ComplexRVMFit::init (MEAL::RotatingVectorModel* rvm)
     return;
 
   cerr << "Pulsar::ComplexRVMFit::init MEAL::RotatingVectorModel" << endl;
-  
-  if ((notset( rvm->line_of_sight ) || notset( rvm->impact ))
-      && notset( rvm->magnetic_axis ))
+
+  if (notset( rvm->magnetic_axis ))
+    rvm->magnetic_axis->set_param (0, M_PI/2);
+      
+  if (notset( rvm->line_of_sight ) || notset( rvm->impact ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " delpsi_delphi=" << delpsi_delphi << endl;
 
     /*
 
-    Choose a reasonable first guess for alpha and zeta
-      
-    Use Equation 5 of Everett & Weisberg (2001) and choose
-    alpha = 90 (most probable by geometry)
+    Choose a reasonable first guess for beta
+    using Equation 5 of Everett & Weisberg (2001)
 
     */
 
-    double sin_alpha = 1.0;
-    double sin_beta = - sin_alpha / delpsi_delphi;
+    double alpha = rvm->magnetic_axis->get_param (0);
     
+    double sin_alpha = sin (alpha);
+    double sin_beta = - sin_alpha / delpsi_delphi;    
     double beta = asin( sin_beta );
-    double alpha = asin( sin_alpha );
 
     if (verbose)
       cerr << "Pulsar::ComplexRVMFit::set_observation"
 	" alpha=" << alpha << " beta=" << beta << endl;
-
-    rvm->magnetic_axis->set_param (0, alpha);
 
     if (rvm->impact)
       rvm->impact->set_param (0, beta);
@@ -946,8 +944,8 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
 
   if ( range_zeta.first == range_zeta.second )
   {
-    range_zeta.first = M_PI;
-    range_zeta.second = -step_search/2;
+    range_zeta.first = M_PI + step_search/4;
+    range_zeta.second = -step_search/4;
   }
   else
   {
@@ -979,7 +977,7 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
     cerr << " search=" << current_search << endl;
     search->set_value (current_search);
 
-#if 0
+#if 1
     // ensure that each attempt starts with the same guess
     rvm->magnetic_meridian->set_value (peak_phase);
     rvm->reference_position_angle->set_value (peak_pa);
