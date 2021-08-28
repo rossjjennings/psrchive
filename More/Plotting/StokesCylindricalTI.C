@@ -22,6 +22,10 @@ Pulsar::StokesCylindrical::Interface::Interface (StokesCylindrical* instance)
        &StokesCylindrical::set_chan,
        "chan", "Frequency channel to plot" );
 
+  add( &StokesCylindrical::get_csv_filename,
+       &StokesCylindrical::set_csv_filename,
+       "csv", "Filename for comma-separated output" );
+
   import ( MultiPhase::Interface() );
 
   // when this is set, import will filter out attributes with identical names

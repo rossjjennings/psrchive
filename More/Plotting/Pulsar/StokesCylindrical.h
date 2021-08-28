@@ -53,12 +53,18 @@ namespace Pulsar {
     //! Get the PosAngPlot
     PosAngPlot* get_orientation () { return &orientation; }
 
+    //! Set the name of the file to which comma-separated values are written
+    void set_csv_filename (const std::string& fname) { csv_filename = fname; }
+    const std::string& get_csv_filename () const { return csv_filename; }
+
   protected:
 
     StokesPlot flux;
     PosAngPlot orientation;
     Index isubint;
     Index ichan;
+
+    std::string csv_filename;
 
     template<class T> void prepare (T* plot, const Archive* data = 0)
     {

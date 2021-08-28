@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/Profile.h"
+
+#include <fstream>
+using namespace std;
 
 Pulsar::StokesCylindrical::StokesCylindrical ()
 {
@@ -43,6 +47,28 @@ void Pulsar::StokesCylindrical::prepare (const Archive* data)
 {
   prepare( &flux, data );
   prepare( &orientation, data );
+
+  if (csv_filename.empty())
+    return;
+
+  const std::vector< Reference::To<const Profile> >& profs
+    = flux.get_plotter()->profiles;
+
+  const std::vector< Estimate<double> >& angles
+    = orientation.AnglePlot::get_angles ();
+
+  ofstream output (csv_filename.c_str());
+  unsigned nbin = profs[0]->get_nbin();
+
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+  {
+    output << ibin << ",";
+    for (unsigned i=0; i<profs.size(); i++)
+      output << profs[i]->get_amps()[ibin] << ",";
+    
+    output << angles[ibin].get_value() << ","
+	   << angles[ibin].get_error() << endl;
+  }
 }
 
 

@@ -71,6 +71,9 @@ namespace Pulsar {
 
     Functor< float(float) > model;
 
+    const std::vector< Estimate<double> >& get_angles () const
+    { return angles; }
+
   protected:
 
     //! Marker used to plot each point
