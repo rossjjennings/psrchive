@@ -53,9 +53,6 @@ namespace MEAL {
   private:
 
     void init ();
-
-    // the answer
-    Reference::To<Scalar> expression;
   };
 
 }

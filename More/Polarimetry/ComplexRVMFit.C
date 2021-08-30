@@ -447,16 +447,49 @@ MEAL::ComplexRVM* Pulsar::ComplexRVMFit::get_model ()
   return model;
 }
 
+/*
+  This function effectively marginalizes over L_i 
+  as in Desvignes et al (2019; see Equations S1 and S2
+  of the Supplementary Material).
+*/
+void Pulsar::ComplexRVMFit::renormalize()
+{
+  MEAL::ComplexRVM* cRVM = get_model();
+  
+  cRVM->set_gains_infit (false);
+  
+  const unsigned nstate = cRVM->get_nstate();
+
+  // MEAL::Function::verbose = true;
+
+  for (unsigned i=0; i<nstate; i++)
+  {
+    data_x[i].apply();
+
+    complex<double> model = cRVM->evaluate();
+
+    double dot = data_y[i].real().val * model.real() + data_y[i].imag().val * model.imag();
+    double scale = fabs(dot) / norm (model);
+
+    double L = cRVM->get_linear(i).get_value();
+    // cerr << i << " L=" << L << " scale=" << scale << endl;
+    double new_L = scale * L;
+
+    cRVM->set_linear( i, new_L );
+  }
+}
+
 //! Fit data to the model
 void Pulsar::ComplexRVMFit::solve ()
 {
-  
   if (!model)
     model = new MEAL::ComplexRVM;
 
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
 
+  renormalize ();
+      
   chisq = fit.init (data_x, data_y, *model);
 
   if (!isfinite(chisq))
@@ -474,6 +507,8 @@ void Pulsar::ComplexRVMFit::solve ()
     if (verbose)
       cerr << "Pulsar::ComplexRVMFit::solve iteration " << iter << endl;
 
+    renormalize ();
+    
     float nchisq = fit.iter (data_x, data_y, *model);
 
     if (verbose)

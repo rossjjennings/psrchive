@@ -194,6 +194,7 @@ libMEAL_la_SOURCES = \
         RotatingVectorModel.C \
         Rotation.C \
 	Rotation1.C \
+	RVM.C \
         Scalar.C \
         ScalarAbsolute.C \
         ScalarArgument.C \

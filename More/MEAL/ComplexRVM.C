@@ -26,8 +26,26 @@ void MEAL::ComplexRVM::set_rvm (RVM* new_rvm)
   ScalarMath N = *(rvm->get_north());
   ScalarMath E = *(rvm->get_east ());
 
-  ScalarMath Q = N*N - E*E;
-  ScalarMath U = 2.0 * N * E;
+  /*
+    WvS - 30 August 2021
+    
+    N and E are no longer necessarily normalized.
+
+    Performing the normalization here
+
+    1. avoids calling sqrt or atan2 in RVM::set_atan_Psi
+
+    2. ensures that the magnitude of each complex value is orthogonal
+    to its phase, thereby preserving the ability to marginalize over
+    L_i as in Desvignes et al (2019; see Equations S1 and S2 of the
+    Supplementary Material).
+
+  */
+  
+  ScalarMath norm = N*N + E*E;
+
+  ScalarMath Q = (N*N - E*E) / norm;
+  ScalarMath U = 2.0 * N * E / norm;
 
   ChainRule<Complex>* phase = new ChainRule<Complex>;
 
@@ -146,6 +164,12 @@ Estimate<double> MEAL::ComplexRVM::get_linear (unsigned i) const
 {
   check (i, "get_linear");
   return state[i].gain->get_gain();
+}
+
+void MEAL::ComplexRVM::set_gains_infit (bool flag)
+{
+  for (unsigned i=0; i<state.size(); i++)
+    state[i].gain->set_infit (0, flag);
 }
 
 void MEAL::ComplexRVM::renormalize (double renorm)

@@ -63,6 +63,9 @@ namespace MEAL {
     //! Correct gain of each state to account for amplitude of complex phase
     void renormalize (double renorm);
 
+    //! Set the fit flag of every gain parameter
+    void set_gains_infit (bool flag);
+      
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation

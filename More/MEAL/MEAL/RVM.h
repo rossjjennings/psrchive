@@ -12,8 +12,9 @@
 #define __RVM_H
 
 #include "MEAL/Univariate.h"
-#include "MEAL/Scalar.h"
 #include "MEAL/ScalarParameter.h"
+#include "MEAL/ScalarArgument.h"
+#include "MEAL/ScalarMath.h"
 
 namespace MEAL {
 
@@ -23,6 +24,8 @@ namespace MEAL {
   {
 
   public:
+
+    RVM ();
 
     //! psi0: position angle at magnetic meridian
     /*! effectively rotation of pulsar about the line of sight */
@@ -37,6 +40,8 @@ namespace MEAL {
     Scalar* get_east () { return east; }
 
   protected:
+
+    void set_atan_Psi (const ScalarMath& sin, const ScalarMath& cos);
     
     // the magnetic field line projected onto North
     Reference::To<Scalar> north;
@@ -44,12 +49,18 @@ namespace MEAL {
     // the magnetic field line projected onto East
     Reference::To<Scalar> east;
 
+    // pulse longitude
+    Reference::To<ScalarArgument> longitude;
+    
   private:
 
     // disable the calculate method
     /* derived classes copy the evaluation policy of the
        resulting ScalarMath expression */
     void calculate (double&, std::vector<double>*) {}
+
+    // the answer
+    Reference::To<Scalar> expression;
 
   };
 

@@ -159,6 +159,9 @@ namespace Pulsar
     // used by set_observation method to find the maximum in delpsi/delphi
     void find_delpsi_delphi_max ();
 
+    // set L of each bin to least-squares best fit
+    void renormalize();
+
     std::vector< std::complex< Estimate<double> > > linear;
     double delpsi_delphi;
 

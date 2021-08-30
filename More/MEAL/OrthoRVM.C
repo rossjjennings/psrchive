@@ -17,12 +17,6 @@ void MEAL::OrthoRVM::init ()
   if (verbose)
     cerr << "MEAL::OrthoRVM::init" << endl;
 
-  reference_position_angle = new ScalarParameter;
-  reference_position_angle->set_value_name ("PA_0");
-
-  magnetic_meridian = new ScalarParameter;
-  magnetic_meridian->set_value_name ("phi_0");
-
   inverse_slope = new ScalarParameter;
   inverse_slope->set_value_name ("kappa");
 
@@ -36,27 +30,13 @@ void MEAL::OrthoRVM::init ()
     This is achieved here by reversing the sign of phi.
   */
 
-  // the argument to this function is pulse phase, phi
-  ScalarArgument* argument = new ScalarArgument; 
-  ScalarMath longitude = *argument - *magnetic_meridian;
+  ScalarMath lon = *longitude - *magnetic_meridian;
 
-  ScalarMath y = sin(longitude);
+  ScalarMath y = sin(lon);
 
-  ScalarMath x = *inverse_slope + cos(*line_of_sight) * (cos(longitude)-1.0);
+  ScalarMath x = *inverse_slope + cos(*line_of_sight) * (cos(lon)-1.0);
 
-  ScalarMath result = atan2(y,x) + *reference_position_angle;
-
-  expression = result.get_expression();
-
-  copy_parameter_policy  (expression);
-  copy_evaluation_policy (expression);
-  copy_univariate_policy (argument);
-
-  ScalarMath N = cos(result);
-  ScalarMath E = sin(result);
-
-  north = N.get_expression ();
-  east = E.get_expression ();
+  set_atan_Psi (y, x);
 }
 
 MEAL::OrthoRVM::OrthoRVM ()

@@ -8,7 +8,6 @@
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
-#include "MEAL/ScalarArgument.h"
 
 using namespace std;
 
@@ -17,52 +16,33 @@ void MEAL::RotatingVectorModel::init ()
   if (verbose)
     cerr << "MEAL::RotatingVectorModel::init" << endl;
 
-  reference_position_angle = new ScalarParameter;
-  reference_position_angle->set_value_name ("PA_0");
-
-  line_of_sight = new ScalarParameter;
-  line_of_sight->set_value_name ("zeta");
-
   /*
     SumRule is used to optionally add alpha to zeta, turning this
     parameter into beta (see use_impact method).
   */
+  
+  line_of_sight = new ScalarParameter;
+  line_of_sight->set_value_name ("zeta");
+
   zeta_sum = new SumRule<Scalar>;
   zeta_sum->add_model( line_of_sight );
 
   magnetic_axis = new ScalarParameter;
   magnetic_axis->set_value_name ("alpha");
 
-  magnetic_meridian = new ScalarParameter;
-  magnetic_meridian->set_value_name ("phi_0");
-
-  // the argument to this function is pulse phase, phi
-  ScalarArgument* argument = new ScalarArgument; 
-  ScalarMath longitude = *argument - *magnetic_meridian;
+  ScalarMath lon = *longitude - *magnetic_meridian;
 
   /*
     The original RVM sign convention for PA is opposite to that of the IAU.
     See Everett & Weisberg (2001; ApJ 553:341) for more details.
   */
 
-  ScalarMath y = sin(*magnetic_axis) * sin(longitude);
+  ScalarMath y = sin(*magnetic_axis) * sin(lon);
 
-  ScalarMath x = sin(*magnetic_axis) * cos(*zeta_sum) * cos(longitude)
+  ScalarMath x = sin(*magnetic_axis) * cos(*zeta_sum) * cos(lon)
     - cos(*magnetic_axis) * sin(*zeta_sum);
 
-  ScalarMath result = atan2(y,x) + *reference_position_angle;
-
-  expression = result.get_expression();
-
-  copy_parameter_policy  (expression);
-  copy_evaluation_policy (expression);
-  copy_univariate_policy (argument);
-
-  ScalarMath N = cos(result);
-  ScalarMath E = sin(result);
-
-  north = N.get_expression ();
-  east = E.get_expression ();
+  set_atan_Psi (y, x);
 }
 
 //! Switch to using impact as a free parameter

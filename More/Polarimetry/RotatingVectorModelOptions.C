@@ -5,10 +5,10 @@
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "Pulsar/RotatingVectorModelOptions.h"
 #include "MEAL/ScalarParameter.h"
+
+using namespace std;
 
 Pulsar::RotatingVectorModelOptions::RotatingVectorModelOptions ()
 {

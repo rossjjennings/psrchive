@@ -63,9 +63,6 @@ namespace MEAL {
     void calculate (double&, std::vector<double>*) {}
     void init ();
 
-    // the answer
-    Reference::To<Scalar> expression;
-
     // the sum rule used to switch between zeta and beta
     Reference::To< SumRule<Scalar> > zeta_sum;
 
