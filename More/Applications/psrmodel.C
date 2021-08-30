@@ -332,11 +332,11 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg = menu.add (this, &psrmodel::use_ortho, "ortho");
   arg->set_help ("use orthometric parameterization");
 
-  arg = menu.add (ortho->inverse_slope.get(),
+  arg = menu.add (ortho->dPsi_dphi.get(),
 		  &MEAL::ScalarParameter::set_value, 'k', "degrees");
   arg->set_help ("kappa: inverse of steepest slope");
 
-  arg = menu.add (ortho->inverse_slope.get(),
+  arg = menu.add (ortho->dPsi_dphi.get(),
 		  &MEAL::ScalarParameter::set_fit, 'K', false);
   arg->set_help ("hold kappa constant");
   
@@ -421,9 +421,21 @@ void psrmodel::setup ()
 
   if (orig->line_of_sight)
   {
-    ortho->line_of_sight->set_value ( orig->line_of_sight->get_value() );
-    ortho->line_of_sight->set_fit ( orig->line_of_sight->get_fit() );
+    double zeta = orig->line_of_sight->get_param(0);
+
+    if (zeta != 0.0)
+    {
+      cerr << "psrmodel::setup set ortho zeta = " << orig->line_of_sight->get_param(0) << endl;
+      ortho->set_line_of_sight ( orig->line_of_sight->get_param(0) );
+    }
+
+    ortho->atanh_cos_zeta->set_fit ( orig->line_of_sight->get_fit() );
   }
+
+  ortho->magnetic_meridian->copy( orig->magnetic_meridian );
+  ortho->reference_position_angle->copy( orig->reference_position_angle );
+    
+  // COPY OTHER ORIG PARAMS TO ORTHO
   
   if (!search_2D.empty())
   {
@@ -519,8 +531,9 @@ void psrmodel::process (Pulsar::Archive* data)
     if (ortho_rvm)
     {
       cerr <<
-	"zeta   " << state(ortho_rvm->line_of_sight) << " deg\n"
-	"kappa  " << state(ortho_rvm->inverse_slope, 1) << endl;
+	"zeta   " << ((ortho_rvm->atanh_cos_zeta->get_infit(0))? "[fit]":"[fix]")
+		  << " = " << deg*ortho_rvm->get_line_of_sight().get_value() << " deg\n"
+	"kappa  " << state(ortho_rvm->dPsi_dphi, 1) << endl;
     }
 	
 #if HAVE_PGPLOT
@@ -558,8 +571,8 @@ void psrmodel::process (Pulsar::Archive* data)
   if (ortho_rvm)
   {
     cerr <<
-      "zeta =" << deg*ortho_rvm->line_of_sight->get_value() << " deg\n"
-      "kappa=" << ortho_rvm->inverse_slope->get_value() << endl;
+      "zeta =" << deg*ortho_rvm->get_line_of_sight() << " deg\n"
+      "kappa=" << ortho_rvm->dPsi_dphi->get_value() << endl;
   }
       
   output_residuals();

@@ -130,14 +130,12 @@ void Pulsar::ComplexRVMFit::init (MEAL::OrthoRVM* rvm)
   if (!rvm)
     return;
 
-  if (notset( rvm->inverse_slope ))
-    rvm->inverse_slope->set_param (0, 1.0/delpsi_delphi);
+  if (notset( rvm->dPsi_dphi ))
+    rvm->dPsi_dphi->set_param (0, delpsi_delphi);
 
   // start with most probable value as first guess
-  if (notset( rvm->line_of_sight ))
-    rvm->line_of_sight->set_param (0, M_PI/2);
-  
-  // rvm->line_of_sight->set_infit (0, false);
+  if (notset( rvm->atanh_cos_zeta ))
+    rvm->atanh_cos_zeta->set_param (0, 0.0);
 }
 
 //! Set the data to which model will be fit
@@ -447,6 +445,14 @@ MEAL::ComplexRVM* Pulsar::ComplexRVMFit::get_model ()
   return model;
 }
 
+double sign (double x)
+{
+  if (x < 0)
+    return -1.0;
+  else
+    return 1.0;
+}
+
 /*
   This function effectively marginalizes over L_i 
   as in Desvignes et al (2019; see Equations S1 and S2
@@ -472,7 +478,6 @@ void Pulsar::ComplexRVMFit::renormalize()
     double scale = fabs(dot) / norm (model);
 
     double L = cRVM->get_linear(i).get_value();
-    // cerr << i << " L=" << L << " scale=" << scale << endl;
     double new_L = scale * L;
 
     cRVM->set_linear( i, new_L );
@@ -490,7 +495,7 @@ void Pulsar::ComplexRVMFit::solve ()
 
   renormalize ();
       
-  chisq = fit.init (data_x, data_y, *model);
+  float last_chisq = chisq = fit.init (data_x, data_y, *model);
 
   if (!isfinite(chisq))
     throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
@@ -499,15 +504,37 @@ void Pulsar::ComplexRVMFit::solve ()
   if (verbose)
     cerr << "Pulsar::ComplexRVMFit::solve initial chisq = " << chisq << endl;
 
-  float close = 1e-3;
   unsigned iter = 1;
   unsigned not_improving = 0;
+
+  MEAL::ComplexRVM* cRVM = get_model();
+  MEAL::OrthoRVM* ortho = dynamic_cast<MEAL::OrthoRVM*> (cRVM->get_rvm());
+  bool fit_cos_zeta = false;
+  if (ortho)
+    fit_cos_zeta = ortho->atanh_cos_zeta->get_infit(0);
+      
+  bool reset_cos_zeta = false;
+  
   while (not_improving < 25)
   {
     if (verbose)
       cerr << "Pulsar::ComplexRVMFit::solve iteration " << iter << endl;
 
     renormalize ();
+
+    if (fit_cos_zeta)
+    {
+      double cos_zeta = ortho->atanh_cos_zeta->get_param(0);
+
+      if (fabs(cos_zeta)>10.0)
+	{
+	  cos_zeta = sign(cos_zeta) * 5;
+	  ortho->atanh_cos_zeta->set_param(0, cos_zeta);
+	  ortho->atanh_cos_zeta->set_infit(0, false);
+	  fit_cos_zeta = false;
+	  reset_cos_zeta = true;
+	}
+    }
     
     float nchisq = fit.iter (data_x, data_y, *model);
 
@@ -520,16 +547,18 @@ void Pulsar::ComplexRVMFit::solve ()
 
     if (nchisq < chisq)
     {
-      float diffchisq = chisq - nchisq;
+      float diffchisq = last_chisq - nchisq;
       chisq = nchisq;
       not_improving = 0;
 
-      if (diffchisq/chisq < close && diffchisq > 0)
+      if (diffchisq < 1 && diffchisq >= 0)
 	break;
     }
     else
       not_improving ++;
 
+    last_chisq = nchisq;
+    
     iter ++;
   }
 
@@ -540,13 +569,21 @@ void Pulsar::ComplexRVMFit::solve ()
 
   if (chisq_map)
     return;
+
+  if (reset_cos_zeta)
+  {
+    ortho->atanh_cos_zeta->set_infit(0, true);
+    fit.init (data_x, data_y, *model);
+  }
   
   std::vector<std::vector<double> > covariance;
   fit.result (*model, covariance);
 
-  nfree = 2 * model->get_nstate();
+  // marginalizing over L_i removes a degree of freedom from each bin
+  nfree = model->get_nstate();
 
-  cerr << "ComplexRVMFit::solve nconstraint=" << nfree << endl;
+  if (verbose)
+    cerr << "ComplexRVMFit::solve nconstraint=" << nfree << endl;
 
   for (unsigned iparm=0; iparm < model->get_nparam(); iparm++)
   {
@@ -560,8 +597,8 @@ void Pulsar::ComplexRVMFit::solve ()
     model->set_variance (iparm, 2.0*covariance[iparm][iparm]);
   }
 
-  cerr << "ComplexRVMFit::solve nfree=" << nfree << endl;
-
+  if (verbose)
+    cerr << "ComplexRVMFit::solve nfree=" << nfree << endl;
 }
 
 // ensure that phi lies on 0 -> 2*PI
@@ -960,8 +997,8 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
   ortho_rvm = dynamic_cast<MEAL::OrthoRVM*> (rvm);
   if (ortho_rvm)
   {
-    search = ortho_rvm->line_of_sight;
-    other = ortho_rvm->inverse_slope;
+    search = ortho_rvm->atanh_cos_zeta;
+    other = ortho_rvm->dPsi_dphi;
   }
   
   const unsigned nstate = cRVM->get_nstate();

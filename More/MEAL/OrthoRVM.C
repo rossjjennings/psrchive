@@ -10,18 +10,21 @@
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarArgument.h"
 
+#include <cmath>
+
 using namespace std;
+
 
 void MEAL::OrthoRVM::init ()
 {
   if (verbose)
     cerr << "MEAL::OrthoRVM::init" << endl;
 
-  inverse_slope = new ScalarParameter;
-  inverse_slope->set_value_name ("kappa");
+  dPsi_dphi = new ScalarParameter;
+  dPsi_dphi->set_value_name ("slope");
 
-  line_of_sight = new ScalarParameter;
-  line_of_sight->set_value_name ("zeta");
+  atanh_cos_zeta = new ScalarParameter;
+  atanh_cos_zeta->set_value_name ("atcz");
   
   /*
     The original RVM sign convention for PA is opposite to that of the IAU.
@@ -34,10 +37,25 @@ void MEAL::OrthoRVM::init ()
 
   ScalarMath y = sin(lon);
 
-  ScalarMath x = *inverse_slope + cos(*line_of_sight) * (cos(lon)-1.0);
+  ScalarMath x = 1.0 / *dPsi_dphi + tanh(*atanh_cos_zeta) * (cos(lon) - 1.0);
 
   set_atan_Psi (y, x);
 }
+
+//! colatitude of line of sight with respect to spin axis
+void MEAL::OrthoRVM::set_line_of_sight (double zeta)
+{
+  double cos_zeta = std::cos(zeta);
+  double hyp = std::atanh (cos_zeta);
+  atanh_cos_zeta->set_param (0, hyp);
+}
+
+Estimate<double> MEAL::OrthoRVM::get_line_of_sight () const
+{
+  ScalarMath cos_zeta = tanh( *atanh_cos_zeta );
+  return acos (cos_zeta.get_Estimate());
+}
+
 
 MEAL::OrthoRVM::OrthoRVM ()
 {

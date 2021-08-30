@@ -35,11 +35,15 @@ namespace MEAL {
     //! Destructor
     ~OrthoRVM ();
 
-    //! kappa: inverse of slope at magnetic meridian
-    Reference::To<ScalarParameter> inverse_slope;
+    //! colatitude of line of sight with respect to spin axis
+    void set_line_of_sight (double radians);
+    Estimate<double> get_line_of_sight () const;
+    			    
+    //! slope (dPsi/dphi) at magnetic meridian
+    Reference::To<ScalarParameter> dPsi_dphi;
 
-    //! zeta: colatitude of line of sight with respect to spin axis
-    Reference::To<ScalarParameter> line_of_sight;
+    //! atanh(cos(zeta)) where zeta is the colatitude of the line of sight
+    Reference::To<ScalarParameter> atanh_cos_zeta;
 
     // ///////////////////////////////////////////////////////////////////
     //
