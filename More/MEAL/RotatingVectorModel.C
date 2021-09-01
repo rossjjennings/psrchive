@@ -35,6 +35,8 @@ void MEAL::RotatingVectorModel::init ()
   /*
     The original RVM sign convention for PA is opposite to that of the IAU.
     See Everett & Weisberg (2001; ApJ 553:341) for more details.
+
+    This is achieved here by reversing the sign of the denominator, x.
   */
 
   ScalarMath y = sin(*magnetic_axis) * sin(lon);

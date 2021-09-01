@@ -30,7 +30,9 @@ void MEAL::OrthoRVM::init ()
     The original RVM sign convention for PA is opposite to that of the IAU.
     See Everett & Weisberg (2001; ApJ 553:341) for more details.
 
-    This is achieved here by reversing the sign of phi.
+    This is achieved here by reversing the sign of the denominator, x.
+
+    Note that dPsi_dphi = -sin(alpha)/sin(beta)
   */
 
   ScalarMath lon = *longitude - *magnetic_meridian;

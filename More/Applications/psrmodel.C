@@ -488,7 +488,9 @@ void psrmodel::process (Pulsar::Archive* data)
 
   Reference::To<Integration> subint = data->get_Integration(0);
 
-  cerr << "psrmodel::process gate=" << subint->get_gate_duty_cycle () << endl;
+  if (verbose)
+    cerr << "psrmodel::process gate=" << subint->get_gate_duty_cycle () << endl;
+
   rvmfit->set_gate_duty_cycle (subint->get_gate_duty_cycle ());
   
   Reference::To<PolnProfile> p = subint->new_PolnProfile(0);

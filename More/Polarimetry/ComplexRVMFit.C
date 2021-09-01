@@ -525,7 +525,6 @@ void Pulsar::ComplexRVMFit::solve ()
     if (fit_cos_zeta)
     {
       double cos_zeta = ortho->atanh_cos_zeta->get_param(0);
-
       if (fabs(cos_zeta)>10.0)
 	{
 	  cos_zeta = sign(cos_zeta) * 5;
@@ -795,6 +794,12 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
   double step_alpha = M_PI/nalpha;
   double step_zeta = M_PI/nzeta;
 
+  if ( range_alpha.second < range_alpha.first )
+    std::swap ( range_alpha.second, range_alpha.first );
+  
+  if ( range_zeta.second < range_zeta.first )
+    std::swap ( range_zeta.second, range_zeta.first );
+  
   if ( range_alpha.first == range_alpha.second )
   {
     range_alpha.first = step_alpha/2;
@@ -841,6 +846,12 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
     chisq_surface.resize (nalpha * nzeta);
   }
 
+  cerr << "first 1=" << range_alpha.first
+       << " 2=" << range_alpha.second << endl;
+
+  cerr << "second 1=" << range_zeta.first
+       << " 2=" << range_zeta.second << endl;
+
   for (double alpha=range_alpha.first; 
        alpha <= range_alpha.second; 
        alpha += step_alpha)
@@ -849,10 +860,17 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
 	 zeta <= range_zeta.second;
 	 zeta += step_zeta) try
     {
+
+      cerr << "first=" << alpha << " second=" << zeta << endl;
+      
       if (alpha == zeta)
       {
         if (chisq_map)
-        {
+	{
+	  if (chisq_index >= chisq_surface.size())
+	    cerr << "ABORT 1: chisq_index=" << chisq_index
+		 << " chisq_surface.size()=" << chisq_surface.size() << endl;
+
           assert (chisq_index < chisq_surface.size());
           chisq_surface[chisq_index] = 0.0;
           chisq_index ++;
@@ -892,6 +910,10 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
 
       if (chisq_map)
       {
+	if (chisq_index >= chisq_surface.size())
+	  cerr << "ABORT 2: chisq_index=" << chisq_index
+	       << " chisq_surface.size()=" << chisq_surface.size() << endl;
+
 	assert (chisq_index < chisq_surface.size());
 	chisq_surface[chisq_index] = chisq;
         chisq_index ++;
@@ -922,6 +944,10 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
 
   if (chisq_map)
   {
+    if (chisq_index != chisq_surface.size())
+      cerr << "ABORT 3: chisq_index=" << chisq_index
+	   << " chisq_surface.size()=" << chisq_surface.size() << endl;
+
     assert (chisq_index == chisq_surface.size());
     double min=0, max=0;
     minmax (chisq_surface, min, max);
@@ -983,14 +1009,12 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
 
   MEAL::RotatingVectorModel* orig_rvm = 0;
   orig_rvm = dynamic_cast<MEAL::RotatingVectorModel*> (rvm);
+
   if (orig_rvm)
   {
-    cerr << "original RVM a" << endl;
     search = orig_rvm->magnetic_axis;
-    cerr << "original RVM b" << endl;
     orig_rvm->use_impact();
     other = orig_rvm->impact;
-    cerr << "original RVM c" << endl;
   }
 
   MEAL::OrthoRVM* ortho_rvm = 0;
@@ -1000,7 +1024,9 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
     search = ortho_rvm->atanh_cos_zeta;
     other = ortho_rvm->dPsi_dphi;
   }
-  
+
+  double initial_other = other->get_param (0);
+   
   const unsigned nstate = cRVM->get_nstate();
   if (!nstate)
     throw Error (InvalidState, "Pulsar::ComplexRVMFit::global_search",
@@ -1012,12 +1038,12 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
   for (unsigned i=0; i<nstate; i++)
     best_linear[i] = linear[i] = cRVM->get_linear(i).get_value();
 
-  double step_search = -M_PI/nsearch;
+  double step_search = M_PI/nsearch;
 
   if ( range_zeta.first == range_zeta.second )
   {
-    range_zeta.first = M_PI + step_search/4;
-    range_zeta.second = -step_search/4;
+    range_zeta.first = step_search/4;
+    range_zeta.second = M_PI - step_search/4;
   }
   else
   {
@@ -1043,25 +1069,34 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
   }
 
   for (double current_search=range_zeta.first; 
-       current_search > range_zeta.second;
+       current_search < range_zeta.second;
        current_search += step_search) try
   {
-    cerr << " search=" << current_search << endl;
-    search->set_value (current_search);
+    if (ortho_rvm)
+      ortho_rvm->set_line_of_sight (current_search);
+    else
+      search->set_value (current_search);
 
 #if 1
     // ensure that each attempt starts with the same guess
     rvm->magnetic_meridian->set_value (peak_phase);
     rvm->reference_position_angle->set_value (peak_pa);
+    other->set_value (initial_other);
+
     for (unsigned i=0; i<nstate; i++)
       cRVM->set_linear(i, linear[i]);
 #endif
     
     solve ();
-    
+
+    // cerr << " search=" << search->get_value() << " other=" << other->get_value() << endl;
+	
     if (chisq_map)
     {
-      cerr <<chisq_index<< " " << chisq_surface.size()<<endl;
+      if (chisq_index >= chisq_surface.size())
+	cerr << "ABORT 4: chisq_index=" << chisq_index
+	     << " chisq_surface.size()=" << chisq_surface.size() << endl;
+
       assert (chisq_index < chisq_surface.size());
       chisq_surface[chisq_index] = chisq;
       chisq_index ++;
@@ -1071,7 +1106,7 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
     {
       // cerr << "current best chisq=" << chisq << endl;
       best_chisq = chisq;
-      best_search = current_search;
+      best_search = search->get_param (0);
 
       best_other = other->get_value ().val;
       best_phi0 = rvm->magnetic_meridian->get_value ().val;
@@ -1089,21 +1124,27 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
     chisq_index ++;
   }
 
+  cerr << "ComplexRVMFit::search_1D main loop finished" << endl;
+
   if (chisq_map)
   {
+    cerr << "ComplexRVMFit::search_1D write chisq map" << endl;
+      
+    if (chisq_index != chisq_surface.size())
+      cerr << "ABORT 5: chisq_index=" << chisq_index
+	   << " chisq_surface.size()=" << chisq_surface.size() << endl;
+
     assert (chisq_index == chisq_surface.size());
     double min=0, max=0;
     minmax (chisq_surface, min, max);
-
-    cerr << "min=" << min << endl;
     
     for (unsigned i=0; i<chisq_index; i++)
       chisq_surface[i] -= min;
 
     chisq_index = 0;
     
-    for (double current_search=range_zeta.first; 
-	 current_search > range_zeta.second;
+    for (double current_search = range_zeta.first; 
+	 current_search < range_zeta.second;
 	 current_search += step_search)
     {
       const double deg = 180/M_PI;
