@@ -524,11 +524,13 @@ void Pulsar::ComplexRVMFit::solve ()
 
     if (fit_cos_zeta)
     {
-      double cos_zeta = ortho->atanh_cos_zeta->get_param(0);
-      if (fabs(cos_zeta)>10.0)
+      double gamma = ortho->atanh_cos_zeta->get_param(0);
+      double gamma_limit = 5.0;
+      
+      if (fabs(gamma) > gamma_limit)
 	{
-	  cos_zeta = sign(cos_zeta) * 5;
-	  ortho->atanh_cos_zeta->set_param(0, cos_zeta);
+	  gamma = sign(gamma) * gamma_limit;
+	  ortho->atanh_cos_zeta->set_param(0, gamma);
 	  ortho->atanh_cos_zeta->set_infit(0, false);
 	  fit_cos_zeta = false;
 	  reset_cos_zeta = true;
