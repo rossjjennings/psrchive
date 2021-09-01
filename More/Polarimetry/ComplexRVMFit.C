@@ -525,13 +525,20 @@ void Pulsar::ComplexRVMFit::solve ()
     if (fit_cos_zeta)
     {
       double gamma = ortho->atanh_cos_zeta->get_param(0);
-      double gamma_limit = 5.0;
+       double gamma_limit = 5.0;
       
       if (fabs(gamma) > gamma_limit)
 	{
-	  gamma = sign(gamma) * gamma_limit;
+	  // set zeta to 1 degree away from extreme
+	  double fix_zeta = 1.0; // deg
+	  gamma = sign(gamma) * atanh(cos(fix_zeta*M_PI/180));
+	  cerr << "Pulsar::ComplexRVMFit::solve fix zeta =" << fix_zeta << endl;
+	  
 	  ortho->atanh_cos_zeta->set_param(0, gamma);
 	  ortho->atanh_cos_zeta->set_infit(0, false);
+
+	  fit.init (data_x, data_y, *model);
+	  
 	  fit_cos_zeta = false;
 	  reset_cos_zeta = true;
 	}
