@@ -12,6 +12,8 @@
 #define __Pulsar_DeltaRM_h
 
 #include "Pulsar/PhaseWeight.h"
+#include "Pulsar/FrequencyIntegrate.h"
+
 #include "Estimate.h"
 
 namespace Pulsar {
@@ -59,6 +61,9 @@ namespace Pulsar {
     //! Set the phase bins to be excluded from the computation
     void set_exclude (const std::vector<unsigned>& bins);
 
+    //! Set the policy used to integrate frequency channels
+    void set_policy (FrequencyIntegrate::Divided*);
+
   protected:
 
     float threshold;
@@ -78,6 +83,9 @@ namespace Pulsar {
 
     //! Weights applied to each phase bin (defines on-pulse region)
     Reference::To<PhaseWeight> onpulse_weights;
+
+    //! Policy used to integrate frequency channels
+    Reference::To<FrequencyIntegrate::Divided> policy;
   };
 
 }

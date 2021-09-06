@@ -189,6 +189,8 @@ Estimate<double> best_search_rm;
 static vector<unsigned> include_bins;
 static vector<unsigned> exclude_bins;
 
+static bool wavelength_squared_spacing = false;
+
 int main (int argc, char** argv)
 {
   poln_stats = new Pulsar::PolnProfileStats;
@@ -247,7 +249,7 @@ int main (int argc, char** argv)
   // estimate an unique RM for each component in the model
   Reference::To<Pulsar::ComponentModel> component_model;
 
-  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Lm:M:p:P:rR:S:T:tu:U:vVw:W:Yz:";
+  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Lm:M:p:P:rR:S:T:tu:U:vVw:WYz:";
 
   int gotc = 0;
 
@@ -452,6 +454,10 @@ int main (int argc, char** argv)
       }
       break;
 
+    case 'W':
+      wavelength_squared_spacing = true;
+      break;
+      
     case 'Y':
       plotv = true;
       if (fin)
@@ -1417,6 +1423,9 @@ void do_refine (Reference::To<Pulsar::Archive> data,
     delta_rm.set_threshold (selection_threshold);
   }
 
+  if (wavelength_squared_spacing)
+    delta_rm.set_policy (new FrequencyIntegrate::WavelengthSquaredSpaced);
+
   delta_rm.set_include (include_bins);
   delta_rm.set_exclude (exclude_bins);
   delta_rm.set_onpulse (onpulse_weights);
@@ -1427,10 +1436,10 @@ void do_refine (Reference::To<Pulsar::Archive> data,
   Estimate<double> old_rm;
   Estimate<double> new_rm;
 
-  while (!converged) {
-
-    if (iterations > max_iterations) {
-
+  while (!converged)
+  {
+    if (iterations > max_iterations)
+    {
       cerr << "rmfit: maximum iterations (" << max_iterations << ") exceeded"
 	   << endl;
 
@@ -1449,7 +1458,6 @@ void do_refine (Reference::To<Pulsar::Archive> data,
 	rmresult (data, new_rm, data->get_nbin());
 
       return;
-
     }
 
     old_rm = new_rm;

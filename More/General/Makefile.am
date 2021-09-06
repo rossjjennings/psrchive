@@ -72,6 +72,7 @@ nobase_include_HEADERS = \
 	Pulsar/MaskSmooth.h \
 	Pulsar/ModularSNR.h \
         Pulsar/NoiseStatistics.h \
+	Pulsar/NonlinearlySpaced.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
 	Pulsar/PatchFrequency.h \

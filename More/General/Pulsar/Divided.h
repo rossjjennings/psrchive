@@ -44,10 +44,10 @@ namespace Pulsar {
     //! Derived types must return the size of the container
     virtual unsigned get_size (const C*) = 0;
 
-    //! The number of output frequency channels
+    //! The number of output elements
     unsigned ndivide;
 
-    //! The number of frequency channels to integrate
+    //! The number of elements to integrate
     unsigned nintegrate;
 
   };
@@ -62,7 +62,7 @@ Pulsar::Integrate<C>::Divided::Divided ()
   nintegrate = 0;
 }
 
-//! Set the number of output frequency channels
+//! Set the number of output elements
 template<class C>
 void Pulsar::Integrate<C>::Divided::set_ndivide (unsigned _ndivide)
 {
@@ -70,7 +70,7 @@ void Pulsar::Integrate<C>::Divided::set_ndivide (unsigned _ndivide)
   nintegrate = 0;
 }
 
-//! Get the number of output frequency channels
+//! Get the number of output elements
 template<class C>
 unsigned Pulsar::Integrate<C>::Divided::get_ndivide () const
 {
@@ -108,7 +108,7 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
 		<< std::endl;
 #endif
 
-    // the number of output frequency channel ranges was specified
+    // the number of output elements was specified
     output_ndivide = ndivide;
     // calculate the output_nintegrate
     output_nintegrate = input_ndivide / output_ndivide;
@@ -124,9 +124,9 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
 		<< nintegrate << std::endl; 
 #endif
 
-    // the output_nintegrate of frequency channels (scrunch) was specified
+    // the number of elements to integrate was specified
     output_nintegrate = nintegrate;
-    // calculate the number of output frequency channel ranges
+    // calculate the number of output elements
     output_ndivide = input_ndivide / output_nintegrate;
     if (input_ndivide % output_nintegrate)
       output_ndivide ++;

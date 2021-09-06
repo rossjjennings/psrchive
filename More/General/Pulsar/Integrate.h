@@ -40,6 +40,9 @@ namespace Pulsar {
     //! Policy for selecting indeces of container elements to be integrated
     class RangePolicy;
 
+    //! Policy for setting the number of divisions or integration factor
+    class Divided;
+
     //! Set the range division policy
     virtual void set_range_policy (RangePolicy* rp) { range_policy = rp; }
 
@@ -48,11 +51,11 @@ namespace Pulsar {
     //! The frequency channel range selection policy
     Reference::To<RangePolicy> range_policy;
 
-    //! Policy for setting the number of divisions or integration factor
-    class Divided;
-
     //! Policy for dividing into evenly spaced ranges
     class EvenlySpaced;
+
+    //! Policy for dividing into nonlinearly spaced ranges
+    class NonlinearlySpaced;
 
     //! Policy for dividing into evenly weighted ranges
     class EvenlyWeighted;

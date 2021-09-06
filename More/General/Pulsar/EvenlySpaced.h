@@ -22,10 +22,10 @@ namespace Pulsar {
     //! Initialize ranges for the specified parameters
     void initialize (Integrate*, C*);
 
-    //! Return the number of output frequency channel ranges
+    //! Return the number of output elements
     unsigned get_nrange () { return output_ndivide; }
 
-    //! Return the frequency channels indeces for the specified range
+    //! Return the element indeces for the specified range
     void get_range (unsigned irange, unsigned& start, unsigned& stop);
 
   protected:

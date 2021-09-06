@@ -14,6 +14,8 @@
 #include "Pulsar/Integrate.h"
 #include "Pulsar/EvenlySpaced.h"
 #include "Pulsar/EvenlyWeighted.h"
+#include "Pulsar/NonlinearlySpaced.h"
+
 #include "Pulsar/Integration.h"
 
 namespace Pulsar {
@@ -57,9 +59,12 @@ namespace Pulsar {
     //! Policy for producing evenly spaced frequency channel ranges
     class EvenlySpaced;
 
-    //! Policy for producing evenly distributed frequency channel ranges
+    //! Policy for producing evenly weighted frequency channel ranges
     class EvenlyWeighted;
 
+    //! Policy for dividing the band into intervals evenly spaced in wavelength squared
+    class WavelengthSquaredSpaced;
+    
   protected:
 
     bool dedisperse;
@@ -84,6 +89,16 @@ namespace Pulsar {
     { return sub->get_weight (ichan); }
   };
 
+  class FrequencyIntegrate::WavelengthSquaredSpaced : 
+    public Integrate<Integration>::NonlinearlySpaced
+  {
+    unsigned get_size (const Integration* sub)
+    { return sub->get_nchan(); }
+
+    double get_value (const Integration* sub, unsigned ichan)
+    { double freq = sub->get_centre_frequency (ichan); return 1.0 / (freq*freq); }
+  };
+  
 }
 
 #endif

@@ -16,8 +16,6 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 
-#include "Pulsar/FrequencyIntegrate.h"
-
 #include <iostream>
 using namespace std;
 
@@ -27,6 +25,8 @@ Pulsar::DeltaRM::DeltaRM ()
 {
   threshold = 3.0;
   used_bins = 0;
+
+  policy = new FrequencyIntegrate::EvenlyWeighted;
 }
 
 Pulsar::DeltaRM::~DeltaRM ()
@@ -75,6 +75,12 @@ void Pulsar::DeltaRM::set_exclude (const std::vector<unsigned>& bins)
   exclude_bins = bins;
 }
 
+//! Set the policy used to integrate frequency channels
+void Pulsar::DeltaRM::set_policy (FrequencyIntegrate::Divided* _policy)
+{
+  policy = _policy;
+}
+
 //! Refine the rotation measure estimate
 void Pulsar::DeltaRM::refine ()
 {
@@ -86,10 +92,9 @@ void Pulsar::DeltaRM::refine ()
   Reference::To<Integration> clone = archive_clone->get_Integration(0);
 
   FrequencyIntegrate fscr;
-  FrequencyIntegrate::EvenlyWeighted policy;
-
-  policy.set_ndivide (2);
-  fscr.set_range_policy ( &policy );
+  
+  policy->set_ndivide (2);
+  fscr.set_range_policy ( policy );
 
   fscr.transform (clone);
 
