@@ -9,6 +9,60 @@
 #include <config.h>
 #endif
 
+#include <iostream>
+using namespace std;
+
+void usage ()
+{
+  cout <<
+    "A program for finding rotation measures\n"
+    "Usage: rmfit [options] filenames\n"
+    "\n"
+    "Brute force search for peak linear polarization options: \n"
+    "\n"
+    "  -m min,max,steps  Specify the bounds and number of steps \n"
+    "  -t            Use the default bounds and resolution \n"
+    "  -a rad        Compute RM step size so that delta-Psi<rad across band \n"
+    "  -A rad        Compute maximum RM so that delta-Psi<rad across channel \n"
+    "  -i nchan      Subdivide the band (fscrunch-x2) until \"nchan\" channels are left (incorporates systematics) \n"
+    "  -j ntimes     Subdivide the pulse profile (bscrunch-x2) ntimes (incorporates systematics) \n"
+    "  -u max        Set the upper bound on the default maximum RM \n"
+    "  -U rm/dm      Set upper bound on default maximum RM = DM * rm/dm \n"
+    "\n"
+    "Iterative differential position angle refinement options: \n"
+    "\n"
+    "  -r            Refine the RM using two halves of band (enables this mode) \n"
+    "  -W            Divide the band in two equal wavelength-squared intervals \n"
+    "  -T sigma_L    Set the threshold used to select bins (default: 3 sigma) \n"
+    "  -P paas.m     Perform RM refinement for each profile component in model \n"
+    "  -b [+/-][i-k] Include/exclude phase bins i through k (inclusive) \n"
+    "\n"
+    "Quadratic fitting algorithm (Noutsos et al. 2008) options: \n"
+    "\n"
+    "  -p [x1,x2]        Fit for every phase bin in window \n"
+    "  -w [x1,x2]        Average over phase window \n"
+    "  -Y                Produce a postscript plot of V against frequency\n"
+    "  -T sigma_L        Set threshold used to select bins (default: all)\n"
+    "  -C weight         Set threshold used to select channels (default: all)\n"
+    "\n"
+    "Preprocessing options: \n"
+    "  -B [factor]       Scrunch in phase bins \n"
+    "  -F [factor]       Scrunch in frequency \n"
+    "  -R RM             Set the input rotation measure \n"
+    "  -z \"z1 z2 z3...\"  Zap these channels\n"
+    "\n"
+    "Plotting options: \n"
+    "  -D                Display results \n"
+    "  -K dev            Specify pgplot device\n"
+    "\n"
+    "Standard options:\n"
+    "  -h                This help page \n"
+    "  -v                Verbose mode \n"
+    "  -V                Very verbose mode \n"
+    "  -L                Log results in source.log \n"
+       << endl;
+}
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/DeltaRM.h"
@@ -45,7 +99,6 @@
 
 #include <sys/stat.h>
 
-using namespace std;
 using namespace Pulsar;
 using TextInterface::parse_indeces;
 
@@ -119,58 +172,6 @@ void
 rmresult (Pulsar::Archive* archive, const Estimate<double>& rm, unsigned used);
 
 static bool display = false;
-
-void usage ()
-{
-  cout <<
-    "A program for finding rotation measures\n"
-    "Usage: rmfit [options] filenames\n"
-    "\n"
-    "Brute force search for peak linear polarization options: \n"
-    "\n"
-    "  -m min,max,steps  Specify the bounds and number of steps \n"
-    "  -t            Use the default bounds and resolution \n"
-    "  -a rad        Compute RM step size so that delta-Psi<rad across band \n"
-    "  -A rad        Compute maximum RM so that delta-Psi<rad across channel \n"
-    "  -i nchan      Subdivide the band (fscrunch-x2) until \"nchan\" channels are left (incorporates systematics) \n"
-    "  -j ntimes     Subdivide the pulse profile (bscrunch-x2) ntimes (incorporates systematics) \n"
-    "  -u max        Set the upper bound on the default maximum RM \n"
-    "  -U rm/dm      Set upper bound on default maximum RM = DM * rm/dm \n"
-    "\n"
-    "Iterative differential position angle refinement options: \n"
-    "\n"
-    "  -r            Refine the RM using two halves of band (enables this mode)\n"
-    "  -T sigma_L    Set the threshold used to select bins (default: 3 sigma)\n"
-    "  -P paas.m     Perform RM refinement for each profile component in model\n"
-    "  -b [+/-][i-k] Include/exclude phase bins i through k (inclusive)\n"
-    "\n"
-    "Quadratic fitting algorithm (Noutsos et al. 2008) options: \n"
-    "\n"
-    "  -p [x1,x2]        Fit for every phase bin in window \n"
-    "  -w [x1,x2]        Average over phase window \n"
-    "  -Y                Produce a postscript plot of V against frequency\n"
-    "  -T sigma_L        Set threshold used to select bins (default: all)\n"
-    "  -C weight         Set threshold used to select channels (default: all)\n"
-    "\n"
-    "Preprocessing options: \n"
-    "  -B [factor]       Scrunch in phase bins \n"
-    "  -F [factor]       Scrunch in frequency \n"
-    "  -R RM             Set the input rotation measure \n"
-    "  -z \"z1 z2 z3...\"  Zap these channels\n"
-    "\n"
-    "Plotting options: \n"
-    "  -D                Display results \n"
-    "  -K dev            Specify pgplot device\n"
-    "\n"
-    "Standard options:\n"
-    "  -h                This help page \n"
-    "  -v                Verbose mode \n"
-    "  -V                Very verbose mode \n"
-    "  -L                Log results in source.log \n"
-       << endl;
-}
-
-
 
 static bool auto_maxmthd = false;
 static float auto_maxrm_dm = 0.0;
