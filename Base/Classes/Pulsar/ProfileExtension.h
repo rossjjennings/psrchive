@@ -52,18 +52,22 @@ namespace Pulsar
     
   };
 
-  /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
+  /*! e.g. 
+    const Profile* profile;
+    const MyExtension* ext = profile->get<MyExtension>(); */
   template<class T>
   const T* Profile::get () const
   {
-    return get_ext<T> (this, "Pulsar::Profile::get<Ext>", verbose);
+    return get_ext<const T> (this, "Pulsar::Profile::get<Ext>", verbose);
   }
 
+  /*! e.g. 
+    Profile* profile;
+    MyExtension* ext = profile->get<MyExtension>(); */
   template<class T>
   T* Profile::get ()
   {
-    return const_cast<T*>
-      ( get_ext<T> (this, "Pulsar::Profile::get<Ext>", verbose) );
+    return get_ext<T> (this, "Pulsar::Profile::get<Ext>", verbose);
   }
 
 }

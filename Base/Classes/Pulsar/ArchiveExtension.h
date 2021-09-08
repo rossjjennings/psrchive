@@ -47,9 +47,9 @@ namespace Pulsar
 
     //! Resize the Extension
     virtual void resize (unsigned nsubint,
-		    unsigned npol  = 0,
-		    unsigned nchan = 0,
-		    unsigned nbin  = 0) {}
+			 unsigned npol  = 0,
+			 unsigned nchan = 0,
+			 unsigned nbin  = 0) {}
 
     //! Derived type factory
     static Extension* factory (const std::string& name);
@@ -69,18 +69,22 @@ namespace Pulsar
     
   };
 
-  /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
+  /*! e.g. 
+    const Archive* archive;
+    const MyExtension* ext = archive->get<MyExtension>(); */
   template<class T>
   const T* Archive::get () const
   {
-    return get_ext<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
+    return get_ext<const T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
   }
 
+  /*! e.g. 
+    Archive* archive;
+    MyExtension* ext = archive->get<MyExtension>(); */
   template<class T>
   T* Archive::get ()
   {
-    return const_cast<T*>
-      ( get_ext<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2) );
+    return get_ext<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
   }
 
   /*! If the specified extension type T does not exist, an atempt is made to

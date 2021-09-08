@@ -69,18 +69,22 @@ namespace Pulsar
     const Archive* get_parent (const Integration* subint) const;
   };
 
-  /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
+  /*! e.g. 
+    const Integration* integration;
+    const MyExtension* ext = integration->get<MyExtension>(); */
   template<class T>
   const T* Integration::get () const
   {
-    return get_ext<T> (this, "Pulsar::Integration::get<Ext>", verbose);
+    return get_ext<const T> (this, "Pulsar::Integration::get<Ext>", verbose);
   }
 
+  /*! e.g. 
+    Integration* integration;
+    MyExtension* ext = integration->get<MyExtension>(); */
   template<class T>
   T* Integration::get ()
   {
-    return const_cast<T*>
-      ( get_ext<T> (this, "Pulsar::Integration::get<Ext>", verbose) );
+    return get_ext<T> (this, "Pulsar::Integration::get<Ext>", verbose);
   }
 
   /*! If the specified extension type T does not exist, an atempt is made to

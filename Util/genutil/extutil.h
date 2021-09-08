@@ -16,20 +16,20 @@
 
 //! implementation of Archive, Integration, and Profile::get<T> methods
 template<class T, class Container>
-const T* get_ext (const Container* container, const char* method, bool verbose)
+T* get_ext (Container* container, const char* method, bool verbose)
 {
-  const T* extension = 0;
+  T* extension = 0;
 
   const unsigned next = container->get_nextension();
   for (unsigned iext=0; iext<next; iext++)
   {
-    const typename Container::Extension* ext = container->get_extension (iext);
+    auto ext = container->get_extension (iext);
 
     if (verbose)
       std::cerr << method << " name="
 		<< ext->get_extension_name() << std::endl;
       
-    extension = dynamic_cast<const T*>( ext );
+    extension = dynamic_cast<T*>( ext );
       
     if (extension)
       return extension;
