@@ -401,6 +401,9 @@ void psradd::setup ()
       set_total (inplace_archive);
     }
   }
+
+  if (!time_direction)
+    sort_archives ( Pulsar::in_frequency_order );
 }
 
 void psradd::force ()

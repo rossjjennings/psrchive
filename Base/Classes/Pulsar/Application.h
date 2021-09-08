@@ -72,6 +72,9 @@ namespace Pulsar {
     //! Any extra setup before running main loop
     virtual void setup ();
 
+    template<typename Compare>
+    void sort_archives (Compare c);
+    
     //! The main loop
     virtual void run ();
 
@@ -124,6 +127,9 @@ namespace Pulsar {
     // list of file names on which to operate
     std::vector <std::string> filenames;
 
+    // vector of loaded archives
+    std::vector < Reference::To<Archive> > archives;
+    
     // name of file containing list of Archive filenames
     std::string metafile;
 
@@ -163,6 +169,16 @@ namespace Pulsar {
     Reference::To<Application,false> application;
 
   };
+
+  template<typename Compare>
+  void Application::sort_archives (Compare compare)
+  {
+    archives.resize( filenames.size() );
+    for (unsigned ifile=0; ifile < filenames.size(); ifile++)
+      archives[ifile] = load (filenames[ifile]);
+
+    std::sort (archives.begin(), archives.end(), compare);
+  }
 
 }
 

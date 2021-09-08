@@ -165,9 +165,19 @@ void Pulsar::Application::run ()
     throw Error (InvalidParam, name,
 		 "please specify filename[s]");
 
+  if (archives.size() && archives.size() != filenames.size())
+    throw Error (InvalidState, name,
+		 "archives.size=%u != filenames.size=%u",
+		 archives.size(), filenames.size());
+
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
-    Reference::To<Archive> archive = load (filenames[ifile]);
+    Reference::To<Archive> archive;
+
+    if (archives.size())
+      archive = archives[ifile];
+    else
+      archive = load (filenames[ifile]);
 
     process (archive);
 
