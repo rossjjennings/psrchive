@@ -31,14 +31,14 @@ namespace Pulsar {
     //! Get the integrate flag
     bool get_integrate () const { return integrate; }
     //! Set the integrate flag
-    void set_integrate (bool flag) { integrate = flag; }
+    void set_integrate (bool flag = true) { integrate = flag; }
 
     //! Get the extension flag
     /*! Provides access to extended data sets, such as MoreProfile */
     bool get_extension () const { return extension; }
     //! Set the extension flag
     /*! Provides access to extended data sets, such as MoreProfile */
-    void set_extension (bool flag) { extension = flag; }
+    void set_extension (bool flag = true) { extension = flag; }
 
   protected:
 
