@@ -12,6 +12,8 @@
 #include "Pulsar/SimplePlot.h"
 #include "Pulsar/TimeScale.h"
 #include "Pulsar/FrequencyScale.h"
+#include "Pulsar/Index.h"
+
 #include "ColourMap.h"
 
 namespace Pulsar {
@@ -51,9 +53,9 @@ namespace Pulsar {
     std::pair<int,int> get_srange() const;
     void set_srange( const std::pair<int,int> &range );
       
-    //! Pick a polarization
-    void set_pol (int s_pol) { pol = s_pol; }
-    int get_pol() const { return pol; }
+    //! Set the polarization to plot
+    void set_pol (const Index& _ipol) { ipol = _ipol; }
+    Index get_pol () const { return ipol; }
 
     //! Set a method
     void set_method (int s_method) { method = s_method; }
@@ -69,7 +71,7 @@ namespace Pulsar {
 
     pgplot::ColourMap colour_map;
 
-    int pol;
+    Index ipol;
     int method;
 
     bool zero_check;

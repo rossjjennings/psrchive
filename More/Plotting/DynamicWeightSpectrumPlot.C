@@ -39,7 +39,7 @@ void Pulsar::DynamicWeightSpectrumPlot::get_plot_array( const Archive *data,
     for( int isub = srange.first; isub < srange.second; isub++ )
     {
       Reference::To<const Profile> prof = 
-        data->get_Profile ( isub, pol, ichan);
+        get_Profile ( data, isub, ipol, ichan);
       array[ii] = prof->get_weight();
       ii++;
     }

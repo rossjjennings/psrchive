@@ -22,19 +22,3 @@ Pulsar::DynamicStatSpectrumPlot::Interface::Interface(
 
   import( DynamicSpectrumPlot::Interface() );
 }
-
-//! Set the profile statistic
-void Pulsar::DynamicStatSpectrumPlot::set_statistic (const std::string& name)
-{
-  stat = ProfileStatistic::factory (name);
-}
-
-//! Get the profile statistic
-std::string Pulsar::DynamicStatSpectrumPlot::get_statistic () const
-{
-  if (!stat)
-    return "none";
-
-  return stat->get_identity();
-}
-

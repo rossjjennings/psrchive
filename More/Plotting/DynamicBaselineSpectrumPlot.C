@@ -97,7 +97,7 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
     for (int isub = srange.first; isub < srange.second; isub++ )
     {
       Reference::To<const Profile> prof = 
-	data_copy->get_Profile(isub, pol, ichan);
+	get_Profile(data_copy, isub, ipol, ichan);
 	    
       float value = 0.0;
 

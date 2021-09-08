@@ -5,7 +5,6 @@
  *
  ***************************************************************************/
 
-
 #include "Pulsar/DynamicCalSpectrumPlot.h"
 #include "Pulsar/DynamicSpectrumPlot.h"
 #include <Pulsar/Archive.h>
@@ -33,21 +32,22 @@ void Pulsar::DynamicCalSpectrumPlot::get_plot_array( const Archive *data,
   std::pair<unsigned,unsigned> crange = get_chan_range (data);
 
   int nsub = srange.second - srange.first;
-  int nchan = crange.second - crange.first;
 
   // Cal levels
   std::vector< std::vector< Estimate<double> > > hi;
   std::vector< std::vector< Estimate<double> > > lo;
 
-  for (int isub=srange.first; isub<srange.second; isub++) {
-
+  for (int isub=srange.first; isub<srange.second; isub++)
+  {
     data->get_Integration(isub)->cal_levels(hi, lo);
 
-    for (int ichan=crange.first; ichan<crange.second; ichan++) {
-
+    for (int ichan=crange.first; ichan<crange.second; ichan++)
+    {
       double val = 0.0;
-
-      if (data->get_Profile(isub,pol,ichan)->get_weight()!=0.0) {
+      unsigned pol = ipol.get_value();
+	
+      if (data->get_Profile(isub,pol,ichan)->get_weight()!=0.0)
+      {
         hi[pol][ichan] -= lo[pol][ichan];
         val = hi[pol][ichan].get_value();
       }

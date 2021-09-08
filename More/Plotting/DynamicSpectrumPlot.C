@@ -38,7 +38,7 @@ Pulsar::DynamicSpectrumPlot::DynamicSpectrumPlot ()
   // ensure that no labels are printed inside the frame
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
 
-  pol = 0;
+  ipol.set_integrate();
 
   method = 0;
 
