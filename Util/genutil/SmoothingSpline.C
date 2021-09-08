@@ -46,6 +46,27 @@ void SmoothingSpline::set_minimize_gcv (bool flag)
   minimize_gcv = flag;
 }
 
+const char* gcvspl_error (int code)
+{
+  /*
+    IER = 0:        Normal exit
+    IER = 1:        M.le.0 .or. N.lt.2*M
+    IER = 2:        Knot sequence is not strictly
+                    increasing, or some weight
+                    factor is not positive.
+    IER = 3:        Wrong mode  parameter or value.
+  */
+
+  switch (code)
+    {
+    case 0: return "Normal exit";
+    case 1: return "M.le.0 .or. N.lt.2*M";
+    case 2: return "Knot sequence is not strictly increasing, or some weight factor is not positive";
+    case 3: return "Wrong mode parameter or value";
+    default: return "Unknown error";
+    }
+}
+
 void SmoothingSpline::fit (const vector< double >& data_x,
 			   const vector< Estimate<double> >& data_y)
 {
@@ -115,7 +136,7 @@ void SmoothingSpline::fit (const vector< double >& data_x,
   
   if (err != 0)
     throw Error (FailedCall, "SmoothingSpline::fit",
-		 "gcvspl returned %d", err);
+		 "gcvspl error: %s", gcvspl_error (err));
 
   current_knot = 0;
   
