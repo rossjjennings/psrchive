@@ -319,20 +319,6 @@ public:
 
 };
 
-void Q1_Q2_Q3 (vector<double> data, double& Q1, double& Q2, double& Q3)
-{
-  std::sort( data.begin(), data.end() );
-  unsigned nbin = data.size();
-
-  unsigned iQ1 = nbin / 4;
-  unsigned iQ2 = nbin / 2;
-  unsigned iQ3 = (3 * nbin) / 4;
-
-  Q1 = data[iQ1];
-  Q2 = data[iQ2];
-  Q3 = data[iQ3];
-}
-
 double iqr (const vector<double>& data)
 {
   double Q1=0, Q2=0, Q3=0;
