@@ -10,7 +10,7 @@
 #define __Pulsar_DynamicStatSpectrumPlot_h
 
 #include "Pulsar/DynamicSpectrumPlot.h"
-#include "Pulsar/ProfileStatistic.h"
+#include "Pulsar/ArchiveStatistic.h"
 
 namespace Pulsar {
 
@@ -40,14 +40,14 @@ namespace Pulsar {
     virtual void preprocess (Archive*) {} 
 
     //! Set the statistic
-    void set_statistic (const std::string&);
+    void set_statistic (ArchiveStatistic*);
 
     //! Get the statistic
-    std::string get_statistic () const;
+    ArchiveStatistic* get_statistic () const;
 
   protected:
 
-    Reference::To<ProfileStatistic> stat;
+    Reference::To<ArchiveStatistic> statistic;
 
   };
 
