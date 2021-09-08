@@ -54,6 +54,7 @@ nobase_include_HEADERS = \
         Pulsar/CrossCovarianceMatrix.h
 
 libExtensions_la_SOURCES = \
+	ArchiveExtensionFrequencyAppend.C \
         Arecibo.C \
 	AuxColdPlasma.C \
 	AuxColdPlasmaTI.C \

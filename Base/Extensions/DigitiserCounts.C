@@ -194,3 +194,11 @@ void DigitiserCounts::insert (unsigned isub)
   for (unsigned i=0; i<new_subint.data.size(); i++) new_subint.data[i]=0;
   subints.insert(subints.begin() + isub, new_subint);
 }
+
+using FrequencyAppend = DigitiserCounts::FrequencyAppend;
+
+void FrequencyAppend::append (DigitiserCounts* to,
+			      const DigitiserCounts* from) const
+{
+  to->Accumulate( *from );
+}

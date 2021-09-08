@@ -148,11 +148,8 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
   into->set_bandwidth( total_bandwidth );
   into->set_centre_frequency( weighted_centre_frequency );
 
-  // Sum the digitiser counts
-  DigitiserCounts *into_counts = into->get<DigitiserCounts>();
-  DigitiserCounts *from_counts = from->get<DigitiserCounts>();
-  if( into_counts != NULL && from_counts != NULL )
-    into_counts->Accumulate( *from_counts );
+  for (auto append : Archive::Extension::FrequencyAppend::children() )
+    append->append (into, from);
 
   FITSHdrExtension *fitshdrext = into->get<FITSHdrExtension>();
   if (fitshdrext != NULL)

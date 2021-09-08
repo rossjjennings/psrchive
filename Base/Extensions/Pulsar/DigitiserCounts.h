@@ -18,8 +18,6 @@
 using std::string;
 using std::vector;
 
-
-
 namespace Pulsar
 {
 
@@ -27,6 +25,7 @@ namespace Pulsar
   class DigitiserCounts : public Archive::Extension
   {
   public:
+    
     //Default constructor
     DigitiserCounts ();
 
@@ -39,6 +38,8 @@ namespace Pulsar
     // Destructor
     ~DigitiserCounts ();
 
+    class FrequencyAppend;
+    
     //! Append the counts from another DigitiserCounts to this one
     void Append( const DigitiserCounts &src );
 
@@ -96,6 +97,13 @@ namespace Pulsar
     int ndigr;
     string diglev;
     float dyn_levt;
+  };
+
+  class DigitiserCounts::FrequencyAppend
+    : public ExtensionFrequencyAppend<DigitiserCounts, Archive>
+  {
+  public:
+    void append (DigitiserCounts* to, const DigitiserCounts* from) const;
   };
 }
 

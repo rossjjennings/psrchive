@@ -62,6 +62,9 @@ namespace Pulsar
       { return this->instance->get_short_name(); }
     };
 
+    //! Abstract base class of objects that can frequency append extension data
+    class FrequencyAppend;
+    
   protected:
     
     //! Extension name - useful when debugging
@@ -101,6 +104,17 @@ namespace Pulsar
     return add_ext;
   }
 
+
+  class Archive::Extension::FrequencyAppend : public Reference::Able
+  {
+  public:
+    
+    //! Returns a list of available FrequencyAppend children
+    static const std::vector<const FrequencyAppend*>& children ();
+
+    virtual void append (Archive* to, const Archive* from) const = 0;
+  };
+  
 }
 
 #endif
