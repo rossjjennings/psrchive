@@ -94,6 +94,9 @@ namespace Pulsar {
     //! Get the transformation for the specified frequency channel
     const Transformation* get_transformation (unsigned c) const;
 
+    //! Append PolnCalibrator Extension data from another Archive
+    void frequency_append (Archive* to, const Archive* from);
+
     void fscrunch (unsigned factor = 0);
     void fscrunch_to_nchan (unsigned new_nchan);
 

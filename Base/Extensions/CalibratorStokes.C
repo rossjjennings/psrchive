@@ -9,7 +9,7 @@
 #include "TextInterface.h"
 #include "templates.h"
 
-using Pulsar::CalibratorStokes;
+using namespace Pulsar;
 using namespace std;
 
 //! Default constructor
@@ -78,7 +78,7 @@ bool CalibratorStokes::get_valid (unsigned ichan) const
 
 //! Set the Stokes parameters of the specified frequency channel
 void CalibratorStokes::set_stokes (unsigned ichan,
-					   const Stokes< Estimate<float> >& s)
+				   const Stokes< Estimate<float> >& s)
 {
   range_check (ichan, "CalibratorStokes::set_stokes");
 
@@ -123,6 +123,19 @@ void CalibratorStokes::range_check (unsigned ichan,
     throw Error (InvalidRange, method, "ichan=%d >= nchan=%d", 
 		 ichan, stokes.size());
 }
+	       
+void CalibratorStokes::frequency_append (Archive* to, const Archive* from)
+{
+  const CalibratorStokes* ext = from->get<CalibratorStokes>();
+  if (!ext)
+    throw Error (InvalidState, "CalibratorStokes::frequency_append",
+		 "other Archive does not have a CalibratorStokes");
+
+  stokes.insert ( (in_frequency_order (to, from))
+		  ? stokes.end() : stokes.begin(),
+		  ext->stokes.begin(), ext->stokes.end() );
+}
+
 
 class CalibratorStokes::PolnVector : public Reference::Able
 {

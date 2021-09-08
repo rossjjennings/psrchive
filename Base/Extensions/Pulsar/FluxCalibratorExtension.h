@@ -112,6 +112,9 @@ namespace Pulsar
     bool get_valid (unsigned ichan) const;
     void set_valid (unsigned ichan, bool valid);
 
+    //! Append FluxCalibrator Extension data from another Archive
+    void frequency_append (Archive* to, const Archive* from);
+
   protected:
 
     //! System equivalent flux density in each receptor and frequency channel

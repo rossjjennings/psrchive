@@ -78,6 +78,9 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
 
+    //! Append Calibrator Extension data from another Archive
+    void frequency_append (Archive* to, const Archive* from);
+
     protected:
 
     //! Type of the calibrator
@@ -94,6 +97,9 @@ namespace Pulsar {
 
     //! Ensure that ichan < get_nchan
     void range_check (unsigned ichan, const char* method) const;
+
+    //! For use by children
+    void frequency_append (const CalibratorExtension*, bool in_order);
 
   };
  

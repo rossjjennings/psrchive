@@ -25,6 +25,7 @@
 #include "strutil.h"
 
 using namespace std;
+using namespace Pulsar;
 
 void Pulsar::Archive::init ()
 {
@@ -352,3 +353,10 @@ bool Pulsar::Archive::zero_phase_aligned () const
   return true;
 }
 
+bool Pulsar::in_frequency_order (const Archive* A, const Archive* B)
+{
+  bool freq_order = A->get_centre_frequency() < B->get_centre_frequency();
+  bool upper_sideband = A->get_bandwidth() > 0;
+
+  return freq_order == upper_sideband;
+}

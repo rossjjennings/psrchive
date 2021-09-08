@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2009 by Willem van Straten
+ *   Copyright (C) 2004-2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -242,4 +242,35 @@ void FluxCalibratorExtension::set_valid (unsigned ichan, bool valid)
   else
     set_weight (ichan, 1.0);
 }
- 
+
+void FluxCalibratorExtension::frequency_append (Archive* to,
+						const Archive* from)
+{
+  const FluxCalibratorExtension* ext = from->get<FluxCalibratorExtension>();
+  if (!ext)
+    throw Error (InvalidState, "FluxCalibratorExtension::frequency_append",
+		 "other Archive does not have a FluxCalibratorExtension");
+
+  if (scale_available != ext->scale_available)
+    throw Error (InvalidState, "FluxCalibratorExtension::frequency_append",
+		 "incompatible scale_available this=%u other=%u",
+		 scale_available, ext->scale_available);
+
+  bool in_order = in_frequency_order (to, from);
+  CalibratorExtension::frequency_append (ext, in_order);
+  
+  S_sys.insert ( in_order ? S_sys.end() : S_sys.begin(),
+		 ext->S_sys.begin(), ext->S_sys.end() );
+
+  S_cal.insert ( in_order ? S_cal.end() : S_cal.begin(),
+		 ext->S_cal.begin(), ext->S_cal.end() );
+
+  if (!scale_available)
+    return;
+
+  scale.insert ( in_order ? scale.end() : scale.begin(),
+		 ext->scale.begin(), ext->scale.end() );
+
+  ratio.insert ( in_order ? ratio.end() : ratio.begin(),
+		 ext->ratio.begin(), ext->ratio.end() );
+}

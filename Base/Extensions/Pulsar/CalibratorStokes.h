@@ -70,6 +70,9 @@ namespace Pulsar {
     Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
     void set_Estimate (unsigned iparam, unsigned ichan, Estimate<float>&);
 
+    //! Append CalibratorStokes Extension data from another Archive
+    void frequency_append (Archive* to, const Archive* from);
+
   protected:
 
     //! The Stokes parameters for each frequency channel

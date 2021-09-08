@@ -117,6 +117,30 @@ void CalibratorExtension::range_check (unsigned ichan,
 		 ichan, weight.size());
 }
 
+void CalibratorExtension::frequency_append (Archive* to, const Archive* from)
+{
+  const CalibratorExtension* ext = from->get<CalibratorExtension>();
+  if (!ext)
+    throw Error (InvalidState, "CalibratorExtension::frequency_append",
+		 "other Archive does not have a CalibratorExtension");
+
+  frequency_append (ext, in_frequency_order (to, from));
+}
+
+void CalibratorExtension::frequency_append (const CalibratorExtension* from,
+					    bool in_order)
+{
+  weight.insert ( in_order ? weight.end() : weight.begin(),
+		  from->weight.begin(), from->weight.end() );
+
+  centre_frequency.insert ( in_order
+			    ? centre_frequency.end() : centre_frequency.begin(),
+			    from->centre_frequency.begin(),
+			    from->centre_frequency.end() );
+
+  epoch = (epoch + from->epoch) / 2.0;  
+}
+
 // Text interface to a CalibratorExtension extension
 CalibratorExtension::Interface::Interface (CalibratorExtension *s_instance)
 {

@@ -42,23 +42,6 @@ T* get_ext (Container* container, const char* method, bool verbose)
   return extension;
 }
 
-template<class T, class Container>
-class ExtensionFrequencyAppend : public Container::Extension::FrequencyAppend 
-{
-public:
-  virtual void append (Container* to, const Container* from) const
-  {
-    T* to_ext = to->template get<T> ();
-    const T* from_ext = from->template get<T> ();
-
-    if (to_ext && from_ext)
-      this->append (to_ext, from_ext);
-  }
-
-  virtual void append (T* to, const T* from) const = 0;
-};
-
-
 template<class T> 
 void clean_dangling (std::vector<T>& data)
 {

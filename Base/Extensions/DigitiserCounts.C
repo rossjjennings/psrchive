@@ -5,23 +5,13 @@
  *
  ***************************************************************************/
 
-
 #include "Pulsar/DigitiserCounts.h"
 #include "TextInterface.h"
 
 #include <assert.h>
 
-
-
 using Pulsar::DigitiserCounts;
-using std::cerr;
-using std::cout;
-using std::endl;
-
-
-
-
-
+using namespace std;
 
 //Default constructor
 DigitiserCounts::DigitiserCounts ()
@@ -36,7 +26,8 @@ DigitiserCounts::DigitiserCounts (const Pulsar::DigitiserCounts& extension)
 }
 
 // Operator =
-const DigitiserCounts& DigitiserCounts::operator= (const DigitiserCounts& extension)
+const DigitiserCounts&
+DigitiserCounts::operator= (const DigitiserCounts& extension)
 {
   dig_mode = extension.dig_mode;
   nlev = extension.nlev;
@@ -52,7 +43,6 @@ const DigitiserCounts& DigitiserCounts::operator= (const DigitiserCounts& extens
 // Destructor
 DigitiserCounts::~DigitiserCounts ()
 {}
-
 
 class DigitiserCounts::Interface : public TextInterface::To<DigitiserCounts>
 {
@@ -195,10 +185,9 @@ void DigitiserCounts::insert (unsigned isub)
   subints.insert(subints.begin() + isub, new_subint);
 }
 
-using FrequencyAppend = DigitiserCounts::FrequencyAppend;
-
-void FrequencyAppend::append (DigitiserCounts* to,
-			      const DigitiserCounts* from) const
+void DigitiserCounts::frequency_append (Archive* to, const Archive* from)
 {
-  to->Accumulate( *from );
+  const DigitiserCounts* ext = from->get<DigitiserCounts>();
+  if (ext)
+    Accumulate (*ext);
 }

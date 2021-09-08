@@ -46,6 +46,9 @@ namespace Pulsar
     //! Accumulate the counts from another DigitiserCounts onto this one
     void Accumulate( const DigitiserCounts &src );
 
+    //! Accumulate DigitiserCounts from another archive
+    void frequency_append (Archive* to, const Archive* from);
+
     //! Clone method
     DigitiserCounts* clone () const { return new DigitiserCounts( *this ); }
 
@@ -99,12 +102,6 @@ namespace Pulsar
     float dyn_levt;
   };
 
-  class DigitiserCounts::FrequencyAppend
-    : public ExtensionFrequencyAppend<DigitiserCounts, Archive>
-  {
-  public:
-    void append (DigitiserCounts* to, const DigitiserCounts* from) const;
-  };
 }
 
 #endif

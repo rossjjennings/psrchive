@@ -723,6 +723,9 @@ namespace Pulsar
 
   };
 
+  //! Return true if A precedes B in frequency order of channels
+  bool in_frequency_order (const Archive* A, const Archive* B);
+  
 }
 
 #endif

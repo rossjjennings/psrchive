@@ -198,6 +198,37 @@ void PolnCalibratorExtension::construct ()
   }
 }
 
+void PolnCalibratorExtension::frequency_append (Archive* to,
+						const Archive* from)
+{
+  const PolnCalibratorExtension* ext = from->get<PolnCalibratorExtension>();
+  if (!ext)
+    throw Error (InvalidState, "PolnCalibratorExtension::frequency_append",
+		 "other Archive does not have a PolnCalibratorExtension");
+
+  if (nparam != ext->nparam)
+    throw Error (InvalidState, "PolnCalibratorExtension::frequency_append",
+		 "incompatible nparam this=%u other=%u",
+		 nparam, ext->nparam);
+
+  if (has_solver != ext->has_solver)
+    throw Error (InvalidState, "PolnCalibratorExtension::frequency_append",
+		 "incompatible has_solver this=%u other=%u",
+		 has_solver, ext->has_solver);
+
+  if (has_covariance != ext->has_covariance)
+    throw Error (InvalidState, "PolnCalibratorExtension::frequency_append",
+		 "incompatible has_covariance this=%u other=%u",
+		 has_covariance, ext->has_covariance);
+
+  bool in_order = in_frequency_order (to, from);
+  CalibratorExtension::frequency_append (ext, in_order);
+  
+  response.insert ( in_order ? response.end() : response.begin(),
+		    ext->response.begin(), ext->response.end() );
+}
+
+
 PolnCalibratorExtension::Transformation::Transformation ()
 {
   valid = true;

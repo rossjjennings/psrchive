@@ -79,7 +79,8 @@ bool Pulsar::FrequencyAppend::stop (Archive* into, const Archive* from)
     throw Error (InvalidState, "Pulsar::FrequencyAppend::stop",
 		  "IntegrationOrder extension support not yet implemented");
 
-  return Append::stop (into, from);
+  // even if there are no sub-integrations, frequency append the extensions
+  return false;
 }
 
 void Pulsar::FrequencyAppend::check (Archive* into, const Archive* from)
@@ -148,9 +149,10 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
   into->set_bandwidth( total_bandwidth );
   into->set_centre_frequency( weighted_centre_frequency );
 
-  for (auto append : Archive::Extension::FrequencyAppend::children() )
-    append->append (into, from);
-
+  unsigned next = into->get_nextension();
+  for (unsigned iext=0; iext < next; iext++)
+    into->get_extension(iext)->frequency_append (into, from);
+  
   FITSHdrExtension *fitshdrext = into->get<FITSHdrExtension>();
   if (fitshdrext != NULL)
   {
