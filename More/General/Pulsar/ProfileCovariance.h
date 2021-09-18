@@ -8,13 +8,12 @@
 #ifndef __Pulsar_ProfileCovariance_h
 #define __Pulsar_ProfileCovariance_h
 
-#include "Pulsar/Profile.h"
 #include "Pulsar/Algorithm.h"
-#include "Warning.h"
-#include "string.h" // for memcpy
 
 namespace Pulsar
 {
+  class Profile;
+  
   /*! This pure virtual base class of ProfileCovariance defines the
    * interface by which various routines for calculating the covariance
    * matrix of the given profile can be accessed */

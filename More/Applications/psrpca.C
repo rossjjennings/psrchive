@@ -548,7 +548,8 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
   profiles = gsl_matrix_alloc ( full_stokes_pca ? 4 * (unsigned)nbin : (unsigned)nbin, total_count );
   for (unsigned i_subint = 0; i_subint < total->get_nsubint(); i_subint++ )
   {
-    //cerr << "Handling subint " << i_subint << endl;
+    // cerr << "Handling subint " << i_subint << endl;
+
     Reference::To<Profile> prof;
     if ( ! full_stokes_pca )
     {
@@ -566,13 +567,14 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
 	{
 	  memcpy ( prof_amps + (unsigned)nbin*i_pol, total->get_Profile ( i_subint, i_pol, 0 )->get_amps(), (unsigned)nbin*sizeof(float) );
 	}
-	for (int iii = 0; iii < 4; iii++) {
-	}
 	prof->set_amps ( prof_amps );
       }
       //cerr << "set amps for prof" << endl;
     } // full_stokes_pca is true
-    if ( apply_shift )
+
+    // cerr << "Got prof" << endl;
+	
+    if ( apply_shift && toas.size() )
     {
       total->get_Integration( i_subint )->expert()->rotate_phase( toas[i_subint].get_phase_shift() );
       if ( full_stokes_pca )
@@ -585,6 +587,7 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
 	prof->set_amps ( prof_amps );
       }
     }
+    
     // if full_stokes_pca, use total intensity S/N. Else use the chosen pol
     snr = total->get_Profile ( i_subint, full_stokes_pca ? 0 : which_pol, 0 )->snr();
 

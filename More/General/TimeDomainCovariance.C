@@ -6,6 +6,8 @@
  ****************************************************************************/
 
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/Profile.h"
+
 #include "Warning.h"
 #include <algorithm>
 
