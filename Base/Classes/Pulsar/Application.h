@@ -15,6 +15,8 @@
 #include "CommandLine.h"
 #include "Functor.h"
 
+#include <algorithm>
+
 namespace Pulsar {
 
   class Archive;
