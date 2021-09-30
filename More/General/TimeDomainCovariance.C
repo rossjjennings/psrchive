@@ -9,6 +9,9 @@
 #include "Pulsar/Profile.h"
 
 #include "Warning.h"
+
+#include <string.h>
+
 #include <algorithm>
 
 using namespace std;
