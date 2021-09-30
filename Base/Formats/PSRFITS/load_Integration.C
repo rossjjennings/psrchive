@@ -317,6 +317,10 @@ try {
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       FourthMoments* fourth = new FourthMoments;
+
+      // cerr << "FITSArchive::load_Integration nsample=" << aux_nsample <<endl;
+
+      fourth->set_nsample (aux_nsample);
       fourth->resize (naux_profile, get_nbin());
       integ->get_Profile(0,ichan)->add_extension (fourth);
     }

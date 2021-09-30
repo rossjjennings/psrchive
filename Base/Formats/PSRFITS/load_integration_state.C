@@ -314,7 +314,15 @@ void Pulsar::FITSArchive::load_state (fitsfile* fptr)
   int naux = 0;
   undefined = 0;
   psrfits_read_key (fptr, "NAUX", &naux, undefined, verbose > 2);
-
   naux_profile = naux;
+
+  if (naux != 0)
+  {
+    double nsample = 0.0;
+    psrfits_read_key (fptr, "AUXNSAMP", &nsample, zero, verbose > 2);
+    aux_nsample = nsample;
+    // cerr << "FITSArchive::load_state nsample=" << aux_nsample <<endl;
+  }
+  
 }
 

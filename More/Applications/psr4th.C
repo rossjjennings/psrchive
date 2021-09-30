@@ -102,7 +102,9 @@ protected:
   Reference::To<Archive> output;
 
   double integration_length;
-
+  double total_nsample;
+  unsigned total_nsubint;
+  
   unsigned remove_running_mean;
   unsigned histogram_pa;
   unsigned histogram_el;
@@ -142,7 +144,11 @@ psr4th::psr4th ()
   : Application ("psr4th", "psr4th psrchive program")
 {
   add( new StandardOptions );
+
   integration_length = 0;
+  total_nsample = 0;
+  total_nsubint = 0;
+  
   histogram_pa = 0;
   histogram_el = 0;
   histogram_threshold = 3.0;
@@ -220,6 +226,7 @@ void psr4th::process (Archive* archive)
   unsigned nsub = archive->get_nsubint();
   unsigned nbin = archive->get_nbin();
   unsigned nchan = archive->get_nchan();
+  unsigned npol = archive->get_npol();
 
   if (extract_eigenvectors)
   {
@@ -303,13 +310,27 @@ void psr4th::process (Archive* archive)
     running_mean->tscrunch (remove_running_mean);
   }
 
-  unsigned npol = archive->get_npol();
-  
   for (unsigned isub=0; isub < nsub; isub++)
   {
     Reference::To<Integration> subint = archive->get_Integration (isub);
-    integration_length += subint->get_duration ();
 
+    // duration in seconds
+    double duration = subint->get_duration();
+    // bandwidth in Hertz
+    double bandwidth = abs(subint->get_bandwidth() * 1e6 / subint->get_nchan());
+
+    if (bandwidth == 0)
+      throw Error (InvalidState, "psr4th::process",
+		   "bandwidth unknown");
+
+    if (duration <= 0)
+      throw Error (InvalidState, "psr4th::process",
+		   "integration length unknown");
+    
+    integration_length += duration;
+    total_nsample += duration * bandwidth / nbin;
+    total_nsubint ++;
+    
     if (running_mean)
     {
       unsigned imean = isub / remove_running_mean;
@@ -435,6 +456,8 @@ void psr4th::finalize()
   Integration* subint = output->get_Integration (0);
   subint->set_duration( integration_length );
 
+  double nsample = total_nsample / total_nsubint;
+  
   if (cross_covariance_lags && nchan == 1)
   {
     cerr << "psr4th: cross covariance" << endl;
@@ -455,7 +478,7 @@ void psr4th::finalize()
   {
     // PolnProfile* profile = subint->new_PolnProfile (ichan);
 
-    Reference::To<MoreProfiles> more = new FourthMoments;
+    Reference::To<FourthMoments> more = new FourthMoments;
     more->resize( nmoment, nbin );
 
     if (histogram_pa)
@@ -476,26 +499,18 @@ void psr4th::finalize()
     {
       subint->set_weight (ichan, 0.0);
       subint->get_Profile(0,ichan)->zero();
+      more->set_nsample (0);
     }
-
+    else
+    {
+      // cerr << "psr4th: nsample=" << nsample << endl;
+      more->set_nsample (nsample);
+    }
+    
     for (unsigned ibin = 0; ibin < nbin ; ibin ++)
     {
       Matrix<4,4,double> covar;
       covar = results[ichan].get_covariance (ibin);
-
-#if 0 
-      Stokes<double> mean = results[ichan].get_mean (ibin);
-
-      /*
-	Normalize the covariance matrix so that it represents the
-	covariances of the mean Stokes parameters (as opposed to the
-	covariances of the single-pulse Stokes parameters).  This is
-	done so that the variances of the off-pulse baselines of the
-	mean Stokes parameters will be equal to the mean of the
-	off-pulse baselines of the variances of the Stokes parameters.
-      */
-      covar /= results[ichan].count;
-#endif
 
       unsigned index=0;
       for (unsigned i=0; i<4; i++)

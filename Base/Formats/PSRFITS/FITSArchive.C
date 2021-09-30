@@ -65,7 +65,8 @@ void Pulsar::FITSArchive::init ()
 
   // no auxiliary profiles
   naux_profile = 0;
-
+  aux_nsample = 0;
+  
   // on construction, the data have not been loaded from fits file
   loaded_from_fits = false;
 

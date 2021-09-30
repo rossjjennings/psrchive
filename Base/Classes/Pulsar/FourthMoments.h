@@ -18,6 +18,9 @@ namespace Pulsar
   /*! Phase-resolved fourth-order moments of the electric field */
   class FourthMoments : public MoreProfiles
   {
+    //! The number of samples in each sub-sample (phase bin) analysed
+    double nsample;
+    
   public:
 
     //! Construct with a name
@@ -26,6 +29,9 @@ namespace Pulsar
     //! Clone operator
     FourthMoments* clone () const;
 
+    void set_nsample (double _nsamp) { nsample = _nsamp; }
+    double get_nsample () const { return nsample; }
+    
     //! multiplies each bin of the profile by scale
     void scale (double scale);
 

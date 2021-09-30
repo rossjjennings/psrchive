@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,7 +9,7 @@
 #include "Pulsar/ProfileColumn.h"
 
 #include "Pulsar/IntegrationOrder.h"
-#include "Pulsar/MoreProfiles.h"
+#include "Pulsar/FourthMoments.h"
 #include "Pulsar/CalInfoExtension.h"
 
 #include "FITSError.h"
@@ -108,12 +108,21 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   psrfits_update_key (ffptr, "RM", get_rotation_measure ());
 
   naux_profile = 0;
-
+  aux_nsample = 0;
+  
   const MoreProfiles* more = get_Profile(0,0,0)->get<MoreProfiles>();
   if (more)
   {
     naux_profile = more->get_size ();
     psrfits_update_key (ffptr, "NAUX", (int) naux_profile);
+
+    const FourthMoments* fourth = dynamic_cast<const FourthMoments*> (more);
+    if (fourth)
+    {
+      aux_nsample = fourth->get_nsample();
+      // cerr << "FITSArchive::unload_integrations nsample=" << aux_nsample << endl;
+      psrfits_update_key (ffptr, "AUXNSAMP", aux_nsample);
+    }
   }
   
   // Set the sizes of the columns which may have changed

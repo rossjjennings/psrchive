@@ -48,6 +48,9 @@ namespace Pulsar {
     //! Get the number of bins
     unsigned get_nbin () const;
 
+    //! Get the (effective) number of samples in each sub-sample
+    double get_nsample () const;
+    
     //! Get the specifed constant profile
     const Profile* get_Profile (unsigned i) const;
 

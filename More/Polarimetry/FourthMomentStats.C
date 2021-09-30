@@ -21,7 +21,7 @@
 using namespace std;
 using namespace Pulsar;
 
-// #define _DEBUG
+// #define _DEBUG 1
 
 //! Default constructor
 Pulsar::FourthMomentStats::FourthMomentStats (const PolnProfile* _profile)
@@ -262,7 +262,8 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 	peigen[i] *= -1.0;
 #endif
 
-#define METRIC(i) (pvar[i] + fabs(natural[i]))
+    // #define METRIC(i) (pvar[i] + fabs(natural[i]))
+#define METRIC(i) (pvar[i])
 
     // sort the eigen values from greatest to least
     unsigned order [3] = { 0, 1, 2 };
@@ -592,6 +593,31 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
   }
 }
 
+double get_nsample (const Integration* subint)
+{
+  cerr << "FourthMomentStats::debias assuming single-pulse data" << endl;
+
+  // sub-integration length in seconds
+  double folding_period = subint->get_folding_period();
+
+  // bandwidth in Hz
+  double bandwidth = abs(subint->get_bandwidth() * 1e6 / subint->get_nchan());
+
+  if (folding_period <= 0)
+    throw Error (InvalidState,
+		 "Pulsar::FourthMomentStats::debias", 
+		 "folding period unknown");
+
+  if (bandwidth <= 0)
+    throw Error (InvalidState,
+		 "Pulsar::FourthMomentStats::debias",
+		   "bandwidth unknown");
+
+  unsigned nbin = subint->get_nbin();
+
+  return folding_period * bandwidth / nbin;
+}
+
 void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
 {
   unsigned nsubint = data->get_nsubint();
@@ -602,27 +628,6 @@ void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
     Integration* subint = data->get_Integration(isubint);
-    double folding_period = subint->get_folding_period();
-    double duration = subint->get_duration();
-    // bandwidth in Hz
-    double bandwidth = abs(subint->get_bandwidth() * 1e6 / subint->get_nchan());
-
-    // cerr << "FourthMomentStats::debias Integration=" << subint << endl;
-
-    if (folding_period <= 0)
-      throw Error (InvalidState,
-		 "Pulsar::FourthMomentStats::debias", 
-		 "folding period unknown");
-
-    if (bandwidth <= 0)
-      throw Error (InvalidState,
-		   "Pulsar::FourthMomentStats::debias",
-		   "bandwidth unknown");
-
-    if (duration <= 0)
-      throw Error (InvalidState,
-		   "Pulsar::FourthMomentStats::debias",
-		   "integration length unknown");
 
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
@@ -630,11 +635,11 @@ void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
 
       StokesCovariance* covariance = profile->get_covariance();
 
-      // cerr << "FourthMomentStats::debias StokesCovariance=" << covariance << endl;
-
       unsigned nbin = covariance->get_nbin();
-      // double npulse = duration / folding_period;
-      double nsample = folding_period * bandwidth / nbin;
+      
+      double nsample = covariance->get_nsample ();
+      if (nsample == 0.0)
+	nsample = get_nsample (subint);
 
       PhaseWeight* baseline = data->baseline ();
       vector<float> weight;
@@ -679,36 +684,6 @@ void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
 
       }
 
-#if _DEBUG
-      
-      cerr << "bandwidth=" << bandwidth
-	   << " weight=" << profile->get_Profile(0)->get_weight()
-	   << " npulse=" << npulse << " nsample=" << nsample << endl;
-
-      Matrix<4,4,double> predicted = Minkowski::outer(off_pulse_mean,
-						      off_pulse_mean);
-      predicted /= double(nsample);
-
-      unsigned iprof=0;
-      for (unsigned i=0; i<4; i++)
-	for (unsigned j=i; j<4; j++)
-	{
-	  Reference::To<Profile> result = covariance->get_Profile(iprof);
-	  double off_pulse_moment = 0;
-	  baseline->stats (result, &off_pulse_moment);
-
-	  cerr << i << " " << j << " "
-	       << predicted[i][j] << " "
-	       << off_pulse_moment << " -> "
-	       << off_pulse_moment/predicted[i][j] << endl;
-
-	  // " " << off_pulse_covar[i][j]*npulse << endl;
-
-	  iprof ++;
-	}
-
-#endif
-
       // collect the off-pulse mean values
       Matrix<4,4,double> off;
       unsigned iprof=0;
@@ -719,6 +694,27 @@ void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
 	    baseline->stats (Cij, &(off[i][j]));
 	    iprof ++;
 	  }
+      
+#if _DEBUG
+
+      Matrix<4,4,double> predicted = Minkowski::outer(off_pulse_mean,
+						      off_pulse_mean);
+      predicted /= double(nsample);
+
+      for (unsigned i=0; i<4; i++)
+	for (unsigned j=i; j<4; j++)
+	{
+	  double off_pulse_moment = off[i][j];
+
+	  cerr << i << " " << j << " exp="
+	       << predicted[i][j] << "/dat="
+	       << off_pulse_moment << " -> "
+	       << predicted[i][j]/off_pulse_moment << endl;
+
+	  // " " << off_pulse_covar[i][j]*npulse << endl;
+	}
+
+#endif
 
       double max_ratio = 0;
 
@@ -758,7 +754,8 @@ void Pulsar::FourthMomentStats::debias (Archive* data, bool xcovar) try
 	  }
       }
 
-      cerr << "relative significance of xcovar=" << sqrt(max_ratio) << endl;
+      if (xcovar)
+	cerr << "relative significance of xcovar=" << sqrt(max_ratio) << endl;
 
     }
   }

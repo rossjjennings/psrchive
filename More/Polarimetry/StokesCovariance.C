@@ -73,6 +73,14 @@ unsigned Pulsar::StokesCovariance::get_nbin () const
 //
 //
 //
+double Pulsar::StokesCovariance::get_nsample () const
+{
+  return covariance->get_nsample();
+}
+
+//
+//
+//
 const Pulsar::Profile* 
 Pulsar::StokesCovariance::get_Profile (unsigned i) const
 {

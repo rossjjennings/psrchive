@@ -311,6 +311,9 @@ namespace Pulsar
     //! Number of auxiliary profiles stored in each channel
     mutable unsigned naux_profile;
 
+    //! If the auxiliary profiles are fourth moments, the sub-sample size
+    mutable double aux_nsample;
+    
     // Reference epoch is used during unload_Integration
     /* This attribute enables proper handling of time stamps when there
        is no FITSHdrExtension in use (as is the case in psrconv) */
