@@ -244,6 +244,7 @@ libGeneral_la_SOURCES = \
 	PhaseWeightStatistic.C \
         PhaseWeight.C \
 	PhaseWidth.C \
+	ProfileCovariance.C \
 	ProfileInterpreter.C \
 	ProfileShiftFit.C \
 	ProfileStatistic.C \

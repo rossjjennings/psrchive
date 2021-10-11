@@ -741,7 +741,7 @@ void psrpca::get_covariance_matrix()
   covariance = gsl_matrix_alloc ( (int) nbin, (int) nbin );
   if ( load_prefix.size() == 0 )
   {
-    t_cov->get_covariance_matrix_gsl ( covariance );
+    t_cov->get_covariance_matrix_copy ( covariance->data );
   }
   else
   {
@@ -764,58 +764,23 @@ void psrpca::solve_eigenproblem()
 {
   if ( verbose )
     cerr << "psrpca::solve_eigenproblem () entered" << endl;
-  //solve the eigenproblem
-  gsl_matrix_view m = gsl_matrix_submatrix ( covariance, 0, 0, (int)nbin, (int)nbin );
-  eval = gsl_vector_alloc ( (int)nbin );
-  evec = gsl_matrix_alloc ( (int)nbin, (int)nbin );
 
-  if ( load_prefix.size() == 0 )
+  t_cov->eigen ();
+
+  // save evectors
+  if ( save_evecs )
   {
-#ifdef HAVE_CULA
-    if ( verbose )
-      cerr << "psrpca: Running cula implementation" << endl;
-    //CULA implementation of the eigenproblem:
-    gsl_matrix_transpose( covariance ); // transposing as CULA uses column-major while GSL uses row-major ordering
-    status = culaDsyev( 'V', 'U', nbin, covariance->data, nbin, eval->data );
+    //Reference::To<Archive> evecs_archive = total->clone();
+    // TODO remove the hardwired name of the file
+    //Reference::To<Archive> evecs_archive = Archive::load ( "all.FcalibP" );
+    gsl_vector *evec_copy = gsl_vector_alloc ( (int)nbin );
 
-    gsl_matrix_transpose( covariance ); 
-    checkStatus(status);
-    // Invert the evals (cula produces them in ascending order):
-    gsl_permutation *p_reverse = gsl_permutation_calloc( nbin );
-    gsl_permutation_reverse( p_reverse );
-    gsl_permute_vector( p_reverse, eval );
-    // transposing as CULA uses column-major while GSL uses row-major ordering
-    // ..and swap the columns of the evectors, to get back the correspondence to evals
-    for ( unsigned i_column = 0; i_column < nbin/2; i_column++) {
-      gsl_matrix_swap_columns( covariance, i_column, nbin-i_column-1 );
-    }
-    // copy the evecs as calculated by CULA to the gsl matrix evec:
-    gsl_matrix_memcpy( evec, covariance );
-
-#else
-    //original GSL implementation:
-    if ( verbose )
-      cerr << "psrpca: Running gsl implementation" << endl;
-    gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc ( (int)nbin );
-    gsl_eigen_symmv ( &m.matrix, eval, evec, w );
-    gsl_eigen_symmv_free ( w );
-    gsl_eigen_symmv_sort ( eval, evec, GSL_EIGEN_SORT_VAL_DESC );
-#endif
-
-    // save evectors
-    if ( save_evecs )
-    {
-      //Reference::To<Archive> evecs_archive = total->clone();
-      // TODO remove the hardwired name of the file
-      //Reference::To<Archive> evecs_archive = Archive::load ( "all.FcalibP" );
-      gsl_vector *evec_copy = gsl_vector_alloc ( (int)nbin );
-
-      /*for (unsigned iext=0; iext < evecs_archive->get_nextension(); iext++)
+    /*for (unsigned iext=0; iext < evecs_archive->get_nextension(); iext++)
       {
       delete evecs_archive->get_extension(iext);
       }*/
-      evecs_archive->resize ( (unsigned)nbin, 0, 0, 0 );
-      if ( nbin > total_count )
+    evecs_archive->resize ( (unsigned)nbin, 0, 0, 0 );
+    if ( nbin > total_count )
       {
 	long double folding_period = (long double) evecs_archive->get_Integration(0)->get_folding_period();
 	MJD ref_MJD = evecs_archive->get_Integration(total_count-1)->get_epoch();
@@ -824,22 +789,22 @@ void psrpca::solve_eigenproblem()
 	  evecs_archive->get_Integration( isub )->set_epoch( ref_MJD + (double) ( isub - total_count + 1 ) * folding_period );
 	}
       }
-      for (unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
+    for (unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
       {
 	gsl_vector_view view = gsl_matrix_column(evec, i_evec);
-
+	
 	gsl_vector_memcpy( evec_copy, &view.vector ); // this memcopy is necessary, as the evec matrix is stored in row-major order
 	evecs_archive->get_Profile( i_evec, 0, 0 ) -> set_amps( evec_copy->data );
 	if ( full_stokes_pca )
-	{
-	  for ( unsigned i_pol = 1; i_pol < 4; i_pol++ )
 	  {
-	    evecs_archive->get_Profile( i_evec, i_pol, 0 )->set_amps( evec_copy->data + (unsigned)(nbin/4.0)*i_pol );
+	    for ( unsigned i_pol = 1; i_pol < 4; i_pol++ )
+	      {
+		evecs_archive->get_Profile( i_evec, i_pol, 0 )->set_amps( evec_copy->data + (unsigned)(nbin/4.0)*i_pol );
+	      }
 	  }
-	}
       }
-      evecs_archive->unload ( prefix+"_evecs.ar" );
-    } 
+    evecs_archive->unload ( prefix+"_evecs.ar" );
+    
   } //calculating eigenvectors / values
   else 
   {

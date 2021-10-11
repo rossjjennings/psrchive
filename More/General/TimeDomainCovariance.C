@@ -11,6 +11,14 @@
 #include "Warning.h"
 #include <algorithm>
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if HAVE_GSL
+#include <gsl/gsl_eigen.h>
+#endif
+
 using namespace std;
 using namespace Pulsar;
 
@@ -21,21 +29,9 @@ static Warning warn;
 //! Default constructor
 TimeDomainCovariance::TimeDomainCovariance ()
 {
-  covariance_matrix = NULL;
-  rank = 0;
-  count = 0;
-  wt_sum = 0.0;
-  wt_sum2 = 0.0;
+  subtract_mean = true;
   first_bin = 0;
   last_bin = 0;
-  p_damps = NULL;
-  finalized = false;
-}
-
-//! Destructor
-TimeDomainCovariance::~TimeDomainCovariance ()
-{
-  if ( covariance_matrix != NULL ) delete [] covariance_matrix;
 }
 
 void TimeDomainCovariance::reset ()
@@ -45,6 +41,9 @@ void TimeDomainCovariance::reset ()
   count = 0;
   for (unsigned i = 0; i < rank * rank; ++i)
     covariance_matrix[i] = 0.0;
+
+  for (unsigned i = 0; i < rank * rank; ++i)
+    mean[i] = 0.0;
 }
 
 void TimeDomainCovariance::set_rank ( unsigned value )
@@ -53,14 +52,11 @@ void TimeDomainCovariance::set_rank ( unsigned value )
     rank = value;
   else
     throw Error (InvalidState, "TimeDomainCovariance::set_rank",
-		    "Rank can't be changed after it was set");
+		 "Rank can't be changed after it was set");
 
-  if ( covariance_matrix == NULL )
-  {
-    covariance_matrix = new double[rank * rank];
-    covariance_gsl = gsl_matrix_calloc ( rank, rank );
-    p_damps = new double [rank];
-  }
+  covariance_matrix.resize (rank * rank);
+  mean.resize (rank);
+  reset ();
 }
 
 unsigned TimeDomainCovariance::get_rank ()
@@ -88,7 +84,9 @@ void TimeDomainCovariance::add_Profile ( const Profile* p )
 void TimeDomainCovariance::add_Profile ( const Profile* p, float wt )
 {
   if (finalized)
-    cerr << "TimeDomainCovariance::add_Profile WARNING: the covariance matrix has already been finalised" << endl;
+    throw Error (InvalidState, "TimeDomainCovariance::addProfile",
+		 "already finalized");
+  
   if (wt == 0.0 )
     return;
 
@@ -96,52 +94,140 @@ void TimeDomainCovariance::add_Profile ( const Profile* p, float wt )
     set_rank ( p->get_nbin () );
   else if (rank != p->get_nbin () )
     throw Error (InvalidParam, "TimeDomainCovariance::addProfile",
-		    "Mismatch between number of bins and rank of covariance matrix");
+		 "nbin=%u != rank=%u", p->get_nbin(), rank);
 
   count += 1;
   wt_sum += wt;
   wt_sum2 += wt * wt;
 
-  transform( p->get_amps(), p->get_amps() + rank, p_damps, CastToDouble() );
-  p_gsl = gsl_vector_view_array (const_cast<double *> (p_damps), rank );
-
-  gsl_blas_dger (wt, &p_gsl.vector, &p_gsl.vector, covariance_gsl );
+  const float* fprof = p->get_amps();
+  
+  for (unsigned i=0; i<rank; i++)
+  {
+    mean[i] += wt*fprof[i];
+    for (unsigned j=0; j<rank; j++)
+      covariance_matrix[i*rank + j] += wt*fprof[i]*fprof[j];
+  }
 }
 
-void TimeDomainCovariance::get_covariance_matrix ( double *dest )
-{
-  finalize ();
-  memcpy ( (void*)covariance_matrix, (void*)covariance_gsl->data, rank * rank * sizeof(double) ); 
-  //TODO take the last first bin into account
-  memcpy( dest, covariance_matrix, rank * rank * sizeof(double) );
-}
-
-void TimeDomainCovariance::get_covariance_matrix_gsl ( gsl_matrix *dest )
-{
-  finalize ();
-  gsl_matrix_memcpy( dest, covariance_gsl );
-}
-
-void TimeDomainCovariance::set_covariance_matrix ( double *src )
-{
-  //TODO take the last first bin into account
-  memcpy ( covariance_matrix, src, rank * rank * sizeof(double) );
-}
-
-double TimeDomainCovariance::get_covariance_matrix_value ( unsigned i, unsigned j)
+void TimeDomainCovariance::get_covariance_matrix_copy ( double* dest )
 {
   finalize ();
   //TODO take the last first bin into account
-  return gsl_matrix_get( covariance_gsl, i, j );
+  memcpy ( dest, &covariance_matrix[0], rank * rank * sizeof(double) );
+}
+
+void TimeDomainCovariance::set_covariance_matrix ( const double* src )
+{
+  //TODO take the last first bin into account
+  memcpy ( &covariance_matrix[0], src, rank * rank * sizeof(double) );
+}
+
+double TimeDomainCovariance::get_covariance_matrix_value( unsigned i,
+							  unsigned j )
+{
+  finalize ();
+  return covariance_matrix[i*rank + j];
+}
+
+void TimeDomainCovariance::get_eigenvectors_copy ( double* dest )
+{
+  eigen ();
+  //TODO take the last first bin into account
+  memcpy ( dest, &eigenvectors[0], rank * rank * sizeof(double) );
+}
+
+double TimeDomainCovariance::get_eigenvectors_value( unsigned i,
+						     unsigned j )
+{
+  eigen ();
+  return eigenvectors[i*rank + j];
 }
 
 void TimeDomainCovariance::finalize ()
 {
-  if ( ! finalized )
-    gsl_matrix_scale ( covariance_gsl, 1.0 / wt_sum );
-  else 
-    cerr << "WARNING: Pulsar::TimeDomainCovariance::finalize covariance matrix already finalized" << endl;
+  if ( finalized )
+    return;
+
+  for (unsigned i=0; i<rank; i++)
+  {
+    mean[i] /= wt_sum;
+    for (unsigned j=0; j<rank; j++)
+      covariance_matrix[i*rank + j] /= wt_sum;
+  }
+
+  if (subtract_mean)
+    for (unsigned i=0; i<rank; i++)
+      for (unsigned j=0; j<rank; j++)
+	covariance_matrix[i*rank + j] -= mean[i]*mean[j];
+    
   finalized = true;
+}
+
+void TimeDomainCovariance::eigen ()
+{
+  if (eigen_decomposed)
+    return;
+  
+  finalize ();
+
+#ifdef HAVE_CULA
+  
+  //CULA implementation of the eigenproblem:
+  vector<double> eval;
+  int status = culaDsyev( 'V', 'U', nbin, covariance_matrix, rank, &(eval[0]) );
+
+  if (status)
+  {
+    char buf[256];
+    culaGetErrorInfoString(status, culaGetErrorInfo(), buf, 256);
+    culaShutdown();
+    exit(EXIT_FAILURE);
+  }
+
+  // Invert the evals (cula produces them in ascending order):
+  gsl_permutation *p_reverse = gsl_permutation_calloc( nbin );
+  gsl_permutation_reverse( p_reverse );
+  gsl_permute_vector( p_reverse, eval );
+  // transposing as CULA uses column-major while GSL uses row-major ordering
+  // ..and swap the columns of the evectors, to get back the correspondence to evals
+  for ( unsigned i_column = 0; i_column < rank/2; i_column++)
+    gsl_matrix_swap_columns( covariance, i_column, nbin-i_column-1 );
+
+  // copy the evecs as calculated by CULA to the gsl matrix evec:
+  gsl_matrix_memcpy( evec, covariance );
+
+#else
+
+    
+  // Run eigenvalue/vector routine (gsl)
+  gsl_matrix_view m = gsl_matrix_view_array(&covariance_matrix[0], rank, rank);
+  gsl_vector *eval = gsl_vector_alloc(rank);
+  gsl_matrix *evec = gsl_matrix_alloc(rank, rank);
+  gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(rank);
+  gsl_eigen_symmv(&m.matrix, eval, evec, w);
+  gsl_eigen_symmv_free(w);
+  gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_DESC);
+
+  // Organize results
+  eigenvalues.resize (rank);
+  eigenvectors.resize (rank * rank);
+  
+  for (unsigned i=0; i<rank; i++)
+  {
+    eigenvalues[i] = gsl_vector_get(eval, i);
+
+    for (unsigned j=0; j<rank; j++)
+      eigenvectors[i*rank + j] = gsl_matrix_get(evec, j, i);
+  }
+  
+  // Free temp mem
+  gsl_matrix_free(evec);
+  gsl_vector_free(eval);
+
+#endif
+
+  eigen_decomposed = true;
 }
 
 void TimeDomainCovariance::choose_bins ( unsigned val_1, unsigned val_2 )

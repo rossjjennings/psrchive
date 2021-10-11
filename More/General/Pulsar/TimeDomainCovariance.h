@@ -8,10 +8,6 @@
 #ifndef __Pulsar__TimeDomainCovariance_h
 #define __Pulsar__TimeDomainCovariance_h
 
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_blas.h>
-
 #include "Pulsar/ProfileCovariance.h"
 
 namespace Pulsar
@@ -19,11 +15,9 @@ namespace Pulsar
   class TimeDomainCovariance : public ProfileCovariance
   {
   public:
+    
     //! Default constructor
     TimeDomainCovariance ();
-
-    //! Destructor
-    ~TimeDomainCovariance ();
 
     //! Choose which bins are to be used in the calculation of covariance matrix
     void choose_bins ( unsigned, unsigned );
@@ -35,23 +29,24 @@ namespace Pulsar
     void add_Profile (const Profile* );
     void add_Profile (const Profile*, float wt );
 
-    //! Get the whole covariance matrix
-    void get_covariance_matrix ( double * );
-
-    //! Get the whole covariance matrix - gsl
-    void get_covariance_matrix_gsl ( gsl_matrix * );
-
     //! Set the whole covariance matrix
-    void set_covariance_matrix ( double * );
- 
-    //! Get the i, j covariance matrix element, where i is the row and j is the column
-    double get_covariance_matrix_value ( unsigned, unsigned );
+    void set_covariance_matrix ( const double * );
+
+    //! Get the whole covariance matrix
+    void get_covariance_matrix_copy ( double* dest );
+      
+    //! Get the row, col covariance matrix element
+    double get_covariance_matrix_value ( unsigned row, unsigned col );
 
     //! This normalizes the covariance matrix after all profiles were added
     void finalize ();
 
-    //! Return a text interface that can be used to configure this instance
-    //virtual TextInterface::Parser* get_interface ();
+    //! Compute the eigen decomposition
+    void eigen ();
+
+    //! Get the eigenvectors
+    void get_eigenvectors_copy ( double* dest );
+    double get_eigenvectors_value ( unsigned row, unsigned col );
 
     //! Get the count of profiles used to estimate the covariance matrix
     unsigned get_count ();
@@ -69,17 +64,29 @@ namespace Pulsar
     void reset ();
 
   protected:
+    
     //! first bin to be used
     unsigned first_bin;
 
     //! last bin to be used
     unsigned last_bin;
 
-    //! Auxiliary variable for covariance matrix_calculation
-    gsl_matrix *covariance_gsl;
+    bool subtract_mean;
 
-    //! Auxiliary variable for storing the profile
-    gsl_vector_view p_gsl;
+    //! Current covariance matrix (symmetric)
+    std::vector<double> covariance_matrix;
+    
+    //! Current mean profile
+    std::vector<double> mean;
+
+    //! Eigenvectors (row vectors in row-major order)
+    std::vector<double> eigenvectors;
+    
+    //! Eigenvalues
+    std::vector<double> eigenvalues;
+
+    bool eigen_decomposed;
+
   };
 }
 

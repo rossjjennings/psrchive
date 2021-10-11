@@ -1,8 +1,8 @@
 /***************************************************************************
- *  *
- *  *   Copyright (C) 2011 by Stefan Oslowski
- *  *   Licensed under the Academic Free License version 2.1
- *  *
+ *
+ *   Copyright (C) 2011 by Stefan Oslowski
+ *   Licensed under the Academic Free License version 2.1
+ *
  ****************************************************************************/
 
 #ifndef __Pulsar_ProfileCovariance_h
@@ -30,20 +30,11 @@ namespace Pulsar
     //! Adds the given Profile to the covariance matrix estimate
     virtual void add_Profile (const Profile* ) = 0;
 
-    //! Get the whole covariance matrix
-    virtual void get_covariance_matrix ( double * ) = 0;
-
-    //! Set the whole covariance matrix
-    virtual void set_covariance_matrix ( double * ) = 0;
-
-    //! Get the i, j covariance matrix element, where i is the row and j is the column
-    virtual double get_covariance_matrix_value ( unsigned, unsigned ) = 0;
-
-    //! Normalize the covariance matrix after all the profiles were added
+    //! Compute the covariance matrix after all the profiles were added
     virtual void finalize () = 0;
 
-    //! Return a text interface that can be used to configure this instance
-    //virtual TextInterface::Parser* get_interface () = 0;
+    //! Perform eigen decomposition of covariance matrix
+    virtual void eigen () = 0;
 
     //! Get the count of profiles used to estimate the covariance matrix
     virtual unsigned get_count () = 0;
@@ -62,11 +53,11 @@ namespace Pulsar
 
   protected:
 
+    //! Default constructor initializes the following attributes to nil
+    ProfileCovariance ();
+
     //! Has the covariance matrix
     bool finalized;
-
-    //! The calculated covariance matrix
-    double *covariance_matrix;
 
     //! Rank of the covariance matrix
     unsigned rank;
@@ -79,15 +70,6 @@ namespace Pulsar
 
     //! Sum of squard weights
     double wt_sum2;
-
-    //! Promote an array of floats to doubles. Necessary for using the gsl's eigensystems
-    struct CastToDouble
-    {
-      double operator () (float value) const { return static_cast<double>(value);}
-    };
-
-    //! double version of profile
-    double *p_damps;
   };
 }
 
