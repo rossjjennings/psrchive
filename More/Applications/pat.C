@@ -138,7 +138,7 @@ bool fscrunch = false;
 bool tscrunch = false;
 bool preprocess = true;
 Pulsar::SmoothSinc* sinc = 0;
-Reference::To<ArrivalTime> arrival = new ArrivalTime;
+Reference::To<ArrivalTime> arrival;
 
 Archive* load_standard (const string& filename);
 
@@ -214,6 +214,7 @@ void usage ()
 
 int main (int argc, char** argv) try
 {
+  arrival = new ArrivalTime;
   arrival->set_shift_estimator (new PhaseGradShift);
   
   bool verbose = false;
