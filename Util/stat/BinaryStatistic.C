@@ -236,7 +236,7 @@ namespace BinaryStatistics {
 static unsigned instance_count = 0;
 
 BinaryStatistic::BinaryStatistic (const string& name, 
-					const string& description)
+				  const string& description)
 {
   instance_count ++;
 
