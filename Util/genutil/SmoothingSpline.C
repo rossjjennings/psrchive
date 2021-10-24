@@ -59,11 +59,17 @@ const char* gcvspl_error (int code)
 
   switch (code)
     {
-    case 0: return "Normal exit";
-    case 1: return "M.le.0 .or. N.lt.2*M";
-    case 2: return "Knot sequence is not strictly increasing, or some weight factor is not positive";
-    case 3: return "Wrong mode parameter or value";
-    default: return "Unknown error";
+    case 0:
+      return "Normal exit";
+    case 1:
+      return "M.le.0 .or. N.lt.2*M";
+    case 2:
+      return "Knot sequence is not strictly increasing, "
+	"or some weight factor is not positive";
+    case 3:
+      return "Wrong mode parameter or value";
+    default:
+      return "Unknown error";
     }
 }
 
