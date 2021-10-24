@@ -95,6 +95,9 @@ protected:
   double median_nfree;
   double pspline_alpha;
 
+  double interquartile_range;
+  double outlier_smoothing;
+  
   bool use_smoothing_spline ();
   
   unsigned freq_order;
@@ -200,8 +203,16 @@ protected:
   void fit (set&);
 
   void fit_pspline (SmoothingSpline& spline,
-                    const vector< double >& data_x,
-                    const vector< Estimate<double> >& data_y);
+		    vector< double >& data_x,
+		    vector< Estimate<double> >& data_y);
+
+  void iteratively_remove_outliers (SmoothingSpline& spline,
+				    vector< double >& data_x,
+				    vector< Estimate<double> >& data_y);
+  
+  unsigned remove_outliers (SmoothingSpline& spline,
+			    vector< double >& data_x,
+			    vector< Estimate<double> >& data_y);
 
 #if HAVE_PGPLOT
 
@@ -247,6 +258,9 @@ smint::smint ()
   find_median_nfree = false;
   median_nfree = 0;
   current_subint = 0;
+
+  interquartile_range = 0.0;
+  outlier_smoothing = 15;
 }
 
 
@@ -285,6 +299,12 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (find_median_nfree, "mnf");
   arg->set_help ("compute p-spline smoothing using median nfree");
+
+  // add a blank line and a header to the output of -h
+  menu.add ("\n" "Iterative outlier excision options:");
+
+  arg = menu.add (interquartile_range, "iqr", "double");
+  arg->set_help ("outlier threshold as inter-quartile range");
 
 #if HAVE_PGPLOT
   // add a blank line and a header to the output of -h
@@ -933,9 +953,12 @@ void smint::setup_and_plot (Spline& model,
 #endif
 
 void smint::fit_pspline (SmoothingSpline& spline,
-                         const vector< double >& data_x,
-                         const vector< Estimate<double> >& data_y)
+			 vector< double >& data_x,
+			 vector< Estimate<double> >& data_y)
 {
+  if (interquartile_range)
+    iteratively_remove_outliers (spline, data_x, data_y);
+  
   if (pspline_alpha)
     spline.set_smoothing (pspline_alpha);
 
@@ -947,10 +970,79 @@ void smint::fit_pspline (SmoothingSpline& spline,
 
   spline.fit (data_x, data_y);
 
+  double nfree = spline.get_fit_effective_nfree ();
+  cerr << "smint::fit_pspline effective nfree=" << nfree << endl;
+
 #ifdef HAVE_PGPLOT
   setup_and_plot (spline, data_x, data_y);
 #endif
 
+}
+
+template<class Container>
+void erase (Container& container, unsigned index)
+{
+  container.erase (container.begin()+index);
+}
+
+void smint::iteratively_remove_outliers (SmoothingSpline& spline,
+					 vector< double >& data_x,
+					 vector< Estimate<double> >& data_y)
+{
+  bool done = false;
+
+  spline.set_effective_nfree (data_x.size() / outlier_smoothing);
+  
+  while (!done)
+  {
+    spline.fit (data_x, data_y);    
+    done = remove_outliers (spline, data_x, data_y) == 0;
+  }
+
+  spline.set_minimize_gcv (true);
+}
+
+
+unsigned smint::remove_outliers (SmoothingSpline& spline,
+				 vector< double >& data_x,
+				 vector< Estimate<double> >& data_y)
+{
+  unsigned npts = data_x.size();
+
+  vector<double> normalized_residual (npts);
+  
+  for (unsigned i=0; i<npts; i++)
+  {
+    double yval = spline.evaluate (data_x[i]);
+    normalized_residual[i] = (data_y[i].val - yval) / sqrt(data_y[i].var);
+  }
+
+  double Q1, Q2, Q3;
+  Q1_Q2_Q3 (normalized_residual, Q1, Q2, Q3);
+
+  double IQR = Q3 - Q1;
+  double lower_threshold = Q1 - interquartile_range * IQR;
+  double upper_threshold = Q3 + interquartile_range * IQR;
+
+  unsigned ipt = 0;
+  unsigned removed = 0;
+  
+  while (ipt < data_x.size())
+  {
+    if ( (normalized_residual[ipt] < lower_threshold) ||
+	 (normalized_residual[ipt] > upper_threshold) )
+      {
+	erase (normalized_residual, ipt);
+	erase (data_x, ipt);
+	erase (data_y, ipt);
+	removed ++;
+      }
+    else
+      ipt++;
+  }
+
+  cerr << "smint::remove_outliers removed " << removed << endl;
+  return removed;
 }
 
 #if HAVE_SPLINTER
