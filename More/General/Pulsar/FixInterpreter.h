@@ -41,6 +41,9 @@ namespace Pulsar
     //! recompute the frequency of each sub-band
     std::string freq (const std::string& args);
 
+    //! fix the coordinates of the archive, based on the source name
+    std::string coord (const std::string& args);
+
     //! fix the Pointing extension info
     std::string pointing (const std::string& args);
 

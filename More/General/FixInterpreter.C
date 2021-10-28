@@ -13,12 +13,16 @@
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/ParametersLookup.h"
+
+
 #ifdef HAVE_CFITSIO
 #include "Pulsar/FITSArchive.h"
 #endif
 #include "TextInterface.h"
 
 using namespace std;
+using namespace Pulsar;
 
 Pulsar::FixInterpreter::FixInterpreter ()
 {
@@ -46,7 +50,11 @@ Pulsar::FixInterpreter::FixInterpreter ()
 
   add_command
     ( &FixInterpreter::pointing,
-      "pointing", "fix the Pointing extension info\n");
+      "pointing", "fix the Pointing extension info \n");
+
+  add_command
+    ( &FixInterpreter::coord,
+      "coord", "fix the coordinates, based in the name \n");
 
 #ifdef HAVE_CFITSIO
   add_command
@@ -191,7 +199,41 @@ catch (Error& error)
   return response (error);
 }
 
+string Pulsar::FixInterpreter::coord (const string& args) try
+{
+  Archive* archive = get();
 
+  /*
+    if the coordinates are already set, do nothing unless args == "clobber"
+  */
+
+  if (args != "clobber")
+  {
+    sky_coord current = archive->get_coordinates ();
+    if (current.ra() != 0.0 || current.dec() != 0.0)
+      return response (Good, "coordinates already set");
+  }
+  
+  string name = archive->get_source ();
+
+  Parameters::Lookup catalog;
+
+  Reference::To<Parameters> params = catalog(name);
+
+  string right_ascension = params->get_value ("RAJ");
+  string declination = params->get_value ("DECJ");
+
+  sky_coord coord = hmsdms (right_ascension, declination);
+
+  archive->set_coordinates (coord);
+  
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (error);
+}
+  
 string Pulsar::FixInterpreter::pointing (const string& args) try
 {
   Archive* archive = get();
