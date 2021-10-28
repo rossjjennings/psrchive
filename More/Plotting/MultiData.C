@@ -15,18 +15,21 @@ Pulsar::Plot* Pulsar::MultiData::factory (Plot* plot)
   SimplePlot* simple = dynamic_cast<SimplePlot*>(plot);
   if (simple)
   {
-    cerr << "MultiData::factory plot is a SimplePlot" << endl;
+    if (verbose)
+      cerr << "MultiData::factory plot is a SimplePlot" << endl;
     return new MultiDataPlot<SimplePlot> (simple);
   }
 
   MultiPlot* multi = dynamic_cast<MultiPlot*>(plot);
   if (multi)
   {
-    cerr << "MultiData::factory plot is a MultiPlot" << endl;
+    if (verbose)
+      cerr << "MultiData::factory plot is a MultiPlot" << endl;
     return new MultiDataPlot<MultiPlot> (multi);
   }
 
-  cerr << "MultiData::factory plot cannot overlay" << endl;
+  if (verbose)
+    cerr << "MultiData::factory plot cannot overlay" << endl;
 
   return plot;
 }
