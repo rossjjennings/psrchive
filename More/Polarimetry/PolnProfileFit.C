@@ -330,19 +330,23 @@ catch (Error& error)
   throw error += "PolnProfileFit::fit";
 }
 
+void PolnProfileFit::delete_observations ()
+{
+   // delete any previously set data
+  equation->delete_data ();
+
+  // (re)set the number of phases to zero
+  if (phases)
+    phases->resize (0);
+}
+
 void PolnProfileFit::set_observation (const PolnProfile* only) try
 {
   if (!equation)
     throw Error (InvalidState, "PolnProfileFit::set_observation",
 		 "no measurement equation");
 
-  // delete any previously set data
-  equation->delete_data ();
-
-  // (re)set the number of phases to zero
-  if (phases)
-    phases->resize (0);
-
+  delete_observations ();
   add_observation (only);
 }
 catch (Error& error)
@@ -442,7 +446,6 @@ void PolnProfileFit::add_observation (CoherencyMeasurementSet& measurements,
     // initialize the measurement sets
     for (unsigned ibin=1; ibin<n_harmonic; ibin++)
     {
-
       Stokes< complex<double> > val;
       Stokes< complex<double> > var;
       valvar( standard_data->get_stokes(ibin), val, var );
@@ -469,8 +472,6 @@ void PolnProfileFit::add_observation (CoherencyMeasurementSet& measurements,
       measurement.add_coordinate ( index_axis.new_Value(index) );
       
       measurements.push_back ( measurement );
-      
-
     }
   }
   catch (Error& error)

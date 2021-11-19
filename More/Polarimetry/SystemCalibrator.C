@@ -1040,11 +1040,16 @@ catch (Error& error)
 }
 
 void SystemCalibrator::submit_pulsar_data
-( Calibration::CoherencyMeasurementSet& measurements)
+( Calibration::CoherencyMeasurementSet& measurements) try
 {
   unsigned mchan = measurements.get_ichan();
   MJD epoch = measurements.get_epoch();
-  
+
+#if _DEBUG
+    cerr << "SystemCalibrator::submit_pulsar_data ichan=" << mchan
+	 << " model.size=" << model.size() << endl;
+#endif
+    
   VariableBackendEstimate* backend = model[mchan]->get_backend (epoch);
   IndexedProduct* product = backend->get_psr_response ();
 
@@ -1063,6 +1068,10 @@ void SystemCalibrator::submit_pulsar_data
 
   model[mchan]->add_observation_epoch (epoch);
   backend->add_weight (1.0);
+}
+catch (Error& error)
+{
+  throw error += "SystemCalibrator::submit_pulsar_data";
 }
 
 void SystemCalibrator::init_estimates

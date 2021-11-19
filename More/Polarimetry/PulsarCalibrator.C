@@ -340,7 +340,7 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
   the specified channel
 */
 void Pulsar::PulsarCalibrator::add_pulsar
-( Calibration::CoherencyMeasurementSet& measurements,
+( CoherencyMeasurementSet& measurements,
   const Integration* integration, unsigned ichan )
 {
   if (verbose > 2)
@@ -355,27 +355,21 @@ void Pulsar::PulsarCalibrator::add_pulsar
 
   assert (ichan < mtm.size());
 
-  //
-  // the measurement set passed down by SystemCalibrator contains information
-  // that must be incorporated into the equation maintained by PolnProfileFit
-  //
-
   if (solve_each)
   {
-    mtm[ichan]->set_measurement_set( measurements );
-
-    if (verbose > 2) cerr << "Pulsar::PulsarCalibrator::add_pulsar"
-      " solving ichan=" << ichan << endl;
-
+    /*
+      if solving for each pulsar observation added,
+      first delete everything added so far
+    */
+    mtm[ichan]->delete_observations ();
+	
     unsigned nbin = integration->get_nbin();
 
     mtm[ichan]->set_plan
       ( FTransform::Agent::current->get_plan (nbin, FTransform::frc) );
-
-    queue.submit( this, &Pulsar::PulsarCalibrator::solve1,
-		  integration, ichan );
   }
-  else try
+
+  try
   {
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::add_pulsar adding to path index="
@@ -391,6 +385,17 @@ void Pulsar::PulsarCalibrator::add_pulsar
       cerr << "Pulsar::PulsarCalibrator::add_pulsar ichan=" << ichan 
 	   << " error\n\t" << error << endl;
     get_data_fail ++;
+    return;
+  }
+
+  if (solve_each)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::PulsarCalibrator::add_pulsar"
+	" solving ichan=" << ichan << endl;
+
+    queue.submit( this, &Pulsar::PulsarCalibrator::solve1,
+		  measurements );
   }
 
   if (verbose > 2)
@@ -464,21 +469,21 @@ Pulsar::PulsarCalibrator::get_transformation (const Archive* data,
 class interface : public MEAL::GimbalLockMonitor
 {
 public:
-  bool check (Calibration::ReceptionModel*) { lock_detected(); return true; }
+  bool check (ReceptionModel*) { lock_detected(); return true; }
 };
 
-Functor< bool(Calibration::ReceptionModel*) >
-gimbal_lock( Calibration::Instrument* instrument, unsigned receptor )
+Functor< bool(ReceptionModel*) >
+gimbal_lock( Instrument* instrument, unsigned receptor )
 {
-  Calibration::Feed* feed = instrument->get_feed();
-  Calibration::SingleAxis* backend = instrument->get_backend()->get_backend();
+  Feed* feed = instrument->get_feed();
+  SingleAxis* backend = instrument->get_backend()->get_backend();
 
   interface* condition = new interface;
   condition->set_yaw  ( feed->get_orientation_transformation( receptor ) );
   condition->set_pitch( feed->get_ellipticity_transformation( receptor ) );
   condition->set_roll ( backend->get_rotation_transformation() );
 
-  return Functor< bool(Calibration::ReceptionModel*) >
+  return Functor< bool(ReceptionModel*) >
     ( condition, &interface::check );
 }
 
@@ -494,7 +499,7 @@ MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
 
   MEAL::Complex2* xform = model[ichan]->get_transformation();
 
-  Calibration::Instrument* instrument = dynamic_cast<Instrument*> (xform);
+  Instrument* instrument = dynamic_cast<Instrument*> (xform);
   if (!instrument)
     return xform;
 
@@ -549,8 +554,10 @@ string get_state (MEAL::Function* f)
   return state;
 }
 
-void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
+void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
 {
+  unsigned ichan = data.get_ichan();
+  
   if (verbose)
     cerr << "Pulsar::PulsarCalibrator::solve1 ichan=" << ichan << endl;
 
@@ -558,9 +565,12 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 
   assert (ichan < transformation.size());
 
+  CoherencyMeasurementSet measurements (data);
+  submit_pulsar_data (measurements);
+      
   for (unsigned tries=0 ; tries < 2; tries ++) try
   {
-    setup (data, ichan);
+    // setup (data, ichan);
 
     if (!transformation[ichan])
       return;
@@ -592,13 +602,15 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       transformation[ichan]->copy (backup);
     }
 
-    mtm[ichan]->set_observation( data->new_PolnProfile (ichan) );
+    MJD epoch = get_epoch(); 
+    model[ichan]->set_reference_epoch ( epoch );
 
     configure( mtm[ichan]->get_equation() );
 
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::solve1 pre-fit " 
            << get_state(transformation[ichan]) << endl;
+
 
     mtm[ichan]->solve ();
 
@@ -669,7 +681,7 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 	cerr << "  BIG DIFFERENCE=" << chisq << endl;
 	cerr << "    OLD\t\t\t\tNEW" << endl;
 
-	Calibration::Instrument test;
+	Instrument test;
 	solution[ichan]->update(&test);
 	
 	unsigned nparam = test.get_nparam();
@@ -686,7 +698,7 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
   if ( dynamic_cast<Instrument*>( transformation[ichan].ptr() ) )
   {
     if (!solution[ichan])
-      solution[ichan] = new Calibration::MeanInstrument;
+      solution[ichan] = new MeanInstrument;
 
     solution[ichan]->integrate( transformation[ichan] );
   }
