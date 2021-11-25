@@ -22,6 +22,7 @@ Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
 void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
 {
   twobit_stats = data->get<TwoBitStats>();
+
   if (twobit_stats)
     ja98_a5.set_nsamp (twobit_stats->get_nsample());
   else
@@ -31,6 +32,17 @@ void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
 
   for (unsigned isub=0; isub < data->get_nsubint(); isub++)
     transform (data->get_Integration(isub));
+}
+
+#include <fstream>
+
+void write (JenetAnderson98::EquationA5& a5, const char* filename)
+{
+  ofstream out (filename);
+  unsigned L = a5.get_nsamp ();
+
+  for (unsigned i=1; i+1 < L; i++)
+    out << i << " " << a5.evaluate (double(i) / L) << endl;
 }
 
 void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
@@ -45,6 +57,16 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
       throw Error (InvalidParam, "Pulsar::ScatteredPowerCorrection::transform",
 		   "data with npol==4 must have state=Signal::Coherence");
     npol = 2;
+  }
+
+  if (twobit_stats)
+  {
+    if (twobit_stats->get_ndig() != data->get_npol())
+      throw Error (InvalidState, "Pulsar::ScatteredPowerCorrection::correct",
+                   "number of digitizers, ndig=%u does not equal \n\t"
+                   "number of polarizations, npol=%u \n\t"
+                   "(This can be fixed.  Please contact developers.)",
+                   twobit_stats->get_ndig(), data->get_npol());
   }
 
   // check that scattered power is not significantly dispersed
@@ -71,7 +93,7 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
     if (twobit_stats)
       ja98_a5.set_A6( twobit_stats->get_histogram(ipol) );
 
-    for (unsigned ibin = 0; ibin < nbin; ibin++)
+    for (unsigned ibin = 0; ibin < nbin; ibin++) try
     {
       unsigned ichan = 0;
       double power = 0.0;
@@ -103,6 +125,15 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 
       for (ichan = 0; ichan < nchan; ichan++)
 	data->get_Profile(ipol,ichan)->get_amps()[ibin] -= scattered_power;
+    }
+    catch (Error& error)
+    {
+      cerr << "Pulsar::ScatteredPowerCorrection::transform failed on "
+	" ipol=" << ipol << " ibin=" << ibin << " "
+	   << error.get_message() << endl;
+
+      write (ja98_a5, "ja98_a5.txt");
+      throw error;
     }
   }
 }
