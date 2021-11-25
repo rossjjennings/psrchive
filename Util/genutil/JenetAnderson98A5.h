@@ -24,6 +24,9 @@ class JenetAnderson98::EquationA5 : public Reference::Able {
   //! Set the number of samples used to estimate the undigitized power
   void set_nsamp (unsigned nsamp);
 
+  //! Get the number of samples used to estimate the undigitized power
+  unsigned get_nsamp () const { return losq.size(); }
+  
   //! Set the discrete probability distribution; used instead of A6
   template<typename T>
   void set_A6 (const std::vector<T>& prob)
