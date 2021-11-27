@@ -241,7 +241,8 @@ int main (int argc, char** argv) try
   // preprocess0
   archive->fscrunch();
   archive->tscrunch();
-  // archive->pscrunch();
+  if (ipol.get_integrate())
+    archive->pscrunch();
 
   // phase up as requested
   if (centre_model)
