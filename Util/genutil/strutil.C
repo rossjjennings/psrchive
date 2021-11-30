@@ -92,6 +92,7 @@ void string_split ( string source, string &before, string &after, string delimit
   }
 }
 
+
 void string_split_on_any ( string source, string &before, string &after, string delim_chars )
 {
   string::size_type pos = source.find_first_of( delim_chars );
@@ -105,3 +106,22 @@ void string_split_on_any ( string source, string &before, string &after, string 
       after = source.substr( pos + 1 );
     }
 }
+
+void string_split_on_any ( const string& source, vector<string>& result, string delim_chars )
+{
+  string::size_type start = 0;
+
+  while (1)
+  {
+    string::size_type pos = source.find_first_of( delim_chars, start );
+  
+    if (pos == string::npos)
+      break;
+
+    result.push_back( source.substr( start, pos-start ) );
+    start = pos + 1;
+  }
+
+  result.push_back( source.substr( start ) );    
+}
+

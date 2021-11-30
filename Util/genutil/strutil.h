@@ -98,5 +98,8 @@ void string_split( std::string source, std::string &before, std::string &after, 
 
 void string_split_on_any ( std::string source, std::string &before, std::string &after, std::string delim_chars );
 
+// split string into an array of strings
+void string_split_on_any ( const std::string& source, std::vector<std::string>& result, std::string delim_chars );
+
 #endif
 

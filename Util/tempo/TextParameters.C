@@ -22,7 +22,20 @@ bool Pulsar::TextParameters::equals (const Parameters* that) const
   if (!like)
     return false;
 
-  return this->text == like->text;
+  // 
+
+  this->parse_rows ();
+  like->parse_rows ();
+
+  if (this->rows.size() != like->rows.size())
+    return false;
+      
+  for (unsigned irow=0; irow < rows.size(); irow++)
+    if (! this->rows[irow].equals( like->rows[irow] ))
+      return false;
+
+  // cerr << "Pulsar::TextParameters::equals return true" << endl;
+  return true;
 }
 
 void Pulsar::TextParameters::load (FILE* fptr)
@@ -30,6 +43,8 @@ void Pulsar::TextParameters::load (FILE* fptr)
   text = "";
   if (stringload (&text, fptr) < 0)
     throw Error (FailedSys, "Pulsar::TextParameters::load", "stringload");
+
+  rows.resize (0);
 }
 
 //! Unload to an open stream
@@ -38,6 +53,32 @@ void Pulsar::TextParameters::unload (FILE* fptr) const
   if (fputs (text.c_str(), fptr) == EOF)
     throw Error (FailedSys, "Pulsar::TextParameters::unload", "fputs");
 }
+
+void Pulsar::TextParameters::parse_rows () const
+{
+  if (rows.size() > 0)
+    return;
+  
+  vector<string> lines;
+
+  string_split_on_any ( text, lines, "\n" );
+
+  // cerr << "TextParameters::parse_rows nlines=" << lines.size() << endl;
+
+  string whitespace = " \t\n";
+  
+  for (unsigned iline=0; iline < lines.size(); iline++)
+  {
+    Row row;
+    row.keyword = stringtok (lines[iline], whitespace);
+    row.value = stringtok (lines[iline], whitespace);
+    row.flag = stringtok (lines[iline], whitespace);
+
+    if (row.keyword != "" && row.value != "")
+      rows.push_back( row );
+  }
+}
+
 
 //! Retrieve a string from the text
 string Pulsar::TextParameters::get_value (const string& keyword) const

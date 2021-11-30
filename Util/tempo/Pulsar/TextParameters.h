@@ -58,6 +58,24 @@ namespace Pulsar {
   protected:
 
     std::string text;
+
+    struct Row
+    {
+      std::string keyword;
+      std::string value;
+      std::string flag;
+
+      bool equals (const Row& that)
+      { return
+	  keyword == that.keyword &&
+	  value == that.value &&
+	  flag == that.flag;
+      }
+    };
+
+    mutable std::vector<Row> rows;
+
+    void parse_rows () const;
   };
 
 }
