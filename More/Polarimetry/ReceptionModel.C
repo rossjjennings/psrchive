@@ -116,13 +116,13 @@ void Calibration::ReceptionModel::copy_fit (const ReceptionModel* other)
 void Calibration::ReceptionModel::add_data (CoherencyMeasurementSet& datum)
 {
   if (datum.get_transformation_index() >= get_num_transformation())
-      throw Error (InvalidParam,
-		   "Calibration::ReceptionModel::add_data",
-		   "path_index=%d >= npath=%d",
-		   datum.get_transformation_index(), get_num_transformation());
+    throw Error (InvalidParam,
+		 "Calibration::ReceptionModel::add_data",
+		 "path_index=%d >= npath=%d",
+		 datum.get_transformation_index(), get_num_transformation());
  
-  for (unsigned imeas=0; imeas<datum.size(); imeas++)  {
-
+  for (unsigned imeas=0; imeas<datum.size(); imeas++)
+  {
     if (datum[imeas].get_input_index() >= get_num_input())
       throw Error (InvalidParam,
 		   "Calibration::ReceptionModel::add_data",

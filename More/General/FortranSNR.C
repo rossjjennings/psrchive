@@ -31,6 +31,7 @@ extern "C" void F77_smooth_mmw(float* period, int* nbin, int* minw, int* maxw,
 FortranSNR::FortranSNR() 
 {
   minwidthbins = 0;
+  maxwidthbins = 0;
   rms = 0;
   rms_set = false;
   bestwidth = 0;

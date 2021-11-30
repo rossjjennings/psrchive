@@ -143,8 +143,8 @@ namespace Pulsar {
     //! Initialize the SignalPath of the specified channel
     void init_model (unsigned ichan);
 
-    //! Solve the measurement equation for the given channel
-    void solve1 (const Integration* data, unsigned ichan);
+    //! Solve the measurement equation for the given measurements
+    void solve1 (const Calibration::CoherencyMeasurementSet& measurements);
 
     //! Set things up for the model in the given channel
     void setup (const Integration* data, unsigned ichan);

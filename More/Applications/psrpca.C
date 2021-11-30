@@ -59,12 +59,13 @@
 
 #include <RobustStats.h>
 
-
 #ifdef HAVE_CULA
 #include <cula_lapack.hpp>
 #include <cula_blas.hpp>
 #include <cula.hpp>
 #endif
+
+#include <string.h>
 
 using namespace std;
 using namespace Pulsar;

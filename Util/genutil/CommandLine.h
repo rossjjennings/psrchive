@@ -221,6 +221,28 @@ namespace CommandLine {
     { (instance->*method) (parse(arg)); }
   };
 
+  //! A function that can parse the string
+  class Parser : public Argument
+  {
+  protected:
+
+    //! The action to be taken
+    Functor < void( const std::string& ) > action;
+
+  public:
+
+    //! Default constructor
+    Parser (Functor < void( const std::string& ) >& _action)
+    { action = _action;  has_arg = required_argument; }
+
+    //! Handle the argument
+    void handle (const std::string& arg)
+    {
+      // std::cerr << "Parser::handle arg='" << arg << "'" << std::endl;
+      action(arg);
+    }
+  };
+  
   //! A command line Action
   class Action : public Argument
   {
@@ -262,7 +284,7 @@ namespace CommandLine {
     //! Handle the argument
     void handle (const std::string&) { action(argument); }
   };
-
+  
   class Heading : public Item
   {
 
@@ -271,7 +293,7 @@ namespace CommandLine {
     //! Default constructor
     Heading (const std::string& _text) { text = _text; }
 
-    //! Always eturn false
+    //! Always return false
     bool matches (int) const { return false; }
 
     //! Handle the argument
@@ -346,6 +368,20 @@ namespace CommandLine {
       return add_value (value, name, &Argument::set_long_name, type);
     }
 
+    //! Add an parse action with only a single letter name
+    Argument* add (Functor< void(const std::string&) > action,
+		   char name, const char* type = 0)
+    {
+      return add_parser (action, name, &Argument::set_short_name, type);
+    }
+
+    //! Add a parse action with only a long string name
+    Argument* add (Functor< void(const std::string&) > action,
+		   const std::string& name, const char* type = 0)
+    { 
+      return add_parser (action, name, &Argument::set_long_name, type);
+    }
+    
     //! Add an Attribute with only a single letter name
     template<class C, class B, typename T>
     Argument* add (C* ptr, void (B::*method)(T), char name, 
@@ -458,6 +494,20 @@ namespace CommandLine {
       return argument;
     }
 
+    template<typename N, typename S>
+    Argument* add_parser (Functor< void(const std::string&) >& action,
+			  N name, S set, const char* type)
+    {
+      // std::cerr << "Menu::add_parser type='" << type << "'" << std::endl;
+
+      Argument* argument = new Parser (action);
+      (argument->*set) (name);
+      if (type)
+	argument->set_type (type);
+      item.push_back (argument);
+      return argument;
+    }
+    
     template<class C, typename M, typename N, typename S>
     Argument* add_action (C* ptr, M method, N name, S set)
     {
@@ -477,6 +527,7 @@ namespace CommandLine {
       item.push_back (argument);
       return argument;
     }
+
   };
 
 

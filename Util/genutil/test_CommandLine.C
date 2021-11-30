@@ -44,6 +44,11 @@ int main(int argc, char** argv)
     " -f " << test.flag << endl;
 }
 
+void test (const std::string& text)
+{
+  cerr << "test: text='" << text << "'" << endl;
+}
+
 void Test::parseOptions (int argc, char** argv)
 {
   CommandLine::Menu menu;
@@ -57,6 +62,9 @@ void Test::parseOptions (int argc, char** argv)
 
   arg = menu.add (text, 's');
   arg->set_help ("string of text");
+
+  arg = menu.add (&test, 't', "code");
+  arg->set_help ("parse string of text");
 
   arg = menu.add (this, &Test::parse, 'p', "arg");
   arg->set_help ("prints the argument");

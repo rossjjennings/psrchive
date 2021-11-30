@@ -239,7 +239,7 @@ C*****************************************************************
 C*****************************************************************
       INTEGER       DAYNR,DDO,DO2,SEASON,SEADAY
       REAL       LATI,LONGI,MO2,MO,MODIP,NMF2,MAGBR,INVDIP   
-     &      NMF1,NME,NMD,MM,MLAT,MLONG,NOBO2
+     &      NMF1,NME,NMD,MM,MLAT,MLONG,NOBO2,HF1
       CHARACTER  IRIDIR*80
       INTEGER    IRILEN
       CHARACTER  FILNAM*80

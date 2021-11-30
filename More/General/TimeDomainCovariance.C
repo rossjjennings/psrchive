@@ -9,6 +9,9 @@
 #include "Pulsar/Profile.h"
 
 #include "Warning.h"
+
+#include <string.h>
+
 #include <algorithm>
 
 #ifdef HAVE_CONFIG_H

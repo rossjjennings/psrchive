@@ -101,6 +101,9 @@ namespace Pulsar
     //! Set the only observation to be fit to the standard
     void set_observation ( const PolnProfile* );
 
+    //! Delete any previously added observations
+    void delete_observations ();
+    
     //! Set the template from which measurment sets will be constructed
     void set_measurement_set (const Calibration::CoherencyMeasurementSet&);
 
