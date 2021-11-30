@@ -14,6 +14,10 @@
 #ifndef __ndArray_H
 #define __ndArray_H
 
+//! An N-dimensional array of elements of type T, defined recursively
+/*! This template implements row-major order calculation of offsets using
+  C-style array index notation; e.g. data[i][j][k] */
+
 template<unsigned N, typename T> class ndArray
 {
   ndArray<N-1,T> next;
