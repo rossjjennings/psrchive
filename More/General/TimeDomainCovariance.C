@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Warning.h"
+#include "debug.h"
 
 #include <string.h>
 
@@ -45,7 +46,7 @@ void TimeDomainCovariance::reset ()
   for (unsigned i = 0; i < rank * rank; ++i)
     covariance_matrix[i] = 0.0;
 
-  for (unsigned i = 0; i < rank * rank; ++i)
+  for (unsigned i = 0; i < rank; ++i)
     mean[i] = 0.0;
 }
 
@@ -104,6 +105,10 @@ void TimeDomainCovariance::add_Profile ( const Profile* p, float wt )
   wt_sum2 += wt * wt;
 
   const float* fprof = p->get_amps();
+
+  DEBUG("TimeDomainCovariance::add_Profile rank=" << rank);
+  
+  assert (covariance_matrix.size() == rank * rank);
   
   for (unsigned i=0; i<rank; i++)
   {
@@ -171,8 +176,10 @@ void TimeDomainCovariance::eigen ()
 {
   if (eigen_decomposed)
     return;
-  
+
+  DEBUG("TimeDomainCovariance::eigen call finalize");
   finalize ();
+  DEBUG("TimeDomainCovariance::eigen done finalize");
 
 #ifdef HAVE_CULA
   
@@ -202,14 +209,17 @@ void TimeDomainCovariance::eigen ()
 
 #else
 
-    
+  DEBUG("TimeDomainCovariance::eigen gsl_matrix_view_array");
   // Run eigenvalue/vector routine (gsl)
   gsl_matrix_view m = gsl_matrix_view_array(&covariance_matrix[0], rank, rank);
   gsl_vector *eval = gsl_vector_alloc(rank);
   gsl_matrix *evec = gsl_matrix_alloc(rank, rank);
   gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(rank);
+
+  DEBUG("TimeDomainCovariance::eigen gsl_eigen_symmv");
   gsl_eigen_symmv(&m.matrix, eval, evec, w);
   gsl_eigen_symmv_free(w);
+  DEBUG("TimeDomainCovariance::eigen gsl_eigen_symmv_sort");
   gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_DESC);
 
   // Organize results
@@ -246,7 +256,10 @@ void TimeDomainCovariance::choose_bins ( unsigned val_1, unsigned val_2 )
     last_bin = val_1;
   }
 
-  warn << "TimeDomainCovariance::choose_bins WARNING" << " calculation of covariance matrix for some bins only not implemented yet" << endl;
+  throw Error (InvalidState, "TimeDomainCovariance::choose_bins",
+	       "calculation of covariance matrix for subset of phase bins "
+	       "not implemented");
+
   set_rank ( last_bin - first_bin + 1 );
 }
 
