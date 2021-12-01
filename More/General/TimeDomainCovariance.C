@@ -138,11 +138,30 @@ double TimeDomainCovariance::get_covariance_matrix_value( unsigned i,
   return covariance_matrix[i*rank + j];
 }
 
+//! Set the eigenvector matrix
+void TimeDomainCovariance::set_eigenvectors (const std::vector<double>& copy)
+{
+  eigenvectors = copy;
+}
+
+void TimeDomainCovariance::set_eigenvectors ( const double* copy )
+{
+  memcpy (&eigenvectors[0], copy, eigenvectors.size() * sizeof(double));
+}
+
+//! Get a copy of the eigenvector matrix
+void TimeDomainCovariance::get_eigenvectors_copy ( std::vector<double>& copy )
+{
+  eigen ();
+  copy = eigenvectors;
+}
+
+
 void TimeDomainCovariance::get_eigenvectors_copy ( double* dest )
 {
   eigen ();
   //TODO take the last first bin into account
-  memcpy ( dest, &eigenvectors[0], rank * rank * sizeof(double) );
+  memcpy ( dest, &eigenvectors[0], eigenvectors.size() * sizeof(double));
 }
 
 double TimeDomainCovariance::get_eigenvectors_value( unsigned i,
@@ -150,6 +169,45 @@ double TimeDomainCovariance::get_eigenvectors_value( unsigned i,
 {
   eigen ();
   return eigenvectors[i*rank + j];
+}
+
+const double* TimeDomainCovariance::get_eigenvectors_pointer ()
+{
+  return &eigenvectors[0];
+}
+
+//! Set the eigenvalue vector
+void TimeDomainCovariance::set_eigenvalues ( const std::vector<double>& copy )
+{
+  eigenvalues = copy;
+}
+
+void TimeDomainCovariance::set_eigenvalues ( const double* copy )
+{
+  memcpy (&eigenvalues[0], copy, eigenvalues.size() * sizeof(double));
+}
+
+//! Get a copy of the eigenvalue vector
+void TimeDomainCovariance::get_eigenvalues_copy ( std::vector<double>& copy )
+{
+  eigen ();
+  copy = eigenvalues;
+}
+
+void TimeDomainCovariance::get_eigenvalues_copy ( double* dest )
+{
+  eigen ();
+  memcpy ( dest, &eigenvalues[0], eigenvalues.size() * sizeof(double));
+}
+
+double TimeDomainCovariance::get_eigenvalue ( unsigned row )
+{
+  return eigenvalues [row];
+}
+
+const double* TimeDomainCovariance::get_eigenvalues_pointer ()
+{
+  return &(eigenvalues[0]);
 }
 
 void TimeDomainCovariance::finalize ()
@@ -179,7 +237,12 @@ void TimeDomainCovariance::eigen ()
 
   DEBUG("TimeDomainCovariance::eigen call finalize");
   finalize ();
-  DEBUG("TimeDomainCovariance::eigen done finalize");
+
+  DEBUG("TimeDomainCovariance::eigen view and allocate arrays");
+  gsl_matrix_view m = gsl_matrix_view_array(&covariance_matrix[0], rank, rank);
+  gsl_vector *eval = gsl_vector_alloc(rank);
+  gsl_matrix *evec = gsl_matrix_alloc(rank, rank);
+  gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(rank);
 
 #ifdef HAVE_CULA
   
@@ -208,13 +271,6 @@ void TimeDomainCovariance::eigen ()
   gsl_matrix_memcpy( evec, covariance );
 
 #else
-
-  DEBUG("TimeDomainCovariance::eigen gsl_matrix_view_array");
-  // Run eigenvalue/vector routine (gsl)
-  gsl_matrix_view m = gsl_matrix_view_array(&covariance_matrix[0], rank, rank);
-  gsl_vector *eval = gsl_vector_alloc(rank);
-  gsl_matrix *evec = gsl_matrix_alloc(rank, rank);
-  gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(rank);
 
   DEBUG("TimeDomainCovariance::eigen gsl_eigen_symmv");
   gsl_eigen_symmv(&m.matrix, eval, evec, w);

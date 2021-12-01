@@ -32,7 +32,7 @@ namespace Pulsar
     //! Set the whole covariance matrix
     void set_covariance_matrix ( const double * );
 
-    //! Get the whole covariance matrix
+    //! Get a copy of the covariance matrix
     void get_covariance_matrix_copy ( double* dest );
       
     //! Get the row, col covariance matrix element
@@ -44,10 +44,28 @@ namespace Pulsar
     //! Compute the eigen decomposition
     void eigen ();
 
-    //! Get the eigenvectors
-    void get_eigenvectors_copy ( double* dest );
-    double get_eigenvectors_value ( unsigned row, unsigned col );
+    //! Set the eigenvector matrix
+    void set_eigenvectors ( const std::vector<double>& );
+    void set_eigenvectors ( const double* );
 
+    //! Get a copy of the eigenvector matrix
+    void get_eigenvectors_copy ( std::vector<double>& );
+    void get_eigenvectors_copy ( double* );
+    
+    double get_eigenvectors_value ( unsigned row, unsigned col );
+    const double* get_eigenvectors_pointer ();
+
+    //! Set the eigenvalue vector
+    void set_eigenvalues ( const std::vector<double>& );
+    void set_eigenvalues ( const double* );
+
+    //! Get a copy of the eigenvalue vector
+    void get_eigenvalues_copy ( std::vector<double>& );
+    void get_eigenvalues_copy ( double* );
+    
+    double get_eigenvalue ( unsigned row );
+    const double* get_eigenvalues_pointer ();
+    
     //! Get the count of profiles used to estimate the covariance matrix
     unsigned get_count ();
 
