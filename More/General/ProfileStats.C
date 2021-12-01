@@ -138,6 +138,21 @@ void Pulsar::ProfileStats::select_profile (const Profile* set_profile) try
 
 void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::deselect_onpulse prof=" << (void*) prof << endl;
+
+  if (!prof)
+    return;
+
+  if (prof->get_nbin() != onpulse.get_nbin())
+    throw Error (InvalidState, "Pulsar::ProfileStats::deselect_onpulse",
+                 "profile nbin=%u != onpulse nbin=%u", 
+                 prof->get_nbin(), onpulse.get_nbin());
+
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::deselect_onpulse nbin=" << prof->get_nbin() 
+         << endl;
+
   for (unsigned i=0; i<prof->get_nbin(); i++)
     if (prof->get_amps()[i] < thresh)
       onpulse[i] = 0;
