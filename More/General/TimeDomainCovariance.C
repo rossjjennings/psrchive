@@ -5,19 +5,19 @@
  *  *
  ****************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/TimeDomainCovariance.h"
 #include "Pulsar/Profile.h"
 
 #include "Warning.h"
 #include "debug.h"
 
-#include <string.h>
-
 #include <algorithm>
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <cstring>
+#include <cassert>
 
 #if HAVE_GSL
 #include <gsl/gsl_eigen.h>
