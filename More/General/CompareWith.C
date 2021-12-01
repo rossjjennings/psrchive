@@ -12,6 +12,9 @@
 #include "GeneralizedChiSquared.h"
 #include "UnaryStatistic.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace Pulsar;
 using namespace std;
 
@@ -57,10 +60,7 @@ void CompareWith::set (ndArray<2,double>& result,
 		       unsigned iprimary, unsigned icompare,
 		       double value)
 {
-#if _DEBUG
-  cerr << "CompareWith::set i=" << iprimary << " j=" << icompare
-       << " val=" << value << endl;
-#endif
+  DEBUG ("CompareWith::set i=" << iprimary << " j=" << icompare << " val=" << value );
   
   if (transpose)
     result[icompare][iprimary] = value;
@@ -113,7 +113,7 @@ void CompareWith::setup (unsigned iprimary)
   if (!gcs)
     return;
 
-  // cerr << "CompareWith::setup iprimary=" << iprimary << endl;
+  DEBUG( "CompareWith::setup iprimary=" << iprimary );
 
   if (!covar)
     covar = new TimeDomainCovariance;
@@ -143,13 +143,16 @@ void CompareWith::setup (unsigned iprimary)
     covar->add_Profile (prof);
   }
 
+  if (norm == 0)
+    throw Error (InvalidState, "CompareWith::setup", "no good data");
+  
   var /= norm;
   
-  // cerr << "CompareWith::setup var=" << var << endl;
+  DEBUG( "CompareWith::setup var=" << var );
 
   covar->eigen ();
 
-  // cerr << "CompareWith::setup eigen" << endl;
+  DEBUG( "CompareWith::setup eigen" );
 
   const double* eval = covar->get_eigenvalues_pointer();
   const double* evec = covar->get_eigenvectors_pointer();
@@ -174,6 +177,6 @@ void CompareWith::setup (unsigned iprimary)
     gcs->eigenvalues[irank] = eval[irank] / var;
   }
 
-  // cerr << "CompareWith::setup done" << endl;
+  DEBUG( "CompareWith::setup done" );
 }
     

@@ -13,6 +13,8 @@
 #include "Pulsar/Profile.h"
 
 #include "Warning.h"
+
+//#define _DEBUG 1
 #include "debug.h"
 
 #include <algorithm>
@@ -220,6 +222,9 @@ void TimeDomainCovariance::finalize ()
   if ( finalized )
     return;
 
+  if (rank == 0)
+    throw Error (InvalidState, "TimeDomainCovariance::finalize", "no data");
+  
   for (unsigned i=0; i<rank; i++)
   {
     mean[i] /= wt_sum;
