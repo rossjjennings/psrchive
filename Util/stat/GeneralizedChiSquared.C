@@ -16,62 +16,59 @@
 
 using namespace std;
 
-void linear_fit (double& scale, double& offset,
-		 const vector<double>& dat1, const vector<double>& dat2,
-		 const vector<bool>* mask)
+void general_linear_fit (double& scale, double& offset,
+			 const vector< vector<double> >& evec,
+			 const vector<double>& eval,
+			 const vector<double>& dat1,
+			 const vector<double>& dat2,
+			 const vector<bool>* mask)
 {
-  double covar = 0.0;
+  unsigned ndim = evec.size();
+  assert (ndim == eval.size());
+
+  // principal components
+  vector<double> pc1 (ndim, 0.0);
+  vector<double> pc2 (ndim, 0.0);
+  vector<double> sum (ndim, 0.0);
+
+  for (unsigned idim=0; idim < ndim; idim++)
+  {
+    for (unsigned i=0; i<dat1.size(); i++)
+    {
+      if (mask && !(*mask)[i])
+	continue;
+
+      pc1[idim] += evec[idim][i] * dat1[i];
+      pc2[idim] += evec[idim][i] * dat2[i];
+      sum[idim] += evec[idim][i];
+    }
+  }
+  
   double mu_1 = 0.0;
   double mu_2 = 0.0;
+  double covar = 0.0;
   double var_2 = 0.0;
-  unsigned count = 0;
+  double wmu_2 = 0.0;
+  double norm = 0;
     
-  for (unsigned i=0; i<dat1.size(); i++)
-  {
-    if (mask && !(*mask)[i])
-      continue;
-      
-    mu_1 += dat1[i];
-    mu_2 += dat2[i];
-    var_2 += dat2[i] * dat2[i];
-    covar += dat1[i] * dat2[i];
-    
-    count ++;
+  for (unsigned idim=0; idim < ndim; idim++)
+  {   
+    mu_1 += pc1[idim] / eval[idim];
+    mu_2 += pc2[idim] / eval[idim];
+    covar += pc1[idim] * pc2[idim] / eval[idim];
+    var_2 += pc2[idim] * pc2[idim] / eval[idim];
+    wmu_2 += sum[idim] * pc2[idim] / eval[idim];
+    norm += sum[idim] * sum[idim] / eval[idim];
   }
-
-  double sum1 = mu_1;
-  double sum2 = mu_2;
-  double sumsqr2 = var_2;
-  double sumprod = covar;
-
-  double scale_alt = (sumprod - sum1*sum2/count) / (sumsqr2 - sum2*sum2/count);
   
-  mu_1 /= count;
-  mu_2 /= count;
-  covar /= count;
-  covar -= mu_1 * mu_2;
-  var_2 /= count;
-  var_2 -= mu_2 * mu_2;
+  mu_1 /= norm;
+  mu_2 /= norm;
+  covar -= mu_1 * wmu_2;
+  var_2 -= mu_2 * wmu_2;
   
   scale = covar / var_2;
 
-  cerr << scale << " " << scale_alt << endl;
-  
-  vector<double> diff (count);
-  unsigned idiff = 0;
-  
-  for (unsigned i=0; i<dat1.size(); i++)
-  {
-    if (mask && !(*mask)[i])
-      continue;
-    
-    diff[idiff] = dat1[i] - scale * dat2[i];
-    idiff ++;
-  }
-  
-  assert (idiff == count);
-  
-  offset = median (diff);
+  offset = mu_1 - scale * mu_2;
 }
 
 
@@ -80,7 +77,7 @@ using namespace BinaryStatistics;
 static double sqr (double x) { return x*x; }
 
 GeneralizedChiSquared::GeneralizedChiSquared ()
-: BinaryStatistic ("chi", "variance of difference")
+: BinaryStatistic ("gchi", "variance of difference")
 {
   robust_linear_fit = true;
   max_zap_fraction = 0.5;
@@ -90,7 +87,25 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 				   const vector<double>& dat2)
 {
   assert (dat1.size() == dat2.size());
-      
+
+  unsigned ndim = eigenvectors.size();
+  assert (ndim == eigenvalues.size());
+
+  // principal components
+  vector<double> pc1 (ndim, 0.0);
+  vector<double> pc2 (ndim, 0.0);
+  vector<double> sum (ndim, 0.0);
+
+  for (unsigned idim=0; idim < ndim; idim++)
+  {
+    for (unsigned i=0; i<dat1.size(); i++)
+    {
+      pc1[idim] += eigenvectors[idim][i] * dat1[i];
+      pc2[idim] += eigenvectors[idim][i] * dat2[i];
+      sum[idim] += eigenvectors[idim][i];
+    }
+  }
+  
   double scale = 1.0;
   double offset = 0.0;
   
@@ -106,7 +121,9 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
     unsigned zapped = 0;
     do
     {
-      linear_fit (scale, offset, dat1, dat2, &mask);
+      general_linear_fit (scale, offset,
+			  eigenvectors, eigenvalues,
+			  dat1, dat2, &mask);
       
       double sigma = 2.0;
       double var = 1 + sqr(scale);
@@ -118,9 +135,21 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
       {
 	if (!mask[i])
 	  continue;
+
+	double residual = 0.0;
+	double norm = 0.0;
 	
-	double residual = dat1[i] - scale * dat2[i] - offset;
-	if ( sqr(residual) > cut )
+	for (unsigned idim=0; idim<ndim; idim++)
+	{
+	  double pc1 = eigenvectors[idim][i] * dat1[i];
+	  double pc2 = eigenvectors[idim][i] * dat2[i];
+	  double sum = eigenvectors[idim][i];
+	  norm += sum * sum;
+	  
+	  residual += sqr(pc1 - scale * pc2 - offset * sum) / eigenvalues[i];
+	}
+	
+	if ( residual > cut * norm )
         {
 	  mask[i] = false;
 	  zapped ++;
@@ -133,13 +162,18 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
   }
   
   double coeff = 0.0;
-  for (unsigned i=0; i<dat1.size(); i++)
-    coeff += sqr(dat1[i] - scale * dat2[i] - offset);
+  for (unsigned i=0; i<ndim; i++)
+    coeff += sqr(pc1[i] - scale * pc2[i] - offset * sum[i]) / eigenvalues[i];
   
   return coeff / ( dat1.size() * ( 1 + sqr(scale) ) );
 }
 
-void GeneralizedChiSquared::set_eigenvectors ( std::vector< std::vector<double> >& );
+void GeneralizedChiSquared::set_eigenvectors (const vector<vector<double> >& m)
+{
+  eigenvectors = m;
+}
 
-
-void GeneralizedChiSquared::set_eigenvalues ( std::vector< double >& );
+void GeneralizedChiSquared::set_eigenvalues (const vector<double>& v)
+{
+  eigenvalues = v;
+}

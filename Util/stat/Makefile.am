@@ -4,7 +4,8 @@ noinst_LTLIBRARIES = libstat.la
 nobase_include_HEADERS = BinaryStatistic.h UnaryStatistic.h evaluate.h
 
 libstat_la_SOURCES = BinaryStatistic.C UnaryStatistic.C evaluate.C \
-	ChiSquared.C
+	ChiSquared.C ChiSquared.h \
+	GeneralizedChiSquared.C GeneralizedChiSquared.h
 
 TESTS = test_evaluate
 

@@ -21,18 +21,14 @@ namespace BinaryStatistics
     double max_zap_fraction;
 
     std::vector< std::vector<double> > eigenvectors;
-    std::vector< double > inverse_eigenvalues;
+    std::vector< double > eigenvalues;
     
   public:
 
     GeneralizedChiSquared ();
 
-    void set_eigenvectors ( std::vector< std::vector<double> >& );
-    void set_eigenvectors ( std::vector< double >& );
-    void set_eigenvectors ( unsigned ndat, double* );
-
-    void set_eigenvalues ( std::vector< double >& );
-    void set_eigenvalues ( unsigned ndat, double* );
+    void set_eigenvectors ( const std::vector< std::vector<double> >& );
+    void set_eigenvalues ( const std::vector< double >& );
 
     double get (const std::vector<double>&, const std::vector<double>&);
     GeneralizedChiSquared* clone () const { return new GeneralizedChiSquared; }

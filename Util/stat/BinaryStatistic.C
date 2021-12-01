@@ -127,6 +127,7 @@ BinaryStatistic::BinaryStatistic (const string& name,
 static std::vector< BinaryStatistic* >* instances = NULL;
 
 #include "ChiSquared.h"
+#include "GeneralizedChiSquared.h"
 
 using namespace BinaryStatistics;
 
@@ -141,6 +142,7 @@ void BinaryStatistic::build ()
  
   instances->push_back( new CrossCorrelation );
   instances->push_back( new ChiSquared );
+  instances->push_back( new GeneralizedChiSquared );
   instances->push_back( new RelativeSpectralEntropy );
 
   assert (instances->size() == instance_count - start_count);
