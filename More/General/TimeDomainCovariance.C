@@ -33,6 +33,7 @@ static Warning warn;
 //! Default constructor
 TimeDomainCovariance::TimeDomainCovariance ()
 {
+  eigen_decomposed = false;
   subtract_mean = true;
   first_bin = 0;
   last_bin = 0;
@@ -43,6 +44,10 @@ void TimeDomainCovariance::reset ()
   wt_sum = 0.0;
   wt_sum2 = 0.0;
   count = 0;
+
+  eigen_decomposed = false;
+  finalized = false;
+
   for (unsigned i = 0; i < rank * rank; ++i)
     covariance_matrix[i] = 0.0;
 
