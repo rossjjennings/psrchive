@@ -22,11 +22,8 @@ namespace Pulsar {
   */
   class CompareWithSum : public CompareWith
   {
-
-  public:
-
-    //! Compute the comparison summary over all dimensions
-    void compute (ndArray<2,double>& result);
+    //! Compute the comparison summary for primary dimension
+    void compute (unsigned iprimary, ndArray<2,double>& result);
   };
 }
 

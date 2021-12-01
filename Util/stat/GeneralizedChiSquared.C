@@ -17,8 +17,8 @@
 using namespace std;
 
 void general_linear_fit (double& scale, double& offset,
-			 const vector< vector<double> >& evec,
-			 const vector<double>& eval,
+			 const ndArray<2,double>& evec,
+			 const ndArray<1,double>& eval,
 			 const vector<double>& dat1,
 			 const vector<double>& dat2,
 			 const vector<bool>* mask)
@@ -69,6 +69,8 @@ void general_linear_fit (double& scale, double& offset,
   scale = covar / var_2;
 
   offset = mu_1 - scale * mu_2;
+
+  // cerr << "scale=" << scale << " offset=" << offset << endl;
 }
 
 
@@ -77,7 +79,7 @@ using namespace BinaryStatistics;
 static double sqr (double x) { return x*x; }
 
 GeneralizedChiSquared::GeneralizedChiSquared ()
-: BinaryStatistic ("gchi", "variance of difference")
+: BinaryStatistic ("gcs", "generalized chi-squared")
 {
   robust_linear_fit = true;
   max_zap_fraction = 0.5;
@@ -165,15 +167,10 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
   for (unsigned i=0; i<ndim; i++)
     coeff += sqr(pc1[i] - scale * pc2[i] - offset * sum[i]) / eigenvalues[i];
   
-  return coeff / ( dat1.size() * ( 1 + sqr(scale) ) );
+  double retval = coeff / ( ndim * ( 1 + sqr(scale) ) );
+  
+  // cerr << "gcs=" << retval << endl;
+  
+  return retval;
 }
 
-void GeneralizedChiSquared::set_eigenvectors (const vector<vector<double> >& m)
-{
-  eigenvectors = m;
-}
-
-void GeneralizedChiSquared::set_eigenvalues (const vector<double>& v)
-{
-  eigenvalues = v;
-}

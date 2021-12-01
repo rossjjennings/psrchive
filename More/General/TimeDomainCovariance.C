@@ -223,10 +223,13 @@ void TimeDomainCovariance::finalize ()
   }
 
   if (subtract_mean)
+  {
+    DEBUG("TimeDomainCovariance::finalize subtracting mean");
     for (unsigned i=0; i<rank; i++)
       for (unsigned j=0; j<rank; j++)
 	covariance_matrix[i*rank + j] -= mean[i]*mean[j];
-    
+  }
+  
   finalized = true;
 }
 

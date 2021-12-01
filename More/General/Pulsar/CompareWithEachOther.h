@@ -34,15 +34,15 @@ namespace Pulsar {
     //! Estimates of the standard deviations of each profile
     std::vector<double> rms;
 
+    //! Compute the comparison summary for primary dimension
+    void compute (unsigned iprimary, ndArray<2,double>& result);
+    
   public:
 
     CompareWithEachOther ();
 
     //! Used to summarize comparisons
     void set_summary (UnaryStatistic*);
-
-    //! Compute the comparison summary over all dimensions
-    void compute (ndArray<2,double>& result);
   };
 }
 

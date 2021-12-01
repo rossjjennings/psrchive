@@ -43,6 +43,7 @@ public:
   { next.offset = offset + idat * next.stride(); return next; }
 
   uint64_t stride () const { return ndat * next.stride(); }
+  uint64_t size () const { return ndat; }
 };
 
 template<typename T>
@@ -65,6 +66,7 @@ public:
   T& operator[] (uint64_t idat) { return data[offset + idat]; }
 
   uint64_t stride () const { return ndat; }
+  uint64_t size () const { return ndat; }
 };
 
 #endif

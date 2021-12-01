@@ -9,6 +9,7 @@
 // psrchive/More/General/GeneralizedChiSquared.h
 
 #include "BinaryStatistic.h"
+#include "ndArray.h"
 
 namespace BinaryStatistics
 {
@@ -20,17 +21,16 @@ namespace BinaryStatistics
     bool robust_linear_fit;
     double max_zap_fraction;
 
-    std::vector< std::vector<double> > eigenvectors;
-    std::vector< double > eigenvalues;
-    
   public:
 
     GeneralizedChiSquared ();
 
-    void set_eigenvectors ( const std::vector< std::vector<double> >& );
-    void set_eigenvalues ( const std::vector< double >& );
-
     double get (const std::vector<double>&, const std::vector<double>&);
+
     GeneralizedChiSquared* clone () const { return new GeneralizedChiSquared; }
+
+    ndArray<2,double> eigenvectors;
+    ndArray<1,double> eigenvalues;
+    
   };
 }

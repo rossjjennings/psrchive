@@ -126,6 +126,10 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   for (unsigned i=0; i<dat1.size(); i++)
     coeff += sqr(dat1[i] - scale * dat2[i] - offset);
   
-  return coeff / ( dat1.size() * ( 1 + sqr(scale) ) );
+  double retval = coeff / ( dat1.size() * ( 1 + sqr(scale) ) );
+
+  // cerr << "chi=" << retval << endl;
+  
+  return retval;
 }
 

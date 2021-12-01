@@ -12,8 +12,8 @@
 #define __CompareWith_h
 
 #include "Pulsar/HasArchive.h"
+#include "Pulsar/TimeDomainCovariance.h"
 #include "ndArray.h"
-#include "ReferenceAble.h"
 
 class BinaryStatistic;
 class UnaryStatistic;
@@ -48,7 +48,15 @@ namespace Pulsar {
 	      double value);
 
     //! Check that necessary attributes have been set
-    void check (const char* context);
+    void check ();
+
+    //! Perform an eigenanalysis and set up the generalized chi squared
+    virtual void setup (unsigned iprimary);
+    
+    Reference::To<TimeDomainCovariance> covar;
+
+    //! Compute the comparison summary for primary dimension
+    virtual void compute (unsigned iprimary, ndArray<2,double>& result) = 0;
 
   public:
 
@@ -60,7 +68,7 @@ namespace Pulsar {
     void set_primary (unsigned n, void (HasArchive::*) (Index));
     void set_compare (unsigned n, void (HasArchive::*) (Index));
 
-     virtual void compute (ndArray<2,double>& result) = 0;
+    virtual void compute (ndArray<2,double>& result);
   };
 }
 

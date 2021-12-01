@@ -24,10 +24,8 @@ void CompareWithEachOther::set_summary (UnaryStatistic* stat)
   summary = stat;
 }
 
-void CompareWithEachOther::compute (ndArray<2,double>& result)
+void CompareWithEachOther::compute (unsigned iprimary, ndArray<2,double>& result)
 {
-  check ("CompareWithEachOther::compute");
-  
   // resize the temporary ndArray
   temp * ncompare * ncompare;
 
@@ -36,92 +34,87 @@ void CompareWithEachOther::compute (ndArray<2,double>& result)
        << " nchan=" << nchan << endl;
 #endif
 
-  for (unsigned iprimary=0; iprimary < nprimary; iprimary++)
-  {
-    (data->*primary) (iprimary);
-
-    rms.resize (ncompare, 0.0);
-    unsigned irms=0;
+  rms.resize (ncompare, 0.0);
+  unsigned irms=0;
     
-    for (unsigned icompare=0; icompare < ncompare; icompare++)
-    {
-      (data->*compare) (icompare);
+  for (unsigned icompare=0; icompare < ncompare; icompare++)
+  {
+    (data->*compare) (icompare);
 	
-      Reference::To<const Profile> iprof = data->get_Profile ();
+    Reference::To<const Profile> iprof = data->get_Profile ();
 
-      if (iprof->get_weight() == 0.0)
+    if (iprof->get_weight() == 0.0)
+    {
+      set (result, iprimary, icompare, 0.0);	
+      continue;
+    }
+    
+    vector<double> idata (iprof->get_amps(),
+			  iprof->get_amps() + iprof->get_nbin());
+    
+    if (irms < icompare)
+    {
+      irms = icompare;
+      rms[irms] = sqrt( robust_variance (idata) );
+    }
+    
+    for (double& element : idata)
+      element /= rms[icompare];
+
+    for (unsigned jcompare=icompare+1; jcompare < ncompare; jcompare++)
+    {
+      (data->*compare) (jcompare);
+
+      Reference::To<const Profile> jprof = data->get_Profile ();
+      
+      if (jprof->get_weight() == 0.0)
       {
-	set (result, iprimary, icompare, 0.0);	
+	temp[icompare][jcompare] = temp[jcompare][icompare] = 0.0;
 	continue;
       }
-	
-      vector<double> idata (iprof->get_amps(),
-			    iprof->get_amps() + iprof->get_nbin());
-
-      if (irms < icompare)
+      
+      vector<double> jdata (jprof->get_amps(),
+			    jprof->get_amps() + jprof->get_nbin());
+      
+      if (irms < jcompare)
       {
-	irms = icompare;
-	rms[irms] = sqrt( robust_variance (idata) );
+	irms = jcompare;
+	rms[irms] = sqrt( robust_variance (jdata) );
       }
-
-      for (double& element : idata)
-	element /= rms[icompare];
-
-      for (unsigned jcompare=icompare+1; jcompare < ncompare; jcompare++)
-      {
-	(data->*compare) (jcompare);
-
-	Reference::To<const Profile> jprof = data->get_Profile ();
-	  
-	if (jprof->get_weight() == 0.0)
-        {
-	  temp[icompare][jcompare] = temp[jcompare][icompare] = 0.0;
-	  continue;
-	}
-
-	vector<double> jdata (jprof->get_amps(),
-			      jprof->get_amps() + jprof->get_nbin());
-
-	if (irms < jcompare)
-	{
-	  irms = jcompare;
-	  rms[irms] = sqrt( robust_variance (jdata) );
-	}
-	
-	for (double& element : jdata)
-	  element /= rms[jcompare];
-
+      
+      for (double& element : jdata)
+	element /= rms[jcompare];
+      
 #ifdef _DEBUG
-	cerr << "calling BinaryStatistic::get" << endl;
+      cerr << "calling BinaryStatistic::get" << endl;
 #endif
 	
-	double val = statistic->get (idata, jdata);
-
-	temp[icompare][jcompare] = temp[jcompare][icompare] = val;
-      }
-
-      std::vector<double> data (ncompare-1);
-      unsigned ndat = 0;
-	
-      for (unsigned jcompare=0; jcompare < ncompare; jcompare++)
-      {
-	if (jcompare == icompare)
-	  continue;
-
-	if (temp[icompare][jcompare] == 0.0)
-	  continue;
-	  
-	data[ndat] = temp[icompare][jcompare];
-	ndat ++;
-      }
-
-      if (ndat == 0)
-	set (result, iprimary, icompare, 0.0);	
-      else
-      {
-	data.resize (ndat);
-	set (result, iprimary, icompare, summary->get(data));
-      }
+      double val = statistic->get (idata, jdata);
+      
+      temp[icompare][jcompare] = temp[jcompare][icompare] = val;
+    }
+    
+    std::vector<double> data (ncompare-1);
+    unsigned ndat = 0;
+    
+    for (unsigned jcompare=0; jcompare < ncompare; jcompare++)
+    {
+      if (jcompare == icompare)
+	continue;
+      
+      if (temp[icompare][jcompare] == 0.0)
+	continue;
+      
+      data[ndat] = temp[icompare][jcompare];
+      ndat ++;
+    }
+    
+    if (ndat == 0)
+      set (result, iprimary, icompare, 0.0);	
+    else
+    {
+      data.resize (ndat);
+      set (result, iprimary, icompare, summary->get(data));
     }
   }
 }
