@@ -19,10 +19,6 @@
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
 
@@ -48,9 +44,6 @@
 #include "Pulsar/TimeDomainCovariance.h"
 #include "Pulsar/CrossCovarianceMatrix.h"
 
-//#define _DEBUG 1
-#include "debug.h"
-
 #include<gsl/gsl_blas.h>
 #include<gsl/gsl_eigen.h>
 #include<gsl/gsl_linalg.h>
@@ -69,6 +62,12 @@
 #endif
 
 #include <string.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+
+// #define _DEBUG 1
+#include "debug.h"
 
 using namespace std;
 using namespace Pulsar;
@@ -111,8 +110,9 @@ protected:
   void populate_profiles_matrix();
   gsl_matrix *profiles;
   gsl_matrix *decompositions;
-  gsl_matrix *evec;
-  gsl_vector *eval;
+
+  //gsl_matrix *evec;
+  //gsl_vector *eval;
   gsl_vector *mean_calc_vector;
   float nbin;
 
@@ -816,7 +816,7 @@ void psrpca::solve_eigenproblem()
 
   t_cov->eigen ();
 
-  DEBUG("TimeDomain::eigen finished");
+  DEBUG("psrpca::solve_eigenproblem TimeDomain::eigen finished");
 
   vector<double> damps (nbin);
   gsl_vector_const_view damps_view
@@ -825,30 +825,32 @@ void psrpca::solve_eigenproblem()
   // save evectors
   if ( save_evecs )
   {
-    //Reference::To<Archive> evecs_archive = total->clone();
-    // TODO remove the hardwired name of the file
-    //Reference::To<Archive> evecs_archive = Archive::load ( "all.FcalibP" );
-    gsl_vector *evec_copy = gsl_vector_alloc ( (int)nbin );
+    DEBUG("psrpca::solve_eigenproblem saving eigenvectors");
 
-    /*for (unsigned iext=0; iext < evecs_archive->get_nextension(); iext++)
-      {
-      delete evecs_archive->get_extension(iext);
-      }*/
+    gsl_vector *evec_copy = gsl_vector_alloc ( (int)nbin );
     evecs_archive->resize ( (unsigned)nbin, 0, 0, 0 );
+
     if ( nbin > total_count )
-      {
+    {
 	long double folding_period = (long double) evecs_archive->get_Integration(0)->get_folding_period();
 	MJD ref_MJD = evecs_archive->get_Integration(total_count-1)->get_epoch();
 	for ( unsigned isub = total_count; isub < nbin; isub++ ) {
 	  //evecs_archive->set_epoch( to_MJD( from_MJD(evecs_archive->get_Integration(isub-1)->get_epoch()) + ((long double)(isub-total_count+1))*folding_period ) );
 	  evecs_archive->get_Integration( isub )->set_epoch( ref_MJD + (double) ( isub - total_count + 1 ) * folding_period );
 	}
-      }
+    }
+
+    DEBUG("psrpca::solve_eigenproblem extracting eigenvectors");
+
+    gsl_matrix_const_view evec
+      = gsl_matrix_const_view_array(t_cov->get_eigenvectors_pointer(), nbin, nbin);
+
     for (unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
       {
-	gsl_vector_view view = gsl_matrix_column(evec, i_evec);
-	
-	gsl_vector_memcpy( evec_copy, &view.vector ); // this memcopy is necessary, as the evec matrix is stored in row-major order
+	gsl_vector_const_view view = gsl_matrix_const_column(&evec.matrix, i_evec);
+
+	// this memcopy is necessary, as the evec matrix is stored in row-major order
+	gsl_vector_memcpy( evec_copy, &view.vector );
 	evecs_archive->get_Profile( i_evec, 0, 0 ) -> set_amps( evec_copy->data );
 	if ( full_stokes_pca )
 	  {
@@ -859,7 +861,9 @@ void psrpca::solve_eigenproblem()
 	  }
       }
     evecs_archive->unload ( prefix+"_evecs.ar" );
-    
+
+    DEBUG("psrpca::solve_eigenproblem eigenvectors saved");
+
   } //calculating eigenvectors / values
   else 
   {
@@ -869,6 +873,10 @@ void psrpca::solve_eigenproblem()
     Reference::To<Archive> evecs_archive = Archive::load( load_prefix + "_evecs.ar" );
 
     float *famps = new float [ (unsigned)nbin ];
+
+    vector<double> eigen_vectors (nbin * nbin);
+    gsl_matrix_view evec
+      = gsl_matrix_view_array(&(eigen_vectors[0]), nbin, nbin);
 
     for ( unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
     {
@@ -884,14 +892,22 @@ void psrpca::solve_eigenproblem()
 	famps  = evecs_archive->get_Profile( i_evec, 0, 0 )->get_amps();
       }
       transform( famps, famps+(unsigned)nbin, damps.begin(), CastToDouble() );
-      gsl_matrix_set_col( evec, i_evec, &damps_view.vector );
+
+      gsl_matrix_set_col( &evec.matrix, i_evec, &damps_view.vector );
+
     }
+
+    t_cov->set_eigenvectors (eigen_vectors);
+
+    vector<double> eval (nbin);
+    gsl_vector_view eval_view
+      = gsl_vector_view_array( &(eval[0]), nbin );
 
     // load eigenvalues
     FILE *in;
     int status;
     in = fopen( (load_prefix+"_evals.dat").c_str(), "r" );
-    status = gsl_vector_fscanf( in, eval );
+    status = gsl_vector_fscanf( in, &eval_view.vector );
     fclose( in );
     if ( status == GSL_EFAILED )
     {
@@ -902,9 +918,12 @@ void psrpca::solve_eigenproblem()
 
   if ( save_evals )
   {
+    gsl_vector_const_view eval_view
+      = gsl_vector_const_view_array( t_cov->get_eigenvalues_pointer(), nbin );
+
     FILE *out;
     out = fopen ( (prefix+"_evals.dat").c_str(), "w" );
-    gsl_vector_fprintf ( out, eval, "%g" );
+    gsl_vector_fprintf ( out, &eval_view.vector, "%g" );
     fclose ( out );
   } // save_evals
 }
@@ -930,7 +949,11 @@ void psrpca::decompose_profiles()
   //cerr << "Decomposing residual profiles finished!" << endl;
   culaShutdown();
 #else
-  gsl_blas_dgemm ( CblasTrans, CblasNoTrans, 1.0, profiles, evec, 0.0, decompositions );
+
+  gsl_matrix_const_view evec
+    = gsl_matrix_const_view_array(t_cov->get_eigenvectors_pointer(), nbin, nbin);
+      
+  gsl_blas_dgemm ( CblasTrans, CblasNoTrans, 1.0, profiles, &evec.matrix, 0.0, decompositions );
 #endif
 
   FILE *out;
