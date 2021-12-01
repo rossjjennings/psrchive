@@ -8,8 +8,7 @@
 
 // psrchive/Util/units/debug.h
 
-#ifndef __debug_h
-#define __debug_h
+#undef DEBUG
 
 #ifdef _DEBUG
 
@@ -22,4 +21,3 @@
 
 #endif
 
-#endif
