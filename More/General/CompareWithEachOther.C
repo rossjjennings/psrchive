@@ -28,7 +28,7 @@ void CompareWithEachOther::compute (ndArray<2,double>& result)
 {
   check ("CompareWithEachOther::compute");
   
-  // reside the temporary ndArray
+  // resize the temporary ndArray
   temp * ncompare * ncompare;
 
 #ifdef _DEBUG
