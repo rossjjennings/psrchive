@@ -61,10 +61,11 @@
 #include <cula.hpp>
 #endif
 
-#include <string.h>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cstring>
+#include <cassert>
 
 // #define _DEBUG 1
 #include "debug.h"
