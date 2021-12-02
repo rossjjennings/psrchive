@@ -41,12 +41,26 @@ namespace Pulsar {
 
     const std::string& get_way () const { return way; }
     void set_way (const std::string& t) { way = t; }
-    
+
+    //! Flags for subset of sub-integrations to be computed
+    void set_compute_subint (const std::vector<bool>& flags)
+    { compute_subint = flags; }
+
+    //! Flags for subset of channels to be computed
+    void set_compute_chan (const std::vector<bool>& flags)
+    { compute_chan = flags; }
+
   protected:
     
     Reference::To<BinaryStatistic> stat;
     ndArray<2,double> result;
 
+    //! Flags for subset of sub-integrations to be computed
+    std::vector<bool> compute_subint;
+
+    //! Flags for subset of channels to be computed
+    std::vector<bool> compute_chan;
+    
     // what to compare
     std::string what;
     // dimension along which to compare

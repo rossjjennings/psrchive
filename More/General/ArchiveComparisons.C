@@ -95,12 +95,14 @@ void ArchiveComparisons::build () try
     compare->set_primary (nchan, &HasArchive::set_chan);
     compare->set_compare (nsubint, &HasArchive::set_subint);
     compare->set_transpose (true);
+    compare->set_compute_mask (compute_chan);
   }
   else if (way == "freq")
   {
     compare->set_primary (nsubint, &HasArchive::set_subint);
     compare->set_compare (nchan, &HasArchive::set_chan);
     compare->set_transpose (false);
+    compare->set_compute_mask (compute_subint);
   }
   else
     throw Error (InvalidState, "ArchiveComparisons::build",

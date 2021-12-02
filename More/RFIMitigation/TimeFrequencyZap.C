@@ -16,7 +16,7 @@
 
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
-#include "Pulsar/ArchiveStatistic.h"
+#include "Pulsar/ArchiveComparisons.h"
 #include "Pulsar/Index.h"
 
 #include "Pulsar/StandardOptions.h"
@@ -86,6 +86,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
   add( &TimeFrequencyZap::get_report,
        &TimeFrequencyZap::set_report,
        "report", "Print one-line report to stdout" );
+
+  add( &TimeFrequencyZap::get_filename,
+       &TimeFrequencyZap::set_filename,
+       "fname", "Name of file to which stats are printed" );
 }
 
 // defined in More/General/standard_interface.C
@@ -361,6 +365,9 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
 
   unsigned iter = 0;
   unsigned nmasked_during_loop = 0;
+
+  compute_subint.clear();
+  compute_chan.clear();
   
   do 
   {
@@ -425,8 +432,26 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
     // force recomputation of any buffered data
     statistic->set_Archive (NULL);
     statistic->set_Archive (data);
+
+    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    if (compare)
+    {
+      compare->set_compute_subint (compute_subint);
+      compare->set_compute_chan (compute_chan);
+    }
   }
- 
+
+  FILE* fptr = 0;
+  
+  if (filename != "")
+  {
+    cerr << "TimeFrequencyZap::compute_stat opening '" << filename << "'" << endl;
+    fptr = fopen(filename.c_str(),"w");
+
+    // disable writing on the next iteration
+    filename = "";
+  }
+  
   // Eval expression, fill stats array
   for (unsigned isub=0; isub<nsubint; isub++) 
   {
@@ -466,9 +491,18 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
 	       << " fval=" << fval << endl;
 
         stat[idx(isub,ichan,ipol)] = fval;
+
+	if (fptr)
+	  fprintf (fptr, "%u %u %u %g\n", isub, ichan, ipol, fval);
       }
     }
+
+    if (fptr)
+      fprintf (fptr, "\n");
   }
+
+  if (fptr)
+    fclose (fptr);
 }
 
 void Pulsar::TimeFrequencyZap::update_mask ()
@@ -511,6 +545,12 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
   unsigned nscrunch = factor.get_nscrunch (archive->get_nchan());
   
   assert ( nchan * nscrunch + chan_offset <= archive->get_nchan() );
+
+  compute_subint.resize (nsubint);
+  std::fill (compute_subint.begin(), compute_subint.end(), false);
+
+  compute_chan.resize (nchan);
+  std::fill (compute_chan.begin(), compute_chan.end(), false);
   
   // apply mask back to original archive
   for (unsigned isub=0; isub<nsubint; isub++) 
@@ -529,7 +569,11 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
       {
 	unsigned ch = ichan*nscrunch + jchan + chan_offset;
 	if (wt == 0 && subint->get_weight(ch) != 0)
+	{
 	  nmasked ++;
+	  compute_subint[isub] = true;
+	  compute_chan[ichan] = true;
+	}
 	subint->set_weight(ch, wt);
       }
     }

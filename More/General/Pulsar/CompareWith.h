@@ -58,6 +58,9 @@ namespace Pulsar {
     //! Compute the comparison summary for primary dimension
     virtual void compute (unsigned iprimary, ndArray<2,double>& result) = 0;
 
+    //! Flags for subset of sub-integrations to be computed
+    std::vector<bool> compute_mask;
+    
   public:
 
     CompareWith ();
@@ -68,6 +71,10 @@ namespace Pulsar {
     void set_primary (unsigned n, void (HasArchive::*) (Index));
     void set_compare (unsigned n, void (HasArchive::*) (Index));
 
+    //! Flags for subset of primary axis to be computed
+    void set_compute_mask (const std::vector<bool>& flags)
+    { compute_mask = flags; }
+			   
     virtual void compute (ndArray<2,double>& result);
   };
 }

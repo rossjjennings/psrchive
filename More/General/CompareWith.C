@@ -86,9 +86,17 @@ void CompareWith::check ()
 void CompareWith::compute (ndArray<2,double>& result)
 {
   check ();
+
+  DEBUG("CompareWith::compute nprimary=" << nprimary << " mask.size=" << compute_mask.size());
   
   for (unsigned iprimary=0; iprimary < nprimary; iprimary++) try
   {
+    if (compute_mask.size() == nprimary && !compute_mask[iprimary])
+    {
+      DEBUG("not recomputing " << iprimary);
+      continue;
+    }
+    
     (data->*primary) (iprimary);
 
     setup (iprimary);
@@ -157,18 +165,29 @@ void CompareWith::setup (unsigned iprimary)
   const double* eval = covar->get_eigenvalues_pointer();
   const double* evec = covar->get_eigenvectors_pointer();
   
-  unsigned nrank = covar->get_rank();
+  unsigned rank = covar->get_count();
   unsigned eff_rank = 0;
-  while (eff_rank < nrank && eval[eff_rank] > var)
+  while (eff_rank < rank && eval[eff_rank] > var)
     eff_rank ++;
 
-  gcs->eigenvectors * eff_rank * nrank;
+  if (eff_rank+1 == rank)
+  {
+    eff_rank --;
+    
+    DEBUG("CompareWith::setup i=" << iprimary << " full rank lambda/var=" << eval[eff_rank-1/var);
+  }
+  
+  DEBUG("CompareWith::setup i=" << iprimary << " rank=" << rank << " effective rank=" << eff_rank);
+
+  unsigned nbin = covar->get_rank();
+  
+  gcs->eigenvectors * eff_rank * nbin;
   gcs->eigenvalues * eff_rank;
   
   for (unsigned irank=0; irank < eff_rank; irank++)
   {
-    for (unsigned jrank=0; jrank < nrank; jrank++)
-      gcs->eigenvectors[irank][jrank] = evec[irank*nrank+jrank];
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+      gcs->eigenvectors[irank][ibin] = evec[irank*nbin+ibin];
 
     /*
       divide by var because both CompareWithSum and CompareWithEachOther normalize

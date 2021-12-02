@@ -108,7 +108,13 @@ namespace Pulsar {
       //! Get flag to print a one-line report
       bool get_report () const { return report; }
 
-    protected:
+      //! Set flag to print a one-line filename
+      void set_filename (const std::string& name) { filename = name; }
+
+      //! Get flag to print a one-line filename
+      const std::string& get_filename () const { return filename; }
+
+  protected:
     
       void transform (Archive* data, Archive* archive,
 		      unsigned chan_offset = 0);
@@ -193,14 +199,26 @@ namespace Pulsar {
 
     //! Print a report on stdout
     bool report;
+
+    //! Name of file to which statistics are printed on first iteration
+    std::string filename;
     
   private:
     
     //! Number of subints/chans zapped during update_mask
     unsigned nmasked;
 
+    //! Flags for subset of sub-integrations to be computed
+    /*! Optimization: recomputing can be expensive */
+    std::vector<bool> compute_subint;
+
+    //! Flags for subset of channels to be computed
+    /*! Optimization: recomputing can be expensive */
+    std::vector<bool> compute_chan;
+    
     //! The archive that was last cloned and dedispersed
     Reference::To<Archive> last_dedispersed;
+    
     //! The dedispersed clone
     Reference::To<Archive> dedispersed_clone;
   };
