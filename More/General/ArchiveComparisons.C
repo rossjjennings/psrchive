@@ -97,16 +97,19 @@ void ArchiveComparisons::build () try
     compare->set_transpose (true);
     compare->set_compute_mask (compute_chan);
   }
-  else if (way == "freq")
+  else if ((way == "freq") || (way == "all"))
   {
     compare->set_primary (nsubint, &HasArchive::set_subint);
     compare->set_compare (nchan, &HasArchive::set_chan);
     compare->set_transpose (false);
-    compare->set_compute_mask (compute_subint);
+    if (way == "all")
+      compare->set_compare_all ();
+    else
+      compare->set_compute_mask (compute_subint);
   }
   else
     throw Error (InvalidState, "ArchiveComparisons::build",
-		 "way must be 'time' or 'freq'");
+		 "way must be 'time' or 'freq' or 'all'");
 
   Index isubint_restore = get_subint();
   Index ichan_restore = get_chan();

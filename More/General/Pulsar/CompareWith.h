@@ -40,6 +40,12 @@ namespace Pulsar {
     void (HasArchive::* compare) (Index);
     unsigned ncompare;
 
+    //! Compare over both dimensions
+    bool compare_all;
+
+    //! Compute the covariance matrix of the best-fit residual after fitting scale+offset
+    bool model_residual;
+    
     //! Transpose indeces when computing results
     bool transpose;
 
@@ -51,8 +57,12 @@ namespace Pulsar {
     void check ();
 
     //! Perform an eigenanalysis and set up the generalized chi squared
-    virtual void setup (unsigned iprimary);
-    
+    virtual void setup (unsigned start_primary, unsigned nprimary = 1);
+
+    //! Compute the mean of the profiles to be compared
+    void compute_mean (unsigned start_primary, unsigned nprimary);
+    Reference::To<Profile> mean;
+
     Reference::To<TimeDomainCovariance> covar;
 
     //! Compute the comparison summary for primary dimension
@@ -71,6 +81,8 @@ namespace Pulsar {
     void set_primary (unsigned n, void (HasArchive::*) (Index));
     void set_compare (unsigned n, void (HasArchive::*) (Index));
 
+    void set_compare_all (bool flag = true) { compare_all = flag; }
+    
     //! Flags for subset of primary axis to be computed
     void set_compute_mask (const std::vector<bool>& flags)
     { compute_mask = flags; }

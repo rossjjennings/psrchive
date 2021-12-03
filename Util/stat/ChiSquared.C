@@ -75,42 +75,46 @@ ChiSquared::ChiSquared ()
 {
   robust_linear_fit = true;
   max_zap_fraction = 0.5;
+  outlier_threshold = 5.0;
 }
 
 double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
 {
   assert (dat1.size() == dat2.size());
-      
+
+  unsigned ndat = dat1.size();
   double scale = 1.0;
   double offset = 0.0;
   
   if (robust_linear_fit)
   {
-    vector<bool> mask (dat1.size(), true);
+    vector<bool> mask (ndat, true);
     
     unsigned total_zapped = 0;
-    unsigned max_zapped = dat1.size();
+    unsigned max_zapped = ndat;
     if (max_zap_fraction)
       max_zapped = max_zap_fraction * max_zapped;
+
+    residual.resize (ndat);
     
     unsigned zapped = 0;
     do
     {
       linear_fit (scale, offset, dat1, dat2, &mask);
-      
-      double sigma = 2.0;
+
+      double sigma = 2.0 * outlier_threshold;
       double var = 1 + sqr(scale);
       double cut = sqr(sigma) * var;
       
       zapped = 0;
       
-      for (unsigned i=0; i<dat1.size(); i++)
+      for (unsigned i=0; i<ndat; i++)
       {
 	if (!mask[i])
 	  continue;
 	
-	double residual = dat1[i] - scale * dat2[i] - offset;
-	if ( sqr(residual) > cut )
+	residual[i] = dat1[i] - scale * dat2[i] - offset;
+	if ( outlier_threshold > 0 && sqr(residual[i]) > cut )
         {
 	  mask[i] = false;
 	  zapped ++;
@@ -120,13 +124,15 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
       total_zapped += zapped;
     }
     while (zapped && total_zapped < max_zapped);
+
+    // cerr << "ndat=" << ndat << " zapped=" << total_zapped << " scale=" << scale << " offset=" << offset << endl;
   }
   
   double coeff = 0.0;
-  for (unsigned i=0; i<dat1.size(); i++)
+  for (unsigned i=0; i<ndat; i++)
     coeff += sqr(dat1[i] - scale * dat2[i] - offset);
   
-  double retval = coeff / ( dat1.size() * ( 1 + sqr(scale) ) );
+  double retval = coeff / ( ndat * ( 1 + sqr(scale) ) );
 
   // cerr << "chi=" << retval << endl;
   

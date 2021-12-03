@@ -10,6 +10,7 @@
 #include "Pulsar/Profile.h"
 
 #include "GeneralizedChiSquared.h"
+#include "ChiSquared.h"
 #include "UnaryStatistic.h"
 
 // #define _DEBUG 1
@@ -25,6 +26,8 @@ CompareWith::CompareWith ()
   primary = 0;
   compare = 0;
   transpose = false;
+  compare_all = false;
+  model_residual = true;
 }
 
 void CompareWith::set_statistic (BinaryStatistic* stat)
@@ -60,8 +63,6 @@ void CompareWith::set (ndArray<2,double>& result,
 		       unsigned iprimary, unsigned icompare,
 		       double value)
 {
-  DEBUG ("CompareWith::set i=" << iprimary << " j=" << icompare << " val=" << value );
-  
   if (transpose)
     result[icompare][iprimary] = value;
   else
@@ -87,19 +88,20 @@ void CompareWith::compute (ndArray<2,double>& result)
 {
   check ();
 
-  DEBUG("CompareWith::compute nprimary=" << nprimary << " mask.size=" << compute_mask.size());
+  DEBUG("CompareWith::compute nprimary=" << nprimary << " mask.size=" << compute_mask.size() << " all=" << compare_all);
+
+  if (compare_all)
+    setup (0, nprimary);
   
   for (unsigned iprimary=0; iprimary < nprimary; iprimary++) try
   {
     if (compute_mask.size() == nprimary && !compute_mask[iprimary])
-    {
-      DEBUG("not recomputing " << iprimary);
       continue;
-    }
     
     (data->*primary) (iprimary);
 
-    setup (iprimary);
+    if (!compare_all)
+      setup (iprimary);
     
     compute (iprimary, result);
   }
@@ -113,44 +115,103 @@ void CompareWith::compute (ndArray<2,double>& result)
 
 }
 
-using BinaryStatistics::GeneralizedChiSquared;
+using namespace BinaryStatistics;
 
-void CompareWith::setup (unsigned iprimary)
+void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 {
+  mean = 0;
+  
   GeneralizedChiSquared* gcs = dynamic_cast<GeneralizedChiSquared*> (statistic.get());
   if (!gcs)
     return;
 
-  DEBUG( "CompareWith::setup iprimary=" << iprimary );
+  DEBUG( "CompareWith::setup start_primary=" << start_primary << " nprimary=" << nprimary);
 
   if (!covar)
     covar = new TimeDomainCovariance;
 
   covar->reset ();
 
+  Reference::To<Profile> temp;
+  vector<double> mamps;
+  
+  if (model_residual)
+  {
+    compute_mean (start_primary, nprimary);
+    
+    if (!mean)
+      throw Error (InvalidState, "CompareWith::setup", "no good data");
+
+    mamps = vector<double> ( mean->get_amps(),
+			     mean->get_amps() + mean->get_nbin() );
+
+    double rms = sqrt( robust_variance (mamps) );
+    for (double& element : mamps)
+      element /= rms;
+  }
+  
   double var = 0.0;
   double norm = 0.0;
+
+  ChiSquared chi;
   
-  for (unsigned icompare=0; icompare < ncompare; icompare++)
+  for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
   {
-    (data->*compare) (icompare);
-
-    Reference::To<const Profile> prof = data->get_Profile ();
-
-    double weight = prof->get_weight();
-
-    if (weight == 0.0)
-      continue;
-
-    vector<double> amps (prof->get_amps(),
-			 prof->get_amps() + prof->get_nbin());
-
-    var += weight * robust_variance (amps);
-    norm += weight;
+    (data->*primary) (iprimary);
     
-    covar->add_Profile (prof);
-  }
+    for (unsigned icompare=0; icompare < ncompare; icompare++)
+    {
+      (data->*compare) (icompare);
 
+      Reference::To<const Profile> prof = data->get_Profile ();
+
+      double weight = prof->get_weight();
+      
+      if (weight == 0.0)
+	continue;
+
+      vector<double> amps (prof->get_amps(),
+			   prof->get_amps() + prof->get_nbin());
+
+      if (model_residual)
+      {
+	double rms = sqrt( robust_variance (amps) );
+	for (double& element : amps)
+	  element /= rms;
+
+	chi.set_outlier_threshold (0.0);
+	double chisq = chi.get (amps, mamps);
+	// DEBUG( "CompareWith::setup chisq=" << chisq );
+
+#if _DEBUG
+	static bool once = true;
+	if (once)
+	  {
+	    vector<double> resid = chi.get_residual();
+	    FILE* fptr = fopen ("resid.dat", "w");
+	    for (unsigned i=0; i<amps.size(); i++)
+	      fprintf (fptr, "%g %g %g\n", mamps[i], amps[i], resid[i]);
+	    fclose (fptr);
+	    once = false;
+	  }
+#endif
+	  
+	amps = chi.get_residual();
+
+	if (!temp)
+	  temp = prof->clone();
+
+	temp->set_amps (amps);
+	prof = temp;
+      }
+
+      var += weight * robust_variance (amps);
+      norm += weight;
+      
+      covar->add_Profile (prof);
+    }
+  }
+  
   if (norm == 0)
     throw Error (InvalidState, "CompareWith::setup", "no good data");
   
@@ -165,19 +226,22 @@ void CompareWith::setup (unsigned iprimary)
   const double* eval = covar->get_eigenvalues_pointer();
   const double* evec = covar->get_eigenvectors_pointer();
   
-  unsigned rank = covar->get_count();
+  unsigned rank = std::min( covar->get_count(), covar->get_rank() );
+
+  DEBUG("CompareWith::setup count=" << covar->get_count() << " dim=" << covar->get_rank() << " rank=" << rank);
+
   unsigned eff_rank = 0;
   while (eff_rank < rank && eval[eff_rank] > var)
     eff_rank ++;
 
-  if (eff_rank+1 == rank)
+  if (eff_rank > 0 && eff_rank+1 >= rank)
   {
     eff_rank --;
     
-    DEBUG("CompareWith::setup i=" << iprimary << " full rank lambda/var=" << eval[eff_rank-1/var);
+    DEBUG("CompareWith::setup full rank lambda/var=" << eval[eff_rank]/var);
   }
   
-  DEBUG("CompareWith::setup i=" << iprimary << " rank=" << rank << " effective rank=" << eff_rank);
+  DEBUG("CompareWith::setup effective rank=" << eff_rank);
 
   unsigned nbin = covar->get_rank();
   
@@ -199,3 +263,29 @@ void CompareWith::setup (unsigned iprimary)
   DEBUG( "CompareWith::setup done" );
 }
     
+void CompareWith::compute_mean (unsigned start_primary, unsigned nprimary)
+{
+  mean = 0;
+
+  // DEBUG( "CompareWith::compute_mean start=" << start_primary << " n=" << nprimary);
+
+  for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
+  {
+    (data->*primary) (iprimary);
+    
+    for (unsigned icompare=0; icompare < ncompare; icompare++)
+    {
+      (data->*compare) (icompare);
+
+      Reference::To<const Profile> iprof = data->get_Profile ();
+
+      if (iprof->get_weight() == 0.0)
+	continue;
+
+      if (!mean)
+	mean = iprof->clone();
+      else
+	mean->average (iprof);
+    }
+  }
+}

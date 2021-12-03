@@ -11,36 +11,32 @@
 #include "BinaryStatistic.h"
 #include "UnaryStatistic.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace Pulsar;
 using namespace std;
 
+void CompareWithSum::setup (unsigned start_primary, unsigned nprimary)
+{
+  CompareWith::setup (start_primary, nprimary);
+
+  if (!mean)
+    compute_mean (start_primary, nprimary);
+}
+
 void CompareWithSum::compute (unsigned iprimary, ndArray<2,double>& result)
 {
-  Reference::To<Profile> sum = 0;
-    
-  for (unsigned icompare=0; icompare < ncompare; icompare++)
+  if (!mean)
   {
-    (data->*compare) (icompare);
-
-    Reference::To<const Profile> iprof = data->get_Profile ();
-
-    if (iprof->get_weight() == 0.0)
-    {
+    for (unsigned icompare=0; icompare < ncompare; icompare++)
       set (result, iprimary, icompare, 0.0);	
-      continue;
-    }
-      
-    if (!sum)
-      sum = iprof->clone();
-    else
-      sum->average (iprof);
-  }
 
-  if (!sum)
     return;
-    
-  vector<double> sumdata (sum->get_amps(),
-			  sum->get_amps() + sum->get_nbin());
+  }
+	
+  vector<double> sumdata (mean->get_amps(),
+			  mean->get_amps() + mean->get_nbin());
 
   double rms = sqrt( robust_variance (sumdata) );
   for (double& element : sumdata)
@@ -53,8 +49,11 @@ void CompareWithSum::compute (unsigned iprimary, ndArray<2,double>& result)
     Reference::To<const Profile> iprof = data->get_Profile ();
 
     if (iprof->get_weight() == 0.0)
+    {
+      set (result, iprimary, icompare, 0.0);	
       continue;
-
+    }
+      
     vector<double> idata (iprof->get_amps(),
 			  iprof->get_amps() + iprof->get_nbin());
 
