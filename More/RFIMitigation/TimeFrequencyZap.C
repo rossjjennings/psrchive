@@ -113,8 +113,11 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
 
   max_iterations = 1;
   recompute = false;
-
+  recompute_original = false;
+  
   nmasked = 0;
+  nmasked_original = 0;
+  
   report = false;
 }
 
@@ -256,58 +259,15 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
     data = processor.result();
   }
 
-  Reference::To<Archive> backup = data;
-
-  if (fscrunch_factor.scrunch_enabled())
-  {
-    if (Archive::verbose > 2)
-      cerr << "TimeFrequencyZap::transform"
-      " fscrunch by " << fscrunch_factor << endl;
-    
-    data = backup->clone();
-    Pulsar::fscrunch (data.get(), fscrunch_factor);
-
-    if (Archive::verbose > 2)
-      cerr << "TimeFrequencyZap::transform"
-      " after fscrunch, nchan=" << data->get_nchan() << endl;
-  }
-
-  if (Archive::verbose > 2)
-    cerr << "TimeFrequencyZap::transform performing transformation" << endl;
-
   unsigned total_masked = 0;
+  unsigned iterations = 0;
 
-  transform (data, archive);
-
-  // nmasked set by transform
-  total_masked += nmasked;
-    
-  if (fscrunch_factor.scrunch_enabled() && data->get_nchan() > 1)
-  {
-    // do it again with the fscrunched channel boundaries offset by 0.5*chbw
-    
-    data = backup->clone();
-
-    if (Archive::verbose > 2)
-      cerr << "TimeFrequencyZap::transform delete edges" << endl;
-    
-    delete_edges (data, fscrunch_factor);
-
-    if (Archive::verbose > 2)
-      cerr << "TimeFrequencyZap::transform"
-        " fscrunch by " << fscrunch_factor << endl;
-    
-    Pulsar::fscrunch (data.get(), fscrunch_factor);
-
-    if (Archive::verbose > 2)
-      cerr << "TimeFrequencyZap::transform performing transformation" << endl;
-
-    unsigned offset = fscrunch_factor.get_nscrunch (nchan) / 2;
-    transform (data, archive, offset);
-
-    // nmasked set by transform
-    total_masked += nmasked;
+  do {
+    iteration (data);
+    total_masked += nmasked_original;
+    iterations ++;
   }
+  while (recompute_original && nmasked_original && iterations < max_iterations);
 
   if (report)
   {
@@ -326,8 +286,96 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   }
 }
 
-void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
-					  unsigned chan_offset)
+void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
+{
+  Reference::To<Archive> data = archive;
+  Reference::To<Archive> backup = data;
+
+  if (fscrunch_factor.scrunch_enabled())
+  {
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform"
+      " fscrunch by " << fscrunch_factor << endl;
+
+    /*
+      If the ArchiveComparison is based on a generalized chi-squared statistic,
+      or anything else that is based on a sample covariance matrix, then it is
+      best to compute that covariance matrix before fscrunching in order to
+      maximize the rank (condition) of the matrix.
+     */
+    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    if (compare)
+    {
+      compare->set_setup_Archive (backup);
+      recompute_original = recompute && compare->get_setup ();
+    }
+    
+    data = backup->clone();
+    Pulsar::fscrunch (data.get(), fscrunch_factor);
+
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform"
+      " after fscrunch, nchan=" << data->get_nchan() << endl;
+  }
+
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::transform computing mask" << endl;
+
+  compute_mask (data);
+
+  nmasked_original = nmasked_during_iterations;
+      
+  if (fscrunch_factor.scrunch_enabled() && data->get_nchan() > 1)
+  {
+    // back up the weights mask
+    std::vector<float> mask0 = mask;
+    unsigned nchan0 = nchan;
+    
+    // compute another mask with the fscrunched channel boundaries offset by 0.5*chbw
+    
+    data = backup->clone();
+
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform delete edges" << endl;
+    
+    delete_edges (data, fscrunch_factor);
+
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform"
+        " fscrunch by " << fscrunch_factor << endl;
+    
+    Pulsar::fscrunch (data.get(), fscrunch_factor);
+
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform computing offset mask" << endl;
+
+    compute_mask (data);
+
+    if (Archive::verbose > 2)
+      cerr << "TimeFrequencyZap::transform applying offset mask" << endl;
+
+    unsigned offset = fscrunch_factor.get_nscrunch (nchan) / 2;
+    apply_mask (archive, fscrunch_factor, offset);
+
+    /*
+      nmasked_original is reset here because clone is masked during iterations
+    */
+    nmasked_original = nmasked;
+
+    // restore the original mask
+    mask = mask0;
+    nchan = nchan0;
+  }
+
+  if (Archive::verbose > 2)
+    cerr << "TimeFrequencyZap::transform applying mask" << endl;
+
+  apply_mask (archive, fscrunch_factor);
+  nmasked_original += nmasked;
+}
+
+
+void Pulsar::TimeFrequencyZap::compute_mask (Archive* data)
 {
   // Size arrays
   nchan = data->get_nchan();
@@ -338,7 +386,7 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   npol = pol_i.size();
 
   if (Archive::verbose > 2)
-    cerr << "TimeFrequencyZap::transform nsubint=" << nsubint
+    cerr << "TimeFrequencyZap::compute_mask nsubint=" << nsubint
          << " nchan=" << nchan << " npol=" << npol << endl;
   
   freq.resize(nchan*nsubint);
@@ -364,7 +412,7 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   }
 
   unsigned iter = 0;
-  unsigned nmasked_during_loop = 0;
+  nmasked_during_iterations = 0;
 
   compute_subint.clear();
   compute_chan.clear();
@@ -372,18 +420,17 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
   do 
   {
     if (Archive::verbose > 2)
-      cerr << "TimeFrequencyZap::transform iteration=" << iter << endl;
+      cerr << "TimeFrequencyZap::compute_mask iteration=" << iter << endl;
 
     if (iter == 0 || recompute)
     {
       if (iter > 0)
       {
 	apply_mask (data);
-	if (data == archive)
-	  nmasked_during_loop += nmasked;
+	nmasked_during_iterations += nmasked;
       }
       
-      compute_stat(data);
+      compute_stat (data);
     }
     
     // sets nmasked
@@ -391,14 +438,10 @@ void Pulsar::TimeFrequencyZap::transform (Archive* data, Archive* archive,
 
     iter ++;
   }
-  while (iter < max_iterations && nmasked > 0);
-
-  apply_mask (archive, fscrunch_factor, chan_offset);
-
-  nmasked += nmasked_during_loop;
+  while (iter < max_iterations && nmasked > 0 && !recompute_original);
 
   if (Archive::verbose > 2)
-    cerr << "TimeFrequencyZap::transform nmasked=" << nmasked << endl;
+    cerr << "TimeFrequencyZap::compute_mask nmasked=" << nmasked_during_iterations << endl;
 }
 
 

@@ -19,6 +19,8 @@ class UnaryStatistic;
 
 namespace Pulsar {
 
+  class CompareWith;
+  
   class ArchiveComparisons : public Identifiable::Proxy<ArchiveStatistic>
   {
  
@@ -26,7 +28,7 @@ namespace Pulsar {
 
     ArchiveComparisons (BinaryStatistic*);
     
-    void set_Archive (const Archive* arch);
+    void set_Archive (const Archive*);
   
     double get ();
 
@@ -50,9 +52,22 @@ namespace Pulsar {
     void set_compute_chan (const std::vector<bool>& flags)
     { compute_chan = flags; }
 
-  protected:
+    //! Archive used to set up
+    void set_setup_Archive (const Archive*);
+
+    //! Return true if call to set_setup_Archive sets anything up
+    /* Not all archive comparisons require a global set up */
+    bool get_setup ();
     
+  protected:
+
+    //! Manages comparisons
+    Reference::To<CompareWith> compare;
+
+    //! Performs comparisons
     Reference::To<BinaryStatistic> stat;
+
+    //! Result of comparisons
     ndArray<2,double> result;
 
     //! Flags for subset of sub-integrations to be computed
@@ -60,7 +75,7 @@ namespace Pulsar {
 
     //! Flags for subset of channels to be computed
     std::vector<bool> compute_chan;
-    
+
     // what to compare
     std::string what;
     // dimension along which to compare
@@ -68,7 +83,9 @@ namespace Pulsar {
 
     void build ();
     bool built;
-    
+
+    void build_compare ();
+    void init_compare (const Archive* arch);
   };
 
 }

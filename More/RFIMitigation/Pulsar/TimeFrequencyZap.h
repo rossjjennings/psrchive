@@ -115,9 +115,9 @@ namespace Pulsar {
       const std::string& get_filename () const { return filename; }
 
   protected:
-    
-      void transform (Archive* data, Archive* archive,
-		      unsigned chan_offset = 0);
+
+      //! computer the mask
+      void compute_mask (Archive* data);
 
       //! compute the relevant statistic
       virtual void compute_stat (Archive* data);
@@ -178,7 +178,7 @@ namespace Pulsar {
       //! The current statistic values
       std::vector<float> stat;
 
-      //! The current weghts mask
+      //! The current weights mask
       std::vector<float> mask;
 
       //! Index into the freqs, mask arrays vs chan and subint
@@ -191,12 +191,18 @@ namespace Pulsar {
         return nchan*npol*isubint + npol*ichan + ipol;
       }
 
-    //! Maximum number of times to run update_mask
+    //! One iteration of the transformation
+    void iteration (Archive* archive);
+
+    //! Maximum number of times to loop
     unsigned max_iterations;
 
     //! Recompute the statistic on each iteration
     bool recompute;
 
+    //! Iterate and recompute after masking the original data
+    bool recompute_original;
+    
     //! Print a report on stdout
     bool report;
 
@@ -207,6 +213,12 @@ namespace Pulsar {
     
     //! Number of subints/chans zapped during update_mask
     unsigned nmasked;
+
+    //! Number of subints/chans zapped during iteration (on original data)
+    unsigned nmasked_original;
+
+    //! Number of subints/chans zapped during iterations while computing mask
+    unsigned nmasked_during_iterations;
 
     //! Flags for subset of sub-integrations to be computed
     /*! Optimization: recomputing can be expensive */

@@ -49,15 +49,21 @@ namespace Pulsar {
     //! Transpose indeces when computing results
     bool transpose;
 
+    //! Perform an eigenanalysis and set up the generalized chi squared
+    virtual void setup (unsigned start_primary, unsigned nprimary = 1);
+
+    //! Set true when setup has completed
+    bool setup_completed;
+
+    //! Set true when setup has completed during set_setup_data
+    bool is_setup;
+
     void set (ndArray<2,double>& result,
 	      unsigned iprimary, unsigned icompare,
 	      double value);
 
     //! Check that necessary attributes have been set
     void check ();
-
-    //! Perform an eigenanalysis and set up the generalized chi squared
-    virtual void setup (unsigned start_primary, unsigned nprimary = 1);
 
     //! Compute the mean of the profiles to be compared
     void compute_mean (unsigned start_primary, unsigned nprimary);
@@ -77,6 +83,13 @@ namespace Pulsar {
 
     void set_statistic (BinaryStatistic*);
     void set_data (HasArchive*);
+    
+    void set_setup_data (const Archive*);
+
+    //! Return true if call to set_setup_data sets anything up
+    /* Not all comparisons require a global set up */
+    bool get_setup () { return is_setup; }
+
     void set_transpose (bool);
     void set_primary (unsigned n, void (HasArchive::*) (Index));
     void set_compare (unsigned n, void (HasArchive::*) (Index));

@@ -7,6 +7,7 @@
 
 #include "Pulsar/CompareWith.h"
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
 #include "GeneralizedChiSquared.h"
@@ -28,6 +29,8 @@ CompareWith::CompareWith ()
   transpose = false;
   compare_all = false;
   model_residual = true;
+  is_setup = false;
+  setup_completed = false;
 }
 
 void CompareWith::set_statistic (BinaryStatistic* stat)
@@ -38,6 +41,25 @@ void CompareWith::set_statistic (BinaryStatistic* stat)
 void CompareWith::set_data (HasArchive* _data)
 {
   data = _data;
+}
+
+void CompareWith::set_setup_data (const Archive* _data)
+{
+  is_setup = false;
+
+  if (_data == NULL)
+    return;
+
+  if (!compare_all)
+    return;
+  
+  Reference::To<const Archive> target = data->get_Archive();
+  data->set_Archive (_data);
+
+  setup (0, nprimary);
+
+  is_setup = setup_completed;
+  data->set_Archive (target);
 }
 
 void CompareWith::set_primary (unsigned n,
@@ -90,7 +112,7 @@ void CompareWith::compute (ndArray<2,double>& result)
 
   DEBUG("CompareWith::compute nprimary=" << nprimary << " mask.size=" << compute_mask.size() << " all=" << compare_all);
 
-  if (compare_all)
+  if (compare_all && !is_setup)
     setup (0, nprimary);
   
   for (unsigned iprimary=0; iprimary < nprimary; iprimary++) try
@@ -100,7 +122,7 @@ void CompareWith::compute (ndArray<2,double>& result)
     
     (data->*primary) (iprimary);
 
-    if (!compare_all)
+    if (!compare_all && !is_setup)
       setup (iprimary);
     
     compute (iprimary, result);
@@ -120,6 +142,8 @@ using namespace BinaryStatistics;
 void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 {
   mean = 0;
+
+  setup_completed = false;
   
   GeneralizedChiSquared* gcs = dynamic_cast<GeneralizedChiSquared*> (statistic.get());
   if (!gcs)
@@ -259,6 +283,8 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
     */
     gcs->eigenvalues[irank] = eval[irank] / var;
   }
+
+  setup_completed = true;
 
   DEBUG( "CompareWith::setup done" );
 }

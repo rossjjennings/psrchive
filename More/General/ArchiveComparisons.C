@@ -19,6 +19,9 @@
 #include <algorithm>
 #include <cassert>
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 using namespace Pulsar;
 
@@ -34,10 +37,7 @@ ArchiveComparisons::ArchiveComparisons (BinaryStatistic* my_stat)
   what = "each";
   way = "time";
   
-#if _DEBUG
-  cerr << "ArchiveComparisons my_stat=" << stat->get_identity()
-       << " summary=" << summary->get_identity() << endl;
-#endif
+  DEBUG("ArchiveComparisons stat=" << stat->get_identity());
 }
 
 void ArchiveComparisons::set_Archive (const Archive* arch)
@@ -50,7 +50,25 @@ void ArchiveComparisons::set_Archive (const Archive* arch)
 
   HasArchive::set_Archive (arch);
 }
-  
+
+void ArchiveComparisons::set_setup_Archive (const Archive* arch)
+{
+  DEBUG("ArchiveComparisons::set_setup_Archive arch=" << (void*) arch);
+  build_compare ();
+  DEBUG("ArchiveComparisons::set_setup_Archive init nchan=" << arch->get_nchan());
+  init_compare (arch);
+  DEBUG("ArchiveComparisons::set_setup_Archive CompareWith::set_setup_data");
+  HasArchive::set_Archive (arch);
+  compare->set_setup_data (arch);
+  DEBUG("ArchiveComparisons::set_setup_Archive done");
+  built = false;
+}
+
+bool ArchiveComparisons::get_setup ()
+{
+  return compare->get_setup ();
+}
+
 double ArchiveComparisons::get ()
 {
   if (!built)
@@ -59,36 +77,28 @@ double ArchiveComparisons::get ()
   unsigned isubint = get_subint().get_value();
   unsigned ichan = get_chan().get_value();
 
-#if _DEBUG
-  cerr << "ArchiveComparisons::get isub=" << isubint << " ichan=" << ichan
-       << " val=" << result[isubint][ichan] << endl;
-#endif
+  DEBUG("ArchiveComparisons::get isub=" << isubint << " ichan=" << ichan << " val=" << result[isubint][ichan]);
   
   return result[isubint][ichan];
 }
 
-void ArchiveComparisons::build () try
+void ArchiveComparisons::build_compare ()
 {
-  const Archive* arch = get_Archive();
-  unsigned nsubint = arch->get_nsubint();
-  unsigned nchan = arch->get_nchan();
-
-#if _DEBUG
-  cerr << "ArchiveComparisons::build nsubint=" << nsubint 
-       << " nchan=" << nchan << endl;
-#endif
-
-  result * nsubint * nchan;
-  
-  Reference::To<CompareWith> compare;
-  
   if (what == "each")
     compare = new CompareWithEachOther;
   else if (what == "sum")
     compare = new CompareWithSum;
   else
-    throw Error (InvalidState, "ArchiveComparisons::build",
+    throw Error (InvalidState, "ArchiveComparisons::build_compare",
 		 "'what' must be 'each' or 'sum'");
+}
+
+void ArchiveComparisons::init_compare (const Archive* arch)
+{
+  unsigned nsubint = arch->get_nsubint();
+  unsigned nchan = arch->get_nchan();
+
+  DEBUG("ArchiveComparisons::init_compare nsubint=" << nsubint << " nchan=" << nchan);
 
   if (way == "time")
   {
@@ -108,15 +118,33 @@ void ArchiveComparisons::build () try
       compare->set_compute_mask (compute_subint);
   }
   else
-    throw Error (InvalidState, "ArchiveComparisons::build",
+    throw Error (InvalidState, "ArchiveComparisons::init_compare",
 		 "way must be 'time' or 'freq' or 'all'");
 
+  compare->set_statistic (stat);
+  compare->set_data (this);
+}
+
+
+void ArchiveComparisons::build () try
+{
+  const Archive* arch = get_Archive();
+  unsigned nsubint = arch->get_nsubint();
+  unsigned nchan = arch->get_nchan();
+
+  DEBUG("ArchiveComparisons::build nsubint=" << nsubint << " nchan=" << nchan);
+
+  result * nsubint * nchan;
+  
+  if (!compare)
+    build_compare ();
+
+  init_compare (arch);
+  
   Index isubint_restore = get_subint();
   Index ichan_restore = get_chan();
   Index ipol_restore = get_pol();
 
-  compare->set_statistic (stat);
-  compare->set_data (this);
   compare->compute (result);
 
   set_subint (isubint_restore);
