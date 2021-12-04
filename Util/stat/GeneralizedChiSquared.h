@@ -19,6 +19,7 @@ namespace BinaryStatistics
   class GeneralizedChiSquared : public BinaryStatistic
   {
     bool robust_linear_fit;
+    double outlier_threshold;
     double max_zap_fraction;
 
   public:

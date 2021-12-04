@@ -75,7 +75,7 @@ ChiSquared::ChiSquared ()
 {
   robust_linear_fit = true;
   max_zap_fraction = 0.5;
-  outlier_threshold = 5.0;
+  outlier_threshold = 3.0;
 }
 
 double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
@@ -125,7 +125,11 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
     }
     while (zapped && total_zapped < max_zapped);
 
-    // cerr << "ndat=" << ndat << " zapped=" << total_zapped << " scale=" << scale << " offset=" << offset << endl;
+#if _DEBUG
+    if (total_zapped)
+      cerr << "chi ndat=" << ndat << " zapped=" << total_zapped
+	   << " scale=" << scale << " offset=" << offset << endl;
+#endif
   }
   
   double coeff = 0.0;

@@ -83,6 +83,7 @@ GeneralizedChiSquared::GeneralizedChiSquared ()
 {
   robust_linear_fit = true;
   max_zap_fraction = 0.5;
+  outlier_threshold = 0.0;
 }
 
 double GeneralizedChiSquared::get (const vector<double>& dat1,
@@ -90,6 +91,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 {
   assert (dat1.size() == dat2.size());
 
+  unsigned ndat = dat1.size();
   unsigned ndim = eigenvectors.size();
   assert (ndim == eigenvalues.size());
 
@@ -100,7 +102,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 
   for (unsigned idim=0; idim < ndim; idim++)
   {
-    for (unsigned i=0; i<dat1.size(); i++)
+    for (unsigned i=0; i<ndat; i++)
     {
       pc1[idim] += eigenvectors[idim][i] * dat1[i];
       pc2[idim] += eigenvectors[idim][i] * dat2[i];
@@ -113,27 +115,33 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
   
   if (robust_linear_fit)
   {
-    vector<bool> mask (dat1.size(), true);
+    vector<bool> mask (ndat, true);
     
     unsigned total_zapped = 0;
-    unsigned max_zapped = dat1.size();
+    unsigned max_zapped = ndat;
     if (max_zap_fraction)
       max_zapped = max_zap_fraction * max_zapped;
     
     unsigned zapped = 0;
+    unsigned iterations = 0;
     do
     {
       general_linear_fit (scale, offset,
 			  eigenvectors, eigenvalues,
 			  dat1, dat2, &mask);
+
+      iterations ++;
       
-      double sigma = 2.0;
+      if (outlier_threshold == 0.0)
+	break;
+      
+      double sigma = 2.0 * outlier_threshold;
       double var = 1 + sqr(scale);
       double cut = sqr(sigma) * var;
       
       zapped = 0;
       
-      for (unsigned i=0; i<dat1.size(); i++)
+      for (unsigned i=0; i<ndat; i++)
       {
 	if (!mask[i])
 	  continue;
@@ -161,6 +169,12 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
       total_zapped += zapped;
     }
     while (zapped && total_zapped < max_zapped);
+
+    if (total_zapped)
+      cerr << "gchi ndat=" << ndat << " zapped=" << total_zapped
+	   << " iterations=" << iterations
+	   << " scale=" << scale << " offset=" << offset << endl;
+
   }
   
   double coeff = 0.0;
