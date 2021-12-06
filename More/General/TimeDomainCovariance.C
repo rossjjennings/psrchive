@@ -25,6 +25,12 @@
 #include <gsl/gsl_eigen.h>
 #endif
 
+#ifdef HAVE_CULA
+#include <cula_lapack.hpp>
+#include <cula_blas.hpp>
+#include <cula.hpp>
+#endif
+
 using namespace std;
 using namespace Pulsar;
 
@@ -283,7 +289,7 @@ void TimeDomainCovariance::eigen ()
   // copy the evecs as calculated by CULA to the gsl matrix evec:
   gsl_matrix_memcpy( evec, covariance );
 
-#else
+#elif HAVE_GSL
 
   DEBUG("TimeDomainCovariance::eigen gsl_eigen_symmv");
   gsl_eigen_symmv(&m.matrix, eval, evec, w);
@@ -307,6 +313,11 @@ void TimeDomainCovariance::eigen ()
   gsl_matrix_free(evec);
   gsl_vector_free(eval);
 
+#else
+
+  throw Error (InvalidState, "TimeDomainCovariance::eigen",
+	       "not implemented (no GSL or CULA)");
+  
 #endif
 
   eigen_decomposed = true;

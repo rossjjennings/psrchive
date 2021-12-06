@@ -123,6 +123,7 @@ nobase_include_HEADERS = \
         Pulsar/SyntheticPolnProfile.h \
 	Pulsar/TargetDuration.h \
 	Pulsar/TimeAppend.h \
+	Pulsar/TimeDomainCovariance.h \
 	Pulsar/TimeIntegrate.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
@@ -286,6 +287,7 @@ libGeneral_la_SOURCES = \
 	Subtract.C \
 	TargetDuration.C \
 	TimeAppend.C \
+	TimeDomainCovariance.C \
 	TimeIntegrate.C \
         Transposer.C \
         Weight.C \
@@ -300,8 +302,7 @@ libGeneral_la_SOURCES = \
 #
 if HAVE_GSL
 
-libGeneral_la_SOURCES += WaveletSmooth.C WaveletTransform.C AdaptiveSmooth.C TimeDomainCovariance.C
-nobase_include_HEADERS += Pulsar/TimeDomainCovariance.h
+libGeneral_la_SOURCES += WaveletSmooth.C WaveletTransform.C AdaptiveSmooth.C 
 
 if HAVE_CFITSIO
 
