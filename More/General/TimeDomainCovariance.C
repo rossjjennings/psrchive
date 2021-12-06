@@ -257,6 +257,8 @@ void TimeDomainCovariance::eigen ()
   DEBUG("TimeDomainCovariance::eigen call finalize");
   finalize ();
 
+#if HAVE_GSL
+
   DEBUG("TimeDomainCovariance::eigen view and allocate arrays");
   gsl_matrix_view m = gsl_matrix_view_array(&covariance_matrix[0], rank, rank);
   gsl_vector *eval = gsl_vector_alloc(rank);
@@ -289,7 +291,7 @@ void TimeDomainCovariance::eigen ()
   // copy the evecs as calculated by CULA to the gsl matrix evec:
   gsl_matrix_memcpy( evec, covariance );
 
-#elif HAVE_GSL
+#else
 
   DEBUG("TimeDomainCovariance::eigen gsl_eigen_symmv");
   gsl_eigen_symmv(&m.matrix, eval, evec, w);
@@ -312,6 +314,8 @@ void TimeDomainCovariance::eigen ()
   // Free temp mem
   gsl_matrix_free(evec);
   gsl_vector_free(eval);
+
+#endif
 
 #else
 
