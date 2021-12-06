@@ -4,7 +4,6 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/NoiseStatistics.h"
 #include "Pulsar/Profile.h"
@@ -15,6 +14,8 @@ using namespace std;
 #if defined(sun)
 #include <ieeefp.h>
 #endif
+
+using namespace std;
 
 Pulsar::NoiseStatistics::NoiseStatistics ()
 {
@@ -58,7 +59,7 @@ float Pulsar::NoiseStatistics::get_nfnr (const Profile* profile)
   double total = 0.0;
 
   for (unsigned ibin=start; ibin < nbin; ibin++) {
-    if (!finite(amps[ibin]))
+    if (!isfinite(amps[ibin]))
       throw Error (InvalidState, "Pulsar::NoiseStatistics::get_nfnr",
 		   "amps[%d] = %f", ibin, amps[ibin]);
     total += amps[ibin];

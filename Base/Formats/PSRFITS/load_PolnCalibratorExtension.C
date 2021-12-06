@@ -142,7 +142,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
       {
 	pce->get_transformation(ichan)->set_param_name (j, param_names[j]);
 
-	if (!finite(data[count]))
+	if (!isfinite(data[count]))
 	  valid = false;
 	else
 	  pce->get_transformation(ichan)->set_param(j,data[count]);
@@ -200,7 +200,7 @@ void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
       {
 	float err = data[count];
 
-	if (!finite(err))
+	if (!isfinite(err))
 	  valid = false;
 	else
 	  pce->get_transformation(ichan)->set_variance (j,err*err);

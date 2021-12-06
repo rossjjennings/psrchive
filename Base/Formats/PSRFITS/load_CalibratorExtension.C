@@ -104,7 +104,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
 	 << " weights read" << endl;
 
   for (ichan=0; ichan < ext->get_nchan(); ichan++)
-    if ( !finite(data[ichan]) )
+    if ( !isfinite(data[ichan]) )
       data[ichan] = 0;
 
   for (ichan=0; ichan < ext->get_nchan(); ichan++)

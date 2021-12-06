@@ -249,7 +249,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, ephem->value_double + ieph, &anynul, &status);
 
-        if (ephem->value_double[ieph] == 0.0 || !finite(ephem->value_double[ieph]))
+        if (ephem->value_double[ieph] == 0.0 || !isfinite(ephem->value_double[ieph]))
           anynul = true;
 
         if (anynul)
@@ -336,7 +336,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, ephem->value_double + ieph, &anynul, &status);
 
-        if (ephem->value_double[ieph] == 0.0 || !finite(ephem->value_double[ieph]))
+        if (ephem->value_double[ieph] == 0.0 || !isfinite(ephem->value_double[ieph]))
           anynul = true;
 
         if (anynul)
