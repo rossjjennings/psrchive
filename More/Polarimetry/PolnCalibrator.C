@@ -453,7 +453,7 @@ void Pulsar::PolnCalibrator::build_response ()
       // sanity check of model parameters
       unsigned nparam = transformation[ichan]->get_nparam();
       for (unsigned iparam=0; iparam < nparam; iparam++)
-        if ( !finite(transformation[ichan]->get_param(iparam)) )
+        if ( !isfinite(transformation[ichan]->get_param(iparam)) )
 	{
 	  if (verbose > 2)
 	    cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
@@ -465,7 +465,7 @@ void Pulsar::PolnCalibrator::build_response ()
 
       double normdet = norm(det( transformation[ichan]->evaluate() ));
 
-      if ( !finite(normdet) )
+      if ( !isfinite(normdet) )
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<

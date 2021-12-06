@@ -185,7 +185,7 @@ void Calibration::ReceptionModel::Solver::check_solution ()
   if (report_chisq)
     cerr << "  reduced chisq " << reduced_chisq << endl;
 
-  if (!finite(reduced_chisq) ||
+  if (!isfinite(reduced_chisq) ||
       (maximum_reduced && reduced_chisq > maximum_reduced))
     throw Error (InvalidState,
 		 "Calibration::ReceptionModel::Solver::check_solution",
@@ -208,7 +208,7 @@ void Calibration::ReceptionModel::Solver::set_variances ()
       cerr << "Calibration::ReceptionModel::Solver::set_variances"
 	" variance[" << iparam << "]=" << variance << endl;
 
-    if (!finite(variance))
+    if (!isfinite(variance))
       throw Error (InvalidState, 
 		   "Calibration::ReceptionModel::Solver::set_variances",
 		   "non-finite variance "

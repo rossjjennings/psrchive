@@ -366,7 +366,7 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
   unsigned nbin = get_Profile(0)->get_nbin();
 
   float Gain = abs( det(response) );
-  if (!finite(Gain))
+  if (!isfinite(Gain))
     throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
                  "non-invertbile response.  det(J)=%f", Gain);
 

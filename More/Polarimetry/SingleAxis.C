@@ -99,9 +99,9 @@ Estimate<double> Calibration::SingleAxis::get_diff_phase () const
 
 void check (const char* name, const Estimate<double>& g)
 {
-  if (!finite (g.val))
+  if (!isfinite (g.val))
     throw Error (InvalidParam, name, "Estimate value = %lf", g.val);
-  if (!finite (g.var))
+  if (!isfinite (g.var))
     throw Error (InvalidParam, name, "Estimate variance = %lf", g.var);
 }
 
