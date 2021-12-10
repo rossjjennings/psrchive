@@ -78,6 +78,12 @@ namespace Pulsar {
       //! Get the frequency scrunch factor
       const ScrunchFactor get_fscrunch () const { return fscrunch_factor; }
 
+      //! Compute covariance matrix from bscrunched clone of data
+      void set_bscrunch (const ScrunchFactor& f) { bscrunch_factor = f; }
+    
+      //! Get the phase bin scrunch factor
+      const ScrunchFactor get_bscrunch () const { return bscrunch_factor; }
+
       //! Set the maximum number of iterations
       void set_max_iterations (unsigned n) { max_iterations = n; }
 
@@ -144,7 +150,10 @@ namespace Pulsar {
 
       //! Compute mask from fscrunched clone of data (twice)
       ScrunchFactor fscrunch_factor;
-    
+
+      //! Compute covariance matrix from bscrunched clone of data
+      ScrunchFactor bscrunch_factor;
+
       //! Tasks performed on clone before computing statistic
       std::string jobs;
 

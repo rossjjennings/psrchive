@@ -13,6 +13,8 @@
 
 #include "Pulsar/HasArchive.h"
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/ScrunchFactor.h"
+
 #include "ndArray.h"
 
 class BinaryStatistic;
@@ -71,20 +73,36 @@ namespace Pulsar {
 
     Reference::To<TimeDomainCovariance> covar;
 
+    //! Compute covariance matrix from bscrunched clone of data
+    ScrunchFactor bscrunch_factor;
+
+    //! Get normalized and bscrunched amps
+    void get_amps (std::vector<double>& amps, const Profile* profile);
+
     //! Compute the comparison summary for primary dimension
     virtual void compute (unsigned iprimary, ndArray<2,double>& result) = 0;
 
     //! Flags for subset of sub-integrations to be computed
     std::vector<bool> compute_mask;
-    
+
+    //! Temporary storage
+    Reference::To<Profile> temp;
+
   public:
 
     CompareWith ();
 
     void set_statistic (BinaryStatistic*);
     void set_data (HasArchive*);
-    
+
+    //! Use to compute the covariance matrix before an fscrunch or tscrunch
     void set_setup_data (const Archive*);
+    
+    //! Compute covariance matrix from bscrunched clone of data
+    void set_bscrunch (const ScrunchFactor& f) { bscrunch_factor = f; }
+    
+    //! Get the phase bin scrunch factor
+    const ScrunchFactor get_bscrunch () const { return bscrunch_factor; }
 
     //! Return true if call to set_setup_data sets anything up
     /* Not all comparisons require a global set up */

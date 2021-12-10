@@ -36,7 +36,9 @@ ArchiveComparisons::ArchiveComparisons (BinaryStatistic* my_stat)
 
   what = "each";
   way = "time";
-  
+
+  bscrunch_factor.disable_scrunch();
+
   DEBUG("ArchiveComparisons stat=" << stat->get_identity());
 }
 
@@ -49,6 +51,13 @@ void ArchiveComparisons::set_Archive (const Archive* arch)
     built = false;
 
   HasArchive::set_Archive (arch);
+}
+
+//! Compute covariance matrix from bscrunched clone of data
+void ArchiveComparisons::set_bscrunch (const ScrunchFactor& f)
+{
+  bscrunch_factor = f;
+  built = false;
 }
 
 void ArchiveComparisons::set_setup_Archive (const Archive* arch)
@@ -121,6 +130,9 @@ void ArchiveComparisons::init_compare (const Archive* arch)
     throw Error (InvalidState, "ArchiveComparisons::init_compare",
 		 "way must be 'time' or 'freq' or 'all'");
 
+  DEBUG("ArchiveComparisons::init_compare bscrunch by " << bscrunch_factor);
+    
+  compare->set_bscrunch (bscrunch_factor);
   compare->set_statistic (stat);
   compare->set_data (this);
 }

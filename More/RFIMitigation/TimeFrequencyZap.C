@@ -75,6 +75,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyZap::set_fscrunch,
        "fscrunch", "Compute mask after fscrunch" );
 
+  add( &TimeFrequencyZap::get_bscrunch,
+       &TimeFrequencyZap::set_bscrunch,
+       "bscrunch", "Compute covariance matrix after bscrunch" );
+
   add( &TimeFrequencyZap::get_recompute,
        &TimeFrequencyZap::set_recompute,
        "recompute", "Recompute statistic on each iteration" );
@@ -102,6 +106,7 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
   pscrunch = false;
   
   fscrunch_factor.disable_scrunch();
+  bscrunch_factor.disable_scrunch();
   
   polns = ""; // Defaults to all
 
@@ -269,6 +274,9 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   }
   while (recompute_original && nmasked_original && iterations < max_iterations);
 
+  if (cloned)
+    copy_weights (archive, data);
+  
   if (report)
   {
     string ret;
@@ -291,11 +299,24 @@ void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
   Reference::To<Archive> data = archive;
   Reference::To<Archive> backup = data;
 
+  if (bscrunch_factor.scrunch_enabled())
+  {
+    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    if (compare)
+    {
+      if (Archive::verbose > 2)
+	cerr << "TimeFrequencyZap::transform"
+	  " bscrunch by " << bscrunch_factor << endl;
+      
+      compare->set_bscrunch (bscrunch_factor);
+    }
+  }
+  
   if (fscrunch_factor.scrunch_enabled())
   {
     if (Archive::verbose > 2)
       cerr << "TimeFrequencyZap::transform"
-      " fscrunch by " << fscrunch_factor << endl;
+	" fscrunch by " << fscrunch_factor << " nbin=" << archive->get_nbin() << endl;
 
     /*
       If the ArchiveComparison is based on a generalized chi-squared statistic,

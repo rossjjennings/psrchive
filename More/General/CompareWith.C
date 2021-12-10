@@ -31,6 +31,8 @@ CompareWith::CompareWith ()
   model_residual = true;
   is_setup = false;
   setup_completed = false;
+
+  bscrunch_factor.disable_scrunch();
 }
 
 void CompareWith::set_statistic (BinaryStatistic* stat)
@@ -139,6 +141,34 @@ void CompareWith::compute (ndArray<2,double>& result)
 
 using namespace BinaryStatistics;
 
+void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
+{
+  unsigned nbin = profile->get_nbin ();
+  
+  amps = vector<double> ( profile->get_amps(),
+			  profile->get_amps() + nbin );
+
+  double variance = robust_variance (amps);
+
+  if (bscrunch_factor.scrunch_enabled())
+  {
+    if (!temp)
+      temp = profile->clone();
+
+    temp->set_amps (amps);
+    Pulsar::bscrunch (temp.get(), bscrunch_factor);
+
+    amps = vector<double> ( temp->get_amps(),
+			    temp->get_amps() + temp->get_nbin() );
+
+    variance /= bscrunch_factor.get_nscrunch (nbin);
+  }
+
+  double rms = sqrt( variance );
+  for (double& element : amps)
+    element /= rms;
+}
+
 void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 {
   mean = 0;
@@ -156,7 +186,6 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
   covar->reset ();
 
-  Reference::To<Profile> temp;
   vector<double> mamps;
   
   if (model_residual)
@@ -166,12 +195,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
     if (!mean)
       throw Error (InvalidState, "CompareWith::setup", "no good data");
 
-    mamps = vector<double> ( mean->get_amps(),
-			     mean->get_amps() + mean->get_nbin() );
-
-    double rms = sqrt( robust_variance (mamps) );
-    for (double& element : mamps)
-      element /= rms;
+    get_amps (mamps, mean);
   }
   
   double var = 0.0;
@@ -199,12 +223,11 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
       if (model_residual)
       {
-	double rms = sqrt( robust_variance (amps) );
-	for (double& element : amps)
-	  element /= rms;
+	get_amps (amps, prof);
 
 	chi.set_outlier_threshold (0.0);
 	double chisq = chi.get (amps, mamps);
+	
 	// DEBUG( "CompareWith::setup chisq=" << chisq );
 
 #if _DEBUG

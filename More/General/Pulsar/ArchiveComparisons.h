@@ -12,6 +12,8 @@
 #define __ArchiveComparisons_h
 
 #include "Pulsar/ArchiveStatistic.h"
+#include "Pulsar/ScrunchFactor.h"
+
 #include "ndArray.h"
 
 class BinaryStatistic;
@@ -52,6 +54,12 @@ namespace Pulsar {
     void set_compute_chan (const std::vector<bool>& flags)
     { compute_chan = flags; }
 
+    //! Compute covariance matrix from bscrunched clone of data
+    void set_bscrunch (const ScrunchFactor& f);
+    
+    //! Get the phase bin scrunch factor
+    const ScrunchFactor get_bscrunch () const { return bscrunch_factor; }
+
     //! Archive used to set up
     void set_setup_Archive (const Archive*);
 
@@ -75,6 +83,9 @@ namespace Pulsar {
 
     //! Flags for subset of channels to be computed
     std::vector<bool> compute_chan;
+
+    //! Compute covariance matrix from bscrunched clone of data
+    ScrunchFactor bscrunch_factor;
 
     // what to compare
     std::string what;

@@ -15,6 +15,8 @@
 #include <vector>
 #include <map>
 
+// #define _DEBUG 1
+
 #if _DEBUG
 #include <iostream>
 #endif
@@ -47,7 +49,6 @@ class Separator
   template<typename Container>
     void separate (std::string text, Container& container);
 };
-
 
 template<typename Container>
 void Separator::separate (std::string text, Container& container)
@@ -103,11 +104,31 @@ void Separator::separate (std::string text, Container& container)
     
     // the first naked delimiter
     std::string token = text.substr (0, end);
+
+    std::string::size_type length = token.length();
     
+#if _DEBUG
+    std::cerr << "Separator::separate token='" << token << "'" << std::endl;
+#endif
+    
+    if ( opening_brackets.find (token[0]) != std::string::npos
+	 && token[length-1] == brackets[token[0]] )
+    {
+      token = token.substr (1, length-2);
+#if _DEBUG
+      std::cerr << "Separator::separate stripped token ='" << token << "'" << std::endl;
+#endif
+    }
+
     container.push_back (token);
     
     end = text.find_first_not_of (delimiters, end);
     text.erase (0, end);
+
+#if _DEBUG
+    std::cerr << "Separator::separate text='" << text << "'" << std::endl;
+#endif
+    
   }
 }
 

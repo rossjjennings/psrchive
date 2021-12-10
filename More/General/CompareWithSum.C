@@ -34,14 +34,13 @@ void CompareWithSum::compute (unsigned iprimary, ndArray<2,double>& result)
 
     return;
   }
-	
-  vector<double> sumdata (mean->get_amps(),
-			  mean->get_amps() + mean->get_nbin());
 
-  double rms = sqrt( robust_variance (sumdata) );
-  for (double& element : sumdata)
-    element /= rms;
-	      
+  vector<double> sumdata;
+
+  get_amps (sumdata, mean);
+
+  vector<double> idata;
+
   for (unsigned icompare=0; icompare < ncompare; icompare++)
   {
     (data->*compare) (icompare);
@@ -54,13 +53,8 @@ void CompareWithSum::compute (unsigned iprimary, ndArray<2,double>& result)
       continue;
     }
       
-    vector<double> idata (iprof->get_amps(),
-			  iprof->get_amps() + iprof->get_nbin());
+    get_amps (idata, iprof);
 
-    rms = sqrt( robust_variance (idata) );
-    for (double& element : idata)
-      element /= rms;
-	      
 #ifdef _DEBUG
     cerr << "CompareWithSum::compute calling BinaryStatistic::get" << endl;
 #endif
