@@ -299,7 +299,7 @@ void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
   Reference::To<Archive> data = archive;
   Reference::To<Archive> backup = data;
 
-  if (bscrunch_factor.scrunch_enabled())
+  if (statistic && bscrunch_factor.scrunch_enabled())
   {
     ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
     if (compare)
@@ -324,7 +324,11 @@ void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
       best to compute that covariance matrix before fscrunching in order to
       maximize the rank (condition) of the matrix.
      */
-    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    ArchiveComparisons* compare = 0;
+
+    if (statistic)
+      compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+
     if (compare)
     {
       compare->set_setup_Archive (backup);
