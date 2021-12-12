@@ -200,11 +200,17 @@ namespace Pulsar
     //! Report on the number of failed attempts to add data
     virtual void set_report_input_failed (bool flag = true);
 
-    //! Set the threshold used to reject outliers when computing levels
-    void set_outlier_threshold (float f) { outlier_threshold = f; }
+    //! Set the threshold used to reject outliers when computing CAL levels
+    void set_cal_outlier_threshold (float f) { cal_outlier_threshold = f; }
 
-    //! Get the threshold used to reject outliers when computing levels
-    float get_outlier_threshold () const { return outlier_threshold; }
+    //! Get the threshold used to reject outliers when computing CAL levels
+    float get_cal_outlier_threshold () const { return cal_outlier_threshold; }
+
+    //! Set the threshold used to reject CAL observations with no signal
+    void set_cal_intensity_threshold (float f) { cal_intensity_threshold = f; }
+
+    //! Get the threshold used to reject CAL observations with no signal
+    float get_cal_intensity_threshold () const { return cal_intensity_threshold; }
 
     //! Set the algorithm used to automatically insert steps in response
     void set_step_finder (StepFinder*);
@@ -419,9 +425,12 @@ namespace Pulsar
     //! Report the number of input failures
     bool report_input_failed;
 
-    //! Threshold used to reject outliers when computing levels
-    double outlier_threshold;
-    
+    //! Threshold used to reject outliers when computing CAL levels
+    double cal_outlier_threshold;
+
+    //! Threshold used to reject CAL observations with no signal
+    double cal_intensity_threshold;
+
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
 

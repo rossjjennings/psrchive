@@ -681,7 +681,10 @@ bool check_coordinates = true;
 bool must_have_cals = true;
 
 // threshold used to reject outliers while computing CAL levels
-float outlier_threshold = 0.0;
+float cal_outlier_threshold = 0.0;
+
+// threshold used to reject CAL observations with no signal
+float cal_intensity_threshold = 1.0; // sigma
 
 // threshold used to insert steps in model
 float step_threshold = 0.0;
@@ -946,8 +949,11 @@ void pcm::add_options (CommandLine::Menu& menu)
 
   menu.add ("\n" "Outlier and step detection options:");
 
-  arg = menu.add (outlier_threshold, 'K', "sigma");
+  arg = menu.add (cal_outlier_threshold, 'K', "sigma");
   arg->set_help ("Reject outliers when computing CAL levels");
+
+  arg = menu.add (cal_intensity_threshold, "calI", "sigma");
+  arg->set_help ("Reject CAL observations with low intensity");
 
   arg = menu.add (step_threshold, "step", "sigma");
   arg->set_help ("Insert steps where adjacent CAL levels differ");
@@ -1145,7 +1151,8 @@ void configure_model (Pulsar::SystemCalibrator* model)
 {
   model->set_nthread (nthread);
   model->set_report_projection (true);
-  model->set_outlier_threshold (outlier_threshold);
+  model->set_cal_outlier_threshold (cal_outlier_threshold);
+  model->set_cal_intensity_threshold (cal_intensity_threshold);
 
   if (step_threshold)
     model->set_step_finder( new RobustStepFinder (step_threshold) );

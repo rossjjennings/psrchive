@@ -80,7 +80,8 @@ SystemCalibrator::SystemCalibrator (Archive* archive)
   report_input_data = false;
   report_input_failed = false;
 
-  outlier_threshold = 0.0;
+  cal_outlier_threshold = 0.0;
+  cal_intensity_threshold = 1.0;
 
   projection = new VariableProjectionCorrection;
 
@@ -734,7 +735,7 @@ void SystemCalibrator::add_calibrator (const Archive* data)
     }
 
     polncal->set_nchan( get_calibrator()->get_nchan() );
-    polncal->set_outlier_threshold( outlier_threshold );
+    polncal->set_outlier_threshold( cal_outlier_threshold );
     
     add_calibrator (polncal);
   }
@@ -829,10 +830,10 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
     if (verbose)
       cerr << "SystemCalibrator::add_calibrator"
-	" outlier_threshold=" << outlier_threshold << endl;
+	" outlier_threshold=" << cal_outlier_threshold << endl;
     
     ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
-				     outlier_threshold);
+				     cal_outlier_threshold);
     
     string identifier = cal->get_filename() + " " + tostring(isub);
 
@@ -869,6 +870,14 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
       // convert to Stokes parameters
       data.observation = coherency( convert (calibtor) );
       data.baseline = coherency( convert (baseline) );
+
+      Estimate<double> calI = data.observation[0];
+      if (calI.get_value() < cal_intensity_threshold * calI.get_error())
+      {
+        cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
+             << " signal not detected" << endl;
+        continue;
+      }
 
       if ( solution->get_transformation_valid (ichan) )
       {
