@@ -686,6 +686,9 @@ float cal_outlier_threshold = 0.0;
 // threshold used to reject CAL observations with no signal
 float cal_intensity_threshold = 1.0; // sigma
 
+// minimum degree of polarization of CAL observations
+float cal_polarization_threshold = 0.5;  // 50%
+
 // threshold used to insert steps in model
 float step_threshold = 0.0;
 
@@ -953,7 +956,10 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg->set_help ("Reject outliers when computing CAL levels");
 
   arg = menu.add (cal_intensity_threshold, "calI", "sigma");
-  arg->set_help ("Reject CAL observations with low intensity");
+  arg->set_help ("Minimum significance of CAL intensity");
+
+  arg = menu.add (cal_polarization_threshold, "calp", "frac");
+  arg->set_help ("Minimum degree of polarization of CAL");
 
   arg = menu.add (step_threshold, "step", "sigma");
   arg->set_help ("Insert steps where adjacent CAL levels differ");
@@ -1153,6 +1159,7 @@ void configure_model (Pulsar::SystemCalibrator* model)
   model->set_report_projection (true);
   model->set_cal_outlier_threshold (cal_outlier_threshold);
   model->set_cal_intensity_threshold (cal_intensity_threshold);
+  model->set_cal_polarization_threshold (cal_polarization_threshold);
 
   if (step_threshold)
     model->set_step_finder( new RobustStepFinder (step_threshold) );

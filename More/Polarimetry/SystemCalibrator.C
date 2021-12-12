@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 - 2012 by Willem van Straten
+ *   Copyright (C) 2008 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -81,7 +81,8 @@ SystemCalibrator::SystemCalibrator (Archive* archive)
   report_input_failed = false;
 
   cal_outlier_threshold = 0.0;
-  cal_intensity_threshold = 1.0;
+  cal_intensity_threshold = 1.0;    // sigma
+  cal_polarization_threshold = 0.5; // fraction of I
 
   projection = new VariableProjectionCorrection;
 
@@ -876,6 +877,15 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
       {
         cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
              << " signal not detected" << endl;
+        continue;
+      }
+
+      Estimate<double> calp = data.observation.abs_vect ();
+      if (calp.get_value() < cal_polarization_threshold * calI.get_value())
+      {
+        cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
+             << " signal less than " << cal_polarization_threshold 
+             << " polarized" << endl;
         continue;
       }
 

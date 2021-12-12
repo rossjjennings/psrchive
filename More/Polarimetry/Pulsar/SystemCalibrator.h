@@ -212,6 +212,12 @@ namespace Pulsar
     //! Get the threshold used to reject CAL observations with no signal
     float get_cal_intensity_threshold () const { return cal_intensity_threshold; }
 
+    //! Set the minimum degree of polarization of CAL observations
+    void set_cal_polarization_threshold (float f) { cal_polarization_threshold = f; }
+
+    //! Get the minimum degree of polarization of CAL observations
+    float get_cal_polarization_threshold () const { return cal_polarization_threshold; }
+
     //! Set the algorithm used to automatically insert steps in response
     void set_step_finder (StepFinder*);
 
@@ -430,6 +436,9 @@ namespace Pulsar
 
     //! Threshold used to reject CAL observations with no signal
     double cal_intensity_threshold;
+
+    //! Minimum degree of polarization of CAL observations
+    double cal_polarization_threshold;
 
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
