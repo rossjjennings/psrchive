@@ -132,8 +132,11 @@ void pcmrm::finalize ()
 		   filename + " does not have PolnCalibratorExtension");
 
     update (ext);
+
+    archive->set_rotation_measure (fit_rm);
+    archive->set_faraday_corrected (true);
     
-    string new_filename = replace_extension (filename, ".drm");
+    string new_filename = replace_extension (filename, ".rmc");
     archive->unload (new_filename);
   }
 }

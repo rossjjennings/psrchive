@@ -359,6 +359,8 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr) try
     set_faraday_corrected (false);
   }
 
+  set_rotation_measure (last.rotation_measure);
+  
   if (last.pr_corr == 1)
     receiver->set_projection_corrected (true);
 
@@ -373,7 +375,6 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr) try
 
     receiver->set_projection_corrected (false);
   }
-
 
   if (last.fd_corr == 1)
     receiver->set_basis_corrected (true);
@@ -417,6 +418,8 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr) try
 
     set_dedispersed (false);
   }
+
+  set_dispersion_measure (last.dispersion_measure);
 
   add_extension (history);
 
