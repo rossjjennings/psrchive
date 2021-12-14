@@ -37,3 +37,23 @@ namespace BinaryStatistics
     ChiSquared* clone () const { return new ChiSquared; }
   };
 }
+
+// ordinary least squares
+void linear_fit (double& scale, double& offset,
+		 const std::vector<double>& yval,
+		 const std::vector<double>& xval,
+		 const std::vector<bool>* mask = 0);
+
+// weighted least squares
+void weighted_linear_fit (double& scale, double& offset,
+			  const std::vector<double>& yval,
+			  const std::vector<double>& xval,
+			  const std::vector<double>& wt);
+
+// used by both ordinary and weighted
+void linear_fit_work (double& scale, double& offset,
+		      const std::vector<double>& dat1,
+		      const std::vector<double>& dat2,
+		      const std::vector<double>& one,
+		      const std::vector<double>& wt,
+		      bool robust_offset = false);
