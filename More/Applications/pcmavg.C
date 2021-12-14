@@ -298,10 +298,24 @@ void pcmavg::record_pce(Pulsar::Archive* archive)
   }
 }
 
+Estimate<double> weighted_mean (const std::vector< Estimate<double> >& vals)
+{
+  MeanEstimate<double> mean;
+  for (auto element: vals)
+    mean += element;
+  return mean.get_Estimate();
+}
+
 Estimate<double> weighted_median (std::vector< Estimate<double> > vals)
 {
   if (vals.size () == 0)
     return 0.0;
+
+  if (vals.size () == 1)
+    return vals[0];
+
+  if (vals.size () == 2)
+    return weighted_mean (vals);
   
   double total_weight = 0.0;
   for (auto element: vals)
@@ -316,6 +330,11 @@ Estimate<double> weighted_median (std::vector< Estimate<double> > vals)
     weight += 1.0 / vals[ival].var;
     ival ++;
   }
+
+  if (ival == vals.size())
+    ival --;
+  
+  // cerr << "vals.size=" << vals.size() << " ival=" << ival << endl;
 
   Estimate<double> retval (vals[ival].val, 1.0/total_weight);
   return retval;
