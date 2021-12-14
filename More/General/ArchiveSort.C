@@ -11,6 +11,7 @@
 using namespace std;
 
 bool Pulsar::ArchiveSort::read_length = false;
+bool Pulsar::ArchiveSort::compare_frequencies = true;
 
 Pulsar::ArchiveSort::ArchiveSort ()
 {
@@ -41,17 +42,22 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
     return false;
   }
 
-  if (a.centre_frequency < b.centre_frequency) {
-    if (ArchiveSort::verbose)
-      cerr << a.centre_frequency << " < " << b.centre_frequency << endl;
-    return true;
+  if (ArchiveSort::compare_frequencies)
+  {
+    if (a.centre_frequency < b.centre_frequency)
+    {
+      if (ArchiveSort::verbose)
+	cerr << a.centre_frequency << " < " << b.centre_frequency << endl;
+      return true;
+    }
+    else if (a.centre_frequency > b.centre_frequency)
+    {
+      if (ArchiveSort::verbose)
+	cerr << a.centre_frequency << " > " << b.centre_frequency << endl;
+      return false;
+    }
   }
-  else if (a.centre_frequency > b.centre_frequency) {
-    if (ArchiveSort::verbose)
-      cerr << a.centre_frequency << " > " << b.centre_frequency << endl;
-    return false;
-  }
-
+  
   if (a.epoch < b.epoch) {
     if (ArchiveSort::verbose)
       cerr << a.epoch.printdays(5) << " < " << b.epoch.printdays(5) << endl;

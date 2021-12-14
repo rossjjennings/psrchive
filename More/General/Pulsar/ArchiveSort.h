@@ -53,6 +53,9 @@ namespace Pulsar {
 
     //! Enable the new ArchiveSort behaviour (in new psrpl pipelines)
     static bool read_length;
+
+    //! Set to false when you want to join bands into a single session
+    static bool compare_frequencies;
   };
 
   //! Comparison operator
