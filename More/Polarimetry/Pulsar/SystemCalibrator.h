@@ -85,7 +85,7 @@ namespace Pulsar
     
     //! Set the flux calibrator solution used to estimate calibrator Stokes
     void set_flux_calibrator (const FluxCalibrator* fluxcal);
-
+    
     //! Set the calibrator observations to be loaded after first pulsar
     void set_calibrators (const std::vector<std::string>& filenames);
     
@@ -94,6 +94,12 @@ namespace Pulsar
 
     //! Set the response (pure Jones) transformation
     virtual void set_response( MEAL::Complex2* );
+
+    //! Set the response to a previous solution (for the first guess)
+    void set_previous_solution (const PolnCalibrator*);
+
+    //! Set the response parameters to be held fixed
+    void set_response_fixed (const std::vector<unsigned>&);
 
     //! Set the temporal variation function of a specified response parameter
     virtual void set_response_variation ( unsigned iparam,
@@ -105,6 +111,9 @@ namespace Pulsar
     //! Set the projection transformation
     virtual void set_projection( VariableTransformation* );
 
+    //! Set the ionospheric rotation measure applied to all observations
+    virtual void set_ionospheric_rotation_measure (double rm);
+    
     //! Set the time variation of absolute gain
     virtual void set_gain( MEAL::Univariate<MEAL::Scalar>* );
 
@@ -284,12 +293,18 @@ namespace Pulsar
     //! The projection transformation (overrides ProjectionCorrection)
     Reference::To<VariableTransformation> projection;
 
+    //! The ionospheric rotation measure applied to all observations
+    double ionospheric_rotation_measure;
+    
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 
     //! Response transformation
     Reference::To< MEAL::Complex2 > response;
 
+    //! Indeces of response parameters to be held fixed
+    std::vector<unsigned> response_fixed;
+    
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;
 

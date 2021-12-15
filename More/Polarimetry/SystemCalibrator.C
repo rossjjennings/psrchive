@@ -86,6 +86,8 @@ SystemCalibrator::SystemCalibrator (Archive* archive)
 
   projection = new VariableProjectionCorrection;
 
+  ionospheric_rotation_measure = 0.0;
+  
   step_after_cal = false;
 
   if (archive)
@@ -106,6 +108,11 @@ void SystemCalibrator::set_calibrator (const Archive* archive)
 void SystemCalibrator::set_projection (VariableTransformation* _projection)
 {
   projection = _projection;
+}
+
+void SystemCalibrator::set_ionospheric_rotation_measure (double rm)
+{
+  ionospheric_rotation_measure = rm;
 }
 
 void SystemCalibrator::set_normalize_by_invariant (bool flag)
@@ -458,22 +465,34 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
   // correct ionospheric Faraday rotation
   Reference::To<Faraday> iono_faraday;
-  if (! integration->get_auxiliary_birefringence_corrected ())
+  double iono_rm = ionospheric_rotation_measure;
+  
+  if (iono_rm != 0.0)
+  {
+    cerr << " correcting ionospheric Faraday rotation - RM=" << iono_rm << endl;
+  }
+  else if (! integration->get_auxiliary_birefringence_corrected ())
   {
     const AuxColdPlasmaMeasures* aux
       = integration->get<AuxColdPlasmaMeasures> ();
 
-    if (aux && aux->get_rotation_measure() != 0.0)
+    if (aux)
     {
-      cerr << " correcting auxiliary Faraday rotation - RM=" 
-	   << aux->get_rotation_measure () << endl;
+      iono_rm = aux->get_rotation_measure();
 
-      iono_faraday = new Faraday;
-      iono_faraday->set_rotation_measure( aux->get_rotation_measure () );
-
-      // correct ionospheric Faraday rotation wrt infinite frequency
-      iono_faraday->set_reference_wavelength( 0.0 );
+      if (iono_rm != 0)
+	cerr << " correcting auxiliary Faraday rotation - RM=" 
+	     << aux->get_rotation_measure () << endl;
     }
+  }
+
+  if (iono_rm != 0.0)
+  {
+    iono_faraday = new Faraday;
+    iono_faraday->set_rotation_measure( iono_rm );
+
+    // correct ionospheric Faraday rotation wrt infinite frequency
+    iono_faraday->set_reference_wavelength( 0.0 );
   }
 
   Reference::To<Faraday> ism_faraday;
@@ -614,6 +633,16 @@ void SystemCalibrator::set_calibrators (const vector<string>& n)
 void SystemCalibrator::set_flux_calibrator (const FluxCalibrator* fluxcal)
 {
   flux_calibrator = fluxcal;
+}
+
+void SystemCalibrator::set_previous_solution (const PolnCalibrator* polcal)
+{
+  previous = polcal;
+}
+
+void SystemCalibrator::set_response_fixed (const std::vector<unsigned>& params)
+{
+  response_fixed = params;
 }
 
 void SystemCalibrator::load_calibrators ()
@@ -1405,6 +1434,15 @@ void SystemCalibrator::init_model (unsigned ichan)
   if (verbose > 2)
     cerr << "SystemCalibrator::init_model ichan=" << ichan << endl;
 
+  if (response_fixed.size())
+  {
+    if (!response)
+      response = Pulsar::new_transformation (type);
+
+    for (unsigned i=0; i < response_fixed.size(); i++)
+      response->set_infit ( response_fixed[i], false );
+  }
+  
   if (response)
   {
     if (verbose > 2)

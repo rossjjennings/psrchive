@@ -593,7 +593,6 @@ void RobustStepFinder::find_steps (vector<unsigned>& steps,
 				   const vector<unsigned>& after)
 {
   unsigned nsubint = before.size();
-  unsigned good = (depth * (depth+1)) / 2;
 
   for (unsigned isub=1; isub+2 < nsubint; isub++)
   {

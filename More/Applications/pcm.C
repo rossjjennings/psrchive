@@ -414,6 +414,16 @@ bool physical_coherency = false;
 float retry_chisq = 0.0;
 float invalid_chisq = 0.0;
 
+// filename of previous pcm solution to be used as first guess
+string previous_solution;
+
+// set of parameter indeces to be copied from previous_solution
+/* if not specified, all parameters are copied */
+string copy_parameters;
+
+// set of response parameter indeces to be held fixed
+string response_fixed;
+
 int main (int argc, char **argv)
 {
 #ifdef _DEBUG
@@ -950,6 +960,15 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg = menu.add (check_coordinates, 'Z');
   arg->set_help ("ignore the sky coordinates of PolnCal observations");
 
+  arg = menu.add (previous_solution, "solution", "file");
+  arg->set_help ("load previous solution from 'file' as first guess");
+  
+  arg = menu.add (copy_parameters, "copy", "i,j,k");
+  arg->set_help ("copy only specified parameters from previous solution");
+
+  arg = menu.add (response_fixed, "fix", "i,j,k");
+  arg->set_help ("hold specified parameters fixed");
+
   menu.add ("\n" "Outlier and step detection options:");
 
   arg = menu.add (cal_outlier_threshold, 'K', "sigma");
@@ -1106,6 +1125,8 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg->set_help ("share a single phase shift estimate b/w all observations");
 }
 
+Reference::To<Pulsar::PolnCalibrator> pcm_solution;
+
 void pcm::setup ()
 {
   if (nthread == 0)
@@ -1124,6 +1145,23 @@ void pcm::setup ()
       " -p min,max  Choose constraints from the specified pulse phase range \n"
       " -c archive  Choose optimal constraints from the specified archive");
 
+  if (!previous_solution.empty())
+  {
+    Reference::To<Archive> cal = Archive::load (previous_solution);
+    pcm_solution = new PolnCalibrator (cal);
+
+    const Calibrator::Type* type = pcm_solution->get_type ();
+
+    cerr << "pcm: previous solution has type=" << type->get_name()
+	 << " and nparam=" << type->get_nparam() << endl;
+    
+    if (!type->is_a (model_type) || !model_type->is_a (type))
+    {
+      cerr << "pcm: over-riding model type=" << model_type->get_name() << endl;
+      model_type = type->clone();
+    }
+  }
+  
   if (mem_mode && fscrunch_data_to_template)
     throw Error (InvalidState, "pcm",
 		 "In MEM mode, the -G option is not supported");
@@ -1157,6 +1195,10 @@ void configure_model (Pulsar::SystemCalibrator* model)
 {
   model->set_nthread (nthread);
   model->set_report_projection (true);
+
+  if (pcm_solution)
+    model->set_previous_solution (pcm_solution);
+  
   model->set_cal_outlier_threshold (cal_outlier_threshold);
   model->set_cal_intensity_threshold (cal_intensity_threshold);
   model->set_cal_polarization_threshold (cal_polarization_threshold);
@@ -1189,6 +1231,22 @@ void configure_model (Pulsar::SystemCalibrator* model)
   for (auto ptr : response_variation)
     model->set_response_variation( ptr.first, ptr.second );
 
+  vector<unsigned> fixed_indeces;
+  while (!response_fixed.empty())
+  {
+    string sub = stringtok (response_fixed, ", ");
+    fixed_indeces.push_back ( fromstring<unsigned>(sub) );
+  }
+
+  if (fixed_indeces.size())
+  {
+    cerr << "pcm: fixing response at iparam=";
+    for (auto element: fixed_indeces)
+      cerr << element << " ";
+    cerr << endl;
+    model->set_response_fixed (fixed_indeces);
+  }
+  
   if (foreach_calibrator.get())
   {
     Reference::To< Calibration::SingleAxis > foreach;
