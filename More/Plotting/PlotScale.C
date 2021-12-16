@@ -64,6 +64,25 @@ void Pulsar::PlotScale::set_minmax (float min, float max)
   minmaxvalset = true;
 }
 
+void Pulsar::PlotScale::update_minmax (float min, float max)
+{
+  if (frozen)
+    return;
+
+  if (!minmaxvalset)
+  {
+    minval = min;
+    maxval = max;
+  }
+  else
+  {
+    minval = std::min (min, minval);
+    maxval = std::max (max, maxval);
+  }
+ 
+  minmaxvalset = true;
+}
+
 //! Get the minimum and maximum value in the data
 void Pulsar::PlotScale::get_minmax (float& min, float& max) const
 {

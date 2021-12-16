@@ -15,6 +15,9 @@
 
 #include "Pulsar/Archive.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 
 Pulsar::CalibratorInfo::CalibratorInfo ()
@@ -34,8 +37,7 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
 
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
 {
-  if (verbose)
-    cerr << "Pulsar::CalibratorInfo::prepare" << endl;
+  DEBUG("Pulsar::CalibratorInfo::prepare");
 
   Calibrator::Info* info = 0;
 
@@ -86,6 +88,9 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
   float yheight = (1.0 - yspace) / float(nclass);
   float ybottom = 0.0;
 
+  float xmin = 0.0;
+  float xmax = 0.0;
+
   for (unsigned iclass=0; iclass < nclass; iclass++)
   {
     unsigned jclass = iclass;
@@ -100,7 +105,25 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
 
     plot->set_managed (true);
     plot->set_class (jclass);
+
+    DEBUG("Pulsar::CalibratorInfo::prepare call CalibratorParameter::prepare");
+
     plot->prepare (info, data);
+
+    float fmin = 0.0;
+    float fmax = 0.0;
+
+    get_scale()->get_minmax (fmin, fmax);
+
+    if (xmin == 0.0)
+      xmin = fmin;
+    else if (fmin != 0.0)
+      xmin = std::min (xmin, fmin);
+
+    if (xmax == 0.0)
+      xmax = fmax;
+    else if (fmax != 0.0)
+      xmax = std::max (xmax, fmax);
 
     plot->get_frame()->set_viewport (0,1, ybottom, ybottom+yheight);
     ybottom += yheight + ybetween;
@@ -120,6 +143,9 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
       plot->get_frame()->get_x_axis()->rem_opt('N');
     }
   }
+
+  get_scale()->set_minmax (xmin, xmax);
+
 }
 
 void Pulsar::CalibratorInfo::set_calibrator_stokes_degree (bool x)
