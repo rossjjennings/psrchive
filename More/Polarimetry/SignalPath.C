@@ -569,7 +569,7 @@ void SignalPath::copy_transformation (const MEAL::Complex2* xform)
       throw Error (InvalidState, "SignalPath::copy_transformation",
 		   "solution is not of the required type");
 
-    copy_param( physical, copy );
+    copy_param( physical->get_frontend(), copy->get_frontend() );
   }
 }
 

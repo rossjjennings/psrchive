@@ -718,8 +718,8 @@ void SystemCalibrator::load_calibrators ()
 
   if (previous && previous->get_nchan() == nchan)
   {
-    cerr << "Using previous solution" << endl;
-    set_initial_guess = false;
+    cerr << "Copying frontend of previous solution" << endl;
+    // set_initial_guess = false;
     for (unsigned ichan=0; ichan<nchan; ichan++)
       if (previous->get_transformation_valid(ichan))
         model[ichan]->copy_transformation(previous->get_transformation(ichan));
@@ -1641,10 +1641,12 @@ void SystemCalibrator::solve_prepare ()
       Estimate<double> I = calibrator_estimate[ichan].source->get_stokes()[0];
       if (I.get_value() == 0)
       {
-        cerr << "SystemCalibrator::solve_prepare"
-         " reference flux equals zero \n"
-         "\t attempts=" << calibrator_estimate[ichan].add_data_attempts <<
-         "\t failures=" << calibrator_estimate[ichan].add_data_failures << endl;
+        if (verbose > 1)
+          cerr << "SystemCalibrator::solve_prepare"
+           " reference flux equals zero \n"
+           "\t attempts=" << calibrator_estimate[ichan].add_data_attempts <<
+           "\t failures=" << calibrator_estimate[ichan].add_data_failures 
+               << endl;
 
         model[ichan]->set_valid( false, "reference flux equals zero" );
       }

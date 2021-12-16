@@ -229,7 +229,23 @@ void Calibration::ReceptionModel::Solver::set_variances ()
 
     // cerr << iparam << ".var=" << variance << endl;
 
-    equation->set_variance (iparam, variance);
+    if (variance > 0)
+      equation->set_variance (iparam, variance);
+    else
+    {
+      /* WvS - 2021 Dec 17
+         If the diagonal element of the covariance matrix is zero and
+         the variance of the model parameter is not zero, then this
+         model parameter was most likely loaded from a previous solution 
+         and held fixed.
+
+         It is most useful for the value of the parameter from this previous 
+         solution (and its uncertainty) to propagate through to the output. 
+      */
+      // cerr << "back var iparam=" << iparam << endl;
+      variance = equation->get_variance (iparam);
+      covariance[iparam][iparam] = variance;
+    }
   }
 
   for (unsigned i=0; i < acceptance_condition.size(); i++)

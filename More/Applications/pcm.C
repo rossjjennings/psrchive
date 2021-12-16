@@ -1876,6 +1876,9 @@ void pcm::load_calibrator_database () try
   if (!cal_dbase_filenames.size())
     return;
 
+  if (!filenames.size())
+    return;
+
   Reference::To<Pulsar::Archive> archive;
   while (filenames.size()) try
   {
