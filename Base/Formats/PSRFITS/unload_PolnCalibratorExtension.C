@@ -8,8 +8,12 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
+
 #include "psrfitsio.h"
 #include "strutil.h"
+
+// #define _DEBUG 1
+#include "debug.h"
 
 #include <assert.h>
 
@@ -92,20 +96,19 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   {
     if (pce->get_valid(ichan))
     {
+      DEBUG ("FITSArchive::unload PolnCalibratorExtension ichan=" << ichan << " valid");
       for (int j = 0; j < ncpar; j++)
       {
 	data[count] = pce->get_transformation(ichan)->get_param(j);
+        DEBUG ("\t" << j << " " << data[count]);
 	count++;
       }
     }
     else
     {
-      if (verbose == 3)
-        cerr << "FITSArchive::unload PolnCalibratorExtension ichan="
-             << ichan << " flagged invalid" << endl;
+      DEBUG ("FITSArchive::unload PolnCalibratorExtension ichan=" << ichan << " invalid");
       count += ncpar;
     }
-
   }
 
   assert (count == dimension);
@@ -192,16 +195,25 @@ void unload_covariances (fitsfile* fptr,
       pce->get_transformation(ichan)->get_covariance (covar);
 
     if (covar.size() == 0)
+    {
+      DEBUG ("unload_covariances ichan=" << ichan << " zero");
       zero = true;
+    }
     else
+    {
+      DEBUG ("unload_covariances ichan=" << ichan << " ncovar=" << covar.size());
       assert (covar.size() == unsigned(ncovar));
+    }
 
     for (int icovar = 0; icovar < ncovar; icovar++)
     {
-      if (zero) {
+      if (zero)
+      {
 	    data[count] = 0;
       }
-      else {
+      else
+      {
+            DEBUG ("\t" << icovar << " " << covar[icovar]);
 	    data[count] = covar[icovar];
       }
       count++;
