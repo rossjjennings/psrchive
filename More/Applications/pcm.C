@@ -419,7 +419,7 @@ string previous_solution;
 
 // set of parameter indeces to be copied from previous_solution
 /* if not specified, all parameters are copied */
-string copy_parameters;
+// string copy_parameters; /* not implemented */
 
 // set of response parameter indeces to be held fixed
 string response_fixed;
@@ -444,6 +444,8 @@ int main (int argc, char **argv)
 Reference::To< Pulsar::VariableTransformation > projection;
 Reference::To< MEAL::Real4 > impurity;
 Reference::To< MEAL::Complex2 > response;
+
+double ionospheric_rm = 0;
 
 Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
@@ -962,9 +964,12 @@ void pcm::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (previous_solution, "solution", "file");
   arg->set_help ("load previous solution from 'file' as first guess");
-  
+ 
+#if 0 
+  /* not yet implemented */
   arg = menu.add (copy_parameters, "copy", "i,j,k");
   arg->set_help ("copy only specified parameters from previous solution");
+#endif
 
   arg = menu.add (response_fixed, "fix", "i,j,k");
   arg->set_help ("hold specified parameters fixed");
@@ -999,6 +1004,9 @@ void pcm::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &pcm::set_projection, 'P', "file");
   arg->set_help ("load projection transformations from file");
+
+  arg = menu.add (ionospheric_rm, "iono", "rm");
+  arg->set_help ("ionospheric Faraday rotation measure");
 
   arg = menu.add (least_squares, 'l', "solver");
   arg->set_help ("solver: MEAL [default] or GSL");
@@ -1195,6 +1203,7 @@ void configure_model (Pulsar::SystemCalibrator* model)
 {
   model->set_nthread (nthread);
   model->set_report_projection (true);
+  model->set_ionospheric_rotation_measure (ionospheric_rm);
 
   if (pcm_solution)
     model->set_previous_solution (pcm_solution);
