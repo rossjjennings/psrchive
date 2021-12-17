@@ -111,12 +111,12 @@ void Separator::separate (std::string text, Container& container)
     std::cerr << "Separator::separate token='" << token << "'" << std::endl;
 #endif
     
-    if ( opening_brackets.find (token[0]) != std::string::npos
-	 && token[length-1] == brackets[token[0]] )
+    if ( (token[0] == '"' && token[length-1] == '"') ||
+         (token[0] == '\'' && token[length-1] == '\'') )
     {
       token = token.substr (1, length-2);
 #if _DEBUG
-      std::cerr << "Separator::separate stripped token ='" << token << "'" << std::endl;
+      std::cerr << "Separator::separate quotation stripped token ='" << token << "'" << std::endl;
 #endif
     }
 
