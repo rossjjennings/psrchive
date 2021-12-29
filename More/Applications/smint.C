@@ -89,6 +89,11 @@ protected:
   bool minimize_gcv;
   // determine smoothing by minimizing true mean-squared error
   bool minimize_tmse;
+
+  // determine smoothing by m-fold cross-validation
+  CrossValidatedSmoothing* cross_validated_smoothing;
+  void cross_validate ();
+    
   // find the median effective number of free parameters
   bool find_median_nfree;
 
@@ -97,6 +102,8 @@ protected:
 
   double interquartile_range;
   double outlier_smoothing;
+
+  bool interpolate;
   
   bool use_smoothing_spline ();
   
@@ -260,9 +267,16 @@ smint::smint ()
   current_subint = 0;
 
   interquartile_range = 0.0;
-  outlier_smoothing = 15;
+  outlier_smoothing = 0.0;
+
+  interpolate = true;
+  cross_validated_smoothing = 0;
 }
 
+void smint::cross_validate ()
+{
+  cross_validated_smoothing = new CrossValidatedSmoothing;
+}
 
 /*!
 
@@ -272,6 +286,9 @@ smint::smint ()
 void smint::add_options (CommandLine::Menu& menu)
 {
   CommandLine::Argument* arg;
+
+  arg = menu.add (interpolate, "noint");
+  arg->set_help ("disable interpolation (smooth only)");
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Polynomial fitting options:");
@@ -299,6 +316,9 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (find_median_nfree, "mnf");
   arg->set_help ("compute p-spline smoothing using median nfree");
+
+  arg = menu.add (this, &smint::cross_validate, "cross");
+  arg->set_help ("compute p-spline smoothing using m-fold cross-validation");
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Iterative outlier excision options:");
@@ -751,6 +771,23 @@ void smint::unload (const string& filename, const vector<row>& table)
 }
 
 template<class Extension>
+void zero (Extension* ext, unsigned iparam)
+{
+  unsigned nchan = ext->get_nchan();
+
+  Estimate<float> zero (0.0);
+  
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    if (!ext->get_valid (ichan))
+      continue;
+    
+    ext->set_Estimate (iparam, ichan, zero);
+  }
+}
+
+		    
+template<class Extension>
 void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 {
   unsigned nchan = ext->get_nchan();
@@ -768,6 +805,12 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
+      if (interpolate)
+	ext->set_valid (ichan, true);
+
+      if (!ext->get_valid (ichan))
+	continue;
+      
       xval = channel_frequency[ichan];
       if (nrow == 1 || row_by_row)
         yval = data[i].table[ifile].spline1d.evaluate (xval);
@@ -779,7 +822,7 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 #endif
       }
 
-      ext->set_valid (ichan, true);
+
       Estimate<float> val (yval, fabs(yval)*1e-4);
       ext->set_Estimate (iparam, ichan, val);
     }
@@ -887,6 +930,10 @@ void smint::finalize ()
 
       ext->set_has_covariance (false);
 
+      zero (ext, 0);
+      zero (ext, 1);
+      zero (ext, 2);
+      
       unload (ext, pcal_data, ifile);
     }
 
@@ -968,11 +1015,18 @@ void smint::fit_pspline (SmoothingSpline& spline,
   if (minimize_tmse)
     spline.set_msre (1.0);
 
-  spline.fit (data_x, data_y);
-
-  double nfree = spline.get_fit_effective_nfree ();
-  cerr << "smint::fit_pspline effective nfree=" << nfree << endl;
-
+  if (cross_validated_smoothing)
+  {
+    cross_validated_smoothing->set_spline (&spline);
+    cross_validated_smoothing->fit (data_x, data_y);
+  }
+  else
+  {
+    spline.fit (data_x, data_y);
+    double nfree = spline.get_fit_effective_nfree ();
+    cerr << "smint::fit_pspline effective nfree=" << nfree << endl;
+  }
+  
 #ifdef HAVE_PGPLOT
   setup_and_plot (spline, data_x, data_y);
 #endif
@@ -991,7 +1045,10 @@ void smint::iteratively_remove_outliers (SmoothingSpline& spline,
 {
   bool done = false;
 
-  spline.set_effective_nfree (data_x.size() / outlier_smoothing);
+  if (outlier_smoothing > 0)
+    spline.set_effective_nfree (data_x.size() / outlier_smoothing);
+  else
+    spline.set_minimize_gcv (true);
   
   while (!done)
   {
