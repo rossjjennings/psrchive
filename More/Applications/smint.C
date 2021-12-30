@@ -104,6 +104,7 @@ protected:
   double outlier_smoothing;
 
   bool interpolate;
+  bool bootstrap_uncertainty;
   
   bool use_smoothing_spline ();
   
@@ -270,7 +271,9 @@ smint::smint ()
   outlier_smoothing = 0.0;
 
   interpolate = true;
+  
   cross_validated_smoothing = 0;
+  bootstrap_uncertainty = false;
 }
 
 void smint::cross_validate ()
@@ -289,6 +292,9 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (interpolate, "noint");
   arg->set_help ("disable interpolation (smooth only)");
+
+  arg = menu.add (bootstrap_uncertainty, "boot");
+  arg->set_help ("output bootstrap (replacement) error bars");
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Polynomial fitting options:");
@@ -803,6 +809,15 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 
     double xval=0, yval=0;
 
+    if (bootstrap_uncertainty && (nrow == 1 || row_by_row))
+    {
+      BootstrapUncertainty bootstrap;
+      cerr << "smint: computing error bars (bootstrap replacement)" << endl;
+      bootstrap.set_spline (& data[i].table[ifile].spline1d);
+      bootstrap.get_uncertainty (data[i].table[ifile].freq,
+				 data[i].table[ifile].data);
+    }
+	
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       if (interpolate)
@@ -812,18 +827,27 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 	continue;
       
       xval = channel_frequency[ichan];
+      Estimate<float> val;
+      
       if (nrow == 1 || row_by_row)
-        yval = data[i].table[ifile].spline1d.evaluate (xval);
+      {
+	if (bootstrap_uncertainty)
+	  val = data[i].table[ifile].data[ichan];
+	else
+	{
+	  yval = data[i].table[ifile].spline1d.evaluate (xval);
+	  val = Estimate<float> (yval, fabs(yval)*1e-4);
+	}
+      }
       else
       {	
 #if HAVE_SPLINTER
         pair<double,double> coord (data[i].table[ifile].x0, xval);
         yval = data[i].spline2d.evaluate ( coord );
+	val = Estimate<float> (yval, fabs(yval)*1e-4);
 #endif
       }
 
-
-      Estimate<float> val (yval, fabs(yval)*1e-4);
       ext->set_Estimate (iparam, ichan, val);
     }
   }

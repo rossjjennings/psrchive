@@ -112,4 +112,19 @@ public:
 
 };
 
+class BootstrapUncertainty
+{
+  unsigned nsample;
+  SmoothingSpline* spline;      // the spline implementation
+  
+public:
+
+  BootstrapUncertainty ();
+
+  void set_spline (SmoothingSpline* _spline) { spline = _spline; }
+  
+  void get_uncertainty (const std::vector< double >& dat_x,
+			std::vector< Estimate<double> >& dat_y);
+};
+  
 #endif

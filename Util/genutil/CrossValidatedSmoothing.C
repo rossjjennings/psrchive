@@ -69,8 +69,10 @@ void CrossValidatedSmoothing::fit (const vector< double >& dat_x,
 
     mean_gof[itrial] = get_mean_gof (dat_x, dat_y);
 
+#if _DEBUG
     cerr << "CrossValidatedSmoothing::fit nfree=" << nfree_trials[itrial]
 	 << " gof=" << mean_gof[itrial] << endl;
+#endif
   }
 
   unsigned imin = 0;

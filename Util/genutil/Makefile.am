@@ -75,6 +75,7 @@ libgenutil_la_SOURCES = \
         angleconv.c \
 	Barycentre.C \
 	BatchQueue.C \
+	BootstrapUncertainty.C \
 	BoxMuller.C \
         Cartesian.C \
 	CommandLine.C \
