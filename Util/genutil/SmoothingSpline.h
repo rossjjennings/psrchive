@@ -87,10 +87,11 @@ public:
 
 class CrossValidatedSmoothing
 {
+  bool logarithmic;             // linearly space smoothing factors on logarithmic scale
   unsigned ntrial;              // number of trial smoothing factors
   unsigned npartition;          // m=40 in Clark (1977)
   double validation_fraction;   // 0.1 in Clark (1977)
-  SmoothingSpline* spline;       // the spline implementation
+  SmoothingSpline* spline;      // the spline implementation
   
 public:
 
@@ -105,6 +106,10 @@ public:
   //! Return the mean goodness-of-fit for the current smoothing
   double get_mean_gof (const std::vector< double >& data_x,
 		       const std::vector< Estimate<double> >& data_y);
+
+  //! Get the trial smoothing factors
+  void get_nfree_trials (std::vector<double>& nfree, unsigned ndat);
+
 };
 
 #endif

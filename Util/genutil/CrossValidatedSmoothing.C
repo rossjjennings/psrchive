@@ -14,10 +14,36 @@ using namespace std;
 
 CrossValidatedSmoothing::CrossValidatedSmoothing ()
 {
-  npartition = 40;
-  validation_fraction = 0.1;
+  logarithmic = true;
+  npartition = 80;
+  validation_fraction = 0.2;
   ntrial = 30;
   spline = 0;
+}
+
+void CrossValidatedSmoothing::get_nfree_trials (vector<double>& nfree, unsigned ndat)
+{
+  unsigned nval = validation_fraction * ndat;
+  unsigned nest = ndat - nval;
+  unsigned nmin = 3;
+  unsigned nmax = nest - 3;
+
+  nfree.resize (ntrial);
+  
+  if (logarithmic)
+  {
+    double log_nmin = log(nmin);
+    double log_nmax = log(nmax);
+    double log_nfree_step = (log_nmax - log_nmin) / (ntrial - 1.0);
+    for (unsigned itrial=0; itrial < ntrial; itrial ++)
+      nfree[itrial] = exp( log_nmin + itrial * log_nfree_step );
+  }
+  else
+  {
+    double nfree_step = (nmax - nmin) / (ntrial - 1.0);
+    for (unsigned itrial=0; itrial < ntrial; itrial ++)
+      nfree[itrial] = nmin + itrial * nfree_step;
+  }
 }
 
 void CrossValidatedSmoothing::fit (const vector< double >& dat_x,
@@ -28,30 +54,22 @@ void CrossValidatedSmoothing::fit (const vector< double >& dat_x,
   spline->set_minimize_gcv (true);
   spline->fit (dat_x, dat_y);
 
+  double best_fit_nfree = spline->get_fit_effective_nfree ();
   cerr << "CrossValidatedSmoothing::fit GCV best nfree="
-       << spline->get_fit_effective_nfree () << endl;
+       << best_fit_nfree << endl;
 
-  unsigned ndat = dat_x.size();
-  unsigned nval = validation_fraction * ndat;
-  unsigned nest = ndat - nval;
-  unsigned nmin = 3;
-  
-  double nfree_step = (nest - nmin) / (ntrial + 1.0);
-
-  cerr << "CrossValidatedSmoothing::fit nfree_step="
-       << nfree_step << endl;
+  vector<double> nfree_trials (ntrial);
+  get_nfree_trials (nfree_trials, dat_x.size());
   
   vector<double> mean_gof (ntrial, 0.0);
   
   for (unsigned itrial=0; itrial < ntrial; itrial ++)
   {
-    double nfree = nmin + itrial * nfree_step;
-
-    spline->set_effective_nfree (nfree);
+    spline->set_effective_nfree (nfree_trials[itrial]);
 
     mean_gof[itrial] = get_mean_gof (dat_x, dat_y);
 
-    cerr << "CrossValidatedSmoothing::fit nfree=" << nfree
+    cerr << "CrossValidatedSmoothing::fit nfree=" << nfree_trials[itrial]
 	 << " gof=" << mean_gof[itrial] << endl;
   }
 
@@ -67,9 +85,11 @@ void CrossValidatedSmoothing::fit (const vector< double >& dat_x,
     }
   }
 
-  double nfree = nmin + imin * nfree_step;
+  double nfree = nfree_trials[imin];
 
-  cerr << "CrossValidatedSmoothing::fit best nfree=" << nfree << endl;
+  cerr << "CrossValidatedSmoothing::fit best cross nfree=" << nfree << endl;
+  cerr << "RATIO: " << best_fit_nfree / nfree << endl;
+  
   spline->set_effective_nfree (nfree);
   spline->fit (dat_x, dat_y);
 }
@@ -124,6 +144,13 @@ void unique_sorted_random (vector<unsigned>& vals, unsigned nmax)
   }
 
   sort (vals.begin(), vals.end());
+
+#if _DEBUG
+  cerr << "val: ";
+  for (unsigned ival=0; ival < nval; ival++)
+    cerr << vals[ival] << " ";
+  cerr << endl;
+#endif
 }
 
 double CrossValidatedSmoothing::get_mean_gof (const vector< double >& dat_x,
