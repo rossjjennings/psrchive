@@ -811,13 +811,17 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
 
     if (bootstrap_uncertainty && (nrow == 1 || row_by_row))
     {
+      interpolate = false;
+      
       BootstrapUncertainty bootstrap;
       cerr << "smint: computing error bars (bootstrap replacement)" << endl;
       bootstrap.set_spline (& data[i].table[ifile].spline1d);
       bootstrap.get_uncertainty (data[i].table[ifile].freq,
 				 data[i].table[ifile].data);
     }
-	
+
+    unsigned data_index = 0;
+    
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       if (interpolate)
@@ -832,7 +836,11 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
       if (nrow == 1 || row_by_row)
       {
 	if (bootstrap_uncertainty)
-	  val = data[i].table[ifile].data[ichan];
+	{
+	  assert (xval == data[i].table[ifile].freq[data_index]);
+	  val = data[i].table[ifile].data[data_index];
+	  data_index ++;
+	}
 	else
 	{
 	  yval = data[i].table[ifile].spline1d.evaluate (xval);

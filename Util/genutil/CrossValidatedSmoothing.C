@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "SmoothingSpline.h"
+
+#include <algorithm>
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
