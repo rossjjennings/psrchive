@@ -42,6 +42,7 @@ void usage ()
     " -S i:j       swap parameter i and j before comparing \n"
     " -s pcm.std   compare all solutions with this standard \n"
     " -p           print statistical summary of differences (no plot) \n"
+    " -A           print the relative likelihood (Akaike weight) \n"
     " \n"
        << endl;
 }
@@ -121,6 +122,44 @@ double get_max_outlier (const vector<Estimate<double> >& residuals)
   return sqrt(max);
 }
 
+double get_AIC (const Pulsar::PolnCalibrator* calibrator)
+{
+  unsigned nchan  = calibrator->get_nchan ();
+
+  double total_chisq = 0.0;
+  unsigned total_ndat = 0;
+  unsigned total_nfit = 0;
+  
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    if (!calibrator->get_transformation_valid(ichan))
+      continue;
+
+    const MEAL::LeastSquares* solver = calibrator->get_solver (ichan);
+
+    total_chisq += solver->get_chisq ();
+
+    unsigned nfree = solver->get_nfree ();
+    unsigned nfit = solver->get_nparam_infit ();
+    
+    total_nfit += nfit;
+    total_ndat += nfit + nfree;
+  }
+
+  return total_chisq + 2.0 * total_nfit
+    + 2.0 * total_nfit * (total_nfit+1) / (total_ndat - total_nfit - 1.0); 
+}
+	     
+double get_relative_likelihood (Pulsar::PolnCalibrator* A, Pulsar::PolnCalibrator* B)
+{
+  double AIC_A = get_AIC (A);
+  double AIC_B = get_AIC (B);
+
+  cerr << "AIC_A=" << AIC_A << " AIC_B=" << AIC_B << endl;
+  
+  return exp( -0.5 * (AIC_A - AIC_B) );
+}
+
 int main (int argc, char** argv) try
 {
   // filename of filenames
@@ -140,12 +179,15 @@ int main (int argc, char** argv) try
 
   bool plot_errors = true;
   bool plot_calibrator_stokes = true;
+  
   bool print_summary = false;
+  bool print_relative_likelihood = false;
+  bool print_only = false;
   
   vector<ipair> swaps;
   
   char c;
-  while ((c = getopt(argc, argv, "Cc:D:EhM:pPs:S:vV")) != -1)  {
+  while ((c = getopt(argc, argv, "ACc:D:EhM:pPs:S:vV")) != -1)  {
 
     switch (c)  {
 
@@ -153,6 +195,11 @@ int main (int argc, char** argv) try
       usage();
       return 0;
 
+    case 'A':
+      print_relative_likelihood = true;
+      print_only = true;
+      break;
+      
     case 'C':
       plot_calibrator_stokes = false;
       break;
@@ -204,6 +251,7 @@ int main (int argc, char** argv) try
 
     case 'p':
       print_summary = true;
+      print_only = true;
       break;
       
     case 'V':
@@ -240,7 +288,7 @@ int main (int argc, char** argv) try
 #if HAVE_PGPLOT
   Pulsar::CalibratorPlotter plotter;
 
-  if (!print_summary)
+  if (!print_only)
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
@@ -387,6 +435,11 @@ int main (int argc, char** argv) try
 	     << " chisq= " << chisq
 	     << " maxout= " << maxout << endl;
       }
+    }
+    else if (print_relative_likelihood)
+    {
+      double relative_likelihood = get_relative_likelihood (compare, calibrator);
+      cout << filenames[ifile] << " l= " << relative_likelihood << endl;
     }
 #if HAVE_PGPLOT
     else
