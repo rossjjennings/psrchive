@@ -184,10 +184,15 @@ namespace Pulsar {
     //! Set the best fit value of chi squared
     void set_chisq (double);
 
-    //! Get the number of free parameters
+    //! Get the number of degrees of freedom
     unsigned get_nfree() const;
-    //! Set the number of free parameters
+    //! Set the number of degress of freedom
     void set_nfree (unsigned);
+
+    //! Get the number of model parameters varied to find best fit
+    unsigned get_nfit() const;
+    //! Set the number of model parameters varied to find best fit
+    void set_nfit (unsigned);
 
     // Text interface to a PolnCalibratorExtension instance
     class Interface : public TextInterface::To<Transformation>
@@ -205,7 +210,7 @@ namespace Pulsar {
     std::vector<double> covariance;
     double chisq;
     unsigned nfree;
-
+    unsigned nfit;
     bool valid;
 
   };

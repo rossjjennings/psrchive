@@ -112,6 +112,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
       const MEAL::LeastSquares* solver = calibrator->get_solver( ichan );
       get_transformation(ichan)->set_chisq( solver->get_chisq() );
       get_transformation(ichan)->set_nfree( solver->get_nfree() );
+      get_transformation(ichan)->set_nfit( solver->get_nparam_infit() );
     }
   }
 }

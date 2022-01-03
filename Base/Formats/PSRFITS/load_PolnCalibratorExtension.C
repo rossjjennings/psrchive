@@ -293,7 +293,7 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 {
   unsigned nchan = pce->get_nchan();
   data.resize( nchan );
-  vector<int> nfree( nchan, 0 );
+  vector<unsigned> nfree( nchan, 0 );
 
   try {
     psrfits_read_col (fptr, "CHISQ", data);
@@ -308,12 +308,31 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
     return;
   }
 
-  for (unsigned ichan = 0; ichan < pce->get_nchan(); ichan++)
-    if (pce->get_valid(ichan))
-    {
-      pce->get_transformation(ichan)->set_chisq( data[ichan] );
-      pce->get_transformation(ichan)->set_nfree( nfree[ichan] );
-    }
+  // WvS new on 3 Jan 2022 - needed to compute the AIC
+  vector<unsigned> nfit ( nchan, 0 );
+  try {
+    psrfits_read_col (fptr, "NFIT", nfit);
+  }
+  catch (Error& error)
+  {
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "FITSArchive::load_PolnCalibratorExtension"
+	" no NFIT" << endl;
+    nfit.resize (0);
+  }
+
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+  {
+    if (! pce->get_valid(ichan))
+      continue;
+    
+    pce->get_transformation(ichan)->set_chisq( data[ichan] );
+    pce->get_transformation(ichan)->set_nfree( nfree[ichan] );
+
+    // WvS new on 3 Jan 2022 - needed to compute the AIC
+    if (nfit.size() == nchan)
+      pce->get_transformation(ichan)->set_nfit( nfit[ichan] );
+  }
 
   pce->set_has_solver (true);
 }

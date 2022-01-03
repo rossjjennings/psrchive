@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.2             '   / Header version 
+HDRVER  = '6.3             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -457,6 +457,8 @@ TFORM#  = E                    / NCOVAR*NCHAN floats
 TTYPE#  = CHISQ                / Total chi-squared (objective merit function)
 TFORM#  = E                    / NCHAN floats
 TTYPE#  = NFREE                / Number of degrees of freedom
+TFORM#  = J                    / NCHAN long (32-bit) integers
+TTYPE#  = NFIT                 / Number of model parameters varied in fit
 TFORM#  = J                    / NCHAN long (32-bit) integers
 END
 #

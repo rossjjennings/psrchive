@@ -298,9 +298,9 @@ bool Pulsar::PolnCalibrator::has_solver () const
 class TmpSolver : public MEAL::LeastSquares
 {
 public:
-  TmpSolver (float _chisq, unsigned _nfree)
+  TmpSolver (float _chisq, unsigned _nfree, unsigned _nfit)
   {
-    best_chisq = _chisq; nfree = _nfree; solved = true;
+    best_chisq = _chisq; nfree = _nfree; nparam_infit = _nfit; solved = true;
   }
   string get_name () const { return "TmpSolver"; }
 };
@@ -320,7 +320,9 @@ Pulsar::PolnCalibrator::get_solver (unsigned ichan) const
     const PolnCalibratorExtension::Transformation* xform 
       = poln_extension->get_transformation (ichan);
 
-    tmp_solver[ichan] = new TmpSolver (xform->get_chisq(), xform->get_nfree());
+    tmp_solver[ichan] = new TmpSolver ( xform->get_chisq(),
+					xform->get_nfree(),
+					xform->get_nfit() );
   }
 
   return tmp_solver[ichan];

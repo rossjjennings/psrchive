@@ -232,35 +232,40 @@ void unload_covariances (fitsfile* fptr,
 
 void unload_solver (fitsfile* fptr,
 		    const Pulsar::PolnCalibratorExtension* pce,
-		    vector<float>& data)
+		    vector<float>& chisq)
 {
   unsigned nchan = pce->get_nchan();
 
-  data.resize( nchan );
+  chisq.resize( nchan );
   vector<unsigned> nfree( nchan, 0 );
+  vector<unsigned> nfit( nchan, 0 );
 
   for (unsigned i = 0; i < nchan; i++)
   {
     if (pce->get_valid(i))
     {
-      data[i] = pce->get_transformation(i)->get_chisq();
+      chisq[i] = pce->get_transformation(i)->get_chisq();
       nfree[i] = pce->get_transformation(i)->get_nfree();
+      nfit[i]  = pce->get_transformation(i)->get_nfit();
     }
     else
     {
-      data[i] = 0.0;
-      nfree[i] = 0.0;
+      chisq[i] = 0.0;
+      nfree[i] = 0;
+      nfit[i]  = 0;
     }
   }
 
   vector<unsigned> no_dimensions;
 
-  psrfits_write_col (fptr, "CHISQ", 1, data,  no_dimensions);
+  psrfits_write_col (fptr, "CHISQ", 1, chisq, no_dimensions);
   psrfits_write_col (fptr, "NFREE", 1, nfree, no_dimensions);
+  psrfits_write_col (fptr, "NFIT",  1, nfit,  no_dimensions);
 }
 
 void delete_solver (fitsfile* fptr)
 {
   psrfits_delete_col (fptr, "CHISQ");
   psrfits_delete_col (fptr, "NFREE");
+  psrfits_delete_col (fptr, "NFIT");
 }

@@ -234,6 +234,7 @@ PolnCalibratorExtension::Transformation::Transformation ()
   valid = true;
   chisq = 0.0;
   nfree = 0;
+  nfit = 0;
 }
 
 unsigned
@@ -345,6 +346,16 @@ unsigned PolnCalibratorExtension::Transformation::get_nfree() const
 void PolnCalibratorExtension::Transformation::set_nfree (unsigned n)
 {
   nfree = n;
+}
+
+unsigned PolnCalibratorExtension::Transformation::get_nfit() const
+{
+  return nfit;
+}
+
+void PolnCalibratorExtension::Transformation::set_nfit (unsigned n)
+{
+  nfit = n;
 }
 
 //! Get the covariance matrix of the model paramters
