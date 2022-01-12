@@ -19,8 +19,12 @@ using namespace std;
 Pulsar::InterQuartileRange::InterQuartileRange ()
 {
   set_cutoff_threshold (1.5);
+  minimum_slope_median_duty_cycle = 0;
 }
 
+unsigned get_minimum_slope_index (const std::vector<float>& data,
+				  float duty_cycle);
+  
 unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask, 
 						  std::vector<float> &stat,
 						  std::vector<float> &model,
@@ -67,6 +71,28 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
 
     assert (valid <= ntest);
     data.resize(valid);
+    std::sort (data.begin(), data.begin()+valid);
+
+    unsigned offset = 0;
+    
+    if (minimum_slope_median_duty_cycle != 0.0)
+    {
+      unsigned msi = get_minimum_slope_index (data,
+					      minimum_slope_median_duty_cycle);
+      unsigned medi = valid / 2;
+
+      if (msi < medi)
+      {
+	cerr << "msmi=" << msi << " less than medi=" << medi << endl;
+	valid = msi * 2;
+      }
+      else
+      {
+	cerr << "msmi=" << msi << " greater than medi=" << medi << endl;
+	offset = (msi - medi) * 2;
+	valid -= offset;
+      }
+    }
 
     unsigned iq1 = valid/4;
     unsigned iq3 = (valid*3)/4;
@@ -75,9 +101,10 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
     cerr << "iQ1=" << iq1 << " iQ3=" << iq3 << endl;
 #endif
 
-    std::sort (data.begin(), data.begin()+valid);
-    double Q1 = data[ iq1 ];
-    double Q3 = data[ iq3 ];
+    
+
+    double Q1 = data[ iq1+offset ];
+    double Q3 = data[ iq3+offset ];
   
     double IQR = Q3 - Q1;
 
@@ -151,5 +178,62 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
   add( &InterQuartileRange::get_cutoff_threshold_max,
        &InterQuartileRange::set_cutoff_threshold_max,
        "cutmax", "Outlier threshold: Q1-cutmin*IQR - Q3+cutmax*IQR" );
+
+  add( &InterQuartileRange::get_minimum_slope_median_duty_cycle,
+       &InterQuartileRange::set_minimum_slope_median_duty_cycle,
+       "msm", "Duty cycle used to find the minimum slope median" ); 
 }
 
+double get_slope (const std::vector<float>& data,
+		  unsigned istart, unsigned iend)
+{
+  double xmean = 0.0;
+  double ymean = 0.0;
+  unsigned n = 0;
+  for (unsigned i=istart; i<=iend; i++)
+    {
+      xmean += i;
+      ymean += data[i];
+      n++;
+    }
+
+  
+  xmean /= n;
+  ymean /= n;
+
+  double covar = 0.0;
+  double xvar = 0.0;
+    
+  for (unsigned i=istart; i<=iend; i++)
+  {
+    double dx = i - xmean;
+    double dy = data[i] - ymean;
+    covar += dx * dy;
+    xvar += dx * dx;
+  }
+
+  return covar / xvar;
+}
+
+unsigned get_minimum_slope_index (const std::vector<float>& data,
+				  float duty_cycle)
+{
+  unsigned ndat = data.size();
+  unsigned nslope = ndat * duty_cycle;
+  unsigned half = nslope / 2;
+
+  unsigned imin = ndat / 2;
+  double min_slope = -1;
+    
+  for (unsigned idat=half; idat+half < ndat; idat++)
+  {
+    double slope = get_slope (data, idat-half, idat+half);
+    if (slope < min_slope || min_slope == -1)
+    {
+      min_slope = slope;
+      imin = idat;
+    }
+  }
+
+  return imin;
+}
