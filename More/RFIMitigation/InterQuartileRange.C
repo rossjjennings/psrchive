@@ -101,8 +101,6 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
     cerr << "iQ1=" << iq1 << " iQ3=" << iq3 << endl;
 #endif
 
-    
-
     double Q1 = data[ iq1+offset ];
     double Q3 = data[ iq3+offset ];
   

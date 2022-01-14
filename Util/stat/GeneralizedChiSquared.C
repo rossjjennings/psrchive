@@ -157,7 +157,17 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
   
   double coeff = 0.0;
   for (unsigned i=0; i<ndim; i++)
-    coeff += sqr(pc1[i] - scale * pc2[i] - offset * sum[i]) / eigenvalues[i];
+  {
+    double resid = pc1[i] - scale * pc2[i] - offset * sum[i];
+    coeff += resid * resid / eigenvalues[i];
+
+    if (fptr)
+    {
+      // cerr << "fprintf resid fptr=" << (void*) fptr << endl;
+      fprintf (fptr, " %g", resid);
+      // cerr << "fprinted" << endl;
+    }
+  }
   
   double retval = coeff / ( ndim * ( 1 + sqr(scale) ) );
   

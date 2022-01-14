@@ -14,7 +14,7 @@
 #include "ChiSquared.h"
 #include "UnaryStatistic.h"
 
-// #define _DEBUG 1
+#define _DEBUG 1
 #include "debug.h"
 
 using namespace Pulsar;
@@ -28,11 +28,16 @@ CompareWith::CompareWith ()
   compare = 0;
   transpose = false;
   compare_all = false;
+
   model_residual = true;
+  use_null_space = false;
+  
   is_setup = false;
   setup_completed = false;
 
   bscrunch_factor.disable_scrunch();
+
+  fptr = 0;
 }
 
 void CompareWith::set_statistic (BinaryStatistic* stat)
@@ -95,6 +100,8 @@ void CompareWith::set (ndArray<2,double>& result,
 
 void CompareWith::check ()
 {
+  DEBUG("CompareWith::check");
+
   if (!data)
     throw Error (InvalidState, "CompareWith::check", "archive data not set");
 
@@ -106,6 +113,12 @@ void CompareWith::check ()
 
   if (!compare)
     throw Error (InvalidState, "CompareWith::check", "compare index method not set");
+
+  DEBUG("CompareWith::check fptr=" << (void*) fptr);
+
+  statistic->set_file (fptr);
+
+  DEBUG("CompareWith::check done");
 }
 
 void CompareWith::compute (ndArray<2,double>& result)
@@ -116,6 +129,8 @@ void CompareWith::compute (ndArray<2,double>& result)
 
   if (compare_all && !is_setup)
     setup (0, nprimary);
+
+  DEBUG("CompareWith::compute setup done");
   
   for (unsigned iprimary=0; iprimary < nprimary; iprimary++) try
   {
@@ -226,11 +241,13 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 	get_amps (amps, prof);
 
 	chi.set_outlier_threshold (0.0);
-	double chisq = chi.get (amps, mamps);
-	
-	// DEBUG( "CompareWith::setup chisq=" << chisq );
 
 #if _DEBUG
+	double chisq = chi.get (amps, mamps);
+	
+	DEBUG( "CompareWith::setup chisq=" << chisq );
+
+
 	static bool once = true;
 	if (once)
 	  {
@@ -276,20 +293,32 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   unsigned rank = std::min( covar->get_count(), covar->get_rank() );
 
   DEBUG("CompareWith::setup count=" << covar->get_count() << " dim=" << covar->get_rank() << " rank=" << rank);
-
+  
   unsigned eff_rank = 0;
-  while (eff_rank < rank && eval[eff_rank] > var)
-    eff_rank ++;
+  unsigned offset = 0;
 
-  if (eff_rank > 0 && eff_rank+1 >= rank)
+  if (use_null_space)
   {
-    eff_rank --;
+    eff_rank = 2;
+    offset = rank-2;
+
+    cerr << "using null space" << endl;
+  }
+  else
+  {
+    while (eff_rank < rank && eval[eff_rank] > var)
+      eff_rank ++;
+
+    if (eff_rank > 0 && eff_rank+1 >= rank)
+    {
+      eff_rank --;
     
-    DEBUG("CompareWith::setup full rank lambda/var=" << eval[eff_rank]/var);
+      DEBUG("CompareWith::setup full rank lambda/var=" << eval[eff_rank]/var);
+    }
+  
+    DEBUG("CompareWith::setup effective rank=" << eff_rank);
   }
   
-  DEBUG("CompareWith::setup effective rank=" << eff_rank);
-
   unsigned nbin = covar->get_rank();
   
   gcs->eigenvectors * eff_rank * nbin;
@@ -298,13 +327,13 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   for (unsigned irank=0; irank < eff_rank; irank++)
   {
     for (unsigned ibin=0; ibin < nbin; ibin++)
-      gcs->eigenvectors[irank][ibin] = evec[irank*nbin+ibin];
+      gcs->eigenvectors[irank][ibin] = evec[(irank+offset)*nbin+ibin];
 
     /*
       divide by var because both CompareWithSum and CompareWithEachOther normalize
       each profile by the robust_variance
     */
-    gcs->eigenvalues[irank] = eval[irank] / var;
+    gcs->eigenvalues[irank] = eval[irank+offset] / var;
   }
 
   setup_completed = true;

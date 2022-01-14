@@ -29,6 +29,9 @@ namespace Pulsar {
     /*! Available only to derived classes */
     ArchiveStatistic ();
 
+    //! File to which auxiliary data will be printed
+    FILE* fptr;
+    
   public:
 
     //! Create a new instance of ArchiveStatistic based on name
@@ -46,6 +49,12 @@ namespace Pulsar {
 
     //! Derived types must also define clone method
     virtual ArchiveStatistic* clone () const = 0;
+
+    //! Set the file to which auxiliary data will be printed
+    virtual void set_file (FILE* f) { fptr = f; }
+
+    //! Close the file to which auxiliary data were printed
+    virtual void fclose ();
   };
 
   std::ostream& operator<< (std::ostream&, ArchiveStatistic*);

@@ -94,6 +94,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
   add( &TimeFrequencyZap::get_filename,
        &TimeFrequencyZap::set_filename,
        "fname", "Name of file to which stats are printed" );
+
+  add( &TimeFrequencyZap::get_aux_filename,
+       &TimeFrequencyZap::set_aux_filename,
+       "aname", "Name of file to which auxiliary data are printed" );
 }
 
 // defined in More/General/standard_interface.C
@@ -501,7 +505,21 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
     statistic->set_Archive (NULL);
     statistic->set_Archive (data);
 
-    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    if (aux_filename != "")
+    {
+      cerr << "TimeFrequencyZap::compute_stat opening "
+	"'" << aux_filename << "'" << endl;
+      
+      FILE* f = fopen (aux_filename.c_str(), "w");
+      statistic->set_file (f);
+
+      // disable writing on the next iteration
+      aux_filename = "";
+    }
+    
+    ArchiveComparisons* compare = 0;
+    compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    
     if (compare)
     {
       compare->set_compute_subint (compute_subint);
@@ -513,11 +531,15 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
   
   if (filename != "")
   {
-    cerr << "TimeFrequencyZap::compute_stat opening '" << filename << "'" << endl;
-    fptr = fopen(filename.c_str(),"w");
+    cerr << "TimeFrequencyZap::compute_stat opening "
+      "'" << filename << "'" << endl;
+    
+    fptr = fopen (filename.c_str(), "w");
 
     // disable writing on the next iteration
     filename = "";
+
+    cerr << "TimeFrequencyZap::compute_stat file opened" << endl;
   }
   
   // Eval expression, fill stats array
@@ -542,7 +564,9 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
         if (statistic)
         {
 	  statistic->set_pol (pol_i[ipol]);
+	  // cerr << "calling Statistic::get" << endl;
           fval = statistic->get();
+	  // cerr << "Statistic::get returned" << endl;
         }
         else
         {
@@ -570,7 +594,14 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
   }
 
   if (fptr)
+  {
     fclose (fptr);
+    fptr = 0;
+  }
+  
+  // cerr << "calling Statistic::fclose" << endl;
+  if (statistic)
+    statistic->fclose ();
 }
 
 void Pulsar::TimeFrequencyZap::update_mask ()

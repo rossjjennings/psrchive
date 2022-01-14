@@ -36,8 +36,16 @@ public:
   //! Derived types must also define clone method
   virtual BinaryStatistic* clone () const = 0;
 
-private:
+  //! Set the file to which auxiliary data will be printed
+  void set_file (FILE* f) { fptr = f; }
 
+protected:
+
+  //! The file to which auxiliary data will be printed
+  FILE* fptr;
+
+private:
+  
   //! thread-safe build for factory
   static void build (); 
 };

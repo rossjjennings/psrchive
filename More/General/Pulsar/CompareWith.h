@@ -45,8 +45,10 @@ namespace Pulsar {
     //! Compare over both dimensions
     bool compare_all;
 
-    //! Compute the covariance matrix of the best-fit residual after fitting scale+offset
+    //! Compute the covariance matrix of the best-fit residual
+    /*! Residual after fitting scale and offset */
     bool model_residual;
+    bool use_null_space;
     
     //! Transpose indeces when computing results
     bool transpose;
@@ -88,6 +90,9 @@ namespace Pulsar {
     //! Temporary storage
     Reference::To<Profile> temp;
 
+    //! File to which auxiliary data will be printed
+    FILE* fptr;
+
   public:
 
     CompareWith ();
@@ -119,6 +124,10 @@ namespace Pulsar {
     { compute_mask = flags; }
 			   
     virtual void compute (ndArray<2,double>& result);
+
+    //! Set the file to which auxiliary data will be printed
+    void set_file (FILE* f) { fptr = f; }
+
   };
 }
 

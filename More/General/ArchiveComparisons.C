@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <cassert>
 
-// #define _DEBUG 1
+#define _DEBUG 1
 #include "debug.h"
 
 using namespace std;
@@ -38,7 +38,7 @@ ArchiveComparisons::ArchiveComparisons (BinaryStatistic* my_stat)
   way = "time";
 
   bscrunch_factor.disable_scrunch();
-
+  
   DEBUG("ArchiveComparisons stat=" << stat->get_identity());
 }
 
@@ -107,7 +107,9 @@ void ArchiveComparisons::init_compare (const Archive* arch)
   unsigned nsubint = arch->get_nsubint();
   unsigned nchan = arch->get_nchan();
 
-  DEBUG("ArchiveComparisons::init_compare nsubint=" << nsubint << " nchan=" << nchan);
+  DEBUG("ArchiveComparisons::init_compare nsubint=" << nsubint << " nchan=" << nchan << " fptr=" << (void*) fptr);
+
+  compare->set_file (fptr);
 
   if (way == "time")
   {
@@ -135,6 +137,8 @@ void ArchiveComparisons::init_compare (const Archive* arch)
   compare->set_bscrunch (bscrunch_factor);
   compare->set_statistic (stat);
   compare->set_data (this);
+
+  DEBUG("ArchiveComparisons::init_compare return");
 }
 
 
@@ -157,7 +161,11 @@ void ArchiveComparisons::build () try
   Index ichan_restore = get_chan();
   Index ipol_restore = get_pol();
 
+  DEBUG("ArchiveComparisons::build call CompareWith::compute");
+
   compare->compute (result);
+
+  DEBUG("ArchiveComparisons::build CompareWith::compute returned");
 
   set_subint (isubint_restore);
   set_chan (ichan_restore);

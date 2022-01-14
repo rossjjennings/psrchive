@@ -122,6 +122,8 @@ BinaryStatistic::BinaryStatistic (const string& name,
 
   set_identity (name);
   set_description (description);
+
+  fptr = 0;
 }
 
 static std::vector< BinaryStatistic* >* instances = NULL;

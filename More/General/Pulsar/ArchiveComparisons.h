@@ -66,7 +66,7 @@ namespace Pulsar {
     //! Return true if call to set_setup_Archive sets anything up
     /* Not all archive comparisons require a global set up */
     bool get_setup ();
-    
+
   protected:
 
     //! Manages comparisons

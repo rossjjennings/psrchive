@@ -52,7 +52,14 @@ void CompareWithSum::compute (unsigned iprimary, ndArray<2,double>& result)
       set (result, iprimary, icompare, 0.0);	
       continue;
     }
-      
+
+    if (fptr)
+    {
+      // cerr << "fprintf dimensions fptr=" << (void*) fptr << endl;
+      fprintf (fptr, "%u %u", iprimary, icompare);
+      // cerr << "fprinted" << endl;
+    }
+    
     get_amps (idata, iprof);
 
 #ifdef _DEBUG
@@ -61,6 +68,9 @@ void CompareWithSum::compute (unsigned iprimary, ndArray<2,double>& result)
 	
     double val = statistic->get (idata, sumdata);
 
+    if (fptr)
+      fprintf (fptr, "\n");
+      
 #if _DEBUG
     cerr << "CompareWithSum::compute iprim=" << iprimary
 	 << " icomp=" << icompare << " val=" << val << endl;
