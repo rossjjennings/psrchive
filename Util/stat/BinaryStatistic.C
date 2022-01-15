@@ -1,9 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2020 by Willem van Straten
+ *   Copyright (C) 2020 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "BinaryStatistic.h"
 #include "UnaryStatistic.h"
@@ -131,6 +135,10 @@ static std::vector< BinaryStatistic* >* instances = NULL;
 #include "ChiSquared.h"
 #include "GeneralizedChiSquared.h"
 
+#if HAVE_ARMADILLO
+#include "GaussianMixtureProbabilityDensity.h"
+#endif
+
 using namespace BinaryStatistics;
 
 void BinaryStatistic::build ()
@@ -147,6 +155,10 @@ void BinaryStatistic::build ()
   instances->push_back( new GeneralizedChiSquared );
   instances->push_back( new RelativeSpectralEntropy );
 
+#if HAVE_ARMADILLO
+  instances->push_back( new GaussianMixtureProbabilityDensity );
+#endif
+  
   assert (instances->size() == instance_count - start_count);
 }
 

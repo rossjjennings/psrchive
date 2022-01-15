@@ -393,20 +393,51 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   if (!gmpd)
     return;
   
-  arma::mat data (eff_rank, nprofile, fill::zeros);
+  arma::mat pc (eff_rank, nprofile);
 
   // fill data matrix
+
+  unsigned iprofile = 0;
+  
+  for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
+  {
+    (data->*primary) (iprimary);
+    
+    for (unsigned icompare=0; icompare < ncompare; icompare++)
+    {
+      (data->*compare) (icompare);
+
+      Reference::To<const Profile> prof = data->get_Profile ();
+
+      double weight = prof->get_weight();
+      
+      if (weight == 0.0)
+	continue;
+
+      vector<double> amps;
+      get_amps (amps, prof);
+
+      gcs->get (amps, mamps);
+
+      pc.col(iprofile) = vec( gcs->get_residual() );
+      iprofile ++;
+    }
+  }
   
   if (gmpd->model == NULL)
     gmpd->model = new arma::gmm_diag;
   
   arma::gmm_diag* model = gmpd->model;
+
+  cerr << "calling arma::gmm_diag::learn" << endl;
   
-  bool status = model->learn(data, 2, maha_dist, random_subset, 10, 5, 1e-10, true);
+  bool status = model->learn(pc, 2, maha_dist, random_spread, 10, 5, 1e-10, true);
+  
   if(status == false)  { cout << "learning failed" << endl; }
   model->means.print("means:");
-  double overall_likelihood = model->avg_log_p(data);
+  double overall_likelihood = model->avg_log_p(pc);
 
+  cerr << "overall_likelihood = " << overall_likelihood << endl;
   DEBUG( "CompareWith::setup Gaussian mixture analysis completed" );
 
 #endif

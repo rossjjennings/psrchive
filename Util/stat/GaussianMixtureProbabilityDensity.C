@@ -43,6 +43,6 @@ double GaussianMixtureProbabilityDensity::get (const vector<double>& dat1,
 
   double likelihood = model->log_p( residual );
    
-  return exp(likelihood);
+  return likelihood;
 }
 
