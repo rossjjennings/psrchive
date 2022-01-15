@@ -15,6 +15,7 @@
 #include "Pulsar/TimeDomainCovariance.h"
 #include "Pulsar/ScrunchFactor.h"
 
+#include "ChiSquared.h"
 #include "ndArray.h"
 
 class BinaryStatistic;
@@ -78,8 +79,18 @@ namespace Pulsar {
     //! Compute covariance matrix from bscrunched clone of data
     ScrunchFactor bscrunch_factor;
 
-    //! Get normalized and bscrunched amps
+    //! Set amps to the normalized and bscrunched profile amplitudes
     void get_amps (std::vector<double>& amps, const Profile* profile);
+
+    //! Set amps to the residual after best fit of amps to mamps
+    void get_residual (std::vector<double>& amps,
+		       const std::vector<double>& mamps);
+
+    //! After call to get_residual, also stores residual profile amplitudes
+    Reference::To<Profile> temp;
+
+    //! Used to compute the residual
+    BinaryStatistics::ChiSquared chi;
 
     //! Compute the comparison summary for primary dimension
     virtual void compute (unsigned iprimary, ndArray<2,double>& result) = 0;
@@ -87,8 +98,6 @@ namespace Pulsar {
     //! Flags for subset of sub-integrations to be computed
     std::vector<bool> compute_mask;
 
-    //! Temporary storage
-    Reference::To<Profile> temp;
 
     //! File to which auxiliary data will be printed
     FILE* fptr;

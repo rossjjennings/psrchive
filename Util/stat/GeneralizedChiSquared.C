@@ -99,7 +99,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
     unsigned max_zapped = ndat;
     if (max_zap_fraction)
       max_zapped = max_zap_fraction * max_zapped;
-    
+
     unsigned zapped = 0;
     unsigned iterations = 0;
     do
@@ -154,17 +154,19 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 	   << " scale=" << scale << " offset=" << offset << endl;
 
   }
+
+  residual.resize (ndim);
   
   double coeff = 0.0;
   for (unsigned i=0; i<ndim; i++)
   {
-    double resid = pc1[i] - scale * pc2[i] - offset * sum[i];
-    coeff += resid * resid / eigenvalues[i];
+    residual[i] = pc1[i] - scale * pc2[i] - offset * sum[i];
+    coeff += residual[i] * residual[i] / eigenvalues[i];
 
     if (fptr)
     {
       // cerr << "fprintf resid fptr=" << (void*) fptr << endl;
-      fprintf (fptr, " %g", resid);
+      fprintf (fptr, " %g", residual[i]);
       // cerr << "fprinted" << endl;
     }
   }

@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <cassert>
 
-#define _DEBUG 1
+// #define _DEBUG 1
 #include "debug.h"
 
 using namespace std;

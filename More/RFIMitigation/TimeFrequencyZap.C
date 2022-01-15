@@ -539,7 +539,7 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
     // disable writing on the next iteration
     filename = "";
 
-    cerr << "TimeFrequencyZap::compute_stat file opened" << endl;
+    // cerr << "TimeFrequencyZap::compute_stat file opened" << endl;
   }
   
   // Eval expression, fill stats array

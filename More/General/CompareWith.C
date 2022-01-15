@@ -5,17 +5,27 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/CompareWith.h"
 #include "Pulsar/TimeDomainCovariance.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
+#include "GaussianMixtureProbabilityDensity.h"
 #include "GeneralizedChiSquared.h"
 #include "ChiSquared.h"
 #include "UnaryStatistic.h"
 
-#define _DEBUG 1
+// #define _DEBUG 1
 #include "debug.h"
+
+#if HAVE_ARMADILLO
+#include <armadillo>
+using namespace arma;
+#endif
 
 using namespace Pulsar;
 using namespace std;
@@ -184,14 +194,67 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
     element /= rms;
 }
 
+void CompareWith::get_residual (vector<double>& amps,
+				const vector<double>& mamps)
+{
+  chi.set_outlier_threshold (0.0);
+
+  double chisq = chi.get (amps, mamps);
+
+  DEBUG( "CompareWith::get_residual chisq=" << chisq );
+
+#if _DEBUG
+	
+  static bool once = true;
+  if (once)
+  {
+    vector<double> resid = chi.get_residual();
+    FILE* fptr = fopen ("resid.dat", "w");
+    for (unsigned i=0; i<amps.size(); i++)
+      fprintf (fptr, "%g %g %g\n", mamps[i], amps[i], resid[i]);
+    fclose (fptr);
+    once = false;
+  }
+#endif
+	  
+  amps = chi.get_residual();
+}
+
+
 void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 {
   mean = 0;
 
   setup_completed = false;
+
+  bool needs_setup = false;
   
-  GeneralizedChiSquared* gcs = dynamic_cast<GeneralizedChiSquared*> (statistic.get());
+  GeneralizedChiSquared* gcs = 0;
+  gcs = dynamic_cast<GeneralizedChiSquared*> (statistic.get());
+  if (gcs)
+    needs_setup = true;
+
+#if HAVE_ARMADILLO
+
+  GaussianMixtureProbabilityDensity* gmpd = 0;
+
   if (!gcs)
+  {
+    gmpd = dynamic_cast<GaussianMixtureProbabilityDensity*> (statistic.get());
+    if (gmpd)
+    {
+      needs_setup = true;
+
+      if (gmpd->gcs)
+	gcs = gmpd->gcs;
+      else
+	gmpd->gcs = gcs = new GeneralizedChiSquared;
+    }
+  }
+  
+#endif
+  
+  if (!needs_setup)
     return;
 
   DEBUG( "CompareWith::setup start_primary=" << start_primary << " nprimary=" << nprimary);
@@ -216,7 +279,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   double var = 0.0;
   double norm = 0.0;
 
-  ChiSquared chi;
+  unsigned nprofile = 0;
   
   for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
   {
@@ -239,28 +302,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       if (model_residual)
       {
 	get_amps (amps, prof);
-
-	chi.set_outlier_threshold (0.0);
-
-#if _DEBUG
-	double chisq = chi.get (amps, mamps);
-	
-	DEBUG( "CompareWith::setup chisq=" << chisq );
-
-
-	static bool once = true;
-	if (once)
-	  {
-	    vector<double> resid = chi.get_residual();
-	    FILE* fptr = fopen ("resid.dat", "w");
-	    for (unsigned i=0; i<amps.size(); i++)
-	      fprintf (fptr, "%g %g %g\n", mamps[i], amps[i], resid[i]);
-	    fclose (fptr);
-	    once = false;
-	  }
-#endif
-	  
-	amps = chi.get_residual();
+	get_residual (amps, mamps);
 
 	if (!temp)
 	  temp = prof->clone();
@@ -273,6 +315,8 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       norm += weight;
       
       covar->add_Profile (prof);
+
+      nprofile ++;
     }
   }
   
@@ -320,25 +364,53 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   }
   
   unsigned nbin = covar->get_rank();
-  
-  gcs->eigenvectors * eff_rank * nbin;
-  gcs->eigenvalues * eff_rank;
-  
-  for (unsigned irank=0; irank < eff_rank; irank++)
+
+  if (gcs)
   {
-    for (unsigned ibin=0; ibin < nbin; ibin++)
-      gcs->eigenvectors[irank][ibin] = evec[(irank+offset)*nbin+ibin];
+    gcs->eigenvectors * eff_rank * nbin;
+    gcs->eigenvalues * eff_rank;
+  
+    for (unsigned irank=0; irank < eff_rank; irank++)
+    {
+      for (unsigned ibin=0; ibin < nbin; ibin++)
+	gcs->eigenvectors[irank][ibin] = evec[(irank+offset)*nbin+ibin];
 
-    /*
-      divide by var because both CompareWithSum and CompareWithEachOther normalize
-      each profile by the robust_variance
-    */
-    gcs->eigenvalues[irank] = eval[irank+offset] / var;
+      /*
+	divide by var because both CompareWithSum and
+	CompareWithEachOther normalize each profile by the square root
+	of the robust_variance
+      */
+      gcs->eigenvalues[irank] = eval[irank+offset] / var;
+    }
   }
-
+  
   setup_completed = true;
 
-  DEBUG( "CompareWith::setup done" );
+  DEBUG( "CompareWith::setup eigen analysis completed" );
+    
+#if HAVE_ARMADILLO
+
+  if (!gmpd)
+    return;
+  
+  arma::mat data (eff_rank, nprofile, fill::zeros);
+
+  // fill data matrix
+  
+  if (gmpd->model == NULL)
+    gmpd->model = new arma::gmm_diag;
+  
+  arma::gmm_diag* model = gmpd->model;
+  
+  bool status = model->learn(data, 2, maha_dist, random_subset, 10, 5, 1e-10, true);
+  if(status == false)  { cout << "learning failed" << endl; }
+  model->means.print("means:");
+  double overall_likelihood = model->avg_log_p(data);
+
+  DEBUG( "CompareWith::setup Gaussian mixture analysis completed" );
+
+#endif
+
 }
     
 void CompareWith::compute_mean (unsigned start_primary, unsigned nprimary)

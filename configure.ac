@@ -132,6 +132,7 @@ SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP
 PSR_LIB_SPLINTER
+PSR_LIB_ARMADILLO
 
 #
 # Set up for automatic package installation

@@ -1,12 +1,15 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2020 by Willem van Straten
+ *   Copyright (C) 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-// psrchive/More/General/ChiSquared.h
+// psrchive/Util/stat/ChiSquared.h
+
+#ifndef __Util_stat_ChiSquared_h
+#define __Util_stat_ChiSquared_h
 
 #include "BinaryStatistic.h"
 
@@ -57,3 +60,5 @@ void linear_fit_work (double& scale, double& offset,
 		      const std::vector<double>& one,
 		      const std::vector<double>& wt,
 		      bool robust_offset = false);
+
+#endif

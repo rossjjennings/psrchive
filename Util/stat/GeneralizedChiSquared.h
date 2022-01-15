@@ -22,12 +22,17 @@ namespace BinaryStatistics
     double outlier_threshold;
     double max_zap_fraction;
 
+    std::vector<double> residual;
+
   public:
 
     GeneralizedChiSquared ();
 
     double get (const std::vector<double>&, const std::vector<double>&);
 
+    //! Return the residual
+    const std::vector<double>& get_residual () const { return residual; }
+    
     GeneralizedChiSquared* clone () const { return new GeneralizedChiSquared; }
 
     ndArray<2,double> eigenvectors;

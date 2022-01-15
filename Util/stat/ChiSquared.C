@@ -125,17 +125,15 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   double scale = 1.0;
   double offset = 0.0;
   
+  vector<bool> mask (ndat, true);
+    
   if (robust_linear_fit)
   {
-    vector<bool> mask (ndat, true);
-    
     unsigned total_zapped = 0;
     unsigned max_zapped = ndat;
     if (max_zap_fraction)
       max_zapped = max_zap_fraction * max_zapped;
 
-    residual.resize (ndat);
-    
     unsigned zapped = 0;
     do
     {
@@ -151,9 +149,9 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
       {
 	if (!mask[i])
 	  continue;
-	
-	residual[i] = dat1[i] - scale * dat2[i] - offset;
-	if ( outlier_threshold > 0 && sqr(residual[i]) > cut )
+
+	double residual = dat1[i] - scale * dat2[i] - offset;
+	if ( outlier_threshold > 0 && sqr(residual) > cut )
         {
 	  mask[i] = false;
 	  zapped ++;
@@ -172,8 +170,16 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   }
   
   double coeff = 0.0;
+  residual.resize (ndat);
+    
   for (unsigned i=0; i<ndat; i++)
-    coeff += sqr(dat1[i] - scale * dat2[i] - offset);
+  {
+    residual[i] = dat1[i] - scale * dat2[i] - offset;
+    coeff += sqr(residual[i]);
+
+    if (!mask[i])
+      residual[i] = 0.0;
+  }
   
   double retval = coeff / ( ndat * ( 1 + sqr(scale) ) );
 

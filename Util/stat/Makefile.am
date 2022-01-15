@@ -7,6 +7,11 @@ nobase_include_HEADERS = BinaryStatistic.h UnaryStatistic.h evaluate.h \
 libstat_la_SOURCES = BinaryStatistic.C UnaryStatistic.C evaluate.C \
 	ChiSquared.C GeneralizedChiSquared.C 
 
+if HAVE_ARMADILLO
+  nobase_include_HEADERS += GaussianMixtureProbabilityDensity.h
+  libstat_la_SOURCES += GaussianMixtureProbabilityDensity.C
+endif
+
 TESTS = test_evaluate
 
 check_PROGRAMS = $(TESTS)
