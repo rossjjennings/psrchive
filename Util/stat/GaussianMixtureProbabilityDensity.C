@@ -28,7 +28,7 @@ double GaussianMixtureProbabilityDensity::get (const vector<double>& dat1,
   assert (mean.size() == ndat);
   assert (model != NULL);
   
-  arma::vec residual (ndat);
+  std::vector<double> residual (ndat);
   
   if (gcs)
   {
@@ -41,7 +41,11 @@ double GaussianMixtureProbabilityDensity::get (const vector<double>& dat1,
       residual[i] = dat1[i] - mean[i];
   }
 
-  double likelihood = model->log_p( residual );
+  unsigned ndims = model->n_dims();
+  if (ndims < ndat)
+    residual.resize (ndims);
+
+  double likelihood = model->log_p( arma::vec(residual) );
    
   return likelihood;
 }

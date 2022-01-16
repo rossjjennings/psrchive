@@ -281,9 +281,9 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
   unsigned nprofile = 0;
   
-  for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
+  for (unsigned iprim=start_primary; iprim < start_primary+nprimary; iprim++)
   {
-    (data->*primary) (iprimary);
+    (data->*primary) (iprim);
     
     for (unsigned icompare=0; icompare < ncompare; icompare++)
     {
@@ -392,16 +392,50 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
   if (!gmpd)
     return;
+
+  // number of Gaussians used to model data
+  unsigned ncomponent = 6;
+
+  // number of principal components passed to GMM on first iteration
+  unsigned npc = eff_rank / 2;
+
+  // use kmeans++ to determine initial means
+  const arma::gmm_seed_mode* seed_mode = &arma::random_spread;
+    
+  arma::gmm_diag* model = gmpd->model;
+
+  if (model == NULL)
+  {
+    model = gmpd->model = new arma::gmm_diag;
+    cerr << "new model ptr = " << (void*) model << endl;
+  }
+  else
+  {
+    cerr << "use model ptr = " << (void*) model << endl;
+
+    npc = model->n_dims();
+    seed_mode = &arma::keep_existing;
+  }
   
-  arma::mat pc (eff_rank, nprofile);
+#if 0
+    arma::mat dcov (npc, ncomponent);
+    for (unsigned icomp=0; icomp < ncomponent; icomp++)
+      dcov.col(icomp) = arma::vec (eval, npc);
+    model->set_dcovs ( dcov );
+#endif
+
+
+  arma::mat pc (npc, nprofile);
 
   // fill data matrix
 
   unsigned iprofile = 0;
+
+  std::vector<double> residual;
   
-  for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
+  for (unsigned iprim=start_primary; iprim < start_primary+nprimary; iprim++)
   {
-    (data->*primary) (iprimary);
+    (data->*primary) (iprim);
     
     for (unsigned icompare=0; icompare < ncompare; icompare++)
     {
@@ -419,22 +453,46 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
       gcs->get (amps, mamps);
 
-      pc.col(iprofile) = vec( gcs->get_residual() );
+      residual = gcs->get_residual();
+      if (npc < residual.size())
+	residual.resize (npc);
+      
+      pc.col(iprofile) = arma::vec( residual );
       iprofile ++;
     }
   }
-  
-  if (gmpd->model == NULL)
-    gmpd->model = new arma::gmm_diag;
-  
-  arma::gmm_diag* model = gmpd->model;
 
   cerr << "calling arma::gmm_diag::learn" << endl;
+
+  bool status = model->learn(pc, ncomponent, arma::maha_dist,
+			     *seed_mode,
+			     10, 10, 1e-10, true);
+
+  if (status == false)
+    throw Error (FailedCall, "CompareWith::setup",
+		 "arma::gmm_diag::learn failed");
+    
+  unsigned ndims = model->n_dims();
+  assert (ndims == npc);
+
+  unsigned ngaus = model->n_gaus();
+  assert (ngaus == ncomponent);
   
-  bool status = model->learn(pc, 2, maha_dist, random_spread, 10, 5, 1e-10, true);
-  
-  if(status == false)  { cout << "learning failed" << endl; }
-  model->means.print("means:");
+  arma::rowvec hefts = model->hefts;
+  arma::mat means = model->means;
+  arma::mat dcovs = model->dcovs;
+
+  cerr << "ndims=" << ndims << endl;
+  unsigned print_ndims = 2;
+  for (unsigned igaus=0; igaus < ngaus; igaus++)
+  {
+    cerr << igaus << " heft=" << hefts[igaus] << endl;
+    cerr << "mean var eval" << endl;
+    for (unsigned idim=0; idim < print_ndims; idim++)
+      cerr << means.col(igaus)[idim] << " " << dcovs.col(igaus)[idim]
+	   << " " << eval[idim] << endl;
+  }
+
   double overall_likelihood = model->avg_log_p(pc);
 
   cerr << "overall_likelihood = " << overall_likelihood << endl;
@@ -450,9 +508,9 @@ void CompareWith::compute_mean (unsigned start_primary, unsigned nprimary)
 
   // DEBUG( "CompareWith::compute_mean start=" << start_primary << " n=" << nprimary);
 
-  for (unsigned iprimary=start_primary; iprimary < start_primary+nprimary; iprimary++)
+  for (unsigned iprim=start_primary; iprim < start_primary+nprimary; iprim++)
   {
-    (data->*primary) (iprimary);
+    (data->*primary) (iprim);
     
     for (unsigned icompare=0; icompare < ncompare; icompare++)
     {
