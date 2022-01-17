@@ -19,6 +19,8 @@
 #include "ChiSquared.h"
 #include "UnaryStatistic.h"
 
+#include <algorithm>
+
 // #define _DEBUG 1
 #include "debug.h"
 
@@ -350,6 +352,18 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   }
   else
   {
+    double evectot = 0;
+    for (unsigned i=0; i<rank; i++)
+      evectot += eval[i];
+
+    std::ofstream ofs ("evec_cumu.dat");
+    double evec_cumu = 0;
+    for (unsigned i=0; i<rank; i++)
+    {
+      evec_cumu += eval[i];
+      ofs << eval[i] << " " << 1.0 - evec_cumu / evectot << endl;
+    }
+    
     while (eff_rank < rank && eval[eff_rank] > var)
       eff_rank ++;
 
@@ -395,36 +409,35 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
   // number of Gaussians used to model data
   unsigned ncomponent = 6;
-
+  
   // number of principal components passed to GMM on first iteration
   unsigned npc = eff_rank / 2;
 
+  unsigned ntrial = 100;
+  unsigned km_iter = 10;
+  unsigned em_iter = 50;
+  bool verbose = false;
+
+  arma::gmm_diag* model = gmpd->model;
+
   // use kmeans++ to determine initial means
   const arma::gmm_seed_mode* seed_mode = &arma::random_spread;
-    
-  arma::gmm_diag* model = gmpd->model;
 
   if (model == NULL)
   {
     model = gmpd->model = new arma::gmm_diag;
-    cerr << "new model ptr = " << (void*) model << endl;
   }
+#if 0
   else
   {
-    cerr << "use model ptr = " << (void*) model << endl;
-
     npc = model->n_dims();
-    seed_mode = &arma::keep_existing;
+    // seed_mode = &arma::keep_existing;
+    // verbose = true;
   }
-  
-#if 0
-    arma::mat dcov (npc, ncomponent);
-    for (unsigned icomp=0; icomp < ncomponent; icomp++)
-      dcov.col(icomp) = arma::vec (eval, npc);
-    model->set_dcovs ( dcov );
 #endif
-
-
+  
+  cerr << "npc=" << npc << " eff_rank=" << eff_rank << endl;
+  
   arma::mat pc (npc, nprofile);
 
   // fill data matrix
@@ -432,7 +445,9 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   unsigned iprofile = 0;
 
   std::vector<double> residual;
-  
+
+  std::ofstream ofs ("gmm_input.dat");
+    
   for (unsigned iprim=start_primary; iprim < start_primary+nprimary; iprim++)
   {
     (data->*primary) (iprim);
@@ -456,6 +471,10 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       residual = gcs->get_residual();
       if (npc < residual.size())
 	residual.resize (npc);
+
+      for (unsigned i=0; i<npc; i++)
+	ofs << residual[i] << " ";
+      ofs << endl;
       
       pc.col(iprofile) = arma::vec( residual );
       iprofile ++;
@@ -463,33 +482,98 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   }
 
   cerr << "calling arma::gmm_diag::learn" << endl;
-
-  bool status = model->learn(pc, ncomponent, arma::maha_dist,
-			     *seed_mode,
-			     10, 10, 1e-10, true);
-
-  if (status == false)
-    throw Error (FailedCall, "CompareWith::setup",
-		 "arma::gmm_diag::learn failed");
-    
-  unsigned ndims = model->n_dims();
-  assert (ndims == npc);
-
-  unsigned ngaus = model->n_gaus();
-  assert (ngaus == ncomponent);
   
-  arma::rowvec hefts = model->hefts;
-  arma::mat means = model->means;
-  arma::mat dcovs = model->dcovs;
+  arma::rowvec best_hefts;
+  arma::mat best_means;
+  arma::mat best_dcovs;
 
-  cerr << "ndims=" << ndims << endl;
-  unsigned print_ndims = 2;
-  for (unsigned igaus=0; igaus < ngaus; igaus++)
+  double max_distnorm = 0;
+  double best_dist = 0;
+  double best_var = 0;
+  
+  double var_floor = 1e-10;
+  
+  for (unsigned itrial=0; itrial < ntrial; itrial++)
   {
-    cerr << igaus << " heft=" << hefts[igaus] << endl;
+    bool status = model->learn(pc, ncomponent, arma::maha_dist,
+			       *seed_mode,
+			       km_iter, em_iter, var_floor, verbose);
+
+    if (status == false)
+      throw Error (FailedCall, "CompareWith::setup",
+		   "arma::gmm_diag::learn failed");
+
+    arma::rowvec hefts = model->hefts;
+    arma::mat means = model->means;
+    arma::mat dcovs = model->dcovs;
+
+    unsigned ndims = model->n_dims();
+    assert (ndims == npc);
+
+    unsigned ngaus = model->n_gaus();
+    assert (ngaus == ncomponent);
+  
+    double totvar = 0;
+    double totdist = 0;
+    double distnorm = 0;
+    
+    unsigned count = 0;
+    
+    for (unsigned igaus=0; igaus < ngaus; igaus++)
+    {
+      bool used = false;
+      
+      for (unsigned idim=0; idim < ndims; idim++)
+	if (dcovs(idim, igaus) != var_floor)
+	{
+	  used = true;
+	  break;
+	}
+
+      if (!used)
+	continue;
+      
+      for (unsigned idim=0; idim < ndims; idim++)
+      {
+	totvar += hefts[igaus] * dcovs(idim, igaus);
+	double distsq = means(idim, igaus) * means(idim, igaus);
+	totdist += hefts[igaus] * distsq;
+	distnorm += hefts[igaus] * distsq / dcovs(idim, igaus);
+      }
+
+      count ++;
+    }
+
+    distnorm /= count;
+    
+    if (max_distnorm == 0 || distnorm > max_distnorm)
+    {
+      best_hefts = hefts;
+      best_means = means;
+      best_dcovs = dcovs;
+
+      cerr << "trial=" << itrial
+	   << " distnorm old=" << max_distnorm << " new=" << distnorm
+	   << " dist old=" << best_dist << " new=" << totdist
+	   << " var old=" << best_var << " new=" << totvar << endl;
+
+      max_distnorm = distnorm;
+      best_dist = totdist;
+      best_var = totvar;
+    }
+  }
+  
+  model->set_hefts (best_hefts);
+  model->set_means (best_means);
+  model->set_dcovs (best_dcovs);
+
+  unsigned print_ndims = 2;
+  for (unsigned igaus=0; igaus < ncomponent; igaus++)
+  {
+    cerr << igaus << " heft=" << best_hefts[igaus] << endl;
     cerr << "mean var eval" << endl;
     for (unsigned idim=0; idim < print_ndims; idim++)
-      cerr << means.col(igaus)[idim] << " " << dcovs.col(igaus)[idim]
+      cerr << best_means.col(igaus)[idim] << " " << best_dcovs.col(igaus)[idim]
 	   << " " << eval[idim] << endl;
   }
 
