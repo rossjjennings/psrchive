@@ -222,6 +222,230 @@ void CompareWith::get_residual (vector<double>& amps,
   amps = chi.get_residual();
 }
 
+#if HAVE_ARMADILLO
+
+void brute_force_search_for_best_gmm (arma::gmm_diag* model,
+				      const arma::mat& data,
+				      unsigned ngaus)
+{
+  unsigned ntrial = 100;
+    
+  arma::rowvec best_hefts;
+  arma::mat best_means;
+  arma::mat best_dcovs;
+
+  double max_distnorm = 0;
+  double best_dist = 0;
+  double best_var = 0;
+
+  unsigned km_iter = 10;
+  unsigned em_iter = 50;
+  bool verbose = false;
+
+  double var_floor = 1e-10;
+  
+  for (unsigned itrial=0; itrial < ntrial; itrial++)
+  {
+    bool status = model->learn(data, ngaus, arma::maha_dist,
+			       arma::random_spread,
+			       km_iter, em_iter, var_floor, verbose);
+
+    if (status == false)
+      throw Error (FailedCall, "CompareWith::setup",
+		   "arma::gmm_diag::learn failed");
+
+    arma::rowvec hefts = model->hefts;
+    arma::mat means = model->means;
+    arma::mat dcovs = model->dcovs;
+
+    unsigned ndims = model->n_dims();
+  
+    double totvar = 0;
+    double totdist = 0;
+    double distnorm = 0;
+    
+    unsigned count = 0;
+    
+    for (unsigned igaus=0; igaus < ngaus; igaus++)
+    {
+      bool used = false;
+      
+      for (unsigned idim=0; idim < ndims; idim++)
+	if (dcovs(idim, igaus) != var_floor)
+	{
+	  used = true;
+	  break;
+	}
+
+      if (!used)
+	continue;
+      
+      for (unsigned idim=0; idim < ndims; idim++)
+      {
+	totvar += hefts[igaus] * dcovs(idim, igaus);
+	double distsq = means(idim, igaus) * means(idim, igaus);
+	totdist += hefts[igaus] * distsq;
+	distnorm += hefts[igaus] * distsq / dcovs(idim, igaus);
+      }
+
+      count ++;
+    }
+
+    distnorm /= count;
+    
+    if (max_distnorm == 0 || distnorm > max_distnorm)
+    {
+      best_hefts = hefts;
+      best_means = means;
+      best_dcovs = dcovs;
+
+      cerr << "trial=" << itrial
+	   << " distnorm old=" << max_distnorm << " new=" << distnorm
+	   << " dist old=" << best_dist << " new=" << totdist
+	   << " var old=" << best_var << " new=" << totvar << endl;
+
+      max_distnorm = distnorm;
+      best_dist = totdist;
+      best_var = totvar;
+    }
+  }
+  
+  model->set_hefts (best_hefts);
+  model->set_means (best_means);
+  model->set_dcovs (best_dcovs);
+}
+
+
+
+void targeted_search_for_best_gmm (arma::gmm_diag* model,
+				   const arma::mat& data,
+				   unsigned ngaus, const double* eval)
+{
+  uword d = data.n_rows;     // dimensionality
+  uword N = data.n_cols;     // number of vectors
+
+  // Tukey's default IQR threshold ...
+  double threshold = 1.5;
+  // ... results in about 1% false negatives in normal distribution
+  double normal_outliers = 0.01;
+
+  /* Half of these should be below Q1-1.5*IQR and half should be above
+     Q3+1.5*IQR.  However, the number of outliers will be considered
+     significant only when they are significantly times the false 
+     negative rate of the normal distribution */
+
+  double significantly = 1.5;
+
+  unsigned outlier_count = significantly * normal_outliers/2 * N;
+
+  cerr << "outlier_count=" << outlier_count << endl;
+
+  // set the diagonal covariances to the eigenvalues
+  mat dcovs (d, ngaus);
+
+  vector<double> row (N);
+  vec second (d); 
+  double heft = 0;
+  
+  for (unsigned irow=0; irow < d; irow++)
+  {
+    for (unsigned igaus=0; igaus < ngaus; igaus++)
+      dcovs (irow, igaus) = eval[irow];
+    
+    for (unsigned icol=0; icol < N; icol++)
+      row[icol] =  data(irow, icol);
+
+    sort (row.begin(), row.end());
+    
+    double Q1 = row[N/4];
+    double Q3 = row[(3*N)/4];
+    
+    double IQR = Q3 - Q1;
+
+    unsigned icol=0;
+    while (row[icol] < Q1 - threshold*IQR)
+      icol ++;
+
+    unsigned nlow = icol;
+    double lowmed = 0.0;
+   
+    if (nlow)
+      lowmed = row[ nlow / 2 ];
+   
+    icol=N-1;
+    while (row[icol] > Q3 + threshold*IQR)
+     icol --;
+
+    unsigned nhigh = N-1 - icol;
+    double highmed = 0.0;
+
+    if (nhigh)
+      highmed = row[ icol + nhigh / 2 ];
+
+#if _DEBUG
+    cout << nlow << " " << lowmed
+	 << " " << row[N/2] << " "
+	 << nhigh << " " << highmed << endl;
+#endif
+    
+    if (nlow > outlier_count && nlow > nhigh)
+      second[irow] = lowmed;
+    else if (nhigh > outlier_count)
+      second[irow] = highmed;
+
+    if (irow == 0)
+      heft = double(max(nlow,nhigh)) / N;
+  }
+
+  unsigned km_iter = 0;
+  unsigned em_iter = 0;
+  bool verbose = false;
+
+  double var_floor = 1e-10;
+
+  // this fake run sets up the dimension inside the model
+  // which is required in order to call model->set_means
+  bool status = model->learn(data, ngaus, maha_dist, random_subset,
+			     km_iter, em_iter, var_floor, verbose);
+  
+  if (status == false)
+    throw Error (FailedCall, "CompareWith::setup",
+		 "arma::gmm_diag::learn failed on fake run");
+
+  cerr << "second = " << second[0] << " " << second[1] << endl;
+
+  mat means (d, ngaus);
+  means.col(1) = second;
+
+  arma::rowvec hefts (ngaus);
+
+  double minheft = 0.01;
+  hefts(0) = 1.0 - heft - (ngaus-2) * minheft;
+  hefts(1) = heft;
+
+  for (unsigned i=2; i<ngaus; i++)
+    hefts(i) = minheft;
+  
+  model->set_means (means);
+  model->set_hefts (hefts);
+  model->set_dcovs (dcovs);
+  
+  em_iter = 40;
+
+#if _DEBUG
+  verbose = true;
+#endif
+  
+  status = model->learn(data, ngaus, maha_dist, keep_existing,
+			km_iter, em_iter, var_floor, verbose);
+
+  if (status == false)
+    throw Error (FailedCall, "CompareWith::setup",
+		 "arma::gmm_diag::learn failed on targeted run");
+
+}
+
+#endif // HAVE_ARMADILLO
 
 void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 {
@@ -352,6 +576,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   }
   else
   {
+#if _DEBUG
     double evectot = 0;
     for (unsigned i=0; i<rank; i++)
       evectot += eval[i];
@@ -363,6 +588,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       evec_cumu += eval[i];
       ofs << eval[i] << " " << 1.0 - evec_cumu / evectot << endl;
     }
+#endif
     
     while (eff_rank < rank && eval[eff_rank] > var)
       eff_rank ++;
@@ -408,46 +634,28 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
     return;
 
   // number of Gaussians used to model data
-  unsigned ncomponent = 6;
+  unsigned ncomponent = 4;
   
   // number of principal components passed to GMM on first iteration
   unsigned npc = eff_rank / 2;
 
-  unsigned ntrial = 100;
-  unsigned km_iter = 10;
-  unsigned em_iter = 50;
-  bool verbose = false;
-
   arma::gmm_diag* model = gmpd->model;
-
-  // use kmeans++ to determine initial means
-  const arma::gmm_seed_mode* seed_mode = &arma::random_spread;
-
   if (model == NULL)
-  {
     model = gmpd->model = new arma::gmm_diag;
-  }
-#if 0
-  else
-  {
-    npc = model->n_dims();
-    // seed_mode = &arma::keep_existing;
-    // verbose = true;
-  }
-#endif
-  
-  cerr << "npc=" << npc << " eff_rank=" << eff_rank << endl;
   
   arma::mat pc (npc, nprofile);
 
-  // fill data matrix
+  // fill matrix with principal components after GCS fit
 
   unsigned iprofile = 0;
 
   std::vector<double> residual;
 
+#define _OUTPUT_GMM_INPUT 0
+#if _OUTPUT_GMM_INPUT
   std::ofstream ofs ("gmm_input.dat");
-    
+#endif
+      
   for (unsigned iprim=start_primary; iprim < start_primary+nprimary; iprim++)
   {
     (data->*primary) (iprim);
@@ -472,120 +680,37 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       if (npc < residual.size())
 	residual.resize (npc);
 
+#if _OUTPUT_GMM_INPUT
       for (unsigned i=0; i<npc; i++)
 	ofs << residual[i] << " ";
       ofs << endl;
+#endif
       
       pc.col(iprofile) = arma::vec( residual );
       iprofile ++;
     }
   }
 
+  assert (iprofile == nprofile);
+  pc.save ("gmm.sav");
+  
   cerr << "calling arma::gmm_diag::learn" << endl;
-  
-  arma::rowvec best_hefts;
-  arma::mat best_means;
-  arma::mat best_dcovs;
 
-  double max_distnorm = 0;
-  double best_dist = 0;
-  double best_var = 0;
-  
-  double var_floor = 1e-10;
-  
-  for (unsigned itrial=0; itrial < ntrial; itrial++)
-  {
-    bool status = model->learn(pc, ncomponent, arma::maha_dist,
-			       *seed_mode,
-			       km_iter, em_iter, var_floor, verbose);
-
-    if (status == false)
-      throw Error (FailedCall, "CompareWith::setup",
-		   "arma::gmm_diag::learn failed");
-
-    arma::rowvec hefts = model->hefts;
-    arma::mat means = model->means;
-    arma::mat dcovs = model->dcovs;
-
-    unsigned ndims = model->n_dims();
-    assert (ndims == npc);
-
-    unsigned ngaus = model->n_gaus();
-    assert (ngaus == ncomponent);
-  
-    double totvar = 0;
-    double totdist = 0;
-    double distnorm = 0;
-    
-    unsigned count = 0;
-    
-    for (unsigned igaus=0; igaus < ngaus; igaus++)
-    {
-      bool used = false;
-      
-      for (unsigned idim=0; idim < ndims; idim++)
-	if (dcovs(idim, igaus) != var_floor)
-	{
-	  used = true;
-	  break;
-	}
-
-      if (!used)
-	continue;
-      
-      for (unsigned idim=0; idim < ndims; idim++)
-      {
-	totvar += hefts[igaus] * dcovs(idim, igaus);
-	double distsq = means(idim, igaus) * means(idim, igaus);
-	totdist += hefts[igaus] * distsq;
-	distnorm += hefts[igaus] * distsq / dcovs(idim, igaus);
-      }
-
-      count ++;
-    }
-
-    distnorm /= count;
-    
-    if (max_distnorm == 0 || distnorm > max_distnorm)
-    {
-      best_hefts = hefts;
-      best_means = means;
-      best_dcovs = dcovs;
-
-      cerr << "trial=" << itrial
-	   << " distnorm old=" << max_distnorm << " new=" << distnorm
-	   << " dist old=" << best_dist << " new=" << totdist
-	   << " var old=" << best_var << " new=" << totvar << endl;
-
-      max_distnorm = distnorm;
-      best_dist = totdist;
-      best_var = totvar;
-    }
-  }
-  
-  model->set_hefts (best_hefts);
-  model->set_means (best_means);
-  model->set_dcovs (best_dcovs);
-
-  unsigned print_ndims = 2;
-  for (unsigned igaus=0; igaus < ncomponent; igaus++)
-  {
-    cerr << igaus << " heft=" << best_hefts[igaus] << endl;
-    cerr << "mean var eval" << endl;
-    for (unsigned idim=0; idim < print_ndims; idim++)
-      cerr << best_means.col(igaus)[idim] << " " << best_dcovs.col(igaus)[idim]
-	   << " " << eval[idim] << endl;
-  }
+  targeted_search_for_best_gmm (model, pc, ncomponent, eval);
 
   double overall_likelihood = model->avg_log_p(pc);
 
   cerr << "overall_likelihood = " << overall_likelihood << endl;
+
+  model->hefts.print("hefts:");
+  model->means.print("hefts:");
+  
   DEBUG( "CompareWith::setup Gaussian mixture analysis completed" );
 
 #endif
 
 }
-    
+
 void CompareWith::compute_mean (unsigned start_primary, unsigned nprimary)
 {
   mean = 0;
