@@ -14,7 +14,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
-#include "GaussianMixtureProbabilityDensity.h"
 #include "GeneralizedChiSquared.h"
 #include "ChiSquared.h"
 #include "UnaryStatistic.h"
@@ -25,6 +24,7 @@
 #include "debug.h"
 
 #if HAVE_ARMADILLO
+#include "GaussianMixtureProbabilityDensity.h"
 #include <armadillo>
 using namespace arma;
 #endif
