@@ -445,6 +445,91 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 
 }
 
+void ease_in_to_best_gmm (arma::gmm_diag* model,
+			      const arma::mat& data,
+			      unsigned ngaus, const double* eval)
+{
+  uword d = data.n_rows;     // dimensionality
+  uword N = data.n_cols;     // number of vectors
+
+  unsigned km_iter = 10;
+  unsigned em_iter = 40;
+
+  // initially fit only the first two principal components
+  unsigned nrows = 2;
+  mat subdata = data.rows (0, nrows-1);
+
+  bool verbose = false;
+
+#if _DEBUG
+  verbose = true;
+#endif
+  
+  bool status = model->learn(subdata, ngaus, maha_dist, random_spread,
+			     km_iter, em_iter, 1e-10, verbose);
+  if (status == false)
+    throw Error (FailedCall, "CompareWith::setup",
+		 "arma::gmm_diag::learn failed on initial 2 PC run");
+
+#if _DEBUG
+  model->hefts.print("hefts:");
+  model->means.print("means:");
+  model->dcovs.print("dcovs:");
+#endif
+  
+  em_iter = 30;
+
+  // add two more PCs at a time
+  for (unsigned nrows=4; nrows < d; nrows+=2)
+  {
+    subdata = data.rows (0, nrows-1);
+    
+    rowvec hefts = model->hefts;    
+    mat means = model->means;
+    mat dcovs = model->dcovs;
+
+    unsigned old_nrows = dcovs.n_rows;
+
+    means.resize (nrows, ngaus);
+    dcovs.resize (nrows, ngaus);
+    
+    for (unsigned irow=old_nrows; irow < nrows; irow++)
+      for (unsigned icol=0; icol < ngaus; icol++)
+      {
+	means (irow, icol) = 0.0;
+	dcovs (irow, icol) = eval[irow];
+      }
+
+    // fake run to set up model dimensions
+    status = model->learn(subdata, ngaus, maha_dist, static_subset,
+			  0, 0, 1e-10, false);
+
+    if (status == false)
+      throw Error (FailedCall, "CompareWith::setup",
+		   "arma::gmm_diag::learn failed on fake nrow=%u", nrows);
+    
+    model->set_hefts (hefts);
+    model->set_means (means);
+    model->set_dcovs (dcovs);
+    
+    status = model->learn(subdata, ngaus, maha_dist, keep_existing,
+			  0, em_iter, 1e-10, verbose);
+
+    if (status == false)
+      throw Error (FailedCall, "CompareWith::setup",
+		   "arma::gmm_diag::learn failed on real nrow=%u", nrows);
+
+    if (em_iter > 5)
+      em_iter -= 2;
+
+#if _DEBUG
+    model->hefts.print("hefts:");
+    model->means.print("means:");
+    model->dcovs.print("dcovs:");
+#endif
+  }
+}
+
 #endif // HAVE_ARMADILLO
 
 void CompareWith::setup (unsigned start_primary, unsigned nprimary)
@@ -634,10 +719,10 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
     return;
 
   // number of Gaussians used to model data
-  unsigned ncomponent = 4;
+  unsigned ncomponent = 8;
   
   // number of principal components passed to GMM on first iteration
-  unsigned npc = eff_rank / 2;
+  unsigned npc = eff_rank;
 
   arma::gmm_diag* model = gmpd->model;
   if (model == NULL)
@@ -696,14 +781,10 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   
   cerr << "calling arma::gmm_diag::learn" << endl;
 
-  targeted_search_for_best_gmm (model, pc, ncomponent, eval);
-
-  double overall_likelihood = model->avg_log_p(pc);
-
-  cerr << "overall_likelihood = " << overall_likelihood << endl;
+  ease_in_to_best_gmm (model, pc, ncomponent, eval);
 
   model->hefts.print("hefts:");
-  model->means.print("hefts:");
+  model->means.print("means:");
   
   DEBUG( "CompareWith::setup Gaussian mixture analysis completed" );
 
