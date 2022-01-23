@@ -83,12 +83,12 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
 
       if (msi < medi)
       {
-	cerr << "msmi=" << msi << " less than medi=" << medi << endl;
+	DEBUG( "msmi=" << msi << " less than medi=" << medi );
 	valid = msi * 2;
       }
       else
       {
-	cerr << "msmi=" << msi << " greater than medi=" << medi << endl;
+	DEBUG( "msmi=" << msi << " greater than medi=" << medi );
 	offset = (msi - medi) * 2;
 	valid -= offset;
       }
