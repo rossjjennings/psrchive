@@ -30,3 +30,7 @@ LDADD = libstat.la \
 
 include $(top_srcdir)/config/Makefile.include
 
+AM_CPPFLAGS += @ARMADILLO_CFLAGS@
+
+libstat_la_LIBADD = @ARMADILLO_LIBS@
+
