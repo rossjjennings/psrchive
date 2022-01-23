@@ -779,12 +779,14 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   assert (iprofile == nprofile);
   pc.save ("gmm.sav");
   
-  cerr << "calling arma::gmm_diag::learn" << endl;
+  DEBUG( "CompareWith::setup calling arma::gmm_diag::learn" );
 
   ease_in_to_best_gmm (model, pc, ncomponent, eval);
 
+#if _DEBUG
   model->hefts.print("hefts:");
   model->means.print("means:");
+#endif
   
   DEBUG( "CompareWith::setup Gaussian mixture analysis completed" );
 
