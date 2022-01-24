@@ -446,8 +446,8 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 }
 
 void ease_in_to_best_gmm (arma::gmm_diag* model,
-			      const arma::mat& data,
-			      unsigned ngaus, const double* eval)
+			  const arma::mat& data,
+			  unsigned& ngaus, const double* eval)
 {
   uword d = data.n_rows;     // dimensionality
   uword N = data.n_cols;     // number of vectors
@@ -465,11 +465,46 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
   verbose = true;
 #endif
   
+  // determine the best number of Gaussians via the AIC
+  ngaus = 1;
+  unsigned best_ngaus = 1;
+  double best_aic = 0;
+  
+  do
+  {
+    bool status = model->learn(subdata, ngaus, maha_dist, random_spread,
+			       km_iter, em_iter, 1e-10, verbose);
+    if (status == false)
+      throw Error (FailedCall, "CompareWith::setup",
+		   "arma::gmm_diag::learn failed on 2 PC run");
+
+    double nparam = ngaus * ( 2 * nrows + 1 );
+    double aic = nparam - model->sum_log_p (subdata);
+
+    if (best_aic == 0 || aic < best_aic)
+    {
+      DEBUG( "ngaus=" << ngaus << " aic=" << aic << " best aic=" << best_aic);
+      best_aic = aic;
+      best_ngaus = ngaus;
+      ngaus ++;
+    }
+    else
+    {
+      DEBUG( "BREAK: ngaus=" << ngaus << " aic=" << aic << " best aic=" << best_aic );
+      break;
+    }
+  }
+  while (ngaus == best_ngaus + 1);
+
+  ngaus = best_ngaus;
+
+  DEBUG( "number of Gaussians = " << ngaus );
+
   bool status = model->learn(subdata, ngaus, maha_dist, random_spread,
-			     km_iter, em_iter, 1e-10, verbose);
+			       km_iter, em_iter, 1e-10, verbose);
   if (status == false)
     throw Error (FailedCall, "CompareWith::setup",
-		 "arma::gmm_diag::learn failed on initial 2 PC run");
+		 "arma::gmm_diag::learn failed on best 2 PC run");
 
 #if _DEBUG
   model->hefts.print("hefts:");
@@ -718,9 +753,6 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   if (!gmpd)
     return;
 
-  // number of Gaussians used to model data
-  unsigned ncomponent = 8;
-  
   // number of principal components passed to GMM on first iteration
   unsigned npc = eff_rank;
 
@@ -781,6 +813,12 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   
   DEBUG( "CompareWith::setup calling arma::gmm_diag::learn" );
 
+  /* The optimal number of Gaussians is determined by minimizing the
+     information loss, as estimated via the Akaike Information
+     Criterion */
+  
+  // number of Gaussians used to model data
+  unsigned ncomponent = 0;  
   ease_in_to_best_gmm (model, pc, ncomponent, eval);
 
 #if _DEBUG
