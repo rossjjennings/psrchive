@@ -19,6 +19,7 @@
 #include "UnaryStatistic.h"
 
 #include <algorithm>
+#include <cassert>
 
 // #define _DEBUG 1
 #include "debug.h"
