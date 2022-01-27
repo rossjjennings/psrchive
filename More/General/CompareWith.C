@@ -516,7 +516,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
   em_iter = 30;
 
   // add two more PCs at a time
-  for (unsigned nrows=4; nrows < d; nrows+=2)
+  for (unsigned nrows=4; nrows < d; nrows+=2) try
   {
     subdata = data.rows (0, nrows-1);
     
@@ -563,6 +563,11 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
     model->means.print("means:");
     model->dcovs.print("dcovs:");
 #endif
+  }
+  catch (std::exception& error)
+  {
+    throw Error (FailedCall, "CompareWith::setup",
+                 error.what ());
   }
 }
 
@@ -656,11 +661,16 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
 	temp->set_amps (amps);
 	prof = temp;
-      }
 
-      var += weight * robust_variance (amps);
-      norm += weight;
-      
+        var += 1.0;  // get_amps normalizes by robust rms
+        norm += 1.0;
+      }
+      else
+      {
+        var += weight * robust_variance (amps);
+        norm += weight;
+      }
+ 
       covar->add_Profile (prof);
 
       nprofile ++;
