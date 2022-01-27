@@ -91,6 +91,7 @@ public:
   class Expert;
   friend class Expert;
 
+  //! Determines the precision of iphase (stopping threshold) in seconds
   static double precision;
 
   //! default constructor
