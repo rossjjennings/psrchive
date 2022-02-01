@@ -422,8 +422,8 @@ vector<double> log_likelihood (Archive* data, ArchiveComparisons* model)
   unsigned nsubint = data->get_nsubint();
   unsigned nchan = data->get_nchan();
 
-  cerr << "nsubint=" << nsubint << endl;
-  cerr << "nchan=" << nchan << endl;
+  // cerr << "nsubint=" << nsubint << endl;
+  // cerr << "nchan=" << nchan << endl;
     
   for (unsigned isubint=0; isubint < nsubint; isubint++)
   {
@@ -455,6 +455,9 @@ int likelihood_analysis (vector<string>& filenames)
   vector< GeneralizedChiSquared* > gcs ( nfile );
 
   vector< Reference::To<Archive> > data ( nfile );
+
+  unsigned ibest = 0;
+  unsigned min_ngaus = 0;
   
   for (unsigned ifile=0; ifile < nfile; ifile++)
   {
@@ -472,13 +475,22 @@ int likelihood_analysis (vector<string>& filenames)
     
     compare[ifile]->set_setup_Archive( data[ifile] );
 
+    unsigned ngaus = gmpd[ifile]->get_ngaus ();
+    
     cerr << "file=" << data[ifile]->get_filename() << endl;
     cerr << "neigen=" << gcs[ifile]->get_neigen () << endl;
-    cerr << "ngaus=" << gmpd[ifile]->get_ngaus () << endl;
+    cerr << "ngaus=" << ngaus << endl;
+
+    if (ifile == 0 || ngaus < min_ngaus)
+    {
+      min_ngaus = ngaus;
+      ibest = ifile;
+    }
   }
 
   for (unsigned ifile=0; ifile < nfile; ifile++)
   {
+    cerr << endl << "****************************************" << endl;
     cerr << "BASIS: " << data[ifile]->get_filename() << endl;
     
     for (unsigned jfile=0; jfile < nfile; jfile++)
@@ -491,7 +503,14 @@ int likelihood_analysis (vector<string>& filenames)
       cerr << "median log(L)=" << median(logL) << endl;
     }
   }
+
+  cerr << endl << "****************************************" << endl;
+  cerr << "RESULTS:" << endl << endl;
   
+  for (unsigned jfile=0; jfile < nfile; jfile++)
+    cout << data[jfile]->get_filename() << " "
+	 << mean(log_likelihood (data[jfile], compare[ibest])) << endl;
+
   return 0;
   
 #else
