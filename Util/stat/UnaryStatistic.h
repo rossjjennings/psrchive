@@ -58,6 +58,15 @@ T median (std::vector<T> data)
 }
 
 template<typename T>
+T mean (const std::vector<T>& data)
+{
+  T sum (0.0);
+  for (auto element: data)
+    sum += element;
+  return sum / data.size();
+}
+
+template<typename T>
 void Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3)
 {
   std::sort( data.begin(), data.end() );

@@ -35,6 +35,9 @@ namespace BinaryStatistics
     
     GeneralizedChiSquared* clone () const { return new GeneralizedChiSquared; }
 
+    //! Return the number of eigenvalue/vector pairs
+    unsigned get_neigen () const { return eigenvalues.size(); }
+    
     ndArray<2,double> eigenvectors;
     ndArray<1,double> eigenvalues;
     

@@ -20,6 +20,14 @@ GaussianMixtureProbabilityDensity::GaussianMixtureProbabilityDensity ()
   model = 0;
 }
 
+unsigned GaussianMixtureProbabilityDensity::get_ngaus () const
+{
+  if (!model)
+    return 0;
+
+  return model->n_gaus();
+}
+
 double GaussianMixtureProbabilityDensity::get (const vector<double>& dat1,
 					       const vector<double>& mean)
 {

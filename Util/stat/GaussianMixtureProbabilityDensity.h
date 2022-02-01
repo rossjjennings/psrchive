@@ -33,6 +33,9 @@ namespace BinaryStatistics
 
     double get (const std::vector<double>&, const std::vector<double>&);
 
+    //! Return the number of Gaussians
+    unsigned get_ngaus () const;
+
     GaussianMixtureProbabilityDensity* clone () const
     { return new GaussianMixtureProbabilityDensity; }
     
