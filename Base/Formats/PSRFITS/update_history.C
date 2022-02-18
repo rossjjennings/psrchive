@@ -38,6 +38,10 @@ string fits_state_string (Signal::State state, bool verbose)
 {
   switch (state)
   {
+  case Signal::Nyquist:
+    return "AB";
+  case Signal::Analytic:
+    return "ARAIBRBI";
   case Signal::PPQQ:
     return "AABB";
   case Signal::Stokes:
