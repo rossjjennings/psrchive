@@ -278,6 +278,9 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 //! Return true if parameter covariances are stored
 bool Pulsar::PolnCalibrator::has_covariance () const
 {
+  if (transformation.size() == 0)
+    setup_transformation();
+
   return (covariance.size() == get_nchan());
 }
 
