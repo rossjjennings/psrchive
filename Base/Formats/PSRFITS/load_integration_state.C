@@ -229,6 +229,24 @@ void Pulsar::FITSArchive::interpret_pol_type ()
 	cerr << "FITSArchive::interpret_pol_type Signal::Invariant" << endl;
     }
     
+    else if( state_pol_type == "XRXIYRYI" ||
+             state_pol_type == "LRLIRRRI" ||
+             state_pol_type == "ARAIBRBI" )
+    {
+      set_state ( Signal::Analytic );
+      if (verbose > 2)
+        cerr << "FITSArchive::interpret_pol_type Signal::Analytic" << endl;
+    }
+
+    else if( state_pol_type == "XY" ||
+             state_pol_type == "LR" ||
+             state_pol_type == "AB" )
+    {
+      set_state ( Signal::Nyquist );
+      if (verbose > 2)
+        cerr << "FITSArchive::interpret_pol_type Signal::Nyquist" << endl;
+    }
+
     else
     {
       if (verbose > 1)

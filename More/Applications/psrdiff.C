@@ -408,7 +408,6 @@ void diff_two (const std::string& fileA, const std::string& fileB)
 #include "GaussianMixtureProbabilityDensity.h"
 #include "GeneralizedChiSquared.h"
 #include "UnaryStatistic.h"
-#endif
 
 using namespace BinaryStatistics;
 using namespace Pulsar;
@@ -442,6 +441,8 @@ vector<double> log_likelihood (Archive* data, ArchiveComparisons* model)
 
   return result;
 }
+
+#endif
 
 int likelihood_analysis (vector<string>& filenames)
 {
