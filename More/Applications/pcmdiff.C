@@ -256,9 +256,13 @@ int main (int argc, char** argv) try
       
     case 'V':
       Pulsar::Archive::set_verbosity (3);
-      Pulsar::CalibratorPlotter::verbose = true;
       Pulsar::Calibrator::verbose = true;
       //Calibration::Model::verbose = true;
+
+#if HAVE_PGPLOT
+      Pulsar::CalibratorPlotter::verbose = true;
+#endif
+
     case 'v':
       verbose = true;
       break;
