@@ -78,7 +78,17 @@ void pcmerr::process (Pulsar::Archive* archive)
   unsigned ncov = nparam * (nparam+1) / 2;
   vector<double> cov (ncov);
 
-  unsigned npol = 4;
+  const unsigned npol = 4;
+
+  Matrix<4,4,double> total_bias [npol];
+  Stokes<double> total_Sprime [npol];
+  for (unsigned i=0; i<npol; i++)
+  {
+    total_bias[i] *= 0.0;
+    total_Sprime[i] *= 0.0;
+  }
+
+  unsigned count = 0;
   
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
@@ -103,28 +113,38 @@ void pcmerr::process (Pulsar::Archive* archive)
 
     assert (icov == ncov);
 
+    // cout << ichan << " " << covariance << endl;
+    
     vector< Jones<double> > gradient;
     Jones<double> value = xform->evaluate (&gradient);
     assert (gradient.size() == nparam);
 
     Matrix<4,4,double> M = Mueller (value);
+    Matrix<4,4,double> Minv = inv (M);
 
-    Vector<4,double> diagonal = 0.0;
-    diagonal *= 0.0;
+    // cout << ichan << " inv(M)=" << Minv << endl << endl;
+ 
+    Matrix<4,4,double> max_bias = 0.0;
+    max_bias *= 0.0;
     
     for (unsigned ipol=0; ipol < npol; ipol++)
     {
-      Stokes<double> S (0,0,0,0);
+      Stokes<double> S (1.0,0,0,0);
       S[ipol] = 1.0;
+
+      Stokes<double> Sprime = Minv * S;
+
+      // cout << ichan << " S=" << Sprime << endl;
       
       Matrix<4,7,double> Jacobian = 0.0;
     
       for (unsigned iparam=0; iparam < nparam; iparam++)
       {
 	Matrix<4,4,double> Mgrad = Mueller (value, gradient[iparam]);
-	Matrix<4,4,double> Minv = inv (M);
 	Matrix<4,4,double> Minvgrad = -Minv * Mgrad * Minv;
-	
+
+	// cout << ichan << " " << iparam << " " << Mgrad << endl << endl;
+    
 	Stokes<double> Sgrad = Minvgrad * S;
 	
 	for (unsigned jpol=0; jpol < npol; jpol++)
@@ -132,15 +152,54 @@ void pcmerr::process (Pulsar::Archive* archive)
       }
 
       Matrix<4,4,double> bias = Jacobian * covariance * transpose(Jacobian);
+      total_bias[ipol] += bias;
+      total_Sprime[ipol] += Sprime;
+      
+      // bias relative to calibrated total intensity
+      bias /= Sprime[0]*Sprime[0];
+      
       for (unsigned jpol=0; jpol < npol; jpol++)
-	diagonal[jpol] += bias[jpol][jpol];
+	for (unsigned kpol=0; kpol < npol; kpol++)
+	  max_bias[jpol][kpol] = max( max_bias[jpol][kpol],
+				      fabs(bias[jpol][kpol]) );
     }
 
     for (unsigned jpol=0; jpol < npol; jpol++)
-      diagonal[jpol] = sqrt( diagonal[jpol] );
-    
-    cout << ichan << " " << diagonal << endl;
-  }  
+      for (unsigned kpol=0; kpol < npol; kpol++)
+	max_bias[jpol][kpol] = sqrt( max_bias[jpol][kpol] );
+
+    count ++;
+
+    if (!fscrunch)
+      cout << "chan=" << ichan << " d=" << max_bias << endl;
+  }
+
+  if (!fscrunch)
+    return;
+  
+  Matrix<4,4,double> max_bias = 0.0;
+  max_bias *= 0;
+  
+  for (unsigned i=0; i<npol; i++)
+  {
+    total_bias[i] /= count;
+    total_Sprime[i] /= count;
+
+    // bias relative to calibrated total intensity
+    total_bias[i] /= (total_Sprime[i] * total_Sprime[i]);
+
+    for (unsigned jpol=0; jpol < npol; jpol++)
+      for (unsigned kpol=0; kpol < npol; kpol++)
+	max_bias[jpol][kpol] = max( max_bias[jpol][kpol],
+				    fabs(total_bias[i][jpol][kpol]) );
+  }
+
+  for (unsigned jpol=0; jpol < npol; jpol++)
+    for (unsigned kpol=0; kpol < npol; kpol++)
+      max_bias[jpol][kpol] = sqrt( max_bias[jpol][kpol] );
+
+  cout << max_bias << endl;
+  
 }
 
 int main (int argc, char** argv)
