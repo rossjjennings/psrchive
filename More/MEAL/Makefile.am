@@ -56,6 +56,8 @@ nobase_include_HEADERS = \
         MEAL/Mean.h \
 	MEAL/ModeCoherency.h \
 	MEAL/MuellerTransformation.h \
+	MEAL/Multivariate.h \
+	MEAL/MultivariatePolicy.h \
         MEAL/NegationRule.h \
         MEAL/NoParameters.h \
         MEAL/NormalizeStokes.h \
@@ -175,6 +177,7 @@ libMEAL_la_SOURCES = \
 	LeastSquares.C \
 	ModeCoherency.C \
 	MuellerTransformation.C \
+	MultivariatePolicy.C \
         NormalizeStokes.C \
 	Null.C \
         OneParameter.C \
