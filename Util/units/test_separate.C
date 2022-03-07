@@ -59,7 +59,7 @@ int main ()
     string input = "one \"two, three and four\"";
     vector<string> expect (2);
     expect[0] = "one";
-    expect[1] = "\"two, three and four\"";
+    expect[1] = "two, three and four";
 
     test_separate (input, expect);
   }
