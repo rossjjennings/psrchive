@@ -849,7 +849,36 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
     solution = hybrid_cal;
   }
-  
+
+
+  vector< Jones<double> > response (nchan, 0.0);
+  vector< Reference::To<const MEAL::Complex2> > xform (nchan);
+
+  // save the solution derived from all sub-integrations
+  if ( solution->get_nchan() == nchan )
+  {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      if ( solution->get_transformation_valid (ichan) )
+      {
+       if (verbose > 2)
+         cerr << "SystemCalibrator::add_calibrator ichan="
+              << ichan << " saving response" << endl;
+
+       response[ichan] = solution->get_response(ichan);
+
+       if (verbose > 2)
+         cerr << "SystemCalibrator::add_calibrator ichan="
+              << ichan << " saving transformation" << endl;
+
+       xform[ichan] = solution->get_transformation(ichan);
+      }
+      else if (verbose > 2)
+       cerr << "SystemCalibrator::add_calibrator ichan="
+            << ichan << " transformation not valid" << endl;
+    }
+  }
+
   for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = cal->get_Integration (isub);
@@ -918,25 +947,12 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
         continue;
       }
 
-      if ( solution->get_transformation_valid (ichan) )
+      if ( xform[ichan] )
       {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " saving response" << endl;
-
-	data.response = solution->get_response(ichan);
+	data.response = response[ichan];
+	data.xform = xform[ichan];
       }
-
-      if ( solution->get_nchan() == nchan
-	   && solution->get_transformation_valid (ichan) )
-      {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " saving transformation" << endl;
-	
-	data.xform = solution->get_transformation(ichan);
-      }
-
+      
       calibrator_data.back().push_back (data);
     }
   }

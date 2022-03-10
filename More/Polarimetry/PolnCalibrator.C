@@ -111,6 +111,7 @@ void Pulsar::PolnCalibrator::set_calibrator (const Archive* archive)
 
   built = false;
   observation_nchan = 0;
+  transformation.resize(0);
 
   Calibrator::set_calibrator (archive);
 }
