@@ -1227,8 +1227,8 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     cerr << "writing " << plot_npts << "x" << plot_npts << " grid to " 
          << spline_filename << endl;
 
-    double x1del = (xmax-xmin)/(plot_npts-1);
-    double x0del = x0_span/(plot_npts-1);
+    double x1del = (xmax-xmin)/plot_npts;
+    double x0del = x0_span/plot_npts;
     double x0min = -0.5*x0_span;
 
     ofstream out (spline_filename.c_str());
@@ -1312,16 +1312,19 @@ void smint::fit_polynomial (const vector< double >& data_x,
   unsigned iter = 1;
   unsigned not_improving = 0;
 
-  while (not_improving < 25) {
+  while (not_improving < 25)
+  {
     cerr << "iteration " << iter << endl;
     float nchisq = fit.iter (axis_x, data_y, *scalar);
     cerr << "     chisq = " << nchisq << endl;
 
-    if (nchisq < chisq) {
+    if (nchisq < chisq)
+    {
       float diff_chisq = chisq - nchisq;
       chisq = nchisq;
       not_improving = 0;
-      if (diff_chisq/chisq < threshold && diff_chisq > 0) {
+      if (diff_chisq/chisq < threshold && diff_chisq > 0)
+      {
         cerr << "no big diff in chisq = " << diff_chisq << endl;
         break;
       }

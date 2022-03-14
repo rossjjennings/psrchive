@@ -18,9 +18,9 @@ using namespace std;
 
 class SplineSmooth::Handle
 {
-  public:
-    BSpline spline;
-    Handle (const BSpline& _spline) : spline(_spline) {}
+ public:
+  SPLINTER::BSpline spline;
+  Handle (const SPLINTER::BSpline& _spline) : spline(_spline) {}
 };
 
 SplineSmooth::SplineSmooth ()
@@ -73,14 +73,14 @@ void SplineSmooth::new_spline (const vector<T>& data_x,
   handle = new Handle( bspline_smoother(samples, degree, smoothing, alpha, weights) );
 }
 
-void SplineSmooth1D::set_data (const vector< double >& data_x,
-                               const vector< Estimate<double> >& data_y)
+void SplineSmooth1D::fit (const vector< double >& data_x,
+			  const vector< Estimate<double> >& data_y)
 {
   new_spline (data_x, data_y);
 }
 
-void SplineSmooth2D::set_data (const vector< std::pair<double,double> >& data_x,
-                               const vector< Estimate<double> >& data_y)
+void SplineSmooth2D::fit (const vector< std::pair<double,double> >& data_x,
+			  const vector< Estimate<double> >& data_y)
 { 
   new_spline (data_x, data_y);
 }

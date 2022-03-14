@@ -317,7 +317,10 @@ endif
 #
 if HAVE_SPLINTER
 
-libGeneral_la_SOURCES += SplineSmooth.C
+libGeneral_la_SOURCES += SplineSmooth.C \
+	BootstrapUncertainty2D.C \
+	CrossValidatedSmooth2D.C
+
 nobase_include_HEADERS += Pulsar/SplineSmooth.h
 
 endif
