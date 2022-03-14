@@ -92,6 +92,11 @@ protected:
 
   // determine smoothing by m-fold cross-validation
   CrossValidatedSmoothing* cross_validated_smoothing;
+
+#if HAVE_SPLINTER
+  CrossValidatedSmooth2D* cross_validated_smoothing_2D;
+#endif
+  
   void cross_validate ();
     
   // find the median effective number of free parameters
@@ -273,12 +278,22 @@ smint::smint ()
   interpolate = true;
   
   cross_validated_smoothing = 0;
+
+#if HAVE_SPLINTER
+  cross_validated_smoothing_2D = 0;
+#endif
+  
   bootstrap_uncertainty = false;
 }
 
 void smint::cross_validate ()
 {
   cross_validated_smoothing = new CrossValidatedSmoothing;
+
+#if HAVE_SPLINTER
+  cross_validated_smoothing_2D = new CrossValidatedSmooth2D;
+#endif
+  
 }
 
 /*!
@@ -1190,13 +1205,28 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     }
   }
 
-  cerr << "smint::fit_pspline fitting " << data_x.size() << " data points" << endl;
-  spline.set_data (data_x, data_y);
+  cerr << "frequency xmin=" << xmin << " xmax=" << xmax << endl;
 
-  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
+  cerr << "smint::fit_pspline fitting " << data_x.size() << " data points" << endl;
+
+  if (cross_validated_smoothing_2D)
+  {
+    cross_validated_smoothing_2D->set_spline (&spline);
+    cross_validated_smoothing_2D->fit (data_x, data_y);
+  }
+  else
+  {
+    spline.fit (data_x, data_y);
+  }
+  
 
   if (spline_filename != "")
   {
+    plot_npts = 200;
+
+    cerr << "writing " << plot_npts << "x" << plot_npts << " grid to " 
+         << spline_filename << endl;
+
     double x1del = (xmax-xmin)/(plot_npts-1);
     double x0del = x0_span/(plot_npts-1);
     double x0min = -0.5*x0_span;
@@ -1217,10 +1247,13 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
   
       out << endl;
     }
+
+    cerr << "grid written to " << spline_filename << endl;
   }
 
 #ifdef HAVE_PGPLOT
 
+  cerr << "plotting data" << endl;
   if (plot_filename != "")
     cpgopen (plot_filename.c_str());
 
@@ -1237,6 +1270,7 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
   if (plot_filename != "")
     cpgend ();
 
+  cerr << "data plotted" << endl;
 #endif
 
 }
