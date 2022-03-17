@@ -60,7 +60,12 @@ void SplineSmooth::new_spline (const vector<T>& data_x,
   for (unsigned i=0; i<data_x.size(); i++)
   {
     samples.add_sample (convert(data_x[i]), data_y[i].val);
-    weights.push_back (1.0/data_y[i].var);
+
+    double weight = 0.0;
+    if (data_y[i].var > 0)
+      weight = 1.0/data_y[i].var;
+    
+    weights.push_back (weight);
   }
 
   // Build penalized B-spline (P-spline) that smooths the samples

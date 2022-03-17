@@ -15,6 +15,7 @@
 #include "Pulsar/UnloadOptions.h"
 
 #include "UnaryStatistic.h"
+#include "EstimateStats.h"
 #include "Error.h"
 
 #include <vector>
@@ -296,48 +297,6 @@ void pcmavg::record_pce(Pulsar::Archive* archive)
       pce_params[ichan][iparam].push_back (val);
     }
   }
-}
-
-Estimate<double> weighted_mean (const std::vector< Estimate<double> >& vals)
-{
-  MeanEstimate<double> mean;
-  for (auto element: vals)
-    mean += element;
-  return mean.get_Estimate();
-}
-
-Estimate<double> weighted_median (std::vector< Estimate<double> > vals)
-{
-  if (vals.size () == 0)
-    return 0.0;
-
-  if (vals.size () == 1)
-    return vals[0];
-
-  if (vals.size () == 2)
-    return weighted_mean (vals);
-  
-  double total_weight = 0.0;
-  for (auto element: vals)
-    total_weight += 1.0 / element.var;
-
-  std::sort (vals.begin(), vals.end());
-
-  double weight = 0.0;
-  unsigned ival = 0;
-  while (ival < vals.size() && 2*weight < total_weight)
-  {
-    weight += 1.0 / vals[ival].var;
-    ival ++;
-  }
-
-  if (ival == vals.size())
-    ival --;
-  
-  // cerr << "vals.size=" << vals.size() << " ival=" << ival << endl;
-
-  Estimate<double> retval (vals[ival].val, 1.0/total_weight);
-  return retval;
 }
 				  
 void pcmavg::weighted_median_pce ()

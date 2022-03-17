@@ -86,12 +86,16 @@ namespace Pulsar {
   */
   class CrossValidatedSmooth2D
   {
-    // linearly space smoothing factors on logarithmic scale
-    bool logarithmic;
+    bool logarithmic;             // smoothing factors on logarithmic scale
+    
     unsigned npartition;          // m=40 in Clark (1977)
     double validation_fraction;   // 0.1 in Clark (1977)
+    
     SplineSmooth2D* spline;       // the 2-D spline implementation
 
+    double iqr_threshold;         // Tukey's fence used to detect outliers
+    double gof_step_threshold;
+    
     std::vector<double> gof_tot;
     std::vector<unsigned> gof_count;
 
@@ -102,9 +106,21 @@ namespace Pulsar {
     void set_spline (SplineSmooth2D* _spline) { spline = _spline; }
   
     //! Fit spline to data using current configuration
-    void fit (const std::vector< std::pair<double,double> >& data_x,
-	      const std::vector< Estimate<double> >& data_y);
+    void fit ( std::vector< std::pair<double,double> >& data_x,
+	       std::vector< Estimate<double> >& data_y );
+
+    void remove_iqr_outliers
+    ( std::vector< std::pair<double,double> >& x,
+      std::vector< Estimate<double> >& y );
+
+    void find_optimal_smoothing_factor
+    ( const std::vector< std::pair<double,double> >& dat_x,
+      const std::vector< Estimate<double> >& dat_y );
     
+    void remove_gof_outliers
+    ( std::vector< std::pair<double,double> >& x,
+      std::vector< Estimate<double> >& y );
+
     //! Return the mean goodness-of-fit for the current smoothing
     double get_mean_gof (const std::vector< std::pair<double,double> >& data_x,
 			 const std::vector< Estimate<double> >& data_y);

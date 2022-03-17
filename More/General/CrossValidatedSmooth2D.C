@@ -7,6 +7,7 @@
 
 #include "Pulsar/SplineSmooth.h"
 #include "UnaryStatistic.h"
+#include "EstimateStats.h"
 #include "pairutil.h"
 
 #include <algorithm>
@@ -22,50 +23,54 @@ using namespace Pulsar;
 CrossValidatedSmooth2D::CrossValidatedSmooth2D ()
 {
   logarithmic = true;
+
+  // 5-fold cross-validation by default
   npartition = 5;
   validation_fraction = 0.2;
+
+  iqr_threshold = 2;
+  gof_step_threshold = 1.0;
+  
   spline = 0;
 }
 
-#if 0
-void CrossValidatedSmooth2D::get_nfree_trials (vector<double>& nfree, unsigned ndat)
+void CrossValidatedSmooth2D::remove_iqr_outliers
+( vector< pair<double,double> >& dat_x,
+  vector< Estimate<double> >& dat_y )
 {
-  unsigned nval = validation_fraction * ndat;
-  unsigned nest = ndat - nval;
-  unsigned nmin = 3;
-  unsigned nmax = nest - 3;
+  unsigned ndat = dat_x.size();
+  assert (ndat == dat_y.size());
 
-  nfree.resize (ntrial);
+  Estimate<double> Q1, Q2, Q3;
+  weighted_quartiles (dat_y, Q1, Q2, Q3);
+
+  double IQR = Q3.val - Q1.val;
+  double max_threshold = Q3.val + iqr_threshold * IQR;
+  double min_threshold = Q1.val - iqr_threshold * IQR;
   
-  if (logarithmic)
+  unsigned idat = 0;
+  unsigned count = 0;
+  while (idat < dat_x.size())
   {
-    double log_nmin = log(nmin);
-    double log_nmax = log(nmax);
-    double log_nfree_step = (log_nmax - log_nmin) / (ntrial - 1.0);
-    for (unsigned itrial=0; itrial < ntrial; itrial ++)
-      nfree[itrial] = exp( log_nmin + itrial * log_nfree_step );
+    double val = dat_y[idat].val;
+    
+    if (val > max_threshold || val < min_threshold)
+    {
+      cerr << "IQR outlier idat=" << idat << " val=" << val << endl;
+      dat_y[idat].var = 0.0;
+      count ++;
+    }
+    
+    // else
+    idat ++;
   }
-  else
-  {
-    double nfree_step = (nmax - nmin) / (ntrial - 1.0);
-    for (unsigned itrial=0; itrial < ntrial; itrial ++)
-      nfree[itrial] = nmin + itrial * nfree_step;
-  }
+
+  cerr << "CrossValidatedSmooth2D::remove_iqr_outliers"
+    " removed " << count << " outliers out of " << ndat << " values" << endl;
 }
 
-#endif
-
-/*!
-
-  The 
- */
-
-using namespace SPLINTER;
-
-// extern SparseMatrix compute_second_order_finite_difference_matrix(const BSpline &bspline);
-
-void CrossValidatedSmooth2D::fit (const vector< pair<double,double> >& dat_x,
-				   const vector< Estimate<double> >& dat_y)
+void CrossValidatedSmooth2D::fit ( vector< pair<double,double> >& dat_x,
+				   vector< Estimate<double> >& dat_y )
 {
   assert (spline != 0);
 
@@ -75,8 +80,79 @@ void CrossValidatedSmooth2D::fit (const vector< pair<double,double> >& dat_x,
   if (dat_x.size() == 0)
     return;
 
+  if (iqr_threshold)
+    remove_iqr_outliers (dat_x, dat_y);
+
+  find_optimal_smoothing_factor (dat_x, dat_y);
+
+  if (gof_step_threshold)
+    remove_gof_outliers (dat_x, dat_y);
+
+  spline->fit (dat_x, dat_y);
+}
+
+void CrossValidatedSmooth2D::remove_gof_outliers
+( vector< pair<double,double> >& dat_x,
+  vector< Estimate<double> >& dat_y )
+{
+  unsigned ndat = dat_x.size();
+  assert (ndat == dat_y.size());
+  
+  assert (ndat == gof_tot.size());
+  assert (ndat == gof_count.size());
+  
+  for (unsigned idat=0; idat < ndat; idat++)
+  {
+    if (gof_count[idat] == 0)
+      continue;
+
+    gof_tot[idat] /= gof_count[idat];
+  }
+
+  vector<double> tmp = gof_tot;
+  
+  std::sort (tmp.begin(), tmp.end());
+
+  double threshold = 0;
+  
+  for (unsigned i=0; i+1 < ndat; i++)
+    if ((tmp[i+1]-tmp[i]) > gof_step_threshold)
+    {
+      threshold = tmp[i] + 0.1;
+      break;
+    }
+  
+  // cerr << "outlier threshold=" << threshold << endl;
+  
+  std::ofstream os ("gof.dat");
+
+  unsigned outliers = 0;
+    
+  for (unsigned idat=0; idat < ndat; idat++)
+  {
+    os << tmp[idat] << endl;
+    
+    if (threshold && gof_tot[idat] > threshold)
+    {
+      cerr << "GOF outlier idat=" << idat << " gof=" << gof_tot[idat] << endl;
+      dat_y[idat].var = 0.0;
+      outliers ++;
+    }
+  }
+
+  cerr << "CrossValidatedSmooth2D::remove_gof_outliers"
+    " removed " << outliers << " outliers out of " << ndat << " values" << endl;
+}
+
+void CrossValidatedSmooth2D::find_optimal_smoothing_factor
+( const vector< pair<double,double> >& dat_x,
+  const vector< Estimate<double> >& dat_y )
+{
+  unsigned ndat = dat_x.size();
+  assert (ndat == dat_y.size());
+
   double val[3] = { 3, 0, 6 };
-  double gof[3] = {  0, 0,  0 };
+  double gof[3] = { 0, 0, 0 };
   double close_enough = 0.1;
 
   double interval = val[2] - val[0];
@@ -105,6 +181,9 @@ void CrossValidatedSmooth2D::fit (const vector< pair<double,double> >& dat_x,
       {
 	double alpha = pow (10.0, val[ival]);
 	spline->set_alpha (alpha);
+
+	cerr << "alpha=" << alpha << endl; 
+		  
 	gof[ival] = get_mean_gof (dat_x, dat_y);
 
 	cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
@@ -164,59 +243,14 @@ void CrossValidatedSmooth2D::fit (const vector< pair<double,double> >& dat_x,
     cerr << "interval=" << interval << " val[2]=" << val[2] << " val[0]=" << val[0] << endl;
     
   }
-
-  for (unsigned idat=0; idat < ndat; idat++)
-  {
-    if (gof_count[idat] == 0)
-      continue;
-
-    gof_tot[idat] /= gof_count[idat];
-  }
-
-  vector<double> tmp = gof_tot;
-  
-  std::sort (tmp.begin(),tmp.end());
-
-  double threshold = 0;
-  
-  for (unsigned i=0; i+1 < ndat; i++)
-    if ((tmp[i+1]-tmp[i]) > 1.0)
-    {
-      threshold = tmp[i] + 0.1;
-      break;
-    }
-  
-  cerr << "outlier threshold=" << threshold << endl;
-  
-  std::ofstream os ("gof.dat");
-
-  unsigned outliers = 0;
-
-  vector< pair<double,double> > tmp_x = dat_x;
-  vector< Estimate<double> > tmp_y = dat_y;
-    
-  for (unsigned idat=0; idat < ndat; idat++)
-  {
-    os << tmp[idat] << endl;
-    
-    if (threshold && gof_tot[idat] > threshold)
-    {
-      cerr << "outlier idat=" << idat << " gof=" << gof_tot[idat] << endl;
-      tmp_x.erase (tmp_x.begin() + idat - outliers);
-      tmp_y.erase (tmp_y.begin() + idat - outliers);
-
-      outliers ++;
-    }
-  }
-
-  if (outliers)
-    spline->fit (tmp_x, tmp_y);
 }
+
 
 static double sqr (double x) { return x*x; }
 
 template<typename Tx, typename Ty>
-void filter (vector<Tx>& to, const vector<Ty>& from, const vector<unsigned>& remove)
+void filter (vector<Tx>& to, const vector<Ty>& from,
+	     const vector<unsigned>& remove)
 {
   assert (remove.size() < from.size());
   
@@ -304,6 +338,9 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
 
   unsigned ndat = dat_x.size();
   unsigned nval = ceil (validation_fraction * ndat);
+
+  // cerr << "CrossValidatedSmooth2D::get_mean_gof ndat=" << ndat << " nval=" << nval << endl;
+  
   vector<unsigned> validation_index (nval, 0);
   vector<unsigned> used_count (ndat, 0);
   unsigned use_if = 0;
@@ -345,6 +382,9 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
       pair<double,double> x = dat_x[ jval ];
       Estimate<double> y = dat_y[ jval ];
 
+      if (y.var == 0.0)
+	continue;
+      
       double gof = sqr(y.val - spline->evaluate(x)) / y.var;
 
       if (validation)
@@ -368,6 +408,9 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
   
   for (unsigned idat=0; idat < ndat; idat++)
   {
+    if (dat_y[idat].var == 0.0)
+      continue;
+
     if (validation_count[idat] == 0)
       cerr << idat << " not selected in validation partition" << endl;
     else
@@ -383,9 +426,12 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
 
   double Q1, Q2, Q3;
   Q1_Q2_Q3 (validation_gof, Q1, Q2, Q3);
-  double IQR = Q3 - Q1;
+  // double IQR = Q3 - Q1;
 
-  cerr << "Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;
+  cerr << "GOF alpha=" << spline->get_alpha() << " mean=" << mean_gof
+       << " median=" << Q2 << endl;
+  
+  // cerr << "validation Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;
   
   if (Q2 <= 1.0)
   {
@@ -393,7 +439,7 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
     Q1_Q2_Q3 (estimation_gof, Q1, Q2, Q3);
     double IQR = Q3 - Q1;
     
-    cerr << "estimation Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;
+    // cerr << "estimation Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;
 
     for (unsigned idat=0; idat < ndat; idat++)
     {
@@ -406,7 +452,7 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
     }
   }
   
-  cerr << "gof median=" << Q2 << " mean=" << mean_gof << endl;
+  // cerr << "gof median=" << Q2 << " mean=" << mean_gof << endl;
   
   return Q2;
 }
