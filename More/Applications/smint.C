@@ -1176,12 +1176,19 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   // searching for first data
   bool search_for_min = true;
-  
+
+  double xmin = 0;
+  double xmax = 0;
+
+
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
     bool have_data = false;
+    double freq = table[0].freq[ichan];
     for (unsigned irow = 0; irow < table.size(); irow++)
     {
+      assert (table[irow].freq[ichan] == freq);
+      
       if (table[irow].data[ichan].var > 0)
       {
 	have_data = true;
@@ -1194,17 +1201,20 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
       if (search_for_min)
       {
 	min_chan = ichan;
+	xmin = freq;
 	search_for_min = false;
       }
       else
       {
 	max_chan = ichan;
+	xmax = freq;
       }
     }
   }
 
   cerr << "channel bounds min=" << min_chan << " max=" << max_chan << endl;
-
+  cerr << "frequency xmin=" << xmin << " xmax=" << xmax << endl;
+  
   MJD mid_epoch;
   double x0_span = 0.0;
 
@@ -1229,14 +1239,13 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
   
     cerr << "smint::fit_pspline min=" << min_epoch << " ref=" << mid_epoch << endl;
   }
-    
+
+  // mid_epoch = mid_epoch.int_days ();
+  
   spline.set_alpha (pspline_alpha);
 
   vector< pair<double,double> > data_x;
   vector< Estimate<double> > data_y;
-
-  double xmin = table[0].freq[0];
-  double xmax = xmin;
 
   for (unsigned irow = 0; irow < table.size(); irow++)
   {
@@ -1249,15 +1258,10 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     {
       data_x.push_back ( pair<double,double>( x0, table[irow].freq[ichan] ) );
       data_y.push_back ( table[irow].data[ichan] );
-
-      xmin = min(xmin, table[irow].freq[ichan]);
-      xmax = max(xmax, table[irow].freq[ichan]);
     }
   }
 
-  cerr << "frequency xmin=" << xmin << " xmax=" << xmax << endl;
 
-  cerr << "smint::fit_pspline fitting " << data_x.size() << " data points" << endl;
 
   if (cross_validated_smoothing_2D)
   {

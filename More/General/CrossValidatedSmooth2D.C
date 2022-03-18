@@ -175,7 +175,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   {
     gof_out = new ofstream (gof_filename.c_str());
  
-    (*gof_out) << "# alpha mean median" << endl;
+    (*gof_out) << "# log10_smoothing_factor mean_gof median_gof" << endl;
   }
 
   double val[3] = { 3, 0, 6 };
@@ -196,7 +196,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   while (gof[0] < gof[1])
   {
     // the solution lies to the left
-    cerr << "go left of " << val[0] << " by " << interval << endl;
+    // cerr << "go left of " << val[0] << " by " << interval << endl;
 
     val[2] = val[1];
     gof[2] = gof[1];
@@ -213,7 +213,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   while (gof[2] < gof[1])
   {
     // the solution lies to the right
-    cerr << "go right of " << val[2] << " by " << interval << endl;
+    // cerr << "go right of " << val[2] << " by " << interval << endl;
     val[0] = val[1];
     gof[0] = gof[1];
 
@@ -229,7 +229,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   // binary search for the optimal smoothing factor
   while (interval > close_enough)
   {
-    cerr << "**** interval=" << interval << endl;
+    // cerr << "**** interval=" << interval << endl;
     
     for (unsigned ival=0; ival < 3; ival++)
       cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
@@ -238,13 +238,13 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
     {
       double new_interval = val[2] - val[1];
       double new_point = val[1] + 0.25 * new_interval;
-      cerr << "divide right half at " << new_point << endl;
+      // cerr << "divide right half at " << new_point << endl;
 
       double new_gof = get_mean_gof (new_point, dat_x, dat_y);
 
       if (new_gof < gof[1])
       {
-	cerr << "shift to right half" << endl;
+	// cerr << "shift to right half" << endl;
 	val[0] = val[1];
 	gof[0] = gof[1];
 
@@ -253,7 +253,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
       }
       else
       {
-	cerr << "shorten right half" << endl;
+	// cerr << "shorten right half" << endl;
 	val[2] = new_point;
 	gof[2] = new_gof;
       }
@@ -263,13 +263,13 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
       double new_interval = val[0] - val[1];
       double new_point = val[1] + 0.25 * new_interval;
 
-      cerr << "divide left half at " << new_point << endl;
+      // cerr << "divide left half at " << new_point << endl;
 
       double new_gof = get_mean_gof (new_point, dat_x, dat_y);
 
       if (new_gof < gof[1])
       {
-	cerr << "shift to left half" << endl;
+	// cerr << "shift to left half" << endl;
 	val[2] = val[1];
 	gof[2] = gof[1];
 
@@ -278,7 +278,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
       }
       else
       {
-	cerr << "shorten left half" << endl;
+	// cerr << "shorten left half" << endl;
 	val[0] = new_point;
 	gof[0] = new_gof;
       }
@@ -287,7 +287,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
     interval = val[2] - val[0];
   }
 
-  cerr << "*** done.  last fit." << endl;
+  // cerr << "*** done.  last fit." << endl;
   
   double alpha = pow (10.0, val[1]);
   spline->set_alpha (alpha);
@@ -469,18 +469,18 @@ double CrossValidatedSmooth2D::get_mean_gof
   double mean_gof = total_gof / count;
 
   double Q1, Q2, Q3;
-  Q1_Q2_Q3 (validation_gof, Q1, Q2, Q3);
+  filtered_Q1_Q2_Q3 (validation_gof, Q1, Q2, Q3, 0.0);
   // double IQR = Q3 - Q1;
 
   if (gof_out)
-    (*gof_out) << spline->get_alpha() << " " << mean_gof << " " << Q2 << endl;
+    (*gof_out) << log10(spline->get_alpha()) << " " << mean_gof << " " << Q2 << endl;
   
   // cerr << "validation Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;
   
   if (Q2 <= 1.0)
   {
     double Q1, Q2, Q3;
-    Q1_Q2_Q3 (estimation_gof, Q1, Q2, Q3);
+    filtered_Q1_Q2_Q3 (estimation_gof, Q1, Q2, Q3, 0.0);
     double IQR = Q3 - Q1;
     
     // cerr << "estimation Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;

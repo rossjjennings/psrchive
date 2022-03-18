@@ -76,5 +76,16 @@ void Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3)
   Q3 = data[(3 * ndat) / 4];
 }
 
+template<typename T>
+void filtered_Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3, T value)
+{
+  std::remove( data.begin(), data.end(), value );
+  std::sort( data.begin(), data.end() );
+  unsigned ndat = data.size();
+  Q1 = data[ndat / 4];
+  Q2 = data[ndat / 2];
+  Q3 = data[(3 * ndat) / 4];
+}
+
 #endif
 
