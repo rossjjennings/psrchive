@@ -30,10 +30,9 @@ namespace Pulsar {
     void set_alpha (double _alpha) { alpha = _alpha; }
     double get_alpha () const { return alpha; }
 
-    //! Get the string that describes the p-spline
-    std::string unload () const;
-
-    //! Load the string that describes the p-spline
+    //! Unload spline to specified filename
+    void unload (const std::string&) const;
+    //! Load spline from specified filename
     void load (const std::string&);
 
   protected:
@@ -99,10 +98,15 @@ namespace Pulsar {
     std::vector<double> gof_tot;
     std::vector<unsigned> gof_count;
 
+    std::string gof_filename;
+    std::ofstream* gof_out;
+
   public:
     
     CrossValidatedSmooth2D ();
 
+    void set_gof_filename (const std::string& name) { gof_filename = name; }
+    
     void set_spline (SplineSmooth2D* _spline) { spline = _spline; }
   
     //! Fit spline to data using current configuration
@@ -123,6 +127,11 @@ namespace Pulsar {
 
     //! Return the mean goodness-of-fit for the current smoothing
     double get_mean_gof (const std::vector< std::pair<double,double> >& data_x,
+			 const std::vector< Estimate<double> >& data_y);
+
+    //! Return the mean goodness-of-fit for the specified smoothing
+    double get_mean_gof (double log_10_alpha,
+			 const std::vector< std::pair<double,double> >& data_x,
 			 const std::vector< Estimate<double> >& data_y);
     
   };

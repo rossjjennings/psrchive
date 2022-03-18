@@ -78,6 +78,23 @@ void SplineSmooth::new_spline (const vector<T>& data_x,
   handle = new Handle( bspline_smoother(samples, degree, smoothing, alpha, weights) );
 }
 
+//! Unload spline to specified filename
+void SplineSmooth::unload (const std::string& filename) const
+{
+  if (!handle)
+    throw Error (InvalidState, "SplineSmooth::unload",
+		 "");
+  
+  handle->spline.to_json (filename);
+}
+
+//! Load spline from specified filename
+void SplineSmooth::load (const std::string& filename)
+{
+  handle = new Handle( BSpline::from_json (filename) );
+}
+
+
 void SplineSmooth1D::fit (const vector< double >& data_x,
 			  const vector< Estimate<double> >& data_y)
 {

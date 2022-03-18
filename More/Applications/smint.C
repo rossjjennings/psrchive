@@ -486,7 +486,7 @@ void smint::process (Pulsar::Archive* archive)
     {
       string idx = tostring(profile_data[ipol].index);
 
-      spline_filename = "profile_spline_" + idx + ".txt";
+      spline_filename = "profile_spline_" + idx;
 
       if (plot_device == "")
         plot_filename = "profile_fit_" + idx + ".eps/cps";
@@ -912,7 +912,7 @@ void smint::finalize ()
 
     string idx = tostring(pcal_data[i].index);
 
-    spline_filename = "pcal_spline_" + idx + ".txt";
+    spline_filename = "pcal_spline_" + idx;
 
     if (plot_device == "")
       plot_filename = "pcal_fit_" + idx + ".eps/cps";
@@ -927,7 +927,7 @@ void smint::finalize ()
     cerr << "smint: fitting CalibratorStokes iparam=" << i << endl;
 
     string idx = tostring(cal_stokes_data[i].index);
-    spline_filename = "cal_stokes_spline_" + idx + ".txt";
+    spline_filename = "cal_stokes_spline_" + idx;
 
     if (plot_device == "")
       plot_filename = "cal_stokes_fit_" + idx + ".eps/cps";
@@ -944,7 +944,7 @@ void smint::finalize ()
 
     string idx = tostring(fcal_data[i].index);
 
-    spline_filename = "fcal_spline_" + idx + ".txt";
+    spline_filename = "fcal_spline_" + idx;
 
     if (plot_device == "")
       plot_filename = "fcal_fit_" + idx + ".eps/cps";
@@ -1211,6 +1211,12 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   if (cross_validated_smoothing_2D)
   {
+    if (spline_filename != "")
+    {
+      string filename = spline_filename + ".gof";
+      cross_validated_smoothing_2D->set_gof_filename (filename);
+    }
+    
     cross_validated_smoothing_2D->set_spline (&spline);
     cross_validated_smoothing_2D->fit (data_x, data_y);
   }
@@ -1222,16 +1228,23 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   if (spline_filename != "")
   {
+    string filename = spline_filename + ".out";
+    spline.unload (filename);
+    cerr << "spline written to " << filename << endl;
+    spline.load (filename);
+    cerr << "spline reloaded from " << filename << endl;
+
     plot_npts = 200;
 
+    filename = spline_filename + ".txt";
     cerr << "writing " << plot_npts << "x" << plot_npts << " grid to " 
-         << spline_filename << endl;
+         << filename << endl;
 
     double x1del = (xmax-xmin)/plot_npts;
     double x0del = x0_span/plot_npts;
     double x0min = -0.5*x0_span;
 
-    ofstream out (spline_filename.c_str());
+    ofstream out (filename.c_str());
     for (unsigned i=0; i<plot_npts; i++)
     {
       double x0 = x0min + x0del * double(i);
@@ -1248,7 +1261,7 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
       out << endl;
     }
 
-    cerr << "grid written to " << spline_filename << endl;
+    cerr << "grid written to " << filename << endl;
   }
 
 #ifdef HAVE_PGPLOT
