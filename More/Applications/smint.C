@@ -385,16 +385,10 @@ void smint::load (vector<set>& data, Container* ext, const MJD& epoch)
 
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      if (!ext->get_valid(ichan))
-        continue;
-
-      Estimate<float> val = ext->get_Estimate (iparam, ichan);
-
-      if (val.var == 0.0)
-      {
-        cerr << "smint::load ignoring valid data in ichan=" << ichan << " with zero variance" << endl;
-        continue;
-      }
+      Estimate<float> val (0.0, 0.0);
+      
+      if (ext->get_valid(ichan))
+	val = ext->get_Estimate (iparam, ichan);
 
       data_x.push_back( channel_frequency[ichan] );
       data_y.push_back( val );
@@ -1114,13 +1108,21 @@ unsigned smint::remove_outliers (SmoothingSpline& spline,
   unsigned npts = data_x.size();
 
   vector<double> normalized_residual (npts);
+
+  unsigned ival = 0;
   
   for (unsigned i=0; i<npts; i++)
   {
+    if (data_y[i].var == 0.0)
+      continue;
+    
     double yval = spline.evaluate (data_x[i]);
-    normalized_residual[i] = (data_y[i].val - yval) / sqrt(data_y[i].var);
+    normalized_residual[ival] = (data_y[i].val - yval) / sqrt(data_y[i].var);
+    ival ++;
   }
 
+  normalized_residual.resize (ival);
+  
   double Q1, Q2, Q3;
   Q1_Q2_Q3 (normalized_residual, Q1, Q2, Q3);
 
@@ -1130,17 +1132,22 @@ unsigned smint::remove_outliers (SmoothingSpline& spline,
 
   unsigned ipt = 0;
   unsigned removed = 0;
-  
+
   while (ipt < data_x.size())
   {
-    if ( (normalized_residual[ipt] < lower_threshold) ||
-	 (normalized_residual[ipt] > upper_threshold) )
-      {
-	erase (normalized_residual, ipt);
-	erase (data_x, ipt);
-	erase (data_y, ipt);
-	removed ++;
-      }
+    if (data_y[ipt].var == 0.0)
+      continue;
+    
+    double yval = spline.evaluate (data_x[ipt]);
+    double nres = (data_y[ipt].val - yval) / sqrt(data_y[ipt].var);
+
+    if ( (nres < lower_threshold) ||
+	 (nres > upper_threshold) )
+    {
+      erase (data_x, ipt);
+      erase (data_y, ipt);
+      removed ++;
+    }
     else
       ipt++;
   }
@@ -1153,6 +1160,51 @@ unsigned smint::remove_outliers (SmoothingSpline& spline,
 
 void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 {
+  if (table.size() == 0)
+    throw Error (InvalidParam, "smint::fit_pspline",
+		 "no data");
+
+  unsigned nchan = table[0].freq.size();  
+
+  for (unsigned irow = 0; irow < table.size(); irow++)
+    {
+      assert (table[irow].data.size() == nchan);
+    }
+  
+  unsigned min_chan = 0;
+  unsigned max_chan = 0;
+
+  // searching for first data
+  bool search_for_min = true;
+  
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    bool have_data = false;
+    for (unsigned irow = 0; irow < table.size(); irow++)
+    {
+      if (table[irow].data[ichan].var > 0)
+      {
+	have_data = true;
+	break;
+      }
+    }
+
+    if (have_data)
+    {
+      if (search_for_min)
+      {
+	min_chan = ichan;
+	search_for_min = false;
+      }
+      else
+      {
+	max_chan = ichan;
+      }
+    }
+  }
+
+  cerr << "channel bounds min=" << min_chan << " max=" << max_chan << endl;
+
   MJD mid_epoch;
   double x0_span = 0.0;
 
@@ -1193,9 +1245,7 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
     double x0 = table[irow].x0;
 
-    unsigned nchan = table[irow].freq.size();
-
-    for (unsigned ichan=0; ichan < nchan; ichan++)
+    for (unsigned ichan=min_chan; ichan <= max_chan; ichan++)
     {
       data_x.push_back ( pair<double,double>( x0, table[irow].freq[ichan] ) );
       data_y.push_back ( table[irow].data[ichan] );

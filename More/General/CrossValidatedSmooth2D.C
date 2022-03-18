@@ -300,61 +300,52 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
 
 static double sqr (double x) { return x*x; }
 
-template<typename Tx, typename Ty>
-void filter (vector<Tx>& to, const vector<Ty>& from,
-	     const vector<unsigned>& remove)
+template<typename T, typename U>
+void flag (vector< Estimate<T,U> >& data, const vector<unsigned>& remove)
 {
-  assert (remove.size() < from.size());
+  unsigned ndat = data.size();
+  assert (remove.size() < ndat);
   
-  to.resize (from.size() - remove.size());
-
-  unsigned current_remove = 0;
-  unsigned current_to = 0;
-  
-  for (unsigned ifrom=0; ifrom < from.size(); ifrom++)
+  for (unsigned i=0; i < remove.size(); i++)
   {
-    if (ifrom == remove[current_remove])
-      current_remove++;
-    else
-    {
-      to[current_to] = from[ifrom];
-      current_to ++;
-    }
+    unsigned idat = remove[i];
+    assert (idat < ndat);
+    data[idat].var = 0.0;
   }
-
-  assert (current_to == to.size());
-  assert (current_remove == remove.size());
 }
 
 void unique_sorted_random (vector<unsigned>& vals,
-			   vector<unsigned>& used, unsigned& use_if)
+			   vector<unsigned>& used_count,
+			   unsigned& use_if)
 {
   unsigned nval = vals.size();
-  unsigned nmax = used.size();
+  unsigned nmax = used_count.size();
 
   unsigned total_available = 0;
   for (unsigned ival=0; ival < nmax; ival++)
-    if (used[ival] <= use_if)
+    if (used_count[ival] <= use_if)
       total_available ++;
 
-  //cerr << "total_available=" << total_available << " nval=" << nval << endl;
+  // cerr << "total_available=" << total_available << " nval=" << nval << " use_if=" << use_if << endl;
   
   unsigned ival = 0;
+
+  vector<bool> used (used_count.size(), false);
   
   if (total_available <= nval)
   {
     for (unsigned jval=0; jval < nmax; jval++)
     {
-      if (used[jval] <= use_if)
+      if (used_count[jval] <= use_if)
 	{
 	  vals[ival] = jval;
 	  ival ++;
-	  used[jval] ++;
+	  used_count[jval] ++;
+	  used[jval] = true;
 	}
     }
+    
     use_if ++;
-
-    //cerr << "after using remaining, use_if=" << use_if << endl;
   }
   
   while (ival < nval)
@@ -364,10 +355,11 @@ void unique_sorted_random (vector<unsigned>& vals,
     do {
       trial = lrand48() % nmax;
     }
-    while (used[trial] > use_if);
+    while (used[trial] || used_count[trial] > use_if );
 
     vals[ival] = trial;
-    used[trial] ++;
+    used_count[trial] ++;
+    used[trial] = true;
     ival++;
   }
 
@@ -381,8 +373,9 @@ void unique_sorted_random (vector<unsigned>& vals,
 #endif
 }
 
-double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >& dat_x,
-					      const vector< Estimate<double> >& dat_y)
+double CrossValidatedSmooth2D::get_mean_gof
+(const vector< pair<double,double> >& dat_x,
+ const vector< Estimate<double> >& dat_y)
 {
   assert (spline != 0);
 
@@ -408,31 +401,30 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
   
   for (unsigned ipart=0; ipart < npartition; ipart++)
   {
+    // cerr << "calling unique_sorted_random" << endl;
     unique_sorted_random (validation_index, used_count, use_if);
+    // cerr << "unique_sorted_random done" << endl;
     
-    vector< pair<double,double> > estimation_x;
-    vector< Estimate<double> > estimation_y;
-
-    filter (estimation_x, dat_x, validation_index);
-    filter (estimation_y, dat_y, validation_index);
-
-    spline->fit (estimation_x, estimation_y);
+    vector< Estimate<double> > estimation_y = dat_y;
+    flag (estimation_y, validation_index);
+    
+    // cerr << "spline fit" << endl;
+    spline->fit (dat_x, estimation_y);
+    // cerr << "fit done" << endl;
 
     unsigned vval = 0;
     for (unsigned ival=0; ival < ndat; ival++)
     {
-      unsigned jval = ival;
       bool validation = false;
       
       if (vval < nval && ival == validation_index[vval])
       {
-	jval = validation_index[vval];
 	validation = true;
 	vval ++;
       }
       
-      pair<double,double> x = dat_x[ jval ];
-      Estimate<double> y = dat_y[ jval ];
+      pair<double,double> x = dat_x[ ival ];
+      Estimate<double> y = dat_y[ ival ];
 
       if (y.var == 0.0)
 	continue;
@@ -444,13 +436,13 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
 	total_gof += gof;
 	count ++;
       
-	validation_gof[ jval ] += gof;
-	validation_count[ jval ] ++;
+	validation_gof[ ival ] += gof;
+	validation_count[ ival ] ++;
       }
       else
       {
-	estimation_gof[ jval ] += gof;
-	estimation_count[ jval ] ++;
+	estimation_gof[ ival ] += gof;
+	estimation_count[ ival ] ++;
       }
     }
 

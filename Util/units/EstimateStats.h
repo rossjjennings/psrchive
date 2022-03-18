@@ -12,6 +12,7 @@
 #define __EstimateStats_h
 
 #include "Estimate.h"
+#include <vector>
 
 template <typename T, typename U>
 double chisq (const Estimate<T,U>& a, const Estimate<T,U>& b) 
@@ -48,20 +49,40 @@ Estimate<T,U> weighted_mean (const std::vector< Estimate<T,U> >& vals)
 }
 
 template <typename T, typename U>
-void weighted_quartiles (std::vector< Estimate<T,U> > vals,
+void weighted_quartiles (const std::vector< Estimate<T,U> >& vals,
 			 Estimate<T,U>& Q1,
 			 Estimate<T,U>& Q2,
 			 Estimate<T,U>& Q3)
 {
+  unsigned nval = vals.size();
+  
   if (vals.size () < 3)
     throw Error (InvalidState, "weighted_quartiles",
-		 "ndat=%u < 3", vals.size());
+		 "ndat=%u < 3", nval);
+
+  // remove all esimates with zero variance (flagged as bad)
+  std::vector< Estimate<T,U> > cleaned ( nval );
+  unsigned iclean = 0;
+  for (unsigned ival=0; ival < nval; ival++)
+    if (vals[ival].var > 0)
+      {
+	cleaned[iclean] = vals[ival];
+	iclean ++;
+      }
+
+#if _DEBUG
+  std::cerr << "weighted_quartiles: nval=" << nval << " nclean=" << iclean << std::endl;
+#endif
+  
+  nval = iclean;
+  
+  cleaned.resize (nval);
   
   U total_weight = 0.0;
-  for (auto element: vals)
+  for (auto element: cleaned)
     total_weight += 1.0 / element.var;
 
-  std::sort (vals.begin(), vals.end());
+  std::sort (cleaned.begin(), cleaned.end());
 
   U quartile_weight[3];
   for (unsigned i=0; i<3; i++)
@@ -71,23 +92,25 @@ void weighted_quartiles (std::vector< Estimate<T,U> > vals,
   
   U weight = 0.0;
 
-  for (unsigned ival=0; ival < vals.size(); ival++)
+  for (unsigned ival=0; ival < nval; ival++)
   {
-    weight += 1.0 / vals[ival].var;
+    weight += 1.0 / cleaned[ival].var;
 
     for (unsigned i=0; i<3; i++)
       if (weight < quartile_weight[i])
 	quartile_index[i] = ival;
   }
 
-  std::cerr << "quartile indeces: ndat=" << vals.size();
+#if _DEBUG
+  std::cerr << "weighted_quartile indeces: ";
   for (unsigned i=0; i<3; i++)
     std::cerr << " Q" << i+1 << "=" << quartile_index[i];
   std::cerr << std::endl;
-
-  Q1 = Estimate<T,U> (vals[quartile_index[0]].val, 1.0/total_weight);
-  Q2 = Estimate<T,U> (vals[quartile_index[1]].val, 1.0/total_weight);
-  Q3 = Estimate<T,U> (vals[quartile_index[2]].val, 1.0/total_weight);
+#endif
+  
+  Q1 = Estimate<T,U> (cleaned[quartile_index[0]].val, 1.0/total_weight);
+  Q2 = Estimate<T,U> (cleaned[quartile_index[1]].val, 1.0/total_weight);
+  Q3 = Estimate<T,U> (cleaned[quartile_index[2]].val, 1.0/total_weight);
 }
 
 template <typename T, typename U>
