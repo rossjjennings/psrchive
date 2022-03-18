@@ -32,6 +32,7 @@ CrossValidatedSmooth2D::CrossValidatedSmooth2D ()
   gof_step_threshold = 1.0;
   
   spline = 0;
+  gof_out = 0;
 }
 
 void CrossValidatedSmooth2D::remove_iqr_outliers
@@ -56,7 +57,7 @@ void CrossValidatedSmooth2D::remove_iqr_outliers
     
     if (val > max_threshold || val < min_threshold)
     {
-      cerr << "IQR outlier idat=" << idat << " val=" << val << endl;
+      // cerr << "IQR outlier idat=" << idat << " val=" << val << endl;
       dat_y[idat].var = 0.0;
       count ++;
     }
@@ -134,7 +135,7 @@ void CrossValidatedSmooth2D::remove_gof_outliers
     
     if (threshold && gof_tot[idat] > threshold)
     {
-      cerr << "GOF outlier idat=" << idat << " gof=" << gof_tot[idat] << endl;
+      // cerr << "GOF outlier idat=" << idat << " gof=" << gof_tot[idat] << endl;
       dat_y[idat].var = 0.0;
       outliers ++;
     }
@@ -144,20 +145,22 @@ void CrossValidatedSmooth2D::remove_gof_outliers
     " removed " << outliers << " outliers out of " << ndat << " values" << endl;
 }
 
+double CrossValidatedSmooth2D::get_mean_gof
+( double log_10_alpha,
+  const vector< pair<double,double> >& dat_x,
+  const vector< Estimate<double> >& dat_y )
+{
+  double alpha = pow (10.0, log_10_alpha);
+  spline->set_alpha (alpha);
+  return get_mean_gof (dat_x, dat_y);
+}
+
 void CrossValidatedSmooth2D::find_optimal_smoothing_factor
 ( const vector< pair<double,double> >& dat_x,
   const vector< Estimate<double> >& dat_y )
 {
   unsigned ndat = dat_x.size();
   assert (ndat == dat_y.size());
-
-  double val[3] = { 3, 0, 6 };
-  double gof[3] = { 0, 0, 0 };
-  double close_enough = 0.1;
-
-  double interval = val[2] - val[0];
-  double multiplier = 2.0;
-  int direction = 0;
   
   gof_tot.resize (ndat);
   gof_count.resize (ndat);
@@ -168,81 +171,130 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
     gof_count[idat] = 0;
   }
 
+  if (gof_filename != "")
+  {
+    gof_out = new ofstream (gof_filename.c_str());
+ 
+    (*gof_out) << "# alpha mean median" << endl;
+  }
+
+  double val[3] = { 3, 0, 6 };
+  double gof[3] = { 0, 0, 0 };
+  double close_enough = 0.1;
+
+  // midpoint
+  val[1] = (val[2] + val[0]) / 2;
+        
+  for (unsigned ival=0; ival < 3; ival++)
+  {
+    gof[ival] = get_mean_gof (val[ival], dat_x, dat_y);
+    cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
+  }
+
+  double interval = val[2] - val[0];
+  
+  while (gof[0] < gof[1])
+  {
+    // the solution lies to the left
+    cerr << "go left of " << val[0] << " by " << interval << endl;
+
+    val[2] = val[1];
+    gof[2] = gof[1];
+      
+    val[1] = val[0];
+    gof[1] = gof[0];
+      
+    val[0] -= interval;
+    gof[0] = get_mean_gof (val[0], dat_x, dat_y);
+
+    interval = val[2] - val[0];
+  }
+  
+  while (gof[2] < gof[1])
+  {
+    // the solution lies to the right
+    cerr << "go right of " << val[2] << " by " << interval << endl;
+    val[0] = val[1];
+    gof[0] = gof[1];
+
+    val[1] = val[2];
+    gof[1] = gof[2];
+
+    val[2] += interval;
+    gof[2] = get_mean_gof (val[2], dat_x, dat_y);
+
+    interval = val[2] - val[0];
+  }
+
   // binary search for the optimal smoothing factor
   while (interval > close_enough)
   {
-    // midpoint
-    val[1] = (val[2] + val[0]) / 2;
-    gof[1] = 0.0;
+    cerr << "**** interval=" << interval << endl;
     
     for (unsigned ival=0; ival < 3; ival++)
+      cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
+
+    if (gof[0] < gof[2])
     {
-      if (gof[ival] == 0.0)
+      double new_interval = val[2] - val[1];
+      double new_point = val[1] + 0.25 * new_interval;
+      cerr << "divide right half at " << new_point << endl;
+
+      double new_gof = get_mean_gof (new_point, dat_x, dat_y);
+
+      if (new_gof < gof[1])
       {
-	double alpha = pow (10.0, val[ival]);
-	spline->set_alpha (alpha);
+	cerr << "shift to right half" << endl;
+	val[0] = val[1];
+	gof[0] = gof[1];
 
-	cerr << "alpha=" << alpha << endl; 
-		  
-	gof[ival] = get_mean_gof (dat_x, dat_y);
-
-	cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
-      }
-    }
-    
-    if (gof[0] < gof[1])
-    {
-      if (multiplier == 2.0 && direction == 1.0)
-	multiplier = 0.5;
-
-      direction = -1.0;
-      
-      // the solution lies to the left
-      cerr << "go left of " << val[0] << " by " << interval*multiplier << endl;
-
-      val[2] = val[0];
-      gof[2] = gof[0];
-      
-      val[0] -= interval * multiplier;
-      gof[0] = 0;
-    }
-    else if (gof[2] < gof[1])
-    {
-      if (multiplier == 2.0 && direction == -1.0)
-	multiplier = 0.5;
-
-      direction = 1.0;
-      
-      // the solution lies to the right
-      cerr << "go right of " << val[2] << " by " << interval*multiplier << endl;
-      val[0] = val[2];
-      gof[0] = gof[2];
-
-      val[2] += interval * multiplier;
-      gof[2] = 0;
-    }
-    else
-    {
-      if (gof[0] < gof[2])
-      {
-	cerr << "left half" << endl;
-	val[2] = val[1];
-	gof[2] = gof[1];
-	multiplier = 0.5;
+	val[1] = new_point;
+	gof[1] = new_gof;
       }
       else
       {
-	cerr << "right half" << endl;
-	val[0] = val[1];
-	gof[0] = gof[1];
-	multiplier = 0.5;
+	cerr << "shorten right half" << endl;
+	val[2] = new_point;
+	gof[2] = new_gof;
+      }
+    }
+    else
+    {
+      double new_interval = val[0] - val[1];
+      double new_point = val[1] + 0.25 * new_interval;
+
+      cerr << "divide left half at " << new_point << endl;
+
+      double new_gof = get_mean_gof (new_point, dat_x, dat_y);
+
+      if (new_gof < gof[1])
+      {
+	cerr << "shift to left half" << endl;
+	val[2] = val[1];
+	gof[2] = gof[1];
+
+	val[1] = new_point;
+	gof[1] = new_gof;
+      }
+      else
+      {
+	cerr << "shorten left half" << endl;
+	val[0] = new_point;
+	gof[0] = new_gof;
       }
     }
 
     interval = val[2] - val[0];
-    cerr << "interval=" << interval << " val[2]=" << val[2] << " val[0]=" << val[0] << endl;
-    
   }
+
+  cerr << "*** done.  last fit." << endl;
+  
+  double alpha = pow (10.0, val[1]);
+  spline->set_alpha (alpha);
+  spline->fit (dat_x, dat_y);
+
+  if (gof_out)
+    delete gof_out;
 }
 
 
@@ -428,8 +480,8 @@ double CrossValidatedSmooth2D::get_mean_gof (const vector< pair<double,double> >
   Q1_Q2_Q3 (validation_gof, Q1, Q2, Q3);
   // double IQR = Q3 - Q1;
 
-  cerr << "GOF alpha=" << spline->get_alpha() << " mean=" << mean_gof
-       << " median=" << Q2 << endl;
+  if (gof_out)
+    (*gof_out) << spline->get_alpha() << " " << mean_gof << " " << Q2 << endl;
   
   // cerr << "validation Q1=" << Q1 << " Q2=" << Q2 << " Q3=" << Q3 << " IQR=" << IQR << endl;
   
