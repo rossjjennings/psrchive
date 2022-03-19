@@ -32,6 +32,7 @@ CalibratorExtension::operator= (const CalibratorExtension& copy)
   if (this == &copy)
     return *this;
 
+  type = copy.type->clone();
   epoch = copy.epoch;
   weight = copy.weight;
   centre_frequency = copy.centre_frequency;
