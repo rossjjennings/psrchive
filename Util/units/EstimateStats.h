@@ -13,6 +13,7 @@
 
 #include "Estimate.h"
 #include <vector>
+#include <algorithm>
 
 template <typename T, typename U>
 double chisq (const Estimate<T,U>& a, const Estimate<T,U>& b) 
