@@ -47,6 +47,10 @@ namespace Pulsar {
     //! Get the type of the calibrator
     const Calibrator::Type* get_type () const;// { return type; }
 
+    //! Get the number of epochs in input data
+    unsigned get_nsub_input () const { return nsub_input; }
+    void set_nsub_input (unsigned n) { nsub_input = n; }
+
     //! Set the reference epoch of the interpolator
     void set_reference_epoch (const MJD& epoch) { reference_epoch = epoch; }
     //! Get the reference epoch of the interpolator
@@ -61,6 +65,10 @@ namespace Pulsar {
     void set_maximum_epoch (const MJD& epoch) { maximum_epoch = epoch; }
     //! Get the maximum epoch of the interpolator
     MJD get_maximum_epoch () const { return maximum_epoch; }
+
+    //! Get the number of frequency channels in input data
+    unsigned get_nchan_input () const { return nchan_input; }
+    void set_nchan_input (unsigned n) { nchan_input = n; }
 
     //! Set the reference frequency of the interpolator
     void set_reference_frequency (double freq) { reference_frequency = freq; }
@@ -82,7 +90,7 @@ namespace Pulsar {
 
     //! Text interface to CalibrationInterpolatorExtension extension
     class Interface
-      : public TextInterface::To<Pulsar::CalibrationInterpolatorExtension>
+      : public TextInterface::To<CalibrationInterpolatorExtension>
     {
     public:
       Interface (CalibrationInterpolatorExtension* = 0);
@@ -94,19 +102,47 @@ namespace Pulsar {
     class Parameter : public Reference::Able
     {
     public:
+
+      //! Text interface to CalibrationInterpolatorExtension::Parameter
+      class Interface
+	: public TextInterface::To<Parameter>
+      {
+      public:
+	Interface (Parameter* = 0);
+      };
+
       std::string code;
+      const std::string& get_code () const { return code; }
+
       unsigned iparam;
-      std::string description;
+      unsigned get_iparam () const { return iparam; }
+
+      float log10_smoothing_factor;
+      float get_log10_smoothing_factor () const { return log10_smoothing_factor; }
+      float total_chi_squared;
+      float get_total_chi_squared () const { return total_chi_squared; }
+      
+      unsigned ndat_input;
+      unsigned ndat_flagged_before;
+      unsigned ndat_flagged_after;
+      std::string interpolator;
     };
 
     void add_parameter (Parameter* p) { parameter.push_back(p); }
     unsigned get_nparam () const { return parameter.size(); }
-    Parameter* get_parameter (unsigned iparam) { return parameter.at(iparam); }
+    
+    Parameter* get_parameter (unsigned iparam)
+    { return parameter.at(iparam); }
+    const Parameter* get_parameter (unsigned iparam) const
+    { return parameter.at(iparam); }
     
     protected:
 
     //! Type of the calibrator
     Reference::To<const Calibrator::Type> type;
+
+    //! The number of epochs in the input data
+    unsigned nsub_input;
     
     //! The reference epoch
     MJD reference_epoch;
@@ -115,6 +151,9 @@ namespace Pulsar {
     //! The maximum epoch
     MJD maximum_epoch;
 
+    //! The number of frequency channels in the input data
+    unsigned nchan_input;
+    
     //! The reference frequency in MHz
     double reference_frequency;
     //! The minimum frequency in MHz

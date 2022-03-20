@@ -21,6 +21,8 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_DigitiserStatistics.C load_DigitiserStatistics.C \
 	unload_DigitiserCounts.C load_DigitiserCounts.C \
 	unload_CalibratorExtension.C load_CalibratorExtension.C \
+	unload_CalibrationInterpolatorExtension.C \
+	load_CalibrationInterpolatorExtension.C \
 	unload_PolnCalibratorExtension.C load_PolnCalibratorExtension.C \
 	unload_FluxCalibratorExtension.C load_FluxCalibratorExtension.C \
 	unload_FITSSUBHdrExtension.C load_FITSSUBHdrExtension.C \

@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.3             '   / Header version 
+HDRVER  = '6.4             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -460,6 +460,55 @@ TTYPE#  = NFREE                / Number of degrees of freedom
 TFORM#  = J                    / NCHAN long (32-bit) integers
 TTYPE#  = NFIT                 / Number of model parameters varied in fit
 TFORM#  = J                    / NCHAN long (32-bit) integers
+END
+#
+###############################################################################
+#
+# Polarization Calibration Model Interpolator Binary Table Extension
+# Includes interpolating functions for both
+#   - Feed Cross-Coupling Parameters and
+#   - Artificial Calibrator Stokes Parameters
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** pcm interpolation *****
+BITPIX  =                    8 / N/A 
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    * / Number of fields per row
+#
+EXTNAME = PCMINTER             / Name of this binary table extension
+CAL_MTHD= '                  ' / Name of FEEDPAR model
+NPARAM  =                    * / Number of model parameters interpolated (J)
+NCHAN_IN=                    * / Number of frequency channels in input data (J)
+NSUB_IN =                    * / Number of epochs in input data (J)
+REFFREQ =                    * / [MHz] Reference frequency of interpolator (D)
+MINFREQ =                    * / [MHz] Minimum frequency of interpolator (D)
+MAXFREQ =                    * / [MHz] Maximum frequency of interpolator (D)
+REFEPOCH=                    * / [MJD] Reference epoch of interpolator (D)
+MINEPOCH=                    * / [MJD] Minimum epoch of interpolator (D)
+MAXEPOCH=                    * / [MJD] Maximum epoch of interpolator (D)
+NCHAR   =                    * / Number of characters per row (J)
+#
+TTYPE#  = MODEL                / Code for model (FEEDPAR or CAL_POLN)
+TFORM#  = 8A                   / 8-char string
+TTYPE#  = IPARAM               / Index of model parameter 
+TFORM#  = 1I                   / Integer
+TTYPE#  = LOGSMTH              / Base 10 logarithm of smoothing factor
+TFORM#  = 1E                   / Float
+TTYPE#  = CHISQ                / Total chi-squared (objective merit function)
+TFORM#  = 1E                   / Float
+TTYPE#  = NDAT                 / Number of data used to constrain interpolator
+TFORM#  = J                    / Long (32-bit) integers
+TTYPE#  = NFLAG_IN             / Number of input data flagged before fit
+TFORM#  = J                    / Long (32-bit) integers
+TTYPE#  = NFLAG_OUT            / Number of input data flagged after fit
+TFORM#  = J                    / Long (32-bit) integers
+TTYPE#  = INTERTXT             / Text that describes interpolator
+TFORM#  = A                    / NCHAR characters
 END
 #
 ###############################################################################

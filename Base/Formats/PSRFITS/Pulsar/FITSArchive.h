@@ -13,6 +13,7 @@
 
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/Agent.h"
+#include "FITSError.h"
 
 #include <fitsio.h>
 
@@ -30,6 +31,7 @@ namespace Pulsar
   class PolnCalibratorExtension;
   class FluxCalibratorExtension;
   class CalibratorStokes;
+  class CalibrationInterpolatorExtension;
   class DigitiserCounts;
   class FITSSUBHdrExtension;
   class ProfileColumn;
@@ -95,61 +97,64 @@ namespace Pulsar
     static std::string get_template_name ();
 
     //! Unload FITSHdrExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const FITSHdrExtension*);
+    static void unload (fitsfile*, const FITSHdrExtension*);
 
     //! Unload ObsExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const ObsExtension*);
+    static void unload (fitsfile*, const ObsExtension*);
     
     //! Unload Receiver to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const Receiver*);
+    static void unload (fitsfile*, const Receiver*);
 
     //! Unload WidebandCorrelator to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const WidebandCorrelator*);
+    static void unload (fitsfile*, const WidebandCorrelator*);
 
     //! Unload ITRFExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const ITRFExtension*);
+    static void unload (fitsfile*, const ITRFExtension*);
 
     //! Unload CalInfoExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const CalInfoExtension*);
+    static void unload (fitsfile*, const CalInfoExtension*);
     
     //! Unload ProcHistory to the HISTORY HDU
-    static void unload (fitsfile* fptr, const ProcHistory*);
+    static void unload (fitsfile*, const ProcHistory*);
     
     //! Unload Passband to the BANDPASS HDU
-    static void unload (fitsfile* fptr, const Passband*);
+    static void unload (fitsfile*, const Passband*);
     
     //! Unload DigitiserStatistics to the DIG_STAT HDU
-    static void unload (fitsfile* fptr, const DigitiserStatistics*);
+    static void unload (fitsfile*, const DigitiserStatistics*);
     
     //! Unload DigitiserCounts to DIG_CNTS HDU
-    static void unload (fitsfile* fptr, const DigitiserCounts*);
+    static void unload (fitsfile*, const DigitiserCounts*);
     
     //! Unload PolnCalibratorExtension to the FEEDPAR HDU
-    static void unload (fitsfile* fptr, const PolnCalibratorExtension*);
+    static void unload (fitsfile*, const PolnCalibratorExtension*);
     
     //! Unload FluxCalibratorExtension to the FLUX_CAL HDU
-    static void unload (fitsfile* fptr, const FluxCalibratorExtension*);
+    static void unload (fitsfile*, const FluxCalibratorExtension*);
 
     //! Unload CalibratorStokes to the CAL_POLN HDU
-    static void unload (fitsfile* fptr, const CalibratorStokes*);
+    static void unload (fitsfile*, const CalibratorStokes*);
+
+    //! Unload CalibrationInterpolatorExtension to the PCMINTER HDU
+    static void unload (fitsfile*, const CalibrationInterpolatorExtension*);
     
     //! Unload FITSSUBHdrExtension
-    static void unload (fitsfile *fptr, const FITSSUBHdrExtension*);
+    static void unload (fitsfile*, const FITSSUBHdrExtension*);
     
     //! Unload CoherentDedispersion
-    static void unload (fitsfile* fptr, const CoherentDedispersion*);
+    static void unload (fitsfile*, const CoherentDedispersion*);
 
     //! Unload Pointing to the specified row of the subint table
-    static void unload (fitsfile* fptr, const Pointing*, int row);
+    static void unload (fitsfile*, const Pointing*, int row);
 
     //! Unload AuxColdPlasmaMeausres to the specified row of the subint table
-    static void unload (fitsfile* fptr, const AuxColdPlasmaMeasures*, int row);
+    static void unload (fitsfile*, const AuxColdPlasmaMeasures*, int row);
 
     //! Unload the observation description
-    static void unload (fitsfile* fptr, const ObsDescription*);
+    static void unload (fitsfile*, const ObsDescription*);
 
     //! Unload the Cross-Covariance Matrix Data
-    static void unload (fitsfile* fptr, const CrossCovarianceMatrix*);
+    static void unload (fitsfile*, const CrossCovarianceMatrix*);
 
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
@@ -165,7 +170,7 @@ namespace Pulsar
     class SKLoader;
     
     friend class Archive::Advocate<FITSArchive>;
-    
+
     // Advocates the use of the FITSArchive plugin
     class Agent : public Archive::Advocate<FITSArchive> {
       
@@ -184,7 +189,7 @@ namespace Pulsar
       std::string get_description ();
       
     };
-    
+
     //! Load the FITS header information from filename
     virtual void load_header (const char* filename);
     
@@ -255,6 +260,7 @@ namespace Pulsar
     void load_PolnCalibratorExtension (fitsfile*);
     void load_FluxCalibratorExtension (fitsfile*);
     void load_CalibratorStokes (fitsfile*);
+    void load_CalibrationInterpolatorExtension (fitsfile*);
     void load_Receiver (fitsfile*);
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
@@ -270,15 +276,15 @@ namespace Pulsar
     void load_integration_state ( fitsfile * );
     void load_state ( fitsfile * );
 
-    void load_Pointing (fitsfile* fptr, int row, Integration*);
-    void load_Plasma (fitsfile* fptr, int row, Integration*);
-    void load_SpectralKurtosis (fitsfile* fptr, int row, Integration*);
+    void load_Pointing (fitsfile*, int row, Integration*);
+    void load_Plasma (fitsfile*, int row, Integration*);
+    void load_SpectralKurtosis (fitsfile*, int row, Integration*);
 
     void interpret_scale ( );
     void interpret_pol_type ( );
 
     //! Delete the HDU with the specified name
-    void delete_hdu (fitsfile* fptr, const char* hdu_name) const;
+    void delete_hdu (fitsfile*, const char* hdu_name) const;
 
     // //////////////////////////////////////////////////////////////////////
 
@@ -343,6 +349,9 @@ namespace Pulsar
     // Name of file used for reading 
     std::string read_filename;
   };
+
+  extern template Registry::List<Archive::Agent>::Enter<FITSArchive::Agent>
+  Archive::Advocate<FITSArchive>::entry;
 
 }
 

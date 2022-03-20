@@ -23,6 +23,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/CalibrationInterpolatorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Profile.h"
 
@@ -67,8 +68,13 @@ public:
   //! Perform the fit
   void finalize ();
 
+  //! Set up archive to store interpolator
+  void prepare_solution (Archive*);
+
 protected:
 
+  Reference::To< CalibrationInterpolatorExtension > result;
+  
   bool convert_epochs;
 
   void fit_polynomial (const vector< double >& data_x,
@@ -98,7 +104,10 @@ protected:
 #endif
   
   void cross_validate ();
-    
+
+  bool unload_solution;
+  bool unload_smoothed;
+  
   // find the median effective number of free parameters
   bool find_median_nfree;
 
@@ -159,9 +168,15 @@ protected:
   // the centre frequency of the data
   double centre_frequency;
   vector<double> channel_frequency;
+
   string reference_filename;
   vector<string> input_filenames;
 
+  // the reference epoch of the data
+  MJD reference_epoch;
+  MJD min_epoch;
+  MJD max_epoch;
+      
   // load profile data from Integration
   void load (vector<set>& data, Integration* subint);
 
@@ -199,7 +214,9 @@ protected:
 
   string spline_filename;
   string plot_filename;
-
+  string model_code;
+  unsigned model_index;
+  
   unsigned plot_npts;
   double plot_xmin;
   double plot_xmax;
@@ -284,6 +301,9 @@ smint::smint ()
 #endif
   
   bootstrap_uncertainty = false;
+
+  unload_solution = true;
+  unload_smoothed = false;
 }
 
 void smint::cross_validate ()
@@ -870,10 +890,37 @@ void smint::unload (Extension* ext, vector<set>& data, unsigned ifile)
   }
 }
 
+template <class T>
+void delete_extension (Archive* archive)
+{
+  T* ext = archive->get<T>();
+  if (ext)
+    delete ext;
+}
+
+void smint::prepare_solution (Archive* archive)
+{
+  // delete the existing calibration solution extension
+  delete_extension <PolnCalibratorExtension> (archive);
+  delete_extension <CalibratorStokes> (archive);
+  delete_extension <FluxCalibratorExtension> (archive);
+
+  result = archive->getadd <CalibrationInterpolatorExtension> ();
+}
 
 void smint::finalize ()
 {
   cerr << "smint::finalize" << endl;
+
+  Reference::To<Archive> solution;
+      
+  if (unload_solution)
+  {
+    cerr << "smint::finalize reference filename=" << reference_filename << endl;
+    solution = Archive::load (reference_filename);
+
+    smint::prepare_solution (solution);
+  }
   
   for (unsigned i=0; i < pcal_data.size(); i++)
   {
@@ -899,51 +946,58 @@ void smint::finalize ()
     cpgopen (plot_device.c_str());
 #endif
 
+  convert_epochs = true;
+  model_code = "FEEDPAR";
+
   for (unsigned i=0; i < pcal_data.size(); i++)
   {
+    model_index = pcal_data[i].index;
+    
     cerr << "smint: fitting PolnCalibrator "
-            "iparam=" << pcal_data[i].index << endl;
+            "iparam=" << model_index << endl;
 
-    string idx = tostring(pcal_data[i].index);
+    string idx = tostring(model_index);
 
     spline_filename = "pcal_spline_" + idx;
 
     if (plot_device == "")
       plot_filename = "pcal_fit_" + idx + ".eps/cps";
 
-    convert_epochs = true;
-
     fit (pcal_data[i]);
   }
 
+  model_code = "CAL_POLN";
+    
   for (unsigned i=0; i < cal_stokes_data.size(); i++)
   {
-    cerr << "smint: fitting CalibratorStokes iparam=" << i << endl;
+    model_index = cal_stokes_data[i].index;
+    
+    cerr << "smint: fitting CalibratorStokes iparam=" << model_index << endl;
 
-    string idx = tostring(cal_stokes_data[i].index);
+    string idx = tostring(model_index);
     spline_filename = "cal_stokes_spline_" + idx;
 
     if (plot_device == "")
       plot_filename = "cal_stokes_fit_" + idx + ".eps/cps";
 
-    convert_epochs = true;
-
     fit (cal_stokes_data[i]);
   }
 
+  model_code = "FLUX_CAL";
+
   for (unsigned i=0; i < fcal_data.size(); i++)
   {
+    model_index = fcal_data[i].index;
+    
     cerr << "smint: fitting FluxCalibrator "
-            "iparam=" << fcal_data[i].index << endl;
+            "iparam=" << model_index << endl;
 
-    string idx = tostring(fcal_data[i].index);
+    string idx = tostring(model_index);
 
     spline_filename = "fcal_spline_" + idx;
 
     if (plot_device == "")
       plot_filename = "fcal_fit_" + idx + ".eps/cps";
-
-    convert_epochs = true;
 
     fit (fcal_data[i]);
   }
@@ -953,6 +1007,12 @@ void smint::finalize ()
     cpgend ();
 #endif
 
+  if (solution)
+    solution->unload ("smint.fits");
+  
+  if (!unload_smoothed)
+    return;
+      
   cerr << "smint::finalize unloading smoothed solutions" << endl;
   
   for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
@@ -1158,6 +1218,27 @@ unsigned smint::remove_outliers (SmoothingSpline& spline,
 
 #if HAVE_SPLINTER
 
+double chisq (SplineSmooth2D& spline,
+	      const vector< pair<double,double> >& data_x,
+	      const vector< Estimate<double> >& data_y)
+{
+  unsigned ndat = data_x.size ();
+  assert (ndat == data_y.size ());
+
+  double total_chisq = 0.0;
+  
+  for (unsigned i=0; i<ndat; i++)
+  {
+    if (data_y[i].var > 0)
+    {
+      double diff = spline.evaluate ( data_x[i] ) - data_y[i].val;
+      total_chisq += diff*diff/data_y[i].var;
+    }
+  }
+
+  return total_chisq;
+}
+	      
 void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 {
   if (table.size() == 0)
@@ -1179,7 +1260,6 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   double xmin = 0;
   double xmax = 0;
-
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
@@ -1214,14 +1294,29 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
   cerr << "channel bounds min=" << min_chan << " max=" << max_chan << endl;
   cerr << "frequency xmin=" << xmin << " xmax=" << xmax << endl;
-  
-  MJD mid_epoch;
-  double x0_span = 0.0;
 
+  if (result)
+  {
+    result->set_nchan_input (nchan);
+    result->set_reference_frequency (centre_frequency);
+    
+    double freq = result->get_minimum_frequency();
+    if (freq != 0.0)
+      assert (freq == xmin);
+    else
+      result->set_minimum_frequency (freq);
+
+    freq = result->get_maximum_frequency();
+    if (freq != 0.0)
+      assert (freq == xmax);
+    else
+      result->set_maximum_frequency (freq);
+  }
+  
   if (convert_epochs)
   {
-    MJD min_epoch = table.front().epoch;
-    MJD max_epoch = table.front().epoch;
+    min_epoch = table.front().epoch;
+    max_epoch = table.front().epoch;
 
     for (unsigned irow = 1; irow < table.size(); irow++)
     {
@@ -1231,26 +1326,38 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
         min_epoch = table[irow].epoch;
     }
   
-    x0_span = (max_epoch - min_epoch).in_days();
+    double x0_span = (max_epoch - min_epoch).in_days();
   
     cerr << "smint::fit_pspline data span " << x0_span << " days" << endl;
   
-    mid_epoch = min_epoch + MJD(0.5 * x0_span);
+    reference_epoch = min_epoch + MJD(0.5 * x0_span);
   
-    cerr << "smint::fit_pspline min=" << min_epoch << " ref=" << mid_epoch << endl;
+    cerr << "smint::fit_pspline min=" << min_epoch
+	 << " ref=" << reference_epoch << endl;
+
+    convert_epochs = false;
+
+    if (result)
+    {
+      result->set_nsub_input (table.size());
+      result->set_reference_epoch (reference_epoch);
+      result->set_minimum_epoch (min_epoch);
+      result->set_maximum_epoch (max_epoch);
+    }
   }
 
-  // mid_epoch = mid_epoch.int_days ();
-  
+  double x0_span = (max_epoch - min_epoch).in_days();
+    
   spline.set_alpha (pspline_alpha);
 
   vector< pair<double,double> > data_x;
   vector< Estimate<double> > data_y;
 
+  unsigned ndat_input = 0;
+  
   for (unsigned irow = 0; irow < table.size(); irow++)
   {
-    if (convert_epochs)
-      table[irow].x0 = (table[irow].epoch - mid_epoch).in_days();
+    table[irow].x0 = (table[irow].epoch - reference_epoch).in_days();
 
     double x0 = table[irow].x0;
 
@@ -1258,11 +1365,21 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     {
       data_x.push_back ( pair<double,double>( x0, table[irow].freq[ichan] ) );
       data_y.push_back ( table[irow].data[ichan] );
+
+      if (table[irow].data[ichan].var > 0)
+	ndat_input ++;
     }
   }
 
-
-
+  CalibrationInterpolatorExtension::Parameter* param = 0;
+  if (result)
+  {
+    param = new CalibrationInterpolatorExtension::Parameter;
+    param->code = model_code;
+    param->iparam = model_index;
+    param->ndat_input = ndat_input;
+  }
+  
   if (cross_validated_smoothing_2D)
   {
     if (spline_filename != "")
@@ -1273,13 +1390,35 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     
     cross_validated_smoothing_2D->set_spline (&spline);
     cross_validated_smoothing_2D->fit (data_x, data_y);
+
+    if (param)
+    {
+      param->ndat_flagged_before
+	= cross_validated_smoothing_2D->get_nflagged_iqr ();
+
+      param->ndat_flagged_after
+	= cross_validated_smoothing_2D->get_nflagged_gof ();
+    }
   }
   else
   {
     spline.fit (data_x, data_y);
   }
-  
 
+  if (param)
+  {
+    param->log10_smoothing_factor = log10( spline.get_alpha() );
+    param->total_chi_squared = chisq (spline, data_x, data_y);
+
+    const char* filename = "smint.tmp";
+    spline.unload (filename);
+
+    ifstream in (filename);
+    in >> param->interpolator;
+
+    cerr << "interpolator nchar=" << param->interpolator.size() << endl;
+  }
+  
   if (spline_filename != "")
   {
     string filename = spline_filename + ".out";

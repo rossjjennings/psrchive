@@ -93,7 +93,10 @@ namespace Pulsar {
     SplineSmooth2D* spline;       // the 2-D spline implementation
 
     double iqr_threshold;         // Tukey's fence used to detect outliers
+    unsigned nflagged_iqr;
+
     double gof_step_threshold;
+    unsigned nflagged_gof;
     
     std::vector<double> gof_tot;
     std::vector<unsigned> gof_count;
@@ -117,6 +120,8 @@ namespace Pulsar {
     ( std::vector< std::pair<double,double> >& x,
       std::vector< Estimate<double> >& y );
 
+    unsigned get_nflagged_iqr () const { return nflagged_iqr; }
+    
     void find_optimal_smoothing_factor
     ( const std::vector< std::pair<double,double> >& dat_x,
       const std::vector< Estimate<double> >& dat_y );
@@ -124,6 +129,8 @@ namespace Pulsar {
     void remove_gof_outliers
     ( std::vector< std::pair<double,double> >& x,
       std::vector< Estimate<double> >& y );
+
+    unsigned get_nflagged_gof () const { return nflagged_gof; }
 
     //! Return the mean goodness-of-fit for the current smoothing
     double get_mean_gof (const std::vector< std::pair<double,double> >& data_x,

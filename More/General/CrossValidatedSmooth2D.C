@@ -33,6 +33,9 @@ CrossValidatedSmooth2D::CrossValidatedSmooth2D ()
   
   spline = 0;
   gof_out = 0;
+
+  nflagged_iqr = 0;
+  nflagged_gof = 0;
 }
 
 void CrossValidatedSmooth2D::remove_iqr_outliers
@@ -66,6 +69,8 @@ void CrossValidatedSmooth2D::remove_iqr_outliers
     idat ++;
   }
 
+  nflagged_iqr = count;
+  
   cerr << "CrossValidatedSmooth2D::remove_iqr_outliers"
     " removed " << count << " outliers out of " << ndat << " values" << endl;
 }
@@ -83,12 +88,16 @@ void CrossValidatedSmooth2D::fit ( vector< pair<double,double> >& dat_x,
 
   if (iqr_threshold)
     remove_iqr_outliers (dat_x, dat_y);
+  else
+    nflagged_iqr = 0;
 
   find_optimal_smoothing_factor (dat_x, dat_y);
 
   if (gof_step_threshold)
     remove_gof_outliers (dat_x, dat_y);
-
+  else
+    nflagged_gof = 0;
+  
   spline->fit (dat_x, dat_y);
 }
 
@@ -141,6 +150,8 @@ void CrossValidatedSmooth2D::remove_gof_outliers
     }
   }
 
+  nflagged_gof = outliers;
+  
   cerr << "CrossValidatedSmooth2D::remove_gof_outliers"
     " removed " << outliers << " outliers out of " << ndat << " values" << endl;
 }
@@ -188,7 +199,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   for (unsigned ival=0; ival < 3; ival++)
   {
     gof[ival] = get_mean_gof (val[ival], dat_x, dat_y);
-    cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
+    // cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
   }
 
   double interval = val[2] - val[0];
@@ -229,11 +240,13 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   // binary search for the optimal smoothing factor
   while (interval > close_enough)
   {
-    // cerr << "**** interval=" << interval << endl;
-    
+    cerr << "*** interval=" << interval << endl;
+
+#if _DEBUG
     for (unsigned ival=0; ival < 3; ival++)
       cerr << ival << " " << val[ival] << " " << gof[ival] << endl;
-
+#endif
+    
     if (gof[0] < gof[2])
     {
       double new_interval = val[2] - val[1];

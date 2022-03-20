@@ -68,6 +68,26 @@ const Calibrator::Type* CalibrationInterpolatorExtension::get_type () const
   return type;
 }
 
+CalibrationInterpolatorExtension::Parameter::Interface::Interface
+(CalibrationInterpolatorExtension::Parameter *s_instance)
+{
+  if( s_instance )
+    set_instance( s_instance );
+
+  add( &CalibrationInterpolatorExtension::Parameter::get_code,
+       "code", "Calibration model code" );
+
+  add( &CalibrationInterpolatorExtension::Parameter::get_iparam,
+       "index", "Calibration model index" );
+
+  add( &CalibrationInterpolatorExtension::Parameter::get_log10_smoothing_factor,
+       "logsm", "Base 10 logarithm of spline smoothing factor" );
+
+  add( &CalibrationInterpolatorExtension::Parameter::get_total_chi_squared,
+       "chisq", "Total chi squared" );
+}
+
+
 // Text interface to a CalibrationInterpolatorExtension extension
 CalibrationInterpolatorExtension::Interface::Interface
   (CalibrationInterpolatorExtension *s_instance)
