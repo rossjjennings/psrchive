@@ -51,11 +51,15 @@ void FITSArchive::unload (fitsfile* fptr,
   psrfits_update_key (fptr, "CAL_MTHD", cal_mthd);
 
   // NPARAM
-  int nparam = ext->get_nparam ();
+  unsigned nparam = ext->get_nparam ();
   psrfits_update_key (fptr, "NPARAM", nparam);
 
+  // NCHAN_IN
+  unsigned nchan = ext->get_nchan_input();
+  psrfits_update_key (fptr, "NCHAN_IN", nchan);
+
   // NSUB_IN
-  int nsub = ext->get_nsub_input();
+  unsigned nsub = ext->get_nsub_input();
   psrfits_update_key (fptr, "NSUB_IN", nsub);
 
   // REFFREQ
@@ -91,6 +95,8 @@ void FITSArchive::unload (fitsfile* fptr,
   }
 
   assert (max_strlen > 0);
+
+  psrfits_update_key (fptr, "NCHAR", max_strlen);
 
   for (unsigned iparam=0; iparam < nparam; iparam++)
     ::unload (fptr, iparam+1, ext->get_parameter(iparam), max_strlen);

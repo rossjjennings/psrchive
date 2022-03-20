@@ -900,12 +900,20 @@ void delete_extension (Archive* archive)
 
 void smint::prepare_solution (Archive* archive)
 {
+  Reference::To<const Calibrator::Type> type;
+
+  auto ext = archive->get<PolnCalibratorExtension> ();
+  if (ext)
+    type = ext->get_type();
+
   // delete the existing calibration solution extension
   delete_extension <PolnCalibratorExtension> (archive);
   delete_extension <CalibratorStokes> (archive);
   delete_extension <FluxCalibratorExtension> (archive);
 
   result = archive->getadd <CalibrationInterpolatorExtension> ();
+  if (type)
+    result->set_type (type);
 }
 
 void smint::finalize ()
@@ -1378,6 +1386,7 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     param->code = model_code;
     param->iparam = model_index;
     param->ndat_input = ndat_input;
+    result->add_parameter (param);
   }
   
   if (cross_validated_smoothing_2D)
@@ -1459,7 +1468,6 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
 
 #ifdef HAVE_PGPLOT
 
-  cerr << "plotting data" << endl;
   if (plot_filename != "")
     cpgopen (plot_filename.c_str());
 
@@ -1476,7 +1484,6 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
   if (plot_filename != "")
     cpgend ();
 
-  cerr << "data plotted" << endl;
 #endif
 
 }

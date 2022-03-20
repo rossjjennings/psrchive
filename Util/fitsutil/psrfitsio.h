@@ -233,7 +233,14 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
     throw FITSError (status, "psrfits_write_col(vector<T>)",
                      "fits_get_colnum (name=%s)", name);
 
-  psrfits_write_col (fptr, colnum, row, stream);
+  try
+  {
+    psrfits_write_col (fptr, colnum, row, stream);
+  }
+  catch (Error& error)
+  {
+    throw error += "psrfits_write_col(vector<T>," + std::string(name) + ")";
+  }
 }
 
 template<typename T>
@@ -336,7 +343,13 @@ void psrfits_write_col( fitsfile *fptr, const char *name, int row,
     throw FITSError (status, "psrfits_write_col(T)",
                      "fits_get_colnum (name=%s)", name);
 
-  psrfits_write_col (fptr, colnum, row, data);
+  try {
+    psrfits_write_col (fptr, colnum, row, data);
+  }
+  catch (Error& error)
+  {
+    throw error += "psrfits_write_col(T," + std::string(name) + ")";
+  }
 }
 
 template<typename T>

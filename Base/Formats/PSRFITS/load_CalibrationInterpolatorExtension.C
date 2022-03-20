@@ -62,16 +62,16 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
 	 << ext->get_type()->get_name() << endl;
 
   // NPARAM
-  int nparam = 0;
+  unsigned nparam = 0;
   psrfits_read_key (fptr, "NPARAM", &nparam);
 
   // NCHAN_IN
-  int nchan_in = 0;
+  unsigned nchan_in = 0;
   psrfits_read_key (fptr, "NCHAN_IN", &nchan_in);
   ext->set_nchan_input (nchan_in);
 
   // NSUB_IN
-  int nsub_in = 0;
+  unsigned nsub_in = 0;
   psrfits_read_key (fptr, "NSUB_IN", &nsub_in);
   ext->set_nsub_input (nsub_in);
 
@@ -105,7 +105,7 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
   psrfits_read_key (fptr, "MAXEPOCH", &maxepoch);
   ext->set_maximum_epoch (maxepoch);
   
-  for (int iparam = 0; iparam < nparam; iparam++)
+  for (unsigned iparam = 0; iparam < nparam; iparam++)
   {
     cerr << "load interpolation row=" << iparam+1 << endl;
     
