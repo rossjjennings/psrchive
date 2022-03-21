@@ -23,6 +23,16 @@ namespace Pulsar {
   class CalibratorStokes : public Pulsar::Archive::Extension {
     
   public:
+
+    //! The point where the reference source signal is coupled    
+    enum CouplingPoint
+    {
+     BeforeProjection, // e.g. satellite-borne
+     BeforeBasis,      // e.g. radiated onto primary reflector
+     BeforeFrontend,   // e.g. radiated into feedhorn
+     BeforeIdeal,      // e.g. coupled after transducer
+     BeforeBackend     // not sure why
+    };
     
     //! Default constructor
     CalibratorStokes ();
@@ -53,6 +63,11 @@ namespace Pulsar {
     //! Get the number of frequency channels
     unsigned get_nchan () const;
 
+    //! Set the point where the reference source signal is coupled
+    void set_coupling_point (CouplingPoint);
+    //! The point where the reference source signal is coupled
+    CouplingPoint get_coupling_point () const;
+
     //! Remove the inclusive range of channels
     void remove_chan (unsigned first, unsigned last);
 
@@ -75,6 +90,17 @@ namespace Pulsar {
 
   protected:
 
+    //! The point where the reference source signal is coupled
+    /*! On some systems, the reference source (e.g. noise diode)
+      signal is coupled to the astronomy signal after the OMT.  Also,
+      when modeling the instrumental response using METM, variable
+      ionospheric Faraday rotation causes variable apparent rotation
+      about the line of sight, which in turn affects the best-fit
+      Stokes parameters of the reference source.  Therefore, when
+      using METM, it is best to model the reference source as though
+      coupled after the frontend. */
+    CouplingPoint coupling_point;
+    
     //! The Stokes parameters for each frequency channel
     /*! Stokes I is used to represent data validity */
     std::vector< Stokes< Estimate<float> > > stokes;
@@ -93,6 +119,10 @@ namespace Pulsar {
     Reference::To<PolnVector> current;
   };
  
+  std::ostream& operator << (std::ostream& ostr,
+			     CalibratorStokes::CouplingPoint);
+  std::istream& operator >> (std::istream& is,
+			     CalibratorStokes::CouplingPoint&);
 
 }
 

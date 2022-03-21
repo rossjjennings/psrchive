@@ -1350,7 +1350,10 @@ SystemCalibrator::get_CalibratorStokes () const
   Reference::To<CalibratorStokes> ext = new CalibratorStokes;
     
   ext->set_nchan (nchan);
-    
+
+  if (refcal_through_frontend)
+    ext->set_coupling_point (CalibratorStokes::BeforeIdeal);
+  
   for (unsigned ichan=0; ichan < nchan; ichan++) try
   {
     bool valid = get_transformation_valid(ichan);

@@ -13,6 +13,7 @@
 
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/CalibratorType.h"
+#include "Pulsar/CalibratorStokes.h"
 
 namespace Pulsar {
 
@@ -46,6 +47,14 @@ namespace Pulsar {
     void set_type (const Calibrator::Type* t);// { type = t; }
     //! Get the type of the calibrator
     const Calibrator::Type* get_type () const;// { return type; }
+
+    //! Set the point where the reference source signal is coupled
+    void set_coupling_point (CalibratorStokes::CouplingPoint point)
+    { coupling_point = point; }
+    
+    //! The point where the reference source signal is coupled
+    CalibratorStokes::CouplingPoint get_coupling_point () const
+    { return coupling_point; }
 
     //! Get the number of epochs in input data
     unsigned get_nsub_input () const { return nsub_input; }
@@ -141,6 +150,9 @@ namespace Pulsar {
     //! Type of the calibrator
     Reference::To<const Calibrator::Type> type;
 
+    //! The point where the reference source signal is coupled
+    CalibratorStokes::CouplingPoint coupling_point;
+    
     //! The number of epochs in the input data
     unsigned nsub_input;
     

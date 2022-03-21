@@ -50,6 +50,10 @@ void FITSArchive::unload (fitsfile* fptr,
   string cal_mthd = ext->get_type()->get_name();
   psrfits_update_key (fptr, "CAL_MTHD", cal_mthd);
 
+  // COUPLING
+  string coupling = tostring( ext->get_coupling_point () );
+  psrfits_update_key (fptr, "COUPLING", coupling);
+
   // NPARAM
   unsigned nparam = ext->get_nparam ();
   psrfits_update_key (fptr, "NPARAM", nparam);

@@ -900,20 +900,23 @@ void delete_extension (Archive* archive)
 
 void smint::prepare_solution (Archive* archive)
 {
-  Reference::To<const Calibrator::Type> type;
-
-  auto ext = archive->get<PolnCalibratorExtension> ();
-  if (ext)
-    type = ext->get_type();
-
-  // delete the existing calibration solution extension
-  delete_extension <PolnCalibratorExtension> (archive);
-  delete_extension <CalibratorStokes> (archive);
-  delete_extension <FluxCalibratorExtension> (archive);
-
   result = archive->getadd <CalibrationInterpolatorExtension> ();
-  if (type)
-    result->set_type (type);
+
+  auto pcext = archive->get<PolnCalibratorExtension> ();
+  if (pcext)
+  {  
+    result->set_type( pcext->get_type() );
+    delete pcext;
+  }
+
+  auto csext = archive->get<CalibratorStokes> ();
+  if (csext)
+  {
+    result->set_coupling_point( csext->get_coupling_point() );
+    delete csext;
+  }
+  
+  delete_extension <FluxCalibratorExtension> (archive);
 }
 
 void smint::finalize ()

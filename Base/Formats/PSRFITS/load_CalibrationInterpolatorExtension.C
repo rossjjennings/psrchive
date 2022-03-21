@@ -61,6 +61,13 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
     cerr << "FITSArchive::load_CalibrationInterpolatorExtension type=" 
 	 << ext->get_type()->get_name() << endl;
 
+  // Get COUPLING (new in PSRFITS version 6.5)
+  string coupling = "BeforeBasis";
+  psrfits_read_key (fptr, "COUPLING", &coupling, coupling, verbose > 2);
+
+  auto point = fromstring<CalibratorStokes::CouplingPoint> (coupling);
+  ext->set_coupling_point (point);
+  
   // NPARAM
   unsigned nparam = 0;
   psrfits_read_key (fptr, "NPARAM", &nparam);

@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.4             '   / Header version 
+HDRVER  = '6.5             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -407,6 +407,7 @@ TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = CAL_POLN             / name of this binary table extension
 NCHAN   =                    * / Nr of channels in flux cal file
+COUPLING= '                  ' / Point at which reference signal is coupled
 #
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
@@ -482,6 +483,7 @@ TFIELDS =                    * / Number of fields per row
 #
 EXTNAME = PCMINTER             / Name of this binary table extension
 CAL_MTHD= '                  ' / Name of FEEDPAR model
+COUPLING= '                  ' / Point at which reference signal is coupled
 NPARAM  =                    * / Number of model parameters interpolated (V)
 NCHAN_IN=                    * / Number of frequency channels in input data (V)
 NSUB_IN =                    * / Number of epochs in input data (V)

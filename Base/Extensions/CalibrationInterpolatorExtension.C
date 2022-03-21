@@ -37,6 +37,8 @@ CalibrationInterpolatorExtension::operator= (const CalibrationInterpolatorExtens
 
   type = copy.type->clone();
 
+  coupling_point = copy.coupling_point;
+  
   reference_epoch = copy.reference_epoch;
   minimum_epoch = copy.minimum_epoch;
   maximum_epoch = copy.maximum_epoch;
