@@ -6,10 +6,10 @@
  *
  ***************************************************************************/
 
-// psrchive/More/Polarimetry/Pulsar/InterpolatedCalibrator.h
+// psrchive/More/Polarimetry/Pulsar/CalibrationInterpolator.h
 
-#ifndef __InterpolatedCalibrator_H
-#define __InterpolatedCalibrator_H
+#ifndef __CalibrationInterpolator_H
+#define __CalibrationInterpolator_H
 
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/CalibrationInterpolatorExtension.h"
@@ -19,15 +19,15 @@ namespace Pulsar {
   class CalibratorStokes;
 
   //! A calibration solution that spans a finite bandwidth and time
-  class InterpolatedCalibrator : public PolnCalibrator {
+  class CalibrationInterpolator : public PolnCalibrator {
     
   public:
 
     //! Construct from a solution with a CalibrationInterpolatorExtension
-    InterpolatedCalibrator (Archive* data);
+    CalibrationInterpolator (Archive* data);
 
     //! Destructor
-    ~InterpolatedCalibrator ();
+    ~CalibrationInterpolator ();
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
