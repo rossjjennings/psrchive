@@ -132,8 +132,14 @@ namespace Pulsar {
       float get_total_chi_squared () const { return total_chi_squared; }
       
       unsigned ndat_input;
+      unsigned get_ndat_input () const { return ndat_input; }
+      
       unsigned ndat_flagged_before;
+      unsigned get_ndat_flagged_before () const { return ndat_flagged_before; }
+      
       unsigned ndat_flagged_after;
+      unsigned get_ndat_flagged_after () const { return ndat_flagged_after; }
+      
       std::string interpolator;
     };
 
