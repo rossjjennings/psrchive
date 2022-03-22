@@ -57,12 +57,14 @@ static string source;
 static double folding_period = 0.0;
 
 static vector< string > names;
+static vector< double > periods;
 static vector< sky_coord > coordinates;
 static vector< Vector<3,double> > susceptibility;
 
 void mtm_analysis (PolnProfileFit::Analysis& analysis,
 		   PolnProfileFit& fit,
-		   const std::string& name)
+		   const std::string& name,
+                   double period)
 {
   if (verbose)
     cerr << "mtm: set fit" << endl;
@@ -138,6 +140,7 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
 
     susceptibility.push_back( boost.dotvarphi() );
     names.push_back( name );
+    periods.push_back( period );
 
     double delshift = boost.delvarphi_delbeta ();
 
@@ -328,7 +331,7 @@ int main (int argc, char *argv[])
 
     folding_period = arch->get_Integration(0)->get_folding_period();
 
-    mtm_analysis (analysis, fit, arch->get_source());
+    mtm_analysis (analysis, fit, arch->get_source(), folding_period);
   }
   catch (Error& error) {
     cerr << "Error processing " << filenames[i] << endl;
@@ -349,6 +352,7 @@ int main (int argc, char *argv[])
   {
     ofstream out ( "susceptibility_correlation.txt" );
 
+    out << "# psrA psrB normA normB angsep corrcoeff covar(s^2)" << endl;
     for (unsigned i=0; i<susceptibility.size(); i++)
     {
       Vector<3,double> A = susceptibility[i];
@@ -364,7 +368,8 @@ int main (int argc, char *argv[])
 	out << names[i] << " " << names[j] << " "
 	    << Anorm << " " << Bnorm << " "
 	    << Acoord.angularSeparation(Bcoord).getDegrees() << " "
-	    << A*B/(Anorm*Bnorm) << endl;
+	    << A*B/(Anorm*Bnorm) << " "
+            << A*B * periods[i] * periods[j] << endl;
       }
     }
   }
