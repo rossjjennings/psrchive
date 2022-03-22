@@ -114,8 +114,6 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
   
   for (unsigned iparam = 0; iparam < nparam; iparam++)
   {
-    cerr << "load interpolation row=" << iparam+1 << endl;
-    
     auto param = new CalibrationInterpolatorExtension::Parameter;
     ::load (fptr, iparam+1, param);
     ext->add_parameter (param);
