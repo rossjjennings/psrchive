@@ -5,17 +5,17 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/InterpolatedCalibrator.h"
+#include "Pulsar/CalibrationInterpolator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 
 using namespace std;
 
-Pulsar::InterpolatedCalibrator::InterpolatedCalibrator (Archive* data)
+Pulsar::CalibrationInterpolator::CalibrationInterpolator (Archive* data)
 {
   interpolator = data->get<CalibrationInterpolatorExtension> ();
   if (!interpolator)
-    throw Error (InvalidParam, "InterpolatedCalibrator ctor",
+    throw Error (InvalidParam, "CalibrationInterpolator ctor",
 		 data->get_filename()
 		 + " does not contain a CalibrationInterpolatorExtension");
 
@@ -34,7 +34,7 @@ Pulsar::InterpolatedCalibrator::InterpolatedCalibrator (Archive* data)
   }
 
   if (!has_feedpar)
-    throw Error (InvalidParam, "InterpolatedCalibrator ctor",
+    throw Error (InvalidParam, "CalibrationInterpolator ctor",
 		 "CalibrationInterpolatorExtension has no feed parameters");
 
   poln_extension = feedpar = data->getadd<PolnCalibratorExtension> ();
@@ -53,16 +53,16 @@ Pulsar::InterpolatedCalibrator::InterpolatedCalibrator (Archive* data)
 
 
 //! Destructor
-Pulsar::InterpolatedCalibrator::~InterpolatedCalibrator ()
+Pulsar::CalibrationInterpolator::~CalibrationInterpolator ()
 {
 }
 
-MJD Pulsar::InterpolatedCalibrator::get_epoch () const
+MJD Pulsar::CalibrationInterpolator::get_epoch () const
 {
   return interpolator->get_reference_epoch();
 }
 
-void Pulsar::InterpolatedCalibrator::calculate_transformation ()
+void Pulsar::CalibrationInterpolator::calculate_transformation ()
 {
 
   unsigned target_nchan = observation_nchan;
@@ -77,7 +77,7 @@ void Pulsar::InterpolatedCalibrator::calculate_transformation ()
   for (unsigned ichan=0; ichan<target_nchan; ++ichan) try
   {
     if (verbose > 2)
-      cerr << "Pulsar::InterpolatedCalibrator::calculate_transformation"
+      cerr << "Pulsar::CalibrationInterpolator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
 
@@ -85,13 +85,13 @@ void Pulsar::InterpolatedCalibrator::calculate_transformation ()
   catch (Error& error)
   {
     if (verbose > 1)
-      cerr << "Pulsar::InterpolatedCalibrator::calculate_transformation"
+      cerr << "Pulsar::CalibrationInterpolator::calculate_transformation"
 	" error ichan=" << ichan << error << endl;
 
   }
 
   if (verbose > 2)
-    cerr << "Pulsar::InterpolatedCalibrator::calculate_transformation exit"
+    cerr << "Pulsar::CalibrationInterpolator::calculate_transformation exit"
 	 << endl;
 }
 
