@@ -52,27 +52,26 @@ void CrossValidatedSmooth2D::remove_iqr_outliers
   double max_threshold = Q3.val + iqr_threshold * IQR;
   double min_threshold = Q1.val - iqr_threshold * IQR;
   
-  unsigned idat = 0;
+  nflagged_iqr = 0;
   unsigned count = 0;
-  while (idat < dat_x.size())
+  for (unsigned idat=0; idat < ndat; idat++)
   {
+    if (dat_y[idat].var <= 0)
+      continue;
+
+    count ++;
     double val = dat_y[idat].val;
     
     if (val > max_threshold || val < min_threshold)
     {
       // cerr << "IQR outlier idat=" << idat << " val=" << val << endl;
       dat_y[idat].var = 0.0;
-      count ++;
+      nflagged_iqr++;
     }
-    
-    // else
-    idat ++;
   }
-
-  nflagged_iqr = count;
   
   cerr << "CrossValidatedSmooth2D::remove_iqr_outliers"
-    " removed " << count << " outliers out of " << ndat << " values" << endl;
+    " flagged " << nflagged_iqr << " out of " << count << " values" << endl;
 }
 
 void CrossValidatedSmooth2D::fit ( vector< pair<double,double> >& dat_x,
@@ -113,10 +112,8 @@ void CrossValidatedSmooth2D::remove_gof_outliers
   
   for (unsigned idat=0; idat < ndat; idat++)
   {
-    if (gof_count[idat] == 0)
-      continue;
-
-    gof_tot[idat] /= gof_count[idat];
+    if (gof_count[idat] > 0)
+      gof_tot[idat] /= gof_count[idat];
   }
 
   vector<double> tmp = gof_tot;
@@ -135,25 +132,29 @@ void CrossValidatedSmooth2D::remove_gof_outliers
   // cerr << "outlier threshold=" << threshold << endl;
   
   std::ofstream os ("gof.dat");
+  
+  unsigned count = 0;
+  nflagged_gof = 0;
 
-  unsigned outliers = 0;
-    
   for (unsigned idat=0; idat < ndat; idat++)
   {
     os << tmp[idat] << endl;
+
+    if (gof_count[idat] == 0)
+      continue;
+
+    count ++;
     
     if (threshold && gof_tot[idat] > threshold)
     {
       // cerr << "GOF outlier idat=" << idat << " gof=" << gof_tot[idat] << endl;
       dat_y[idat].var = 0.0;
-      outliers ++;
+      nflagged_gof ++;
     }
   }
 
-  nflagged_gof = outliers;
-  
   cerr << "CrossValidatedSmooth2D::remove_gof_outliers"
-    " removed " << outliers << " outliers out of " << ndat << " values" << endl;
+    " flagged " << nflagged_gof << " out of " << count << " values" << endl;
 }
 
 double CrossValidatedSmooth2D::get_mean_gof
