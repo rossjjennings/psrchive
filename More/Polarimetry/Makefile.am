@@ -38,6 +38,7 @@ nobase_include_HEADERS = \
 	Pulsar/InputDataReport.h \
         Pulsar/Instrument.h \
 	Pulsar/InstrumentInfo.h \
+	Pulsar/InterpolatedCalibrator.h \
         Pulsar/IonosphereCalibrator.h \
         Pulsar/IRIonosphere.h \
 	Pulsar/IXRInfo.h \
@@ -147,10 +148,11 @@ libPolarimetry_la_SOURCES = \
 	FourthMomentStats.C \
 	FrontendCorrection.C \
         HybridCalibrator.C \
+	InputDataReport.C \
         Instrument.C \
         InstrumentInfo.C \
         Integration_defaraday.C \
-	InputDataReport.C \
+	InterpolatedCalibrator.C \
         IonosphereCalibrator.C \
         IRIonosphere.C \
 	IXRInfo.C \
