@@ -1303,8 +1303,10 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     }
   }
 
+#if _DEBUG
   cerr << "channel bounds min=" << min_chan << " max=" << max_chan << endl;
   cerr << "frequency xmin=" << xmin << " xmax=" << xmax << endl;
+#endif
 
   if (result)
   {
@@ -1428,7 +1430,7 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     ifstream in (filename);
     in >> param->interpolator;
 
-    cerr << "interpolator nchar=" << param->interpolator.size() << endl;
+    // cerr << "interpolator nchar=" << param->interpolator.size() << endl;
   }
   
   if (spline_filename != "")
