@@ -259,7 +259,7 @@ int main (int argc, char** argv) try {
 
     // get all of the fluxcal on/off observations and sort them
     Pulsar::Database::Criteria criteria;
-    vector<Pulsar::Database::Entry> entries;
+    vector<const Pulsar::Database::Entry*> entries;
 
     criteria = database->criteria(Pulsar::Database::any, Signal::FluxCalOn);
     database->all_matching (criteria, entries);

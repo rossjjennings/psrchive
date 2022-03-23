@@ -84,18 +84,27 @@ CalibrationInterpolator::~CalibrationInterpolator ()
 
 template<typename C>
 void set_params (C* container,
-	  std::map< unsigned, Reference::To<SplineSmooth2D> >& params,
-	  double x, double y)
+		 std::map< unsigned, Reference::To<SplineSmooth2D> >& params,
+		 unsigned ichan,
+		 double x, double y)
 {
   std::pair<double,double> coord (x,y);
   
   for (auto param: params)
   {
-    if (param.first >= container->get_nparam())
+    unsigned iparam = param.first;
+    
+    if (iparam >= container->get_nparam())
       throw Error (InvalidParam, "CalibrationInterpolator::set_params",
-		   "iparam=%u nparam%u", param.first, container->get_nparam());
+		   "iparam=%u nparam%u", iparam, container->get_nparam());
 
-    double value = param.second->evaluate (coord);
+    SplineSmooth2D* spline = param.second;
+    double value = spline->evaluate (coord);
+
+    // To-Do: fit 2-D splines to bootstrap (replacement) errors
+    Estimate<float> estimate (value, 0.001);
+
+    container->set_Estimate (iparam, ichan, estimate);
   }
 }
 	  
@@ -143,14 +152,14 @@ bool CalibrationInterpolator::update (const Integration* subint)
     {
       feedpar->set_valid (ichan, valid);
       if (valid)
-	set_params (feedpar.get(), feedpar_splines, x0, freq - ref_freq);
+	set_params (feedpar.get(), feedpar_splines, ichan, x0, freq - ref_freq);
     }
     
     if (calpoln)
     {
       calpoln->set_valid (ichan, valid);
       if (valid)
-	set_params (calpoln.get(), calpoln_splines, x0, freq - ref_freq);
+	set_params (calpoln.get(), calpoln_splines, ichan, x0, freq - ref_freq);
     }
 
   }

@@ -12,6 +12,7 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
 
+#include "Pulsar/CalibrationInterpolatorExtension.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/FeedExtension.h"
@@ -34,6 +35,7 @@
 
 #include "dirutil.h"
 #include "strutil.h"
+#include "pairutil.h"
 
 #include <unistd.h> 
 #include <errno.h>
@@ -41,13 +43,13 @@
 using namespace std;
 using namespace Pulsar;
 
-bool Pulsar::Database::cache_last_cal = true;
-bool Pulsar::Database::match_verbose = false;
+bool Database::cache_last_cal = true;
+bool Database::match_verbose = false;
 
 
 /*! By default, the long time scale is set to four weeks. */
 Pulsar::Option<double> 
-Pulsar::Database::long_time_scale
+Database::long_time_scale
 (
  "Database::long_time_scale", 60.0 * 24 * 28,
 
@@ -61,7 +63,7 @@ Pulsar::Database::long_time_scale
 
 /*! By default, the short time scale is set to two hours. */
 Pulsar::Option<double> 
-Pulsar::Database::short_time_scale
+Database::short_time_scale
 (
  "Database::short_time_scale", 120.0,
 
@@ -75,7 +77,7 @@ Pulsar::Database::short_time_scale
 
 /*! By default, the maximum angular separation is 5 degrees */
 Pulsar::Option<double> 
-Pulsar::Database::max_angular_separation 
+Database::max_angular_separation 
 (
  "Database::max_angular_separation", 5.0,
 
@@ -88,7 +90,7 @@ Pulsar::Database::max_angular_separation
 
 /*! By default, the maximum centre frequency difference is 1 Hz */
 Pulsar::Option<double> 
-Pulsar::Database::max_centre_frequency_difference
+Database::max_centre_frequency_difference
 (
  "Database::max_centre_frequency_difference", 1.0,
 
@@ -101,7 +103,7 @@ Pulsar::Database::max_centre_frequency_difference
 
 /*! By default, the maximum bandwidth difference is 1 Hz */
 Pulsar::Option<double> 
-Pulsar::Database::max_bandwidth_difference
+Database::max_bandwidth_difference
 (
  "Database::max_bandwidth_difference", 1.0,
 
@@ -113,168 +115,247 @@ Pulsar::Database::max_bandwidth_difference
 
 
 /*! This null parameter is intended only to improve code readability */
-const Pulsar::Archive* Pulsar::Database::any = 0;
+const Pulsar::Archive* Database::any = 0;
 
 // //////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Database::Entry
+// Database::Entry
 //
 // filename type posn MJD bandwidth cfrequency nchan instrument
 //
 
 //! Initialise all variables
-void Pulsar::Database::Entry::init ()
+void Database::Entry::init ()
 {
   obsType = Signal::Unknown;
 
   bandwidth = 0.0;
   frequency = 0.0; 
-  nchan = 0; 
   
   receiver = "unset";
   instrument = "unset";
   filename = "unset";
 }
 
-Pulsar::Database::Entry::Entry ()
+void Database::StaticEntry::init ()
 {
-  init ();
-}
-
-Pulsar::Database::Entry::Entry (const std::string& str)
-{
-  load (str);
+  Entry::init ();
+  nchan = 0; 
 }
 
 //! Construct from a Pulsar::Archive
-Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
+Database::Entry::Entry (const Pulsar::Archive* arch)
 {
   init ();
 
-  obsType = arch.get_type();
+  if (!arch)
+    return;
+  
+  obsType = arch->get_type();
 
-  const Pulsar::Backend* backend = arch.get<Backend>();
+  const Pulsar::Backend* backend = arch->get<Backend>();
   if (!backend)
-    throw Error (InvalidParam, "Pulsar::Database::Entry",
+    throw Error (InvalidParam, "Database::Entry",
 		 "Archive has no Backend Extension");
 
-  const Pulsar::Receiver* receiver_ext = arch.get<Receiver>();
+  const Pulsar::Receiver* receiver_ext = arch->get<Receiver>();
   if (!receiver_ext)
-    throw Error (InvalidParam, "Pulsar::Database::Entry",
+    throw Error (InvalidParam, "Database::Entry",
 		 "Archive has no Receiver Extension");
 
+  calType = 0;
+  
   if (obsType == Signal::Calibrator)
   {
-    const CalibratorExtension* ext = arch.get<CalibratorExtension>();
+    {
+      auto ext = arch->get<CalibratorExtension>();
+      if (ext)
+	calType = ext->get_type();
+    }
 
-    if (!ext)
-      throw Error (InvalidState, "Pulsar::Database::Entry",
+    {
+      auto ext = arch->get<CalibrationInterpolatorExtension>();
+      if (ext)
+	calType = ext->get_type();
+    }
+    
+    if (!calType)
+      throw Error (InvalidState, "Database::Entry",
 		   "Archive::get_type==Signal::Calibrator but"
-		   " no CalibratorExtension");
-
-    calType = ext->get_type();
-    time = ext->get_epoch();
-  }
-  else
-  {
-    unsigned nsubint = arch.get_nsubint();
-
-    if (nsubint == 0)
-      throw Error (InvalidParam, "Pulsar::Database::Entry",
-		   "Archive has no Integrations");
-
-    // assign the midpoint epoch to the observation
-    MJD epoch1 = arch.get_Integration(0)->get_epoch();
-    MJD epochN = arch.get_Integration(nsubint-1)->get_epoch();
-
-    time = (epoch1 + epochN) / 2;
+		   " neither CalibratorExtension"
+		   " nor CalibrationInterpolatorExtension");
   }
 
-  position = arch.get_coordinates();
-  bandwidth = arch.get_bandwidth();
-  frequency = arch.get_centre_frequency();
-  nchan = arch.get_nchan();
-  filename = arch.get_filename();
+  position = arch->get_coordinates();
+  bandwidth = arch->get_bandwidth();
+  frequency = arch->get_centre_frequency();
+  filename = arch->get_filename();
 
   instrument = backend->get_name();
   receiver = receiver_ext->get_name();
 }
 
+//! Construct from a Pulsar::Archive
+Database::StaticEntry::StaticEntry (const Pulsar::Archive* arch)
+  : Entry (arch)
+{
+  if (!arch)
+    return;
+  
+  nchan = arch->get_nchan();
+
+  if (obsType == Signal::Calibrator)
+  {
+    const CalibratorExtension* ext = arch->get<CalibratorExtension>();
+    time = ext->get_epoch();
+  }
+  else
+  {
+    unsigned nsubint = arch->get_nsubint();
+
+    if (nsubint == 0)
+      throw Error (InvalidParam, "Database::Entry",
+		   "Archive has no Integrations");
+
+    // assign the midpoint epoch to the observation
+    MJD epoch1 = arch->get_Integration(0)->get_epoch();
+    MJD epochN = arch->get_Integration(nsubint-1)->get_epoch();
+
+    time = (epoch1 + epochN) / 2;
+  }
+}
+
+//! Construct from a Pulsar::Archive
+Database::InterpolatorEntry::InterpolatorEntry (const Pulsar::Archive* arch)
+  : Entry (arch)
+{
+  if (!arch)
+    return;
+
+  auto interpolator = arch->get<const CalibrationInterpolatorExtension>();
+  if (!interpolator)
+    throw Error (InvalidParam, "Database::InterpolatorEntry ctor",
+		 arch->get_filename() +
+		 " does not contain a CalibrationInterpolatorExtension");
+
+  start_time = interpolator->get_minimum_epoch();
+  end_time = interpolator->get_maximum_epoch();
+}
+
 //! Destructor
-Pulsar::Database::Entry::~Entry ()
+Database::Entry::~Entry ()
 {
   
 }
 
+
+Database::Entry* Database::Entry::create (const Archive* archive)
+{
+  if (archive->get<const CalibrationInterpolatorExtension>())
+    return new InterpolatorEntry (archive);
+  else
+    return new StaticEntry (archive);
+}
+
+
 // load from ascii string
-void Pulsar::Database::Entry::load (const string& str) try
+Database::Entry* Database::Entry::load (const string& str) try
 {
   const char* whitespace = " \t\n";
   string line = str;
 
   // /////////////////////////////////////////////////////////////////
   // filename
-  filename = stringtok (line, whitespace);
+  string filename = stringtok (line, whitespace);
   
   // /////////////////////////////////////////////////////////////////
   // type
   string typestr = stringtok (line, whitespace);
 
-  try
-  {
-    obsType = Signal::string2Source(typestr);
-  }
-  catch (Error& e)
-  {
-    obsType = Signal::Calibrator;
-
-    // cerr << "Pulsar::Database::Entry::load name=" << typestr << endl;
-    calType = Calibrator::Type::factory (typestr);
-    // cerr << "Pulsar::Database::Entry::load type=" << calType->get_name() << endl;
-  }
-
   // /////////////////////////////////////////////////////////////////
   // RA DEC
   string coordstr = stringtok (line, whitespace);
   coordstr += " " + stringtok (line, whitespace);
-  position = sky_coord (coordstr.c_str());
 
   // /////////////////////////////////////////////////////////////////
   // MJD
   string mjdstr  = stringtok (line, whitespace);
-  time = MJD (mjdstr);
 
   // /////////////////////////////////////////////////////////////////
-  // bandwidth, frequency, number of channels
-  int s = sscanf (line.c_str(), "%lf %lf %d", &bandwidth, &frequency, &nchan);
-  if (s != 3)
-    throw Error (FailedSys, "Pulsar::Database::Entry::load",
-                 "sscanf(" + line + ") != 3");
+  // bandwidth
+  string bwstr  = stringtok (line, whitespace);
 
-  stringtok (line, whitespace);
-  stringtok (line, whitespace);
-  stringtok (line, whitespace);
+  // /////////////////////////////////////////////////////////////////
+  // frequency
+  string freqstr  = stringtok (line, whitespace);
+
+  Reference::To<Entry> entry;
+  
+  if (mjdstr.find ("-") != string::npos)
+  {
+    cerr << "Database::Entry::load new InterpolatorEntry "
+      "mjd range=" << mjdstr << endl;
+    
+    // the MJD string contains a range of MJDs; therefore
+    auto interpolator_entry = new InterpolatorEntry;
+
+    entry = interpolator_entry;
+  }
+  else
+  {
+    cerr << "Database::Entry::load new StaticEntry "
+      "mjd=" << mjdstr << endl;
+    
+    auto static_entry = new StaticEntry;
+    static_entry->time = MJD (mjdstr);
+
+    // /////////////////////////////////////////////////////////////////
+    // frequency
+    string nchan = stringtok (line, whitespace);
+    static_entry->nchan = fromstring<unsigned> (nchan);
+    entry = static_entry;
+  }
+
+  entry->filename = filename;
+    
+  try
+  {
+    entry->obsType = Signal::string2Source(typestr);
+  }
+  catch (Error& e)
+  {
+    entry->obsType = Signal::Calibrator;
+
+    // cerr << "Database::Entry::load name=" << typestr << endl;
+    entry->calType = Calibrator::Type::factory (typestr);
+    // cerr << "Database::Entry::load type=" << calType->get_name() << endl;
+  }
+    
+  entry->position = sky_coord (coordstr.c_str());
+  entry->bandwidth = fromstring<double> (bwstr);
+  entry->frequency = fromstring<double> (freqstr);
 
   // /////////////////////////////////////////////////////////////////
   // instrument
-  instrument = stringtok (line, whitespace);
+  entry->instrument = stringtok (line, whitespace);
 
   // /////////////////////////////////////////////////////////////////
   // receiver
-  receiver = stringtok (line, whitespace);
+  entry->receiver = stringtok (line, whitespace);
 
-  if (receiver.length() == 0)
-    throw Error (InvalidParam, "Pulsar::Database::Entry::load",
-                 "Could not parse '%s'");
+  if (entry->receiver.length() == 0)
+    throw Error (InvalidParam, "Database::Entry::load",
+                 "Could not parse '"+str+"'");
 
+  return entry.release();
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Database::Entry::load";
+  throw error += "Database::Entry::load";
 }
 
 // unload to a string
-void Pulsar::Database::Entry::unload (string& retval)
+void Database::Entry::unload (string& retval)
 {
   retval = filename + " ";
   
@@ -287,15 +368,42 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval += position.getRaDec().getHMSDMS();
 
   retval += " ";
-  retval += time.printdays(15);
+  retval += get_time_str ();
 
-  retval += stringprintf (" %lf %lf %d", bandwidth, frequency, nchan);
+  retval += " ";
+  retval += tostring(bandwidth);
+
+  retval += " ";
+  retval += tostring(frequency);
+
+  retval += " ";
+  retval += get_nchan_str ();
 
   retval += " " + instrument + " " + receiver;
 }
 
+string Database::StaticEntry::get_time_str () const
+{
+  return time.printdays(15);
+}
+
+string Database::InterpolatorEntry::get_time_str () const
+{
+  return start_time.printdays(4) + "-" + end_time.printdays(4);
+}
+
+string Database::StaticEntry::get_nchan_str () const
+{
+  return tostring(nchan);
+}
+
+string Database::InterpolatorEntry::get_nchan_str () const
+{
+  return "";
+}
+
 //! Returns the full pathname of the Entry filename
-string Pulsar::Database::Entry::get_filename () const
+string Database::Entry::get_filename () const
 {
   return filename;
 }
@@ -315,42 +423,95 @@ namespace Pulsar
   }
 }
 
-bool Pulsar::operator == (const Database::Entry& a, const Database::Entry& b)
+
+bool Database::Entry::equals (const Entry* that) const
 {
-  return
-    a.obsType == b.obsType &&
-    same( a.calType, b.calType ) &&
-    a.bandwidth == b.bandwidth &&
-    a.frequency == b.frequency &&
-    a.instrument == b.instrument &&
-    a.receiver == b.receiver &&
-    fabs( (a.time - b.time).in_seconds() ) < 10.0 &&
-    a.position.angularSeparation(b.position).getDegrees() < 0.1;
+  cerr << "Database::Entry::equals this=" << (void*) this << endl;
+    
+  return this->obsType == that->obsType &&
+    same( this->calType, that->calType ) &&
+    this->bandwidth == that->bandwidth &&
+    this->frequency == that->frequency &&
+    this->instrument == that->instrument &&
+    this->receiver == that->receiver &&
+    this->position.angularSeparation(that->position).getDegrees() < 0.1;
 }
 
-bool Pulsar::operator < (const Database::Entry& a, const Database::Entry& b)
-{ 
-  if (a.instrument < b.instrument)
+bool Database::StaticEntry::equals (const Entry* that) const
+{
+  cerr << "Database::StaticEntry::equals this=" << (void*) this << endl;
+
+  if (!Entry::equals (that))
+    return false;
+  
+  auto like = dynamic_cast<const StaticEntry*> (that);
+  if (!like)
+    return false;
+
+  cerr << "Database::StaticEntry::equals " << this->time << " " << like->time
+       << endl;
+  
+  return fabs( (this->time - like->time).in_seconds() ) < 10.0;
+}
+
+bool Database::InterpolatorEntry::equals (const Entry* that) const
+{
+  cerr << "Database::InterpolatorEntry::equals this=" << (void*) this << endl;
+
+  if (!Entry::equals (that))
+    return false;
+  
+  auto like = dynamic_cast<const InterpolatorEntry*> (that);
+  if (!like)
+    return false;
+
+  return
+    fabs( (this->start_time - like->start_time).in_seconds() ) < 10.0 &&
+    fabs( (this->end_time - like->end_time).in_seconds() ) < 10.0;
+}
+
+bool Database::Entry::less_than (const Entry* that) const
+{
+  if (this->instrument < that->instrument)
     return true;
-  else if (a.instrument > b.instrument) 
+  else if (this->instrument > that->instrument) 
     return false;
 
-  if (a.receiver < b.receiver)
+  if (this->receiver < that->receiver)
     return true;
-  else if (a.receiver > b.receiver) 
+  else if (this->receiver > that->receiver) 
     return false;
 
-  if (a.frequency < b.frequency)
+  if (this->frequency < that->frequency)
     return true;
-  else if (a.frequency > b.frequency) 
+  else if (this->frequency > that->frequency) 
     return false;
 
-  if (a.bandwidth < b.bandwidth)
-    return true; 
-  else if (a.bandwidth > b.bandwidth)
-    return false;
+  return this->bandwidth < that->bandwidth;
+}
 
-  return a.time < b.time;
+bool Database::StaticEntry::less_than (const Entry* that) const
+{
+  if (Entry::less_than (that))
+    return true;
+  
+  auto like = dynamic_cast<const StaticEntry*> (that);
+  if (like)
+    return this->time < like->time;
+
+  return false;
+}
+
+bool Database::InterpolatorEntry::less_than (const Entry* that) const
+{
+  if (Entry::less_than (that))
+    return true;
+  
+  auto like = dynamic_cast<const InterpolatorEntry*> (that);
+  if (like)
+    return this->start_time < like->start_time;
+
+  return false;
 }
 
 ostream& Pulsar::operator << (ostream& os, Database::Sequence sequence)
@@ -398,7 +559,7 @@ istream& Pulsar::operator >> (istream& is, Database::Sequence& sequence)
 
 
 
-Pulsar::Database::Criteria::Criteria ()
+Database::Criteria::Criteria ()
 {
   minutes_apart = short_time_scale;
   deg_apart  = max_angular_separation;
@@ -418,8 +579,9 @@ Pulsar::Database::Criteria::Criteria ()
   diff_degrees = diff_minutes = 0;
 }
 
-void Pulsar::Database::Criteria::no_data ()
+void Database::Criteria::no_data ()
 {
+  entry = new StaticEntry;
   check_obs_type    = true;
   check_receiver    = false;
   check_instrument  = false;
@@ -433,17 +595,17 @@ void Pulsar::Database::Criteria::no_data ()
 bool freq_close (double f1, double f2)
 {
   // bandwidth is in MHz; maximum difference is in Hz
-  return fabs(f1 - f2)*1e6 < Pulsar::Database::max_centre_frequency_difference;
+  return fabs(f1 - f2)*1e6 < Database::max_centre_frequency_difference;
 }
 
 bool bandwidth_close (double f1, double f2)
 {
   // bandwidth is in MHz; maximum difference is in Hz
-  return fabs(f1 - f2)*1e6 < Pulsar::Database::max_bandwidth_difference;
+  return fabs(f1 - f2)*1e6 < Database::max_bandwidth_difference;
 }
 
-bool Pulsar::Database::Criteria::compare_times (const MJD& want,
-						 const MJD& have) const
+bool Database::Criteria::compare_times (const MJD& want,
+					const MJD& have) const
 {
   diff_minutes = (have - want).in_minutes();
 
@@ -468,9 +630,18 @@ bool Pulsar::Database::Criteria::compare_times (const MJD& want,
       || (diff_minutes < minutes_apart && diff_minutes >= 0);
 }
 
+bool Database::Criteria::bracketed_time (const MJD& want,
+					 const pair<MJD,MJD>& have) const
+{
+  match_report += "\n\t" "range="
+    + tostring(have.first) + "-" + tostring(have.second) + " ... ";
 
-bool Pulsar::Database::Criteria::compare_coordinates (const sky_coord& want,
-						       const sky_coord& have) 
+  return want > have.first && want < have.second;
+}
+
+
+bool Database::Criteria::compare_coordinates (const sky_coord& want,
+					      const sky_coord& have) 
   const
 {
   diff_degrees = have.angularSeparation(want).getDegrees();
@@ -488,10 +659,10 @@ std::ostream& operator<< (std::ostream& ostr, const Reference::To<const Calibrat
 }
 
 //! returns true if this matches observation parameters
-bool Pulsar::Database::Criteria::match (const Entry& have) const try
+bool Database::Criteria::match (const Entry* have) const try
 {
   if (Calibrator::verbose > 1)
-    cerr << "Pulsar::Database::Criteria::match" << endl;
+    cerr << "Database::Criteria::match" << endl;
  
   match_report = "";
   match_count = 0;
@@ -499,40 +670,51 @@ bool Pulsar::Database::Criteria::match (const Entry& have) const try
 
   if (check_obs_type)
   {
-    compare( "obsType", entry.obsType, have.obsType );
+    compare( "obsType", entry->obsType, have->obsType );
     
-    if (entry.obsType == Signal::Calibrator)
-      compare( "calType", entry.calType, have.calType, &Pulsar::same );
+    if (entry->obsType == Signal::Calibrator)
+      compare( "calType", entry->calType, have->calType, &Pulsar::same );
   }
 
   if (check_receiver)
-    compare( "receiver", entry.receiver, have.receiver );
+    compare( "receiver", entry->receiver, have->receiver );
 
   if (check_instrument)
-    compare( "instrument", entry.instrument, have.instrument );
+    compare( "instrument", entry->instrument, have->instrument );
 
   if (check_frequency)
-    compare( "frequency", entry.frequency, have.frequency, &freq_close );
+    compare( "frequency", entry->frequency, have->frequency, &freq_close );
 
   if (check_bandwidth)
-    compare( "bandwidth", entry.bandwidth, have.bandwidth, &bandwidth_close );
+    compare( "bandwidth", entry->bandwidth, have->bandwidth, &bandwidth_close );
 
-  if (check_time)
+  auto static_entry = dynamic_cast<const StaticEntry*> (have);
+  
+  if (static_entry && check_time)
   {
     Functor< bool (MJD, MJD) >
       predicate (this, &Criteria::compare_times);
-    compare( "time", entry.time, have.time, predicate );
+    compare( "time", entry->time, static_entry->time, predicate );
   }
 
+  auto interpolator = dynamic_cast<const InterpolatorEntry*> (have);
+  if (interpolator)
+  {
+    Functor< bool (MJD, pair<MJD,MJD>) >
+      predicate (this, &Criteria::bracketed_time);
+
+    pair<MJD,MJD> range (interpolator->start_time, interpolator->end_time);
+    compare( "time", entry->time, range, predicate );
+  }
+  
   if (check_coordinates)
   {
     Functor< bool (sky_coord, sky_coord) > 
       predicate (this, &Criteria::compare_coordinates);
-    compare( "position", entry.position, have.position, predicate );
+    compare( "position", entry->position, have->position, predicate );
   }
 
-
-  if (check_frequency_array)
+  if (static_entry && check_frequency_array)
   {
     // For now this assumes we can accurately recreate the original
     // freq arrays from nchan, bw, and freq.
@@ -540,7 +722,7 @@ bool Pulsar::Database::Criteria::match (const Entry& have) const try
     ChannelSubsetMatch chan_match;
 
     match_report += "channel subset ... ";
-    if (chan_match.match(have, entry))
+    if (chan_match.match(static_entry, entry))
     {
       match_report += "match";
       match_count ++;
@@ -553,7 +735,7 @@ bool Pulsar::Database::Criteria::match (const Entry& have) const try
   }
 
   if (Calibrator::verbose > 1 || match_verbose)
-    cerr << "Pulsar::Database::Criteria::match found \n\n"
+    cerr << "Database::Criteria::match found \n\n"
 	 << match_report << endl;
   
   return true;
@@ -561,30 +743,30 @@ bool Pulsar::Database::Criteria::match (const Entry& have) const try
 catch (bool f)
 {
   if (Calibrator::verbose > 1 || match_verbose)
-    cerr << "Pulsar::Database::Criteria::match not found \n\n"
+    cerr << "Database::Criteria::match not found \n\n"
 	 << match_report << endl;
   return f;
 }
 
 // //////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Database
+// Database
 //
-// A group of Pulsar::Database::Entry objects
+// A group of Database::Entry objects
 //
 
 //! Null constructor
-Pulsar::Database::Database ()
+Database::Database ()
 {
   path = "unset";
 }
 
-Pulsar::Database::Database (const string& filename)
+Database::Database (const string& filename)
 {
   path = "unset";
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database load " << filename << endl;
+    cerr << "Database load " << filename << endl;
 
   load (filename);
 }
@@ -609,7 +791,7 @@ string get_current_path ()
 }
 
 //! Construct a database from archives in a metafile
-Pulsar::Database::Database (const std::string& _path, 
+Database::Database (const std::string& _path, 
 			    const std::string& metafile)
 {
   vector <string> filenames;
@@ -618,27 +800,27 @@ Pulsar::Database::Database (const std::string& _path,
   string current = get_current_path ();
 
   if (chdir(_path.c_str()) != 0)
-    throw Error (FailedSys, "Pulsar::Database", "chdir("+_path+")");
+    throw Error (FailedSys, "Database", "chdir("+_path+")");
 
   path = get_current_path ();
 
   construct (filenames);
 
   if (chdir(current.c_str()) != 0)
-    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
+    throw Error (FailedSys, "Database", "chdir("+current+")");
 }
 
 
 /*! This constructor scans the given directory for calibrator files
   ending in the extensions specified in the second argument.
 */      
-Pulsar::Database::Database (const string& _path, 
+Database::Database (const string& _path, 
 			    const vector<string>& extensions)
 {
   string current = get_current_path ();
 
   if (chdir(_path.c_str()) != 0)
-    throw Error (FailedSys, "Pulsar::Database", "chdir("+_path+")");
+    throw Error (FailedSys, "Database", "chdir("+_path+")");
 
   path = get_current_path ();
 
@@ -651,17 +833,17 @@ Pulsar::Database::Database (const string& _path,
   dirglobtree (&filenames, "", patterns);
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database " << filenames.size() 
+    cerr << "Database " << filenames.size() 
          << " calibrator files found" << endl;
 
   construct (filenames);
   
   if (chdir(current.c_str()) != 0)
-    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
+    throw Error (FailedSys, "Database", "chdir("+current+")");
 
 }
 
-void Pulsar::Database::construct (const vector<string>& filenames)
+void Database::construct (const vector<string>& filenames)
 {
   ModifyRestore<bool> mod (Profile::no_amps, true);
 
@@ -673,39 +855,39 @@ void Pulsar::Database::construct (const vector<string>& filenames)
       continue;
 
     if (Calibrator::verbose > 1)
-      cerr << "Pulsar::Database loading "
+      cerr << "Database loading "
 	   << filenames[ifile] << endl;
     
     newArch = Archive::load(filenames[ifile]);
     
     if (Calibrator::verbose > 1)
-      cerr << "Pulsar::Database create new Entry" << endl;
+      cerr << "Database create new Entry" << endl;
     
     add (newArch);
   }
   catch (Error& error)
   {
-    cerr << "Pulsar::Database error " << error.get_message() << endl;
+    cerr << "Database error " << error.get_message() << endl;
   }
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::construct "
+    cerr << "Database::construct "
          << entries.size() << " Entries" << endl; 
 }
 
 //! Destructor
-Pulsar::Database::~Database ()
+Database::~Database ()
 {
 }
 
 //! Loads an entire database from a file
-void Pulsar::Database::load (const string& dbase_filename)
+void Database::load (const string& dbase_filename)
 {
   string use_filename = expand (dbase_filename);
 
   FILE* fptr = fopen (use_filename.c_str(), "r");
   if (!fptr)
-    throw Error (FailedCall, "Pulsar::Database::load",
+    throw Error (FailedCall, "Database::load",
 		 "fopen (" + use_filename + ")");
 
   bool old_style = false;
@@ -717,9 +899,9 @@ void Pulsar::Database::load (const string& dbase_filename)
     rewind (fptr);
     scanned = fscanf (fptr, "Pulsar::Calibration::Database::path %s\n", temp);
     if (scanned)
-      cerr << "Pulsar::Database::load old database summmary file" << endl;
+      cerr << "Database::load old database summmary file" << endl;
     else
-      throw Error (InvalidParam, "Pulsar::Database::load",
+      throw Error (InvalidParam, "Database::load",
                    use_filename + " is not a database file");
     old_style = true;
   }
@@ -727,7 +909,7 @@ void Pulsar::Database::load (const string& dbase_filename)
   path = temp;
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::load setting path = " << path << endl;
+    cerr << "Database::load setting path = " << path << endl;
 
   unsigned count = 0;
 
@@ -736,58 +918,57 @@ void Pulsar::Database::load (const string& dbase_filename)
     parse = "Pulsar::Calibration::Database # of entries = %d\n";
 
   if ( fscanf (fptr, parse.c_str(), &count) < 1 )
-    cerr << "Pulsar::Database::load failed to read number of entries" << endl;
+    cerr << "Database::load failed to read number of entries" << endl;
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::loading " << count << " entries" << endl;
+    cerr << "Database::loading " << count << " entries" << endl;
 
-  Entry entry;
+  Entry* entry;
 
   while (fgets (temp, 4096, fptr)) try
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
+      cerr << "Database::load '"<< temp << "'" << endl;
 
-    entry.load (temp);
+    entry = Entry::load (temp);
     expand_filename (entry);
     add (entry);
   }
   catch (Error& error)
   {
-    cerr << "Pulsar::Database::load discarding entry:" << error << endl;
+    cerr << "Database::load discarding entry:" << error << endl;
   }
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::load " << entries.size() << " entries" <<endl;
+    cerr << "Database::load " << entries.size() << " entries" <<endl;
 
   fclose (fptr);
 }
-
-void Pulsar::Database::merge (const Database* other)
+void Database::merge (const Database* other)
 {
   for (unsigned ie=0; ie < other->entries.size(); ie++)
     add (other->entries[ie]);
 }
 
 //! Unloads entire database to file
-void Pulsar::Database::unload (const string& filename)
+void Database::unload (const string& filename)
 {
   FILE* fptr = fopen (filename.c_str(), "w");
   if (!fptr)
-    throw Error (FailedSys, "Pulsar::Database::unload" 
+    throw Error (FailedSys, "Database::unload" 
 		 "fopen (" + filename + ")");
   
-  fprintf (fptr, "Pulsar::Database::path %s\n", path.c_str());
-  fprintf (fptr, "Pulsar::Database # of entries = %u\n", 
+  fprintf (fptr, "Database::path %s\n", path.c_str());
+  fprintf (fptr, "Database # of entries = %u\n", 
 	   (unsigned)entries.size());
 
   string out;
   for (unsigned ie=0; ie<entries.size(); ie++)
   {
-    Entry temp = entries[ie];
+    Entry* temp = entries[ie];
 
     shorten_filename (temp);
-    temp.unload(out);
+    temp->unload(out);
 
     fprintf (fptr, "%s\n", out.c_str());
   }
@@ -795,60 +976,56 @@ void Pulsar::Database::unload (const string& filename)
 }
 
 //! Add the given Archive to the database
-void Pulsar::Database::add (const Pulsar::Archive* archive)
+void Database::add (const Pulsar::Archive* archive)
 {
   if (!archive)
-    throw Error (InvalidParam, "Pulsar::Database::add Archive",
+    throw Error (InvalidParam, "Database::add Archive",
 		 "null Archive*");
   try
   {
-    Entry entry (*archive);
+    Entry* entry = Entry::create (archive);
     expand_filename (entry);
     add (entry);
   }
   catch (Error& error)
   {
-    throw error += "Pulsar::Database::add Archive";
+    throw error += "Database::add Archive";
   }
 }
 
-void Pulsar::Database::expand_filename (Entry& entry)
+void Database::expand_filename (Entry* entry)
 {
   if (path.empty())
     return;
 
-  entry.filename = get_filename (entry);
+  entry->filename = get_filename (entry);
 }
 
-void Pulsar::Database::shorten_filename (Entry& entry)
+void Database::shorten_filename (Entry* entry)
 {
   if (path.empty())
     return;
 
-  if (entry.filename.substr(0, path.length()) == path)
-    entry.filename.erase (0, path.length()+1);
+  if (entry->filename.substr(0, path.length()) == path)
+    entry->filename.erase (0, path.length()+1);
 }
 
 //! Add the given Archive to the database
-void Pulsar::Database::add (const Entry& entry) try
+void Database::add (Entry* entry) try
 {
-  if (entry.time == 0.0)
-    throw Error (InvalidParam, "Pulsar::Database::add Entry",
-		 entry.filename + " has epoch = 0 (MJD)");
-
   for (unsigned ie=0; ie < entries.size(); ie++) 
   {
-    if (entries[ie].filename == entry.filename)
+    if (entries[ie]->filename == entry->filename)
     {
-      cerr << "Pulsar::Database::add replacing current entry: \n\t"
-           << entry.filename << endl;
+      cerr << "Database::add replacing current entry: \n\t"
+           << entry->filename << endl;
       entries[ie] = entry;
       return;
     }
-    else if (entries[ie] == entry)
+    else if (entries[ie]->equals (entry))
     {
-      cerr << "Pulsar::Database::add keeping newest of duplicate entries:\n\t"
-           << entries[ie].filename << " and\n\t" << entry.filename << endl;
+      cerr << "Database::add keeping newest of duplicate entries:\n\t"
+           << entries[ie]->filename << " and\n\t" << entry->filename << endl;
       if ( file_mod_time (get_filename(entry).c_str()) >
 	   file_mod_time (get_filename(entries[ie]).c_str()) )
 	entries[ie] = entry;
@@ -860,14 +1037,14 @@ void Pulsar::Database::add (const Entry& entry) try
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Database::add Entry";
+  throw error += "Database::add Entry";
 }
 
-void Pulsar::Database::all_matching (const Criteria& criteria,
-				     vector<Entry>& matches) const
+void Database::all_matching (const Criteria& criteria,
+			     vector<const Entry*>& matches) const
 {
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::all_matching " << entries.size()
+    cerr << "Database::all_matching " << entries.size()
          << " entries" << endl;
 
   closest_match = Criteria();
@@ -881,14 +1058,14 @@ void Pulsar::Database::all_matching (const Criteria& criteria,
   }
 }
 
-Pulsar::Database::Entry 
-Pulsar::Database::best_match (const Criteria& criteria) const
+const Database::Entry*
+Database::best_match (const Criteria& criteria) const
 {
   if (Calibrator::verbose > 1)
-    cerr << "Pulsar::Database::best_match " << entries.size()
+    cerr << "Database::best_match " << entries.size()
 	 << " entries" << endl;
   
-  Entry best_match;
+  const Entry* best_match = 0;
 
   closest_match = Criteria();
   
@@ -898,14 +1075,14 @@ Pulsar::Database::best_match (const Criteria& criteria) const
     else
       closest_match = Criteria::closest (closest_match, criteria);
 
-  if (best_match.obsType == Signal::Unknown)
+  if (best_match->obsType == Signal::Unknown)
     throw Error (InvalidParam, "Pulsar::Calibration::Database::best_match",
                  "no match found");
 
   return best_match;
 }
 
-std::string Pulsar::Database::get_closest_match_report () const
+std::string Database::get_closest_match_report () const
 { 
   if (!closest_match.match_count)
     return "\t" "empty" "\n";
@@ -913,11 +1090,19 @@ std::string Pulsar::Database::get_closest_match_report () const
     return closest_match.match_report;
 }
 
-Pulsar::Database::Entry 
-Pulsar::Database::Criteria::best (const Entry& a, const Entry& b) const
+const Database::Entry*
+Database::Criteria::best (const Entry* a, const Entry* b) const
 {
-  double a_diff = fabs( (a.time - entry.time).in_minutes() );
-  double b_diff = fabs( (b.time - entry.time).in_minutes() );
+  auto stat_a = dynamic_cast<const StaticEntry*> (a);
+  if (!stat_a)
+    return a;  // assume that interpolator is best
+  
+  auto stat_b = dynamic_cast<const StaticEntry*> (b);
+  if (!stat_b)
+    return b;  // assume that interpolator is best
+  
+  double a_diff = fabs( (stat_a->time - entry->time).in_minutes() );
+  double b_diff = fabs( (stat_b->time - entry->time).in_minutes() );
 
   if (a_diff < b_diff)
     return a;
@@ -925,11 +1110,11 @@ Pulsar::Database::Criteria::best (const Entry& a, const Entry& b) const
     return b;
 }
 
-Pulsar::Database::Criteria
-Pulsar::Database::Criteria::closest (const Criteria& a, const Criteria& b)
+Database::Criteria
+Database::Criteria::closest (const Criteria& a, const Criteria& b)
 {
   if (Calibrator::verbose > 1)
-    cerr << "Pulsar::Database::Criteria::closest \n"
+    cerr << "Database::Criteria::closest \n"
       " A:" << a.match_count << "=" << a.match_report << "\n"
       " B:" << b.match_count << "=" << b.match_report << endl;
 
@@ -948,11 +1133,11 @@ Pulsar::Database::Criteria::closest (const Criteria& a, const Criteria& b)
   return b;
 }
 
-static Pulsar::Database::Criteria* default_criteria = 0;
+static Database::Criteria* default_criteria = 0;
 
 //! Get the default matching criteria for PolnCal observations
-Pulsar::Database::Criteria
-Pulsar::Database::get_default_criteria ()
+Database::Criteria
+Database::get_default_criteria ()
 {
   if (!default_criteria)
     default_criteria = new Criteria;
@@ -960,7 +1145,7 @@ Pulsar::Database::get_default_criteria ()
   return *default_criteria;
 }
 
-void Pulsar::Database::set_default_criteria (const Criteria& criteria)
+void Database::set_default_criteria (const Criteria& criteria)
 {
   if (!default_criteria)
     default_criteria = new Criteria;
@@ -971,9 +1156,9 @@ void Pulsar::Database::set_default_criteria (const Criteria& criteria)
 
 
 
-Pulsar::Database::Criteria
-Pulsar::Database::criteria (const Pulsar::Archive* arch,
-			     Signal::Source obsType) const
+Database::Criteria
+Database::criteria (const Pulsar::Archive* arch,
+			    Signal::Source obsType) const
 try {
 
   Criteria criteria = get_default_criteria();
@@ -992,23 +1177,23 @@ try {
     criteria.minutes_apart = short_time_scale;
 
   if (arch)
-    criteria.entry = Entry (*arch);
+    criteria.entry = new StaticEntry (arch);
   else
     criteria.no_data ();
 
-  criteria.entry.obsType = obsType;
+  criteria.entry->obsType = obsType;
 
   return criteria;
 
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Database::criteria Signal::Source";
+  throw error += "Database::criteria Signal::Source";
 }
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
-Pulsar::Database::Criteria
-Pulsar::Database::criteria (const Pulsar::Archive* arch, 
+Database::Criteria
+Database::criteria (const Pulsar::Archive* arch, 
 			     const Calibrator::Type* calType) const
 try {
 
@@ -1031,18 +1216,18 @@ try {
     criteria.minutes_apart = short_time_scale;
 
   if (arch)
-    criteria.entry = Entry (*arch);
+    criteria.entry = new StaticEntry (arch);
   else
     criteria.no_data ();
 
-  criteria.entry.obsType = Signal::Calibrator;
-  criteria.entry.calType = calType;
+  criteria.entry->obsType = Signal::Calibrator;
+  criteria.entry->calType = calType;
 
   return criteria;
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Database::criteria Calibrator::Type";
+  throw error += "Database::criteria Calibrator::Type";
 }
 
 template<class Container>
@@ -1063,7 +1248,7 @@ void remove_channels (const Pulsar::Archive* arch,
   Pulsar::ChannelSubsetMatch chan_match;
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::generatePolnCalibrator " 
+    cerr << "Database::generatePolnCalibrator " 
 	 << "BW mismatch, trying channel truncation... " << endl;
 
   unsigned nremoved = 0;
@@ -1094,7 +1279,7 @@ void remove_channels (const Pulsar::Archive* arch,
   }
 
   if (Calibrator::verbose > 2) 
-    cerr << "Pulsar::Database::generatePolnCalibrator removed " 
+    cerr << "Database::generatePolnCalibrator removed " 
 	 << nremoved << " channels." << endl;
 
   // Test that the final numbers of channels match up
@@ -1132,14 +1317,14 @@ void match_channels (Pulsar::Archive* calarch, const Pulsar::Archive* arch)
   flux calibration of the original pulsar observation.
 */      
 Pulsar::FluxCalibrator* 
-Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
+Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 
-  Entry match = best_match (criteria(arch, new CalibratorTypes::Flux));
+  const Entry* match = best_match (criteria(arch, new CalibratorTypes::Flux));
 
   if (lastFluxCal.entry == match)
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generateFluxCalibrator using cached calibrator\n";
+      cerr << "Database::generateFluxCalibrator using cached calibrator\n";
     return lastFluxCal.calibrator;
   }
 
@@ -1151,7 +1336,7 @@ Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
   if (cache_last_cal)
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generateFluxCalibrator caching FluxCalibrator" << endl;
+      cerr << "Database::generateFluxCalibrator caching FluxCalibrator" << endl;
     lastFluxCal.cache (match, fcal);
   }
 
@@ -1160,33 +1345,33 @@ Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 catch (Error& error)
 {  
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::generateFluxCalibrator failure"
+    cerr << "Database::generateFluxCalibrator failure"
       " generating processed FluxCal\n" << error.get_message() << endl;
   
   if (allow_raw)
     return rawFluxCalibrator (arch);
   
   else
-    throw error += "Pulsar::Database::generateFluxCalibrator";
+    throw error += "Database::generateFluxCalibrator";
 }
 
 Pulsar::FluxCalibrator* 
-Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
+Database::rawFluxCalibrator (Pulsar::Archive* arch)
 {
-  vector<Pulsar::Database::Entry> oncals;
+  vector<const Entry*> oncals;
   all_matching (criteria (arch, Signal::FluxCalOn), oncals);
 
   if (!oncals.size())
     throw Error (InvalidState, 
-                 "Pulsar::Database::generateFluxCalibrator",
+                 "Database::generateFluxCalibrator",
                  "no FluxCalOn observations found to match observation");
 
-  vector<Pulsar::Database::Entry> offcals;
+  vector<const Entry*> offcals;
   all_matching (criteria (arch, Signal::FluxCalOff), offcals);
 
   if (!offcals.size())
     throw Error (InvalidState,
-                 "Pulsar::Database::generateFluxCalibrator",
+                 "Database::generateFluxCalibrator",
                  "no FluxCalOff observations found to match observation");
 
 
@@ -1214,18 +1399,18 @@ Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
   observation. */
 
 Pulsar::PolnCalibrator* 
-Pulsar::Database::generatePolnCalibrator (Archive* arch,
-					  const Calibrator::Type* type)
+Database::generatePolnCalibrator (Archive* arch,
+				  const Calibrator::Type* type)
 {
   if (!arch)
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
 		 "no Pulsar::Archive given");
   
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::generatePolnCalibrator type="
+    cerr << "Database::generatePolnCalibrator type="
 	 << type->get_name() << endl;
 
-  Entry entry;
+  const Entry* entry = 0;
 
   //
   // unless a CompleteJones transformation is requested,
@@ -1236,7 +1421,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   if (! type->is_a<CalibratorTypes::CompleteJones>()) try
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator search for " 
+      cerr << "Database::generatePolnCalibrator search for " 
 	"Signal::PolnCal match" << endl;
     entry = best_match (criteria (arch, Signal::PolnCal));
   }
@@ -1246,7 +1431,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     // the Hybrid transformations require access to a raw PolnCal observation
     //
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator search for"
+      cerr << "Database::generatePolnCalibrator search for"
       "Signal::PolnCal failed. closest = " << get_closest_match_report();
 
     polncal_match_report = get_closest_match_report ();
@@ -1254,45 +1439,45 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     if (type->is_a<CalibratorTypes::Hybrid>())
     {
       error << "\n\tHybrid Calibrator requires raw PolnCal observation";
-      throw error += "Pulsar::Database::generatePolnCalibrator";
+      throw error += "Database::generatePolnCalibrator";
     }
   }
 
   if (! type->is_a<CalibratorTypes::Hybrid>()) try
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator search for " 
+      cerr << "Database::generatePolnCalibrator search for " 
 	   << type->get_name() << " match" << endl;
     
     Criteria cal_criteria = criteria (arch, type);
-    Entry cal_entry = best_match (cal_criteria);
+    const Entry* cal_entry = best_match (cal_criteria);
     entry = cal_criteria.best (entry, cal_entry);
   }
   catch (Error& error)
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator search for "
+      cerr << "Database::generatePolnCalibrator search for "
            << type->get_name() << " failed. closest = " << get_closest_match_report();
 
-    if (entry.obsType == Signal::Unknown)
+    if (entry->obsType == Signal::Unknown)
     {
       error << "\n\tneither raw nor processed calibrator archives found.\n"
                "\n\tRAW -- closest match: \n\n" << polncal_match_report <<
                "\n\tPROCESSED";
-      throw error += "Pulsar::Database::generatePolnCalibrator";
+      throw error += "Database::generatePolnCalibrator";
     }
   }
 
-  if (lastPolnCal.entry == entry)
+  if (lastPolnCal.entry->equals(entry))
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator using cached calibrator\n";
+      cerr << "Database::generatePolnCalibrator using cached calibrator\n";
     return lastPolnCal.calibrator;
   }
 
   if (Calibrator::verbose > 2)
-    cout << "Pulsar::Database::generatePolnCalibrator constructing from file "
-	 << entry.filename << endl;
+    cout << "Database::generatePolnCalibrator constructing from file "
+	 << entry->filename << endl;
 
   Reference::To<Pulsar::Archive> polcalarch;
   polcalarch = Pulsar::Archive::load( get_filename(entry) );
@@ -1307,13 +1492,13 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
 
   if (Calibrator::verbose > 2)
   {
-    if (entry.obsType == Signal::Calibrator)
-      cerr << "CAL OF TYPE " <<  entry.calType->get_name() << endl;
+    if (entry->obsType == Signal::Calibrator)
+      cerr << "CAL OF TYPE " <<  entry->calType->get_name() << endl;
     else
-      cerr << "FILE OF TYPE " << Signal::Source2string (entry.obsType) << endl;
+      cerr << "FILE OF TYPE " << Signal::Source2string (entry->obsType) << endl;
   }
 
-  if (entry.obsType == Signal::Calibrator)
+  if (entry->obsType == Signal::Calibrator)
     // if a solved model, return the solution
     return new Pulsar::PolnCalibrator (polcalarch);
 
@@ -1324,7 +1509,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   if ( type->is_a<CalibratorTypes::Hybrid>() )
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
+      cerr << "Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
   }
 
@@ -1332,7 +1517,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   if (cache_last_cal)
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generatePolnCalibrator caching PolnCalibrator" << endl;
+      cerr << "Database::generatePolnCalibrator caching PolnCalibrator" << endl;
     lastPolnCal.cache (entry, ref_cal);
   }
 
@@ -1340,7 +1525,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
 }
 
 Pulsar::HybridCalibrator* 
-Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
+Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 					    Archive* arch)
 {
   if (!arch) throw Error (InvalidParam,
@@ -1351,9 +1536,9 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 			    "no Pulsar::ReferenceCalibrator given");
  
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::generateHybridCalibrator" << endl;
+    cerr << "Database::generateHybridCalibrator" << endl;
 
-  Entry entry;
+  const Entry* entry = 0;
 
   try
   {
@@ -1364,15 +1549,15 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
   }
   catch (Error& error)
   {
-    throw Error (InvalidState, "Pulsar::Database::generateHybridCalibrator",
+    throw Error (InvalidState, "Database::generateHybridCalibrator",
 		 "No complete parameterization (e.g. pcm output) found \n" +
                  get_closest_match_report ());
   }
 
-  if (lastHybridCal.entry == entry)
+  if (lastHybridCal.entry->equals(entry))
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generateHybridCalibrator using cached calibrator\n";
+      cerr << "Database::generateHybridCalibrator using cached calibrator\n";
     return lastHybridCal.calibrator;
   }
 
@@ -1399,13 +1584,13 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
   }
   catch (Error& error)
   {
-    throw error += "Pulsar::Database::generateHybridCalibrator";
+    throw error += "Database::generateHybridCalibrator";
   }
 
   if (cache_last_cal)
   {
     if (Calibrator::verbose > 2)
-      cerr << "Pulsar::Database::generateHybridCalibrator caching HybridCalibrator" << endl;
+      cerr << "Database::generateHybridCalibrator caching HybridCalibrator" << endl;
     lastHybridCal.cache (entry, hybrid);
   }
 
@@ -1414,16 +1599,16 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 }
 
 //! Returns the full pathname of the Entry filename
-string Pulsar::Database::get_filename (const Entry& entry) const
+string Database::get_filename (const Entry* entry) const
 {
-  if (entry.filename[0] == '/')
-    return entry.filename;
+  if (entry->filename[0] == '/')
+    return entry->filename;
   else
-    return path + "/" + entry.filename;
+    return path + "/" + entry->filename;
 }
 
 //! Returns the full pathname of the Entry filename
-string Pulsar::Database::get_path () const
+string Database::get_path () const
 {
   return path;
 }

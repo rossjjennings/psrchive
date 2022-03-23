@@ -87,7 +87,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
 #else
     throw Error (InvalidState, "PolnCalibrator ctor",
 		 "Archive has CalibrationInterpolatorExtension\n\t"
-		 "but SPLINTER library not avaialable");
+		 "but SPLINTER library not available to interpret it");
 #endif
   }
   
@@ -809,7 +809,22 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::calibrate Archive::transform" <<endl;
 
-    arch->transform (response);
+    unsigned nsubint = arch->get_nsubint();
+    
+    for (unsigned isub=0; isub < nsubint; isub++)
+    {
+      Integration* subint = arch->get_Integration (isub);
+
+      if (variation)
+      {
+	bool rebuild_needed = variation->update (subint);
+	if (rebuild_needed)
+	  build (subint->get_nchan());
+      }
+      
+      subint->expert()->transform (response);
+    }
+    
     arch->set_poln_calibrated (true);
 
 #if CORRECT_BASIS

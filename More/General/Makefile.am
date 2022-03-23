@@ -19,7 +19,6 @@ nobase_include_HEADERS = \
 	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
         Pulsar/BaselineWindow.h \
-        Pulsar/ChannelSubsetMatch.h \
         Pulsar/ChannelWeight.h \
         Pulsar/ColdPlasma.h \
 	Pulsar/Combination.h \
@@ -174,7 +173,6 @@ libGeneral_la_SOURCES = \
 	Archive_weighted_frequency.C \
 	BaselineEstimator.C \
         BaselineWindow.C \
-        ChannelSubsetMatch.C \
 	CompareWith.C \
 	CompareWithEachOther.C \
 	CompareWithSum.C \

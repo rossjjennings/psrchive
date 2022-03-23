@@ -1931,11 +1931,11 @@ void pcm::load_calibrator_database () try
 
   Pulsar::Database::Criteria criteria;
   criteria = database->criteria (archive, Signal::PolnCal);
-  criteria.entry.time = mid;
+  criteria.entry->time = mid;
   criteria.check_coordinates = check_coordinates;
   criteria.minutes_apart = search_hours * 60.0;
 
-  vector<Pulsar::Database::Entry> oncals;
+  vector<const Pulsar::Database::Entry*> oncals;
   database->all_matching (criteria, oncals);
 
   unsigned poln_cals = oncals.size();
@@ -1972,7 +1972,7 @@ void pcm::load_calibrator_database () try
 
     criteria.check_coordinates = false;
     criteria.minutes_apart = search_days * 24.0 * 60.0;
-    criteria.entry.obsType = Signal::FluxCalOn;
+    criteria.entry->obsType = Signal::FluxCalOn;
     
     cerr << "pcm: searching for on-source flux calibrator observations"
       " within " << search_days << " days of midtime" << endl;
@@ -1987,7 +1987,7 @@ void pcm::load_calibrator_database () try
     {
       unsigned ncals = oncals.size();
 
-      criteria.entry.obsType = Signal::FluxCalOff;
+      criteria.entry->obsType = Signal::FluxCalOff;
 
       cerr << "pcm: searching for off-source flux calibrator observations"
               " within " << search_days << " days of midtime" << endl;
@@ -2005,7 +2005,7 @@ void pcm::load_calibrator_database () try
   for (unsigned i = 0; i < oncals.size(); i++)
   {
     string filename = database->get_filename( oncals[i] );
-    cerr << "pcm: adding " << oncals[i].filename << endl;
+    cerr << "pcm: adding " << oncals[i]->filename << endl;
     calibrator_filenames.push_back (filename);
   }
 }
