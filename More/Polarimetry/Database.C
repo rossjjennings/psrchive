@@ -293,24 +293,26 @@ Database::Entry* Database::Entry::load (const string& str) try
   
   if (mjdstr.find ("-") != string::npos)
   {
-    cerr << "Database::Entry::load new InterpolatorEntry "
-      "mjd range=" << mjdstr << endl;
-    
+    // cerr << "Database::Entry::load new InterpolatorEntry mjd range=" << mjdstr << endl;
+   
+    string mjd1 = stringtok (mjdstr, "-");
+     
     // the MJD string contains a range of MJDs; therefore
     auto interpolator_entry = new InterpolatorEntry;
+    interpolator_entry->start_time = MJD (mjd1);
+    interpolator_entry->end_time = MJD (mjdstr);
 
     entry = interpolator_entry;
   }
   else
   {
-    cerr << "Database::Entry::load new StaticEntry "
-      "mjd=" << mjdstr << endl;
+    // cerr << "Database::Entry::load new StaticEntry mjd=" << mjdstr << endl;
     
     auto static_entry = new StaticEntry;
     static_entry->time = MJD (mjdstr);
 
     // /////////////////////////////////////////////////////////////////
-    // frequency
+    // nchan
     string nchan = stringtok (line, whitespace);
     static_entry->nchan = fromstring<unsigned> (nchan);
     entry = static_entry;
@@ -426,7 +428,7 @@ namespace Pulsar
 
 bool Database::Entry::equals (const Entry* that) const
 {
-  cerr << "Database::Entry::equals this=" << (void*) this << endl;
+  // cerr << "Database::Entry::equals this=" << (void*) this << endl;
     
   return this->obsType == that->obsType &&
     same( this->calType, that->calType ) &&
@@ -439,7 +441,7 @@ bool Database::Entry::equals (const Entry* that) const
 
 bool Database::StaticEntry::equals (const Entry* that) const
 {
-  cerr << "Database::StaticEntry::equals this=" << (void*) this << endl;
+  // cerr << "Database::StaticEntry::equals this=" << (void*) this << endl;
 
   if (!Entry::equals (that))
     return false;
@@ -448,15 +450,14 @@ bool Database::StaticEntry::equals (const Entry* that) const
   if (!like)
     return false;
 
-  cerr << "Database::StaticEntry::equals " << this->time << " " << like->time
-       << endl;
+  // cerr << "Database::StaticEntry::equals " << this->time << " " << like->time << endl;
   
   return fabs( (this->time - like->time).in_seconds() ) < 10.0;
 }
 
 bool Database::InterpolatorEntry::equals (const Entry* that) const
 {
-  cerr << "Database::InterpolatorEntry::equals this=" << (void*) this << endl;
+  // cerr << "Database::InterpolatorEntry::equals this=" << (void*) this << endl; 
 
   if (!Entry::equals (that))
     return false;
@@ -958,8 +959,8 @@ void Database::unload (const string& filename)
     throw Error (FailedSys, "Database::unload" 
 		 "fopen (" + filename + ")");
   
-  fprintf (fptr, "Database::path %s\n", path.c_str());
-  fprintf (fptr, "Database # of entries = %u\n", 
+  fprintf (fptr, "Pulsar::Database::path %s\n", path.c_str());
+  fprintf (fptr, "Pulsar::Database # of entries = %u\n", 
 	   (unsigned)entries.size());
 
   string out;
@@ -1075,7 +1076,7 @@ Database::best_match (const Criteria& criteria) const
     else
       closest_match = Criteria::closest (closest_match, criteria);
 
-  if (best_match->obsType == Signal::Unknown)
+  if (!best_match || best_match->obsType == Signal::Unknown)
     throw Error (InvalidParam, "Pulsar::Calibration::Database::best_match",
                  "no match found");
 
@@ -1090,9 +1091,17 @@ std::string Database::get_closest_match_report () const
     return closest_match.match_report;
 }
 
-const Database::Entry*
-Database::Criteria::best (const Entry* a, const Entry* b) const
+const Database::Entry* Database::Criteria::best (const Entry* a, const Entry* b) const
 {
+  if (!a && !b)
+    throw Error (InvalidParam, "Database::Criteria::best", "both arguments are NULL");
+
+  if (!a)
+    return b;
+
+  if (!b)
+    return a;
+
   auto stat_a = dynamic_cast<const StaticEntry*> (a);
   if (!stat_a)
     return a;  // assume that interpolator is best
@@ -1468,7 +1477,7 @@ Database::generatePolnCalibrator (Archive* arch,
     }
   }
 
-  if (lastPolnCal.entry->equals(entry))
+  if (lastPolnCal.entry && lastPolnCal.entry->equals(entry))
   {
     if (Calibrator::verbose > 2)
       cerr << "Database::generatePolnCalibrator using cached calibrator\n";
@@ -1554,7 +1563,7 @@ Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
                  get_closest_match_report ());
   }
 
-  if (lastHybridCal.entry->equals(entry))
+  if (lastHybridCal.entry && lastHybridCal.entry->equals(entry))
   {
     if (Calibrator::verbose > 2)
       cerr << "Database::generateHybridCalibrator using cached calibrator\n";
