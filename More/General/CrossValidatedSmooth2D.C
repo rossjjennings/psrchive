@@ -241,7 +241,7 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
   // binary search for the optimal smoothing factor
   while (interval > close_enough)
   {
-    cerr << "*** interval=" << interval << endl;
+    // cerr << "*** interval=" << interval << endl;
 
 #if _DEBUG
     for (unsigned ival=0; ival < 3; ival++)
@@ -512,5 +512,5 @@ double CrossValidatedSmooth2D::get_mean_gof
   
   // cerr << "gof median=" << Q2 << " mean=" << mean_gof << endl;
   
-  return Q2;
+  return mean_gof;
 }
