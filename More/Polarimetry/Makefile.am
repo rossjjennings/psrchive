@@ -38,7 +38,6 @@ nobase_include_HEADERS = \
 	Pulsar/InputDataReport.h \
         Pulsar/Instrument.h \
 	Pulsar/InstrumentInfo.h \
-	Pulsar/CalibrationInterpolator.h \
         Pulsar/IonosphereCalibrator.h \
         Pulsar/IRIonosphere.h \
 	Pulsar/IXRInfo.h \
@@ -152,7 +151,6 @@ libPolarimetry_la_SOURCES = \
         Instrument.C \
         InstrumentInfo.C \
         Integration_defaraday.C \
-	CalibrationInterpolator.C \
         IonosphereCalibrator.C \
         IRIonosphere.C \
 	IXRInfo.C \
@@ -223,9 +221,25 @@ libPolarimetry_la_SOURCES = \
 	VariableTransformation.C \
 	VariationInfo.C
 
+##############################################################################
+#
+# GSL-dependent code
+#
 if HAVE_GSL
 libPolarimetry_la_SOURCES += ReceptionModelSolveGSL.C
 endif
+
+##############################################################################
+#
+# SPLINTER-dependent code
+#
+if HAVE_SPLINTER
+
+libPolarimetry_la_SOURCES += CalibrationInterpolator.C
+nobase_include_HEADERS += Pulsar/CalibrationInterpolator.h
+
+endif
+
 
 SUBDIRS = iri2001
 

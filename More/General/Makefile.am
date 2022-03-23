@@ -324,6 +324,7 @@ libGeneral_la_SOURCES += SplineSmooth.C \
 nobase_include_HEADERS += Pulsar/SplineSmooth.h
 
 endif
+
 #############################################################################
 #
 

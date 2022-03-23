@@ -23,6 +23,9 @@ namespace Pulsar {
     //! Constructor
     SplineSmooth();
 
+    //! Construct from a string that describes the spline function
+    SplineSmooth (const std::string& json_string);
+    
     //! Destructor
     ~SplineSmooth();
 
@@ -68,10 +71,16 @@ namespace Pulsar {
   {
     public:
 
-      void fit (const std::vector< std::pair<double,double> >& data_x,
-                     const std::vector< Estimate<double> >& data_y);
+    //! Default constructor does nothing
+    SplineSmooth2D () {}
+    
+    //! Construct from a string that describes the spline function
+    SplineSmooth2D (const std::string& json) : SplineSmooth (json) {}
 
-      double evaluate ( const std::pair<double,double>& );
+    void fit (const std::vector< std::pair<double,double> >& data_x,
+	      const std::vector< Estimate<double> >& data_y);
+    
+    double evaluate ( const std::pair<double,double>& );
   };
 
   //! Determines the spline smoothing factor as in Clark (1977)

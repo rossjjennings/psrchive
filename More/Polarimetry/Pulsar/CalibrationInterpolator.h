@@ -12,33 +12,34 @@
 #define __CalibrationInterpolator_H
 
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/CalibrationInterpolatorExtension.h"
+#include <map>
 
 namespace Pulsar {
 
+  class CalibrationInterpolatorExtension;
+  class PolnCalibrator;
+  class PolnCalibratorExtension;
   class CalibratorStokes;
-
+  class Integration;
+  class SplineSmooth2D;
+  
   //! A calibration solution that spans a finite bandwidth and time
-  class CalibrationInterpolator : public PolnCalibrator {
+  class CalibrationInterpolator : public PolnCalibrator::Variation
+  {
     
   public:
 
-    //! Construct from a solution with a CalibrationInterpolatorExtension
-    CalibrationInterpolator (Archive* data);
+    //! Construct from a calibrator with a CalibrationInterpolatorExtension
+    CalibrationInterpolator (PolnCalibrator*);
 
     //! Destructor
     ~CalibrationInterpolator ();
 
-    //! Return the reference epoch of the calibration experiment
-    MJD get_epoch () const;
-
+    //! Update the model parameters to match the integration
+    /*! Returns true if transformation should be recomputed */
+    bool update (const Integration*);
+    
   protected:
-
-    //! Fill the transformation vector of the PolnCalibrator base class
-    void calculate_transformation ();
-
-    //! Return the number of channels in the PolnCalibrator
-    unsigned get_maximum_nchan () const;
 
     //! Calibration Interpolator Extension
     Reference::To<const CalibrationInterpolatorExtension> interpolator;
@@ -48,6 +49,10 @@ namespace Pulsar {
 
     //! The model of the feed
     Reference::To<PolnCalibratorExtension> feedpar;
+
+    std::map< unsigned, Reference::To<SplineSmooth2D> > feedpar_splines;
+    std::map< unsigned, Reference::To<SplineSmooth2D> > calpoln_splines;
+    
   };
 
 }

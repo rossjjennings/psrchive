@@ -8,9 +8,12 @@
 #include "Pulsar/SplineSmooth.h"
 #include "Error.h"
 
+#include <fstream>
+
 #include <data_table.h>
 #include <bspline.h>
 #include <bspline_builders.h>
+#include <stdio.h>
 
 using namespace SPLINTER;
 using namespace Pulsar;
@@ -26,6 +29,18 @@ class SplineSmooth::Handle
 SplineSmooth::SplineSmooth ()
 {
   handle = 0;
+}
+
+SplineSmooth::SplineSmooth (const std::string& json)
+{
+  char* fname = tempnam (NULL, NULL);
+  {
+    ofstream os (fname);
+    os << json;
+  }
+
+  load (fname);
+  free (fname);
 }
 
 SplineSmooth::~SplineSmooth ()
@@ -83,7 +98,7 @@ void SplineSmooth::unload (const std::string& filename) const
 {
   if (!handle)
     throw Error (InvalidState, "SplineSmooth::unload",
-		 "");
+		 "no spline to unload");
   
   handle->spline.to_json (filename);
 }

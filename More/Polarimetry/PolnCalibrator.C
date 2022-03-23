@@ -1,12 +1,22 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2011 by Willem van Straten
+ *   Copyright (C) 2003 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+
+#ifdef HAVE_SPLINTER
+#include "Pulsar/CalibrationInterpolator.h"
+#endif
+
+#include "Pulsar/CalibrationInterpolatorExtension.h"
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/BasisCorrection.h"
@@ -70,6 +80,17 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
   // store the calibrator archive
   set_calibrator (archive);
 
+  if (archive->get<CalibrationInterpolatorExtension> ())
+  {
+#ifdef HAVE_SPLINTER
+    variation = new CalibrationInterpolator (this);
+#else
+    throw Error (InvalidState, "PolnCalibrator ctor",
+		 "Archive has CalibrationInterpolatorExtension\n\t"
+		 "but SPLINTER library not avaialable");
+#endif
+  }
+  
   // store the related Extension, if any
   poln_extension = archive->get<PolnCalibratorExtension>();
   if (poln_extension)

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -22,10 +22,10 @@
 
 namespace Pulsar {
 
-  class Integration;
   class PolnCalibratorExtension;
   class FeedExtension;
   class Receiver;
+  class Integration;
 
   //! Polarimetric calibrators
   /*! The calibrated archive will have its flux normalized by the
@@ -33,7 +33,8 @@ namespace Pulsar {
     multiply the archive by the absolute calibrator flux.
     Polarimetric calibration does not require a flux calibrator in
     order to work.  */
-  class PolnCalibrator : public Calibrator {
+  class PolnCalibrator : public Calibrator
+  {
 
   public:
 
@@ -138,8 +139,20 @@ namespace Pulsar {
     //! Communicates PolnCalibrator parameters to plotting routines
     class Info;
 
+    //! Abstract base of classes that update model parameters
+    class Variation : public Reference::Able
+    {
+    public:
+      //! Update the model parameters to match the integration
+      /*! Returns true if transformation should be recomputed */
+      virtual bool update (const Integration*) = 0;
+    };
+
   protected:
 
+    //! Updates model parameters
+    Reference::To<Variation> variation;
+    
     //! The array of transformation Model instances
     Reference::Vector<MEAL::Complex2> transformation;
 
