@@ -14,6 +14,7 @@
 #include "Physical.h"
 #include "Error.h"
 #include "typeutil.h"
+#include "debug.h"
 
 #include <iostream>
 #include <string>
@@ -102,8 +103,7 @@ Pulsar::Profile::Profile (const Profile& profile)
 //! copy constructor
 Pulsar::Profile::Profile (const Profile* profile)
 {
-  if (verbose)
-    cerr << "Pulsar::Profile ctor this=" << this << " instances=" << instance_count << endl;
+  DEBUG("Profile ctor this=" << this << " instances=" << instance_count);
 
   init();
   copy (profile);
@@ -111,8 +111,7 @@ Pulsar::Profile::Profile (const Profile* profile)
 
 Pulsar::Profile::~Profile()
 {
-  if (verbose)
-    cerr << "Pulsar::Profile dtor this=" << this << " instances=" << instance_count << endl;
+  DEBUG("Profile dtor this=" << this << " instances=" << instance_count);
 
   instance_count --;
 }

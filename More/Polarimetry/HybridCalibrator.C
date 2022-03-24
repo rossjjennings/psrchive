@@ -90,6 +90,8 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 
   if (!precalibrator) return;
 
+  copy_variation (precalibrator);
+  
   set_calibrator( precalibrator->get_Archive() );
 
   filenames.resize (2);

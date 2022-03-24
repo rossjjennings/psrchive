@@ -52,7 +52,8 @@ namespace Pulsar {
 
     std::map< unsigned, Reference::To<SplineSmooth2D> > feedpar_splines;
     std::map< unsigned, Reference::To<SplineSmooth2D> > calpoln_splines;
-    
+
+    MJD last_computed;
   };
 
 }

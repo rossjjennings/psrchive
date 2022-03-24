@@ -152,6 +152,7 @@ namespace Pulsar {
 
     //! Updates model parameters
     Reference::To<Variation> variation;
+    void copy_variation (PolnCalibrator*);
     
     //! The array of transformation Model instances
     Reference::Vector<MEAL::Complex2> transformation;

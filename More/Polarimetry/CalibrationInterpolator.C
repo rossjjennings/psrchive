@@ -41,7 +41,7 @@ CalibrationInterpolator::CalibrationInterpolator (PolnCalibrator* cal)
   
   unsigned nparam = interpolator->get_nparam();
 
-  cerr << "CalibrationInterpolator constructing splines" << endl;
+  DEBUG("CalibrationInterpolator constructing splines");
   
   for (unsigned iparam=0; iparam < nparam; iparam++)
   {
@@ -115,13 +115,22 @@ void set_params (C* container,
 	  
 bool CalibrationInterpolator::update (const Integration* subint)
 {
-  unsigned nchan = subint->get_nchan();
-
+  DEBUG("CalibrationInterpolator::update");
+  
   /*
     update the feedpar and calpoln attributes
   */
 
   MJD epoch = subint->get_epoch ();
+
+  double interval = (epoch - last_computed).in_days();
+  if (fabs (interval) < 1.0)
+  {
+    DEBUG("CalibrationInterpolator::update no need to update");
+    return false;
+  }
+
+  DEBUG("CalibrationInterpolator::update compute");
 
   MJD min_epoch = interpolator->get_minimum_epoch ();
   MJD max_epoch = interpolator->get_maximum_epoch ();
@@ -134,6 +143,8 @@ bool CalibrationInterpolator::update (const Integration* subint)
       
   double x0 = (epoch - interpolator->get_reference_epoch ()).in_days();
 
+  unsigned nchan = subint->get_nchan();
+  
   if (feedpar)
     feedpar->set_nchan (nchan);
 
@@ -178,6 +189,8 @@ bool CalibrationInterpolator::update (const Integration* subint)
 
   if (Archive::verbose > 2)
     cerr << "CalibrationInterpolator::update exit" << endl;
+
+  last_computed = epoch;
 
   return true;
 }

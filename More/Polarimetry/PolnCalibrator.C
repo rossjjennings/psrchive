@@ -83,6 +83,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
   if (archive->get<CalibrationInterpolatorExtension> ())
   {
 #ifdef HAVE_SPLINTER
+    DEBUG("PolnCalibrator ctor set variation");
     variation = new CalibrationInterpolator (this);
 #else
     throw Error (InvalidState, "PolnCalibrator ctor",
@@ -90,13 +91,19 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
 		 "but SPLINTER library not available to interpret it");
 #endif
   }
-  
+
   // store the related Extension, if any
   poln_extension = archive->get<PolnCalibratorExtension>();
   if (poln_extension)
     extension = poln_extension;
 
   filenames.push_back( archive->get_filename() );
+}
+
+void Pulsar::PolnCalibrator::copy_variation (PolnCalibrator* other)
+{
+  if (other->variation)
+    variation = other->variation;
 }
 
 void Pulsar::PolnCalibrator::set_Receiver (const Archive* archive)
@@ -780,6 +787,12 @@ void Pulsar::PolnCalibrator::calibration_setup (Archive* arch)
 
   if (response.size() != arch->get_nchan()) try
   {
+    if (variation)
+    {
+      DEBUG("PolnCalibrator::calibration_setup calling Variation::update");
+      variation->update (arch->get_Integration(0));
+    }
+    
     build( arch->get_nchan() );
   }
   catch (Error& error)
