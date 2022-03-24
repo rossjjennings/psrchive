@@ -212,9 +212,9 @@ protected:
   // unload text to file
   void unload (const string& filename, const vector<row>& table);
 
+  CalibrationInterpolatorExtension::Parameter::Type model_code;
   string spline_filename;
   string plot_filename;
-  string model_code;
   unsigned model_index;
   
   unsigned plot_npts;
@@ -958,7 +958,7 @@ void smint::finalize ()
 #endif
 
   convert_epochs = true;
-  model_code = "FEEDPAR";
+  model_code = CalibrationInterpolatorExtension::Parameter::FrontendParameter;
 
   for (unsigned i=0; i < pcal_data.size(); i++)
   {
@@ -977,8 +977,8 @@ void smint::finalize ()
     fit (pcal_data[i]);
   }
 
-  model_code = "CAL_POLN";
-    
+  model_code = CalibrationInterpolatorExtension::Parameter::CalibratorStokesParameter;
+      
   for (unsigned i=0; i < cal_stokes_data.size(); i++)
   {
     model_index = cal_stokes_data[i].index;
@@ -994,7 +994,7 @@ void smint::finalize ()
     fit (cal_stokes_data[i]);
   }
 
-  model_code = "FLUX_CAL";
+  model_code = CalibrationInterpolatorExtension::Parameter::FluxCalibratorParameter;
 
   for (unsigned i=0; i < fcal_data.size(); i++)
   {
@@ -1292,14 +1292,15 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
       if (search_for_min)
       {
 	min_chan = ichan;
-	xmin = freq;
 	search_for_min = false;
       }
       else
       {
 	max_chan = ichan;
-	xmax = freq;
       }
+
+      xmin = std::min (xmin, freq);
+      xmax = std::max (xmax, freq);
     }
   }
 
@@ -1315,15 +1316,15 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     
     double freq = result->get_minimum_frequency();
     if (freq != 0.0)
-      assert (freq == xmin);
+      assert (freq == xmin+centre_frequency);
     else
-      result->set_minimum_frequency (freq);
+      result->set_minimum_frequency (xmin+centre_frequency);
 
     freq = result->get_maximum_frequency();
     if (freq != 0.0)
-      assert (freq == xmax);
+      assert (freq == xmax+centre_frequency);
     else
-      result->set_maximum_frequency (freq);
+      result->set_maximum_frequency (xmax+centre_frequency);
   }
   
   if (convert_epochs)

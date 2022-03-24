@@ -154,7 +154,11 @@ void psrfits_read_col_work( fitsfile *fptr, const char *name,
   fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, status);
   if (*status != 0)
     return; 
- 
+
+  if (typecode != TSTRING)
+    throw Error (InvalidState, "psrfits_read_col_work",
+		 "%s typecode != TSTRING", name);
+
   char* nullstr = const_cast<char*>( null.c_str() );
   char* tempstr = new char[repeat + 1];
 

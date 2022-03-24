@@ -120,8 +120,16 @@ namespace Pulsar {
 	Interface (Parameter* = 0);
       };
 
-      std::string code;
-      const std::string& get_code () const { return code; }
+      //! The type of model parameter
+      enum Type
+      {
+        FrontendParameter = 1,
+        CalibratorStokesParameter = 2,
+	FluxCalibratorParameter = 3
+      };
+      
+      Type code;
+      Type get_code () const { return code; }
 
       unsigned iparam;
       unsigned get_iparam () const { return iparam; }
@@ -182,6 +190,8 @@ namespace Pulsar {
     std::vector< Reference::To<Parameter> > parameter;
   };
  
+  std::ostream& operator << (std::ostream& ostr,
+			     CalibrationInterpolatorExtension::Parameter::Type);
 
 }
 

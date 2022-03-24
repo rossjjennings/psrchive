@@ -496,21 +496,21 @@ MAXEPOCH=                    * / [MJD] Maximum epoch of interpolator (D)
 NCHAR   =                    * / Number of characters per row (V)
 #
 TTYPE#  = MODEL                / Code for model (FEEDPAR or CAL_POLN)
-TFORM#  = 8A                   / 8-char string
+TFORM#  = 1J                   / Integer code
 TTYPE#  = IPARAM               / Index of model parameter 
-TFORM#  = 1V                   / Unsigned integer
+TFORM#  = 1J                   / Integer
 TTYPE#  = LOGSMTH              / Base 10 logarithm of smoothing factor
 TFORM#  = 1E                   / Float
 TTYPE#  = CHISQ                / Total chi-squared (objective merit function)
 TFORM#  = 1E                   / Float
 TTYPE#  = NDAT                 / Number of data used to constrain interpolator
-TFORM#  = 1V                   / Unsigned integer
+TFORM#  = 1J                   / Integer
 TTYPE#  = NFLAG_IN             / Number of input data flagged before fit
-TFORM#  = 1V                   / Unsigned integer
+TFORM#  = 1J                   / Integer
 TTYPE#  = NFLAG_OUT            / Number of input data flagged after fit
-TFORM#  = 1V                   / Unsigned integer
+TFORM#  = 1J                   / Integer
 TTYPE#  = INTERTXT             / Text that describes interpolator
-TFORM#  = A                    / NCHAR characters
+TFORM#  = 4096A                / 4k of text per row
 END
 #
 ###############################################################################

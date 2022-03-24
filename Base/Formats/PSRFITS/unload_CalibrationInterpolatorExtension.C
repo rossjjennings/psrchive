@@ -19,21 +19,33 @@
 using namespace std;
 using namespace Pulsar;
 
-void unload (fitsfile* fptr, int row,
+void unload (fitsfile* fptr, int& row,
 	     const CalibrationInterpolatorExtension::Parameter* param,
-	     unsigned nchar)
+	     unsigned bytes_per_row)
 {
-  psrfits_write_col (fptr, "MODEL", row, param->code);
-  psrfits_write_col (fptr, "IPARAM", row, param->iparam);
   psrfits_write_col (fptr, "LOGSMTH", row, param->log10_smoothing_factor);
   psrfits_write_col (fptr, "CHISQ", row, param->total_chi_squared);
-  psrfits_write_col (fptr, "NDAT", row, param->ndat_input);
-  psrfits_write_col (fptr, "NFLAG_IN", row, param->ndat_flagged_before);
-  psrfits_write_col (fptr, "NFLAG_OUT", row, param->ndat_flagged_after);
+  psrfits_write_col (fptr, "NDAT", row, (int) param->ndat_input);
+  psrfits_write_col (fptr, "NFLAG_IN", row, (int) param->ndat_flagged_before);
+  psrfits_write_col (fptr, "NFLAG_OUT", row, (int) param->ndat_flagged_after);
 
   string txt = param->interpolator;
-  txt.resize (nchar, 0);
-  psrfits_write_col (fptr, "INTERTXT", row, txt);  
+
+  unsigned chars_per_row = bytes_per_row - 1; // leave one for null char
+  unsigned nrow = ceil (double(txt.size()) / chars_per_row);
+
+  int code = param->code;
+  int iparam = param->iparam;
+  
+  for (unsigned irow=0; irow < nrow; irow++)
+  {
+    psrfits_write_col (fptr, "MODEL", row, code);
+    psrfits_write_col (fptr, "IPARAM", row, iparam);
+
+    string block = txt.substr (irow*chars_per_row, chars_per_row);
+    psrfits_write_col (fptr, "INTERTXT", row, block);
+    row ++;
+  }
 }
 
 void FITSArchive::unload (fitsfile* fptr, 
@@ -90,23 +102,33 @@ void FITSArchive::unload (fitsfile* fptr,
   double max_epoch = ext->get_maximum_epoch().in_days();
   psrfits_update_key (fptr, "MAXEPOCH", max_epoch);
 
-  // NCHAR
-  unsigned max_strlen = 0;
-  for (int iparam=0; iparam < nparam; iparam++)
-  {
-    unsigned strlen = ext->get_parameter(iparam)->interpolator.size();
-    max_strlen = std::max (max_strlen, strlen);
-  }
+  // INTERTXT
+  int colnum = 0;
+  int status = 0;
+  fits_get_colnum (fptr, CASEINSEN, "INTERTXT", &colnum, &status);
+  int typecode = 0;
+  long repeat = 0;
+  long width = 0;
+  
+  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
 
-  assert (max_strlen > 0);
+  if (status)
+    throw FITSError (status,
+		     "FITSArchive::unload CalibrationInterpolatorExtension",
+                     "fits_get_coltype (name=INTERTXT, col=%d)", colnum);
 
-  psrfits_update_key (fptr, "NCHAR", max_strlen);
-
+  if (typecode != TSTRING)
+    throw FITSError (status,
+		     "FITSArchive::unload CalibrationInterpolatorExtension",
+                     "INTERTXT (col=%d) is not TSTRING", colnum);
+  
+  int row = 1;
   for (unsigned iparam=0; iparam < nparam; iparam++)
-    ::unload (fptr, iparam+1, ext->get_parameter(iparam), max_strlen);
+    ::unload (fptr, row, ext->get_parameter(iparam), width);
   
   if (verbose == 3)
-    cerr << "FITSArchive::unload CalibrationInterpolatorExtension exiting" << endl; 
+    cerr << "FITSArchive::unload CalibrationInterpolatorExtension " << row
+	 << " rows written" << endl; 
 
 }
 catch (Error& error)

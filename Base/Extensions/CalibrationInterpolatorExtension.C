@@ -115,11 +115,27 @@ CalibrationInterpolatorExtension::Interface::Interface
 
   add( &CalibrationInterpolatorExtension::get_reference_epoch,
        &CalibrationInterpolatorExtension::set_reference_epoch,
-       "mjd", "Reference epoch of calibration interpolator" );
+       "mjd", "Reference epoch" );
+
+  add( &CalibrationInterpolatorExtension::get_minimum_epoch,
+       &CalibrationInterpolatorExtension::set_minimum_epoch,
+       "minmjd", "Minimum epoch spanned" );
+  
+  add( &CalibrationInterpolatorExtension::get_maximum_epoch,
+       &CalibrationInterpolatorExtension::set_maximum_epoch,
+       "maxmjd", "Maximum epoch spanned" );
 
   add( &CalibrationInterpolatorExtension::get_reference_frequency,
        &CalibrationInterpolatorExtension::set_reference_frequency,
-       "freq", "Reference frequency of calibration interpolator" );
+       "freq", "Reference frequency" );
+
+  add( &CalibrationInterpolatorExtension::get_minimum_frequency,
+       &CalibrationInterpolatorExtension::set_minimum_frequency,
+       "minfreq", "Minimum frequency spanned" );
+
+  add( &CalibrationInterpolatorExtension::get_maximum_frequency,
+       &CalibrationInterpolatorExtension::set_maximum_frequency,
+       "maxfreq", "Maximum frequency spanned" );
 
   typedef CalibrationInterpolatorExtension::Parameter*
   (CalibrationInterpolatorExtension::*get_mutable) (unsigned);
@@ -133,4 +149,19 @@ CalibrationInterpolatorExtension::Interface::Interface
 TextInterface::Parser* CalibrationInterpolatorExtension::get_interface()
 {
   return new CalibrationInterpolatorExtension::Interface( this );
+}
+
+
+std::ostream& Pulsar::operator << (std::ostream& ostr,
+				   CalibrationInterpolatorExtension::Parameter::Type type)
+{
+  switch (type)
+  {
+  case CalibrationInterpolatorExtension::Parameter::FrontendParameter:
+  return ostr << "Frontend";
+  case CalibrationInterpolatorExtension::Parameter::CalibratorStokesParameter:
+  return ostr << "CalStokes";
+  default:
+  return ostr << "unknown";
+  }
 }

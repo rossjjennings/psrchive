@@ -20,17 +20,51 @@
 using namespace std;
 using namespace Pulsar;
 
-void load (fitsfile* fptr, int row,
-	   CalibrationInterpolatorExtension::Parameter* param)
+void load (fitsfile* fptr, int& row,
+	   CalibrationInterpolatorExtension::Parameter* param,
+	   unsigned nrows)
 {
-  psrfits_read_col (fptr, "MODEL", &(param->code), row);
-  psrfits_read_col (fptr, "IPARAM", &(param->iparam), row);
+  int code = 0;
+  psrfits_read_col (fptr, "MODEL", &code, row);
+  param->code = (CalibrationInterpolatorExtension::Parameter::Type) code;
+
+  int iparam = 0;
+  psrfits_read_col (fptr, "IPARAM", &iparam, row);
+  param->iparam = iparam;
+  
   psrfits_read_col (fptr, "LOGSMTH", &(param->log10_smoothing_factor), row);
   psrfits_read_col (fptr, "CHISQ", &(param->total_chi_squared), row);
-  psrfits_read_col (fptr, "NDAT", &(param->ndat_input), row);
-  psrfits_read_col (fptr, "NFLAG_IN", &(param->ndat_flagged_before), row);
-  psrfits_read_col (fptr, "NFLAG_OUT", &(param->ndat_flagged_after), row);
-  psrfits_read_col (fptr, "INTERTXT", &(param->interpolator), row); 
+
+  int ndat = 0;
+  psrfits_read_col (fptr, "NDAT", &ndat, row);
+  param->ndat_input = ndat;
+  
+  int nflag = 0;
+  psrfits_read_col (fptr, "NFLAG_IN", &nflag, row);
+  param->ndat_flagged_before = nflag;
+  
+  psrfits_read_col (fptr, "NFLAG_OUT", &nflag, row);
+  param->ndat_flagged_after = nflag;
+  
+  int first_code = code;
+  int first_iparam = iparam;
+  
+  while (iparam == first_iparam && code == first_code)
+  {
+    string txt;
+    psrfits_read_col (fptr, "INTERTXT", &txt, row);
+    param->interpolator += txt;
+    
+    row ++;
+
+    if (row <= nrows)
+    {
+      psrfits_read_col (fptr, "MODEL", &code, row);
+      psrfits_read_col (fptr, "IPARAM", &iparam, row);
+    }
+    else
+      iparam = -1;  // break the loop
+  }
 }
 
 void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
@@ -111,19 +145,43 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
   double maxepoch = 0;
   psrfits_read_key (fptr, "MAXEPOCH", &maxepoch);
   ext->set_maximum_epoch (maxepoch);
+
+  // INTERTXT
+  int colnum = 0;
+  int status = 0;
+  fits_get_colnum (fptr, CASEINSEN, "INTERTXT", &colnum, &status);
+  int typecode = 0;
+  long repeat = 0;
+  long width = 0;
   
+  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
+
+  if (status)
+    throw FITSError (status,
+		     "FITSArchive::load_CalibrationInterpolatorExtension",
+                     "fits_get_coltype (name=INTERTXT, col=%d)", colnum);
+
+  if (typecode != TSTRING)
+    throw FITSError (status,
+		     "FITSArchive::load_CalibrationInterpolatorExtension",
+                     "INTERTXT (col=%d) is not TSTRING", colnum);
+
+  long nrows = 0;
+  fits_get_num_rows(fptr, &nrows, &status);
+
+  int row = 1;
   for (unsigned iparam = 0; iparam < nparam; iparam++)
   {
     auto param = new CalibrationInterpolatorExtension::Parameter;
-    ::load (fptr, iparam+1, param);
+    ::load (fptr, row, param, nrows);
     ext->add_parameter (param);
   }
-  
-  add_extension (ext);
-  
-  if (verbose == 3)
-    cerr << "FITSArchive::load_CalibrationInterpolatorExtension exiting" << endl;
 
+  if (verbose == 3)
+    cerr << "FITSArchive::load_CalibrationInterpolatorExtension " << row
+	 << " rows read" << endl;
+    
+  add_extension (ext);
 }
 catch (Error& error)
 {

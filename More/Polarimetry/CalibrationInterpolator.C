@@ -46,18 +46,23 @@ CalibrationInterpolator::CalibrationInterpolator (PolnCalibrator* cal)
   for (unsigned iparam=0; iparam < nparam; iparam++)
   {
     auto param = interpolator->get_parameter (iparam);
-    if (param->get_code() == "FEEDPAR")
+    switch (param->get_code())
+    {
+    case CalibrationInterpolatorExtension::Parameter::FrontendParameter:
     {
       has_feedpar = true;
       feedpar_splines[ param->iparam ]
 	= new SplineSmooth2D (param->interpolator);
+      break;
     }
     
-    else if (param->get_code() == "CAL_POLN")
+    case CalibrationInterpolatorExtension::Parameter::CalibratorStokesParameter:
     {
       has_calpoln = true;
       calpoln_splines[ param->iparam ]
 	= new SplineSmooth2D (param->interpolator);
+      break;
+    }
     }
   }
 

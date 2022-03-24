@@ -257,7 +257,7 @@ CalibratorStokes::CouplingPoint string2CouplingPoint (const string& ss)
 	       "Unknown point '" + ss + "'");
 }
 
-std::ostream& Pulsar::operator<< (std::ostream& ostr,
+std::ostream& Pulsar::operator << (std::ostream& ostr,
 				  CalibratorStokes::CouplingPoint point)
 {
   return ostr << CouplingPoint2string(point);
