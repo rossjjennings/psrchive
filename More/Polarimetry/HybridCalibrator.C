@@ -166,6 +166,8 @@ const MEAL::Complex2*
 get_xform (const Pulsar::PolnCalibrator* response,
 	   const unsigned ichan, bool backend_only)
 {
+  DEBUG("get_xform PolnCalibrator=" << (void*) response << "backend_only=" << backend_only);
+
   const MEAL::Complex2* xform = response->get_transformation(ichan);
 
   if (!backend_only)
@@ -177,7 +179,10 @@ get_xform (const Pulsar::PolnCalibrator* response,
     throw Error (InvalidParam, "get_xform",
 		 "transformation cannot be split into backend and feed");
 
-  return splittable->get_backend()->get_backend();
+  const MEAL::Complex2* backend = splittable->get_backend()->get_backend();
+
+  DEBUG("get_xform backend name=" << backend->get_name() << " xform=" << backend->evaluate());
+  return backend;
 }
 
   
@@ -198,6 +203,8 @@ Jones<double> get_response (const Pulsar::PolnCalibrator* response,
 
   if (factor == 1)
   {
+    DEBUG("get_response valid=" << response->get_transformation_valid (ichan));
+
     if (!response->get_transformation_valid (ichan))
       throw Error (InvalidParam, "get_response(PolnCalibrator)",
 		   "ichan=%u flagged invalid", ichan);
@@ -303,6 +310,8 @@ bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
     }
   }
 
+  DEBUG("HybridCalibrator ichan=" << ichan << " valid=" << valid << " PolnCalibrator::valid=" << PolnCalibrator::get_valid (ichan));
+
   return valid && PolnCalibrator::get_valid (ichan);
 }
 
@@ -387,7 +396,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     {
       cal_stokes = get_stokes (reference_input, ichan, target_nchan);
       if (verbose > 2)
-	cerr << "HybridCalibrator cal_stokes=" << cal_stokes << endl;
+	cerr << "HybridCalibrator ichan=" << ichan 
+             << " cal_stokes=" << cal_stokes << endl;
     }
 
     // get the precalibrator transformation
@@ -397,7 +407,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     {
       response = ::get_response (precalibrator, ichan, target_nchan);
       if (verbose > 2)
-	cerr << "HybridCalibrator pre-calibrator response=" << response << endl;
+	cerr << "HybridCalibrator ichan=" << ichan 
+             << " precal response=" << response << endl;
     }
 
     Jones<double> cal_response (1.0);
@@ -422,7 +433,10 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       throw Error (InvalidState, "HybridCalibrator::calculate_transformation",
 		   "unknown coupling point=" + point);
     }
-      
+
+    if (verbose > 2)
+      cerr << "HybridCalibrator ichan=" << ichan << " cal_response=" << cal_response << endl;
+ 
     // pass the reference Stokes parameters through the instrument
     Stokes< Estimate<double> > input_stokes;
     input_stokes = transform (cal_stokes, cal_response);

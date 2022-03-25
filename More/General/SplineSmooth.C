@@ -37,9 +37,13 @@ SplineSmooth::SplineSmooth (const std::string& json)
   {
     ofstream os (fname);
     os << json;
+    if (!os)
+      throw Error (FailedSys, "SplineSmooth ctor",
+                   "error after writing string");
   }
 
   load (fname);
+  remove (fname);
   free (fname);
 }
 

@@ -39,6 +39,7 @@
 
 #include <unistd.h> 
 #include <errno.h>
+#include <assert.h>
 
 using namespace std;
 using namespace Pulsar;
@@ -473,6 +474,12 @@ bool Database::InterpolatorEntry::equals (const Entry* that) const
 
 bool Database::Entry::less_than (const Entry* that) const
 {
+  if (!that)
+    throw Error (InvalidParam, "Database::Entry::less_than",
+                 "null pointer passed as argument");
+
+  // cerr << "lt this=" << (void*)this << " that=" << (void*)that << endl;
+
   if (this->instrument < that->instrument)
     return true;
   else if (this->instrument > that->instrument) 
@@ -488,31 +495,12 @@ bool Database::Entry::less_than (const Entry* that) const
   else if (this->frequency > that->frequency) 
     return false;
 
-  return this->bandwidth < that->bandwidth;
-}
-
-bool Database::StaticEntry::less_than (const Entry* that) const
-{
-  if (Entry::less_than (that))
+  if (this->bandwidth < that->bandwidth)
     return true;
-  
-  auto like = dynamic_cast<const StaticEntry*> (that);
-  if (like)
-    return this->time < like->time;
+  else if (this->bandwidth > that->bandwidth)
+    return false;
 
-  return false;
-}
-
-bool Database::InterpolatorEntry::less_than (const Entry* that) const
-{
-  if (Entry::less_than (that))
-    return true;
-  
-  auto like = dynamic_cast<const InterpolatorEntry*> (that);
-  if (like)
-    return this->start_time < like->start_time;
-
-  return false;
+  return this->get_effective_time() < that->get_effective_time();
 }
 
 ostream& Pulsar::operator << (ostream& os, Database::Sequence sequence)
@@ -924,7 +912,7 @@ void Database::load (const string& dbase_filename)
   if (Calibrator::verbose > 2)
     cerr << "Database::loading " << count << " entries" << endl;
 
-  Entry* entry;
+  Entry* entry = 0;
 
   while (fgets (temp, 4096, fptr)) try
   {
@@ -968,7 +956,7 @@ void Database::unload (const string& filename)
   {
     Entry* temp = entries[ie];
 
-    shorten_filename (temp);
+    shorten_filename (temp);  // WvS this now shortens entries[ie]
     temp->unload(out);
 
     fprintf (fptr, "%s\n", out.c_str());
@@ -1014,6 +1002,9 @@ void Database::shorten_filename (Entry* entry)
 //! Add the given Archive to the database
 void Database::add (Entry* entry) try
 {
+  if (!entry)
+    throw Error (InvalidParam, "Database::add", "null Entry");
+
   for (unsigned ie=0; ie < entries.size(); ie++) 
   {
     if (entries[ie]->filename == entry->filename)
@@ -1045,26 +1036,46 @@ void Database::all_matching (const Criteria& criteria,
 			     vector<const Entry*>& matches) const
 {
   if (Calibrator::verbose > 2)
-    cerr << "Database::all_matching " << entries.size()
-         << " entries" << endl;
+    cerr << "Database::all_matching " << entries.size() << " entries" << endl;
 
   closest_match = Criteria();
+
+  vector<bool> does_match (entries.size(), false);
+  unsigned total_matches = 0;
 
   for (unsigned j = 0; j < entries.size(); j++)
   {
     if (criteria.match (entries[j]))
-      matches.push_back(entries[j]);
+    {
+      does_match[j] = true;
+      total_matches++;
+    }
     else
+    {
+      does_match[j] = false;
       closest_match = Criteria::closest (closest_match, criteria);
+    }
   }
+
+  unsigned imatch = matches.size();
+  matches.resize (imatch + total_matches);
+  for (unsigned j = 0; j < entries.size(); j++)
+  {
+    if (does_match[j])
+    {
+      matches[imatch] = entries[j];
+      imatch ++;
+    }
+  }
+
+  assert (imatch == matches.size());
 }
 
 const Database::Entry*
 Database::best_match (const Criteria& criteria) const
 {
   if (Calibrator::verbose > 1)
-    cerr << "Database::best_match " << entries.size()
-	 << " entries" << endl;
+    cerr << "Database::best_match " << entries.size() << " entries" << endl;
   
   const Entry* best_match = 0;
 

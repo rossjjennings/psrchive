@@ -175,7 +175,7 @@ PolnCalibratorExtension::get_Estimate ( unsigned iparam, unsigned ichan ) const
 }
 
 void PolnCalibratorExtension::set_Estimate ( unsigned iparam, unsigned ichan,
-                                             Estimate<float>& datum )
+                                             const Estimate<float>& datum )
 {
 #if _DEBUG
   cerr << "PolnCalibratorExtension::set_Estimate iparam=" << iparam

@@ -101,7 +101,7 @@ namespace Pulsar {
     void fscrunch_to_nchan (unsigned new_nchan);
 
     Estimate<float> get_Estimate ( unsigned iparam, unsigned ichan ) const;
-    void set_Estimate (unsigned iparam, unsigned ichan, Estimate<float>&);
+    void set_Estimate (unsigned iparam, unsigned ichan, const Estimate<float>&);
 
   protected:
 

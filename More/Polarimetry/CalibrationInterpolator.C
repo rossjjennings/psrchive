@@ -193,6 +193,14 @@ bool CalibrationInterpolator::update (const Integration* subint)
   double max_freq = interpolator->get_maximum_frequency ();
   double ref_freq = interpolator->get_reference_frequency ();
 
+  if (feedpar)
+  {
+    // set the gain to unity
+    unsigned gain_iparam = 0;
+    for (unsigned ichan=0; ichan<nchan; ++ichan)
+      feedpar->set_Estimate (gain_iparam, ichan, Estimate<float>(1.0,1e-4));
+  }
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
     double freq = subint->get_centre_frequency (ichan);

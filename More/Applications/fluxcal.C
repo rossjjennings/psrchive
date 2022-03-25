@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -122,6 +123,17 @@ void configuration_report (Reference::To<Pulsar::StandardCandles>);
 
 // print all fluxes to cerr
 void print_fluxes (Reference::To<Pulsar::StandardCandles>, double freq);
+
+// compare two Database::Entry instances using Entry::less_than
+bool by_frequency_then_time (const Pulsar::Database::Entry* A, 
+                             const Pulsar::Database::Entry* B)
+{
+  if (A==NULL || B==NULL)
+    throw Error (InvalidParam, "by_frequency_then_time",
+                 "null pointer passed as argument");
+
+  return A->less_than (B);
+}
 
 int main (int argc, char** argv) try {
 
@@ -267,12 +279,13 @@ int main (int argc, char** argv) try {
     criteria = database->criteria(Pulsar::Database::any, Signal::FluxCalOff);
     database->all_matching (criteria, entries);
 
-    sort (entries.begin(), entries.end());
-
-    if (!entries.size()) {
+    if (!entries.size())
+    {
       cerr << "fluxcal: no FluxCalOn|Off observations in database" << endl;
       return -1;
     }
+
+    sort (entries.begin(), entries.end(), &by_frequency_then_time);
 
     // break them into sets
 
@@ -282,7 +295,6 @@ int main (int argc, char** argv) try {
     filenames.resize( entries.size() );
     for (unsigned ifile=0; ifile < filenames.size(); ifile++)
       filenames[ifile] = database->get_filename (entries[ifile]);
-
   }
 
   if (!policy)

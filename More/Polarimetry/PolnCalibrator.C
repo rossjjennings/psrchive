@@ -35,6 +35,7 @@
 #include "templates.h"
 #include "median_smooth.h"
 #include "strutil.h"
+#include "debug.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -377,11 +378,18 @@ void Pulsar::PolnCalibrator::calculate_transformation () try
     cerr << "Pulsar::PolnCalibrator::calculate_transformation" << endl;
 
   if (!poln_extension)
+  {
+    cerr << "Pulsar::PolnCalibrator::calculate_transformation no poln_extension" << endl;
+
     throw Error (InvalidState,
 		 "Pulsar::PolnCalibrator::calculate_transformation",
 		 "no PolnCalibratorExtension available");
+  }
 
   unsigned nchan = poln_extension->get_nchan();
+
+  DEBUG("PolnCalibrator::calculate_transformation this=" << (void*)this << " nchan=" << nchan);
+
   transformation.resize (nchan);
 
   if (poln_extension->get_has_covariance())
