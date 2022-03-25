@@ -123,6 +123,13 @@ void configuration_report (Reference::To<Pulsar::StandardCandles>);
 // print all fluxes to cerr
 void print_fluxes (Reference::To<Pulsar::StandardCandles>, double freq);
 
+// compare two Database::Entry instances using Entry::less_than
+bool by_frequency_then_time (const Pulsar::Database::Entry* A, 
+                             const Pulsar::Database::Entry* B)
+{
+  return A->less_than (B);
+}
+
 int main (int argc, char** argv) try {
 
   Pulsar::Option<bool> self_calibrate ("fluxcal::self_calibrate", false);
@@ -267,7 +274,7 @@ int main (int argc, char** argv) try {
     criteria = database->criteria(Pulsar::Database::any, Signal::FluxCalOff);
     database->all_matching (criteria, entries);
 
-    sort (entries.begin(), entries.end());
+    sort (entries.begin(), entries.end(), by_frequency_then_time);
 
     if (!entries.size()) {
       cerr << "fluxcal: no FluxCalOn|Off observations in database" << endl;
