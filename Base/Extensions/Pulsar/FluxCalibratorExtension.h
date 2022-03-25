@@ -117,6 +117,9 @@ namespace Pulsar
 
   protected:
 
+    //! The number of receptors
+    unsigned nreceptor;
+    
     //! System equivalent flux density in each receptor and frequency channel
     /*! in mJy */
     std::vector< std::vector< Estimate<double> > > S_sys;

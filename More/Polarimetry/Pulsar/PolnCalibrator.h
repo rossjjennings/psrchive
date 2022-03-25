@@ -139,21 +139,8 @@ namespace Pulsar {
     //! Communicates PolnCalibrator parameters to plotting routines
     class Info;
 
-    //! Abstract base of classes that update model parameters
-    class Variation : public Reference::Able
-    {
-    public:
-      //! Update the model parameters to match the integration
-      /*! Returns true if transformation should be recomputed */
-      virtual bool update (const Integration*) = 0;
-    };
-
   protected:
 
-    //! Updates model parameters
-    Reference::To<Variation> variation;
-    void copy_variation (PolnCalibrator*);
-    
     //! The array of transformation Model instances
     Reference::Vector<MEAL::Complex2> transformation;
 

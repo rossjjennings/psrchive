@@ -11,26 +11,26 @@
 #ifndef __CalibrationInterpolator_H
 #define __CalibrationInterpolator_H
 
-#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/Calibrator.h"
 #include <map>
 
 namespace Pulsar {
 
   class CalibrationInterpolatorExtension;
-  class PolnCalibrator;
+  class FluxCalibratorExtension;
   class PolnCalibratorExtension;
   class CalibratorStokes;
   class Integration;
   class SplineSmooth2D;
   
   //! A calibration solution that spans a finite bandwidth and time
-  class CalibrationInterpolator : public PolnCalibrator::Variation
+  class CalibrationInterpolator : public Calibrator::Variation
   {
     
   public:
 
     //! Construct from a calibrator with a CalibrationInterpolatorExtension
-    CalibrationInterpolator (PolnCalibrator*);
+    CalibrationInterpolator (Calibrator*);
 
     //! Destructor
     ~CalibrationInterpolator ();
@@ -50,8 +50,12 @@ namespace Pulsar {
     //! The model of the feed
     Reference::To<PolnCalibratorExtension> feedpar;
 
+    //! The flux calibrator
+    Reference::To<FluxCalibratorExtension> fluxcal;
+
     std::map< unsigned, Reference::To<SplineSmooth2D> > feedpar_splines;
     std::map< unsigned, Reference::To<SplineSmooth2D> > calpoln_splines;
+    std::map< unsigned, Reference::To<SplineSmooth2D> > fluxcal_splines;
 
     MJD last_computed;
   };

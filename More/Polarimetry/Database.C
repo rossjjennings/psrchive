@@ -1353,7 +1353,7 @@ Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 }
 catch (Error& error)
 {  
-  if (Calibrator::verbose > 2)
+  //if (Calibrator::verbose > 2)
     cerr << "Database::generateFluxCalibrator failure"
       " generating processed FluxCal\n" << error.get_message() << endl;
   

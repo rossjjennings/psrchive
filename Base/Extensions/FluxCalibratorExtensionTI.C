@@ -21,6 +21,10 @@ Pulsar::FluxCalibratorExtension::Interface::Interface
   add( &FluxCalibratorExtension::get_nreceptor,
        "nrcvr", "Number of receiver channels" );
 
+  // read-only: requires resize
+  add( &FluxCalibratorExtension::has_scale,
+       "scale", "scale (1=Native 0=Reference)" );
+
   add( &FluxCalibratorExtension::get_epoch,
        &FluxCalibratorExtension::set_epoch,
        "mjd", "Epoch of calibration observation" );

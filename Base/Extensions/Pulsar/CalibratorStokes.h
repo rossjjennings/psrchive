@@ -31,7 +31,8 @@ namespace Pulsar {
      BeforeBasis,      // e.g. radiated onto primary reflector
      BeforeFrontend,   // e.g. radiated into feedhorn
      BeforeIdeal,      // e.g. coupled after transducer
-     BeforeBackend     // not sure why
+     BeforeBackend,    // not sure why
+     Unknown           // don't know
     };
     
     //! Default constructor

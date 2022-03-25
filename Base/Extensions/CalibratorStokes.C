@@ -252,7 +252,8 @@ CalibratorStokes::CouplingPoint string2CouplingPoint (const string& ss)
   if( ss=="BeforeFrontend" ) return CalibratorStokes::BeforeFrontend;
   if( ss=="BeforeIdeal" ) return CalibratorStokes::BeforeIdeal;
   if( ss=="BeforeBackend" ) return CalibratorStokes::BeforeBackend;
-
+  if( ss=="Unknown" ) return CalibratorStokes::Unknown;
+  
   throw Error (InvalidState, "Pulsar::string2CouplingPoint",
 	       "Unknown point '" + ss + "'");
 }

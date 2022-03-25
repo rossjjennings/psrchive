@@ -12,6 +12,9 @@
 #include "Pulsar/CalibrationInterpolator.h"
 #include "Pulsar/CalibrationInterpolatorExtension.h"
 
+#include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/FluxCalibratorExtension.h"
+
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 
@@ -22,10 +25,13 @@
 #include "Pulsar/SplineSmooth.h"
 #endif
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 using namespace Pulsar;
 
-CalibrationInterpolator::CalibrationInterpolator (PolnCalibrator* cal)
+CalibrationInterpolator::CalibrationInterpolator (Calibrator* cal)
 {
   // This class works by inserting new extensions into the archive
   Reference::To<Archive> data = const_cast<Archive*>( cal->get_Archive() );
@@ -37,7 +43,8 @@ CalibrationInterpolator::CalibrationInterpolator (PolnCalibrator* cal)
 		 + " does not contain a CalibrationInterpolatorExtension");
 
   bool has_feedpar = false;  // has feed parameters
-  bool has_calpoln = false;   // has calibrator stokes parameters
+  bool has_calpoln = false;  // has calibrator stokes parameters
+  bool has_fluxcal = false;  // has flux calibrator parameters
   
   unsigned nparam = interpolator->get_nparam();
 
@@ -63,16 +70,30 @@ CalibrationInterpolator::CalibrationInterpolator (PolnCalibrator* cal)
 	= new SplineSmooth2D (param->interpolator);
       break;
     }
+
+    case CalibrationInterpolatorExtension::Parameter::FluxCalibratorParameter:
+    {
+      has_fluxcal = true;
+      fluxcal_splines[ param->iparam ]
+	= new SplineSmooth2D (param->interpolator);
+      break;
+    }
     }
   }
 
-  if (!has_feedpar)
-    throw Error (InvalidParam, "CalibrationInterpolator ctor",
-		 "CalibrationInterpolatorExtension has no feed parameters");
-
-  feedpar = data->getadd<PolnCalibratorExtension> ();
-  feedpar->set_type (interpolator->get_type());
-  feedpar->set_epoch (interpolator->get_reference_epoch());
+  if (has_fluxcal)
+  {
+    fluxcal = data->getadd<FluxCalibratorExtension> ();
+    fluxcal->set_nreceptor( interpolator->get_nreceptor() );
+    fluxcal->has_scale( interpolator->get_native_scale() );
+  }
+    
+  if (has_feedpar)
+  {
+    feedpar = data->getadd<PolnCalibratorExtension> ();
+    feedpar->set_type (interpolator->get_type());
+    feedpar->set_epoch (interpolator->get_reference_epoch());
+  }
   
   if (has_calpoln)
   {
@@ -94,11 +115,14 @@ void set_params (C* container,
 		 double x, double y)
 {
   std::pair<double,double> coord (x,y);
+
+  // cerr << "set_params size=" << params.size() << endl;
   
   for (auto param: params)
   {
     unsigned iparam = param.first;
-    
+    DEBUG("iparam=" << iparam << " nparam=" << container->get_nparam());
+
     if (iparam >= container->get_nparam())
       throw Error (InvalidParam, "CalibrationInterpolator::set_params",
 		   "iparam=%u nparam%u", iparam, container->get_nparam());
@@ -108,7 +132,7 @@ void set_params (C* container,
 
     // To-Do: fit 2-D splines to bootstrap (replacement) errors
     Estimate<float> estimate (value, 0.001);
-
+    
     container->set_Estimate (iparam, ichan, estimate);
   }
 }
@@ -146,24 +170,36 @@ bool CalibrationInterpolator::update (const Integration* subint)
   unsigned nchan = subint->get_nchan();
   
   if (feedpar)
+  {
+    DEBUG("CalibrationInterpolator::update PolnCalibrator::nchan="<<nchan);
     feedpar->set_nchan (nchan);
-
+  }
+  
   if (calpoln)
+  {
+    DEBUG("CalibrationInterpolator::update CalibratorStokes::nchan="<<nchan);
     calpoln->set_nchan (nchan);
-
+  }
+  
+  if (fluxcal)
+  {
+    DEBUG("CalibrationInterpolator::update FluxCalibrator::nchan="<<nchan);
+    fluxcal->set_nchan (nchan);
+    // complete the resize
+    fluxcal->set_nreceptor (interpolator->get_nreceptor());
+  }
+  
   double min_freq = interpolator->get_minimum_frequency ();
   double max_freq = interpolator->get_maximum_frequency ();
   double ref_freq = interpolator->get_reference_frequency ();
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
-    if (Archive::verbose > 2)
-      cerr << "CalibrationInterpolator::update"
-	" ichan=" << ichan << endl;
-
     double freq = subint->get_centre_frequency (ichan);
     bool valid = (freq >= min_freq && freq <= max_freq);
-    
+
+    DEBUG("CalibrationInterpolator::update ichan=" << ichan << " freq=" << freq << " valid=" << valid);
+
     if (feedpar)
     {
       feedpar->set_valid (ichan, valid);
@@ -176,6 +212,14 @@ bool CalibrationInterpolator::update (const Integration* subint)
       calpoln->set_valid (ichan, valid);
       if (valid)
 	set_params (calpoln.get(), calpoln_splines, ichan, x0, freq - ref_freq);
+    }
+
+    if (fluxcal)
+    {
+      DEBUG("CalibrationInterpolator::update fluxcal ichan=" << ichan << " freq=" << freq << " valid=" << valid);
+      fluxcal->set_valid (ichan, valid);
+      if (valid)
+	set_params (fluxcal.get(), fluxcal_splines, ichan, x0, freq - ref_freq);
     }
 
   }

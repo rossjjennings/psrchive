@@ -66,6 +66,23 @@ void FITSArchive::unload (fitsfile* fptr,
   string coupling = tostring( ext->get_coupling_point () );
   psrfits_update_key (fptr, "COUPLING", coupling);
 
+  // NRCVR
+  unsigned nreceptor = ext->get_nreceptor();
+  psrfits_update_key (fptr, "NRCVR", nreceptor);
+
+  // SCALE
+  string scale = "NA";
+
+  if (nreceptor)
+  {
+    if (ext->get_native_scale())
+      scale = "SCALE";
+    else
+      scale = "S_CAL";
+  }
+  
+  psrfits_update_key (fptr, "SCALE", scale);
+
   // NPARAM
   unsigned nparam = ext->get_nparam ();
   psrfits_update_key (fptr, "NPARAM", nparam);

@@ -68,6 +68,12 @@ const Pulsar::Calibrator::Type* Pulsar::Calibrator::get_type () const
   return type;
 }
 
+void Pulsar::Calibrator::copy_variation (Calibrator* other)
+{
+  if (other->variation)
+    variation = other->variation;
+}
+
 //! Provide derived classes with access to the calibrator
 bool Pulsar::Calibrator::has_calibrator () const
 {

@@ -56,6 +56,15 @@ namespace Pulsar {
     CalibratorStokes::CouplingPoint get_coupling_point () const
     { return coupling_point; }
 
+    //! Set the number of receptors in flux calibrator
+    void set_nreceptor (unsigned n) { nreceptor = n; }
+    //! Get the number of receptors in flux calibrator
+    unsigned get_nreceptor () const { return nreceptor; }
+
+    //! Returns true if scale is native, false if scale is relative
+    bool get_native_scale () const { return native_scale; }
+    void set_native_scale (bool flag) { native_scale = flag; }
+
     //! Get the number of epochs in input data
     unsigned get_nsub_input () const { return nsub_input; }
     void set_nsub_input (unsigned n) { nsub_input = n; }
@@ -166,6 +175,12 @@ namespace Pulsar {
 
     //! The point where the reference source signal is coupled
     CalibratorStokes::CouplingPoint coupling_point;
+
+    //! Number of receptors in flux calibrator
+    unsigned nreceptor;
+
+    //! True if scale is native; false if scale is relative to reference
+    bool native_scale;
     
     //! The number of epochs in the input data
     unsigned nsub_input;

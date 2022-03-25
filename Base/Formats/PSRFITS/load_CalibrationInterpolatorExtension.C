@@ -101,7 +101,21 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
 
   auto point = fromstring<CalibratorStokes::CouplingPoint> (coupling);
   ext->set_coupling_point (point);
-  
+
+  // Get NRCVR (new in PSRFITS version 6.6)
+  int nrcvr = 2;
+  psrfits_read_key (fptr, "NRCVR", &nrcvr, nrcvr, verbose > 2);
+  ext->set_nreceptor (nrcvr);
+
+  // Get SCALE (new in PSRFITS version 6.6)
+  string scale = "S_CAL";
+  psrfits_read_key (fptr, "SCALE", &scale, scale, verbose > 2);
+
+  if (scale == "SCALE")
+    ext->set_native_scale (true);
+  else
+    ext->set_native_scale (false);
+    
   // NPARAM
   unsigned nparam = 0;
   psrfits_read_key (fptr, "NPARAM", &nparam);

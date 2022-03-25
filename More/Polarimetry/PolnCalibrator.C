@@ -84,7 +84,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
   {
 #ifdef HAVE_SPLINTER
     DEBUG("PolnCalibrator ctor set variation");
-    variation = new CalibrationInterpolator (this);
+    set_variation( new CalibrationInterpolator (this) );
 #else
     throw Error (InvalidState, "PolnCalibrator ctor",
 		 "Archive has CalibrationInterpolatorExtension\n\t"
@@ -98,12 +98,6 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
     extension = poln_extension;
 
   filenames.push_back( archive->get_filename() );
-}
-
-void Pulsar::PolnCalibrator::copy_variation (PolnCalibrator* other)
-{
-  if (other->variation)
-    variation = other->variation;
 }
 
 void Pulsar::PolnCalibrator::set_Receiver (const Archive* archive)

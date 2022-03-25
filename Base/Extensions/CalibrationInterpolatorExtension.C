@@ -117,6 +117,14 @@ CalibrationInterpolatorExtension::Interface::Interface
        &CalibrationInterpolatorExtension::set_reference_epoch,
        "mjd", "Reference epoch" );
 
+  add( &CalibrationInterpolatorExtension::get_nreceptor,
+       &CalibrationInterpolatorExtension::set_nreceptor,
+       "nr", "Number of receptors" );
+
+  add( &CalibrationInterpolatorExtension::get_native_scale,
+       &CalibrationInterpolatorExtension::set_native_scale,
+       "scale", "Fluxcal scale (1=Native 0=Reference)" );
+
   add( &CalibrationInterpolatorExtension::get_minimum_epoch,
        &CalibrationInterpolatorExtension::set_minimum_epoch,
        "minmjd", "Minimum epoch spanned" );

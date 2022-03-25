@@ -18,7 +18,8 @@ namespace Pulsar {
   class Integration;
   class StandardCandles;
   class CalibratorStokes;
-
+  class FluxCalibratorExtension;
+  
   //! Calibrates flux using standard candles and artificial sources
   class FluxCalibrator : public Calibrator {
     
@@ -105,6 +106,9 @@ namespace Pulsar {
     //! Flux calibrator database
     Reference::To<const StandardCandles> database;
 
+    //! Flux calibrator extension
+    Reference::To<const FluxCalibratorExtension> flux_extension;
+    
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan = 0);
 

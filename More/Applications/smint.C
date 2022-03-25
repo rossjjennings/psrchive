@@ -24,6 +24,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibrationInterpolatorExtension.h"
+#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Profile.h"
 
@@ -533,9 +534,29 @@ void smint::process (Pulsar::Archive* archive)
   {
     if (fcal_data.size() == 0)
     {
-      // smooth only S_cal for each receptor parameters 
+      
+      /*
+	smooth either S_cal or scale for each of the receptor parameters 
 
-      add_if_has_data (fcal_data, fext, 2, 3);
+	See FluxCalibratorExtension::get_Estimate index calculations.
+      */
+
+      unsigned nreceptor = fext->get_nreceptor ();
+      cerr << "smint: fluxcal nreceptor=" << nreceptor << endl;
+
+      unsigned istart = nreceptor;
+      
+      if (fext->has_scale())
+      {
+	cerr << "smint: fluxcal native scale" << endl;
+	istart += nreceptor;
+      }
+
+      unsigned iend = istart + nreceptor - 1;
+
+      cerr << "smint: start=" << istart << " end=" << iend << endl;
+      
+      add_if_has_data (fcal_data, fext, istart, iend);
       set_reference (archive, fext);
     }
     else
@@ -916,7 +937,14 @@ void smint::prepare_solution (Archive* archive)
     delete csext;
   }
   
-  delete_extension <FluxCalibratorExtension> (archive);
+  auto fcext = archive->get<FluxCalibratorExtension> ();
+  if (fcext)
+  {
+    result->set_type( new CalibratorTypes::Flux );
+    result->set_nreceptor( fcext->get_nreceptor() );
+    result->set_native_scale( fcext->has_scale() );
+    delete fcext;
+  }
 }
 
 void smint::finalize ()
