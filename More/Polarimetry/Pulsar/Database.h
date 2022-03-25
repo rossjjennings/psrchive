@@ -127,12 +127,9 @@ namespace Pulsar {
       
     public:
       
-      // Critical information about the entry
-      
-      Signal::Source   obsType;      // FluxCal, PolnCal, Pulsar, etc.
-
       Reference::To<const Calibrator::Type> calType;
 
+      Signal::Source   obsType;      // FluxCal, PolnCal, Pulsar, etc.
       sky_coord        position;     // Where the telescope was pointing
       double           bandwidth;    // Bandwidth of observation
       double           frequency;    // Centre frequency of observation
@@ -162,6 +159,7 @@ namespace Pulsar {
       virtual bool less_than (const Entry*) const;
       virtual bool equals (const Entry*) const;
 
+      virtual MJD get_effective_time () const = 0;
       virtual std::string get_time_str () const = 0;
       virtual std::string get_nchan_str () const = 0;
 
@@ -180,9 +178,9 @@ namespace Pulsar {
       //! Construct from a Pulsar::Archive
       StaticEntry (const Archive* arch = 0);
 
-      bool less_than (const Entry*) const;
       bool equals (const Entry*) const;
 
+      MJD get_effective_time () const { return time; }
       std::string get_time_str () const;
       std::string get_nchan_str () const;
 
@@ -201,9 +199,9 @@ namespace Pulsar {
       //! Construct from a Pulsar::Archive
       InterpolatorEntry (const Archive* arch = 0);
 
-      bool less_than (const Entry*) const;
       bool equals (const Entry*) const;
 
+      MJD get_effective_time () const { return start_time; }
       std::string get_time_str () const;
       std::string get_nchan_str () const;
     };
