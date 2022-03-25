@@ -77,6 +77,7 @@ protected:
   Reference::To< CalibrationInterpolatorExtension > result;
   
   bool convert_epochs;
+  bool use_native_scale;
 
   void fit_polynomial (const vector< double >& data_x,
                        const vector< Estimate<double> >& data_y);
@@ -280,6 +281,7 @@ smint::smint ()
 {
   add( new Pulsar::StandardOptions );
 
+  use_native_scale = false;
   freq_order = time_order = 0;
   threshold = 0.001;
   pspline_alpha = 0.0;
@@ -546,7 +548,7 @@ void smint::process (Pulsar::Archive* archive)
 
       unsigned istart = nreceptor;
       
-      if (fext->has_scale())
+      if (use_native_scale && fext->has_scale())
       {
 	cerr << "smint: fluxcal native scale" << endl;
 	istart += nreceptor;
@@ -942,7 +944,7 @@ void smint::prepare_solution (Archive* archive)
   {
     result->set_type( new CalibratorTypes::Flux );
     result->set_nreceptor( fcext->get_nreceptor() );
-    result->set_native_scale( fcext->has_scale() );
+    result->set_native_scale( use_native_scale && fcext->has_scale() );
     delete fcext;
   }
 }
