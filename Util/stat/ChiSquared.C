@@ -20,49 +20,88 @@ void linear_fit (double& scale, double& offset,
 		 const vector<double>& dat1, const vector<double>& dat2,
 		 const vector<bool>* mask)
 {
-  double covar = 0.0;
-  double mu_1 = 0.0;
-  double mu_2 = 0.0;
-  double var_2 = 0.0;
-  unsigned count = 0;
-    
-  for (unsigned i=0; i<dat1.size(); i++)
+  unsigned ndat = dat1.size();
+  vector<double> one (ndat, 1.0);
+  vector<double> wt (ndat, 1.0);
+
+  if (mask)
   {
-    if (mask && !(*mask)[i])
-      continue;
-      
-    mu_1 += dat1[i];
-    mu_2 += dat2[i];
-    var_2 += dat2[i] * dat2[i];
-    covar += dat1[i] * dat2[i];
-    
-    count ++;
+    for (unsigned idat=0; idat < ndat; idat++)
+      if (! (*mask)[idat])
+	wt[idat] = 0.0;
   }
 
-  mu_1 /= count;
-  mu_2 /= count;
-  covar /= count;
-  covar -= mu_1 * mu_2;
-  var_2 /= count;
-  var_2 -= mu_2 * mu_2;
+  linear_fit_work (scale, offset, dat1, dat2, one, wt, true);
+}
+
+void weighted_linear_fit (double& scale, double& offset,
+			  const vector<double>& yval,
+			  const vector<double>& xval,
+			  const vector<double>& wt)
+{
+  vector<double> one (yval.size(), 1.0);
+  linear_fit_work (scale, offset, yval, xval, one, wt);
+}
+   
+void linear_fit_work (double& scale, double& offset,
+		      const vector<double>& dat1,
+		      const vector<double>& dat2,
+		      const vector<double>& one,
+		      const vector<double>& wt,
+		      bool robust_offset)
+{
+  double mu_1 = 0.0;
+  double mu_2 = 0.0;
+  double covar = 0.0;
+  double var_2 = 0.0;
+  double wmu_2 = 0.0;
+  double norm = 0;
+
+  unsigned ndim = dat1.size ();
+  unsigned count = 0;
+  
+  for (unsigned idim=0; idim < ndim; idim++)
+  {
+    if (wt[idim] == 0)
+      continue;
+
+    count ++;
+    mu_1 += dat1[idim] * wt[idim];
+    mu_2 += dat2[idim] * wt[idim];
+    covar += dat1[idim] * dat2[idim] * wt[idim];
+    var_2 += dat2[idim] * dat2[idim] * wt[idim];
+    wmu_2 += one[idim] * dat2[idim] * wt[idim];
+    norm += one[idim] * one[idim] * wt[idim];
+  }
+  
+  mu_1 /= norm;
+  mu_2 /= norm;
+  covar -= mu_1 * wmu_2;
+  var_2 -= mu_2 * wmu_2;
   
   scale = covar / var_2;
 
-  vector<double> diff (count);
-  unsigned idiff = 0;
-  
-  for (unsigned i=0; i<dat1.size(); i++)
+  if (robust_offset)
   {
-    if (mask && !(*mask)[i])
-      continue;
+    vector<double> diff (count);
+    unsigned idiff = 0;
+  
+    for (unsigned idim=0; idim<ndim; idim++)
+    {
+      if (wt[idim] == 0)
+	continue;
     
-    diff[idiff] = dat1[i] - scale * dat2[i];
-    idiff ++;
+      diff[idiff] = dat1[idim]*wt[idim] - scale * dat2[idim]*wt[idim];
+      idiff ++;
+    }
+  
+    assert (idiff == count);  
+    offset = median (diff);
   }
+  else
+    offset = mu_1 - scale * mu_2;
   
-  assert (idiff == count);
-  
-  offset = median (diff);
+  // cerr << "scale=" << scale << " offset=" << offset << endl;
 }
 
 
@@ -86,17 +125,15 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   double scale = 1.0;
   double offset = 0.0;
   
+  vector<bool> mask (ndat, true);
+    
   if (robust_linear_fit)
   {
-    vector<bool> mask (ndat, true);
-    
     unsigned total_zapped = 0;
     unsigned max_zapped = ndat;
     if (max_zap_fraction)
       max_zapped = max_zap_fraction * max_zapped;
 
-    residual.resize (ndat);
-    
     unsigned zapped = 0;
     do
     {
@@ -112,9 +149,9 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
       {
 	if (!mask[i])
 	  continue;
-	
-	residual[i] = dat1[i] - scale * dat2[i] - offset;
-	if ( outlier_threshold > 0 && sqr(residual[i]) > cut )
+
+	double residual = dat1[i] - scale * dat2[i] - offset;
+	if ( outlier_threshold > 0 && sqr(residual) > cut )
         {
 	  mask[i] = false;
 	  zapped ++;
@@ -133,8 +170,16 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   }
   
   double coeff = 0.0;
+  residual.resize (ndat);
+    
   for (unsigned i=0; i<ndat; i++)
-    coeff += sqr(dat1[i] - scale * dat2[i] - offset);
+  {
+    residual[i] = dat1[i] - scale * dat2[i] - offset;
+    coeff += sqr(residual[i]);
+
+    if (!mask[i])
+      residual[i] = 0.0;
+  }
   
   double retval = coeff / ( ndat * ( 1 + sqr(scale) ) );
 

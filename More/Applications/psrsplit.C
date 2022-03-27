@@ -10,6 +10,7 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/CalibratorExtension.h"
+#include "Pulsar/FITSHdrExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Dispersion.h"
 #include "Pulsar/Integration.h"
@@ -288,6 +289,14 @@ void psrsplit::split_cal_extensions (Pulsar::Archive* archive)
     output->set_dedispersed (false);
     output->set_bandwidth (bw);
     output->set_centre_frequency (cf);
+
+    // overcome the historical vagaries of OBSFREQ and OBSBW
+    FITSHdrExtension* hdr = output->get<FITSHdrExtension> ();
+    if (hdr)
+    {
+      hdr->obsfreq = cf;
+      hdr->obsbw = bw;
+    }
     
     output->unload ( filename );
 

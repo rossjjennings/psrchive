@@ -11,8 +11,9 @@
 
 #if _DEBUG
 #include <iostream>
-using namespace std;
 #endif
+
+using namespace std;
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
@@ -20,6 +21,7 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
 {
   type = Calibrator::Type::factory ("Flux");
   scale_available = false;
+  nreceptor = 0;
 }
 
 //! Copy constructor
@@ -38,6 +40,8 @@ Pulsar::FluxCalibratorExtension::operator= (const FluxCalibratorExtension& fc)
   if (this == &fc)
     return *this;
 
+  nreceptor = fc.nreceptor;
+  
   CalibratorExtension::operator= (fc);
   S_cal = fc.S_cal;
   S_sys = fc.S_sys;
@@ -72,7 +76,8 @@ unsigned int Pulsar::FluxCalibratorExtension::get_nchan( void ) const
   return S_cal.size();
 }
 
-void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first, unsigned last)
+void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first,
+						   unsigned last)
 {
   CalibratorExtension::remove_chan (first, last);
   remove (S_cal, first, last);
@@ -82,12 +87,14 @@ void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first, unsigned last
 }
 
 //! Set the number of frequency channels
-void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned nreceptor)
+void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned _nreceptor)
 {
-  if (nreceptor == 0)
+  if (_nreceptor == 0)
     throw Error (InvalidParam,"Pulsar::FluxCalibratorExtension::set_nreceptor",
 		 "cannot set nreceptor to 0");
 
+  nreceptor = _nreceptor;
+  
   for (unsigned ichan=0; ichan < S_cal.size(); ichan++)
   {
     S_cal[ichan].resize( nreceptor );
@@ -99,9 +106,7 @@ void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned nreceptor)
 
 unsigned Pulsar::FluxCalibratorExtension::get_nreceptor () const
 {
-  if (S_cal.size())
-    return S_cal[0].size();
-  return 0;
+  return nreceptor;
 }
 
 using namespace Pulsar;
@@ -217,6 +222,12 @@ void FluxCalibratorExtension::set_Estimate ( unsigned iparam, unsigned ichan, co
   unsigned jparam = iparam / get_nreceptor();
   unsigned ireceptor = iparam % get_nreceptor();
 
+#if _DEBUG
+  cerr << "FluxCalibratorExtension::set_Estimate ichan=" << ichan
+       << " ireceptor=" << ireceptor << " jparam=" << jparam
+       << " val=" << val << endl;
+#endif
+  
   switch (jparam)
   {
     case 0: set_S_sys (ichan, ireceptor, val); return;

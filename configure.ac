@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[2021-06-03+],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2022-01-14+],[psrchive-developers@lists.sourceforge.net])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
@@ -132,6 +132,7 @@ SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP
 PSR_LIB_SPLINTER
+PSR_LIB_ARMADILLO
 
 #
 # Set up for automatic package installation

@@ -13,6 +13,9 @@
 
 #include "Pulsar/HasArchive.h"
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/ScrunchFactor.h"
+
+#include "ChiSquared.h"
 #include "ndArray.h"
 
 class BinaryStatistic;
@@ -43,8 +46,10 @@ namespace Pulsar {
     //! Compare over both dimensions
     bool compare_all;
 
-    //! Compute the covariance matrix of the best-fit residual after fitting scale+offset
+    //! Compute the covariance matrix of the best-fit residual
+    /*! Residual after fitting scale and offset */
     bool model_residual;
+    bool use_null_space;
     
     //! Transpose indeces when computing results
     bool transpose;
@@ -71,20 +76,47 @@ namespace Pulsar {
 
     Reference::To<TimeDomainCovariance> covar;
 
+    //! Compute covariance matrix from bscrunched clone of data
+    ScrunchFactor bscrunch_factor;
+
+    //! Set amps to the normalized and bscrunched profile amplitudes
+    void get_amps (std::vector<double>& amps, const Profile* profile);
+
+    //! Set amps to the residual after best fit of amps to mamps
+    void get_residual (std::vector<double>& amps,
+		       const std::vector<double>& mamps);
+
+    //! After call to get_residual, also stores residual profile amplitudes
+    Reference::To<Profile> temp;
+
+    //! Used to compute the residual
+    BinaryStatistics::ChiSquared chi;
+
     //! Compute the comparison summary for primary dimension
     virtual void compute (unsigned iprimary, ndArray<2,double>& result) = 0;
 
     //! Flags for subset of sub-integrations to be computed
     std::vector<bool> compute_mask;
-    
+
+
+    //! File to which auxiliary data will be printed
+    FILE* fptr;
+
   public:
 
     CompareWith ();
 
     void set_statistic (BinaryStatistic*);
     void set_data (HasArchive*);
-    
+
+    //! Use to compute the covariance matrix before an fscrunch or tscrunch
     void set_setup_data (const Archive*);
+    
+    //! Compute covariance matrix from bscrunched clone of data
+    void set_bscrunch (const ScrunchFactor& f) { bscrunch_factor = f; }
+    
+    //! Get the phase bin scrunch factor
+    const ScrunchFactor get_bscrunch () const { return bscrunch_factor; }
 
     //! Return true if call to set_setup_data sets anything up
     /* Not all comparisons require a global set up */
@@ -101,6 +133,10 @@ namespace Pulsar {
     { compute_mask = flags; }
 			   
     virtual void compute (ndArray<2,double>& result);
+
+    //! Set the file to which auxiliary data will be printed
+    void set_file (FILE* f) { fptr = f; }
+
   };
 }
 

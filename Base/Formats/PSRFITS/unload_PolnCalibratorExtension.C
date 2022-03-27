@@ -8,8 +8,12 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
+
 #include "psrfitsio.h"
 #include "strutil.h"
+
+// #define _DEBUG 1
+#include "debug.h"
 
 #include <assert.h>
 
@@ -92,20 +96,19 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   {
     if (pce->get_valid(ichan))
     {
+      DEBUG ("FITSArchive::unload PolnCalibratorExtension ichan=" << ichan << " valid");
       for (int j = 0; j < ncpar; j++)
       {
 	data[count] = pce->get_transformation(ichan)->get_param(j);
+        DEBUG ("\t" << j << " " << data[count]);
 	count++;
       }
     }
     else
     {
-      if (verbose == 3)
-        cerr << "FITSArchive::unload PolnCalibratorExtension ichan="
-             << ichan << " flagged invalid" << endl;
+      DEBUG ("FITSArchive::unload PolnCalibratorExtension ichan=" << ichan << " invalid");
       count += ncpar;
     }
-
   }
 
   assert (count == dimension);
@@ -192,16 +195,25 @@ void unload_covariances (fitsfile* fptr,
       pce->get_transformation(ichan)->get_covariance (covar);
 
     if (covar.size() == 0)
+    {
+      DEBUG ("unload_covariances ichan=" << ichan << " zero");
       zero = true;
+    }
     else
+    {
+      DEBUG ("unload_covariances ichan=" << ichan << " ncovar=" << covar.size());
       assert (covar.size() == unsigned(ncovar));
+    }
 
     for (int icovar = 0; icovar < ncovar; icovar++)
     {
-      if (zero) {
+      if (zero)
+      {
 	    data[count] = 0;
       }
-      else {
+      else
+      {
+            DEBUG ("\t" << icovar << " " << covar[icovar]);
 	    data[count] = covar[icovar];
       }
       count++;
@@ -220,35 +232,40 @@ void unload_covariances (fitsfile* fptr,
 
 void unload_solver (fitsfile* fptr,
 		    const Pulsar::PolnCalibratorExtension* pce,
-		    vector<float>& data)
+		    vector<float>& chisq)
 {
   unsigned nchan = pce->get_nchan();
 
-  data.resize( nchan );
+  chisq.resize( nchan );
   vector<unsigned> nfree( nchan, 0 );
+  vector<unsigned> nfit( nchan, 0 );
 
   for (unsigned i = 0; i < nchan; i++)
   {
     if (pce->get_valid(i))
     {
-      data[i] = pce->get_transformation(i)->get_chisq();
+      chisq[i] = pce->get_transformation(i)->get_chisq();
       nfree[i] = pce->get_transformation(i)->get_nfree();
+      nfit[i]  = pce->get_transformation(i)->get_nfit();
     }
     else
     {
-      data[i] = 0.0;
-      nfree[i] = 0.0;
+      chisq[i] = 0.0;
+      nfree[i] = 0;
+      nfit[i]  = 0;
     }
   }
 
   vector<unsigned> no_dimensions;
 
-  psrfits_write_col (fptr, "CHISQ", 1, data,  no_dimensions);
+  psrfits_write_col (fptr, "CHISQ", 1, chisq, no_dimensions);
   psrfits_write_col (fptr, "NFREE", 1, nfree, no_dimensions);
+  psrfits_write_col (fptr, "NFIT",  1, nfit,  no_dimensions);
 }
 
 void delete_solver (fitsfile* fptr)
 {
   psrfits_delete_col (fptr, "CHISQ");
   psrfits_delete_col (fptr, "NFREE");
+  psrfits_delete_col (fptr, "NFIT");
 }

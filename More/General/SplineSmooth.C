@@ -8,9 +8,12 @@
 #include "Pulsar/SplineSmooth.h"
 #include "Error.h"
 
+#include <fstream>
+
 #include <data_table.h>
 #include <bspline.h>
 #include <bspline_builders.h>
+#include <stdio.h>
 
 using namespace SPLINTER;
 using namespace Pulsar;
@@ -18,14 +21,30 @@ using namespace std;
 
 class SplineSmooth::Handle
 {
-  public:
-    BSpline spline;
-    Handle (const BSpline& _spline) : spline(_spline) {}
+ public:
+  SPLINTER::BSpline spline;
+  Handle (const SPLINTER::BSpline& _spline) : spline(_spline) {}
 };
 
 SplineSmooth::SplineSmooth ()
 {
   handle = 0;
+}
+
+SplineSmooth::SplineSmooth (const std::string& json)
+{
+  char* fname = tempnam (NULL, NULL);
+  {
+    ofstream os (fname);
+    os << json;
+    if (!os)
+      throw Error (FailedSys, "SplineSmooth ctor",
+                   "error after writing string");
+  }
+
+  load (fname);
+  remove (fname);
+  free (fname);
 }
 
 SplineSmooth::~SplineSmooth ()
@@ -60,7 +79,12 @@ void SplineSmooth::new_spline (const vector<T>& data_x,
   for (unsigned i=0; i<data_x.size(); i++)
   {
     samples.add_sample (convert(data_x[i]), data_y[i].val);
-    weights.push_back (1.0/data_y[i].var);
+
+    double weight = 0.0;
+    if (data_y[i].var > 0)
+      weight = 1.0/data_y[i].var;
+    
+    weights.push_back (weight);
   }
 
   // Build penalized B-spline (P-spline) that smooths the samples
@@ -73,14 +97,31 @@ void SplineSmooth::new_spline (const vector<T>& data_x,
   handle = new Handle( bspline_smoother(samples, degree, smoothing, alpha, weights) );
 }
 
-void SplineSmooth1D::set_data (const vector< double >& data_x,
-                               const vector< Estimate<double> >& data_y)
+//! Unload spline to specified filename
+void SplineSmooth::unload (const std::string& filename) const
+{
+  if (!handle)
+    throw Error (InvalidState, "SplineSmooth::unload",
+		 "no spline to unload");
+  
+  handle->spline.to_json (filename);
+}
+
+//! Load spline from specified filename
+void SplineSmooth::load (const std::string& filename)
+{
+  handle = new Handle( BSpline::from_json (filename) );
+}
+
+
+void SplineSmooth1D::fit (const vector< double >& data_x,
+			  const vector< Estimate<double> >& data_y)
 {
   new_spline (data_x, data_y);
 }
 
-void SplineSmooth2D::set_data (const vector< std::pair<double,double> >& data_x,
-                               const vector< Estimate<double> >& data_y)
+void SplineSmooth2D::fit (const vector< std::pair<double,double> >& data_x,
+			  const vector< Estimate<double> >& data_y)
 { 
   new_spline (data_x, data_y);
 }

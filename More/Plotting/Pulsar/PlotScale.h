@@ -56,6 +56,9 @@ namespace Pulsar {
     //! Get the minimum and maximum value in the data
     void get_minmax (float& min, float& max) const;
 
+    //! Update the minimum and maximum value in the data
+    void update_minmax (float min, float max);
+
     //! Get the world coordinate range printed on the axis
     std::pair<float,float> get_minmax () const;
 

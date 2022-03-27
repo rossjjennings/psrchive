@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 - 2012 by Willem van Straten
+ *   Copyright (C) 2008 - 2021 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -80,10 +80,14 @@ SystemCalibrator::SystemCalibrator (Archive* archive)
   report_input_data = false;
   report_input_failed = false;
 
-  outlier_threshold = 0.0;
+  cal_outlier_threshold = 0.0;
+  cal_intensity_threshold = 1.0;    // sigma
+  cal_polarization_threshold = 0.5; // fraction of I
 
   projection = new VariableProjectionCorrection;
 
+  ionospheric_rotation_measure = 0.0;
+  
   step_after_cal = false;
 
   if (archive)
@@ -104,6 +108,11 @@ void SystemCalibrator::set_calibrator (const Archive* archive)
 void SystemCalibrator::set_projection (VariableTransformation* _projection)
 {
   projection = _projection;
+}
+
+void SystemCalibrator::set_ionospheric_rotation_measure (double rm)
+{
+  ionospheric_rotation_measure = rm;
 }
 
 void SystemCalibrator::set_normalize_by_invariant (bool flag)
@@ -456,22 +465,34 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 
   // correct ionospheric Faraday rotation
   Reference::To<Faraday> iono_faraday;
-  if (! integration->get_auxiliary_birefringence_corrected ())
+  double iono_rm = ionospheric_rotation_measure;
+  
+  if (iono_rm != 0.0)
+  {
+    cerr << " correcting ionospheric Faraday rotation - RM=" << iono_rm << endl;
+  }
+  else if (! integration->get_auxiliary_birefringence_corrected ())
   {
     const AuxColdPlasmaMeasures* aux
       = integration->get<AuxColdPlasmaMeasures> ();
 
-    if (aux && aux->get_rotation_measure() != 0.0)
+    if (aux)
     {
-      cerr << " correcting auxiliary Faraday rotation - RM=" 
-	   << aux->get_rotation_measure () << endl;
+      iono_rm = aux->get_rotation_measure();
 
-      iono_faraday = new Faraday;
-      iono_faraday->set_rotation_measure( aux->get_rotation_measure () );
-
-      // correct ionospheric Faraday rotation wrt infinite frequency
-      iono_faraday->set_reference_wavelength( 0.0 );
+      if (iono_rm != 0)
+	cerr << " correcting auxiliary Faraday rotation - RM=" 
+	     << aux->get_rotation_measure () << endl;
     }
+  }
+
+  if (iono_rm != 0.0)
+  {
+    iono_faraday = new Faraday;
+    iono_faraday->set_rotation_measure( iono_rm );
+
+    // correct ionospheric Faraday rotation wrt infinite frequency
+    iono_faraday->set_reference_wavelength( 0.0 );
   }
 
   Reference::To<Faraday> ism_faraday;
@@ -614,6 +635,16 @@ void SystemCalibrator::set_flux_calibrator (const FluxCalibrator* fluxcal)
   flux_calibrator = fluxcal;
 }
 
+void SystemCalibrator::set_previous_solution (const PolnCalibrator* polcal)
+{
+  previous = polcal;
+}
+
+void SystemCalibrator::set_response_fixed (const std::vector<unsigned>& params)
+{
+  response_fixed = params;
+}
+
 void SystemCalibrator::load_calibrators ()
 {
   if (calibrator_filenames.size() == 0)
@@ -687,8 +718,8 @@ void SystemCalibrator::load_calibrators ()
 
   if (previous && previous->get_nchan() == nchan)
   {
-    cerr << "Using previous solution" << endl;
-    set_initial_guess = false;
+    cerr << "Copying frontend of previous solution" << endl;
+    // set_initial_guess = false;
     for (unsigned ichan=0; ichan<nchan; ichan++)
       if (previous->get_transformation_valid(ichan))
         model[ichan]->copy_transformation(previous->get_transformation(ichan));
@@ -734,7 +765,7 @@ void SystemCalibrator::add_calibrator (const Archive* data)
     }
 
     polncal->set_nchan( get_calibrator()->get_nchan() );
-    polncal->set_outlier_threshold( outlier_threshold );
+    polncal->set_outlier_threshold( cal_outlier_threshold );
     
     add_calibrator (polncal);
   }
@@ -818,7 +849,36 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
     solution = hybrid_cal;
   }
-  
+
+
+  vector< Jones<double> > response (nchan, 0.0);
+  vector< Reference::To<const MEAL::Complex2> > xform (nchan);
+
+  // save the solution derived from all sub-integrations
+  if ( solution->get_nchan() == nchan )
+  {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      if ( solution->get_transformation_valid (ichan) )
+      {
+       if (verbose > 2)
+         cerr << "SystemCalibrator::add_calibrator ichan="
+              << ichan << " saving response" << endl;
+
+       response[ichan] = solution->get_response(ichan);
+
+       if (verbose > 2)
+         cerr << "SystemCalibrator::add_calibrator ichan="
+              << ichan << " saving transformation" << endl;
+
+       xform[ichan] = solution->get_transformation(ichan);
+      }
+      else if (verbose > 2)
+       cerr << "SystemCalibrator::add_calibrator ichan="
+            << ichan << " transformation not valid" << endl;
+    }
+  }
+
   for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = cal->get_Integration (isub);
@@ -829,10 +889,10 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
     if (verbose)
       cerr << "SystemCalibrator::add_calibrator"
-	" outlier_threshold=" << outlier_threshold << endl;
+	" outlier_threshold=" << cal_outlier_threshold << endl;
     
     ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
-				     outlier_threshold);
+				     cal_outlier_threshold);
     
     string identifier = cal->get_filename() + " " + tostring(isub);
 
@@ -870,25 +930,29 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
       data.observation = coherency( convert (calibtor) );
       data.baseline = coherency( convert (baseline) );
 
-      if ( solution->get_transformation_valid (ichan) )
+      Estimate<double> calI = data.observation[0];
+      if (calI.get_value() < cal_intensity_threshold * calI.get_error())
       {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " saving response" << endl;
-
-	data.response = solution->get_response(ichan);
+        cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
+             << " signal not detected" << endl;
+        continue;
       }
 
-      if ( solution->get_nchan() == nchan
-	   && solution->get_transformation_valid (ichan) )
+      Estimate<double> calp = data.observation.abs_vect ();
+      if (calp.get_value() < cal_polarization_threshold * calI.get_value())
       {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " saving transformation" << endl;
-	
-	data.xform = solution->get_transformation(ichan);
+        cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
+             << " signal less than " << cal_polarization_threshold 
+             << " polarized" << endl;
+        continue;
       }
 
+      if ( xform[ichan] )
+      {
+	data.response = response[ichan];
+	data.xform = xform[ichan];
+      }
+      
       calibrator_data.back().push_back (data);
     }
   }
@@ -1286,7 +1350,10 @@ SystemCalibrator::get_CalibratorStokes () const
   Reference::To<CalibratorStokes> ext = new CalibratorStokes;
     
   ext->set_nchan (nchan);
-    
+
+  if (!refcal_through_frontend)
+    ext->set_coupling_point (CalibratorStokes::BeforeIdeal);
+  
   for (unsigned ichan=0; ichan < nchan; ichan++) try
   {
     bool valid = get_transformation_valid(ichan);
@@ -1386,6 +1453,15 @@ void SystemCalibrator::init_model (unsigned ichan)
   if (verbose > 2)
     cerr << "SystemCalibrator::init_model ichan=" << ichan << endl;
 
+  if (response_fixed.size())
+  {
+    if (!response)
+      response = Pulsar::new_transformation (type);
+
+    for (unsigned i=0; i < response_fixed.size(); i++)
+      response->set_infit ( response_fixed[i], false );
+  }
+  
   if (response)
   {
     if (verbose > 2)
@@ -1584,10 +1660,12 @@ void SystemCalibrator::solve_prepare ()
       Estimate<double> I = calibrator_estimate[ichan].source->get_stokes()[0];
       if (I.get_value() == 0)
       {
-        cerr << "SystemCalibrator::solve_prepare"
-         " reference flux equals zero \n"
-         "\t attempts=" << calibrator_estimate[ichan].add_data_attempts <<
-         "\t failures=" << calibrator_estimate[ichan].add_data_failures << endl;
+        if (verbose > 1)
+          cerr << "SystemCalibrator::solve_prepare"
+           " reference flux equals zero \n"
+           "\t attempts=" << calibrator_estimate[ichan].add_data_attempts <<
+           "\t failures=" << calibrator_estimate[ichan].add_data_failures 
+               << endl;
 
         model[ichan]->set_valid( false, "reference flux equals zero" );
       }

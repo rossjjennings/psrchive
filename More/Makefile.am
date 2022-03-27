@@ -28,8 +28,6 @@ libpsrmore_la_LIBADD += Timing/libTiming.la
 SUBDIRS += RFIMitigation
 libpsrmore_la_LIBADD += RFIMitigation/libRFIMitigation.la
 
-endif
-
 if HAVE_PGPLOT
 SUBDIRS += Plotting
 endif
@@ -48,6 +46,8 @@ if HAVE_QT
 SUBDIRS += psrgui
 endif
 endif
+
+endif # not MAKE_LEAN
 
 if HAVE_PYTHON
 SUBDIRS += python

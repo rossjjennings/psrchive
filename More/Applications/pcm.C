@@ -414,6 +414,16 @@ bool physical_coherency = false;
 float retry_chisq = 0.0;
 float invalid_chisq = 0.0;
 
+// filename of previous pcm solution to be used as first guess
+string previous_solution;
+
+// set of parameter indeces to be copied from previous_solution
+/* if not specified, all parameters are copied */
+// string copy_parameters; /* not implemented */
+
+// set of response parameter indeces to be held fixed
+string response_fixed;
+
 int main (int argc, char **argv)
 {
 #ifdef _DEBUG
@@ -434,6 +444,8 @@ int main (int argc, char **argv)
 Reference::To< Pulsar::VariableTransformation > projection;
 Reference::To< MEAL::Real4 > impurity;
 Reference::To< MEAL::Complex2 > response;
+
+double ionospheric_rm = 0;
 
 Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
@@ -681,7 +693,13 @@ bool check_coordinates = true;
 bool must_have_cals = true;
 
 // threshold used to reject outliers while computing CAL levels
-float outlier_threshold = 0.0;
+float cal_outlier_threshold = 0.0;
+
+// threshold used to reject CAL observations with no signal
+float cal_intensity_threshold = 1.0; // sigma
+
+// minimum degree of polarization of CAL observations
+float cal_polarization_threshold = 0.5;  // 50%
 
 // threshold used to insert steps in model
 float step_threshold = 0.0;
@@ -944,10 +962,28 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg = menu.add (check_coordinates, 'Z');
   arg->set_help ("ignore the sky coordinates of PolnCal observations");
 
+  arg = menu.add (previous_solution, "solution", "file");
+  arg->set_help ("load previous solution from 'file' as first guess");
+ 
+#if 0 
+  /* not yet implemented */
+  arg = menu.add (copy_parameters, "copy", "i,j,k");
+  arg->set_help ("copy only specified parameters from previous solution");
+#endif
+
+  arg = menu.add (response_fixed, "fix", "i,j,k");
+  arg->set_help ("hold specified parameters fixed");
+
   menu.add ("\n" "Outlier and step detection options:");
 
-  arg = menu.add (outlier_threshold, 'K', "sigma");
+  arg = menu.add (cal_outlier_threshold, 'K', "sigma");
   arg->set_help ("Reject outliers when computing CAL levels");
+
+  arg = menu.add (cal_intensity_threshold, "calI", "sigma");
+  arg->set_help ("Minimum significance of CAL intensity");
+
+  arg = menu.add (cal_polarization_threshold, "calp", "frac");
+  arg->set_help ("Minimum degree of polarization of CAL");
 
   arg = menu.add (step_threshold, "step", "sigma");
   arg->set_help ("Insert steps where adjacent CAL levels differ");
@@ -968,6 +1004,9 @@ void pcm::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &pcm::set_projection, 'P', "file");
   arg->set_help ("load projection transformations from file");
+
+  arg = menu.add (ionospheric_rm, "iono", "rm");
+  arg->set_help ("ionospheric Faraday rotation measure");
 
   arg = menu.add (least_squares, 'l', "solver");
   arg->set_help ("solver: MEAL [default] or GSL");
@@ -1094,6 +1133,8 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg->set_help ("share a single phase shift estimate b/w all observations");
 }
 
+Reference::To<Pulsar::PolnCalibrator> pcm_solution;
+
 void pcm::setup ()
 {
   if (nthread == 0)
@@ -1112,6 +1153,23 @@ void pcm::setup ()
       " -p min,max  Choose constraints from the specified pulse phase range \n"
       " -c archive  Choose optimal constraints from the specified archive");
 
+  if (!previous_solution.empty())
+  {
+    Reference::To<Archive> cal = Archive::load (previous_solution);
+    pcm_solution = new PolnCalibrator (cal);
+
+    const Calibrator::Type* type = pcm_solution->get_type ();
+
+    cerr << "pcm: previous solution has type=" << type->get_name()
+	 << " and nparam=" << type->get_nparam() << endl;
+    
+    if (!type->is_a (model_type) || !model_type->is_a (type))
+    {
+      cerr << "pcm: over-riding model type=" << model_type->get_name() << endl;
+      model_type = type->clone();
+    }
+  }
+  
   if (mem_mode && fscrunch_data_to_template)
     throw Error (InvalidState, "pcm",
 		 "In MEM mode, the -G option is not supported");
@@ -1145,7 +1203,14 @@ void configure_model (Pulsar::SystemCalibrator* model)
 {
   model->set_nthread (nthread);
   model->set_report_projection (true);
-  model->set_outlier_threshold (outlier_threshold);
+  model->set_ionospheric_rotation_measure (ionospheric_rm);
+
+  if (pcm_solution)
+    model->set_previous_solution (pcm_solution);
+  
+  model->set_cal_outlier_threshold (cal_outlier_threshold);
+  model->set_cal_intensity_threshold (cal_intensity_threshold);
+  model->set_cal_polarization_threshold (cal_polarization_threshold);
 
   if (step_threshold)
     model->set_step_finder( new RobustStepFinder (step_threshold) );
@@ -1175,6 +1240,22 @@ void configure_model (Pulsar::SystemCalibrator* model)
   for (auto ptr : response_variation)
     model->set_response_variation( ptr.first, ptr.second );
 
+  vector<unsigned> fixed_indeces;
+  while (!response_fixed.empty())
+  {
+    string sub = stringtok (response_fixed, ", ");
+    fixed_indeces.push_back ( fromstring<unsigned>(sub) );
+  }
+
+  if (fixed_indeces.size())
+  {
+    cerr << "pcm: fixing response at iparam=";
+    for (auto element: fixed_indeces)
+      cerr << element << " ";
+    cerr << endl;
+    model->set_response_fixed (fixed_indeces);
+  }
+  
   if (foreach_calibrator.get())
   {
     Reference::To< Calibration::SingleAxis > foreach;
@@ -1199,6 +1280,15 @@ void configure_model (Pulsar::SystemCalibrator* model)
 
   for (unsigned i=0; i < diff_phase_steps.size(); i++)
     model->add_diff_phase_step (diff_phase_steps[i]);
+
+  model->set_step_after_cal( step_after_cal );
+
+  if (refcal_through_frontend)
+    cerr << "pcm: reference source illuminates frontend" << endl;
+  else
+    cerr << "pcm: reference source coupled after frontend" << endl;
+
+  model->set_refcal_through_frontend( refcal_through_frontend );
 
   if (!least_squares.empty())
     model->set_solver( new_solver(least_squares) );
@@ -1614,8 +1704,6 @@ SystemCalibrator* measurement_equation_modeling (const string& binfile,
 
   model->set_normalize_by_invariant( normalize_by_invariant );
 
-  model->set_step_after_cal( step_after_cal );
-
   if (independent_gains)
     cerr << "pcm: each observation has a unique gain" << endl;
 
@@ -1627,13 +1715,6 @@ SystemCalibrator* measurement_equation_modeling (const string& binfile,
     cerr << "pcm: risking physically unrealizable Stokes parameters" << endl;
 
   model->physical_coherency = physical_coherency;
-
-  if (refcal_through_frontend)
-    cerr << "pcm: reference source illuminates frontend" << endl;
-  else
-    cerr << "pcm: reference source coupled after frontend" << endl;
-
-  model->set_refcal_through_frontend( refcal_through_frontend );
 
   if (multiple_flux_calibrators)
     cerr <<
@@ -1804,6 +1885,9 @@ void pcm::load_calibrator_database () try
   if (!cal_dbase_filenames.size())
     return;
 
+  if (!filenames.size())
+    return;
+
   Reference::To<Pulsar::Archive> archive;
   while (filenames.size()) try
   {
@@ -1847,11 +1931,11 @@ void pcm::load_calibrator_database () try
 
   Pulsar::Database::Criteria criteria;
   criteria = database->criteria (archive, Signal::PolnCal);
-  criteria.entry.time = mid;
+  criteria.entry->time = mid;
   criteria.check_coordinates = check_coordinates;
   criteria.minutes_apart = search_hours * 60.0;
 
-  vector<Pulsar::Database::Entry> oncals;
+  vector<const Pulsar::Database::Entry*> oncals;
   database->all_matching (criteria, oncals);
 
   unsigned poln_cals = oncals.size();
@@ -1888,7 +1972,7 @@ void pcm::load_calibrator_database () try
 
     criteria.check_coordinates = false;
     criteria.minutes_apart = search_days * 24.0 * 60.0;
-    criteria.entry.obsType = Signal::FluxCalOn;
+    criteria.entry->obsType = Signal::FluxCalOn;
     
     cerr << "pcm: searching for on-source flux calibrator observations"
       " within " << search_days << " days of midtime" << endl;
@@ -1903,7 +1987,7 @@ void pcm::load_calibrator_database () try
     {
       unsigned ncals = oncals.size();
 
-      criteria.entry.obsType = Signal::FluxCalOff;
+      criteria.entry->obsType = Signal::FluxCalOff;
 
       cerr << "pcm: searching for off-source flux calibrator observations"
               " within " << search_days << " days of midtime" << endl;
@@ -1921,7 +2005,7 @@ void pcm::load_calibrator_database () try
   for (unsigned i = 0; i < oncals.size(); i++)
   {
     string filename = database->get_filename( oncals[i] );
-    cerr << "pcm: adding " << oncals[i].filename << endl;
+    cerr << "pcm: adding " << oncals[i]->filename << endl;
     calibrator_filenames.push_back (filename);
   }
 }

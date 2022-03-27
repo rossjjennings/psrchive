@@ -410,27 +410,47 @@ catch (Error& error)
 
 void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap,
 						  vector< vector<double> >& C)
-try
 {
   SingleAxis* backend = get_backend();
-  
+
+  if (!backend)
+    throw Error (InvalidState, "VariableBackendEstimate::compute_covariance",
+                 "no backend");
+
+  if (imap.size() < backend->get_nparam())
+    throw Error (InvalidParam, "VariableBackendEstimate::compute_covariance",
+                 "imap.size=%u < nparam=%u", imap.size(), backend->get_nparam());
+
+  if (backend_imap.size() < backend->get_nparam())
+    throw Error (InvalidState, "VariableBackendEstimate::compute_covariance",
+                 "backend_imap.size=%u < nparam=%u", backend_imap.size(), backend->get_nparam());
+
   for (unsigned iparam=0; iparam < backend->get_nparam(); iparam++)
     if (backend->get_infit(iparam))
       imap[iparam] = backend_imap[iparam];
 
   if (cal_gain)
+  {
+    if (gain_imap.size() == 0)
+      throw Error (InvalidState, "VariableBackendEstimate::compute_covariance",
+                 "cal_gain=true but gain_imap.size == 0");
+
     imap[0] = gain_imap[0];
-  
-  if (gain_variation)
-    MEAL::covariance( gain_variation, imap[0], gain_imap, C );
+  }
 
-  if (diff_gain_variation)
-    MEAL::covariance( diff_gain_variation, imap[1], diff_gain_imap, C );
+  try { 
+    if (gain_variation)
+      MEAL::covariance( gain_variation, imap[0], gain_imap, C );
 
-  if (diff_phase_variation)
-    MEAL::covariance( diff_phase_variation, imap[2], diff_phase_imap, C );
+    if (diff_gain_variation)
+      MEAL::covariance( diff_gain_variation, imap[1], diff_gain_imap, C );
+
+    if (diff_phase_variation)
+      MEAL::covariance( diff_phase_variation, imap[2], diff_phase_imap, C );
+  }
+  catch (Error& error)
+  {
+    throw error += "VariableBackendEstimate::compute_covariance";
+  }
 }
-catch (Error& error)
-{
-  throw error += "VariableBackendEstimate::compute_covariance";
-}
+

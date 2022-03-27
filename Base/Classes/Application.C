@@ -125,7 +125,11 @@ void Pulsar::Application::parse (int argc, char** argv)
   }
 
   if (!metafile.empty())
-    stringfload (&filenames, metafile);
+  {
+    if (stringfload (&filenames, metafile) < 0)
+      throw Error (FailedSys, "Pulsar::Application::parse", 
+                   "failed to load filnames from '" + metafile + "'\n");
+  }
   else
   {
     for (int i=optind; i<argc; i++)

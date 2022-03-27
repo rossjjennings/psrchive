@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
         Pulsar/BinLngPeriOrder.h \
         Pulsar/CalibratorExtension.h \
 	Pulsar/CalibratorExtensionInterface.h \
+        Pulsar/CalibrationInterpolatorExtension.h \
         Pulsar/CalibratorStokes.h \
         Pulsar/CalInfoExtension.h \
 	Pulsar/CoherentDedispersion.h \
@@ -66,6 +67,7 @@ libExtensions_la_SOURCES = \
         CalibratorExtension_build.C \
         CalibratorExtension.C \
         CalibratorStokes.C \
+        CalibrationInterpolatorExtension.C \
         CalInfoExtension.C \
 	CoherentDedispersion.C \
 	CoherentDedispersionTI.C \

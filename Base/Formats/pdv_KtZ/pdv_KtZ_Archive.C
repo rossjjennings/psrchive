@@ -8,10 +8,17 @@
 #include "Pulsar/pdv_KtZ_Archive.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Pulsar.h"
+
 #include "strutil.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 #include <fstream>
+
 using namespace std;
+using namespace Pulsar;
 
 void Pulsar::pdv_KtZ_Archive::init ()
 {
@@ -80,25 +87,19 @@ Pulsar::pdv_KtZ_Archive* Pulsar::pdv_KtZ_Archive::clone () const
 template<typename T>
 bool parse (std::string& line, const std::string& key, T& value)
 {
-#ifdef _DEBUG
-  cerr << "parse line='" << line << "'" << endl;  
-  cerr << "parse key='" << key << "'" << endl;
-#endif
+  DEBUG( "parse line='" << line << "'" );
+  DEBUG( "parse key='" << key << "'" );
   
   string before, after;
   string_split(line, before, after, key);
 
-#ifdef _DEBUG
-  cerr << "1: parse before='" << before << "'" << endl;
-  cerr << "1: parse after='" << after << "'" << endl;
-#endif
+  DEBUG( "1: parse before='" << before << "'" );
+  DEBUG( "1: parse after='" << after << "'" );
   
   // keyword not found
   if (after.empty())
   {
-#ifdef _DEBUG
-    cerr << "after is empty" << endl;
-#endif
+    DEBUG("after is empty");
     return false;
   }
   
@@ -107,38 +108,46 @@ bool parse (std::string& line, const std::string& key, T& value)
   // remove preceding whitespace
   string_split_on_any (after, before, after, whitespace);
 
-#ifdef _DEBUG
-  cerr << "2: parse before='" << before << "'" << endl;
-  cerr << "2: parse after='" << after << "'" << endl;
-#endif
+  DEBUG( "2: parse before='" << before << "'" );
+  DEBUG( "2: parse after='" << after << "'" );
   
   if (before.empty())
   {
-    string_split_on_any (after, before, after, whitespace);
-#ifdef _DEBUG
-    cerr << "2a: parse before='" << before << "'" << endl;
-    cerr << "2a: parse after='" << after << "'" << endl;
-#endif    
+    string tmp_after;
+    string_split_on_any (after, before, tmp_after, whitespace);
+    DEBUG( "2a: parse before='" << before << "'" );
+    DEBUG( "2a: parse after='" << tmp_after << "'" );
+
+    // at the end of the line, there is no after
+    if (tmp_after == "")
+      before = after;
+
+    after = tmp_after;
+
+    DEBUG( "2b: parse before='" << before << "'" );
+    DEBUG( "2b: parse after='" << after << "'" );
   }
   // value not found
-  if (before.empty()) {
-#ifdef _DEBUG
-    cerr << "before is empty" << endl;
-#endif
+  if (before.empty())
+  {
+    DEBUG( "before is empty" );
     return false;
   }
   
-#ifdef _DEBUG
-  cerr << "parse value='" << before << "'" << endl;
-#endif
-  
-  value = fromstring<T> (before);
+  DEBUG( "parse value='" << before << "'" );
 
-#ifdef _DEBUG
-  cerr << "parse value=" << value << endl;
-#endif
-  
   line = after;
+
+  try {
+    value = fromstring<T> (before);
+  }
+  catch (...)
+    {
+      return false;
+    }
+  
+  DEBUG( "parse value=" << value );
+  
   return true;
 }
 
@@ -216,6 +225,11 @@ void Pulsar::pdv_KtZ_Archive::load_header (const char* filename)
 
   resize (nsubint, npol, nchan, nbin);
 
+  unsigned isub_offset = 0;
+  unsigned ichan_offset = 0;
+  unsigned ibin_offset = 0;
+  bool first_line = true;
+  
   for (unsigned isub=0; isub < get_nsubint(); isub++)
   { 
     BasicIntegration* subint;
@@ -223,16 +237,70 @@ void Pulsar::pdv_KtZ_Archive::load_header (const char* filename)
     if (!subint)
       throw Error (InvalidState, "pdv_KtZ_Archive::load",
 		   "Integration[%d] is not a BasicIntegration", isub);
-    
-    subint->set_folding_period (period);
-    subint->set_epoch (epoch);
-    subint->set_centre_frequency(0, centre_frequency);
-    
-    if (Profile::no_amps)
-      break;
-    
+        
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
     {
+      // check for the pdv sub-header
+      if (is.peek() == '#')
+      {
+	// get the sub-header line
+	getline (is, line);
+
+	// ////////////////////////////////////////////////////////////////////
+	//
+	// epoch
+	//
+	if (!parse (line, "MJD(mid):", epoch))
+	  warning << "Pulsar::pdv_KtZ_Archive::load_header"
+	    " could not parse MJD" << endl;
+	
+	// ////////////////////////////////////////////////////////////////////
+	//
+	// period
+	//
+	if (!parse (line, "P:", period))
+	  warning << "Pulsar::pdv_KtZ_Archive::load_header"
+	    " could not parse period" << endl;
+
+	DEBUG( "After P: remaining line='" << line << "'");
+
+	// ////////////////////////////////////////////////////////////////////
+	//
+	// integration length
+	//
+	if (!parse (line, "Tsub:", integration_length))
+	  warning << "Pulsar::pdv_KtZ_Archive::load_header"
+	    " could not parse integration_length" << endl;
+
+	DEBUG( "After Tsub: remaining line='" << line << "'" );
+
+	// ////////////////////////////////////////////////////////////////////
+	//
+	// frequency
+	//
+	if (!parse (line, "Freq:", centre_frequency))
+	  warning << "Pulsar::pdv_KtZ_Archive::load_header"
+	    " could not parse centre frequency" << endl;
+
+	DEBUG( "After Freq: remaining line='" << line << "'" );
+	
+	// ////////////////////////////////////////////////////////////////////
+	//
+	// bandwidth
+	//
+	if (!parse (line, "BW:", bandwidth))
+	  warning << "Pulsar::pdv_KtZ_Archive::load_header"
+	    " could not parse bandwidth" << endl;
+      }
+      
+      subint->set_folding_period (period);
+      subint->set_duration (integration_length);
+      subint->set_epoch (epoch);
+      subint->set_centre_frequency (ichan, centre_frequency);
+    
+      if (Profile::no_amps)
+	break;
+      
       for (unsigned ibin=0; ibin < get_nbin(); ibin++)
       {
 	if (verbose > 2)
@@ -241,18 +309,33 @@ void Pulsar::pdv_KtZ_Archive::load_header (const char* filename)
 	unsigned jsub, jchan, jbin;
 	is >> jsub >> jchan >> jbin;
 
-	if (jsub != isub)
-	  throw Error (InvalidState, "pdv_KtZ_Archive::load",
-		       "parsed isub=%u != expected isub=%u", jsub, isub);
+	if (is.fail())
+	  throw Error (InvalidParam, "Pulsar::pdv_KtZ_Archive::load",
+		       "index read failed");
+
+	if (first_line)
+	{
+	  isub_offset = jsub;
+	  ichan_offset = jchan;
+	  ibin_offset = jbin;
+	}
+
+	first_line = false;
 	
-	if (jchan != ichan)
+        if (jsub != isub + isub_offset)
 	  throw Error (InvalidState, "pdv_KtZ_Archive::load",
-		       "parsed ichan=%u != expected ichan=%u", jchan, ichan);
+		       "parsed isub=%u != expected isub=%u",
+		       jsub, isub + isub_offset);
 	
-	if (jbin != ibin)
+	if (jchan != ichan + ichan_offset)
 	  throw Error (InvalidState, "pdv_KtZ_Archive::load",
-		       "parsed ibin=%u != expected ibin=%u", jbin, ibin);
+		       "parsed ichan=%u != expected ichan=%u",
+		       jchan, ichan + ichan_offset);
 	
+	if (jbin != ibin + ibin_offset)
+	  throw Error (InvalidState, "pdv_KtZ_Archive::load",
+		       "parsed ibin=%u != expected ibin=%u",
+		       jbin, ibin + ibin_offset);
 
 	for (unsigned ipol=0; ipol < get_npol(); ipol++)
 	{

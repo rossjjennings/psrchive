@@ -39,6 +39,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   // Write NCHAN  
   psrfits_update_key (fptr, "NCHAN", nchan);
 
+  string coupling = tostring( stokes->get_coupling_point () );
+  psrfits_update_key (fptr, "COUPLING", coupling);
+  
   vector<float> data ( nchan );
   for (int i = 0; i < nchan; i++)
     data[i] = stokes->get_valid(i);

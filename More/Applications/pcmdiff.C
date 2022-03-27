@@ -4,21 +4,25 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#define PGPLOT 1
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
 
-#include "Pulsar/CalibratorPlotter.h"
-#include "Pulsar/CalibratorStokesInfo.h"
+#if HAVE_PGPLOT
+# include "Pulsar/CalibratorPlotter.h"
+# include "Pulsar/CalibratorStokesInfo.h"
+# include <cpgplot.h>
+#endif
 
 #include "MEAL/Polar.h"
 
 #include "strutil.h"
 #include "dirutil.h"
 #include "pairutil.h"
-
-#include <cpgplot.h>
 
 #include <iostream>
 #include <unistd.h>
@@ -33,10 +37,14 @@ void usage ()
     " -c [i|j-k]   mark channel or range of channels as bad \n"
     " -C           don't plot calibrator Stokes \n"
     " -D dev       display using PGPLOT device \n"
-    " -P           produce publication-quality plots\n"
-    " -E           plot without error bars\n"
-    " -S i:j       swap parameter i and j before comparing\n"
-    " -s pcm.std   compare all solutions with this standard\n" << endl;
+    " -P           produce publication-quality plots \n"
+    " -E           plot without error bars \n"
+    " -S i:j       swap parameter i and j before comparing \n"
+    " -s pcm.std   compare all solutions with this standard \n"
+    " -p           print statistical summary of differences (no plot) \n"
+    " -A           print the relative likelihood (Akaike weight) \n"
+    " \n"
+       << endl;
 }
 
 
@@ -81,6 +89,77 @@ Pulsar::PolnCalibrator* load_calibrator (const string& filename,
 
 typedef std::pair<unsigned,unsigned> ipair;
 
+double get_chisq (const vector<Estimate<double> >& residuals)
+{
+  unsigned ndat = residuals.size();
+  double sumsq = 0.0;
+  
+  for (unsigned idat=0; idat < ndat; idat++)
+  {
+    double val = residuals[idat].val;
+    double var = residuals[idat].var;
+    sumsq += val*val / var;
+  }
+  
+  return sumsq / ndat;  
+}
+
+double get_max_outlier (const vector<Estimate<double> >& residuals)
+{
+  unsigned ndat = residuals.size();
+  double max = 0.0;
+  
+  for (unsigned idat=0; idat < ndat; idat++)
+  {
+    double val = residuals[idat].val;
+    double var = residuals[idat].var;
+    double out = val*val / var;
+
+    if (out > max)
+      max = out;
+  }
+
+  return sqrt(max);
+}
+
+double get_AIC (const Pulsar::PolnCalibrator* calibrator)
+{
+  unsigned nchan  = calibrator->get_nchan ();
+
+  double total_chisq = 0.0;
+  unsigned total_ndat = 0;
+  unsigned total_nfit = 0;
+  
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    if (!calibrator->get_transformation_valid(ichan))
+      continue;
+
+    const MEAL::LeastSquares* solver = calibrator->get_solver (ichan);
+
+    total_chisq += solver->get_chisq ();
+
+    unsigned nfree = solver->get_nfree ();
+    unsigned nfit = solver->get_nparam_infit ();
+    
+    total_nfit += nfit;
+    total_ndat += nfit + nfree;
+  }
+
+  return total_chisq + 2.0 * total_nfit
+    + 2.0 * total_nfit * (total_nfit+1) / (total_ndat - total_nfit - 1.0); 
+}
+	     
+double get_relative_likelihood (Pulsar::PolnCalibrator* A, Pulsar::PolnCalibrator* B)
+{
+  double AIC_A = get_AIC (A);
+  double AIC_B = get_AIC (B);
+
+  cerr << "AIC_A=" << AIC_A << " AIC_B=" << AIC_B << endl;
+  
+  return exp( -0.5 * (AIC_A - AIC_B) );
+}
+
 int main (int argc, char** argv) try
 {
   // filename of filenames
@@ -100,11 +179,15 @@ int main (int argc, char** argv) try
 
   bool plot_errors = true;
   bool plot_calibrator_stokes = true;
-
+  
+  bool print_summary = false;
+  bool print_relative_likelihood = false;
+  bool print_only = false;
+  
   vector<ipair> swaps;
   
   char c;
-  while ((c = getopt(argc, argv, "Cc:D:EhM:Ps:S:vV")) != -1)  {
+  while ((c = getopt(argc, argv, "ACc:D:EhM:pPs:S:vV")) != -1)  {
 
     switch (c)  {
 
@@ -112,6 +195,11 @@ int main (int argc, char** argv) try
       usage();
       return 0;
 
+    case 'A':
+      print_relative_likelihood = true;
+      print_only = true;
+      break;
+      
     case 'C':
       plot_calibrator_stokes = false;
       break;
@@ -161,11 +249,20 @@ int main (int argc, char** argv) try
       publication = true;
       break;
 
+    case 'p':
+      print_summary = true;
+      print_only = true;
+      break;
+      
     case 'V':
       Pulsar::Archive::set_verbosity (3);
-      Pulsar::CalibratorPlotter::verbose = true;
       Pulsar::Calibrator::verbose = true;
       //Calibration::Model::verbose = true;
+
+#if HAVE_PGPLOT
+      Pulsar::CalibratorPlotter::verbose = true;
+#endif
+
     case 'v':
       verbose = true;
       break;
@@ -173,12 +270,14 @@ int main (int argc, char** argv) try
     } 
   }
 
-  if (!metafile && optind >= argc) {
+  if (!metafile && optind >= argc)
+  {
     cerr << "pcmdiff requires a list of archive filenames as parameters.\n";
     return -1;
   }
 
-  if (!compare) {
+  if (!compare)
+  {
     cerr << "pcmdiff requires a standard (-s)\n";
     return -1;
   }
@@ -190,39 +289,46 @@ int main (int argc, char** argv) try
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  cpgbeg (0, device.c_str(), 0, 0);
-  cpgask(1);
-  cpgsvp (.1,.9, .1,.9);
- 
+#if HAVE_PGPLOT
   Pulsar::CalibratorPlotter plotter;
-  plotter.plot_error_bars = plot_errors;
-  if (publication) {
-    plotter.npanel = 5;
-    plotter.between_panels = 0.08;
-    cpgsvp (.25,.75,.10,.90);
-    cpgslw (2);
-  }
 
+  if (!print_only)
+  {
+    cpgbeg (0, device.c_str(), 0, 0);
+    cpgask(1);
+    cpgsvp (.1,.9, .1,.9);
+  
+    plotter.plot_error_bars = plot_errors;
+    if (publication)
+    {
+      plotter.npanel = 5;
+      plotter.between_panels = 0.08;
+      cpgsvp (.25,.75,.10,.90);
+      cpgslw (2);
+    }
+  }
+#endif
+  
   Reference::To<Pulsar::PolnCalibrator> calibrator;
 
-
-  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
-
+  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
+  {
     calibrator = load_calibrator (filenames[ifile], zapchan);
 
     unsigned nchan = std::min (compare->get_nchan(), calibrator->get_nchan());
-
+    unsigned nparam = 0;
     unsigned comfac = compare->get_nchan() / nchan;
     unsigned calfac = calibrator->get_nchan() / nchan;
 
-    for (unsigned ichan=0; ichan < nchan; ichan++) {
-
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
       unsigned calchan = ichan * calfac;
       unsigned comchan = ichan * comfac;
 
       // cerr << "calchan=" << calchan << " comchan=" << comchan << endl;
 
-      if (!compare->get_transformation_valid(comchan)) {
+      if (!compare->get_transformation_valid(comchan))
+      {
 	calibrator->set_transformation_invalid(calchan);
 	calibrator_stokes->set_valid(calchan, false);
       }
@@ -233,7 +339,7 @@ int main (int argc, char** argv) try
       MEAL::Complex2* cal = calibrator->get_transformation(calchan);
       MEAL::Complex2* com = compare->get_transformation(comchan);
 
-      unsigned nparam = com -> get_nparam();
+      nparam = com -> get_nparam();
       if (cal->get_nparam() != nparam) {
 	cerr << "pcmdiff: calibrator nparam=" << cal->get_nparam() 
 	     << " != " << nparam << endl;
@@ -261,7 +367,8 @@ int main (int argc, char** argv) try
 	  compare_stokes->get_stokes(comchan) );
     }
 
-    if (calfac) {
+    if (calfac > 1)
+    {
       // zap the extra channels
       cerr << "Zapping calfac=" << calfac << endl;
       for (unsigned ichan=0; ichan < nchan; ichan++)
@@ -271,18 +378,90 @@ int main (int argc, char** argv) try
 	}
     }
 
-    cpgpage ();
-    plotter.plot (calibrator);
+    if (print_summary)
+    {
+      nchan = calibrator->get_nchan();
 
-    if (plot_calibrator_stokes)
+      vector< Estimate<double> > diff (nchan);
+      
+      for (unsigned iparam=0; iparam<nparam; iparam++)
+      {
+	unsigned have_chan = 0;
+
+	for (unsigned ichan=0; ichan < nchan; ichan++)
+	{
+	  if (!calibrator->get_transformation_valid(ichan))
+	    continue;
+
+	  MEAL::Complex2* cal = calibrator->get_transformation(ichan);
+
+	  diff[have_chan] = cal->get_Estimate(iparam);
+	  have_chan++;
+	}
+
+	diff.resize (have_chan);
+
+	double chisq = get_chisq (diff);
+	double maxout = get_max_outlier (diff);
+	
+	cout << filenames[ifile]
+	     << " iparam= " << iparam
+	     << " chisq= " << chisq
+	     << " maxout= " << maxout << endl;
+      }
+
+      diff.resize (nchan);
+
+      nparam = 3;
+
+      for (unsigned iparam=0; iparam<nparam; iparam++)
+      {
+	unsigned have_chan = 0;
+
+	for (unsigned ichan=0; ichan < nchan; ichan++)
+	{
+	  if (!calibrator_stokes->get_valid(ichan))
+	    continue;
+
+	  Stokes< Estimate<double> > S = calibrator_stokes->get_stokes (ichan);
+
+	  diff[have_chan] = S[iparam+1];
+	  have_chan++;
+	}
+
+	diff.resize (have_chan);
+
+	double chisq = get_chisq (diff);
+	double maxout = get_max_outlier (diff);
+	
+	cout << filenames[ifile]
+	     << " ical= " << iparam
+	     << " chisq= " << chisq
+	     << " maxout= " << maxout << endl;
+      }
+    }
+    else if (print_relative_likelihood)
+    {
+      double relative_likelihood = get_relative_likelihood (compare, calibrator);
+      cout << filenames[ifile] << " l= " << relative_likelihood << endl;
+    }
+#if HAVE_PGPLOT
+    else
     {
       cpgpage ();
-      plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
-		    calibrator->get_nchan(),
-		    calibrator->get_Archive()->get_centre_frequency(),
-		    calibrator->get_Archive()->get_bandwidth() );
+      plotter.plot (calibrator);
+      
+      if (plot_calibrator_stokes)
+      {
+	cpgpage ();
+	plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+		      calibrator->get_nchan(),
+		      calibrator->get_Archive()->get_centre_frequency(),
+		      calibrator->get_Archive()->get_bandwidth() );
+      }
     }
-
+#endif
+    
   }
   catch (Error& error) {
     cerr << "pcmdiff: Error during " << filenames[ifile] << error << endl;

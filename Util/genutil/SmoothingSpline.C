@@ -9,6 +9,8 @@
 #include "gcvspl.h"
 #include "Error.h"
 
+#include <cassert>
+
 using namespace std;
 
 SmoothingSpline::SmoothingSpline ()
@@ -121,6 +123,7 @@ void SmoothingSpline::fit (const vector< double >& data_x,
     }
     else if (effective_nfree > 0)
     {
+      assert (effective_nfree < ndat);
       val = ndat - effective_nfree;
       mode = 4;
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -16,6 +16,8 @@
 #include "Pulsar/SingleAxisSolver.h"
 #include "Pulsar/SingleAxis.h"
 
+#include "Pulsar/BackendFeed.h"
+#include "Pulsar/VariableBackend.h"
 #include "Pulsar/MeanJones.h"
 
 #include "MEAL/Value.h"
@@ -88,6 +90,8 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 
   if (!precalibrator) return;
 
+  copy_variation (precalibrator);
+  
   set_calibrator( precalibrator->get_Archive() );
 
   filenames.resize (2);
@@ -158,9 +162,33 @@ get_stokes (const Pulsar::CalibratorStokes* stokes,
 }
 
 
+const MEAL::Complex2*
+get_xform (const Pulsar::PolnCalibrator* response,
+	   const unsigned ichan, bool backend_only)
+{
+  DEBUG("get_xform PolnCalibrator=" << (void*) response << "backend_only=" << backend_only);
 
+  const MEAL::Complex2* xform = response->get_transformation(ichan);
+
+  if (!backend_only)
+    return xform;
+
+  auto splittable = dynamic_cast<const Calibration::BackendFeed*> (xform);
+
+  if (!splittable)
+    throw Error (InvalidParam, "get_xform",
+		 "transformation cannot be split into backend and feed");
+
+  const MEAL::Complex2* backend = splittable->get_backend()->get_backend();
+
+  DEBUG("get_xform backend name=" << backend->get_name() << " xform=" << backend->evaluate());
+  return backend;
+}
+
+  
 Jones<double> get_response (const Pulsar::PolnCalibrator* response,
-			    const unsigned ichan, unsigned target_nchan)
+			    const unsigned ichan, unsigned target_nchan,
+			    bool backend_only = false)
 {
   const unsigned have_nchan = response->get_nchan();
   const unsigned factor = have_nchan / target_nchan;
@@ -175,11 +203,13 @@ Jones<double> get_response (const Pulsar::PolnCalibrator* response,
 
   if (factor == 1)
   {
+    DEBUG("get_response valid=" << response->get_transformation_valid (ichan));
+
     if (!response->get_transformation_valid (ichan))
       throw Error (InvalidParam, "get_response(PolnCalibrator)",
 		   "ichan=%u flagged invalid", ichan);
     
-    return response->get_transformation(ichan)->evaluate();
+    return get_xform(response, ichan, backend_only)->evaluate();
   }
 
   unsigned response_ichan = ichan * factor;
@@ -198,7 +228,8 @@ Jones<double> get_response (const Pulsar::PolnCalibrator* response,
       continue;
     }
 
-    mean.integrate( response->get_transformation (response_ichan+i) );
+    mean.integrate( get_xform(response, response_ichan+i, backend_only) );
+
     valid = true;
   }
 
@@ -278,6 +309,8 @@ bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
 	  valid = true;
     }
   }
+
+  DEBUG("HybridCalibrator ichan=" << ichan << " valid=" << valid << " PolnCalibrator::valid=" << PolnCalibrator::get_valid (ichan));
 
   return valid && PolnCalibrator::get_valid (ichan);
 }
@@ -363,21 +396,50 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     {
       cal_stokes = get_stokes (reference_input, ichan, target_nchan);
       if (verbose > 2)
-	cerr << "HybridCalibrator cal_stokes=" << cal_stokes << endl;
+	cerr << "HybridCalibrator ichan=" << ichan 
+             << " cal_stokes=" << cal_stokes << endl;
     }
 
     // get the precalibrator transformation
     Jones<double> response (1.0);
+
     if (precalibrator)
     {
       response = ::get_response (precalibrator, ichan, target_nchan);
       if (verbose > 2)
-	cerr << "HybridCalibrator pre-calibrator response=" << response << endl;
+	cerr << "HybridCalibrator ichan=" << ichan 
+             << " precal response=" << response << endl;
     }
 
+    Jones<double> cal_response (1.0);
+
+    switch (reference_input->get_coupling_point())
+    {
+    case CalibratorStokes::BeforeBasis:
+      cal_response = response * basis_correction;
+      break;
+
+    case CalibratorStokes::BeforeFrontend:
+      cal_response = response;
+      break;
+      
+    case CalibratorStokes::BeforeIdeal:
+      if (precalibrator)
+	cal_response = ::get_response (precalibrator, ichan, target_nchan, true);
+      break;
+
+    default:
+      string point = tostring(reference_input->get_coupling_point());
+      throw Error (InvalidState, "HybridCalibrator::calculate_transformation",
+		   "unknown coupling point=" + point);
+    }
+
+    if (verbose > 2)
+      cerr << "HybridCalibrator ichan=" << ichan << " cal_response=" << cal_response << endl;
+ 
     // pass the reference Stokes parameters through the instrument
     Stokes< Estimate<double> > input_stokes;
-    input_stokes = transform (cal_stokes, response * basis_correction);
+    input_stokes = transform (cal_stokes, cal_response);
 
     // solve for the SingleAxis model that relates input and output states
     correction = new Calibration::SingleAxis;

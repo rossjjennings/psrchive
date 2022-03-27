@@ -78,6 +78,12 @@ namespace Pulsar {
       //! Get the frequency scrunch factor
       const ScrunchFactor get_fscrunch () const { return fscrunch_factor; }
 
+      //! Compute covariance matrix from bscrunched clone of data
+      void set_bscrunch (const ScrunchFactor& f) { bscrunch_factor = f; }
+    
+      //! Get the phase bin scrunch factor
+      const ScrunchFactor get_bscrunch () const { return bscrunch_factor; }
+
       //! Set the maximum number of iterations
       void set_max_iterations (unsigned n) { max_iterations = n; }
 
@@ -108,11 +114,17 @@ namespace Pulsar {
       //! Get flag to print a one-line report
       bool get_report () const { return report; }
 
-      //! Set flag to print a one-line filename
+      //! Set name of file to which data are printed
       void set_filename (const std::string& name) { filename = name; }
 
-      //! Get flag to print a one-line filename
+      //! Get name of file to which data are printed
       const std::string& get_filename () const { return filename; }
+
+      //! Set name of file to which auxiliary data are printed
+      void set_aux_filename (const std::string& name) { aux_filename = name; }
+
+      //! Get name of file to which auxiliary data are printed
+      const std::string& get_aux_filename () const { return aux_filename; }
 
   protected:
 
@@ -144,7 +156,10 @@ namespace Pulsar {
 
       //! Compute mask from fscrunched clone of data (twice)
       ScrunchFactor fscrunch_factor;
-    
+
+      //! Compute covariance matrix from bscrunched clone of data
+      ScrunchFactor bscrunch_factor;
+
       //! Tasks performed on clone before computing statistic
       std::string jobs;
 
@@ -208,7 +223,10 @@ namespace Pulsar {
 
     //! Name of file to which statistics are printed on first iteration
     std::string filename;
-    
+
+    //! Name of file to which auxiliary data is printed on first iteration
+    std::string aux_filename;
+
   private:
     
     //! Number of subints/chans zapped during update_mask

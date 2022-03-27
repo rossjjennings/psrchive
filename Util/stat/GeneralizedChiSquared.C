@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "GeneralizedChiSquared.h"
+#include "ChiSquared.h"
 #include "UnaryStatistic.h"
 
 #include <algorithm>
@@ -29,8 +30,9 @@ void general_linear_fit (double& scale, double& offset,
   // principal components
   vector<double> pc1 (ndim, 0.0);
   vector<double> pc2 (ndim, 0.0);
-  vector<double> sum (ndim, 0.0);
-
+  vector<double> one (ndim, 0.0);
+  vector<double> wt (ndim, 0.0);
+  
   for (unsigned idim=0; idim < ndim; idim++)
   {
     for (unsigned i=0; i<dat1.size(); i++)
@@ -40,38 +42,14 @@ void general_linear_fit (double& scale, double& offset,
 
       pc1[idim] += evec[idim][i] * dat1[i];
       pc2[idim] += evec[idim][i] * dat2[i];
-      sum[idim] += evec[idim][i];
+      one[idim] += evec[idim][i];
+      wt[idim] = 1.0/eval[idim];
     }
   }
-  
-  double mu_1 = 0.0;
-  double mu_2 = 0.0;
-  double covar = 0.0;
-  double var_2 = 0.0;
-  double wmu_2 = 0.0;
-  double norm = 0;
-    
-  for (unsigned idim=0; idim < ndim; idim++)
-  {   
-    mu_1 += pc1[idim] / eval[idim];
-    mu_2 += pc2[idim] / eval[idim];
-    covar += pc1[idim] * pc2[idim] / eval[idim];
-    var_2 += pc2[idim] * pc2[idim] / eval[idim];
-    wmu_2 += sum[idim] * pc2[idim] / eval[idim];
-    norm += sum[idim] * sum[idim] / eval[idim];
-  }
-  
-  mu_1 /= norm;
-  mu_2 /= norm;
-  covar -= mu_1 * wmu_2;
-  var_2 -= mu_2 * wmu_2;
-  
-  scale = covar / var_2;
 
-  offset = mu_1 - scale * mu_2;
-
-  // cerr << "scale=" << scale << " offset=" << offset << endl;
+  linear_fit_work (scale, offset, pc1, pc2, one, wt);
 }
+  
 
 
 using namespace BinaryStatistics;
@@ -121,7 +99,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
     unsigned max_zapped = ndat;
     if (max_zap_fraction)
       max_zapped = max_zap_fraction * max_zapped;
-    
+
     unsigned zapped = 0;
     unsigned iterations = 0;
     do
@@ -176,10 +154,22 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 	   << " scale=" << scale << " offset=" << offset << endl;
 
   }
+
+  residual.resize (ndim);
   
   double coeff = 0.0;
   for (unsigned i=0; i<ndim; i++)
-    coeff += sqr(pc1[i] - scale * pc2[i] - offset * sum[i]) / eigenvalues[i];
+  {
+    residual[i] = pc1[i] - scale * pc2[i] - offset * sum[i];
+    coeff += residual[i] * residual[i] / eigenvalues[i];
+
+    if (fptr)
+    {
+      // cerr << "fprintf resid fptr=" << (void*) fptr << endl;
+      fprintf (fptr, " %g", residual[i]);
+      // cerr << "fprinted" << endl;
+    }
+  }
   
   double retval = coeff / ( ndim * ( 1 + sqr(scale) ) );
   

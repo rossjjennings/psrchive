@@ -48,6 +48,14 @@ namespace Pulsar
     //! Get the cut-off threshold for the minimum value
     float get_cutoff_threshold_min () const { return cutoff_threshold_min; }
 
+    //! Set the duty cycle used to find the 'minimum slope median'
+    void set_minimum_slope_median_duty_cycle (float t)
+    { minimum_slope_median_duty_cycle = t; }
+    
+    //! Get the duty cycle used to find the 'minimum slope median'
+    float get_minimum_slope_median_duty_cycle () const
+    { return minimum_slope_median_duty_cycle; }
+      
     // Text interface to the InterQuartileRange class
     class Interface : public TextInterface::To<InterQuartileRange> {
     public:
@@ -66,6 +74,9 @@ namespace Pulsar
     //! Fraction of IQR
     float cutoff_threshold_max;
     float cutoff_threshold_min;
+
+    //! Duty cycle used to find the 'minimum slope median'
+    float minimum_slope_median_duty_cycle;
   };
 
 }

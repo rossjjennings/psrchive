@@ -40,7 +40,7 @@ public:
   //! Set the smoothing factor
   void set_smoothing (double);
 
-  //! Set the effective number of freely esimated parameters
+  //! Set the effective number of freely estimated parameters
   void set_effective_nfree (double);
 
   //! Set the mean squared residual error, MSRE (Equation 5)
@@ -54,7 +54,7 @@ public:
 
   //! Determine the smoothing factor using generalized cross-validation
   void set_minimize_gcv (bool);
-  
+
   //! Fit spline to data using current configuration
   void fit (const std::vector< double >& data_x,
 	    const std::vector< Estimate<double> >& data_y);
@@ -70,4 +70,61 @@ public:
   double evaluate (double);
 };
 
+//! Determines the spline smoothing factor as in Clark (1977)
+/*! For small numbers of data points to be fit and at low
+  signal-to-noise ratios, the GCV function exhibits multiple local
+  minima and in practice, for around 10% to 20% of trials, the GCVSPL
+  sub-routine yields smoothing splines that overfit the data.
+
+  The m-fold cross-validation technique described in Section 4 of
+  Clark (1977) overcomes this issue.
+
+  R. M. Clark, Non-Parametric Estimation of a Smooth Regression
+  Function, Journal of the Royal Statistical Society. Series B
+  (Methodological), 1977, Vol. 39, No. 1 (1977), pp. 107-113
+  https://www.jstor.org/stable/2984885
+*/
+
+class CrossValidatedSmoothing
+{
+  bool logarithmic;             // linearly space smoothing factors on logarithmic scale
+  unsigned ntrial;              // number of trial smoothing factors
+  unsigned npartition;          // m=40 in Clark (1977)
+  double validation_fraction;   // 0.1 in Clark (1977)
+  SmoothingSpline* spline;      // the spline implementation
+  
+public:
+
+  CrossValidatedSmoothing ();
+
+  void set_spline (SmoothingSpline* _spline) { spline = _spline; }
+  
+  //! Fit spline to data using current configuration
+  void fit (const std::vector< double >& data_x,
+	    const std::vector< Estimate<double> >& data_y);
+
+  //! Return the mean goodness-of-fit for the current smoothing
+  double get_mean_gof (const std::vector< double >& data_x,
+		       const std::vector< Estimate<double> >& data_y);
+
+  //! Get the trial smoothing factors
+  void get_nfree_trials (std::vector<double>& nfree, unsigned ndat);
+
+};
+
+class BootstrapUncertainty
+{
+  unsigned nsample;
+  SmoothingSpline* spline;      // the spline implementation
+  
+public:
+
+  BootstrapUncertainty ();
+
+  void set_spline (SmoothingSpline* _spline) { spline = _spline; }
+  
+  void get_uncertainty (const std::vector< double >& dat_x,
+			std::vector< Estimate<double> >& dat_y);
+};
+  
 #endif

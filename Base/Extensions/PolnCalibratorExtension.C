@@ -175,7 +175,7 @@ PolnCalibratorExtension::get_Estimate ( unsigned iparam, unsigned ichan ) const
 }
 
 void PolnCalibratorExtension::set_Estimate ( unsigned iparam, unsigned ichan,
-                                             Estimate<float>& datum )
+                                             const Estimate<float>& datum )
 {
 #if _DEBUG
   cerr << "PolnCalibratorExtension::set_Estimate iparam=" << iparam
@@ -234,6 +234,7 @@ PolnCalibratorExtension::Transformation::Transformation ()
   valid = true;
   chisq = 0.0;
   nfree = 0;
+  nfit = 0;
 }
 
 unsigned
@@ -345,6 +346,16 @@ unsigned PolnCalibratorExtension::Transformation::get_nfree() const
 void PolnCalibratorExtension::Transformation::set_nfree (unsigned n)
 {
   nfree = n;
+}
+
+unsigned PolnCalibratorExtension::Transformation::get_nfit() const
+{
+  return nfit;
+}
+
+void PolnCalibratorExtension::Transformation::set_nfit (unsigned n)
+{
+  nfit = n;
 }
 
 //! Get the covariance matrix of the model paramters

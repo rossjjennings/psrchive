@@ -63,15 +63,22 @@ static unsigned instance_count = 0;
 Pulsar::ArchiveStatistic::ArchiveStatistic ()
 {
   instance_count ++;
+  fptr = 0;
 }
 
 Pulsar::ArchiveStatistic::ArchiveStatistic (const string& name, 
                                             const string& description)
 {
   instance_count ++;
-
+  fptr = 0;
+  
   set_identity (name);
   set_description (description);
+}
+
+void Pulsar::ArchiveStatistic::fclose ()
+{
+  if (fptr) ::fclose (fptr); fptr = 0;
 }
 
 #include "Pulsar/ArchiveComparisons.h"

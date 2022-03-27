@@ -18,6 +18,7 @@
 
 #include "Error.h"
 #include "typeutil.h"
+#include "debug.h"
 
 using namespace std;
 
@@ -148,8 +149,7 @@ unsigned Pulsar::Integration::get_instance_count ()
 
 Pulsar::Integration::Integration ()
 {
-  if (verbose)
-    cerr << "Pulsar::Integration ctor this=" << this << " instances=" << instance_count << endl;
+  DEBUG("Integration ctor this=" << this << " instances=" << instance_count);
 
   zero_phase_aligned = false;
   instance_count ++;
@@ -189,9 +189,7 @@ void Pulsar::Integration::zero ()
 
 Pulsar::Integration::~Integration ()
 {
-  if (verbose)
-    cerr << "Pulsar::Integration dtor this=" << this << " instances=" << instance_count << endl;
-
+  DEBUG("Integration dtor this=" << this << " instances=" << instance_count);
   instance_count --;
 }
 

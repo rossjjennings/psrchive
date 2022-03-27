@@ -1,14 +1,24 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/FluxCalibratorPolicy.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorInfo.h"
+
+#ifdef HAVE_SPLINTER
+#include "Pulsar/CalibrationInterpolator.h"
+#endif
+
+#include "Pulsar/CalibrationInterpolatorExtension.h"
 
 #include "Pulsar/StandardCandles.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -45,41 +55,32 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
   if (!archive)
     return;
 
-  const FluxCalibratorExtension* fe = archive->get<FluxCalibratorExtension>();
-  if (fe)
+  if (archive->get<CalibrationInterpolatorExtension> ())
+  {
+    set_calibrator( archive );
+
+#ifdef HAVE_SPLINTER
+    DEBUG("FluxCalibrator ctor set variation");
+    set_variation( new CalibrationInterpolator (this) );
+#else
+    throw Error (InvalidState, "FluxCalibrator ctor",
+		 "Archive has CalibrationInterpolatorExtension\n\t"
+		 "but SPLINTER library not available to interpret it");
+#endif
+  }
+    
+  flux_extension = archive->get<FluxCalibratorExtension>();
+  if (flux_extension)
   {
     // store the calibrator archive
     set_calibrator( archive );
 
     // store the extension
-    extension = fe;
+    extension = flux_extension;
 
     // store the filename
     filenames.push_back( archive->get_filename() );
 
-    unsigned nchan = fe->get_nchan();
-    data.resize( nchan );
-
-    if (fe->has_scale())
-      policy = new ConstantGain;
-
-    for (unsigned ichan=0; ichan < nchan; ichan++)
-    {
-      if (fe->has_scale())
-      {
-	ConstantGain* cg = new ConstantGain;
-	cg->set_scale( fe->scale[ichan] );
-	cg->set_gain_ratio( fe->ratio[ichan] );
-	data[ichan] = cg;
-      }
-      else
-	data[ichan] = new VariableGain;
-
-      data[ichan]->set( fe->S_sys[ichan], fe->S_cal[ichan] );
-      data[ichan]->set_valid ( fe->get_weight(ichan) != 0 );
-
-    }
-    
     // disable checks for sufficient data
     have_on = have_off = true;
   }
@@ -349,8 +350,8 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   Reference::To<Pulsar::Archive> clone;
   
-  if (archive->get_state () == Signal::Stokes) {
-
+  if (archive->get_state () == Signal::Stokes)
+  {
     if (verbose > 2)
       cerr << "Pulsar::FluxCalibrator::add_observation clone Stokes->Coherence"
            << endl;
@@ -454,8 +455,15 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 		 + get_calibrator()->get_filename() +
                  " and\n\t" + arch->get_filename() + reason);
 
+  if (variation)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::FluxCalibrator::calibrate Variation::update" << endl;
+    variation->update (arch->get_Integration(0));
+  }
+
   if (verbose > 2)
-    cerr << "Pulsar::FluxCalibrator::calibrate call create" << endl;
+    cerr << "Pulsar::FluxCalibrator::calibrate create" << endl;
 
   create (arch->get_nchan());
 
@@ -472,6 +480,33 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
 		 "no FluxCal Archive");
 
+  if (flux_extension)
+  {
+    unsigned nchan = flux_extension->get_nchan();
+    data.resize( nchan );
+
+    if (flux_extension->has_scale())
+      policy = new ConstantGain;
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (flux_extension->has_scale())
+      {
+	ConstantGain* cg = new ConstantGain;
+	cg->set_scale( flux_extension->scale[ichan] );
+	cg->set_gain_ratio( flux_extension->ratio[ichan] );
+	data[ichan] = cg;
+      }
+      else
+	data[ichan] = new VariableGain;
+
+      data[ichan]->set( flux_extension->S_sys[ichan],
+			flux_extension->S_cal[ichan] );
+      
+      data[ichan]->set_valid ( flux_extension->get_weight(ichan) != 0 );
+    }
+  }
+  
   unsigned nchan = data.size ();
 
   if (!required_nchan)

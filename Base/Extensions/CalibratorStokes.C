@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -16,6 +16,9 @@ using namespace std;
 CalibratorStokes::CalibratorStokes ()
   : Extension ("CalibratorStokes")
 {
+  // the default behaviour of pcm since 2002
+  coupling_point = BeforeBasis;
+
   current = 0;
 }
 
@@ -29,16 +32,29 @@ CalibratorStokes::CalibratorStokes (const CalibratorStokes& extension)
 
 //! Assignment operator
 const CalibratorStokes&
-CalibratorStokes::operator= (const CalibratorStokes& extension)
+CalibratorStokes::operator= (const CalibratorStokes& other)
 {
-  stokes = extension.stokes;
-
+  stokes = other.stokes;
+  coupling_point = other.coupling_point;
+  
   return *this;
 }
 
 //! Destructor
 CalibratorStokes::~CalibratorStokes ()
 {
+}
+
+//! Set the name of the point where the reference source signal is coupled
+void CalibratorStokes::set_coupling_point (CouplingPoint point)
+{
+  coupling_point = point;
+}
+   
+//! Get the name of the point where the reference source signal is coupled
+CalibratorStokes::CouplingPoint CalibratorStokes::get_coupling_point () const
+{
+  return coupling_point;
 }
 
 //! Set the number of frequency channels
@@ -201,9 +217,13 @@ public:
     if (s_instance)
       set_instance (s_instance);
 
-  import( "p", PolnVector::Interface(),
-          &CalibratorStokes::get_poln,
-          &CalibratorStokes::get_nchan );
+    add( &CalibratorStokes::get_coupling_point,
+	 &CalibratorStokes::set_coupling_point,
+	 "coupling", "Point at which reference source is coupled" );
+    
+    import( "p", PolnVector::Interface(),
+	    &CalibratorStokes::get_poln,
+	    &CalibratorStokes::get_nchan );
   }
 };
 
@@ -212,3 +232,40 @@ TextInterface::Parser* CalibratorStokes::get_interface()
   return new Interface (this);
 }
 
+const string CouplingPoint2string (CalibratorStokes::CouplingPoint point)
+{
+  switch( point )
+  {
+  case CalibratorStokes::BeforeProjection: return "BeforeProjection";
+  case CalibratorStokes::BeforeBasis: return "BeforeBasis";
+  case CalibratorStokes::BeforeFrontend: return "BeforeFrontend";
+  case CalibratorStokes::BeforeIdeal: return "BeforeIdeal";
+  case CalibratorStokes::BeforeBackend: return "BeforeBackend";
+  default: return "Unknown";
+  }
+}
+
+CalibratorStokes::CouplingPoint string2CouplingPoint (const string& ss)
+{
+  if( ss=="BeforeProjection" ) return CalibratorStokes::BeforeProjection;
+  if( ss=="BeforeBasis" ) return CalibratorStokes::BeforeBasis;
+  if( ss=="BeforeFrontend" ) return CalibratorStokes::BeforeFrontend;
+  if( ss=="BeforeIdeal" ) return CalibratorStokes::BeforeIdeal;
+  if( ss=="BeforeBackend" ) return CalibratorStokes::BeforeBackend;
+  if( ss=="Unknown" ) return CalibratorStokes::Unknown;
+  
+  throw Error (InvalidState, "Pulsar::string2CouplingPoint",
+	       "Unknown point '" + ss + "'");
+}
+
+std::ostream& Pulsar::operator << (std::ostream& ostr,
+				  CalibratorStokes::CouplingPoint point)
+{
+  return ostr << CouplingPoint2string(point);
+}
+
+std::istream& Pulsar::operator >> (std::istream& is,
+				   CalibratorStokes::CouplingPoint& point)
+{
+  return extraction (is, point, string2CouplingPoint);
+}

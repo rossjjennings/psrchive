@@ -75,6 +75,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyZap::set_fscrunch,
        "fscrunch", "Compute mask after fscrunch" );
 
+  add( &TimeFrequencyZap::get_bscrunch,
+       &TimeFrequencyZap::set_bscrunch,
+       "bscrunch", "Compute covariance matrix after bscrunch" );
+
   add( &TimeFrequencyZap::get_recompute,
        &TimeFrequencyZap::set_recompute,
        "recompute", "Recompute statistic on each iteration" );
@@ -90,6 +94,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
   add( &TimeFrequencyZap::get_filename,
        &TimeFrequencyZap::set_filename,
        "fname", "Name of file to which stats are printed" );
+
+  add( &TimeFrequencyZap::get_aux_filename,
+       &TimeFrequencyZap::set_aux_filename,
+       "aname", "Name of file to which auxiliary data are printed" );
 }
 
 // defined in More/General/standard_interface.C
@@ -102,6 +110,7 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
   pscrunch = false;
   
   fscrunch_factor.disable_scrunch();
+  bscrunch_factor.disable_scrunch();
   
   polns = ""; // Defaults to all
 
@@ -269,6 +278,9 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
   }
   while (recompute_original && nmasked_original && iterations < max_iterations);
 
+  if (cloned)
+    copy_weights (archive, data);
+  
   if (report)
   {
     string ret;
@@ -291,11 +303,24 @@ void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
   Reference::To<Archive> data = archive;
   Reference::To<Archive> backup = data;
 
+  if (statistic && bscrunch_factor.scrunch_enabled())
+  {
+    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    if (compare)
+    {
+      if (Archive::verbose > 2)
+	cerr << "TimeFrequencyZap::transform"
+	  " bscrunch by " << bscrunch_factor << endl;
+      
+      compare->set_bscrunch (bscrunch_factor);
+    }
+  }
+  
   if (fscrunch_factor.scrunch_enabled())
   {
     if (Archive::verbose > 2)
       cerr << "TimeFrequencyZap::transform"
-      " fscrunch by " << fscrunch_factor << endl;
+	" fscrunch by " << fscrunch_factor << " nbin=" << archive->get_nbin() << endl;
 
     /*
       If the ArchiveComparison is based on a generalized chi-squared statistic,
@@ -303,7 +328,11 @@ void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
       best to compute that covariance matrix before fscrunching in order to
       maximize the rank (condition) of the matrix.
      */
-    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    ArchiveComparisons* compare = 0;
+
+    if (statistic)
+      compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+
     if (compare)
     {
       compare->set_setup_Archive (backup);
@@ -476,7 +505,21 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
     statistic->set_Archive (NULL);
     statistic->set_Archive (data);
 
-    ArchiveComparisons* compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    if (aux_filename != "")
+    {
+      cerr << "TimeFrequencyZap::compute_stat opening "
+	"'" << aux_filename << "'" << endl;
+      
+      FILE* f = fopen (aux_filename.c_str(), "w");
+      statistic->set_file (f);
+
+      // disable writing on the next iteration
+      aux_filename = "";
+    }
+    
+    ArchiveComparisons* compare = 0;
+    compare = dynamic_cast<ArchiveComparisons*> (statistic.get());
+    
     if (compare)
     {
       compare->set_compute_subint (compute_subint);
@@ -488,11 +531,15 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
   
   if (filename != "")
   {
-    cerr << "TimeFrequencyZap::compute_stat opening '" << filename << "'" << endl;
-    fptr = fopen(filename.c_str(),"w");
+    cerr << "TimeFrequencyZap::compute_stat opening "
+      "'" << filename << "'" << endl;
+    
+    fptr = fopen (filename.c_str(), "w");
 
     // disable writing on the next iteration
     filename = "";
+
+    // cerr << "TimeFrequencyZap::compute_stat file opened" << endl;
   }
   
   // Eval expression, fill stats array
@@ -517,7 +564,9 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
         if (statistic)
         {
 	  statistic->set_pol (pol_i[ipol]);
+	  // cerr << "calling Statistic::get" << endl;
           fval = statistic->get();
+	  // cerr << "Statistic::get returned" << endl;
         }
         else
         {
@@ -545,7 +594,14 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
   }
 
   if (fptr)
+  {
     fclose (fptr);
+    fptr = 0;
+  }
+  
+  // cerr << "calling Statistic::fclose" << endl;
+  if (statistic)
+    statistic->fclose ();
 }
 
 void Pulsar::TimeFrequencyZap::update_mask ()

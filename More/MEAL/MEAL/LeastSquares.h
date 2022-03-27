@@ -65,7 +65,7 @@ namespace MEAL {
     //! The chi-squared in last call to solve method
     float get_chisq () const { return best_chisq; }
 
-    //! The number of free parameters in last call to solve method
+    //! The number of degrees of freedom in last call to solve method
     unsigned get_nfree () const { return nfree; }
 
     //! Get the number of parameters in fit

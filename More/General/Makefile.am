@@ -19,7 +19,6 @@ nobase_include_HEADERS = \
 	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
         Pulsar/BaselineWindow.h \
-        Pulsar/ChannelSubsetMatch.h \
         Pulsar/ChannelWeight.h \
         Pulsar/ColdPlasma.h \
 	Pulsar/Combination.h \
@@ -174,7 +173,6 @@ libGeneral_la_SOURCES = \
 	Archive_weighted_frequency.C \
 	BaselineEstimator.C \
         BaselineWindow.C \
-        ChannelSubsetMatch.C \
 	CompareWith.C \
 	CompareWithEachOther.C \
 	CompareWithSum.C \
@@ -317,10 +315,14 @@ endif
 #
 if HAVE_SPLINTER
 
-libGeneral_la_SOURCES += SplineSmooth.C
+libGeneral_la_SOURCES += SplineSmooth.C \
+	BootstrapUncertainty2D.C \
+	CrossValidatedSmooth2D.C
+
 nobase_include_HEADERS += Pulsar/SplineSmooth.h
 
 endif
+
 #############################################################################
 #
 
@@ -332,7 +334,7 @@ AM_CPPFLAGS += \
         -I$(top_srcdir)/More/MEAL \
         -I$(top_srcdir)/More/RFIMitigation \
 	@PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ \
-	@SPLINTER_CFLAGS@
+	@SPLINTER_CFLAGS@ @ARMADILLO_CFLAGS@
 
-libGeneral_la_LIBADD = @SPLINTER_LIBS@
+libGeneral_la_LIBADD = @SPLINTER_LIBS@ @ARMADILLO_LIBS@
 

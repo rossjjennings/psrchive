@@ -85,7 +85,7 @@ namespace Pulsar
     
     //! Set the flux calibrator solution used to estimate calibrator Stokes
     void set_flux_calibrator (const FluxCalibrator* fluxcal);
-
+    
     //! Set the calibrator observations to be loaded after first pulsar
     void set_calibrators (const std::vector<std::string>& filenames);
     
@@ -94,6 +94,12 @@ namespace Pulsar
 
     //! Set the response (pure Jones) transformation
     virtual void set_response( MEAL::Complex2* );
+
+    //! Set the response to a previous solution (for the first guess)
+    void set_previous_solution (const PolnCalibrator*);
+
+    //! Set the response parameters to be held fixed
+    void set_response_fixed (const std::vector<unsigned>&);
 
     //! Set the temporal variation function of a specified response parameter
     virtual void set_response_variation ( unsigned iparam,
@@ -105,6 +111,9 @@ namespace Pulsar
     //! Set the projection transformation
     virtual void set_projection( VariableTransformation* );
 
+    //! Set the ionospheric rotation measure applied to all observations
+    virtual void set_ionospheric_rotation_measure (double rm);
+    
     //! Set the time variation of absolute gain
     virtual void set_gain( MEAL::Univariate<MEAL::Scalar>* );
 
@@ -200,11 +209,23 @@ namespace Pulsar
     //! Report on the number of failed attempts to add data
     virtual void set_report_input_failed (bool flag = true);
 
-    //! Set the threshold used to reject outliers when computing levels
-    void set_outlier_threshold (float f) { outlier_threshold = f; }
+    //! Set the threshold used to reject outliers when computing CAL levels
+    void set_cal_outlier_threshold (float f) { cal_outlier_threshold = f; }
 
-    //! Get the threshold used to reject outliers when computing levels
-    float get_outlier_threshold () const { return outlier_threshold; }
+    //! Get the threshold used to reject outliers when computing CAL levels
+    float get_cal_outlier_threshold () const { return cal_outlier_threshold; }
+
+    //! Set the threshold used to reject CAL observations with no signal
+    void set_cal_intensity_threshold (float f) { cal_intensity_threshold = f; }
+
+    //! Get the threshold used to reject CAL observations with no signal
+    float get_cal_intensity_threshold () const { return cal_intensity_threshold; }
+
+    //! Set the minimum degree of polarization of CAL observations
+    void set_cal_polarization_threshold (float f) { cal_polarization_threshold = f; }
+
+    //! Get the minimum degree of polarization of CAL observations
+    float get_cal_polarization_threshold () const { return cal_polarization_threshold; }
 
     //! Set the algorithm used to automatically insert steps in response
     void set_step_finder (StepFinder*);
@@ -272,12 +293,18 @@ namespace Pulsar
     //! The projection transformation (overrides ProjectionCorrection)
     Reference::To<VariableTransformation> projection;
 
+    //! The ionospheric rotation measure applied to all observations
+    double ionospheric_rotation_measure;
+    
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 
     //! Response transformation
     Reference::To< MEAL::Complex2 > response;
 
+    //! Indeces of response parameters to be held fixed
+    std::vector<unsigned> response_fixed;
+    
     //! Impurity transformation
     Reference::To< MEAL::Real4 > impurity;
 
@@ -419,9 +446,15 @@ namespace Pulsar
     //! Report the number of input failures
     bool report_input_failed;
 
-    //! Threshold used to reject outliers when computing levels
-    double outlier_threshold;
-    
+    //! Threshold used to reject outliers when computing CAL levels
+    double cal_outlier_threshold;
+
+    //! Threshold used to reject CAL observations with no signal
+    double cal_intensity_threshold;
+
+    //! Minimum degree of polarization of CAL observations
+    double cal_polarization_threshold;
+
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
 

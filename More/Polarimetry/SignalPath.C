@@ -534,7 +534,7 @@ bool SignalPath::reduce_nfree ()
 
 void copy_param (MEAL::Function* to, const MEAL::Function* from)
 {
-  cerr << "copy_param" << endl;
+  // cerr << "copy_param" << endl;
   unsigned nparam = to->get_nparam ();
 
   if (nparam != from->get_nparam())
@@ -542,13 +542,13 @@ void copy_param (MEAL::Function* to, const MEAL::Function* from)
 		 nparam, from->get_nparam());
 
   for (unsigned iparam=0; iparam<nparam; iparam++)
-    to->set_param( iparam, from->get_param(iparam) );
+    to->set_Estimate( iparam, from->get_Estimate(iparam) );
 }
 
 
 void SignalPath::copy_transformation (const MEAL::Complex2* xform)
 {
-  cerr << "SignalPath::copy_transformation" << endl;
+  // cerr << "SignalPath::copy_transformation" << endl;
   
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
@@ -569,7 +569,7 @@ void SignalPath::copy_transformation (const MEAL::Complex2* xform)
       throw Error (InvalidState, "SignalPath::copy_transformation",
 		   "solution is not of the required type");
 
-    copy_param( physical, copy );
+    copy_param( physical->get_frontend(), copy->get_frontend() );
   }
 }
 

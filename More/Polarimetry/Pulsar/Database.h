@@ -122,51 +122,88 @@ namespace Pulsar {
     unsigned size () const { return entries.size(); }
  
     //! Pulsar Database Entry
-    class Entry {
+    class Entry : public Reference::Able
+    {
       
     public:
       
-      // Critical information about the entry
-      
-      Signal::Source   obsType;      // FluxCal, PolnCal, Pulsar, etc.
-
       Reference::To<const Calibrator::Type> calType;
 
-      MJD              time;         // Mid time of observation
+      Signal::Source   obsType;      // FluxCal, PolnCal, Pulsar, etc.
       sky_coord        position;     // Where the telescope was pointing
       double           bandwidth;    // Bandwidth of observation
       double           frequency;    // Centre frequency of observation
-      unsigned         nchan;        // Number of channels across bandwidth
+
       std::string      instrument;   // name of backend
       std::string      receiver;     // name of receiver
       std::string      filename;     // full path of file
       
-      //! Null constructor
-      Entry ();
-
-      //! Construct from an ASCII string
-      explicit Entry (const std::string&);
-
       //! Construct from a Pulsar::Archive
-      Entry (const Archive& arch);
+      Entry (const Archive* arch);
 
       //! Destructor
       ~Entry();
       
-      // load from ascii string
-      void load (const std::string& str);
+      // factory constructs new Entry from ascii string
+      static Entry* load (const std::string& str);
+
+      // factory constructs new Entry from Archive
+      static Entry* create (const Archive*);
 
       // unload ascii string
-      void unload (std::string& str);
+      virtual void unload (std::string& str);
 
       // return full path to filename
       std::string get_filename () const;
-      
+
+      virtual bool less_than (const Entry*) const;
+      virtual bool equals (const Entry*) const;
+
+      virtual MJD get_effective_time () const = 0;
+      virtual std::string get_time_str () const = 0;
+      virtual std::string get_nchan_str () const = 0;
+
     protected:
       
       //! Clean slate
       void init ();
+    };
+
+    class StaticEntry : public Entry
+    {
+    public:
+      MJD      time;         // Mid time of observation
+      unsigned nchan;        // Number of channels across bandwidth
+
+      //! Construct from a Pulsar::Archive
+      StaticEntry (const Archive* arch = 0);
+
+      bool equals (const Entry*) const;
+
+      MJD get_effective_time () const { return time; }
+      std::string get_time_str () const;
+      std::string get_nchan_str () const;
+
+    protected:
       
+      //! Clean slate
+      void init ();
+    };
+
+    class InterpolatorEntry : public Entry
+    {
+    public:
+      MJD  start_time;   // earliest time spanned by interpolator
+      MJD  end_time;     // latest time spanned by interpolator
+
+      //! Construct from a Pulsar::Archive
+      InterpolatorEntry (const Archive* arch = 0);
+
+      bool equals (const Entry*) const;
+
+      MJD get_effective_time () const { return start_time; }
+      std::string get_time_str () const;
+      std::string get_nchan_str () const;
     };
     
     //! Describes Database matching criteria
@@ -175,7 +212,7 @@ namespace Pulsar {
     public:
       
       //! The parameters to match
-      Entry entry;
+      Reference::To<StaticEntry> entry;
 
       //! The sequence of matching calibrator and pulsar observations
       void set_sequence (Sequence s) { sequence = s; }
@@ -200,7 +237,7 @@ namespace Pulsar {
       void no_data ();
 
       //! Return true if entry matches within the criteria
-      bool match (const Entry& entry) const;
+      bool match (const Entry* entry) const;
       
       /** @name match results
        *  
@@ -223,7 +260,7 @@ namespace Pulsar {
       //@}
 
       //! Return the best of two entries
-      Entry best (const Entry& a, const Entry& b) const;
+      const Entry* best (const Entry* a, const Entry* b) const;
 
       //! Return the criteria that came closest to matching
       static Criteria closest (const Criteria& a, const Criteria& b);
@@ -233,9 +270,9 @@ namespace Pulsar {
       //! The sequence of matching calibrator and pulsar observations
       Sequence sequence;
 
-      template<typename T, typename Predicate>
+      template<typename T, typename U, typename Predicate>
       void compare (const std::string& name,
-		    const T& want, const T& have,
+		    const T& want, const U& have,
 		    Predicate equal ) const
       {
 	match_report += "\t" + name
@@ -263,6 +300,9 @@ namespace Pulsar {
       bool compare_times (const MJD& want, 
 			  const MJD& have) const;
 
+      bool bracketed_time (const MJD& want,
+			   const std::pair<MJD,MJD>& have) const;
+
       bool compare_coordinates (const sky_coord& want,
 				const sky_coord& have) const;
     };
@@ -275,46 +315,48 @@ namespace Pulsar {
     static void set_default_criteria (const Criteria&);
 
     //! Returns the best Entry that matches the given Criteria
-    Entry best_match (const Criteria&) const;
+    const Entry* best_match (const Criteria&) const;
 
     //! Fills a vector with Entry instances that match the given Criteria
-    void all_matching (const Criteria&, std::vector<Entry>& matches) const;
+    void all_matching (const Criteria&,
+		       std::vector<const Entry*>& matches) const;
     
     //! Return the Criteria for the specified Pulsar::Archive
     Criteria criteria (const Pulsar::Archive* arch,
-			 Signal::Source obsType) const;
+		       Signal::Source obsType) const;
     
     //! Return the Criteria for the specified Pulsar::Archive
     Criteria criteria (const Pulsar::Archive* archive,
-			 const Calibrator::Type* calType) const;
+		       const Calibrator::Type* calType) const;
 
     //! Returns the full pathname of the Entry filename
-    std::string get_filename (const Entry&) const;
+    std::string get_filename (const Entry*) const;
     
     //! Add the given entry to the database
-    void add (const Entry& entry);
+    void add (Entry* entry);
 
     //! Remove the preceding path from the Entry filename, if applicable
-    void shorten_filename (Entry& entry);
+    void shorten_filename (Entry* entry);
 
     //! Add path to Entry filename, if applicable
-    void expand_filename (Entry& entry);
+    void expand_filename (Entry* entry);
 
     //! Get the closest match report
     std::string get_closest_match_report () const;
 
   protected:
-    
-    std::vector<Entry> entries;   // list of entries in the database
+
+    // list of entries in the database
+    std::vector< Reference::To<Entry> > entries;
     std::string path;
 
     template<class Cal> class Cache
     {
     public:
-      Entry entry;
+      Reference::To<const Entry> entry;
       Reference::To<Cal> calibrator;
 
-      void cache (const Entry& _entry, Cal* cal)
+      void cache (const Entry* _entry, Cal* cal)
       { entry = _entry; calibrator = cal; }
     };
 
@@ -331,10 +373,6 @@ namespace Pulsar {
     //! The criteria that last came closest to matching
     mutable Criteria closest_match;
   };
-
-  bool operator < (const Database::Entry& a, const Database::Entry& b);
-
-  bool operator == (const Database::Entry& a, const Database::Entry& b);
 
   std::ostream& operator << (std::ostream& os, Database::Sequence);
     

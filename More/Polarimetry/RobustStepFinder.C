@@ -16,6 +16,7 @@ using namespace Pulsar;
 using namespace std;
 
 // #define _DEBUG 1
+#include "debug.h"
 
 typedef vector<Calibration::SourceObservation> ObsVector;
 typedef vector<Calibration::CoherencyMeasurementSet> SetVector;
@@ -30,10 +31,7 @@ unsigned remove_empty (Container& container)
   {
     if (container[idat].size() == 0)
     {
-#if _DEBUG
-      cerr << "RobustStepFinder::process removing empty sub-container at " 
-           << idat + erased << endl;
-#endif
+      DEBUG("RobustStepFinder::process removing empty sub-container at " << idat+erased);
       container.erase (container.begin() + idat);
       erased ++;
     }
@@ -156,6 +154,7 @@ void RobustStepFinder::remove_extra_calibrators ()
       epochs.clear();
     }
   } 
+  DEBUG ("RobustStepFinder::remove_extra_calibrators done");
 }
 
   
@@ -169,6 +168,8 @@ vector<unsigned> all_four ()
 
 void RobustStepFinder::remove_outliers ()
 {
+  DEBUG ("RobustStepFinder::remove_outliers");
+
   bool wedge = false;
 
   // search for outliers using all four Stokes parameters
@@ -181,6 +182,8 @@ void RobustStepFinder::remove_outliers ()
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
   count_consistent (caldata, cal_before, cal_after, wedge);
   remove_inconsistent (caldata, cal_before, cal_after);
+
+  DEBUG ("RobustStepFinder::remove_outliers done");
 }
 
 template <class Container, class Element>
@@ -199,8 +202,7 @@ void RobustStepFinder::insert_steps ()
 
   bool wedge = true;
 
-  cerr << "RobustStepFinder::insert_steps searching pulsar data"
-       << endl;
+  cerr << "RobustStepFinder::insert_steps searching pulsar data" << endl;
   
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   count_consistent (psrdata, psr_before, psr_after, wedge);
@@ -216,12 +218,15 @@ void RobustStepFinder::insert_steps ()
   compare[0] = 2;
   compare[1] = 3;
 
-  cerr << "RobustStepFinder::insert_steps searching calibrator data"
-       << endl;
-
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
+
+  if (caldata.size() == 0)
+    return;
+
+  cerr << "RobustStepFinder::insert_steps searching calibrator data" << endl;
+
   count_consistent (caldata, cal_before, cal_after, wedge);
-  
+
   vector<MJD> cal_steps;
   find_steps_calibrator (cal_steps);
 
@@ -252,6 +257,8 @@ void RobustStepFinder::insert_steps ()
 
 double get_chi (const ObsVector& A, const ObsVector& B, vector<unsigned>& pol)
 {
+  DEBUG ("get_chi ObsVector");
+
   auto Aptr = A.begin();
   auto Bptr = B.begin();
 
@@ -259,13 +266,13 @@ double get_chi (const ObsVector& A, const ObsVector& B, vector<unsigned>& pol)
  
   while (Aptr != A.end() && Bptr != B.end())
   {
-    while (Aptr->ichan < Bptr->ichan && Aptr != A.end())
+    while (Aptr != A.end() && (Aptr->ichan < Bptr->ichan))
       Aptr ++;
 
     if (Aptr == A.end())
       break;
 	
-    while (Bptr->ichan < Aptr->ichan && Bptr != B.end())
+    while (Bptr != B.end() && (Bptr->ichan < Aptr->ichan))
       Bptr ++;
 
     if (Bptr == B.end())
@@ -286,6 +293,14 @@ double get_chi (const ObsVector& A, const ObsVector& B, vector<unsigned>& pol)
     Bptr++;
   }
 
+  if (chi.size() == 0)
+  {
+    DEBUG ("get_chi ObsVector no data");
+    return 0;
+  }
+
+  DEBUG ("get_chi ObsVector ok");
+
   return median (chi);
 }
 
@@ -295,6 +310,8 @@ void get_chi (vector<double>& chi,
 	      const CoherencyMeasurement& A,
 	      const CoherencyMeasurement& B, vector<unsigned>& pol)
 {
+  DEBUG ("get_chi CoherencyMeasurement");
+
   Reference::To<const CoherencyMeasurement::Uncertainty> error;
   error = A.get_uncertainty();
 
@@ -320,6 +337,8 @@ void get_chi (vector<double>& chi,
     if (Schi[ipol].imag() != 0.0)
       chi.push_back( fabs(Schi[ipol].imag()) );
   }
+
+  DEBUG ("get_chi CoherencyMeasurement ok");
 }
 
 void get_chi (vector<double>& chi,
@@ -331,19 +350,21 @@ void get_chi (vector<double>& chi,
 
   while (Aptr != A.end() && Bptr != B.end())
   {
-    while (Aptr->get_input_index() < Bptr->get_input_index() && Aptr != A.end())
+    while (Aptr != A.end() && (Aptr->get_input_index() < Bptr->get_input_index()))
       Aptr ++;
 
     if (Aptr == A.end())
       break;
 	
-    while (Bptr->get_input_index() < Aptr->get_input_index() && Bptr != B.end())
+    while (Bptr != B.end() && (Bptr->get_input_index() < Aptr->get_input_index()))
       Bptr ++;
 
     if (Bptr == B.end())
       break;
 
+    DEBUG ("get_chi CoherencyMeasurementSet get_chi");
     get_chi (chi, *Aptr, *Bptr, pol);
+    DEBUG ("get_chi CoherencyMeasurementSet get_chi ok");
 
     Aptr++;
     Bptr++;
@@ -356,25 +377,35 @@ double get_chi (const SetVector& A, const SetVector& B, vector<unsigned>& pol)
   auto Bptr = B.begin();
 
   vector<double> chi;
+
+  DEBUG ("get_chi SetVector");
  
   while (Aptr != A.end() && Bptr != B.end())
   {
-    while (Aptr->get_ichan() < Bptr->get_ichan() && Aptr != A.end())
+    while (Aptr != A.end() && (Aptr->get_ichan() < Bptr->get_ichan()))
       Aptr ++;
 
     if (Aptr == A.end())
       break;
 	
-    while (Bptr->get_ichan() < Aptr->get_ichan() && Bptr != B.end())
+    while (Bptr != B.end() && (Bptr->get_ichan() < Aptr->get_ichan()))
       Bptr ++;
 
     if (Bptr == B.end())
       break;
 
+    DEBUG ("get_chi SetVector get_chi");
     get_chi (chi, *Aptr, *Bptr, pol);
+    DEBUG ("get_chi SetVector get_chi ok");
 
     Aptr++;
     Bptr++;
+  }
+
+  if (chi.size() == 0)
+  {
+    DEBUG ("get_chi SetVector no data");
+    return 0.0;
   }
 
   return median (chi);
@@ -386,11 +417,16 @@ void RobustStepFinder::count_consistent (const Container& container,
 					 vector<unsigned>& after,
 					 bool wedge)
 {
+  DEBUG ("RobustStepFinder::count_consistent");
+
   before.clear();
   after.clear();
   
   unsigned nsubint = container.size();
-  
+
+  if (nsubint == 0)
+    return;
+ 
   before.resize (nsubint, 0);
   after.resize (nsubint, 0);
 
@@ -400,7 +436,9 @@ void RobustStepFinder::count_consistent (const Container& container,
  
     for (unsigned jsub=isub+1; jsub < jmax; jsub++)
     {
+      DEBUG ("RobustStepFinder::count_consistent get_chi");
       double chi = get_chi (container[isub], container[jsub], compare);
+      DEBUG ("RobustStepFinder::count_consistent chi=" << chi);
 
       // if isub is consistent with jsub ...
       if (chi < step_threshold)
@@ -425,6 +463,7 @@ void RobustStepFinder::count_consistent (const Container& container,
       }
     }
   }
+  DEBUG ("RobustStepFinder::count_consistent done");
 }
 
 template<typename Container>
@@ -432,14 +471,15 @@ void RobustStepFinder::remove_inconsistent (Container& container,
 					    vector<unsigned>& before,
 					    vector<unsigned>& after)
 {
+  DEBUG ("RobustStepFinder::remove_inconsistent");
+
   unsigned nsubint = container.size();
+
+  if (nsubint == 0)
+    return;
 
   assert (before.size() == nsubint);
   assert (after.size() == nsubint);
-
-#if _DEBUG 
-  cerr << "RobustStepFinder::remove_inconsistent" << endl;
-#endif
 
   unsigned min_threshold = depth - 1;
 
@@ -472,6 +512,8 @@ void RobustStepFinder::remove_inconsistent (Container& container,
     if (isub + min_threshold >= container.size() && after_min > 0)
       after_min --;
   }
+
+  DEBUG ("RobustStepFinder::remove_inconsistent done");
 }
       
 void RobustStepFinder::find_steps_pulsar (vector<MJD>& steps)
@@ -593,7 +635,6 @@ void RobustStepFinder::find_steps (vector<unsigned>& steps,
 				   const vector<unsigned>& after)
 {
   unsigned nsubint = before.size();
-  unsigned good = (depth * (depth+1)) / 2;
 
   for (unsigned isub=1; isub+2 < nsubint; isub++)
   {
@@ -617,6 +658,9 @@ void RobustStepFinder::insert_steps (vector<MJD>& steps, VariableBackend* xform)
 {
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   unsigned nsubint = psrdata.size();
+
+  if (nsubint == 0)
+    return;
 
   unsigned nchan = calibrator->get_nchan();
 

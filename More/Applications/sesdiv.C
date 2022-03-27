@@ -35,6 +35,7 @@ void usage ()
     "                        sessions for a given frequency range will \n"
     "                        be placed in name/*.session \n"
     " -f frequency           print the band designation for the frequency \n"
+    " -j                     join bands (divide only in time) \n"
     "\n"
     " -T hours               time between sessions \n"
     " -S secs                seconds between sessions \n"
@@ -90,12 +91,15 @@ int main (int argc, char** argv)
   bool include_minutes = false;
   bool use_length = false;
 
+  // by default, different centre frequencies in different sessions
+  bool divide_frequencies = true;
+  
   bool verbose = false;
   bool vverbose = false;
   
   double frequency = 0.0;
   
-  const char* args = "hb:f:LS:T:vV";
+  const char* args = "hb:f:jLS:T:vV";
   int c = 0;
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -111,7 +115,12 @@ int main (int argc, char** argv)
     case 'f':
       frequency = atof(optarg);
       break;
-     
+
+    case 'j':
+      divide_frequencies = false;
+      Pulsar::ArchiveSort::compare_frequencies = false;
+      break;
+      
     case 'L':
       use_length = true;
       Pulsar::ArchiveSort::read_length = true;
@@ -158,18 +167,20 @@ int main (int argc, char** argv)
 
     cerr << "sesdiv: specified frequency does not fall within designated bands"
 	 << endl;
+    
     return -1;
   }
 
-  for (unsigned iband=0; iband < bands.size(); iband++){
+  for (unsigned iband=0; iband < bands.size(); iband++)
     cerr << "sesdiv: adding band designation " << iband << endl;
-  }
 
   list<Pulsar::ArchiveSort> entries;
 
-  if (optind < argc) {
+  if (optind < argc)
+  {
     ifstream input (argv[optind]);
-    if (!input) {
+    if (!input)
+    {
       cerr << "sesdiv: could not open " << argv[optind] << endl;
       return -1;
     } 
@@ -206,7 +217,7 @@ int main (int argc, char** argv)
 
   for (entry = entries.begin(); entry != entries.end(); entry++) try
   {
-    if (last != entries.end() && ! ( (*last) < (*entry) ))
+    if (divide_frequencies && last != entries.end() && ! ( *last < *entry ))
       cerr << "Entries not sorted!" << endl;
 
     MJD mjd = entry->epoch;
@@ -255,7 +266,7 @@ int main (int argc, char** argv)
       close_session = true;
     }
 
-    if ( entry->centre_frequency != session_cfreq ) {
+    if ( divide_frequencies && entry->centre_frequency != session_cfreq ) {
       cerr << "Different centre frequency" << endl;
       close_session = true;
     }

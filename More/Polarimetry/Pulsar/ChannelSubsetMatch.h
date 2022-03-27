@@ -30,8 +30,9 @@ namespace Pulsar {
     //! Check that Archive sub's channels all exist in super 
     bool match (const Archive* super, const Archive* sub);
 
-    //! Same test for Database::Entry objects
-    bool match (const Database::Entry& super, const Database::Entry& sub);
+    //! Same test for Database::StaticEntry objects
+    bool match (const Database::StaticEntry* super,
+		const Database::StaticEntry* sub);
 
     //! Return channel in super matching the given channel in sub
     //! -1 == no match

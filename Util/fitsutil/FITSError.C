@@ -29,7 +29,8 @@ FITSError::FITSError (int status, const char* func, const char* msg, ...)
   fits_get_errstatus (status, fits_error);
   this_msg += ": ";
   this_msg += fits_error;
-
+  this_msg += " (" + tostring(status) + ")";
+    
   construct (FailedCall, func, this_msg.c_str());
 } 
 

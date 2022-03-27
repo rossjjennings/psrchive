@@ -88,11 +88,25 @@ namespace Pulsar {
       return dynamic_cast<const T*> (this) != 0;
     }
 
+    //! Abstract base of classes that update model parameters
+    class Variation : public Reference::Able
+    {
+    public:
+      //! Update the model parameters to match the integration
+      /*! Returns true if transformation should be recomputed */
+      virtual bool update (const Integration*) = 0;
+    };
+    
   protected:
 
     //! The type of the Calibrator
     Reference::To<Type> type;
 
+    //! Updates model parameters
+    Reference::To<Variation> variation;
+    void copy_variation (Calibrator*);
+    void set_variation (Variation* var) { variation = var; }
+    
     //! The CalibratorExtension of the Archive passed during construction
     Reference::To<const CalibratorExtension> extension;
 

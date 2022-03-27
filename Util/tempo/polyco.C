@@ -35,8 +35,10 @@ using namespace Pulsar;
 bool Pulsar::Predictor::verbose = false;
 bool polyco::debug = false;
 
-// not going to get > ns precision out of a routine based in minutes
-double polynomial::precision = 1e-10;
+/*
+  Determines the precision of iphase (stopping threshold) in seconds
+*/
+double polynomial::precision = 1e-10; // 0.1 nanoseconds
 
 // allow requested time to be about ten percent out of advertised span
 double polynomial::flexibility = 0.1;

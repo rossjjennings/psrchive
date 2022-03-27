@@ -390,7 +390,6 @@ void TextInterface::Parser::clean ()
 }
 
 
-
 bool TextInterface::matches (const string& name,
 			     const string& prefix,
 			     const Value* value)
@@ -404,7 +403,7 @@ bool TextInterface::matches (const string& name,
 
   if (length)
   {
-    if ( name[length] != ':' )
+    if ( name.length() <= length || name[length] != ':' )
     {
 #ifdef _DEBUG
       cerr << " false (no colon)" << endl;

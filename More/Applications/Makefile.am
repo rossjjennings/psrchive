@@ -12,7 +12,7 @@ bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
 	drifting_subpulses dynamic_spectra psr4th psrtxt2 reslice \
-	smint psr4th2txt
+	smint psr4th2txt pcmrm pcmdiff pcmerr
 
 pam_SOURCES = pam.C
 
@@ -24,6 +24,10 @@ paz_SOURCES = paz.C zap_periodic_spikes.C
 calavg_SOURCES = calavg.C
 
 pcmavg_SOURCES = pcmavg.C
+
+pcmrm_SOURCES = pcmrm.C
+
+pcmerr_SOURCES = pcmerr.C
 
 fix_single_SOURCES = fix_single.C
 
@@ -85,6 +89,9 @@ reslice_SOURCES = reslice.C
 smint_SOURCES = smint.C
 smint_LDADD = @SPLINTER_LIBS@ $(LDPLOT)
 
+pcmdiff_SOURCES = pcmdiff.C
+pcmdiff_LDADD = $(LDPLOT)
+
 ######################################################################
 #
 # Eigen C++ template library specific code
@@ -123,7 +130,7 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa lmfit pafit pcmdiff
+	psrsp psrtrash spa lmfit pafit
 
 lmfit_SOURCES = lmfit.C
 lmfit_LDADD = $(LDPLOT)
@@ -166,9 +173,6 @@ psrsp_LDADD = $(LDPLOT)
 
 psrtrash_SOURCES = psrtrash.C
 psrtrash_LDADD = $(LDPLOT)
-
-pcmdiff_SOURCES = pcmdiff.C
-pcmdiff_LDADD = $(LDPLOT)
 
 LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 

@@ -58,6 +58,13 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr) try
   }
 
   stokes->set_nchan( nchan );
+
+  // Get COUPLING (new in PSRFITS version 6.5)
+  string coupling = "BeforeBasis";
+  psrfits_read_key (fptr, "COUPLING", &coupling, coupling, verbose > 2);
+
+  auto point = fromstring<CalibratorStokes::CouplingPoint> (coupling);
+  stokes->set_coupling_point (point);
   
   vector<float> data( nchan );
 

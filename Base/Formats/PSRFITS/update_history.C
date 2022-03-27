@@ -38,6 +38,10 @@ string fits_state_string (Signal::State state, bool verbose)
 {
   switch (state)
   {
+  case Signal::Nyquist:
+    return "AB";
+  case Signal::Analytic:
+    return "ARAIBRBI";
   case Signal::PPQQ:
     return "AABB";
   case Signal::Stokes:
@@ -108,7 +112,11 @@ void Pulsar::FITSArchive::update_history()
   last.ctr_freq = get_centre_frequency();
   last.nchan = get_nchan();
   last.chan_bw = get_bandwidth() / float(get_nchan());
+
+  last.rotation_measure = get_rotation_measure ();
   last.rm_corr = get_faraday_corrected();
+
+  last.dispersion_measure = get_dispersion_measure ();
   last.dedisp = get_dedispersed();
 
   Receiver* receiver = get<Receiver>();

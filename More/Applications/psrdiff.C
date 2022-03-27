@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
@@ -34,6 +38,9 @@ void usage ()
     " -d               StokesPlot difference\n"
     " -c min_chisq     StokesPlot difference only when reduced chisq > min \n"
     " -h               Help page \n"
+#if HAVE_ARMADILLO
+    " -L               print/compare the likelihood of data \n"
+#endif
     " -M metafile      Specify list of archive filenames in metafile \n"
     " -q               Quiet mode \n"
     " -v               Verbose mode \n"
@@ -46,6 +53,8 @@ static bool verbose = false;
 
 void diff_two (const std::string& fileA, const std::string& fileB);
 
+int likelihood_analysis (vector<string>& filenames);
+			  
 int main (int argc, char** argv) try
 {
   Pulsar::Profile::default_duty_cycle = 0.10;
@@ -60,8 +69,11 @@ int main (int argc, char** argv) try
   bool plot = false;
   float plot_when = 0;
 
+  // perform likelihood analysis
+  bool likelihood = false;
+  
   char c;
-  while ((c = getopt(argc, argv, "c:dhM:qs:vV")) != -1) 
+  while ((c = getopt(argc, argv, "c:dhLM:qs:vV")) != -1) 
 
     switch (c)
     {
@@ -77,6 +89,10 @@ int main (int argc, char** argv) try
       usage();
       return 0;
 
+    case 'L':
+      likelihood = true;
+      break;
+      
     case 'M':
       metafile = optarg;
       break;
@@ -114,6 +130,9 @@ int main (int argc, char** argv) try
     return -1;
   }
 
+  if (likelihood)
+    return likelihood_analysis (filenames);
+  
   if (!std_filename)
   {
     if (filenames.size() == 2)
@@ -382,4 +401,126 @@ void diff_two (const std::string& fileA, const std::string& fileB)
 
   cerr << "psrdiff: unloading " << output_filename << endl;
   A->unload (output_filename);
+}
+
+#if HAVE_ARMADILLO
+#include "Pulsar/ArchiveComparisons.h"
+#include "GaussianMixtureProbabilityDensity.h"
+#include "GeneralizedChiSquared.h"
+#include "UnaryStatistic.h"
+
+using namespace BinaryStatistics;
+using namespace Pulsar;
+
+vector<double> log_likelihood (Archive* data, ArchiveComparisons* model)
+{
+  model->set_Archive (data);
+
+  vector<double> result;
+
+  unsigned nsubint = data->get_nsubint();
+  unsigned nchan = data->get_nchan();
+
+  // cerr << "nsubint=" << nsubint << endl;
+  // cerr << "nchan=" << nchan << endl;
+    
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+  {
+    Integration* subint = data->get_Integration( isubint );
+    model->set_subint (isubint);
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (subint->get_weight(ichan) == 0)
+	continue;
+
+      model->set_chan (ichan);
+      result.push_back (model->get());
+    }
+  }
+
+  return result;
+}
+
+#endif
+
+int likelihood_analysis (vector<string>& filenames)
+{
+
+#if HAVE_ARMADILLO
+
+  unsigned nfile = filenames.size();
+  
+  vector< Reference::To<ArchiveComparisons> > compare ( nfile );
+  vector< GaussianMixtureProbabilityDensity* > gmpd ( nfile );
+  vector< GeneralizedChiSquared* > gcs ( nfile );
+
+  vector< Reference::To<Archive> > data ( nfile );
+
+  unsigned ibest = 0;
+  unsigned min_ngaus = 0;
+  
+  for (unsigned ifile=0; ifile < nfile; ifile++)
+  {
+    gmpd[ifile] = new GaussianMixtureProbabilityDensity;
+    gmpd[ifile]->gcs = gcs[ifile] = new GeneralizedChiSquared;
+
+    compare[ifile] = new ArchiveComparisons (gmpd[ifile]);
+    compare[ifile]->set_what ("sum");
+    compare[ifile]->set_way ("all");
+
+    data[ifile] = Archive::load( filenames[ifile] );
+
+    data[ifile]->bscrunch_to_nbin (128);
+    data[ifile]->pscrunch();
+    
+    compare[ifile]->set_setup_Archive( data[ifile] );
+
+    unsigned ngaus = gmpd[ifile]->get_ngaus ();
+    
+    cerr << "file=" << data[ifile]->get_filename() << endl;
+    cerr << "neigen=" << gcs[ifile]->get_neigen () << endl;
+    cerr << "ngaus=" << ngaus << endl;
+
+    if (ifile == 0 || ngaus < min_ngaus)
+    {
+      min_ngaus = ngaus;
+      ibest = ifile;
+    }
+  }
+
+  for (unsigned ifile=0; ifile < nfile; ifile++)
+  {
+    cerr << endl << "****************************************" << endl;
+    cerr << "BASIS: " << data[ifile]->get_filename() << endl;
+    
+    for (unsigned jfile=0; jfile < nfile; jfile++)
+    {
+      cerr << "TEST: " << data[jfile]->get_filename() << endl;
+
+      vector<double> logL = log_likelihood (data[jfile], compare[ifile]);
+      cerr << "N=" << logL.size() << endl;
+      cerr << "mean log(L)=" << mean(logL) << endl;
+      cerr << "median log(L)=" << median(logL) << endl;
+    }
+  }
+
+  cerr << endl << "****************************************" << endl;
+  cerr << "RESULTS:" << endl << endl;
+  
+  for (unsigned jfile=0; jfile < nfile; jfile++)
+    cout << data[jfile]->get_filename() << " "
+	 << mean(log_likelihood (data[jfile], compare[ibest])) << endl;
+
+  return 0;
+  
+#else
+
+  cerr << "psrdiff: ARMADILLO library required to perform likelihood analysis"
+       << endl;
+
+  return -1;
+  
+#endif
+
 }

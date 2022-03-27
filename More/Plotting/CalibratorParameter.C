@@ -15,6 +15,9 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/Archive.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 #include <cpgplot.h>
 #include <assert.h>
 
@@ -25,6 +28,8 @@ Pulsar::CalibratorParameter::get_Info (const Archive* data,
 				       Index subint,
 				       float threshold)
 {
+  DEBUG("CalibratorParameter::get_Info");
+
   Reference::To<Calibrator> calibrator;
 
   if (data->get<Pulsar::FluxCalibratorExtension>())
@@ -115,13 +120,20 @@ void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
 
   unsigned nparam = info->get_nparam (iclass);
 
+  DEBUG ("CalibratorParameter::prepare iclass=" << iclass << " nparam=" << nparam);
+
   for (unsigned iparam=0; iparam<nparam; iparam++)
   {
     vector< Estimate<double> > y (nchan);
 
+    DEBUG ("CalibratorParameter::prepare iparam=" << iparam);
+    
     for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
       y[ichan] = info->get_param (ichan, iclass, iparam);
-
+      DEBUG ("\t" << ichan << " " << y[ichan]);
+    }
+    
     plotter.add_plot (y);
   }
 

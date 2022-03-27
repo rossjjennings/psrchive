@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
 	Pulsar/BrittonInfo.h \
         Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
+        Pulsar/ChannelSubsetMatch.h \
         Pulsar/CoherencyMeasurement.h \
         Pulsar/CoherencyMeasurementSet.h \
 	Pulsar/ComplexRVMFit.h \
@@ -119,6 +120,7 @@ libPolarimetry_la_SOURCES = \
         CalibratorStokesInfo.C \
 	CalibratorType_factory.C \
 	CalInterpreter.C \
+        ChannelSubsetMatch.C \
         choose.C \
         CoherencyMeasurement.C \
         CoherencyMeasurementSet.C \
@@ -147,10 +149,10 @@ libPolarimetry_la_SOURCES = \
 	FourthMomentStats.C \
 	FrontendCorrection.C \
         HybridCalibrator.C \
+	InputDataReport.C \
         Instrument.C \
         InstrumentInfo.C \
         Integration_defaraday.C \
-	InputDataReport.C \
         IonosphereCalibrator.C \
         IRIonosphere.C \
 	IXRInfo.C \
@@ -221,9 +223,25 @@ libPolarimetry_la_SOURCES = \
 	VariableTransformation.C \
 	VariationInfo.C
 
+##############################################################################
+#
+# GSL-dependent code
+#
 if HAVE_GSL
 libPolarimetry_la_SOURCES += ReceptionModelSolveGSL.C
 endif
+
+##############################################################################
+#
+# SPLINTER-dependent code
+#
+if HAVE_SPLINTER
+
+libPolarimetry_la_SOURCES += CalibrationInterpolator.C
+nobase_include_HEADERS += Pulsar/CalibrationInterpolator.h
+
+endif
+
 
 SUBDIRS = iri2001
 

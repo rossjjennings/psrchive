@@ -59,4 +59,8 @@ Pulsar::PolnCalibratorExtension::Transformation::Interface::Interface ()
    add( &Transformation::get_nfree,
 	&Transformation::set_nfree,
 	"nfree", "Number of degrees of freedom" );
+
+   add( &Transformation::get_nfit,
+	&Transformation::set_nfit,
+	"nfit", "Number of model parameters varied" );
 }
