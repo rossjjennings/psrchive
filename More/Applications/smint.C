@@ -105,8 +105,9 @@ protected:
   CrossValidatedSmooth2D* cross_validated_smoothing_2D;
 #endif
   
-  void cross_validate ();
-
+  void setup_cross_validation ();
+  bool cross_validate;
+  
   bool unload_solution;
   bool unload_smoothed;
   
@@ -121,6 +122,7 @@ protected:
 
   bool interpolate;
   bool bootstrap_uncertainty;
+
   
   bool use_smoothing_spline ();
   
@@ -296,7 +298,8 @@ smint::smint ()
   outlier_smoothing = 0.0;
 
   interpolate = true;
-  
+
+  cross_validate = false;
   cross_validated_smoothing = 0;
 
 #if HAVE_SPLINTER
@@ -309,14 +312,15 @@ smint::smint ()
   unload_smoothed = false;
 }
 
-void smint::cross_validate ()
+void smint::setup_cross_validation ()
 {
   cross_validated_smoothing = new CrossValidatedSmoothing;
 
 #if HAVE_SPLINTER
   cross_validated_smoothing_2D = new CrossValidatedSmooth2D;
 #endif
-  
+
+  cross_validate = true;
 }
 
 /*!
@@ -361,7 +365,7 @@ void smint::add_options (CommandLine::Menu& menu)
   arg = menu.add (find_median_nfree, "mnf");
   arg->set_help ("compute p-spline smoothing using median nfree");
 
-  arg = menu.add (this, &smint::cross_validate, "cross");
+  arg = menu.add (this, &smint::setup_cross_validation, "cross");
   arg->set_help ("compute p-spline smoothing using m-fold cross-validation");
 
   // add a blank line and a header to the output of -h
@@ -383,7 +387,7 @@ void smint::add_options (CommandLine::Menu& menu)
 bool smint::use_smoothing_spline ()
 {
   return minimize_gcv || minimize_tmse || find_median_nfree
-    || pspline_alpha > 0;
+    || pspline_alpha > 0 || cross_validate;
 }
 
 /*!
@@ -954,7 +958,10 @@ void smint::finalize ()
   cerr << "smint::finalize" << endl;
 
   Reference::To<Archive> solution;
-      
+
+  unload_smoothed = (input_filenames.size() == 1 || row_by_row);
+  unload_solution = !unload_smoothed;
+  
   if (unload_solution)
   {
     cerr << "smint::finalize reference filename=" << reference_filename << endl;
