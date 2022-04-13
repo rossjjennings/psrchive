@@ -16,7 +16,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 {
   int status = 0;
  
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_FluxCalibratorExtension entered" << endl;
   
   // Move to the FLUX_CAL HDU
@@ -25,7 +25,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
   
   if (status == BAD_HDU_NUM)
   {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::FITSArchive::load_FluxCalibratorExtension"
 	" no FLUX_CAL HDU" << endl;
     return;
@@ -39,7 +39,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
   // Get NCH_FLUX (backward compatibility)
   int nch_flux = 0;
-  psrfits_read_key (fptr, "NCH_FLUX", &nch_flux, 0, verbose == 3);
+  psrfits_read_key (fptr, "NCH_FLUX", &nch_flux, 0, verbose > 2);
   
   if (nch_flux >= 0)
     fce->set_nchan(nch_flux);
@@ -48,7 +48,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
   if (fce->get_nchan() == 0)
   {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive::load_FluxCalibratorExtension FLUX_CAL HDU"
 	   << " contains no data. FluxCalibratorExtension not loaded" << endl;
     return;
@@ -56,7 +56,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
   // Get NRCVR
   int nrcvr = 0;
-  psrfits_read_key (fptr, "NRCVR", &nrcvr, 1, verbose == 3);
+  psrfits_read_key (fptr, "NRCVR", &nrcvr, 1, verbose > 2);
   fce->set_nreceptor (nrcvr);
 
   unsigned nchan = fce->get_nchan();
@@ -71,6 +71,9 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
     unsigned ichan = 0;
     unsigned ireceptor = 0;
 
+    if (verbose > 2)
+      cerr << "FITSArchive::load_FluxCalibratorExtension loading S_SYS" << endl;
+
     try {
       // backward compatibility
       load_Estimates (fptr, temp, "T_SYS");
@@ -82,6 +85,9 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
 	fce->set_S_sys (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_FluxCalibratorExtension loading S_CAL" << endl;
 
     try {
       // backward compatibility
@@ -102,7 +108,15 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
     try {
 
+      if (verbose > 2)
+        cerr << "FITSArchive::load_FluxCalibratorExtension"
+                " loading SCALE (optional)" << endl;
+
       load_Estimates (fptr, temp, "SCALE");
+
+      if (verbose > 2)
+        cerr << "FITSArchive::load_FluxCalibratorExtension"
+                " SCALE loaded" << endl;
 
       fce->has_scale (true);
 
@@ -113,7 +127,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
     }
     catch (Error& error)
     {
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "FITSArchive::load_FluxCalibratorExtension fail SCALE: "
 	     << error.get_message();
 
@@ -122,7 +136,15 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
     try {
 
+      if (verbose > 2)
+        cerr << "FITSArchive::load_FluxCalibratorExtension"
+                " loading RATIO (optional)" << endl;
+
       load_Estimates (fptr, temp, "RATIO");
+
+      if (verbose > 2)
+        cerr << "FITSArchive::load_FluxCalibratorExtension"
+                " RATIO loaded" << endl;
 
       for (ichan=0; ichan < nchan; ichan++)
 	for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
@@ -131,7 +153,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
     }
     catch (Error& error)
     {
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "FITSArchive::load_FluxCalibratorExtension fail RATIO: "
 	     << error.get_message();
     }
@@ -143,6 +165,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
   add_extension (fce);
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_FluxCalibratorExtension exiting" << endl;
 }
+

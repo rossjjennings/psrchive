@@ -602,11 +602,23 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 }
 
 
-void Pulsar::FluxCalibrator::setup () try {
-  
-  // if built from an extension, the data are already available
-  if (extension)
+void Pulsar::FluxCalibrator::setup () try 
+{
+  // if built from an extension, ensure that data are unpacked
+  if (flux_extension)
+  {
+    unsigned nchan = flux_extension->get_nchan();
+    if (data.size() != nchan)
+    {
+      if (verbose > 2)
+        cerr << "Pulsar::FluxCalibrator::setup create nchan=" << nchan << endl;
+
+      create (nchan);
+    }
+
     return;
+  } 
+
 
   if (!database) {
     if (verbose > 2)

@@ -38,7 +38,6 @@ Pulsar::CalibratorParameter::get_Info (const Archive* data,
       cerr << "Pulsar::CalibratorParameter::prepare flux calibrator" << endl;
     calibrator = new Pulsar::FluxCalibrator (data);
   }
-
   if (data->get<Pulsar::PolnCalibratorExtension>())
   {
     if (verbose)

@@ -11,7 +11,7 @@
 using namespace std;
 
 void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
-			     const char* column_name)
+			     const char* column_name, bool verbose)
 {
   long dimension = data.size();
   
@@ -62,7 +62,9 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   if (status)
     throw FITSError (status, "Pulsar::load_Estimates",
 		     "fits_read_col " + name);
-  
+ 
+  unsigned ngood = 0;
+ 
   for (idim=0; idim < dimension; idim++)
   {
     float err = temp[idim];
@@ -73,7 +75,14 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
       cerr << "Pulsar::load_Estimates not finite data[" << idim << "].var=" << data[idim].var << endl;
       data[idim].var = 0.0;
     }
+
+    if (data[idim].var > 0.0)
+      ngood ++;
   }
+
+  if (ngood == 0)
+    cerr << "Pulsar::load_Estimates WARNING: all " << dimension << " estimates glagged invalid" << endl;
+
 }
 
 void Pulsar::unload_Estimates (fitsfile* fptr,

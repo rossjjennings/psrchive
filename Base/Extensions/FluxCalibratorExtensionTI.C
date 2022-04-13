@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/CalibratorExtensionInterface.h"
 
 Pulsar::FluxCalibratorExtension::Interface::Interface
 ( FluxCalibratorExtension *s_instance )
@@ -14,14 +15,15 @@ Pulsar::FluxCalibratorExtension::Interface::Interface
     set_instance (s_instance);
 
   // read-only: requires resize
-  add( &FluxCalibratorExtension::get_nchan,
-       "nchan", "Number of frequency channels" );
-
-  // read-only: requires resize
   add( &FluxCalibratorExtension::get_nreceptor,
        "nrcvr", "Number of receiver channels" );
 
+  import ( CalibratorExtension::Interface() );
+
   // read-only: requires resize
+  // add( &FluxCalibratorExtension::get_nchan,
+  //     "nchan", "Number of frequency channels" );
+
   add( &FluxCalibratorExtension::has_scale,
        "scale", "scale (1=Native 0=Reference)" );
 
