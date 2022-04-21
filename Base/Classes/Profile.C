@@ -405,12 +405,17 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   if (verbose)
     cerr << "Pulsar::Profile::logarithm base=" << base 
 	 << " threshold=" << threshold << endl;
-  
-  float log_threshold = log(threshold)/log(base);
 
-  if (!isfinite(log_threshold))
-    throw Error (InvalidParam, "Pulsar::Profile::logarithm",
-		 "logarithm of threshold=%lf is not finite", threshold);
+  float log_threshold = 0;
+ 
+  if (threshold > 0)
+  { 
+    log_threshold = log(threshold)/log(base);
+
+    if (!isfinite(log_threshold))
+      throw Error (InvalidParam, "Pulsar::Profile::logarithm",
+		   "logarithm of threshold=%lf is not finite", threshold);
+  }
 
   unsigned nbin = get_nbin();
   float* amps = get_amps();
