@@ -32,6 +32,8 @@ class SmoothingSpline
   double chi_squared;
   bool minimize_gcv;
 
+  unsigned ndat_good;
+  
 public:
 
   //! Default constructor
@@ -59,6 +61,9 @@ public:
   void fit (const std::vector< double >& data_x,
 	    const std::vector< Estimate<double> >& data_y);
 
+  //! Return the number of good data points included in the fit
+  unsigned get_ndat_good () const;
+  
   double get_fit_gcv ();
   double get_fit_msre ();
   double get_fit_effective_nfree ();
@@ -100,8 +105,8 @@ public:
   void set_spline (SmoothingSpline* _spline) { spline = _spline; }
   
   //! Fit spline to data using current configuration
-  void fit (const std::vector< double >& data_x,
-	    const std::vector< Estimate<double> >& data_y);
+  void fit ( std::vector< double >& data_x,
+	     std::vector< Estimate<double> >& data_y);
 
   //! Return the mean goodness-of-fit for the current smoothing
   double get_mean_gof (const std::vector< double >& data_x,

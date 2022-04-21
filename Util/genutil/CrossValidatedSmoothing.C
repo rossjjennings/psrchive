@@ -48,20 +48,35 @@ void CrossValidatedSmoothing::get_nfree_trials (vector<double>& nfree, unsigned 
   }
 }
 
-void CrossValidatedSmoothing::fit (const vector< double >& dat_x,
-				   const vector< Estimate<double> >& dat_y)
+void CrossValidatedSmoothing::fit ( vector< double >& dat_x,
+				    vector< Estimate<double> >& dat_y )
 {
   assert (spline != 0);
-  
+
+  // filter bad data
+  unsigned idat=0;
+  while (idat < dat_x.size())
+  {
+    if (dat_y[idat].var <= 0)
+    {
+      dat_x.erase (dat_x.begin() + idat);
+      dat_y.erase (dat_y.begin() + idat);
+    }
+    else
+      idat ++;
+  }
+
   spline->set_minimize_gcv (true);
   spline->fit (dat_x, dat_y);
 
+  unsigned ndat_good = spline->get_ndat_good();
+  
   double best_fit_nfree = spline->get_fit_effective_nfree ();
   cerr << "CrossValidatedSmoothing::fit GCV best nfree="
        << best_fit_nfree << endl;
 
   vector<double> nfree_trials (ntrial);
-  get_nfree_trials (nfree_trials, dat_x.size());
+  get_nfree_trials (nfree_trials, ndat_good);
   
   vector<double> mean_gof (ntrial, 0.0);
   

@@ -19,6 +19,7 @@ SmoothingSpline::SmoothingSpline ()
   smoothing = -1;
   effective_nfree = 0;
   chi_squared = 0;
+  ndat_good = 0;
 }
 
 //! Set the smoothing factor
@@ -75,6 +76,8 @@ const char* gcvspl_error (int code)
     }
 }
 
+unsigned SmoothingSpline::get_ndat_good () const { return ndat_good; }
+
 void SmoothingSpline::fit (const vector< double >& data_x,
 			   const vector< Estimate<double> >& data_y)
 {
@@ -84,14 +87,26 @@ void SmoothingSpline::fit (const vector< double >& data_x,
   vector<double> ydat (ndat, 0.0);
   vector<double> wdat (ndat, 0.0);
 
+  ndat_good = 0;
+  
   for (unsigned idat=0; idat < ndat; idat++)
   {
-    knot[idat] = data_x[idat];
-    ydat[idat] = data_y[idat].val;
-    wdat[idat] = 1.0 / data_y[idat].var;
+    if (data_y[idat].var <= 0)
+      continue;
+	
+    knot[ndat_good] = data_x[idat];
+    ydat[ndat_good] = data_y[idat].val;
+    wdat[ndat_good] = 1.0 / data_y[idat].var;
+
+    ndat_good ++;
   }
+
+  int n = ndat = ndat_good;
+
+  knot.resize (ndat);
+  ydat.resize (ndat);
+  wdat.resize (ndat);
   
-  int n = ndat;
   double* x = &(knot[0]);
   double* y = &(ydat[0]);
   double* wx = &(wdat[0]);
