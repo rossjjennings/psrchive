@@ -84,9 +84,6 @@ AC_C_BIGENDIAN
 # Enable large-file support
 AC_SYS_LARGEFILE
 
-# Check which version of the pulsar catalog is installed
-SWIN_PSRCAT
-
 #
 # Disable the debugging information option, -g
 #

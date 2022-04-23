@@ -5,10 +5,6 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/ParametersLookup.h"
 #include "TemporaryDirectory.h"
 #include "DirectoryLock.h"
@@ -58,22 +54,19 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
   
   /* Create name.eph in local directory */ 
 
-#ifdef HAVE_PSRCAT
-
-  string catalogue = "psrcat";
-  string command = catalogue;
-
-  if (getenv("PSRCAT_RUNDIR") != 0)
-    command += " -all ";
-
-  command += " -e " + psr_name + " > " + psr_name + ".eph";
-
-#else
-
   string command = "psrinfo -e " + psr_name;
   string catalogue = "psrinfo";
 
-#endif
+  if (getenv("PSRCAT_FILE") != 0)
+  {
+    catalogue = "psrcat";
+    command = catalogue;
+
+    if (getenv("PSRCAT_RUNDIR") != 0)
+      command += " -all ";
+
+    command += " -e " + psr_name + " > " + psr_name + ".eph";
+  }
 
   if (verbose)
     cerr << "Pulsar::Parameters::Lookup:: Creating ephemeris by " << catalogue 
@@ -116,3 +109,4 @@ catch (Error& error)
 {
   throw error += "Pulsar::Parameters::Lookup::operator()";
 }
+

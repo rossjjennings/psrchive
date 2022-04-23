@@ -5,10 +5,6 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/ParametersLookup.h"
 #include "TemporaryDirectory.h"
 #include "DirectoryLock.h"
@@ -70,19 +66,21 @@ string Pulsar::Parameters::Lookup::get_param (const string& param, const string 
 
   string command;
 
-#ifdef HAVE_PSRCAT
-  string catalogue = "psrcat";
-  command = catalogue;
+  if (getenv("PSRCAT_FILE") != 0)
+  {
+    command = "psrcat";
 
-  if (getenv("PSRCAT_RUNDIR") != 0)
-    command += " -all ";
+    if (getenv("PSRCAT_RUNDIR") != 0)
+      command += " -all ";
 
-  command += " -c " + param + " " + psr_name + " -nohead -nonumber";
-#else
-  if (verbose)
-    cerr << "Pulsar::Parameters::Lookup::get_param psrcat not available at compilation time" << endl;
-  return string("*");
-#endif
+    command += " -c " + param + " " + psr_name + " -nohead -nonumber";
+  }
+  else
+  {
+    if (verbose)
+      cerr << "Pulsar::Parameters::Lookup::get_param psrcat not available at compilation time" << endl;
+    return string("*");
+  }
 
   char buffer[128];
   std::string result = "";
