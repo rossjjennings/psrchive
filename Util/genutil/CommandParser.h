@@ -24,6 +24,9 @@ class CommandParser : public Reference::Able {
   //! the prompt shown to the user
   std::string prompt;
 
+  //! pointer to the ostream to which the script method prints responses
+  std::ostream* out;
+
   //! null constructor
   CommandParser ();
 
