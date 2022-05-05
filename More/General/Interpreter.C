@@ -938,7 +938,7 @@ string Pulsar::Interpreter::fscrunch (const string& args) try
   ScrunchFactor factor;
 
   if (args.length())
-    factor = fromstring<ScrunchFactor> (args);
+    factor = setup<ScrunchFactor> (args);
   
   Pulsar::fscrunch (get(), factor);
   
@@ -959,7 +959,7 @@ string Pulsar::Interpreter::tscrunch (const string& args) try
   ScrunchFactor factor;
 
   if (args.length())
-    factor = fromstring<ScrunchFactor> (args);
+    factor = setup<ScrunchFactor> (args);
   
   Pulsar::tscrunch (get(), factor);
   
@@ -993,7 +993,7 @@ string Pulsar::Interpreter::bscrunch (const string& args) try
   ScrunchFactor factor;
 
   if (args.length())
-    factor = fromstring<ScrunchFactor> (args);
+    factor = setup<ScrunchFactor> (args);
   
   Pulsar::bscrunch (get(), factor);
 
