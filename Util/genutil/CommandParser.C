@@ -40,25 +40,26 @@ void CommandParser::import (CommandParser* other)
     add_command (other->commands[icmd]);
 }
 
-void CommandParser::script (const string& filename)
+string CommandParser::script (const string& filename)
 {
   vector<string> cmds;
   loadlines (filename, cmds);
-  script (cmds);
+  return script (cmds);
 }
 
 static const char* whitespace = " \t\n";
 
-void CommandParser::script (const vector<string>& cmds)
+string CommandParser::script (const vector<string>& cmds)
 {
-  string cmdargs;
-  string first;
-  string response;
+  string result;
   fault=false;
+
   for (unsigned i=0; i<cmds.size(); i++)
   {
-    cmdargs = cmds[i];
-    first = stringtok(cmdargs, whitespace);
+    string cmdargs = cmds[i];
+    string first = stringtok(cmdargs, whitespace);
+    string response;
+
     if ( (startCommand && first == "init") || (endCommand && first == "end"))
     {
       response = parse (cmdargs);
@@ -69,10 +70,11 @@ void CommandParser::script (const vector<string>& cmds)
     }
     if (fault && abort)
       throw Error (InvalidState, "CommandParser::script", response);
-    cerr << response;
+    result += response;
   }
 
   startCommand = false;
+  return result;
 }
 
 string CommandParser::parse (const string& commandargs)
@@ -147,6 +149,9 @@ string CommandParser::parse2 (const string& command, const string& arguments)
 
   if (debug)
     cerr << "CommandParser::parse command not verbose" << endl;
+
+  if (command == "source")
+    return script (arguments);
 
   if (command == "help" || command == "?")
     return help (arguments);

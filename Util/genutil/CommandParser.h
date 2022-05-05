@@ -37,10 +37,10 @@ class CommandParser : public Reference::Able {
   std::string readline ();
 
   //! Process a script
-  virtual void script (const std::string& filename);
+  virtual std::string script (const std::string& filename);
 
   //! Process a vector of commands
-  virtual void script (const std::vector<std::string>& commands);
+  virtual std::string script (const std::vector<std::string>& commands);
 
   //! Process the standard input (terminal, pipe, here-doc, file, etc.)
   void standard_input (const std::string& prompt);
