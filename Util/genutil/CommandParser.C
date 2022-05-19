@@ -20,6 +20,9 @@ CommandParser::CommandParser()
 {
   quit = false;
   verbose = false;
+
+  out = &std::cout;
+
   fault = false;
   abort = true;
   interactive = true;
@@ -68,9 +71,14 @@ string CommandParser::script (const vector<string>& cmds)
     {
       response = parse (cmds[i]);
     }
+
     if (fault && abort)
       throw Error (InvalidState, "CommandParser::script", response);
-    result += response;
+
+    if (out)
+      *out << response;
+    else 
+      result += response;
   }
 
   startCommand = false;
