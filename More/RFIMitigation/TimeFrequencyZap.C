@@ -25,6 +25,7 @@
 #include <assert.h>
 
 // #define _DEBUG 1
+#include "debug.h"
 
 using namespace std;
 using namespace Pulsar;
@@ -132,6 +133,8 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
 
 void delete_edges (Pulsar::Archive* data, const ScrunchFactor& factor)
 {
+  DEBUG("delete_edges archive=" << (void*) data);
+
   unsigned nchan = data->get_nchan();
   unsigned delete_nchan = factor.get_nscrunch (nchan);
   
@@ -169,6 +172,7 @@ void delete_edges (Pulsar::Archive* data, const ScrunchFactor& factor)
 
 void copy_weights (Pulsar::Archive* to, const Pulsar::Archive* from)
 {
+  DEBUG("copy_weights to=" << (void*) to << " from=" << (void*) from);
   unsigned nsubint = to->get_nsubint();
   unsigned nchan = to->get_nchan();
 
@@ -186,8 +190,7 @@ void copy_weights (Pulsar::Archive* to, const Pulsar::Archive* from)
 
 void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 {
-  if (Archive::verbose > 2)
-    cerr << "TimeFrequencyZap::transform archive=" << (void*) archive << endl;
+  DEBUG("TimeFrequencyZap::transform archive=" << (void*) archive);
 
   Reference::To<Archive> data = archive;
   bool cloned = false;
@@ -228,6 +231,7 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
       // data weights were likely changed on last call
       copy_weights (dedispersed_clone, data);
       data = dedispersed_clone;
+      cloned = true;
     }
     else
     {
@@ -300,6 +304,8 @@ void Pulsar::TimeFrequencyZap::transform (Archive* archive)
 
 void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
 {
+  DEBUG("TimeFrequencyZap::iteration archive=" << (void*) archive);
+
   Reference::To<Archive> data = archive;
   Reference::To<Archive> backup = data;
 
@@ -406,6 +412,8 @@ void Pulsar::TimeFrequencyZap::iteration (Archive* archive)
 
 void Pulsar::TimeFrequencyZap::compute_mask (Archive* data)
 {
+  DEBUG("TimeFrequencyZap::compute_mask archive=" << (void*) data);
+
   // Size arrays
   nchan = data->get_nchan();
   nsubint = data->get_nsubint();
@@ -477,6 +485,8 @@ void Pulsar::TimeFrequencyZap::compute_mask (Archive* data)
 
 void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
 {
+  DEBUG("TimeFrequencyZap::compute_stat archive=" << (void*) data);
+
   if (Archive::verbose > 2)
     cerr << "TimeFrequencyZap::compute_stat nsubint=" << nsubint
          << " nchan=" << nchan << endl;
@@ -633,8 +643,10 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
 					   const ScrunchFactor& factor,
 					   unsigned chan_offset)
 {
+  DEBUG("TimeFrequencyZap::apply_mask archive=" << (void*) archive);
+
   if (Archive::verbose > 2)
-    cerr << "TimeFrequencyZap::apply_mask archive=" << (void*) archive
+    cerr << "TimeFrequencyZap::apply_mask"
          << " fscrunch=" << factor << " chan_offset=" << chan_offset
          << endl;
   
@@ -642,7 +654,7 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
   nmasked = 0;
 
   unsigned nscrunch = factor.get_nscrunch (archive->get_nchan());
-  
+
   assert ( nchan * nscrunch + chan_offset <= archive->get_nchan() );
 
   compute_subint.resize (nsubint);
@@ -662,8 +674,12 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
       {
 	// change the weights of the original archive only if setting to zero
 	// so that the weights are not set to that of the fscrunched data
+	DEBUG("TimeFrequencyZap::apply_mask isub=" << isub << " wt=" << wt << " skip");
 	continue;
       }
+
+      DEBUG("TimeFrequencyZap::apply_mask isub=" << isub << " ichan=" << ichan << " wt=" << wt << " nscr=" << nscrunch << " off=" << chan_offset);
+
       for (unsigned jchan=0; jchan < nscrunch; jchan++)
       {
 	unsigned ch = ichan*nscrunch + jchan + chan_offset;
