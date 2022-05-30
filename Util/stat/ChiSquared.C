@@ -31,7 +31,7 @@ void linear_fit (double& scale, double& offset,
 	wt[idat] = 0.0;
   }
 
-  linear_fit_work (scale, offset, dat1, dat2, one, wt, true);
+  linear_fit_work (scale, offset, dat1, dat2, one, wt, false);
 }
 
 void weighted_linear_fit (double& scale, double& offset,
@@ -183,7 +183,7 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   
   double retval = coeff / ( ndat * ( 1 + sqr(scale) ) );
 
-  // cerr << "chi=" << retval << endl;
+  // cerr << "chi=" << retval << " scale=" << scale << " offset=" << offset << endl;
   
   return retval;
 }
