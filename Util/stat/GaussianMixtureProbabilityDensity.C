@@ -50,6 +50,9 @@ double GaussianMixtureProbabilityDensity::get (const vector<double>& dat1,
   }
 
   unsigned ndims = model->n_dims();
+
+  assert (ndims > 0);
+
   if (ndims < ndat)
     residual.resize (ndims);
 
