@@ -359,7 +359,7 @@ int main (int argc, char *argv[])
       double Anorm = sqrt(A*A);
       sky_coord Acoord = coordinates[i];
 
-      for (unsigned j=i+1; j<susceptibility.size(); j++)
+      for (unsigned j=i; j<susceptibility.size(); j++)
       {
 	Vector<3,double> B = susceptibility[j];
 	double Bnorm = sqrt(B*B);

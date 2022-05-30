@@ -378,7 +378,11 @@ void parse_indeces (vector<unsigned>& indeces,
 		    unsigned limit)
 {
   for (unsigned i=0; i<arguments.size(); i++)
-    TextInterface::parse_indeces (indeces, "[" + arguments[i] + "]", limit);
+  {
+    vector<unsigned> tmp;
+    TextInterface::parse_indeces (tmp, "[" + arguments[i] + "]", limit);
+    for (auto el: tmp) indeces.push_back(el);
+  }
 }
 
 string Pulsar::ZapInterpreter::chan (const string& args) try 
