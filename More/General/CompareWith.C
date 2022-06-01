@@ -227,7 +227,7 @@ void CompareWith::get_residual (vector<double>& amps,
 
 void brute_force_search_for_best_gmm (arma::gmm_diag* model,
 				      const arma::mat& data,
-				      unsigned ngaus)
+				      unsigned ngaus) try
 {
   unsigned ntrial = 100;
     
@@ -315,12 +315,15 @@ void brute_force_search_for_best_gmm (arma::gmm_diag* model,
   model->set_means (best_means);
   model->set_dcovs (best_dcovs);
 }
-
+catch (std::exception& error)
+{
+  throw Error (InvalidState, "brute_force_search_for_best_gmm", error.what());
+}
 
 
 void targeted_search_for_best_gmm (arma::gmm_diag* model,
 				   const arma::mat& data,
-				   unsigned ngaus, const double* eval)
+				   unsigned ngaus, const double* eval) try
 {
   uword d = data.n_rows;     // dimensionality
   uword N = data.n_cols;     // number of vectors
@@ -445,13 +448,20 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 		 "arma::gmm_diag::learn failed on targeted run");
 
 }
+catch (std::exception& error)
+{
+  throw Error (InvalidState, "targeted_search_for_best_gmm", error.what());
+}
 
 void ease_in_to_best_gmm (arma::gmm_diag* model,
 			  const arma::mat& data,
-			  unsigned& ngaus, const double* eval)
+			  unsigned& ngaus, const double* eval) try
 {
   uword d = data.n_rows;     // dimensionality
   uword N = data.n_cols;     // number of vectors
+
+  assert (d > 2);
+  assert (N > 0);
 
   unsigned km_iter = 10;
   unsigned em_iter = 40;
@@ -566,9 +576,13 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
   }
   catch (std::exception& error)
   {
-    throw Error (FailedCall, "CompareWith::setup",
+    throw Error (FailedCall, "ease_in_to_best_gmm",
                  error.what ());
   }
+}
+catch (std::exception& error)
+{
+  throw Error (InvalidState, "ease_in_to_best_gmm", error.what());
 }
 
 #endif // HAVE_ARMADILLO
@@ -707,20 +721,6 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   }
   else
   {
-#if _DEBUG
-    double evectot = 0;
-    for (unsigned i=0; i<rank; i++)
-      evectot += eval[i];
-
-    std::ofstream ofs ("evec_cumu.dat");
-    double evec_cumu = 0;
-    for (unsigned i=0; i<rank; i++)
-    {
-      evec_cumu += eval[i];
-      ofs << eval[i] << " " << 1.0 - evec_cumu / evectot << endl;
-    }
-#endif
-    
     while (eff_rank < rank && eval[eff_rank] > var)
       eff_rank ++;
 
@@ -733,7 +733,40 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   
     DEBUG("CompareWith::setup effective rank=" << eff_rank);
   }
-  
+
+  if (eff_rank < 4)
+  {
+    float threshold = 1.5;
+
+    while (eff_rank+1 < rank && eval[eff_rank]/eval[eff_rank+1] < threshold)
+      eff_rank ++;
+
+    cerr << "CompareWith::setup alternative effective rank=" 
+         << eff_rank << endl;
+  }
+
+  if (eff_rank < 4)
+  { 
+    cerr << "CompareWith::setup work-around var=" << var 
+         << " effective_rank=" << eff_rank 
+         << " rank=" << rank << endl;
+    double evaltot = 0;
+    for (unsigned i=0; i<rank; i++)
+      evaltot += eval[i];
+
+    std::ofstream ofs ("eval_cumu.dat");
+    ofs << "# eigenvalue cumulative" << endl;
+    double eval_cumu = 0;
+    for (unsigned i=0; i<rank; i++)
+    {
+      eval_cumu += eval[i];
+      ofs << eval[i] << " " << 1.0 - eval_cumu / evaltot << endl;
+    }
+
+    cerr << "CompareWith::setup see eigenvalue data in eval_cumu.dat" << endl;
+    eff_rank = rank - 1;
+  } 
+
   unsigned nbin = covar->get_rank();
 
   if (gcs)

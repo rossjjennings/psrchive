@@ -20,12 +20,14 @@ void Pulsar::Archive::set_verbosity (unsigned level)
 {
   Calibrator::verbose = level;
 
+  // level 4
+  Profile::verbose     = (level >= 4);
+  CommandParser::debug = (level >= 4);
+
   // level 3
-  Profile::verbose     = (level >= 3);
   Tempo::verbose       = (level >= 3);
   Parameters::verbose  = (level >= 3);
   Predictor::verbose   = (level >= 3);
-  CommandParser::debug = (level >= 3);
 
   // level 2
   Integration::verbose = (level >= 2);

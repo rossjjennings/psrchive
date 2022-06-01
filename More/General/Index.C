@@ -48,7 +48,7 @@ Pulsar::get_Profile (const Integration* data, Index pol, Index chan)
 
   try {
 
-    if (Archive::verbose > 2) cerr << "Pulsar::get_Profile "
+    if (Profile::verbose) cerr << "Pulsar::get_Profile "
       "(" << pol << "," << chan << ")" << endl;
 
     bool pscrunched = data->get_npol() == 1
@@ -60,7 +60,7 @@ Pulsar::get_Profile (const Integration* data, Index pol, Index chan)
     
     if (chan.get_integrate() && integration->get_nchan() > 1)
     {
-      if (Archive::verbose > 2)
+      if (Profile::verbose)
 	cerr << "Pulsar::get_Profile chan=I fscrunch" << endl;
 
       if (!integration_clone)
@@ -68,7 +68,7 @@ Pulsar::get_Profile (const Integration* data, Index pol, Index chan)
 
       if (pol.get_integrate())
       {
-	if (Archive::verbose > 2)
+	if (Profile::verbose)
 	  cerr << "Pulsar::get_Profile pol=I pscrunch" << endl;
 	integration_clone->expert()->pscrunch();
 	pscrunched = true;
@@ -82,7 +82,7 @@ Pulsar::get_Profile (const Integration* data, Index pol, Index chan)
 
     if (pol.get_integrate() && !pscrunched)
     {
-      if (Archive::verbose > 2)
+      if (Profile::verbose)
 	cerr << "Pulsar::get_Profile pol=I pscrunch optimization" << endl;
 
       Reference::To<Profile> temp;
@@ -122,12 +122,12 @@ Pulsar::get_Integration (const Archive* archive, Index subint)
 
   try
   {
-    if (Archive::verbose > 2)
+    if (Profile::verbose)
       cerr << "Pulsar::get_Integration (" << subint << ")" << endl;
 
     if (subint.get_integrate() && archive->get_nsubint() > 1)
     {
-      if (Archive::verbose > 2)
+      if (Profile::verbose)
 	cerr << "Pulsar::get_Integration chan=I tscrunch" << endl;
 
       Reference::To<Archive> archive_clone = archive->clone();
@@ -162,7 +162,7 @@ Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
 
   try
   {
-    if (Archive::verbose > 2) cerr << "Pulsar::get_Stokes "
+    if (Profile::verbose) cerr << "Pulsar::get_Stokes "
       "(" << subint << "," << chan << ")" << endl;
 
     Reference::To<const Integration> integration;
@@ -185,7 +185,7 @@ Pulsar::get_Stokes (const Integration* data, Index chan)
 
   try
   {
-    if (Archive::verbose > 2) cerr << "Pulsar::get_Stokes "
+    if (Profile::verbose) cerr << "Pulsar::get_Stokes "
       "(" << chan << ")" << endl;
 
     Reference::To<const Integration> integration = data;

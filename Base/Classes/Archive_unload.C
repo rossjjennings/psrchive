@@ -35,6 +35,8 @@ mode_t getumask ()
   filename in the same path as the requested output file. */
 void Pulsar::Archive::unload (const char* filename) const
 {
+  // cerr << "Archive::unload this=" << (void*) this << endl;
+
   // run all verifications
   try
   {

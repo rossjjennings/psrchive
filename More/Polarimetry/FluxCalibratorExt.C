@@ -12,6 +12,9 @@
 #include "Pulsar/Integration.h"
 #include "strutil.h"
 
+// #include _DEBUG 1
+#include "debug.h"
+
 #include <fstream>
 #include <assert.h>
 
@@ -36,10 +39,19 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
     CalibratorExtension::build (calibrator);
 
     unsigned nchan = calibrator->get_nchan();
-    set_nchan (nchan);
+    unsigned nreceptor = calibrator->get_nreceptor();
 
-    for (unsigned ichan=0; ichan < nchan; ichan++) try {
+    if (Archive::verbose > 2)
+      cerr << "FluxCalibratorExtension ctor nchan=" << nchan
+           << " nreceptor=" << nreceptor << endl;
+
+    set_nchan (nchan);
+    set_nreceptor (nreceptor);
+
+    for (unsigned ichan=0; ichan < nchan; ichan++) try
+    {
       calibrator->data[ichan]->get (S_sys[ichan], S_cal[ichan]);
+      DEBUG("\t S_sys["<< ichan <<"].size=" << S_sys[ichan].size());
     }
     catch (Error& error) {
       if (Archive::verbose > 2)
@@ -49,6 +61,9 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 
     if (!dynamic_cast<FluxCalibrator::ConstantGain*>(calibrator->policy.get()))
       return;
+
+    if (Archive::verbose > 2)
+      cerr << "FluxCalibratorExtension ctor scale available" << endl;
 
     scale_available = true;
 

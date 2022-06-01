@@ -37,7 +37,7 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
 
 #if _DEBUG
   cerr << "InterQuartileRange::update_mask nsubint=" << nsubint
-       << " nchan=" << nchan << " npol=" << npol << " ntot=" << ntot 
+       << " nchan=" << nchan << " npol=" << npol << " ntest=" << ntest 
        << " stat.sz=" << stat.size() << " model.sz=" << model.size()
        << " mask.sz=" << mask.size() << endl;
 #endif
@@ -106,6 +106,18 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
   
     double IQR = Q3 - Q1;
 
+#ifdef _DEBUG
+    if (cutoff_threshold_min > 0)
+      cerr << "MIN threshold=" << cutoff_threshold_min 
+           << " Q1=" << Q1 << " IQR=" << IQR
+           << " min=" << Q1 - cutoff_threshold_min * IQR << endl;
+          
+    if (cutoff_threshold_max > 0)
+      cerr << "MAX threshold=" << cutoff_threshold_max
+           << " Q3=" << Q3 << " IQR=" << IQR
+           << " max=" << Q3 + cutoff_threshold_max * IQR << endl;
+#endif
+
     for (unsigned isub=0; isub<nsubint; isub++)
     {
       for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -127,7 +139,7 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
 	    value < Q1 - cutoff_threshold_min * IQR)
           {
 #ifdef _DEBUG
-	    cerr << "TOO LOW isubint=" << isubint 
+	    cerr << "TOO LOW isubint=" << isub 
                  << " ichan=" << ichan << " ipol=" << ipol  << endl;
 #endif
 	    zap = true;
@@ -138,7 +150,7 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
 	    value > Q3 + cutoff_threshold_max * IQR)
           {
 #ifdef _DEBUG
-	    cerr << "TOO HIGH isubint=" << isubint 
+	    cerr << "TOO HIGH isubint=" << isub
                  << " ichan=" << ichan << " ipol=" << ipol  << endl;
 #endif
 	
