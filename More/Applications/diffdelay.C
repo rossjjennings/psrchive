@@ -29,21 +29,14 @@ public:
   //! Load differential phase from PolnCalibrator
   void process (Pulsar::Archive*);
 
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
+
 protected:
 
   //! Differential phase parameter index
   unsigned iparam_phi;
 
-  //! Differntial phase in radians
-  std::vector< Estimate<double> > phi;
-  //! Frequency offset in MHz
-  std::vector< double > freq_offset;
-
-  //! Add command line options
-  void add_options (CommandLine::Menu&);
-
-  double fit_phi0;
-  double fit_tau;
 };
 
 
@@ -80,6 +73,11 @@ void diffdelay::process (Pulsar::Archive* archive)
   unsigned nchan = calibrator->get_nchan();
   double bandwidth = archive->get_bandwidth();
 
+  //! Differntial phase in radians
+  std::vector< Estimate<double> > phi;
+  //! Frequency offset in MHz
+  std::vector< double > freq_offset;
+
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
     if (!calibrator->get_transformation_valid(ichan))
@@ -107,6 +105,9 @@ void diffdelay::process (Pulsar::Archive* archive)
     wt[idat] = 1.0 / phi[idat].var;
     yval[idat] = phi[idat].val;
   }
+
+  double fit_phi0 = 0;
+  double fit_tau = 0;
 
   weighted_linear_fit (fit_tau, fit_phi0, yval, freq_offset, wt);
 
