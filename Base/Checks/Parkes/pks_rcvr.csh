@@ -11,6 +11,8 @@ cat << EOD
   cd /nfs/online/logs
   pks_rcvr.csh <dates>.tcs_ctrl.log[.gz]
 
+  (You might prefer to configure and run pks_rcvr.all)
+
 EOD
 
 endif
@@ -22,7 +24,7 @@ foreach log ( $argv )
 
   set utc_date = `echo $log | awk -F. '{print $1}'`
 
-  $cat_cmd $log | grep -F '(Usr) receiver' | uniq -f 3 | awk '$4 != "???" {print "'$utc_date'-"$1, $4}' 
+  $cat_cmd $log | grep -F '(Usr)' | grep -F 'receiver' | uniq -f 3 | awk '$4 != "???" {print "'$utc_date'-"$1, $4}' 
 
 end
 
