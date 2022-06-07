@@ -316,7 +316,16 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
   if (feed_rotation == 0.0)
     return Jones<double> (1.0);
 
+  /* The evaluate methods of the MEAL::Rotation and MEAL::Rotation1 classes
+     return a passive / alias transformation that represents a change of basis.
+
+     This is desired because the feed rotation angle is measured
+     counter-clockwise from the axis that points toward celestial north
+     to the receptor basis axis that points toward zenith.
+   */
+
   // rotate the basis about the Stokes V axis
+
   MEAL::Rotation1 rotation ( Pauli::basis().get_basis_vector(2) );
   rotation.set_phi ( feed_rotation.getRadians() );
   return rotation.evaluate();
