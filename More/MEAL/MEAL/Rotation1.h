@@ -18,10 +18,17 @@ namespace MEAL {
 
   class OneParameter;
 
-  //! Represents a rotation (unitary transformation) about a fixed axis
-  /*! This class represents a rotation through angle, \f$\phi\f$,
-    about a fixed axis, \f$\hat n\f$. */
-  class Rotation1 : public Complex2 {
+  //! Represents a rotation (passive unitary transformation) about a fixed axis
+
+  /*! This class represents passive transformation that rotates the basis
+    through an angle, \f$\phi\f$, about a fixed unit vector, \f$\hat n\f$,
+    as defined by the right-hand rule.
+
+    When transformed by the rotation matrix returned by this object,
+    a vector is rotated about the specified axis by \f$\- phi\f$. */
+
+  class Rotation1 : public Complex2
+  {
 
   public:
 

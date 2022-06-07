@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Rotation1.h"
 #include "MEAL/OneParameter.h"
 #include "Pauli.h"

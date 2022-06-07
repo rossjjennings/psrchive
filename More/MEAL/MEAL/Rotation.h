@@ -16,15 +16,22 @@
 
 namespace MEAL {
 
-  //! Represents a rotation (unitary transformation) about a free axis
-  /*! This class represents a rotation through angle, \f$\phi\f$,
-    about a unit vector, \f$\hat n\f$.  The three free parameters are
-    the components of the rotation vector, \f${\bf r}=\phi\hat n\f$,
+  //! Represents a rotation (passive unitary transformation) about a free axis
+  /*! This class represents passive transformation that rotates the basis
+    through an angle, \f$\phi\f$, about a unit vector, \f$\hat n\f$,
+    as defined by the right-hand rule.
+
+    When transformed by the rotation matrix returned by this object,
+    a vector is rotated about the axis by \f$\- phi\f$.
+
+    The three free parameters are the components of the rotation vector,
+    \f${\bf r}=\phi\hat n\f$,
     which are related to the quaternion representation by
 
     \f$ Q = [\cos|{\bf r}|, i\, {\rm sinc}|{\bf r}| {\bf r}]\f$
   */
-  class Rotation : public Complex2 {
+  class Rotation : public Complex2
+  {
 
   public:
 

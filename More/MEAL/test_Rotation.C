@@ -10,7 +10,7 @@
 #include <iostream>
 using namespace std;
 
-static char* name = "QUV";
+static const char* name = "QUV";
 
 static complex<double> Ci (0, 1);
 
@@ -95,9 +95,27 @@ void test_loop (unsigned axis, unsigned perm)
       test_Rotation (theta, phi, axis, perm);
 }
 
+void direct_test ()
+{
+  // Stokes Q state
+  Stokes<double> stokes (1,1,0,0);
+
+  // rotation about Stokes V axis
+  MEAL::Rotation1 rotation (Vector<3,float>::basis(2));
+  // 45 deg -> 90 deg rotation of Q into U
+  rotation.set_param (0, M_PI/4);
+
+  Jones<double> xform = rotation.evaluate();
+  cerr << "direct xform=" << xform << endl;
+  stokes = transform (stokes, xform);
+  cerr << "direct out=" << stokes << endl;
+}
+
 int main ()
 {
   init ();
+
+  direct_test ();
 
   cerr << "Testing in linear basis" << endl;
   for (unsigned axis=0; axis < 3; axis++)

@@ -60,9 +60,14 @@ void Directional::build () const
   */
   Vector<3,double> north = basis * observatory_basis * source_basis[0];
 
+  /* negative because vertical/parallactic angle is measured
+     counter-clockwise from the axis pointing toward celestial north
+     to the axis pointing toward zenith. */
+
   vertical = - atan2 (north[1], north[0]);
 
 #ifdef _DEBUG
   cerr << "Directional::build vertical=" << vertical << endl;
 #endif
 }
+
