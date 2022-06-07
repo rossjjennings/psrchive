@@ -30,7 +30,7 @@ fi
 
 # ensure that epsic source is configured
 if test -f $srcdir/config/epsic.sh; then
-  $srcdir/config/epsic.sh
+  $srcdir/config/epsic.sh $srcdir
 fi
 
 ################################################################################
@@ -141,8 +141,7 @@ AC_CONFIG_FILES([packages/Makefile
 	packages/pgplot.csh
 	packages/psrcat.csh
 	packages/tempo.csh
-	packages/tempo2.csh
-	packages/epsic.csh])
+	packages/tempo2.csh])
 
 AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*.csh])
 
