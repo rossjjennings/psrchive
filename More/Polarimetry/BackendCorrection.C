@@ -13,31 +13,38 @@
 #include "Pulsar/Profile.h"
 
 using namespace std;
+using namespace Pulsar;
 
-bool must_correct_lsb (const Pulsar::Backend* be, const Pulsar::Archive* ar)
+bool BackendCorrection::must_correct_lsb (const Backend* be, 
+                                          const Archive* ar) const
 {
   bool corrected = be->get_downconversion_corrected();
   bool result = !corrected && ar->get_bandwidth() < 0;
 
-  if (Pulsar::Archive::verbose > 1)
+  if (verbose)
     cerr << "must_correct_lsb: downconversion_corrected=" << corrected
          << " bw=" << ar->get_bandwidth() << " result=" << result << endl;
 
   return result;
 }
 
-bool must_correct_phase (const Pulsar::Backend* be)
+bool BackendCorrection::must_correct_phase (const Backend* be) const
 {
   bool result = !be->get_corrected() && be->get_argument() == Signal::Conjugate;
 
-  if (Pulsar::Archive::verbose > 1)
+  if (verbose)
     cerr << "must_correct_phase: corrected=" << be->get_corrected()
          << " argument=" << be->get_argument() << " result=" << result << endl;
 
   return result;
 }
 
-bool Pulsar::BackendCorrection::required (const Archive* arch) const
+BackendCorrection::BackendCorrection ()
+{
+  verbose = Archive::verbose > 1;
+}
+
+bool BackendCorrection::required (const Archive* arch) const
 {
   const Backend* backend = arch->get<Backend>();
 
@@ -51,7 +58,7 @@ bool Pulsar::BackendCorrection::required (const Archive* arch) const
   return hand == Signal::Left || correct_phase || correct_lsb;
 }
 
-void Pulsar::BackendCorrection::operator () (Archive* arch) const try
+void BackendCorrection::operator () (Archive* arch) const try
 {
   Backend* backend = arch->get<Backend>();
 
@@ -66,8 +73,8 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   bool correct_lsb = must_correct_lsb (backend, arch);
   bool correct_phase = must_correct_phase (backend);
 
-  if (Archive::verbose > 2)
-    cerr << "Pulsar::BackendCorrection::operator basis=" << basis
+  if (verbose)
+    cerr << "BackendCorrection::operator basis=" << basis
 	 << " hand=" << hand << " phase=" << argument
 	 << " lsb=" << correct_lsb << endl;
 
@@ -78,8 +85,8 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   */
   if (correct_lsb)
   {
-    if (Archive::verbose > 2)
-      cerr << "Pulsar::BackendCorrection::operator down conversion" << endl;
+    if (verbose)
+      cerr << "BackendCorrection::operator down conversion" << endl;
     if (argument == Signal::Conjugate)
       argument = Signal::Conventional;
     else
@@ -98,8 +105,8 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   {
     if (argument == Signal::Conjugate)
     {
-      if (Archive::verbose > 2)
-	cerr << "Pulsar::BackendCorrection::operator phase convention" << endl;
+      if (verbose)
+	cerr << "BackendCorrection::operator phase convention" << endl;
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U
       else
@@ -108,8 +115,8 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
 
     if (hand == Signal::Left) 
     {
-      if (Archive::verbose > 2)
-	cerr << "Pulsar::BackendCorrection::operator hand" << endl;
+      if (verbose)
+	cerr << "BackendCorrection::operator hand" << endl;
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U and ...
       else if (state == Signal::Stokes && basis == Signal::Linear)
@@ -129,13 +136,13 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   for (unsigned ipol=0; ipol < npol; ipol++)
     if (flip[ipol])
     {
-      if (Archive::verbose > 2)
-	cerr << "Pulsar::BackendCorrection::operator flip " << ipol << endl;
+      if (verbose)
+	cerr << "BackendCorrection::operator flip " << ipol << endl;
       flip_something = true;
     }
 
-  if (swap01 && Archive::verbose > 2)
-    cerr << "Pulsar::BackendCorrection::operator swap 0 and 1" << endl;
+  if (swap01 && verbose)
+    cerr << "BackendCorrection::operator swap 0 and 1" << endl;
 
   if (flip_something || swap01)
   {
@@ -161,5 +168,5 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::BackendCorrection::operator";
+  throw error += "BackendCorrection::operator";
 }
