@@ -18,6 +18,7 @@
 
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/SourceEstimate.h"
+#include "Pulsar/Processor.h"
 
 #include "BatchQueue.h"
 
@@ -88,7 +89,10 @@ namespace Pulsar
     
     //! Set the calibrator observations to be loaded after first pulsar
     void set_calibrators (const std::vector<std::string>& filenames);
-    
+
+    //! Set the calibrator preprocessor
+    void set_calibrator_preprocessor (Processor*);
+
     //! Set the calibrator
     virtual void set_calibrator (const Archive*);
 
@@ -397,6 +401,8 @@ namespace Pulsar
 
     //! The calibrators to be loaded after first pulsar observation
     std::vector<std::string> calibrator_filenames;
+    //! The calibrator pre-processor
+    Reference::To<Processor> calibrator_preprocessor;
 
     //! Uncalibrated estimate of calibrator polarization
     std::vector<Calibration::SourceEstimate> calibrator_estimate;

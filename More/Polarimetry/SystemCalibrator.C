@@ -353,19 +353,20 @@ void SystemCalibrator::preprocess (Archive* data)
   {
     if (!has_Receiver())
       set_Receiver(data);
-
-    BackendCorrection correct_backend;
-    if( correct_backend.required (data) )
-    {
-      if (verbose)
-	cerr << "SystemCalibrator::preprocess"
-                " correct backend" << endl;
-      correct_backend (data);
-    }
-    else if (verbose)
-      cerr << "SystemCalibrator::preprocess"
-              " backend correction not required" << endl;
   }
+
+  BackendCorrection correct_backend;
+
+  if( correct_backend.required (data) )
+  {
+    if (verbose)
+      cerr << "SystemCalibrator::preprocess"
+              " correct backend" << endl;
+    correct_backend (data);
+  }
+  else if (verbose)
+    cerr << "SystemCalibrator::preprocess"
+            " backend correction not required" << endl;
 }
 
 //! Add the observation to the set of constraints
@@ -645,6 +646,11 @@ void SystemCalibrator::set_response_fixed (const std::vector<unsigned>& params)
   response_fixed = params;
 }
 
+void SystemCalibrator::set_calibrator_preprocessor (Processor* opt)
+{
+  calibrator_preprocessor = opt;
+}
+
 void SystemCalibrator::load_calibrators ()
 {
   if (calibrator_filenames.size() == 0)
@@ -658,6 +664,11 @@ void SystemCalibrator::load_calibrators ()
 
     Reference::To<Archive> archive;
     archive = Archive::load(calibrator_filenames[ifile]);
+
+    if (calibrator_preprocessor)
+      calibrator_preprocessor->process (archive);
+
+    preprocess (archive);
     add_calibrator (archive);    
   }
   catch (Error& error)
@@ -941,9 +952,10 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
       Estimate<double> calp = data.observation.abs_vect ();
       if (calp.get_value() < cal_polarization_threshold * calI.get_value())
       {
-        cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
-             << " signal less than " << cal_polarization_threshold 
-             << " polarized" << endl;
+        if (Archive::verbose > 1)
+          cerr << "Pulsar::SystemCalibrator::add_calibrator ichan=" << ichan
+               << " signal less than " << cal_polarization_threshold 
+               << " polarized" << endl;
         continue;
       }
 
@@ -1263,7 +1275,10 @@ void SystemCalibrator::integrate_calibrator_data
                  "SystemCalibrator::integrate_calibrator_data",
                  "Jones matrix equals zero");
 
-  Jones< Estimate<double> > apply = invert_basis * data.response;
+  Jones< Estimate<double> > apply = data.response;
+
+  if (refcal_through_frontend)
+    apply = invert_basis * data.response;
 
   if (verbose)
     cerr << "SystemCalibrator::integrate_calibrator_data"

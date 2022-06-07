@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 - 2018 by Willem van Straten
+ *   Copyright (C) 2003 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -141,13 +141,15 @@ protected:
 
 };
 
+Reference::To<Pulsar::StandardOptions> standard_options;
+
 pcm::pcm () : Pulsar::Application ("pcm", 
 				   "polarimetric calibration modelling")
 {
   has_manual = true;
   sort_filenames = true;
 
-  add( new Pulsar::StandardOptions );
+  add( standard_options = new Pulsar::StandardOptions );
 }
 
 // Construct a calibrator model for MEM mode
@@ -591,32 +593,6 @@ Calibration::ReceptionModel::Solver* new_solver (const string& name)
 #endif
 
   throw Error (InvalidParam, "pcm", "no solver named " + name);
-}
-
-// The command language interpreter
-Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
-
-// preprocessing jobs
-vector<string> jobs;
-
-Pulsar::Archive* load (const string& filename)
-{
-  if (verbose)
-    cerr << "pcm: loading " << filename << endl;
-
-  Reference::To<Pulsar::Archive> archive = Pulsar::Archive::load (filename);
-
-  cout << "pcm: loaded archive: " << filename << endl;
-
-  if (jobs.size())
-  {
-    if (verbose)
-      cerr << "pcm: preprocessing " << archive->get_filename() << endl;
-    preprocessor->set(archive);
-    preprocessor->script(jobs);
-  }
-
-  return archive.release();
 }
 
 static bool output_report = false;
@@ -1579,6 +1555,8 @@ void pcm::finalize ()
 
     cout << "pcm: loaded archive: " << filenames[i] << endl;
 
+    standard_options->process ( archive );
+
     model->precalibrate( archive );
 
     if (unload_each_calibrated)
@@ -1733,6 +1711,7 @@ SystemCalibrator* measurement_equation_modeling (const string& binfile,
   
   cerr << "pcm: set calibrators" << endl;
   model->set_calibrators (calibrator_filenames);
+  model->set_calibrator_preprocessor (standard_options);
 
   // archive from which pulse phase bins will be chosen
   Reference::To<Pulsar::Archive> autobin;
@@ -1742,7 +1721,7 @@ SystemCalibrator* measurement_equation_modeling (const string& binfile,
     // archive from which pulse phase bins will be chosen
     Reference::To<Pulsar::Archive> autobin;
 
-    autobin = load (binfile);
+    autobin = Archive::load (binfile);
 
     auto_select (*model, autobin, maxbins);
 
@@ -1823,7 +1802,11 @@ SystemCalibrator* matrix_template_matching (const string& stdname)
          << endl;
 
   for (unsigned ical=0; ical < calibrator_filenames.size(); ical++)
-    model->add_observation( Archive::load (calibrator_filenames[ical]) );
+  {
+    Archive* cal = Archive::load (calibrator_filenames[ical]);
+    standard_options->process (cal);
+    model->add_observation (cal);
+  }
 
   return model;
 }
