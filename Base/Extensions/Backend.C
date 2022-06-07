@@ -54,6 +54,10 @@ Pulsar::Backend::Interface::Interface (Backend *s_instance)
   add( &Backend::get_argument,
        &Backend::set_argument,
        "phase", "Phase convention of backend" );
+
+  add( &Backend::get_hand,
+       &Backend::set_hand,
+       "hand", "Handedness of backend" );
   
   add( &Backend::get_downconversion_corrected,
        &Backend::set_downconversion_corrected,

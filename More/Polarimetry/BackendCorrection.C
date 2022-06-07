@@ -165,6 +165,9 @@ void BackendCorrection::operator () (Archive* arch) const try
     backend->set_corrected ();
   if (correct_lsb)
     backend->set_downconversion_corrected ();
+  if (hand == Signal::Left)
+    backend->set_hand(Signal::Right);
+
 }
 catch (Error& error)
 {
