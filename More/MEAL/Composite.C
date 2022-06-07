@@ -511,6 +511,8 @@ MEAL::Function* MEAL::Composite::get_Function (unsigned& index)
   if (remap_needed)
     remap ();
 
+  unsigned input_index = index;
+
   unsigned imodel = current_model;
   
   if (index < current_index)
@@ -539,7 +541,7 @@ MEAL::Function* MEAL::Composite::get_Function (unsigned& index)
   }
 
   throw Error (InvalidRange, class_name() + "get_Function",
-	       "index=%d > nparam=%d", index, get_nparam());
+	       "index=%d > nparam=%d", input_index, get_nparam());
 }
 
 
