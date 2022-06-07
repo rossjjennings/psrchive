@@ -369,7 +369,7 @@ void ReceptionCalibrator::add_data
   }
   catch (Error& error)
   {
-    // if (verbose > 1)
+    if (verbose > 1)
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
 
