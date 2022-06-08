@@ -655,8 +655,6 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
 
   unsigned nscrunch = factor.get_nscrunch (archive->get_nchan());
 
-  assert ( nchan * nscrunch + chan_offset <= archive->get_nchan() );
-
   compute_subint.resize (nsubint);
   std::fill (compute_subint.begin(), compute_subint.end(), false);
 
@@ -683,6 +681,9 @@ void Pulsar::TimeFrequencyZap::apply_mask (Archive* archive,
       for (unsigned jchan=0; jchan < nscrunch; jchan++)
       {
 	unsigned ch = ichan*nscrunch + jchan + chan_offset;
+        if (ch >= subint->get_nchan())
+          continue;
+
 	if (wt == 0 && subint->get_weight(ch) != 0)
 	{
 	  nmasked ++;
