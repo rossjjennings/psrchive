@@ -52,14 +52,19 @@ catch (Error& error)
 //! Return the statistics of every profile baseline
 void
 Pulsar::Integration::baseline_stats (vector<vector<Estimate<double> > >* mean,
-				     vector< vector<double> >* variance) const
+				     vector< vector<double> >* variance,
+                                     const PhaseWeight* baseline) const
 try {
 
   if (verbose)
     cerr << "Pulsar::Integration::baseline_stats" << endl;
 
+  Reference::To<PhaseWeight> my_baseline;
+  if (!baseline)
+    baseline = my_baseline = this->baseline();
+
   DisperseWeight shift (this);
-  shift.set_weight( baseline() );
+  shift.set_weight( baseline );
 
   // the output of the PhaseWeight shifter
   PhaseWeight shifted_baseline;

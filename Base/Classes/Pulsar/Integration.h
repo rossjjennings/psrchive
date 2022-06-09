@@ -101,7 +101,8 @@ namespace Pulsar {
 
     //! Return the statistics of every profile baseline
     void baseline_stats (std::vector< std::vector< Estimate<double> > >* mean,
-			 std::vector< std::vector<double> >* variance = 0) const;
+			 std::vector< std::vector<double> >* variance = 0,
+                         const PhaseWeight* baseline = 0) const;
 
     //! Remove the baseline from all profiles
     void remove_baseline (const PhaseWeight* baseline = 0);
