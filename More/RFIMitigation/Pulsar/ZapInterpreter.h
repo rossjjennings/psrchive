@@ -53,6 +53,9 @@ namespace Pulsar {
     //! zap the specified fraction of the band at the edges
     std::string edge (const std::string& args);
 
+    //! zap the band edges up to the specified fraction of the cumulative power
+    std::string cumulative (const std::string& args);
+
     //! zap the specified ranges of frequencies
     std::string freq (const std::string& args);
 

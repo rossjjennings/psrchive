@@ -93,6 +93,12 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "  float <fraction>  fraction of band zapped on each edge \n");
 
   add_command
+    ( &ZapInterpreter::cumulative,
+      "cumulative", "zap band edges up to cumulative power threshold",
+      "usage: cumulative <threshold> \n"
+      "  float <threshold>  fraction of total cumulative power \n");
+
+  add_command
     ( &ZapInterpreter::freq,
       "freq", "zap frequency range(s)",
       "usage: freq < MHz0:MHz1 | >MHz | <MHz > \n"
@@ -574,6 +580,72 @@ catch (Error& error)
 }
 
 
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::ZapInterpreter::cumulative (const string& args)
+try {
+
+  float fraction = setup<float> (args);
+
+  if (fraction <= 0.0 || fraction >= 1.0)
+    return response (Fail, "invalid fraction " + tostring(fraction));
+
+  Archive* archive = get();
+
+  Reference::To<Archive> total = archive->clone();
+  total->tscrunch();
+  total->pscrunch();
+
+  unsigned nchan = total->get_nchan();
+  vector<double> sum (nchan, 0.0);
+  double cumu = 0;
+
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    sum[ichan] = total->get_Profile(0,0,ichan)->sum();
+    cumu += sum[ichan];
+  }
+
+  double threshold = fraction * cumu;
+
+  unsigned min_chan = 0;
+  cumu = 0;
+
+  while (cumu < threshold && min_chan < nchan)
+  {
+    cumu += sum[min_chan];
+    min_chan ++;
+  }
+
+  unsigned max_chan = nchan - 1;
+  cumu = 0;
+
+  while (cumu < threshold && max_chan > 0)
+  {
+    cumu += sum[max_chan];
+    max_chan --;
+  }
+
+  cerr << "ZapInterpreter::cumulative nchan=" << nchan 
+       << " min_chan=" << min_chan << " max_chan=" << max_chan << endl;
+
+  unsigned nsub = archive->get_nsubint();
+
+  for (unsigned isub=0; isub < nsub; isub++) 
+  {
+    Integration* subint = archive->get_Integration (isub);
+    for (unsigned ichan=0; ichan < min_chan; ichan++)
+      subint->set_weight (ichan, 0.0);
+    for (unsigned ichan=max_chan+1; ichan < nchan; ichan++)
+      subint->set_weight (ichan, 0.0);
+  }
+
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (error);
+}
 
 // //////////////////////////////////////////////////////////////////////
 //
