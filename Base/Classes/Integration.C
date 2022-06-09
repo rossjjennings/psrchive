@@ -269,22 +269,6 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
   zero_phase_aligned = false;
 }
 
-void Pulsar::Integration::orphan ()
-{
-  if (orphaned)
-    return;
-
-  if (!parent)
-    throw Error (InvalidState, "Pulsar::Integration::orphan",
-		 "not already orphaned and no parent");
-
-  if (verbose)
-    cerr << "Pulsar::Integration::orphan from parent" << endl;
-  
-  orphaned = new Meta(parent);
-  parent = 0;
-}
-
 //! Connect to a new parent archive (also useful after cloning)
 void Pulsar::Integration::adopt (const Archive* archive)
 {

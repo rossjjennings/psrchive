@@ -215,6 +215,7 @@ libGeneral_la_SOURCES = \
         Integration_get_Stokes.C \
         Integration_invint.C \
         Integration_new_PolnProfile.C \
+	Integration_orphan.C \
         Integration_remove_baseline.C \
         Integration_rotate.C \
         Integration_total.C \

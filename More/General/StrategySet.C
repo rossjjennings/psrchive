@@ -177,3 +177,8 @@ Profile::Strategies* Integration::Meta::get_strategy ()
   return strategy;
 }
 
+void Integration::Meta::set_strategy (Profile::Strategies* _strategy)
+{
+  strategy = _strategy;
+}
+

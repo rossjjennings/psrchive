@@ -75,7 +75,8 @@ namespace Pulsar {
     void set_auxiliary_birefringence_corrected (bool);
 
     Profile::Strategies* get_strategy ();
-    
+    void set_strategy (Profile::Strategies*);
+ 
   protected:
 
     double centre_frequency;
