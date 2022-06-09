@@ -40,6 +40,8 @@ Pulsar::Integration::Meta::Meta (const Archive* parent)
 
   set_state( parent->get_state() );
   set_basis( parent->get_basis() );
+
+  strategy = parent->get_strategy()->clone();
 }
 
 std::string Pulsar::Integration::Meta::get_telescope() const
