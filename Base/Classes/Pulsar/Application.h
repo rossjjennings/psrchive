@@ -81,7 +81,7 @@ namespace Pulsar {
     virtual void run ();
 
     //! Load file
-    Archive* load (const std::string& filename);
+    virtual Archive* load (const std::string& filename);
 
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;

@@ -39,8 +39,17 @@ public:
   //! Default constructor
   psr4th ();
 
-  //! Process the given archive
+  //! Load method does additional pre-processing
+  Archive* load (const std::string& filename);
+
+  //! Stage 1: Accumulate the mean
   void process (Archive*);
+
+  //! Stage 2: Accumulate any running means (called during finalize)
+  void compute_means (Archive*);
+
+  //! Stage 3: Compute moments
+  void compute_moments (Archive*);
 
   //! output the eigenvector profiles
   void output_eigenvectors (const Archive*);
@@ -99,13 +108,24 @@ protected:
   //! Array of results - one for each frequency channel
   std::vector<result> results;
 
+  //! Input data filenames
+  vector<string> input_filenames;
+
+  //! The output archive
   Reference::To<Archive> output;
+
+  //! The currently open input archive
+  Reference::To<Archive> current;
+  unsigned isub_offset;
 
   double integration_length;
   double total_nsample;
   unsigned total_nsubint;
   
-  unsigned remove_running_mean;
+  unsigned remove_running_mean_profile;
+  Reference::To<Archive> current_extract;
+  Reference::To<Archive> running_mean_profiles;
+
   unsigned histogram_pa;
   unsigned histogram_el;
   float histogram_threshold;
@@ -113,7 +133,14 @@ protected:
 
   bool total_baseline;
   bool each_baseline;
+
+  unsigned remove_running_mean_baseline;
+  vector< vector< vector< Estimate<double> > > > baselines;
+
   bool report_baseline;
+  std::ofstream baselines_out;
+
+  bool accumulation_required () const { return total_baseline || remove_running_mean_baseline || remove_running_mean_profile; }
 
   bool extract_eigenvectors;
   bool smooth_eigenvectors;
@@ -148,14 +175,17 @@ psr4th::psr4th ()
   integration_length = 0;
   total_nsample = 0;
   total_nsubint = 0;
-  
+  isub_offset = 0;
+
   histogram_pa = 0;
   histogram_el = 0;
   histogram_threshold = 3.0;
   cross_covariance_lags = 0;
-  remove_running_mean = 0;
-  
+  remove_running_mean_profile = 0;
+
   total_baseline = each_baseline = report_baseline = false;
+  remove_running_mean_baseline = 0;
+
   extract_eigenvectors = false;
   smooth_eigenvectors = false;
   report_execution_times = false;
@@ -194,8 +224,11 @@ void psr4th::add_options (CommandLine::Menu& menu)
   arg = menu.add (each_baseline, "b");
   arg->set_help ("remove the baseline, found from each sub-integration");
 
-  arg = menu.add (remove_running_mean, "m", "nsub");
-  arg->set_help ("remove the running mean of nsub sub-integration");
+  arg = menu.add (remove_running_mean_baseline, "d", "nsub");
+  arg->set_help ("remove the running mean baseline of nsub sub-integrations");
+
+  arg = menu.add (remove_running_mean_profile, "m", "nsub");
+  arg->set_help ("remove the running mean profile of nsub sub-integrations");
   
   arg = menu.add (report_baseline, "r");
   arg->set_help ("report baselines in psr4th_baselines.txt");
@@ -215,27 +248,25 @@ void psr4th::add_options (CommandLine::Menu& menu)
 }
 
 
-/*!
+Archive* psr4th::load (const string& filename)
+{
+  if (current && current->get_filename() == filename)
+    return current;
 
-  Scale every profile and optionally set the source name
-
-*/
+  current = Application::load (filename);
+  current->convert_state( Signal::Stokes );
+  return current;
+}
 
 void psr4th::process (Archive* archive)
 {
-  unsigned nsub = archive->get_nsubint();
-  unsigned nbin = archive->get_nbin();
-  unsigned nchan = archive->get_nchan();
-  unsigned npol = archive->get_npol();
-
   if (extract_eigenvectors)
   {
     output_eigenvectors (archive);
     return;
   }
 
-  archive->convert_state( Signal::Stokes );
-
+  // for now, simply add the data to the total
   Reference::To<Archive> tscrunched = archive->tscrunched();
 
   if (!output)
@@ -243,7 +274,10 @@ void psr4th::process (Archive* archive)
     string output_format = "PSRFITS";
     output = Archive::new_Archive (output_format);  
     output->copy (tscrunched);
-    
+
+    unsigned nbin = archive->get_nbin();
+    unsigned nchan = archive->get_nchan();
+ 
     results.resize (nchan);
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     {
@@ -264,13 +298,27 @@ void psr4th::process (Archive* archive)
     output->tscrunch();
   }
 
+  // save the filename for later processing during finalize
+  input_filenames.push_back( archive->get_filename() );
+  current = archive;
+}
+
+// compute running means
+void psr4th::compute_means (Archive* archive)
+{
+  Reference::To<Pulsar::PhaseWeight> baseline;
+
   if (total_baseline)
-    archive->remove_baseline();
+    baseline = output->baseline();
+
+  unsigned nchan = archive->get_nchan();
 
   if (output->get_nchan() != nchan)
     throw Error (InvalidParam, "psr4th::process",
 		 "archive nchan = %u != required nchan = %u",
 		 nchan, output->get_nchan());
+
+  unsigned nbin = archive->get_nbin();
 
   if (output->get_nbin() != nbin)
     throw Error (InvalidParam, "psr4th::process",
@@ -278,37 +326,120 @@ void psr4th::process (Archive* archive)
 		 nbin, output->get_nbin());
 
 
-  if (each_baseline)
+  unsigned nsub = archive->get_nsubint();
+  unsigned npol = archive->get_npol();
+
+#if 0
+  ofstream baselines;
+  if (report_baseline)
+    baselines.open( "psr4th_baselines.txt");
+
+  for (unsigned isub=0; isub < nsub; isub++)
   {
-    ofstream baselines;
-    if (report_baseline)
-      baselines.open( "psr4th_baselines.txt");
-
-    for (unsigned isub=0; isub < nsub; isub++)
+    for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      Reference::To<Integration> subint = archive->get_Integration (isub);
-
-      if (report_baseline)
-      {
-	vector< std::vector< Estimate<double> > > mean;
-	subint->baseline_stats( &mean );
-
-	for (unsigned i=0; i<4; i++)
-	  baselines << mean[i][0].val << " ";
-	baselines << endl;
-      }
-      
-      subint->remove_baseline();
+      for (unsigned i=0; i<4; i++)
+        baselines << baselines[isub][i][ichan].val << " ";
+      baselines << endl;
     }
   }
 
-  Reference::To<Archive> running_mean;
-  
-  if (remove_running_mean > 1)
+#endif
+
+  unsigned total_nsub = baselines.size();
+  baselines.resize( total_nsub + nsub );
+
+  for (unsigned isub=0; isub < nsub; isub++)
   {
-    running_mean = archive->clone();
-    running_mean->tscrunch (remove_running_mean);
+    Reference::To<Integration> subint = archive->get_Integration (isub);
+    subint->baseline_stats( &(baselines[total_nsub+isub]), 0, baseline.ptr() );
   }
+
+  if (remove_running_mean_profile > 1)
+  {
+    unsigned nsub_extract = remove_running_mean_profile;
+
+    vector<unsigned> subints (nsub_extract);
+    unsigned isub_start = 0;
+
+    unsigned nsub_left_over = 0;
+    if (current_extract)
+    {
+      /* if there are any extracted sub-integrations left-over 
+         from the previous file, then top these up */
+      nsub_left_over = current_extract -> get_nsubint ();
+      cerr << "resuming with " << nsub_left_over << " left-over sub-integrations" << endl;
+    }
+
+    while (isub_start < nsub)
+    {
+      subints.resize (nsub_extract);
+      unsigned isub = 0;
+      for (isub=0; isub_start+isub < nsub && nsub_left_over+isub < nsub_extract; isub++)
+        subints[isub] = isub_start + isub;
+
+      cerr << "extract isub start=" << subints[0] << " end=" << subints[isub-1] << endl;
+
+      subints.resize (isub);
+      isub_start += isub;
+
+      // left-overs are used only once
+      nsub_left_over = 0;
+
+      Reference::To<Archive> extract = archive->extract (subints);
+
+      if (current_extract)
+      {
+        cerr << "appending " << isub << " subints to left-over extract with "
+             << current_extract -> get_nsubint() << " subints" << endl;
+
+        current_extract -> append (extract);
+        if (current_extract->get_nsubint() == nsub_extract)
+        {
+          extract = current_extract;
+          current_extract = 0;
+        }
+      }
+
+      if (extract->get_nsubint() == nsub_extract)
+      {
+        cerr << "tscrunching complete extraction with " 
+             << extract->get_nsubint() << " subints" << endl;
+
+        extract->tscrunch ();
+
+        if (running_mean_profiles)
+          running_mean_profiles->append (extract);
+        else
+          running_mean_profiles = extract;
+      }
+      else
+      {
+        cerr << "saving left-over extraction with "
+             << extract->get_nsubint() << " subints" << endl;
+
+        // save any left-over sub-integrations for the next file
+        current_extract = extract;
+      }
+    }
+  }
+}
+
+void psr4th::compute_moments (Archive* archive)
+{
+  unsigned nsub = archive->get_nsubint();
+  unsigned nchan = archive->get_nchan();
+  unsigned npol = archive->get_npol();
+  unsigned nbin = archive->get_nbin();
+
+  Reference::To<Pulsar::PhaseWeight> baseline;
+
+  if (total_baseline)
+    baseline = output->baseline();
+
+  if (running_mean_profiles)
+    cerr << "removing running mean profiles nsub=" << running_mean_profiles->get_nsubint()
+         << " isub_offset=" << isub_offset << endl;
 
   for (unsigned isub=0; isub < nsub; isub++)
   {
@@ -331,13 +462,13 @@ void psr4th::process (Archive* archive)
     total_nsample += duration * bandwidth / nbin;
     total_nsubint ++;
     
-    if (running_mean)
+    if (running_mean_profiles)
     {
-      unsigned imean = isub / remove_running_mean;
-      if (imean >= running_mean->get_nsubint())
-	imean = running_mean->get_nsubint();
+      unsigned imean = (isub_offset + isub) / remove_running_mean_profile;
+      if (imean >= running_mean_profiles->get_nsubint())
+	imean = running_mean_profiles->get_nsubint() - 1;
 
-      Reference::To<Integration> msub = running_mean->get_Integration (imean);
+      Reference::To<Integration> msub = running_mean_profiles->get_Integration (imean);
 
       for (unsigned ichan=0; ichan < nchan; ichan++)
       {
@@ -353,7 +484,22 @@ void psr4th::process (Archive* archive)
 	}
       }
     }
-   
+
+    if (total_baseline || each_baseline)
+    {
+      if (report_baseline && !accumulation_required())
+      {
+        vector< std::vector< Estimate<double> > > mean;
+        subint->baseline_stats( &mean, 0, baseline.ptr() );
+ 
+        for (unsigned i=0; i<4; i++)
+          baselines_out << mean[i][0].val << " ";
+        baselines_out << endl;
+      }
+    
+      subint->remove_baseline( baseline.ptr() );
+    }
+
     RealTimer clock;
 
     clock.start();
@@ -374,8 +520,9 @@ void psr4th::process (Archive* archive)
     if (report_execution_times)
       cerr << "subint=" << isub << " time=" << clock << endl;
   }
-}
 
+  isub_offset += archive->get_nsubint();
+}
 
 void psr4th::result::process (PolnProfile* profile)
 {
@@ -443,6 +590,22 @@ void psr4th::finalize()
 {
   if (extract_eigenvectors)
     return;
+
+  if (accumulation_required())
+  {
+    cerr << "psr4th::finalize computing baselines" << endl;
+
+    if (report_baseline)
+      baselines_out.open( "psr4th_baselines.txt");
+
+    for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
+      compute_means ( load(filenames[ifile]) );
+  }
+
+  cerr << "psr4th::finalize computing moments" << endl;
+
+  for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
+    compute_moments ( load(filenames[ifile]) );
 
   unsigned nbin = output->get_nbin();
   unsigned nchan = output->get_nchan();
