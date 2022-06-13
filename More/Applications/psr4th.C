@@ -518,7 +518,7 @@ void psr4th::compute_moments (Archive* archive)
           // cerr << " " << offset; 
           profile->offset(-offset);
         }
-        cerr << endl;
+        // cerr << endl;
       }
     }
     else if (total_baseline || each_baseline)
