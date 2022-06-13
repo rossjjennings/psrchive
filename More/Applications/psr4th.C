@@ -291,6 +291,9 @@ void psr4th::process (Archive* archive)
 
       results[ichan].histogram_threshold = histogram_threshold;
     }
+
+    if (report_baseline)
+      baselines_out.open( "psr4th_baselines.txt");
   }
   else
   {
@@ -298,9 +301,11 @@ void psr4th::process (Archive* archive)
     output->tscrunch();
   }
 
+  if (!total_baseline && accumulation_required())
+    compute_means (archive);
+
   // save the filename for later processing during finalize
   input_filenames.push_back( archive->get_filename() );
-  current = archive;
 }
 
 // compute running means
@@ -368,7 +373,8 @@ void psr4th::compute_means (Archive* archive)
       /* if there are any extracted sub-integrations left-over 
          from the previous file, then top these up */
       nsub_left_over = current_extract -> get_nsubint ();
-      cerr << "resuming with " << nsub_left_over << " left-over sub-integrations" << endl;
+      if (verbose)
+        cerr << "resuming with " << nsub_left_over << " left-over sub-integrations" << endl;
     }
 
     while (isub_start < nsub)
@@ -378,7 +384,8 @@ void psr4th::compute_means (Archive* archive)
       for (isub=0; isub_start+isub < nsub && nsub_left_over+isub < nsub_extract; isub++)
         subints[isub] = isub_start + isub;
 
-      cerr << "extract isub start=" << subints[0] << " end=" << subints[isub-1] << endl;
+      if (verbose)
+        cerr << "extract isub start=" << subints[0] << " end=" << subints[isub-1] << endl;
 
       subints.resize (isub);
       isub_start += isub;
@@ -390,7 +397,8 @@ void psr4th::compute_means (Archive* archive)
 
       if (current_extract)
       {
-        cerr << "appending " << isub << " subints to left-over extract with "
+        if (verbose)
+          cerr << "appending " << isub << " subints to left-over extract with "
              << current_extract -> get_nsubint() << " subints" << endl;
 
         current_extract -> append (extract);
@@ -403,8 +411,9 @@ void psr4th::compute_means (Archive* archive)
 
       if (extract->get_nsubint() == nsub_extract)
       {
-        cerr << "tscrunching complete extraction with " 
-             << extract->get_nsubint() << " subints" << endl;
+        if (verbose)
+          cerr << "tscrunching complete extraction with " 
+               << extract->get_nsubint() << " subints" << endl;
 
         extract->tscrunch ();
 
@@ -415,8 +424,9 @@ void psr4th::compute_means (Archive* archive)
       }
       else
       {
-        cerr << "saving left-over extraction with "
-             << extract->get_nsubint() << " subints" << endl;
+        if (verbose)
+          cerr << "saving left-over extraction with "
+               << extract->get_nsubint() << " subints" << endl;
 
         // save any left-over sub-integrations for the next file
         current_extract = extract;
@@ -437,7 +447,7 @@ void psr4th::compute_moments (Archive* archive)
   if (total_baseline)
     baseline = output->baseline();
 
-  if (running_mean_profiles)
+  if (verbose && running_mean_profiles)
     cerr << "removing running mean profiles nsub=" << running_mean_profiles->get_nsubint()
          << " isub_offset=" << isub_offset << endl;
 
@@ -591,18 +601,16 @@ void psr4th::finalize()
   if (extract_eigenvectors)
     return;
 
-  if (accumulation_required())
+  if (total_baseline && accumulation_required())
   {
-    cerr << "psr4th::finalize computing baselines" << endl;
-
-    if (report_baseline)
-      baselines_out.open( "psr4th_baselines.txt");
-
+    if (verbose)
+      cerr << "psr4th::finalize computing baselines" << endl;
     for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
       compute_means ( load(filenames[ifile]) );
   }
 
-  cerr << "psr4th::finalize computing moments" << endl;
+  if (verbose)
+    cerr << "psr4th::finalize computing moments" << endl;
 
   for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
     compute_moments ( load(filenames[ifile]) );
