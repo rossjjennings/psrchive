@@ -57,6 +57,9 @@ public:
   //! Output the results
   void finalize ();
 
+  //! Compute the running mean of the baseline estimates
+  void compute_running_mean_baseline ();
+
 protected:
 
   class result
@@ -135,7 +138,10 @@ protected:
   bool each_baseline;
 
   unsigned remove_running_mean_baseline;
+  // estimated baselines[isubint][ipol][ichan]
   vector< vector< vector< Estimate<double> > > > baselines;
+  // smoothed mean baselines
+  vector< vector< vector< MeanEstimate<double> > > > mean_baselines;
 
   bool report_baseline;
   std::ofstream baselines_out;
@@ -494,8 +500,28 @@ void psr4th::compute_moments (Archive* archive)
 	}
       }
     }
+    else if (remove_running_mean_baseline)
+    {
+      unsigned imean = (isub_offset + isub) / remove_running_mean_baseline;
+      assert (imean < mean_baselines.size());
 
-    if (total_baseline || each_baseline)
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+        if (subint->get_weight(ichan) == 0)
+          continue;
+
+        // cerr << isub << "->" << imean << " ichan=" << ichan;
+        for (unsigned ipol=0; ipol < npol; ipol++)
+        {
+          Pulsar::Profile* profile = subint->get_Profile (ipol, ichan);
+          double offset = mean_baselines[imean][ipol][ichan].get_Estimate().get_value();
+          // cerr << " " << offset; 
+          profile->offset(-offset);
+        }
+        cerr << endl;
+      }
+    }
+    else if (total_baseline || each_baseline)
     {
       if (report_baseline && !accumulation_required())
       {
@@ -596,6 +622,55 @@ void dump (MoreProfiles* hist)
   }
 }
 
+void psr4th::compute_running_mean_baseline ()
+{
+  if (verbose)
+    cerr << "psr4th::compute_running_mean_baseline ndat=" << baselines.size() << endl;
+
+  if (baselines.size() == 0)
+    return;
+
+  unsigned nscrunch = remove_running_mean_baseline;
+
+  unsigned ndat = baselines.size();
+  unsigned nmean = ndat / nscrunch;
+  if (ndat % nscrunch)
+    nmean ++;
+
+  unsigned npol = baselines[0].size();
+  assert (npol == 4);
+  unsigned nchan = baselines[0][0].size();
+
+  if (verbose)
+    cerr << "psr4th::compute_running_mean_baseline nscrunch=" << nscrunch 
+         << " nmean=" << nmean << " nchan=" << nchan << endl;
+
+  mean_baselines.resize (nmean);
+
+  unsigned idat = 0;
+  for (unsigned imean = 0; imean < nmean; imean++)
+  {
+    mean_baselines[imean].resize (npol);
+    for (unsigned ipol = 0; ipol < npol; ipol++)
+    {
+      mean_baselines[imean][ipol].resize (nchan);
+      for (unsigned ichan = 0; ichan < nchan; ichan++)
+        mean_baselines[imean][ipol][ichan] = baselines[idat][ipol][ichan];
+    }
+
+    unsigned iscrunch = 1;
+    while (iscrunch < nscrunch && idat+iscrunch < ndat)
+    {
+      for (unsigned ipol = 0; ipol < npol; ipol++)
+        for (unsigned ichan = 0; ichan < nchan; ichan++)
+          mean_baselines[imean][ipol][ichan] += baselines[idat+iscrunch][ipol][ichan];
+
+      iscrunch++;
+    }
+    idat += iscrunch;
+  }
+}
+
 void psr4th::finalize()
 {
   if (extract_eigenvectors)
@@ -605,8 +680,16 @@ void psr4th::finalize()
   {
     if (verbose)
       cerr << "psr4th::finalize computing baselines" << endl;
+
     for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
       compute_means ( load(filenames[ifile]) );
+  }
+
+  if (remove_running_mean_baseline)
+  {
+    if (verbose)
+      cerr << "psr4th::finalize computing running mean baseline" << endl;
+    compute_running_mean_baseline ();
   }
 
   if (verbose)
