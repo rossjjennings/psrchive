@@ -61,11 +61,6 @@ void Pulsar::FourthMoments::pscrunch ()
   delete this;
 }
 
-// defined in Profile_average.C
-void weighted_average (Pulsar::Profile* result,
-		       const Pulsar::Profile* other,
-		       bool second_moment);
-
 //! average information from another MoreProfiles
 void Pulsar::FourthMoments::average (const MoreProfiles* more)
 {
@@ -74,3 +69,4 @@ void Pulsar::FourthMoments::average (const MoreProfiles* more)
 
   MoreProfiles::average (more);
 }
+
