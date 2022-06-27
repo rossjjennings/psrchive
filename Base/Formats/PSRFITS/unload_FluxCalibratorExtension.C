@@ -72,7 +72,14 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     */
 
     if (!fce->has_scale())
+    {
+      // Remove these extra columns if we are not using them
+      psrfits_delete_col(fptr, "SCALE");
+      psrfits_delete_col(fptr, "SCALEERR");
+      psrfits_delete_col(fptr, "RATIO");
+      psrfits_delete_col(fptr, "RATIOERR");
       return;
+    }
 
     if (verbose > 2)
       cerr << "FITSArchive::unload FluxCalibratorExtension has scale" << endl;
