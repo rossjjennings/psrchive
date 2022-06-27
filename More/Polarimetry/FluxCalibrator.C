@@ -486,7 +486,14 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
     data.resize( nchan );
 
     if (flux_extension->has_scale())
+    {
+      if (verbose > 2)
+        cerr << "Pulsar::FluxCalibrator::create setting constant_scale=true" << endl;
       policy = new ConstantGain;
+      constant_scale = true;
+    }
+    else
+      constant_scale = false;
 
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {

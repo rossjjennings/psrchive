@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 
 // #define _DEBUG 1
 #include "debug.h"
