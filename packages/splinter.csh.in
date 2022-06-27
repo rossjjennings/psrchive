@@ -1,0 +1,32 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -d splinter ) then
+
+  echo "Downloading SPLINTER source code from github"
+
+  setenv SPLINTER_GIT https://github.com/bgrimstad/splinter.git
+  git clone $SPLINTER_GIT
+
+endif
+
+cd splinter
+git pull
+git checkout develop
+
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=@prefix@ ..
+make
+make install
+
+echo
+echo
+echo "SPLINTER library installation completed"
+echo
+echo "To use the library, please re-run the PSRCHIVE configure script"
+echo

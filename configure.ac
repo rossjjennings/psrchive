@@ -136,6 +136,8 @@ PSR_LIB_ARMADILLO
 #
 SWIN_DOWNLOAD
 AC_CONFIG_FILES([packages/Makefile
+	packages/armadillo.csh
+	packages/splinter.csh
 	packages/cfitsio.csh
 	packages/fftw.csh
 	packages/pgplot.csh

@@ -1,0 +1,23 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+set armadillo=armadillo-11.2.1
+set file=${armadillo}.tar.xz
+set place=https://sourceforge.net/projects/arma/files
+
+if ( ! -f $file ) then
+  @download@ ${place}/${file}
+endif
+
+tar -xf $file
+cd $armadillo
+
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX:PATH=@prefix@
+make install
+
