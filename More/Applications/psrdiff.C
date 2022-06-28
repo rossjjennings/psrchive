@@ -397,6 +397,16 @@ void diff_two (const std::string& fileA, const std::string& fileB)
       A->fscrunch_to_nchan (nchanB);
     if (nchanB > nchanA)
       B->fscrunch_to_nchan (nchanA);
+
+    if (nchanA != nchanB)
+    {
+      /* if either of the above two cases are true, then it may be
+         necessary to align the profiles to the arrival time of the
+         header centre frequency in order to compensate for any
+         mismatch in weighted centre frequencies */
+      A->dedisperse ();
+      B->dedisperse ();
+    }
   }
 
   std::string reason;
