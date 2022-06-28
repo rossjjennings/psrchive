@@ -8,7 +8,7 @@ AC_DEFUN([SWIN_DOWNLOAD],
   else
     AC_PATH_PROG(CURL, curl, no)
     if test $CURL != no; then
-      download="$CURL -f -L -O"
+      download="$CURL -k -f -L -O"
     else
       AC_MSG_WARN([No download program was found])
       download="echo Cannot download"
