@@ -168,6 +168,9 @@ namespace Pulsar
     //! Add the ReferenceCalibrator observation to the set of constraints
     virtual void add_calibrator (const ReferenceCalibrator* polncal);
 
+    //! Return true if this calibrator can be applied to the data
+    virtual bool calibrator_match (const Archive*, std::string& reason_for_not_matching);
+
     //! Add an observational epoch
     virtual void add_epoch (const MJD& epoch);
    

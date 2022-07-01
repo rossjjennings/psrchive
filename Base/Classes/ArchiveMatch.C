@@ -60,6 +60,7 @@ Pulsar::Archive::Match::Match ()
   check_receiver = false;
   check_centre_frequency = false;
   check_bandwidth = false;
+  check_bandwidth_sign = !opposite_sideband;
 }
 
 Pulsar::Archive::Match* Pulsar::Archive::Match::clone () const
@@ -322,6 +323,16 @@ bool Pulsar::Archive::Match::get_check_bandwidth () const
   return check_bandwidth;
 }
 
+void Pulsar::Archive::Match::set_check_bandwidth_sign (bool flag)
+{
+  check_bandwidth_sign = flag;
+}
+
+bool Pulsar::Archive::Match::get_check_bandwidth_sign () const
+{
+  return check_bandwidth_sign;
+}
+
 bool name_match (std::string a, std::string b)
 {
   if (a[0] == 'J' || a[0] == 'B')
@@ -471,7 +482,7 @@ bool Pulsar::Archive::Match::get_bandwidth_match (const Archive* a,
   double frac_dbw = fabs((fabs(bw1)-fabs(bw2))/bw1);
   bool sign_matches = (bw1*bw2) > 0.0;
 
-  if ( ( frac_dbw<1e-10 ) && (opposite_sideband || sign_matches) )
+  if ( ( frac_dbw<1e-10 ) && (!check_bandwidth_sign || sign_matches) )
     return true;
   else
   {

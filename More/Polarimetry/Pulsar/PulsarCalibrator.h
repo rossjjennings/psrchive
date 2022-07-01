@@ -45,6 +45,9 @@ namespace Pulsar {
     //! Destructor
     ~PulsarCalibrator ();
 
+    //! Return true if this calibrator can be applied to the data
+    bool calibrator_match (const Archive*, std::string& reason_for_not_matching);
+
     //! When set, pulse phase is removed from the model
     void set_fixed_phase (bool flag = true);
 
@@ -171,7 +174,8 @@ namespace Pulsar {
     unsigned big_difference;
 
     //! Build the arrays
-    void build (unsigned nchan);
+    /*! When reverse_channels is true, the order of frequency channels is reversed */
+    void build (unsigned nchan, bool reverse_channels);
 
   };
 

@@ -158,9 +158,6 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 	     << chosen_maximum_harmonic << "/" << clone->get_nbin()/2 << endl;
     }
   }
-
-  if (standard->get_nchan () > 1)
-    build (standard->get_nchan());
 }
 
 unsigned Pulsar::PulsarCalibrator::get_nharmonic () const
@@ -179,7 +176,7 @@ unsigned Pulsar::PulsarCalibrator::get_nstate_pulsar () const
   return get_nharmonic ();
 }
 
-void Pulsar::PulsarCalibrator::build (unsigned nchan) try
+void Pulsar::PulsarCalibrator::build (unsigned nchan, bool reverse_channels) try
 {
   if (verbose > 2)
     cerr << "Pulsar::PulsarCalibrator::build nchan=" << nchan << endl;
@@ -212,6 +209,8 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     unsigned mchan = ichan;
     if (model_nchan == 1)
       mchan = 0;
+    else if (reverse_channels)
+      mchan = model_nchan - ichan - 1;
 
     if (integration->get_weight (mchan) == 0)
     {
@@ -296,21 +295,16 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
   SystemCalibrator::init_model (ichan);
 }
 
-//! Ensure that the pulsar observation can be added to the data set
-void Pulsar::PulsarCalibrator::match (const Archive* data)
+bool Pulsar::PulsarCalibrator::calibrator_match (const Archive* data, std::string& reason)
 {
-  if (verbose)
-    cerr << "Pulsar::PulsarCalibrator::match"
-      " data->nchan=" << data->get_nchan() << endl;
-
   Archive::Match match;
 
   match.set_check_standard (true);
   match.set_check_calibrator (true);
   match.set_check_nbin (false);
+  match.set_check_bandwidth_sign (false);
 
-  bool one_channel = standard->get_nchan() == 1 
-    && data->get_nchan() > 1;
+  bool one_channel = standard->get_nchan() == 1 && data->get_nchan() > 1;
 
   if (one_channel)
   {
@@ -319,20 +313,38 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
     match.set_check_bandwidth (false);
   }
 
-  if (!match.match (get_calibrator(), data))
+  bool result = match.match (get_calibrator(), data);
+  reason = match.get_reason();
+
+  return result;
+}
+
+//! Ensure that the pulsar observation can be added to the data set
+void Pulsar::PulsarCalibrator::match (const Archive* data)
+{
+  if (verbose)
+    cerr << "Pulsar::PulsarCalibrator::match"
+      " data->nchan=" << data->get_nchan() << endl;
+
+  string reason;
+  if (!calibrator_match (data, reason))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::match",
                  "mismatch between calibrator\n\t"
                  + get_calibrator()->get_filename() +
-                 " and\n\t" + data->get_filename() + match.get_reason());
+                 " and\n\t" + data->get_filename() + reason);
 
   if (!has_Receiver())
     set_Receiver (data);
 
+  bool one_channel = standard->get_nchan() == 1 && data->get_nchan() > 1;
+
   if (one_channel)
     PolnCalibrator::set_calibrator (data);
 
-  if (!mtm.size())
-    build (data->get_nchan());
+  bool reverse_channels = get_calibrator()->get_bandwidth() == -1.0 * data->get_bandwidth();
+
+  if (mtm.size() == 0)
+    build (data->get_nchan(), reverse_channels);
 }
 
 /*!

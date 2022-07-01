@@ -101,6 +101,10 @@ namespace Pulsar {
     void set_check_bandwidth (bool flag = true);
     bool get_check_bandwidth () const;
 
+    //! Set to check the sign of the bandwidth attribute
+    void set_check_bandwidth_sign (bool flag = true);
+    bool get_check_bandwidth_sign () const;
+
     //! Return true if the bandwidths match
     virtual bool get_bandwidth_match (const Archive* a, const Archive* b) const;
 
@@ -139,6 +143,8 @@ namespace Pulsar {
     bool check_receiver;
     bool check_centre_frequency;
     bool check_bandwidth;
+    bool check_bandwidth_sign;
+
   };
 
 }

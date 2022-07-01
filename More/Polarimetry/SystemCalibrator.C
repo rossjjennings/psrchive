@@ -1975,6 +1975,11 @@ void SystemCalibrator::calculate_transformation ()
   }
 }
 
+bool SystemCalibrator::calibrator_match (const Archive* data, std::string& reason)
+{
+  return get_calibrator()->calibrator_match (data, reason);
+}
+
 //! Calibrate the polarization of the given archive
 void SystemCalibrator::precalibrate (Archive* data)
 {
@@ -1982,7 +1987,7 @@ void SystemCalibrator::precalibrate (Archive* data)
     cerr << "SystemCalibrator::precalibrate" << endl;
 
   string reason;
-  if (!get_calibrator()->calibrator_match (data, reason))
+  if (!calibrator_match (data, reason))
     throw Error (InvalidParam, "PulsarCalibrator::precalibrate",
 		 "mismatch between calibrator\n\t" 
 		 + get_calibrator()->get_filename() +
