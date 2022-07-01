@@ -124,19 +124,18 @@ void Pulsar::Application::parse (int argc, char** argv)
     optind ++;
   }
 
+  for (int i=optind; i<argc; i++)
+    dirglob (&filenames, argv[i]);
+
+  if (sort_filenames)
+    sort (filenames.begin(), filenames.end());
+
   if (!metafile.empty())
   {
+    // stringfload appends to filenames (without first clearing the vector)
     if (stringfload (&filenames, metafile) < 0)
       throw Error (FailedSys, "Pulsar::Application::parse", 
                    "failed to load filnames from '" + metafile + "'\n");
-  }
-  else
-  {
-    for (int i=optind; i<argc; i++)
-      dirglob (&filenames, argv[i]);
-
-    if (sort_filenames)
-      sort (filenames.begin(), filenames.end());
   }
 
   string separator = " ";
