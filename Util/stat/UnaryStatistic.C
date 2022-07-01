@@ -290,7 +290,35 @@ namespace UnaryStatistics {
     
     Median* clone () const { return new Median(*this); }
   };
-  
+
+  class RobustMedian : public UnaryStatistic
+  {
+    double filter_out;
+
+  public:
+    RobustMedian ()
+      : UnaryStatistic ("rmed", "median of non-zero values")
+      {
+        filter_out = 0.0;
+        add_alias ("robust_median");
+      }
+
+    double get (const vector<double>& data)
+    {
+      vector<double> copy = data;
+      unsigned i=0;
+      while (i < copy.size())
+        if (copy[i] == filter_out)
+          copy.erase (copy.begin()+i);
+        else
+          i ++;
+
+      return median (copy);
+    }
+
+    RobustMedian* clone () const { return new RobustMedian(*this); }
+  };
+
   double madm (vector<double> data)
   {
     double med = median (data);
@@ -769,6 +797,7 @@ void UnaryStatistic::build ()
   instances->push_back( new Kurtosis );
   instances->push_back( new DeviationCoefficient );
   instances->push_back( new Median );
+  instances->push_back( new RobustMedian );
   instances->push_back( new MedianAbsoluteDifference );
   instances->push_back( new InterQuartileRange );
   instances->push_back( new QuartileDispersion );
