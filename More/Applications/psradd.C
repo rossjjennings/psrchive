@@ -181,7 +181,10 @@ psradd::psradd () : Pulsar::Application ("psradd",
   // do not log results by default
   log_results = false;
 
+  // set true when any auto_add feature is enabled
   auto_add = false; 
+
+  // by default, tscrunch before unloading auto_add result
   auto_add_tscrunch = true;
 
   tscrunch_seconds = 0.0;
@@ -211,6 +214,8 @@ bool tscrunch_total = false;
 
 // phase align each archive before appending to total
 bool phase_align = false;
+
+float phase_alignment_threshold = 0.0;
 
 // auto_add features:
 // maximum amount of data (in seconds) to integrate into one archive
@@ -277,6 +282,9 @@ void psradd::add_options (CommandLine::Menu& menu)
   arg = menu.add (phase_align, 'P');
   arg->set_help ("Phase align archive with total before adding");
 
+  arg = menu.add (phase_alignment_threshold, "phath", "turns");
+  arg->set_help ("Omit data if phase offset from total > phath");
+
   arg = menu.add (log_results, 'L');
   arg->set_help ("Log results in <source>.log");
 
@@ -330,6 +338,7 @@ void psradd::add_options (CommandLine::Menu& menu)
   arg->set_help ("... \"condition\" is true");
   arg->set_notification (auto_add);
 
+  // by default, auto_add_tscrunch=true; enabling this option toggles auto_add_tscrunch=false
   arg = menu.add (auto_add_tscrunch, "autoT");
   arg->set_help ("Disable tscrunch before unloading");
 
@@ -571,7 +580,7 @@ void psradd::set_total (Pulsar::Archive* archive)
 {
   if (total)
   {
-    if (auto_add_tscrunch)
+    if (auto_add && auto_add_tscrunch)
     {
       if (verbose)
 	cerr << "psradd: Auto add - tscrunch and unload " 
@@ -657,7 +666,7 @@ void psradd::set_total (Pulsar::Archive* archive)
 
 void psradd::append (Pulsar::Archive* archive) try
 {
-  if (phase_align)
+  if (phase_align || phase_alignment_threshold > 0.0)
   {
     Reference::To<Pulsar::Archive> standard;
     standard = total->total();
@@ -666,8 +675,14 @@ void psradd::append (Pulsar::Archive* archive) try
     Reference::To<Pulsar::Archive> observation;
     observation = archive->total();
     Pulsar::Profile* obs = observation->get_Profile(0,0,0);
-    
-    archive->rotate_phase( obs->shift(std).get_value() );
+   
+    double shift = obs->shift(std).get_value();
+
+    if (phase_align) 
+      archive->rotate_phase( obs->shift(std).get_value() );
+    else if ( fabs(shift) > phase_alignment_threshold )
+      throw Error (InvalidState, "psradd::append",
+                   "phase shift=%lf > threshold=%lf", shift, phase_alignment_threshold);
   }
 
   if (archive->get_state() != total->get_state())
@@ -733,7 +748,8 @@ catch (Error& error)
 {
   if (verbose)
     cerr << "psradd: " << error.get_message() << endl;
-  reset_total = true;
+  if (auto_add)
+    reset_total = true;
 }
 
 // ///////////////////////////////////////////////////////////////
