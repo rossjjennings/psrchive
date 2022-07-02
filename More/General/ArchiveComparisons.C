@@ -182,11 +182,13 @@ class ArchiveComparisons::Interface
 : public TextInterface::To<ArchiveComparisons>
 {
   string name;
+  string description;
   
  public:
   
   std::string get_interface_name () const { return name; }
-  
+  std::string get_interface_description () const { return description; }
+ 
   //! Default constructor
   Interface ( ArchiveComparisons* _instance )
   {
@@ -194,6 +196,7 @@ class ArchiveComparisons::Interface
       set_instance (_instance);
     
     name = _instance->get_identity ();
+    description = _instance->get_description ();
 
     add( &ArchiveComparisons::get_what,
 	 &ArchiveComparisons::set_what,

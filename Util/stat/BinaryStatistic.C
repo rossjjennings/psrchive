@@ -61,7 +61,7 @@ namespace BinaryStatistics {
     
   public:
     RelativeSpectralEntropy ()
-      : BinaryStatistic ("rse", "Relative Spectral Entropy")
+      : BinaryStatistic ("rse", "relative spectral entropy")
       {
 	// exponential distribution has a long tail
 	threshold = 9.0; // sigma

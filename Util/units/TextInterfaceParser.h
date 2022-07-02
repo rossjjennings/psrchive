@@ -82,6 +82,9 @@ namespace TextInterface
     //! Get the name of this interface
     virtual std::string get_interface_name () const { return ""; }
 
+    //! Get a short description of this interface
+    virtual std::string get_interface_description () const { return ""; }
+
     //! Set the indentation that precedes the output of a call to process
     void set_indentation (const std::string& indent) { indentation = indent; }
     std::string get_indentation () const { return indentation; }

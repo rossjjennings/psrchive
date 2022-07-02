@@ -37,9 +37,12 @@ public:
   class Interface : public TextInterface::To<ProfileStatisticWrapper>
   {
     string name;
+    string description;
+
   public:
 
     std::string get_interface_name () const { return name; }
+    std::string get_interface_description () const { return description; }
 
     //! Default constructor
     Interface ( ProfileStatisticWrapper* _instance )
@@ -48,6 +51,7 @@ public:
           set_instance (_instance);
 
         name = _instance->get_identity ();
+        description = _instance->get_description ();
       }
   };
 

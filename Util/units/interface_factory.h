@@ -65,7 +65,8 @@ namespace TextInterface
 	}
       else if (name == "help")
 	{
-	  message += interface->get_interface_name() + "\n"
+	  message += interface->get_interface_name() + "\t" 
+            + interface->get_interface_description() + "\n"
 	    + interface->help (true, false, "   ") + "\n";
 	}
     }
