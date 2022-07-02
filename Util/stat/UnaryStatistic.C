@@ -661,7 +661,7 @@ public:
 	outlier_sum += detrended[i]*detrended[i];
     }
 
-    return outlier_sum;
+    return outlier_sum / var;
   }
 
   SumDetrendedOutlier* clone () const { return new SumDetrendedOutlier(*this); }
