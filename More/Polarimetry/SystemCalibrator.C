@@ -817,7 +817,7 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
                  "invalid source=" + Source2string(cal->get_type()));
 
   string reason;
-  if (calibrator_match (cal, reason))
+  if (!calibrator_match (cal, reason))
     throw Error (InvalidParam, "SystemCalibrator::add_calibrator",
 		 "mismatch between \n\t" 
 		 + get_calibrator()->get_filename() +
