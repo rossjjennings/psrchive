@@ -299,7 +299,9 @@ bool Pulsar::PulsarCalibrator::calibrator_match (const Archive* data, std::strin
 {
   Archive::Match match;
 
-  match.set_check_standard (true);
+  if (data->get_type() == Signal::Pulsar)
+    match.set_check_standard (true);
+
   match.set_check_calibrator (true);
   match.set_check_nbin (false);
   match.set_check_bandwidth_sign (false);
