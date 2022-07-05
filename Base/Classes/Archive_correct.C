@@ -11,6 +11,8 @@
 
 using namespace std;
 
+/*! Perform all of the corrections defined in Base/Checks/Check_registry.C */
+
 void Pulsar::Archive::correct ()
 {
   Check::ensure_linkage();
@@ -39,3 +41,4 @@ void Pulsar::Archive::correct ()
 
   }
 }
+
