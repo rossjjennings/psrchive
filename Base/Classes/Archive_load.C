@@ -66,7 +66,7 @@ Pulsar::Archive* Pulsar::Archive::load (const string& filename)
       archive -> load_header (use_filename.c_str());
       archive -> set_filename (use_filename);
 
-      // perform all checks
+      // perform all checks defined in Base/Checks/Check_registry.C
       archive->correct();
 
       return archive.release();

@@ -77,7 +77,11 @@ namespace Pulsar {
     //! Return true if all Integration::zero_phase_aligned flags are set
     bool zero_phase_aligned () const
     { return instance->zero_phase_aligned(); }
-    
+
+    //! Perform all of the corrections defined in Base/Checks/Check_registry.C
+    void correct ()
+    { instance->correct (); }
+
     //! Get agent list
     static void get_agent_list( std::vector< std::pair< std::string,std::string > > &details )
     { return Archive::Agent::get_list( details ); }
