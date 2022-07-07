@@ -54,6 +54,10 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &ArchiveStatistic::get_interface,
        "stat", "Statistic computed for each subint/chan" );
 
+  add( &TimeFrequencyZap::get_logarithmic,
+       &TimeFrequencyZap::set_logarithmic,
+       "log", "Use the logarithm of the statistic" );
+
   add( &TimeFrequencyZap::get_smoother,
        &TimeFrequencyZap::set_smoother,
        &TimeFrequencySmooth::get_interface,
@@ -109,7 +113,8 @@ Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
   expression = "off:rms";
   regions_from_total = true;
   pscrunch = false;
-  
+  logarithmic = false;
+ 
   fscrunch_factor.disable_scrunch();
   bscrunch_factor.disable_scrunch();
   
@@ -577,6 +582,8 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
 	  // cerr << "calling Statistic::get" << endl;
           fval = statistic->get();
 	  // cerr << "Statistic::get returned" << endl;
+          if (logarithmic)
+            fval = log(fval);
         }
         else
         {

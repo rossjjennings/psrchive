@@ -54,6 +54,12 @@ namespace Pulsar {
       //! Get the statistic
       ArchiveStatistic* get_statistic () const;
 
+      //! Set flag to compute the logarithm of the statistic
+      void set_logarithmic (bool flag = true) { logarithmic = flag; }
+
+      //! Get flag to compute the logarithm of the statistic
+      bool get_logarithmic () const { return logarithmic; }
+
       //! Set the smoother
       void set_smoother (TimeFrequencySmooth*);
 
@@ -147,6 +153,9 @@ namespace Pulsar {
 
       //! The statistic to be derived from each profile
       Reference::To<ArchiveStatistic> statistic;
+
+      //! Use the logarithm of the statistic
+      bool logarithmic;
 
       //! Use the archive total profile to determine on/off pulse regions
       bool regions_from_total;
