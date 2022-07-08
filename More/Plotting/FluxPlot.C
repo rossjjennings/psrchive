@@ -51,6 +51,14 @@ TextInterface::Parser* Pulsar::FluxPlot::get_interface ()
   return new Interface (this);
 }
 
+//! Compute the maximum flux 
+float Pulsar::FluxPlot::get_flux_maximum (const Profile* data)
+{
+  float max = data->max();
+  // cerr << "FluxPlot::get_flux_maximum max=" << max << endl;
+  return max;
+}
+
 /*! The ProfileVectorPlotter class computes the minimum and maximum values
   to be plotted */
 void Pulsar::FluxPlot::prepare (const Archive* data)
@@ -76,15 +84,14 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     // increase the space between the label and the axis
     frame->get_y_axis()->set_displacement (3.0);
 
-    Reference::To<PhaseWeight> weight = baseline->operate(plotter.profiles[0]);
-
     double offset = 0;
     double scale = 1;
     double threshold = 0;
 
     if (logarithmic == 1)
     {
-      // the standard deviation of an exponential distribution equals its mean
+      Reference::To<PhaseWeight> weight = baseline->operate(plotter.profiles[0]);
+
       double rms = weight->get_rms ();
       float log_noise = log(rms) / log(10.0);
       offset = -log_noise;
@@ -92,8 +99,9 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     }
     else if (logarithmic == -1)
     {
+      float max = get_flux_maximum (plotter.profiles[0]);
       threshold = 0;   // no cutoff
-      offset = 0;      // reference power = 1
+      offset = -log(max) / log(10.0);
     }
 
     for (unsigned iprof=0; iprof < plotter.profiles.size(); iprof++)
