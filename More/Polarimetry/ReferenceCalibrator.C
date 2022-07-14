@@ -271,7 +271,7 @@ void ReferenceCalibrator::get_levels
 }
 catch (Error& error)
 {
-  throw error += "ReferenceCalibrator::get_levels";
+  throw error += "ReferenceCalibrator::get_levels (Integration*)";
 }
 
 /*! This method takes care of averaging the calibrator levels from multiple
@@ -282,6 +282,7 @@ void ReferenceCalibrator::get_levels
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo,
  double outlier_threshold)
+try
 {
   if (!archive)
     throw Error (InvalidState,
@@ -347,6 +348,10 @@ void ReferenceCalibrator::get_levels
       cal_lo[ipol][ichan] = total_lo[ipol][ichan].get_Estimate();
     }
   }
+}
+catch (Error& error)
+{
+  throw error += "ReferenceCalibrator::get_levels (Archive*)";
 }
 
 void ReferenceCalibrator::get_levels 
