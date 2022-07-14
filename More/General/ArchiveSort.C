@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,6 +12,7 @@ using namespace std;
 
 bool Pulsar::ArchiveSort::read_length = false;
 bool Pulsar::ArchiveSort::compare_frequencies = true;
+bool Pulsar::ArchiveSort::compare_sources = true;
 
 Pulsar::ArchiveSort::ArchiveSort ()
 {
@@ -31,15 +32,20 @@ bool Pulsar::ArchiveSort::verbose = false;
 
 bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 {
-  if (a.source < b.source) {
-    if (ArchiveSort::verbose)
-      cerr << a.source << " < " << b.source << endl;
-    return true;
-  }
-  else if (a.source > b.source) {
-    if (ArchiveSort::verbose)
-      cerr << a.source << " > " << b.source << endl;
-    return false;
+  if (ArchiveSort::compare_sources)
+  {
+    if (a.source < b.source)
+    {
+      if (ArchiveSort::verbose)
+        cerr << a.source << " < " << b.source << endl;
+      return true;
+    }
+    else if (a.source > b.source)
+    {
+      if (ArchiveSort::verbose)
+        cerr << a.source << " > " << b.source << endl;
+      return false;
+    }
   }
 
   if (ArchiveSort::compare_frequencies)
@@ -58,7 +64,8 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
     }
   }
   
-  if (a.epoch < b.epoch) {
+  if (a.epoch < b.epoch)
+  {
     if (ArchiveSort::verbose)
       cerr << a.epoch.printdays(5) << " < " << b.epoch.printdays(5) << endl;
     return true;
@@ -71,8 +78,8 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 
 
 void Pulsar::ArchiveSort::load (istream& input, list<ArchiveSort>& entries)
-try {
-
+try
+{
   string filename, name, freq, mjd, length;
   input >> filename >> name >> freq >> mjd;
   if (read_length)
@@ -82,12 +89,14 @@ try {
     throw Error (InvalidState, "Pulsar::ArchiveSort::load",
 		 "input is not the output of vap?");
 
-  while (!input.eof()) {
+  while (!input.eof())
+  {
     ArchiveSort entry (input);
     entries.push_back( entry );
   }
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "Pulsar::ArchiveSort::load " << error.get_message() << endl;
 }
+

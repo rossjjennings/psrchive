@@ -56,6 +56,9 @@ namespace Pulsar {
 
     //! Set to false when you want to join bands into a single session
     static bool compare_frequencies;
+
+    //! Set to false when you want to join sources (e.g. HYDRA_[ONS])
+    static bool compare_sources;
   };
 
   //! Comparison operator
