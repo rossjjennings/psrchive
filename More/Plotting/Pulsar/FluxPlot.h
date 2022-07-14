@@ -56,6 +56,9 @@ namespace Pulsar {
     //! Compute the error in flux
     virtual float get_flux_error (const Profile* data);
 
+    //! Compute the maximum flux
+    virtual float get_flux_maximum (const Profile* data);
+
     //! Draw the error box
     virtual void plot_error_box (const Archive* data);
 
