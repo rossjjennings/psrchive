@@ -607,7 +607,8 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
 void Pulsar::FluxCalibrator::resize (unsigned nchan, unsigned nreceptor)
 {
-  cerr << "Pulsar::FluxCalibrator::resize nchan=" << nchan << " nreceptor=" << nreceptor << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::resize nchan=" << nchan << " nreceptor=" << nreceptor << endl;
 
   data.resize( nchan );
   for (unsigned i=0; i < nchan; i++)
@@ -621,7 +622,8 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 {
   unsigned nchan = gain.size();
 
-  cerr << "Pulsar::FluxCalibrator::resize nchan=" << nchan << " required nchan=" << required_nchan << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::resize nchan=" << nchan << " required nchan=" << required_nchan << endl;
 
   if (nchan == required_nchan)
     return;
