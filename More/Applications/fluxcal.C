@@ -31,6 +31,7 @@
 #include <fstream>
 
 using namespace std;
+using namespace Pulsar;
 
 // class name of the processed calibrator archive
 static string archive_class = "PSRFITS";
@@ -52,6 +53,7 @@ void usage ()
     "  -B           fix the off-pulse baseline statistics \n"
     "  -C           calibrate flux calibrator observation with itself \n"
     "  -d database  get FluxCal archives from database and file solutions\n"
+    "  -M meta      meta names a file containing the list of files\n"
     "  -e extension filename extension added to output archives\n"
     "  -O path      directory in which output will be written \n"
     "  -f           fix the type and name attributes, based on coordinates\n"
@@ -125,11 +127,10 @@ void configuration_report (Reference::To<Pulsar::StandardCandles>);
 void print_fluxes (Reference::To<Pulsar::StandardCandles>, double freq);
 
 // compare two Database::Entry instances using Entry::less_than
-bool by_frequency_then_time (const Pulsar::Database::Entry* A, 
-                             const Pulsar::Database::Entry* B)
+bool less_than (const Pulsar::Database::Entry* A, const Pulsar::Database::Entry* B)
 {
   if (A==NULL || B==NULL)
-    throw Error (InvalidParam, "by_frequency_then_time",
+    throw Error (InvalidParam, "less_than (Pulsar::Database::Entry*)",
                  "null pointer passed as argument");
 
   return A->less_than (B);
@@ -153,8 +154,10 @@ int main (int argc, char** argv) try {
   double print_ref_freq = 0.0;
   float outlier_threshold = 0.0;
 
+  char* metafile = NULL;
+
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fgi:I:K:O:P:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fgi:I:K:M:O:P:")) != -1) 
 
     switch (c)  {
 
@@ -226,6 +229,10 @@ int main (int argc, char** argv) try {
       outlier_threshold = atof(optarg);
       break;
 
+    case 'M':
+      metafile = optarg;
+      break;
+
     case 'O':
       unload_path = optarg;
       break;
@@ -247,11 +254,20 @@ int main (int argc, char** argv) try {
   if (print_flux)
     print_fluxes(standards, print_ref_freq);
 
-  vector<string> filenames;
-  for (int ai=optind; ai<argc; ai++)
-    dirglob (&filenames, argv[ai]);
+  vector <string> filenames;
 
-  if (filenames.size() == 0 && !database) {
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+  {
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+
+    sort (filenames.begin(), filenames.end());
+  }
+
+  if (filenames.size() == 0 && !database)
+  {
     if (print_flux)
       return 0;
     else {
@@ -260,11 +276,10 @@ int main (int argc, char** argv) try {
     }
   }
 
-  sort (filenames.begin(), filenames.end());
-
-  if (database) {
-
-    if (filenames.size() != 0) {
+  if (database)
+  {
+    if (filenames.size() != 0)
+    {
       cerr << "fluxcal: do not specify filename[s] with -d option" << endl;
       return -1;
     }
@@ -285,7 +300,7 @@ int main (int argc, char** argv) try {
       return -1;
     }
 
-    sort (entries.begin(), entries.end(), &by_frequency_then_time);
+    sort (entries.begin(), entries.end(), &less_than);
 
     // break them into sets
 
@@ -304,23 +319,35 @@ int main (int argc, char** argv) try {
   Reference::To<Pulsar::Archive> archive;
   Reference::To<Pulsar::FluxCalibrator> fluxcal;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
+  bool memcheck = false;
 
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
+  {
     cerr << "fluxcal: loading " << filenames[ifile] << endl;
     
     archive = Pulsar::Archive::load(filenames[ifile]);
 
-    if (fix) {
+    if (memcheck)
+    {
+      cerr << "fluxcal: Calibrator::instance_count = " 
+           << Calibrator::get_instance_count () << endl;
+      cerr << "fluxcal: Archive::instance_count = " 
+           << Archive::get_instance_count () << endl;
 
+      // cerr << "fluxcal: Integration::instance_count = " << Integration::get_instance_count () << endl;
+      // cerr << "fluxcal: Profile::instance_count = " << Profile::get_instance_count () << endl;
+    }
+
+    if (fix)
+    {
       fix->apply (archive);
 
       if (verbose && fix->get_changes() != "none")
 	cerr << "fluxcal: type fixed to " << fix->get_changes() << endl;
-
     }
 
-    if (self_calibrate) {
-
+    if (self_calibrate)
+    {
       Reference::To<Pulsar::PolnCalibrator> pcal;
 
       if (offpulse_calibrator)
@@ -329,28 +356,27 @@ int main (int argc, char** argv) try {
 	pcal = new Pulsar::SingleAxisCalibrator (archive);
 
       pcal->calibrate (archive);
-
     }
 
-    if (fluxcal) {
-
+    if (fluxcal)
+    {
       double gap = (archive->start_time() - last->end_time()).in_seconds();
 
-      if (gap > interval) {
+      if (gap > interval)
+      {
 	cerr << "fluxcal: gap=" << time_string(gap)
 	     << " > interval=" << time_string(interval) << endl;
         unload (fluxcal);
         fluxcal = 0;
       }
-
     }
 
     if (verbose)
       cerr << "fluxcal: processing " << archive->get_type() 
 	   << " observation" << endl;
 
-    if (fluxcal) {
-
+    if (fluxcal)
+    {
       if (verbose)
         cerr << "fluxcal: adding observation to FluxCalibrator" << endl;
 
@@ -364,11 +390,10 @@ int main (int argc, char** argv) try {
         unload (fluxcal);
         fluxcal = 0;
       }
-
     }
     
-    if (!fluxcal) {
-
+    if (!fluxcal)
+    {
       cerr << "fluxcal: starting new FluxCalibrator" << endl;
       fluxcal = new Pulsar::FluxCalibrator;
 
@@ -393,20 +418,20 @@ int main (int argc, char** argv) try {
   if (fluxcal)
     unload (fluxcal);
 
-  if (database) {
-
+  if (database)
+  {
     string backup = database_filename + ".bkp";
     cerr << "fluxcal: backing up old database" << endl;
     rename (database_filename.c_str(), backup.c_str());
     
     cerr << "fluxcal: writing new database" << endl;
     database->unload (database_filename);
-
   }
 
   return 0;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "fluxcal: error" << error << endl;
   return -1;
 }
