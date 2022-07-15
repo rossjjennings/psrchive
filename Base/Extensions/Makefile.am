@@ -125,5 +125,3 @@ libExtensions_la_SOURCES = \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += -I$(top_srcdir)/More/Polarimetry
-
