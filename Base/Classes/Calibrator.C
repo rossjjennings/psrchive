@@ -54,13 +54,21 @@ Pulsar::Calibrator::det_threshold
  "no check is performed."
 );
 
+static unsigned instance_count = 0;
+
+unsigned Pulsar::Calibrator::get_instance_count ()
+{
+  return instance_count;
+}
 
 Pulsar::Calibrator::Calibrator ()
 {
+  instance_count ++;
 }
 
 Pulsar::Calibrator::~Calibrator ()
 {
+  instance_count --;
 }
 
 const Pulsar::Calibrator::Type* Pulsar::Calibrator::get_type () const
