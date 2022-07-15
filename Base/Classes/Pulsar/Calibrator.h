@@ -64,6 +64,9 @@ namespace Pulsar {
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const = 0;
 
+    //! Get the weight associated with the specified channel
+    virtual float get_weight (unsigned ichan) const = 0;
+
     //! Return a new Calibrator Extension
     virtual CalibratorExtension* new_Extension () const = 0;
 

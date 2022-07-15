@@ -177,6 +177,9 @@ namespace Pulsar {
     //! Derived classes can add conditions for channel validity
     virtual bool get_valid (unsigned ichan) const;
 
+    //! Return the weight (0 or 1) of the specified channel
+    float get_weight (unsigned ichan) const;
+
     //! Derived classes may be able to shrink the transformation array
     virtual unsigned get_maximum_nchan () const;
 

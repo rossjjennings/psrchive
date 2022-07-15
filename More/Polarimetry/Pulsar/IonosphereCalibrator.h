@@ -15,8 +15,10 @@
 
 namespace Pulsar {
 
-  //! Corrects known instrumental effects
-  class IonosphereCalibrator : public Calibrator {
+  //! Corrects ionospheric Faraday rotation
+  /*! Once upon a time, we tried.  */
+  class IonosphereCalibrator : public Calibrator
+  {
 
   public:
 
@@ -37,6 +39,9 @@ namespace Pulsar {
 
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const { return 0; }
+
+    //! Get the weight associated with the specified channel
+    float get_weight (unsigned ichan) const { return 1.0; }
 
     //! Returns a new CalibratorExtension
     CalibratorExtension* new_Extension () const { return 0; }

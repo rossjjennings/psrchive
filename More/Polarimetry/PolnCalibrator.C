@@ -792,6 +792,11 @@ catch (Error& error)
   throw error += "Pulsar::PolnCalibrator::build";
 }
 
+float Pulsar::PolnCalibrator::get_weight (unsigned ichan) const
+{
+  return (get_valid(ichan)) ? 1.0 : 0.0;
+}
+
 //! Return true if the response for the specified channel is valid
 bool Pulsar::PolnCalibrator::get_valid (unsigned ichan) const
 {

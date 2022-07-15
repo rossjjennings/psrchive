@@ -9,6 +9,8 @@
 #include "templates.h"
 
 #include <iostream>
+#include <cassert>
+
 using namespace std;
 
 using Pulsar::FluxCalibrator;
@@ -44,6 +46,8 @@ void FluxCalibrator::VariableGain::integrate (Signal::Source source,
 void FluxCalibrator::VariableGain::add_ratio_on (unsigned ir,
 						 Estimate<double>& ratio)
 {
+  // cerr << "FluxCalibrator::VariableGain::add_ratio_on nreceptor=" << get_nreceptor() << endl;
+  assert (ir < get_nreceptor());
   mean_ratio_on.resize( get_nreceptor() );
   mean_ratio_on[ir] += ratio;
   calculated = false;
@@ -53,6 +57,7 @@ void FluxCalibrator::VariableGain::add_ratio_on (unsigned ir,
 void FluxCalibrator::VariableGain::add_ratio_off (unsigned ir,
 						  Estimate<double>& ratio)
 {
+  assert (ir < get_nreceptor());
   mean_ratio_off.resize( get_nreceptor() );
   mean_ratio_off[ir] += ratio;
   calculated = false;
@@ -67,11 +72,13 @@ void FluxCalibrator::VariableGain::compute (unsigned ireceptor,
  
   if (mean_ratio_on.size() <= ireceptor)
     throw Error (InvalidState, "FluxCalibrator::VariableGain::calculate",
-		 "no on-source observations available");
+		 "no on-source observations available"
+                 " (on.size=%u ircptr=%u)", mean_ratio_on.size(), ireceptor);
 
   if (mean_ratio_off.size() <= ireceptor)
     throw Error (InvalidState, "FluxCalibrator::VariableGain::calculate",
-		 "no off-source observations available");
+		 "no off-source observations available"
+                 " (off.size=%u ircptr=%u)", mean_ratio_off.size(), ireceptor);
 
   // the flux density of the standard candle in each polarization
   double S_std_i = S_std / 2;
@@ -101,5 +108,4 @@ void FluxCalibrator::VariableGain::compute (unsigned ireceptor,
     valid = false;
   }
 }
-
 

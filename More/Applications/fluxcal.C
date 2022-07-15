@@ -115,9 +115,10 @@ void unload (Pulsar::FluxCalibrator* fluxcal) try {
   }
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "fluxcal: error unloading solution\n\t"
-       << error.get_message() << endl;
+       << error << endl;
 }
 
 // print configuration information to cerr

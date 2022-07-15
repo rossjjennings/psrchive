@@ -50,13 +50,23 @@ void Pulsar::unload (fitsfile* fptr, const CalibratorExtension* ext)
 		 " frequencies written" << endl;
 
   // Write the weights
+
+  unsigned invalid_count = 0;
+
   for (int i = 0; i < nchan; i++)
   {
     data[i] = ext->get_weight(i);
-    if (Archive::verbose > 2 && data[i] == 0)
-      cerr << "Pulsar::unload CalibratorExtension ichan=" << i
-	   << " flagged invalid" << endl;
+    if (data[i] == 0)
+    {
+      invalid_count ++;
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::unload CalibratorExtension ichan=" << i
+	     << " flagged invalid" << endl;
+    }
   }
+
+  if (invalid_count && Archive::verbose)
+    cerr << "Pulsar::unload CalibratorExtension " << invalid_count << " out of " << nchan << " invalid channels" << endl;
 
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);

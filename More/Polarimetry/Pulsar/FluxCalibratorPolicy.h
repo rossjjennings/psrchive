@@ -60,8 +60,11 @@ namespace Pulsar {
     void set_valid (bool f = true) { valid = f; }
     
     //! Get the data validity flag
-    bool get_valid () const { return valid && calculated; }
-    
+    bool get_valid () const { return valid; }
+
+    //! Return true when a solution is available
+    bool get_solution_available () const;
+
     //! Return the total system equivalent flux density
     Estimate<double> get_S_sys () const;
     
@@ -77,7 +80,7 @@ namespace Pulsar {
   protected:
     
     //! Flag set when data are valid
-    bool valid;
+    mutable bool valid;
     
     //! Flux density of the standard candle
     double S_std;
