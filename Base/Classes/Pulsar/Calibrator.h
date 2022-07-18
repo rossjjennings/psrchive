@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -122,6 +122,9 @@ namespace Pulsar {
 
     //! Provide derived classes with access to the calibrator
     const Archive* get_calibrator () const;
+
+    //! Provide derived classes with mutable access to the calibrator
+    Archive* get_calibrator ();
 
     //! Provide derived classes with access to the calibrator
     virtual void set_calibrator (const Archive* archive);

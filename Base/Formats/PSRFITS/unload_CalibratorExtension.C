@@ -65,7 +65,7 @@ void Pulsar::unload (fitsfile* fptr, const CalibratorExtension* ext)
     }
   }
 
-  if (invalid_count && Archive::verbose)
+  if (invalid_count && Archive::verbose > 1)
     cerr << "Pulsar::unload CalibratorExtension " << invalid_count << " out of " << nchan << " invalid channels" << endl;
 
   colnum = 0;

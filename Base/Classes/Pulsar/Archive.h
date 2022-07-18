@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2002 - 2016 by Willem van Straten
+ *   Copyright (C) 2002 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -187,6 +187,9 @@ namespace Pulsar
 
     //! Remove the specified sub-integration
     virtual void erase (unsigned isubint);
+
+    //! Reverse the order of frequency channels
+    void reverse_chan ();
 
     //@}
 

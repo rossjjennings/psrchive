@@ -173,9 +173,8 @@ namespace Pulsar {
     // used to communicate between solve and add_observation
     unsigned big_difference;
 
-    //! Build the arrays
-    /*! When reverse_channels is true, the order of frequency channels is reversed */
-    void build (unsigned nchan, bool reverse_channels);
+    //! Initialize the PolnProfileFit (mtm) model for each channel
+    void build (unsigned nchan);
 
   };
 

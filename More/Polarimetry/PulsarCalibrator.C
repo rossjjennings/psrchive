@@ -176,7 +176,7 @@ unsigned Pulsar::PulsarCalibrator::get_nstate_pulsar () const
   return get_nharmonic ();
 }
 
-void Pulsar::PulsarCalibrator::build (unsigned nchan, bool reverse_channels) try
+void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 {
   if (verbose > 2)
     cerr << "Pulsar::PulsarCalibrator::build nchan=" << nchan << endl;
@@ -209,8 +209,6 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan, bool reverse_channels) try
     unsigned mchan = ichan;
     if (model_nchan == 1)
       mchan = 0;
-    else if (reverse_channels)
-      mchan = model_nchan - ichan - 1;
 
     if (integration->get_weight (mchan) == 0)
     {
@@ -304,7 +302,12 @@ bool Pulsar::PulsarCalibrator::calibrator_match (const Archive* data, std::strin
 
   match.set_check_calibrator (true);
   match.set_check_nbin (false);
-  match.set_check_bandwidth_sign (false);
+
+  if (mtm.size() == 0)
+  {
+    // until the model is built, allow sideband mismatch
+    match.set_check_bandwidth_sign (false);
+  }
 
   bool one_channel = standard->get_nchan() == 1 && data->get_nchan() > 1;
 
@@ -343,10 +346,17 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
   if (one_channel)
     PolnCalibrator::set_calibrator (data);
 
-  bool reverse_channels = get_calibrator()->get_bandwidth() == -1.0 * data->get_bandwidth();
-
   if (mtm.size() == 0)
-    build (data->get_nchan(), reverse_channels);
+  {
+    if (get_calibrator()->get_bandwidth() == -1.0 * data->get_bandwidth())
+    {
+      cerr << "Pulsar::PulsarCalibrator::match reverse channels in template" << endl;
+      get_calibrator()->reverse_chan();
+      get_calibrator()->set_bandwidth( data->get_bandwidth() );
+    }
+
+    build( data->get_nchan() );
+  }
 }
 
 /*!

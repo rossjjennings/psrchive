@@ -94,6 +94,12 @@ const Pulsar::Archive* Pulsar::Calibrator::get_calibrator () const
   return calibrator;
 }
 
+//! Provide derived classes with mutable access to the calibrator
+Pulsar::Archive* Pulsar::Calibrator::get_calibrator ()
+{
+  return const_cast<Pulsar::Archive*> (calibrator.get());
+}
+
 //! Provide derived classes with access to the calibrator
 void Pulsar::Calibrator::set_calibrator (const Archive* archive)
 {
