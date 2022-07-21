@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *
  *   Copyright (C) 2009 by Paul Demorest
@@ -30,6 +31,7 @@
 #include "Pulsar/IntegrationOrder.h"
 
 #include "Pulsar/RemoveVariableBaseline.h"
+#include "Pulsar/Interpreter.h"
 
 #include "strutil.h"
 
@@ -219,17 +221,20 @@ void usage_interactive() {
     << endl;
 }
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[]) try
+{
   /* Process any args */
   int opt=0;
   int verb=0;
 
   string expression;
+  bool resume_psrsh = false;
+  vector<string> resume_lines;
 
-  while ((opt=getopt(argc,argv,"hve:E:"))!=-1) {
-    switch (opt) {
-
+  while ((opt=getopt(argc,argv,"hve:E:r"))!=-1)
+  {
+    switch (opt)
+    {
       case 'v':
         verb++;
         Archive::set_verbosity(verb);
@@ -242,6 +247,10 @@ int main(int argc, char *argv[]) {
       case 'E':
 	expression = optarg;
 	break;
+
+      case 'r':
+        resume_psrsh = true;
+        break;
 
       case 'h':
       default:
@@ -268,6 +277,15 @@ int main(int argc, char *argv[]) {
   double bw = arch->get_bandwidth();
   string output_filename = replace_extension(filename, output_ext);
   string psrsh_filename = replace_extension(filename,"psh");
+
+  if (resume_psrsh)
+  {
+    Reference::To<Pulsar::Interpreter> interpreter = standard_shell ();
+
+    interpreter->set( arch );
+    interpreter->script( psrsh_filename );
+    arch = interpreter->get ();
+  }
 
   // Create profile plots
   Reference::To<Archive> tot_arch=NULL,pf_arch=NULL,pt_arch=NULL;
@@ -665,14 +683,25 @@ int main(int argc, char *argv[]) {
     }
     
     // Generate PSRSH script
-    if (ch==CMD_PSRSH) {
-      FILE *file;
-      file=fopen(psrsh_filename.c_str(),"w");
-      fprintf(file,"#!/usr/bin/env psrsh\n\n# Run with psrsh -e <ext> <script>.psh <archive>.ar\n\n");
+    if (ch==CMD_PSRSH)
+    {
+      if ( resume_psrsh && resume_lines.size() == 0)
+        loadlines (psrsh_filename, resume_lines);
+ 
+      FILE *file = fopen (psrsh_filename.c_str(), "w");
+
+      fprintf (file,
+               "#!/usr/bin/env psrsh\n\n"
+               "# Run with psrsh -e <ext> <script>.psh <archive>.ar\n\n");
+
+      for (unsigned iline = 0; iline < resume_lines.size(); iline++)
+        fprintf (file, "%s\n", resume_lines[iline].c_str());
 
       // Full sub/chan zap
-      for (unsigned i=0; i<zap_list.size(); i++) {
-        if (zap_list[i].type == freq_cursor) {
+      for (unsigned i=0; i<zap_list.size(); i++)
+      {
+        if (zap_list[i].type == freq_cursor)
+        {
           int chan0 = freq2chan(arch, zap_list[i].freq0);
           int chan1 = freq2chan(arch, zap_list[i].freq1);
           if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
@@ -680,7 +709,9 @@ int main(int argc, char *argv[]) {
 	    fprintf(file,"zap chan %d\n",chan0);
           else 
 	    fprintf(file,"zap chan %d-%d\n", chan0, chan1);
-        } else if (zap_list[i].type == time_cursor) {
+        }
+        else if (zap_list[i].type == time_cursor)
+        {
           if (zap_list[i].sub0==zap_list[i].sub1) 
             fprintf(file,"zap subint %d\n", zap_list[i].sub0);
           else 
@@ -715,5 +746,12 @@ int main(int argc, char *argv[]) {
 
   } while (ch!=CMD_QUIT);
 
+  return 0;
+
+}
+catch (Error& error)
+{
+  cerr << "psrzap error: " << error << endl;
+  return -1;
 }
 
