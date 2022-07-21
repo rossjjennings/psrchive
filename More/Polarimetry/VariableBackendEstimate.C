@@ -94,6 +94,17 @@ void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
   BackendEstimate::set_response (vb->get_backend());
 }
 
+void VariableBackendEstimate::add_model (MEAL::Complex2* xform)
+{
+  psr_response->add_model (xform);
+
+  VariableBackend* vb = MEAL::extract<VariableBackend>( xform );
+  if (vb && cal_backend_only)
+    cal_response->add_model (vb);
+  else
+    cal_response->add_model (xform);
+}
+
 void VariableBackendEstimate::update ()
 {
 #if _DEBUG

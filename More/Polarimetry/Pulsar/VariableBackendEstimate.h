@@ -79,6 +79,9 @@ namespace Calibration
     //! Set the response that contains the backend
     void set_response (MEAL::Complex2* xform);
 
+    //! Multiply psr_response by xform and cal_response by backend
+    void add_model (MEAL::Complex2* xform);
+
     //! Get the response for pulsar observations
     IndexedProduct* get_psr_response () { return psr_response; }
 

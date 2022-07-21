@@ -456,10 +456,28 @@ void SignalPath::update () try
     if (response->get_infit (iparam))
     {
       for (unsigned i=0; i<backends.size(); i++)
+      {
+        if (backends[i]->get_backend()->get_infit (iparam))
+          throw Error (InvalidState, "SignalPath::update",
+                       "unexpected backend[%u].infit(%u) = true", i, iparam);
+
 	backends[i]->get_backend()->set_param ( iparam, identity[iparam] );
+      }
     }
     else
+    {
+      for (unsigned i=0; i<backends.size(); i++)
+      {
+        if (iparam == 0 && constant_pulsar_gain)
+          continue;
+
+        if (! backends[i]->get_backend()->get_infit (iparam))
+          throw Error (InvalidState, "SignalPath::update",
+                       "unexpected backend[%u].infit(%u) = false", i, iparam);
+
+      }
       response->set_param ( iparam, identity[iparam] );
+    }
   }
 }
 catch (Error& error)
@@ -654,7 +672,7 @@ void SignalPath::add_step (const MJD& mjd,
     backend = backend->clone();
     
     // ... then multiply by the instrument
-    backends[0]->get_psr_response()->add_model (instrument);
+    backends[0]->add_model (instrument);
 
     /* for each free parameter of backend, disable fit flags in the response
        (without enabling any flags that are already disabled) */
@@ -686,7 +704,7 @@ void SignalPath::add_step (const MJD& mjd,
 
   VariableBackendEstimate* middle = new_backend (xform);
   middle->set_start_time (mjd);
-  middle->get_psr_response()->add_model (instrument);
+  middle->add_model (instrument);
 
   // the element that will precede the new one to be inserted
   VariableBackendEstimate* before = backends[in_at];
