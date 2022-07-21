@@ -157,19 +157,21 @@ void apply_zap(Archive *arch, struct zap_range *z) {
 /* Extension for output file */
 string output_ext = "zap";
 
-void usage() {
-  cout << "psrzap - Interactive RFI zapper using off-pulse dynamic spectra" 
-    << endl
-    << "Usage:  psrzap (filename)" << endl
-    << "Command line options:" << endl
-    << "  -h     Show this help screen" << endl
-    << "  -v     Verbose mode" << endl
-    << "  -E exp Mathematical expression to evaluate for each pixel" << endl
-    << "  -e ext Extension for output file (default: " << output_ext 
-      << ")" << endl
-    << endl
-    << "  Press 'h' during program for interactive usage info:" << endl
-    << endl;
+void usage()
+{
+  cout << 
+    "psrzap - Interactive RFI zapper using off-pulse dynamic spectra \n" 
+    "\n"
+    "Usage:  psrzap (filename) \n"
+    "Command line options: \n"
+    "  -h     Show this help screen \n"
+    "  -v     Verbose mode \n"
+    "  -E exp Mathematical expression to evaluate for each pixel \n"
+    "  -e ext Extension for output file (default: " << output_ext << ")\n"
+    "  -r     Resume using last-saved psrsh script \n"
+    "  -R     Reconstruct psrsh script from zapped data \n"
+    "\n"
+    "  Press 'h' during program for interactive usage info: \n" << endl;
 }
 
 /* Interactive commands */
@@ -229,9 +231,11 @@ int main(int argc, char *argv[]) try
 
   string expression;
   bool resume_psrsh = false;
+  bool reconstruct_psrsh = false;
+
   vector<string> resume_lines;
 
-  while ((opt=getopt(argc,argv,"hve:E:r"))!=-1)
+  while ((opt=getopt(argc,argv,"hve:E:rR"))!=-1)
   {
     switch (opt)
     {
@@ -250,6 +254,10 @@ int main(int argc, char *argv[]) try
 
       case 'r':
         resume_psrsh = true;
+        break;
+
+      case 'R':
+        reconstruct_psrsh = true;
         break;
 
       case 'h':
@@ -278,7 +286,75 @@ int main(int argc, char *argv[]) try
   string output_filename = replace_extension(filename, output_ext);
   string psrsh_filename = replace_extension(filename,"psh");
 
-  if (resume_psrsh)
+  string psrsh_header =
+    "#!/usr/bin/env psrsh\n"
+    "\n"
+    "# Run with psrsh -e <ext> <script>.psh <archive>.ar\n"
+    "\n";
+
+  if (reconstruct_psrsh)
+  {
+    FILE *file = fopen (psrsh_filename.c_str(), "w");
+    fprintf (file, "%s\n", psrsh_header.c_str());
+
+    unsigned nsubint = arch->get_nsubint();
+    unsigned nchan = arch->get_nchan();
+
+    vector< vector<bool> > zapped (nsubint);
+    vector< unsigned > subint_zapped (nsubint, 0);
+    vector< unsigned > chan_zapped (nchan, 0);
+
+    for (unsigned isub=0; isub < nsubint; isub++)
+    {
+      Integration* subint = arch->get_Integration (isub);
+      zapped[isub].resize (nchan);
+
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+        zapped[isub][ichan] = subint->get_weight(ichan) == 0.0;
+        if (zapped[isub][ichan])
+        {
+          subint_zapped[isub] ++;
+          chan_zapped[ichan] ++;
+        }
+      }
+    }
+
+    for (unsigned isub=0; isub < nsubint; isub++)
+    {
+      // if this sub-integration has been zapped in every channel
+      if (subint_zapped[isub] == nchan)
+        fprintf (file, "zap subint %u\n", isub);
+    }
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      // if this channel has been zapped in every sub-integration
+      if (chan_zapped[ichan] == nsubint)
+        fprintf (file, "zap chan %u\n", ichan);
+    }
+
+    for (unsigned isub=0; isub < nsubint; isub++)
+    {
+      if (subint_zapped[isub] == nchan)
+        continue;
+
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+        if (chan_zapped[ichan] == nsubint)
+          continue;
+
+        if (zapped[isub][ichan])
+          fprintf (file, "zap such %u,%u\n", isub, ichan);
+      }
+    }
+
+    fclose (file);
+
+    if (!resume_psrsh)
+      return 0;
+  }
+  else if (resume_psrsh)
   {
     Reference::To<Pulsar::Interpreter> interpreter = standard_shell ();
 
@@ -689,10 +765,7 @@ int main(int argc, char *argv[]) try
         loadlines (psrsh_filename, resume_lines);
  
       FILE *file = fopen (psrsh_filename.c_str(), "w");
-
-      fprintf (file,
-               "#!/usr/bin/env psrsh\n\n"
-               "# Run with psrsh -e <ext> <script>.psh <archive>.ar\n\n");
+      fprintf (file, "%s\n", psrsh_header.c_str());
 
       for (unsigned iline = 0; iline < resume_lines.size(); iline++)
         fprintf (file, "%s\n", resume_lines[iline].c_str());
