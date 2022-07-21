@@ -52,7 +52,10 @@ namespace Pulsar {
     unsigned size() const;
 
     //! Change the size of the index array
-    void resize(unsigned i);
+    void resize (unsigned nsubint,
+                         unsigned npol  = 0,
+                         unsigned nchan = 0,
+                         unsigned nbin  = 0);
     
     //! Erase the specified index
     void erase (unsigned i);

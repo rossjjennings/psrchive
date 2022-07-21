@@ -47,9 +47,12 @@ std::string Pulsar::IntegrationOrder::get_Unit () const
   return Unit;
 }
 
-void Pulsar::IntegrationOrder::resize (unsigned i)
+void Pulsar::IntegrationOrder::resize (unsigned nsubint,
+                         unsigned npol,
+                         unsigned nchan,
+                         unsigned nbin)
 {
-  indices.resize(i);
+  indices.resize (nsubint);
 }
 
 unsigned Pulsar::IntegrationOrder::size () const
