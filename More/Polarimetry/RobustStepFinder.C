@@ -213,10 +213,15 @@ void RobustStepFinder::insert_steps ()
   if (psr_steps.size())
     insert_steps (psr_steps, backend);
 
-  // search for steps in differential phase only
-  compare.resize (2);
-  compare[0] = 2;
-  compare[1] = 3;
+  bool search_only_differential_phase = true;
+
+  if (search_only_differential_phase)
+  {
+    // search for steps in differential phase only
+    compare.resize (2);
+    compare[0] = 2;
+    compare[1] = 3;
+  }
 
   vector< ObsVector >& caldata = get_calibrator_data (calibrator);
 
@@ -247,10 +252,15 @@ void RobustStepFinder::insert_steps ()
   
   if (!cal_steps.size())
     return;
-  
-  // disable fits in gain and differential gain
-  backend->set_infit (0, false);
-  backend->set_infit (1, false);
+
+  bool fit_only_differential_phase = false;
+
+  if (fit_only_differential_phase)
+  {
+    // disable variations in gain and differential gain
+    backend->set_infit (0, false);
+    backend->set_infit (1, false);
+  }
 
   insert_steps (cal_steps, backend);
 }
@@ -664,6 +674,8 @@ void RobustStepFinder::insert_steps (vector<MJD>& steps, VariableBackend* xform)
 
   unsigned nchan = calibrator->get_nchan();
 
+  // construct a two-dimensional array of epochs (ichan, isubint)
+
   vector< vector<MJD> > mjds ( nchan, vector<MJD> (nsubint) );
   for (unsigned isub=0; isub < nsubint; isub++)
     for (unsigned jchan=0; jchan < psrdata[isub].size(); jchan++)
@@ -672,6 +684,7 @@ void RobustStepFinder::insert_steps (vector<MJD>& steps, VariableBackend* xform)
       mjds[ichan][isub] = psrdata[isub][jchan].get_epoch();
     }
 
+  // get_model returns SystemCalibrator::model
   Reference::Vector< SignalPath >& model = get_model (calibrator);
     
   for (unsigned ichan=0; ichan < nchan; ichan++)
@@ -696,7 +709,7 @@ void RobustStepFinder::insert_steps (vector<MJD>& steps, VariableBackend* xform)
       }
       else
       {
-	// igore steps with no preceding obs
+	// ignore steps with no preceding obs
 	if (nbefore)
 	  model[ichan]->add_step (steps[istep], xform->clone());
 
