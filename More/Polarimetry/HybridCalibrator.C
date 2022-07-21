@@ -99,19 +99,43 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 }
 
 
-unsigned Pulsar::HybridCalibrator::get_maximum_nchan () const
+unsigned Pulsar::HybridCalibrator::get_maximum_nchan () const try
 {
+  unsigned maximum_nchan = 0;
+
   if (precalibrator)
-    return precalibrator->get_nchan();
+    maximum_nchan = precalibrator->get_nchan();
+
+  if (maximum_nchan != 0)
+    return maximum_nchan;
 
   if (reference_observation)
-    return reference_observation->get_nchan();
+    maximum_nchan = reference_observation->get_nchan();
+
+  if (maximum_nchan != 0)
+    return maximum_nchan;
 
   if (reference_input)
     return reference_input->get_nchan();
 
   throw Error (InvalidState, "Pulsar::HybridCalibrator::maximum_nchan",
 	       "none of the required data have been added");
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::HybridCalibrator::get_maximum_nchan";
+}
+
+unsigned Pulsar::HybridCalibrator::get_nchan () const try
+{
+  if (transformation.size() != 0)
+    return transformation.size();
+
+  return get_maximum_nchan ();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::HybridCalibrator::get_nchan";
 }
 
 //! Return the Stokes parameters of the ichan'th target channel
@@ -188,7 +212,7 @@ get_xform (const Pulsar::PolnCalibrator* response,
   
 Jones<double> get_response (const Pulsar::PolnCalibrator* response,
 			    const unsigned ichan, unsigned target_nchan,
-			    bool backend_only = false)
+			    bool backend_only = false) try
 {
   const unsigned have_nchan = response->get_nchan();
   const unsigned factor = have_nchan / target_nchan;
@@ -239,6 +263,10 @@ Jones<double> get_response (const Pulsar::PolnCalibrator* response,
 
   return mean.get_mean ();
 }
+catch (Error& error)
+{
+  throw error += "Jones<double> get_response";
+}
 
 template<typename T>
 Jones<T> val (const Jones< Estimate<T> >& J)
@@ -260,7 +288,7 @@ Jones<T> val (const Jones< Estimate<T> >& J)
   reference observation.
 
 */
-bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
+bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const try
 {
   bool valid = true;
 
@@ -314,8 +342,12 @@ bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
 
   return valid && PolnCalibrator::get_valid (ichan);
 }
+catch (Error& error)
+{ 
+  throw error += "Pulsar::HybridCalibrator::get_valid";
+}
 
-void Pulsar::HybridCalibrator::calculate_transformation ()
+void Pulsar::HybridCalibrator::calculate_transformation () try
 {
   if (!reference_input)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation\n"
@@ -480,5 +512,9 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
   if (verbose > 2)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation exit" << endl;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::HybridCalibrator::calculate_transformation";
 }
 

@@ -29,14 +29,16 @@ void Pulsar::CalibratorExtension::build (const Calibrator* calibrator)
     const Integration* subint = calibrator->get_Archive()->get_Integration(0);
 
     unsigned nchan = get_nchan();
-    for (unsigned ichan=0; ichan < nchan; ichan++) {
-      weight[ichan] = subint->get_weight(ichan);
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      weight[ichan] = calibrator->get_weight(ichan);
       centre_frequency[ichan] = subint->get_centre_frequency(ichan);
     }
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::CalibratorExtension (Calibrator*)";
   }
-
 }
+

@@ -221,6 +221,14 @@ void Pulsar::Archive::add_extension (Extension* ext)
   text_interface = NULL;
 }
 
+//! Reverse the order of frequency channels
+void Pulsar::Archive::reverse_chan ()
+{
+  unsigned nsubint = get_nsubint();
+  for (unsigned isubint=0; isubint < nsubint; isubint++)
+    get_Integration(isubint)->reverse_chan ();
+}
+
 /* Unless a Receiver Extension is present, this method assumes that the
    signal basis is linear. */
 Signal::Basis Pulsar::Archive::get_basis () const

@@ -911,25 +911,10 @@ int main (int argc, char *argv[]) try {
         arch->set_bandwidth(-1.0 * arch->get_bandwidth());
       }
 
-      if( reverse_freqs ) {
-	// Of course it would be nice to do this with pointers.... but oh well I guess copying will have to do HSK 27/8/04
-
-	unsigned nchan = arch->get_nchan();
-
-	for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
-	  for( unsigned ipol =0; ipol<arch->get_npol(); ipol++){
-	    for( unsigned ichan=0; ichan<nchan/2; ichan++){
-	      Reference::To<Pulsar::Profile> lo = arch->get_Profile(isub,ipol,ichan);	      
-	      Reference::To<Pulsar::Profile> tmp = lo->clone();
-
-	      Reference::To<Pulsar::Profile> hi = arch->get_Profile(isub,ipol,nchan-1-ichan);
-
-	      lo->operator=(*hi);
-	      hi->operator=(*tmp);
-	    }
-	  }
-	}
-	arch->set_bandwidth( -1.0 * arch->get_bandwidth() );
+      if( reverse_freqs )
+      {
+	arch->reverse_chan ();
+        arch->set_bandwidth( -1.0 * arch->get_bandwidth() );
       }
 
       if (reset_weights) {

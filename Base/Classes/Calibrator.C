@@ -54,13 +54,21 @@ Pulsar::Calibrator::det_threshold
  "no check is performed."
 );
 
+static unsigned instance_count = 0;
+
+unsigned Pulsar::Calibrator::get_instance_count ()
+{
+  return instance_count;
+}
 
 Pulsar::Calibrator::Calibrator ()
 {
+  instance_count ++;
 }
 
 Pulsar::Calibrator::~Calibrator ()
 {
+  instance_count --;
 }
 
 const Pulsar::Calibrator::Type* Pulsar::Calibrator::get_type () const
@@ -84,6 +92,12 @@ bool Pulsar::Calibrator::has_calibrator () const
 const Pulsar::Archive* Pulsar::Calibrator::get_calibrator () const
 {
   return calibrator;
+}
+
+//! Provide derived classes with mutable access to the calibrator
+Pulsar::Archive* Pulsar::Calibrator::get_calibrator ()
+{
+  return const_cast<Pulsar::Archive*> (calibrator.get());
 }
 
 //! Provide derived classes with access to the calibrator

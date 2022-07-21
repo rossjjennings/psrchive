@@ -230,7 +230,7 @@ unsigned Pulsar::PolnCalibrator::get_maximum_nchan () const
 
 
 //! Get the number of frequency channels in the calibrator
-unsigned Pulsar::PolnCalibrator::get_nchan () const
+unsigned Pulsar::PolnCalibrator::get_nchan () const try
 {
   if (transformation.size() == 0)
     setup_transformation();
@@ -241,9 +241,13 @@ unsigned Pulsar::PolnCalibrator::get_nchan () const
 
   return transformation.size();
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::get_nchan";
+}
 
 //! Return the system response for the specified channel
-bool Pulsar::PolnCalibrator::get_transformation_valid (unsigned ichan) const
+bool Pulsar::PolnCalibrator::get_transformation_valid (unsigned ichan) const try
 {
   if (transformation.size() == 0)
     setup_transformation();
@@ -255,9 +259,13 @@ bool Pulsar::PolnCalibrator::get_transformation_valid (unsigned ichan) const
 
   return transformation[ichan];
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::get_transformation_valid";
+}
 
 //! Return the system response for the specified channel
-void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan)
+void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan) try
 {
   if (transformation.size() == 0)
     setup_transformation();
@@ -270,10 +278,14 @@ void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan)
   transformation[ichan] = 0;
 
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::set_transformation_invalid";
+}
 
 //! Return the system response for the specified channel
 const ::MEAL::Complex2*
-Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
+Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const try
 {
   if (transformation.size() == 0)
     setup_transformation();
@@ -283,11 +295,15 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   return transformation[ichan];
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::get_transformation const";
 }
 
 //! Return the system response for the specified channel
 MEAL::Complex2*
-Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
+Pulsar::PolnCalibrator::get_transformation (unsigned ichan) try
 {
   if (transformation.size() == 0)
     setup_transformation();
@@ -298,14 +314,22 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 
   return transformation[ichan];
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::get_transformation";
+}
 
 //! Return true if parameter covariances are stored
-bool Pulsar::PolnCalibrator::has_covariance () const
+bool Pulsar::PolnCalibrator::has_covariance () const try
 {
   if (transformation.size() == 0)
     setup_transformation();
 
   return (covariance.size() == get_nchan());
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::has_covariance";
 }
 
 //! Return the covariance matrix vector for the specified channel
@@ -620,7 +644,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
   if (!transformation_built)
   {
     if (verbose > 2)
-      cerr << "Pulsar::PolnCalibrator::build setup transformation" << endl;
+      cerr << "Pulsar::PolnCalibrator::build setup transformation nchan=" << nchan << endl;
 
     observation_nchan = nchan;
     setup_transformation();
@@ -766,6 +790,11 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 catch (Error& error)
 {
   throw error += "Pulsar::PolnCalibrator::build";
+}
+
+float Pulsar::PolnCalibrator::get_weight (unsigned ichan) const
+{
+  return (get_valid(ichan)) ? 1.0 : 0.0;
 }
 
 //! Return true if the response for the specified channel is valid

@@ -903,8 +903,8 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
     MJD epoch = integration->get_epoch();
 
     if (verbose)
-      cerr << "SystemCalibrator::add_calibrator"
-	" outlier_threshold=" << cal_outlier_threshold << endl;
+      cerr << "SystemCalibrator::add_calibrator nchan=" << nchan
+	<< " outlier_threshold=" << cal_outlier_threshold << endl;
     
     ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
 				     cal_outlier_threshold);

@@ -36,6 +36,7 @@ void usage ()
     "                        be placed in name/*.session \n"
     " -f frequency           print the band designation for the frequency \n"
     " -j                     join bands (divide only in time) \n"
+    " -n                     join sources (e.g. HYDRA_[ONS]) \n"
     "\n"
     " -T hours               time between sessions \n"
     " -S secs                seconds between sessions \n"
@@ -93,13 +94,16 @@ int main (int argc, char** argv)
 
   // by default, different centre frequencies in different sessions
   bool divide_frequencies = true;
-  
+
+  // by default, different sources in different sessions
+  bool divide_sources = true;
+
   bool verbose = false;
   bool vverbose = false;
   
   double frequency = 0.0;
   
-  const char* args = "hb:f:jLS:T:vV";
+  const char* args = "hb:f:jLnS:T:vV";
   int c = 0;
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -119,6 +123,11 @@ int main (int argc, char** argv)
     case 'j':
       divide_frequencies = false;
       Pulsar::ArchiveSort::compare_frequencies = false;
+      break;
+
+    case 'n':
+      divide_sources = false;
+      Pulsar::ArchiveSort::compare_sources = false;
       break;
       
     case 'L':
@@ -147,6 +156,7 @@ int main (int argc, char** argv)
 
     default:
       cerr << "invalid param '" << char(c) << "'" << endl;
+      return -1;
     }
 
   if (frequency > 0)

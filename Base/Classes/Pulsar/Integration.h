@@ -419,6 +419,9 @@ namespace Pulsar {
     //! Remove an inclusive channel range from this Integration
     virtual void remove (unsigned ichan_first, unsigned ichan_last);
 
+    //! Reverse the order of frequency channels
+    void reverse_chan ();
+
     //@}
 
     friend class Archive;

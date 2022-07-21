@@ -8,8 +8,8 @@
 #include "Pulsar/FluxCalibratorPolicy.h"
 #include "templates.h"
 
-#include <iostream>
-using namespace std;
+// #define _DEBUG 1
+#include "debug.h"
 
 using Pulsar::FluxCalibrator;
 
@@ -30,12 +30,14 @@ void FluxCalibrator::Policy::set ( const std::vector< Estimate<double> >& s,
 
 void FluxCalibrator::Policy::get ( std::vector< Estimate<double> >& s,
 				   std::vector< Estimate<double> >& c ) const
-try {
+try
+{
   calculate();
   s = S_sys;
   c = S_cal;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   s = S_sys;
   c = S_cal;
   throw error += "Pulsar::FluxCalibrator::Policy::get";
@@ -52,6 +54,23 @@ void Pulsar::FluxCalibrator::Policy::set_nreceptor (unsigned nreceptor)
 unsigned Pulsar::FluxCalibrator::Policy::get_nreceptor () const
 {
   return S_sys.size();
+}
+
+bool Pulsar::FluxCalibrator::Policy::get_solution_available () const try
+{
+  if (!valid)
+    return false;
+
+  if (!calculated)
+    calculate ();
+
+  return true;
+}
+catch (Error& error)
+{
+  DEBUG("FluxCalibrator::Policy::get_solution_available " << error.get_message ());
+  valid = false;
+  return false;
 }
 
 //! Return the sum of all elements in a container

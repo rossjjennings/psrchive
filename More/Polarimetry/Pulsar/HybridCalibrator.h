@@ -23,7 +23,8 @@ namespace Pulsar {
   class CalibratorStokes;
 
   //! Supplements a SystemCalibrator with a SingleAxisCalibrator
-  class HybridCalibrator : public PolnCalibrator {
+  class HybridCalibrator : public PolnCalibrator 
+  {
     
   public:
 
@@ -38,6 +39,9 @@ namespace Pulsar {
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
+
+    //! Get the number of frequency channels in the calibrator
+    unsigned get_nchan () const;
 
     //! Set the Stokes parameters of the reference signal
     void set_reference_input (const CalibratorStokes* reference, 

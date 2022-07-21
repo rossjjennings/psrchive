@@ -20,6 +20,8 @@
 #include "typeutil.h"
 #include "debug.h"
 
+#include <algorithm>
+
 using namespace std;
 
 bool Pulsar::Integration::verbose = false;
@@ -609,6 +611,14 @@ void Pulsar::Integration::swap_profiles (unsigned ipol, unsigned ichan,
   Reference::To<Profile> temp = profiles[ipol][ichan];
   profiles[ipol][ichan] = profiles[jpol][jchan];
   profiles[jpol][jchan] = temp;
+}
+
+//! Reverse the order of frequency channels for each polarization
+void Pulsar::Integration::reverse_chan ()
+{
+  unsigned npol = get_npol();
+  for (unsigned ipol=0; ipol < npol; ipol++)
+    std::reverse (profiles[ipol].begin(), profiles[ipol].end());
 }
 
 void Pulsar::Integration::update_nbin ()

@@ -58,6 +58,9 @@ namespace Pulsar
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const { return 0; }
 
+    //! Get the weight of any channel
+    float get_weight (unsigned) const { return 1.0; }
+
     //! Returns a new CalibratorExtension
     CalibratorExtension* new_Extension () const { return 0; }
 

@@ -112,15 +112,26 @@ string Pulsar::FluxCalibrator::get_standard_candle_info () const
   return standard_candle_info;
 }
 
-double Pulsar::FluxCalibrator::meanTsys ()
+double Pulsar::FluxCalibrator::meanTsys () try
 {
   MeanEstimate<double> mean;
+
+  unsigned invalid_count = 0;
 
   for (unsigned i = 0; i < data.size(); i++)
     if (get_valid(i))
       mean += data[i]->get_S_sys ();
-  
+    else
+      invalid_count ++;
+
+  if (invalid_count && verbose)
+    cerr << "Pulsar::FluxCalibrator::meanTsys " << invalid_count << " invalid channels out of " << data.size() << endl; 
+
   return mean.get_Estimate().val;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::FluxCalibrator::meanTsys";
 }
 
 void Pulsar::FluxCalibrator::data_range_check (unsigned ichan, 
@@ -142,7 +153,7 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
 }
 
 //! Print all the fluxcal info in simple ascii columns
-void Pulsar::FluxCalibrator::print (std::ostream& os)
+void Pulsar::FluxCalibrator::print (std::ostream& os) try
 {
   if (!has_calibrator())
     throw Error (InvalidState, "Pulsar::FluxCalibrator::print",
@@ -163,6 +174,10 @@ void Pulsar::FluxCalibrator::print (std::ostream& os)
     os << std::endl;
   }
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::FluxCalibrator::print";
+}
 
 //! Return an estimate of the artificial cal Stokes parameters
 /*! This method uses the flux cal measurement to determine 
@@ -173,7 +188,7 @@ void Pulsar::FluxCalibrator::print (std::ostream& os)
  * but may have unequal power in the two sides.
  */
 const Pulsar::CalibratorStokes*
-Pulsar::FluxCalibrator::get_CalibratorStokes () const
+Pulsar::FluxCalibrator::get_CalibratorStokes () const try
 {
   if (calibrator_stokes)
     return calibrator_stokes;
@@ -272,9 +287,18 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const
 
   return calibrator_stokes;
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::FluxCalibrator::get_CalibratorStokes";
+}
+
+float Pulsar::FluxCalibrator::get_weight (unsigned ichan) const
+{
+  return (get_valid(ichan)) ? 1.0 : 0.0;
+}
 
 //! Return true if the flux scale for the specified channel is valid
-bool Pulsar::FluxCalibrator::get_valid (unsigned ch) const
+bool Pulsar::FluxCalibrator::get_valid (unsigned ch) const try
 {
   if (ch >= data.size())
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::get_valid",
@@ -283,7 +307,11 @@ bool Pulsar::FluxCalibrator::get_valid (unsigned ch) const
   if (!data[ch])
     return false;
   else
-    return data[ch]->get_valid();
+    return data[ch]->get_solution_available();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::FluxCalibrator::get_valid";
 }
 
 //! Set the flux scale invalid flag for the specified channel
@@ -292,6 +320,9 @@ void Pulsar::FluxCalibrator::set_invalid (unsigned ch)
   if (ch >= data.size())
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::set_invalid",
                  "ichan=%u >= size=%u", ch, data.size());
+
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::set_invalid ichan=" << ch << endl;
 
   if (data[ch])
     data[ch]->set_valid (false);
@@ -310,18 +341,21 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   if ( archive->get_type() != Signal::FluxCalOn &&
        archive->get_type() != Signal::FluxCalOff )
-
+  {
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
 		 "Pulsar::Archive='" + archive->get_filename() + "'"
 		 "is not a FluxCal");
+  }
 
   string reason;
   if (has_calibrator() &&
       !(get_calibrator()->calibrator_match (archive, reason) &&
 	get_calibrator()->processing_match (archive, reason)))
+  {
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
 		 "mismatch between\n\t" + get_calibrator()->get_filename() +
                  " and\n\t" + archive->get_filename() + reason);
+  }
 
   unsigned nchan = archive->get_nchan ();
   unsigned nreceptor = (archive->get_npol() == 1) ? 1 : 2;
@@ -485,6 +519,9 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
     unsigned nchan = flux_extension->get_nchan();
     data.resize( nchan );
 
+    if (verbose)
+      cerr << "FluxCalibrator::create extension nchan=" << nchan << endl;
+
     if (flux_extension->has_scale())
     {
       if (verbose > 2)
@@ -556,6 +593,9 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
     gain[ichan] = 0;
   }
 
+  if (verbose)
+    cerr << "FluxCalibrator::create success in " << successful << " channels" << endl;
+
   if (!successful)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
 		 "failed in all %u channels", nchan);
@@ -567,6 +607,9 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
 void Pulsar::FluxCalibrator::resize (unsigned nchan, unsigned nreceptor)
 {
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::resize nchan=" << nchan << " nreceptor=" << nreceptor << endl;
+
   data.resize( nchan );
   for (unsigned i=0; i < nchan; i++)
   {
@@ -579,11 +622,14 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 {
   unsigned nchan = gain.size();
 
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::resize nchan=" << nchan << " required nchan=" << required_nchan << endl;
+
   if (nchan == required_nchan)
     return;
 
-  if (required_nchan < nchan)  {
-
+  if (required_nchan < nchan)
+  {
     unsigned nscrunch = nchan / required_nchan;
   
     if (verbose > 2)
@@ -592,10 +638,9 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 	     << " nscrunch=" << nscrunch << endl;
 
     scrunch (gain, nscrunch, true);
-
   }
-  else {
-
+  else
+  {
     if (verbose > 2)
         cerr << "Pulsar::FluxCalibrator::resize required nchan="
              << required_nchan << " > nchan=" << nchan 
@@ -604,7 +649,6 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
     vector<float> temp (required_nchan);
     fft::interpolate (temp, gain);
     gain = temp;
-
   }
 }
 

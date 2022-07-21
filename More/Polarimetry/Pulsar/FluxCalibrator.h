@@ -88,6 +88,9 @@ namespace Pulsar {
     //! Return true if the flux scale for the specified channel is valid
     bool get_valid (unsigned ch) const;
 
+    //! Return the weight (0 or 1) associated with the specified channel
+    float get_weight (unsigned ichan) const;
+
     //! Set the flux scale invalid flag for the specified channel
     void set_invalid (unsigned ch);
 
