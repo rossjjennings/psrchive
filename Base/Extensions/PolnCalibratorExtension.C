@@ -358,6 +358,14 @@ void PolnCalibratorExtension::Transformation::set_nfit (unsigned n)
   nfit = n;
 }
 
+double PolnCalibratorExtension::Transformation::get_reduced_chisq () const
+{
+  if (nfree > 0)
+    return chisq / nfree;
+  else
+    return 0.0;
+}
+
 //! Get the covariance matrix of the model paramters
 vector< vector<double> >
 PolnCalibratorExtension::Transformation::get_covariance () const

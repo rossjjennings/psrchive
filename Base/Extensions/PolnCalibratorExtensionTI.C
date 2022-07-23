@@ -63,4 +63,8 @@ Pulsar::PolnCalibratorExtension::Transformation::Interface::Interface ()
    add( &Transformation::get_nfit,
 	&Transformation::set_nfit,
 	"nfit", "Number of model parameters varied" );
+
+   add( &Transformation::get_reduced_chisq,
+        "gof", "Reduced chi squared" );
 }
+

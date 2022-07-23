@@ -194,6 +194,9 @@ namespace Pulsar {
     //! Set the number of model parameters varied to find best fit
     void set_nfit (unsigned);
 
+    //! Get the best fit value of the reduced chi squared = chisq/nfree
+    double get_reduced_chisq () const;
+
     // Text interface to a PolnCalibratorExtension instance
     class Interface : public TextInterface::To<Transformation>
     {
