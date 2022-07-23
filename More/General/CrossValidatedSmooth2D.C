@@ -42,6 +42,9 @@ void CrossValidatedSmooth2D::remove_iqr_outliers
 ( vector< pair<double,double> >& dat_x,
   vector< Estimate<double> >& dat_y )
 {
+  if (iqr_threshold <= 0)
+    return;
+
   unsigned ndat = dat_x.size();
   assert (ndat == dat_y.size());
 

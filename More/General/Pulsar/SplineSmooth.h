@@ -120,7 +120,27 @@ namespace Pulsar {
     void set_gof_filename (const std::string& name) { gof_filename = name; }
     
     void set_spline (SplineSmooth2D* _spline) { spline = _spline; }
-  
+
+    //! Set the number of cross-validation iterations, m
+    /*! m=40 in Clark (1977) ... m=5 by default */
+    void set_npartition (unsigned m) { npartition = m; }
+    unsigned get_npartition () const { return npartition; }
+
+    //! Set the fraction of data reserved for validation
+    /*! f=0.1 in Clark (1977) ... f=0.2 by default */
+    void set_validation_fraction (double f) { validation_fraction = f; }
+    double get_validation_fraction () const { return validation_fraction; }
+
+    //! Set the multiple of IQR used to implement Tukey's fence outlier detection
+    /*! t=2.0 by default ... set to 0 to disable */
+    void set_iqr_threshold (double t) { iqr_threshold = t; }
+    double get_iqr_threshold () const { return iqr_threshold; }
+
+    //! Set the goodness-of-fit step threshold
+    /*! s=1.5 by default ... set to 0 to disable */
+    void set_gof_step_threshold (double s) { gof_step_threshold = s; }
+    double get_gof_step_threshold () const { return gof_step_threshold; }
+
     //! Fit spline to data using current configuration
     void fit ( std::vector< std::pair<double,double> >& data_x,
 	       std::vector< Estimate<double> >& data_y );

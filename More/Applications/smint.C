@@ -99,15 +99,14 @@ protected:
   bool minimize_tmse;
 
   // determine smoothing by m-fold cross-validation
+  bool cross_validate;
+
   CrossValidatedSmoothing* cross_validated_smoothing;
 
 #if HAVE_SPLINTER
   CrossValidatedSmooth2D* cross_validated_smoothing_2D;
 #endif
-  
-  void setup_cross_validation ();
-  bool cross_validate;
-  
+
   bool unload_solution;
   bool unload_smoothed;
   
@@ -300,27 +299,16 @@ smint::smint ()
   interpolate = true;
 
   cross_validate = false;
-  cross_validated_smoothing = 0;
+  cross_validated_smoothing = new CrossValidatedSmoothing;
 
 #if HAVE_SPLINTER
-  cross_validated_smoothing_2D = 0;
+  cross_validated_smoothing_2D = new CrossValidatedSmooth2D;
 #endif
   
   bootstrap_uncertainty = false;
 
   unload_solution = true;
   unload_smoothed = false;
-}
-
-void smint::setup_cross_validation ()
-{
-  cross_validated_smoothing = new CrossValidatedSmoothing;
-
-#if HAVE_SPLINTER
-  cross_validated_smoothing_2D = new CrossValidatedSmooth2D;
-#endif
-
-  cross_validate = true;
 }
 
 /*!
@@ -365,8 +353,28 @@ void smint::add_options (CommandLine::Menu& menu)
   arg = menu.add (find_median_nfree, "mnf");
   arg->set_help ("compute p-spline smoothing using median nfree");
 
-  arg = menu.add (this, &smint::setup_cross_validation, "cross");
+  arg = menu.add (cross_validate, "cross");
   arg->set_help ("compute p-spline smoothing using m-fold cross-validation");
+
+#if HAVE_SPLINTER
+
+  arg = menu.add (cross_validated_smoothing_2D, &CrossValidatedSmooth2D::set_npartition, "cross-m");
+  arg->set_help ("number of cross-validation partitions/iterations, m"
+                 " (default: " + tostring(cross_validated_smoothing_2D->get_npartition()) + ")");
+
+  arg = menu.add (cross_validated_smoothing_2D, &CrossValidatedSmooth2D::set_validation_fraction, "cross-f");
+  arg->set_help ("fraction of data used to validate on each iteration"
+                 " (default: " + tostring(cross_validated_smoothing_2D->get_validation_fraction ()) + ")");
+
+  arg = menu.add (cross_validated_smoothing_2D, &CrossValidatedSmooth2D::set_iqr_threshold, "cross-iqr");
+  arg->set_help ("inter-quartile range threshold"
+                 " (default: " + tostring(cross_validated_smoothing_2D->get_iqr_threshold ()) + ")");
+
+  arg = menu.add (cross_validated_smoothing_2D, &CrossValidatedSmooth2D::set_gof_step_threshold, "cross-gof");
+  arg->set_help ("step in goodness-of-fit threshold"
+                 " (default: " + tostring(cross_validated_smoothing_2D->get_gof_step_threshold ()) + ")");
+
+#endif
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Iterative outlier excision options:");
@@ -1164,7 +1172,7 @@ void smint::fit_pspline (SmoothingSpline& spline,
   if (minimize_tmse)
     spline.set_msre (1.0);
 
-  if (cross_validated_smoothing)
+  if (cross_validate)
   {
     cross_validated_smoothing->set_spline (&spline);
     cross_validated_smoothing->fit (data_x, data_y);
@@ -1432,14 +1440,14 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     result->add_parameter (param);
   }
   
-  if (cross_validated_smoothing_2D)
+  if (cross_validate)
   {
     if (spline_filename != "")
     {
       string filename = spline_filename + ".gof";
       cross_validated_smoothing_2D->set_gof_filename (filename);
     }
-    
+
     cross_validated_smoothing_2D->set_spline (&spline);
     cross_validated_smoothing_2D->fit (data_x, data_y);
 
