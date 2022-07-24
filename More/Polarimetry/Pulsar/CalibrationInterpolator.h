@@ -26,18 +26,34 @@ namespace Pulsar {
   //! A calibration solution that spans a finite bandwidth and time
   class CalibrationInterpolator : public Calibrator::Variation
   {
-    
+    //! Construct from an Archive with a CalibrationInterpolatorExtension
+    void construct (Archive*);
+ 
   public:
 
     //! Construct from a calibrator with a CalibrationInterpolatorExtension
     CalibrationInterpolator (Calibrator*);
 
+    //! Construct from an Archive with a CalibrationInterpolatorExtension
+    CalibrationInterpolator (Archive*);
+
     //! Destructor
     ~CalibrationInterpolator ();
 
-    //! Update the model parameters to match the integration
+    //! Get the extension from which this object was constructed
+    const CalibrationInterpolatorExtension* get_extension();
+
+    //! Get the type of the calibrator
+    const Calibrator::Type* get_type () const;
+
+    //! Update the model parameters to match the Integration
+    bool update (const Integration* subint)
+    { return update<Integration>(subint); }
+
+    //! Update the model parameters to match the container
     /*! Returns true if transformation should be recomputed */
-    bool update (const Integration*);
+    template<class Container>
+    bool update (const Container*);
     
   protected:
 
@@ -58,7 +74,22 @@ namespace Pulsar {
     std::map< unsigned, Reference::To<SplineSmooth2D> > fluxcal_splines;
 
     MJD last_computed;
+
+    //! Performs the work for the template update method
+    bool update (const MJD& epoch, const std::vector<double>& freqs);
   };
+
+  template<class Container>
+  bool CalibrationInterpolator::update (const Container* container)
+  {
+    unsigned nchan = container->get_nchan();
+    std::vector<double> frequency (nchan);
+  
+    for (unsigned ichan=0; ichan<nchan; ++ichan)
+      frequency[ichan] = container->get_centre_frequency (ichan);
+  
+    return update (container->get_epoch (), frequency);
+  }
 
 }
 

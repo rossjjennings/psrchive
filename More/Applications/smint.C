@@ -23,6 +23,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+
+#include "Pulsar/CalibrationInterpolator.h"
 #include "Pulsar/CalibrationInterpolatorExtension.h"
 #include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -269,9 +271,22 @@ protected:
   void load_previous_solution (const string& filename);
 
   Reference::To<Archive> previous_solution;
-  Reference::To<CalibrationInterpolatorExtension> previous_ext;
+  Reference::To<CalibrationInterpolator> previous_interpolator;
 
   void compare (const Archive*);
+
+  template<class Container>
+  void compare (const Archive* arch, const char* name);
+
+  template<class Container>
+  void compare_data (const Container* ext, const Container* prev);
+
+  template <class Extension>
+  void update (const Extension* ext)
+  { previous_interpolator->update (ext); }
+
+  // no update required - CalibratorStokes depends on PolnCalibratorExtension
+  void update (const CalibratorStokes* ext) { }
 
 #endif
 
@@ -1720,45 +1735,71 @@ void smint::plot_model (SplineSmooth2D& spline, double x0,
 
 #endif  // HAVE_PGPLOT
 
-void smint::load_previous_solution (const string& filename)
+void smint::load_previous_solution (const string& filename) try
 {
   previous_solution = Pulsar::Archive::load (filename);
+  previous_interpolator = new CalibrationInterpolator (previous_solution);
+}
+catch (Error& error)
+{
+  throw error += "smint::load_previous_solution";
+}
 
-  previous_ext = previous_solution->get<CalibrationInterpolatorExtension> ();
+template <class Extension>
+void smint::compare (const Archive* arch, const char* name)
+{
+  const Extension* ext = arch->get<Extension>();
+  if (!ext)
+    throw Error (InvalidState, "smint::compare", 
+                 arch->get_filename()
+                 + " does not have " + name);
 
-  if (!previous_ext)
-    throw Error (InvalidState, "smint::load_previous_solution", filename 
-                 + " does not contain a CalibrationInterpolatorExtension");
+  this->update (ext);
+
+  const Extension* prev = previous_solution->get<Extension>();
+  if (!prev)
+    throw Error (InvalidState, "smint::compare", 
+                 previous_solution->get_filename()
+                 + " does not have " + name);
+
+  cerr << "compare " << name << " of " << arch->get_filename () << " with "
+       << previous_solution->get_filename () << endl;
+    
+  compare_data (ext, prev);
 }
 
 void smint::compare (const Archive* arch)
 {
-  if (previous_ext->get_type()->is_a<CalibratorTypes::Flux>())
+  if (previous_interpolator->get_type()->is_a<CalibratorTypes::Flux>())
   {
-    const FluxCalibratorExtension* ext;
-    ext = arch->get<FluxCalibratorExtension>();
-    if (!ext)
-      throw Error (InvalidState, "smint", arch->get_filename()
-                   + " does not have FluxCalibratorExtension");
-
-    cerr << "compare flux " << arch->get_filename () << " with "
-         << previous_solution->get_filename () << endl;
+    compare<FluxCalibratorExtension> (arch, "FluxCalibratorExtension");
   }
   else
   {
-    const PolnCalibratorExtension* ext;
-    ext = arch->get<PolnCalibratorExtension>();
-    if (!ext)
-      throw Error (InvalidState, "smint", arch->get_filename()
-                   + " does not have PolnCalibratorExtension");
-
-    cerr << "compare poln " << arch->get_filename () << " with "
-         << previous_solution->get_filename () << endl;
-
-    return;
+    compare<PolnCalibratorExtension> (arch, "PolnCalibratorExtension");
+    compare<CalibratorStokes> (arch, "CalibratorStokes");
   }
 }
 
+template<class Container>
+void smint::compare_data (const Container* ext, const Container* prev)
+{
+  unsigned nchan = ext->get_nchan();
+  unsigned nparam = ext->get_nparam();
+
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+  {
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      Estimate<float> val (0.0, 0.0);
+
+      if (ext->get_valid(ichan))
+        val = ext->get_Estimate (iparam, ichan);
+
+    }
+  }
+}
 
 /*!
 

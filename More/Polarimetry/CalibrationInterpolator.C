@@ -34,8 +34,16 @@ using namespace Pulsar;
 CalibrationInterpolator::CalibrationInterpolator (Calibrator* cal)
 {
   // This class works by inserting new extensions into the archive
-  Reference::To<Archive> data = const_cast<Archive*>( cal->get_Archive() );
-  
+  construct ( const_cast<Archive*>( cal->get_Archive() ) );
+}
+
+CalibrationInterpolator::CalibrationInterpolator (Archive* archive)
+{
+  construct ( archive );
+}
+
+void CalibrationInterpolator::construct (Archive* data)
+{
   interpolator = data->get<CalibrationInterpolatorExtension> ();
   if (!interpolator)
     throw Error (InvalidParam, "CalibrationInterpolator ctor",
@@ -108,6 +116,19 @@ CalibrationInterpolator::~CalibrationInterpolator ()
 {
 }
 
+//! Get the extension from which this object was constructed
+const CalibrationInterpolatorExtension* 
+CalibrationInterpolator::get_extension()
+{
+  return interpolator;
+}
+
+//! Get the type of the calibrator
+const Calibrator::Type* CalibrationInterpolator::get_type () const
+{
+  return interpolator->get_type ();
+}
+
 template<typename C>
 void set_params (C* container,
 		 std::map< unsigned, Reference::To<SplineSmooth2D> >& params,
@@ -136,16 +157,15 @@ void set_params (C* container,
     container->set_Estimate (iparam, ichan, estimate);
   }
 }
-	  
-bool CalibrationInterpolator::update (const Integration* subint)
+
+bool CalibrationInterpolator::update (const MJD& epoch, 
+                                      const vector<double>& frequency)
 {
   DEBUG("CalibrationInterpolator::update");
   
   /*
     update the feedpar and calpoln attributes
   */
-
-  MJD epoch = subint->get_epoch ();
 
   double interval = (epoch - last_computed).in_days();
   if (fabs (interval) < 1.0)
@@ -161,13 +181,13 @@ bool CalibrationInterpolator::update (const Integration* subint)
   
   if (epoch < min_epoch || epoch > max_epoch)
     throw Error (InvalidParam, "CalibrationInterpolator::update",
-		 "sub-integration epoch=" + epoch.printdays(6) +
+		 "requested epoch=" + epoch.printdays(6) +
 		 " not spanned (" + min_epoch.printdays(6) +
 		 " - " + max_epoch.printdays(6) +")" );
       
   double x0 = (epoch - interpolator->get_reference_epoch ()).in_days();
 
-  unsigned nchan = subint->get_nchan();
+  unsigned nchan = frequency.size();
   
   if (feedpar)
   {
@@ -203,7 +223,7 @@ bool CalibrationInterpolator::update (const Integration* subint)
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
-    double freq = subint->get_centre_frequency (ichan);
+    double freq = frequency[ichan];
     bool valid = (freq >= min_freq && freq <= max_freq);
 
     DEBUG("CalibrationInterpolator::update ichan=" << ichan << " freq=" << freq << " valid=" << valid);
