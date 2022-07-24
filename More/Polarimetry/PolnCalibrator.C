@@ -807,7 +807,7 @@ bool Pulsar::PolnCalibrator::get_valid (unsigned ichan) const
   return det(response[ichan]) != zero;
 }
 
-void Pulsar::PolnCalibrator::calibration_setup (Archive* arch)
+void Pulsar::PolnCalibrator::calibration_setup (const Archive* arch)
 {
   string reason;
   if (!get_calibrator()->calibrator_match (arch, reason))

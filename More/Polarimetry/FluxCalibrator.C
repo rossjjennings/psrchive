@@ -462,7 +462,7 @@ void Pulsar::FluxCalibrator::set_database (const StandardCandles* d)
 }
 
 //! Calibrate the flux in the given archive
-void Pulsar::FluxCalibrator::calibrate (Archive* arch)
+void Pulsar::FluxCalibrator::calibration_setup (const Archive* arch)
 {
   if (!has_calibrator())
     throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
@@ -500,6 +500,12 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
     cerr << "Pulsar::FluxCalibrator::calibrate create" << endl;
 
   create (arch->get_nchan());
+}
+
+//! Calibrate the flux in the given archive
+void Pulsar::FluxCalibrator::calibrate (Archive* arch)
+{
+  calibration_setup (arch);
 
   for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
     calibrate (arch->get_Integration(isub));

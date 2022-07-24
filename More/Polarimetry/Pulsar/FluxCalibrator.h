@@ -100,6 +100,9 @@ namespace Pulsar {
     //! Check whether both on and off are present
     bool complete () const { return (have_on && have_off); }
 
+    //! Setup to calibrate the flux in the given archive
+    void calibration_setup (const Archive* archive);
+
   protected:
 
     friend class FluxCalibratorExtension;

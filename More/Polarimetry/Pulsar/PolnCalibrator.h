@@ -139,6 +139,9 @@ namespace Pulsar {
     //! Communicates PolnCalibrator parameters to plotting routines
     class Info;
 
+    //! Set up done before calibrating an archive
+    void calibration_setup (const Archive* arch);
+
   protected:
 
     //! The array of transformation Model instances
@@ -149,9 +152,6 @@ namespace Pulsar {
 
     //! Set up to call calculate_transformation
     void setup_transformation () const;
-
-    //! Set up done before calibrating an archive
-    void calibration_setup (Archive* arch);
 
     //! The array of Jones matrices derived from the transformation array
     std::vector< Jones<float> > response;
