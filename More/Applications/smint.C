@@ -122,7 +122,6 @@ protected:
   bool interpolate;
   bool bootstrap_uncertainty;
 
-  
   bool use_smoothing_spline ();
   
   unsigned freq_order;
@@ -181,11 +180,11 @@ protected:
   MJD max_epoch;
       
   // load profile data from Integration
-  void load (vector<set>& data, Integration* subint);
+  void load_data (vector<set>& data, Integration* subint);
 
   // load data from a container into one or more set::table
   template<class Container>
-  void load (vector<set>& data, Container* ext, const MJD& epoch);
+  void load_data (vector<set>& data, Container* ext, const MJD& epoch);
 
   // add parameters, from istart to iend inclusive, only if they have been measured
   template<class Container>
@@ -266,6 +265,13 @@ protected:
   void plot_model (SplineSmooth2D& spline, double x0,
                    unsigned npts, double xmin, double xmax);
 #endif
+
+  void load_previous_solution (const string& filename);
+
+  Reference::To<Archive> previous_solution;
+  Reference::To<CalibrationInterpolatorExtension> previous_ext;
+
+  void compare (const Archive*);
 
 #endif
 
@@ -382,6 +388,12 @@ void smint::add_options (CommandLine::Menu& menu)
   arg = menu.add (interquartile_range, "iqr", "double");
   arg->set_help ("outlier threshold as inter-quartile range");
 
+  // add a blank line and a header to the output of -h
+  menu.add ("\n" "Comparison and verification options:");
+
+  arg = menu.add (this, &smint::load_previous_solution, "gof", "solution");
+  arg->set_help ("compare data to spline solution");
+
 #if HAVE_PGPLOT
   // add a blank line and a header to the output of -h
   menu.add ("\n" "Plotting options:");
@@ -404,7 +416,7 @@ bool smint::use_smoothing_spline ()
 */
 
 template<class Container>
-void smint::load (vector<set>& data, Container* ext, const MJD& epoch)
+void smint::load_data (vector<set>& data, Container* ext, const MJD& epoch)
 {
   for (unsigned i=0; i<data.size(); i++)
   {
@@ -492,6 +504,12 @@ void smint::check_reference (Pulsar::Archive* archive, Container* ext)
 
 void smint::process (Pulsar::Archive* archive)
 {
+  if (previous_solution)
+  {
+    compare (archive);
+    return;
+  }
+
   if (archive->get_nsubint() == 1)
   {
     if (!archive->get_dedispersed())
@@ -501,7 +519,7 @@ void smint::process (Pulsar::Archive* archive)
       cerr << "smint: WARNING data are not corrected for Faraday rotation" << endl;
 
     cerr << "smint::process sub-integration" << endl;
-    load (profile_data, archive->get_Integration(0));
+    load_data (profile_data, archive->get_Integration(0));
     cerr << "smint::process loaded sub-integration" << endl;
 
     convert_epochs = false;
@@ -579,7 +597,7 @@ void smint::process (Pulsar::Archive* archive)
     }
 
     MJD epoch = fext->get_epoch();
-    load (fcal_data, fext, epoch);
+    load_data (fcal_data, fext, epoch);
 
   }
 
@@ -601,7 +619,7 @@ void smint::process (Pulsar::Archive* archive)
 
     MJD epoch = ext->get_epoch();
 
-    load (pcal_data, ext, epoch);
+    load_data (pcal_data, ext, epoch);
 
     Reference::To< CalibratorStokes > cal;
     cal = archive->get<CalibratorStokes>();
@@ -613,14 +631,14 @@ void smint::process (Pulsar::Archive* archive)
         add_if_has_data (cal_stokes_data, cal.get(), 0, 2);
       }
     
-      load (cal_stokes_data, cal.get(), epoch);
+      load_data (cal_stokes_data, cal.get(), epoch);
     }
   }
 
   input_filenames.push_back( archive->get_filename() );
 }
 
-void smint::load (vector<set>& data, Integration* subint)
+void smint::load_data (vector<set>& data, Integration* subint)
 {
   const unsigned nchan = subint->get_nchan();
   const unsigned nbin = subint->get_nbin();
@@ -963,6 +981,9 @@ void smint::prepare_solution (Archive* archive)
 
 void smint::finalize ()
 {
+  if (previous_solution)
+    return;
+
   cerr << "smint::finalize" << endl;
 
   Reference::To<Archive> solution;
@@ -1698,6 +1719,45 @@ void smint::plot_model (SplineSmooth2D& spline, double x0,
 #endif  // HAVE_SPLINTER
 
 #endif  // HAVE_PGPLOT
+
+void smint::load_previous_solution (const string& filename)
+{
+  previous_solution = Pulsar::Archive::load (filename);
+
+  previous_ext = previous_solution->get<CalibrationInterpolatorExtension> ();
+
+  if (!previous_ext)
+    throw Error (InvalidState, "smint::load_previous_solution", filename 
+                 + " does not contain a CalibrationInterpolatorExtension");
+}
+
+void smint::compare (const Archive* arch)
+{
+  if (previous_ext->get_type()->is_a<CalibratorTypes::Flux>())
+  {
+    const FluxCalibratorExtension* ext;
+    ext = arch->get<FluxCalibratorExtension>();
+    if (!ext)
+      throw Error (InvalidState, "smint", arch->get_filename()
+                   + " does not have FluxCalibratorExtension");
+
+    cerr << "compare flux " << arch->get_filename () << " with "
+         << previous_solution->get_filename () << endl;
+  }
+  else
+  {
+    const PolnCalibratorExtension* ext;
+    ext = arch->get<PolnCalibratorExtension>();
+    if (!ext)
+      throw Error (InvalidState, "smint", arch->get_filename()
+                   + " does not have PolnCalibratorExtension");
+
+    cerr << "compare poln " << arch->get_filename () << " with "
+         << previous_solution->get_filename () << endl;
+
+    return;
+  }
+}
 
 
 /*!
