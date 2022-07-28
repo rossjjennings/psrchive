@@ -167,8 +167,10 @@ bool CalibrationInterpolator::update (const MJD& epoch,
     update the feedpar and calpoln attributes
   */
 
+  double expiry_days = 1.0;
+
   double interval = (epoch - last_computed).in_days();
-  if (fabs (interval) < 1.0)
+  if (fabs (interval) < expiry_days)
   {
     DEBUG("CalibrationInterpolator::update no need to update");
     return false;
@@ -178,15 +180,16 @@ bool CalibrationInterpolator::update (const MJD& epoch,
 
   MJD min_epoch = interpolator->get_minimum_epoch ();
   MJD max_epoch = interpolator->get_maximum_epoch ();
-  
-  if (epoch < min_epoch || epoch > max_epoch)
+ 
+  double before = (min_epoch - epoch).in_days();
+  double after = (epoch - max_epoch).in_days(); 
+  if (before > expiry_days || after > expiry_days)
     throw Error (InvalidParam, "CalibrationInterpolator::update",
 		 "requested epoch=" + epoch.printdays(6) +
 		 " not spanned (" + min_epoch.printdays(6) +
 		 " - " + max_epoch.printdays(6) +")" );
       
   double x0 = (epoch - interpolator->get_reference_epoch ()).in_days();
-
   unsigned nchan = frequency.size();
   
   if (feedpar)
@@ -256,7 +259,6 @@ bool CalibrationInterpolator::update (const MJD& epoch,
     if (Archive::verbose > 1)
       cerr << "CalibrationInterpolator::update"
 	" error ichan=" << ichan << error << endl;
-
   }
 
   if (Archive::verbose > 2)
