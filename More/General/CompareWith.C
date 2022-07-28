@@ -249,7 +249,7 @@ void brute_force_search_for_best_gmm (arma::gmm_diag* model,
   for (unsigned itrial=0; itrial < ntrial; itrial++)
   {
     bool status = model->learn(data, ngaus, arma::maha_dist,
-			       arma::random_spread,
+			       arma::static_spread,
 			       km_iter, em_iter, var_floor, verbose);
 
     if (status == false)
@@ -410,7 +410,7 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 
   // this fake run sets up the dimension inside the model
   // which is required in order to call model->set_means
-  bool status = model->learn(data, ngaus, maha_dist, random_subset,
+  bool status = model->learn(data, ngaus, maha_dist, static_subset,
 			     km_iter, em_iter, var_floor, verbose);
   
   if (status == false)
@@ -484,7 +484,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
   
   do
   {
-    bool status = model->learn(subdata, ngaus, maha_dist, random_spread,
+    bool status = model->learn(subdata, ngaus, maha_dist, static_spread,
 			       km_iter, em_iter, 1e-10, verbose);
     if (status == false)
       throw Error (FailedCall, "CompareWith::setup",
@@ -512,7 +512,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
 
   DEBUG( "number of Gaussians = " << ngaus );
 
-  bool status = model->learn(subdata, ngaus, maha_dist, random_spread,
+  bool status = model->learn(subdata, ngaus, maha_dist, static_spread,
 			       km_iter, em_iter, 1e-10, verbose);
   if (status == false)
     throw Error (FailedCall, "CompareWith::setup",
