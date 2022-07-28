@@ -86,7 +86,8 @@ protected:
 
 #if HAVE_PGPLOT
   void plot_data (const vector< double >& data_x,
-                  const vector< Estimate<double> >& data_y);
+                  const vector< Estimate<double> >& data_y,
+                  const string& filename);
 
   void plot_model (std::pair<MEAL::Axis<double>*, MEAL::Scalar*>& model,
 		   unsigned npts, double xmin, double xmax);
@@ -137,6 +138,8 @@ protected:
   {
   public:
     SmoothingSpline spline1d;
+
+    string filename;
 
     MJD epoch;
     double x0; // coordinate shared by all data in row
@@ -219,6 +222,8 @@ protected:
   CalibrationInterpolatorExtension::Parameter::Type model_code;
   string spline_filename;
   string plot_filename;
+  string data_filename;
+
   unsigned model_index;
   
   unsigned plot_npts;
@@ -276,10 +281,12 @@ protected:
   void compare (const Archive*);
 
   template<class Container>
-  void compare (const Archive* arch, const char* name);
+  void compare (const Archive*,
+                CalibrationInterpolatorExtension::Parameter::Type);
 
   template<class Container>
-  void compare_data (const Container* ext, const Container* prev);
+  double compute_gof (const Container* ext, const Container* prev, 
+                       unsigned iparam);
 
   template <class Extension>
   void update (const Extension* ext)
@@ -440,6 +447,8 @@ void smint::load_data (vector<set>& data, Container* ext, const MJD& epoch)
     std::vector< double >& data_x = data[i].table.back().freq;
     std::vector< Estimate<double> >& data_y = data[i].table.back().data;
 
+    data[i].table.back().filename = data_filename;
+
     data[i].table.back().epoch = epoch;
 
     unsigned nchan = ext->get_nchan();
@@ -524,6 +533,8 @@ void smint::process (Pulsar::Archive* archive)
     compare (archive);
     return;
   }
+
+  data_filename = archive->get_filename();
 
   if (archive->get_nsubint() == 1)
   {
@@ -793,6 +804,9 @@ void smint::fit (set& dataset)
       {
 	cerr << "smint::fit 1-D pspline to "
 	     << table[irow].freq.size() << " points" << endl;
+
+        data_filename = dataset.table[irow].filename;
+
 	fit_pspline (dataset.table[irow].spline1d,
 		     table[irow].freq, table[irow].data);
       }
@@ -1177,7 +1191,7 @@ void smint::setup_and_plot (Spline& model,
   plot_npts = 200;
 
   cpgpage();
-  plot_data (data_x, data_y);
+  plot_data (data_x, data_y, data_filename);
 
   cpgsci(2);
 
@@ -1561,10 +1575,11 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
   for (unsigned irow = 0; irow < table.size(); irow++)
   {
     cpgpage();
-    plot_data (table[irow].freq, table[irow].data);
+    plot_data (table[irow].freq, table[irow].data, table[irow].filename);
 
     cpgsci(2); 
     double x0 = table[irow].x0;
+
     plot_model (spline, x0, plot_npts, xmin, xmax);
   }
 
@@ -1653,7 +1668,8 @@ void smint::fit_polynomial (const vector< double >& data_x,
 #ifdef HAVE_PGPLOT
 
 void smint::plot_data (const vector< double >& data_x,
-                       const vector< Estimate<double> >& data_y)
+                       const vector< Estimate<double> >& data_y,
+                       const string& filename)
 {
   //
   // Plot the data
@@ -1669,6 +1685,7 @@ void smint::plot_data (const vector< double >& data_x,
   plot.plot();
 
   cpgbox ("bcinst", 0,0, "bcinst", 0,0);
+  cpglab ("Frequency Offset (MHz)", "Data", filename.c_str());
 }
 
 void smint::plot_model (std::pair<MEAL::Axis<double>*, MEAL::Scalar*>& model,
@@ -1746,13 +1763,14 @@ catch (Error& error)
 }
 
 template <class Extension>
-void smint::compare (const Archive* arch, const char* name)
+void smint::compare (const Archive* arch, 
+                     CalibrationInterpolatorExtension::Parameter::Type type)
 {
   const Extension* ext = arch->get<Extension>();
   if (!ext)
     throw Error (InvalidState, "smint::compare", 
                  arch->get_filename()
-                 + " does not have " + name);
+                 + " does not have " + tostring(type));
 
   this->update (ext);
 
@@ -1760,45 +1778,69 @@ void smint::compare (const Archive* arch, const char* name)
   if (!prev)
     throw Error (InvalidState, "smint::compare", 
                  previous_solution->get_filename()
-                 + " does not have " + name);
+                 + " does not have " + tostring(type));
 
-  cerr << "compare " << name << " of " << arch->get_filename () << " with "
+  cerr << "compare " << type << " of " << arch->get_filename () << " with "
        << previous_solution->get_filename () << endl;
-    
-  compare_data (ext, prev);
+
+  const CalibrationInterpolatorExtension* interpolator
+    = previous_interpolator->get_extension();
+
+  unsigned nparam = interpolator->get_nparam ();
+
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+  {
+    const CalibrationInterpolatorExtension::Parameter* param 
+      = interpolator->get_parameter (iparam);
+
+    if (param->get_code() == type)
+    {
+      double gof = compute_gof (ext, prev, param->get_iparam());
+      cout << arch->get_filename() << " " << type << " " 
+           << param->get_iparam() << " " << gof << endl;
+    }
+  }
 }
 
 void smint::compare (const Archive* arch)
 {
   if (previous_interpolator->get_type()->is_a<CalibratorTypes::Flux>())
   {
-    compare<FluxCalibratorExtension> (arch, "FluxCalibratorExtension");
+    compare<FluxCalibratorExtension> (arch, 
+    CalibrationInterpolatorExtension::Parameter::FluxCalibratorParameter);
   }
   else
   {
-    compare<PolnCalibratorExtension> (arch, "PolnCalibratorExtension");
-    compare<CalibratorStokes> (arch, "CalibratorStokes");
+    compare<PolnCalibratorExtension> (arch, 
+    CalibrationInterpolatorExtension::Parameter::FrontendParameter);
+
+    compare<CalibratorStokes> (arch, 
+    CalibrationInterpolatorExtension::Parameter::CalibratorStokesParameter);
   }
 }
 
 template<class Container>
-void smint::compare_data (const Container* ext, const Container* prev)
+double smint::compute_gof (const Container* ext, const Container* prev,
+                           unsigned iparam)
 {
   unsigned nchan = ext->get_nchan();
-  unsigned nparam = ext->get_nparam();
+  double chisq = 0.0;
+  unsigned count = 0;
 
-  for (unsigned iparam=0; iparam < nparam; iparam++)
+  for (unsigned ichan=0; ichan < nchan; ichan++)
   {
+    if (!ext->get_valid(ichan))
+      continue;
 
-    for (unsigned ichan=0; ichan < nchan; ichan++)
-    {
-      Estimate<float> val (0.0, 0.0);
+    Estimate<float> dat = ext->get_Estimate (iparam, ichan);
+    Estimate<float> pred = prev->get_Estimate (iparam, ichan);
 
-      if (ext->get_valid(ichan))
-        val = ext->get_Estimate (iparam, ichan);
-
-    }
+    double diff = dat.get_value() - pred.get_value();
+    chisq += diff * diff / dat.get_variance();
+    count ++;
   }
+
+  return chisq / count;
 }
 
 /*!
