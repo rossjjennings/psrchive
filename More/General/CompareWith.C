@@ -28,11 +28,25 @@
 #if HAVE_ARMADILLO
 #include "GaussianMixtureProbabilityDensity.h"
 #include <armadillo>
-using namespace arma;
 #endif
 
 using namespace Pulsar;
 using namespace std;
+
+#if HAVE_ARMADILLO
+
+static void initialize_armadillo_random_number_generator ()
+{
+  static bool done = false;
+
+  if (done)
+    return;
+
+  arma::arma_rng::set_seed (13);
+  done = true;
+}
+
+#endif
 
 CompareWith::CompareWith ()
 {
@@ -326,8 +340,8 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 				   const arma::mat& data,
 				   unsigned ngaus, const double* eval) try
 {
-  uword d = data.n_rows;     // dimensionality
-  uword N = data.n_cols;     // number of vectors
+  arma::uword d = data.n_rows;     // dimensionality
+  arma::uword N = data.n_cols;     // number of vectors
 
   // Tukey's default IQR threshold ...
   double threshold = 1.5;
@@ -346,10 +360,10 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
   cerr << "outlier_count=" << outlier_count << endl;
 
   // set the diagonal covariances to the eigenvalues
-  mat dcovs (d, ngaus);
+  arma::mat dcovs (d, ngaus);
 
   vector<double> row (N);
-  vec second (d); 
+  arma::vec second (d); 
   double heft = 0;
   
   for (unsigned irow=0; irow < d; irow++)
@@ -410,7 +424,7 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 
   // this fake run sets up the dimension inside the model
   // which is required in order to call model->set_means
-  bool status = model->learn(data, ngaus, maha_dist, static_subset,
+  bool status = model->learn(data, ngaus, arma::maha_dist, arma::static_subset,
 			     km_iter, em_iter, var_floor, verbose);
   
   if (status == false)
@@ -419,7 +433,7 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
 
   cerr << "second = " << second[0] << " " << second[1] << endl;
 
-  mat means (d, ngaus);
+  arma::mat means (d, ngaus);
   means.col(1) = second;
 
   arma::rowvec hefts (ngaus);
@@ -441,7 +455,7 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
   verbose = true;
 #endif
   
-  status = model->learn(data, ngaus, maha_dist, keep_existing,
+  status = model->learn(data, ngaus, arma::maha_dist, arma::keep_existing,
 			km_iter, em_iter, var_floor, verbose);
 
   if (status == false)
@@ -458,8 +472,8 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
 			  const arma::mat& data,
 			  unsigned& ngaus, const double* eval) try
 {
-  uword d = data.n_rows;     // dimensionality
-  uword N = data.n_cols;     // number of vectors
+  arma::uword d = data.n_rows;     // dimensionality
+  arma::uword N = data.n_cols;     // number of vectors
 
   assert (d > 2);
   assert (N > 0);
@@ -469,7 +483,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
 
   // initially fit only the first two principal components
   unsigned nrows = 2;
-  mat subdata = data.rows (0, nrows-1);
+  arma::mat subdata = data.rows (0, nrows-1);
 
   bool verbose = false;
 
@@ -484,7 +498,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
   
   do
   {
-    bool status = model->learn(subdata, ngaus, maha_dist, static_spread,
+    bool status = model->learn(subdata, ngaus, arma::maha_dist, arma::static_spread,
 			       km_iter, em_iter, 1e-10, verbose);
     if (status == false)
       throw Error (FailedCall, "CompareWith::setup",
@@ -512,7 +526,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
 
   DEBUG( "number of Gaussians = " << ngaus );
 
-  bool status = model->learn(subdata, ngaus, maha_dist, static_spread,
+  bool status = model->learn(subdata, ngaus, arma::maha_dist, arma::static_spread,
 			       km_iter, em_iter, 1e-10, verbose);
   if (status == false)
     throw Error (FailedCall, "CompareWith::setup",
@@ -531,9 +545,9 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
   {
     subdata = data.rows (0, nrows-1);
     
-    rowvec hefts = model->hefts;    
-    mat means = model->means;
-    mat dcovs = model->dcovs;
+    arma::rowvec hefts = model->hefts;    
+    arma::mat means = model->means;
+    arma::mat dcovs = model->dcovs;
 
     unsigned old_nrows = dcovs.n_rows;
 
@@ -548,7 +562,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
       }
 
     // fake run to set up model dimensions
-    status = model->learn(subdata, ngaus, maha_dist, static_subset,
+    status = model->learn(subdata, ngaus, arma::maha_dist, arma::static_subset,
 			  0, 0, 1e-10, false);
 
     if (status == false)
@@ -559,7 +573,7 @@ void ease_in_to_best_gmm (arma::gmm_diag* model,
     model->set_means (means);
     model->set_dcovs (dcovs);
     
-    status = model->learn(subdata, ngaus, maha_dist, keep_existing,
+    status = model->learn(subdata, ngaus, arma::maha_dist, arma::keep_existing,
 			  0, em_iter, 1e-10, verbose);
 
     if (status == false)
@@ -800,6 +814,8 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
   // number of principal components passed to GMM on first iteration
   unsigned npc = eff_rank;
+
+  initialize_armadillo_random_number_generator ();
 
   arma::gmm_diag* model = gmpd->model;
   if (model == NULL)
