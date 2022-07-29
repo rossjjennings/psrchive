@@ -60,6 +60,20 @@ void Pulsar::Config::load ()
     throw error += "Pulsar::Config::load";
   }
 
+  const char* psrpl_config = getenv ("PSRPL_PSRCHIVE_CONFIG");
+  if (psrpl_config) try
+  {
+    DEBUG("Pulsar::Config::load $PSRPL_PSRCHIVE_CONFIG=" << file);
+    Configuration::load( psrpl_config );
+
+    // PSRPL_PSRCHIVE_CONFIG over-rides all other configs
+    return;
+  }
+  catch (Error& error)
+  { 
+    throw error += "Pulsar::Config::load";
+  }
+
   const char* psrchive_config = getenv ("PSRCHIVE_CONFIG");
   if (psrchive_config) try
   {
