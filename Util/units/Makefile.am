@@ -27,7 +27,6 @@ include_HEADERS = \
 	ndIndex.h \
 	OwnStream.h \
         pad.h \
-        random.h \
         ReferenceAble.h \
         Reference.h \
         ReferenceTo.h \
