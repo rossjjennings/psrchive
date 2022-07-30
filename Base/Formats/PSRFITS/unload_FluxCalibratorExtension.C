@@ -50,7 +50,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	temp[ichan + nchan*ireceptor] = fce->get_S_sys (ichan, ireceptor);
+	temp[ichan + nchan*ireceptor] = fce->get_solution(ichan)->get_S_sys (ireceptor);
 
     unload_Estimates (fptr, temp, "S_SYS", &dimensions);
 
@@ -59,7 +59,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	temp[ichan + nchan*ireceptor] = fce->get_S_cal (ichan, ireceptor);
+	temp[ichan + nchan*ireceptor] = fce->get_solution(ichan)->get_S_cal (ireceptor);
 
     unload_Estimates(fptr, temp, "S_CAL", &dimensions);
 
@@ -86,13 +86,13 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	temp[ichan + nchan*ireceptor] = fce->get_scale (ichan, ireceptor);
+	temp[ichan + nchan*ireceptor] = fce->get_solution(ichan)->get_scale (ireceptor);
 
     unload_Estimates (fptr, temp, "SCALE", &dimensions);
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	temp[ichan + nchan*ireceptor] = fce->get_gain_ratio (ichan, ireceptor);
+	temp[ichan + nchan*ireceptor] = fce->get_solution(ichan)->get_gain_ratio (ireceptor);
 
     unload_Estimates (fptr, temp, "RATIO", &dimensions);
 

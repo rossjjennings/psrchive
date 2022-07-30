@@ -84,7 +84,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	fce->set_S_sys (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+	fce->get_solution(ichan)->set_S_sys (ireceptor, temp[ichan + nchan*ireceptor]);
 
     if (verbose > 2)
       cerr << "FITSArchive::load_FluxCalibratorExtension loading S_CAL" << endl;
@@ -99,7 +99,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	fce->set_S_cal (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+	fce->get_solution(ichan)->set_S_cal (ireceptor, temp[ichan + nchan*ireceptor]);
 
     /*
       2019-Sep-05 Willem van Straten
@@ -122,7 +122,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
       for (ichan=0; ichan < nchan; ichan++)
 	for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	  fce->set_scale (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+	  fce->get_solution(ichan)->set_scale (ireceptor, temp[ichan + nchan*ireceptor]);
 
     }
     catch (Error& error)
@@ -148,7 +148,7 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
       for (ichan=0; ichan < nchan; ichan++)
 	for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
-	  fce->set_gain_ratio (ichan, ireceptor, temp[ichan+nchan*ireceptor]);
+	  fce->get_solution(ichan)->set_gain_ratio (ireceptor, temp[ichan+nchan*ireceptor]);
 
     }
     catch (Error& error)

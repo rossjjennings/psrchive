@@ -50,8 +50,8 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 
     for (unsigned ichan=0; ichan < nchan; ichan++) try
     {
-      calibrator->data[ichan]->get (S_sys[ichan], S_cal[ichan]);
-      DEBUG("\t S_sys["<< ichan <<"].size=" << S_sys[ichan].size());
+      calibrator->data[ichan]->get (solution[ichan].S_sys, solution[ichan].S_cal);
+      DEBUG("\t S_sys["<< ichan <<"].size=" << solution[ichan].S_sys.size());
     }
     catch (Error& error) {
       if (Archive::verbose > 2)
@@ -78,8 +78,8 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 		     "Pulsar::FluxCalibratorExtension (FluxCalibrator*)",
 		     "Policy is not of type ConstantGain");
 
-      cg->get_scale (scale[ichan]);
-      cg->get_gain_ratio (ratio[ichan]);
+      cg->get_scale (solution[ichan].scale);
+      cg->get_gain_ratio (solution[ichan].ratio);
     }
     catch (Error& error) {
       if (Archive::verbose > 2)

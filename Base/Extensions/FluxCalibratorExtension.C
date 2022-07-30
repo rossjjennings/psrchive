@@ -41,15 +41,10 @@ Pulsar::FluxCalibratorExtension::operator= (const FluxCalibratorExtension& fc)
     return *this;
 
   nreceptor = fc.nreceptor;
-  
-  CalibratorExtension::operator= (fc);
-  S_cal = fc.S_cal;
-  S_sys = fc.S_sys;
-
   scale_available = fc.scale_available;
+  solution = fc.solution;
 
-  scale = fc.scale;
-  ratio = fc.ratio;
+  CalibratorExtension::operator= (fc);
 
   return *this;
 }
@@ -63,27 +58,20 @@ Pulsar::FluxCalibratorExtension::~FluxCalibratorExtension ()
 void Pulsar::FluxCalibratorExtension::set_nchan (unsigned nchan)
 {
   CalibratorExtension::set_nchan( nchan );
-
-  S_cal.resize( nchan );
-  S_sys.resize( nchan );
-  scale.resize( nchan );
-  ratio.resize( nchan );
+  solution.resize( nchan );
 }
 
 //! Get the number of frequency channels
-unsigned int Pulsar::FluxCalibratorExtension::get_nchan( void ) const
+unsigned Pulsar::FluxCalibratorExtension::get_nchan () const
 {
-  return S_cal.size();
+  return solution.size();
 }
 
 void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first,
 						   unsigned last)
 {
   CalibratorExtension::remove_chan (first, last);
-  remove (S_cal, first, last);
-  remove (S_sys, first, last);
-  remove (scale, first, last);
-  remove (ratio, first, last);
+  remove (solution, first, last);
 }
 
 //! Set the number of frequency channels
@@ -95,13 +83,8 @@ void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned _nreceptor)
 
   nreceptor = _nreceptor;
   
-  for (unsigned ichan=0; ichan < S_cal.size(); ichan++)
-  {
-    S_cal[ichan].resize( nreceptor );
-    S_sys[ichan].resize( nreceptor );
-    scale[ichan].resize( nreceptor );
-    ratio[ichan].resize( nreceptor );
-  }
+  for (unsigned ichan=0; ichan < solution.size(); ichan++)
+    solution[ichan].resize( nreceptor );
 }
 
 unsigned Pulsar::FluxCalibratorExtension::get_nreceptor () const
@@ -111,75 +94,90 @@ unsigned Pulsar::FluxCalibratorExtension::get_nreceptor () const
 
 using namespace Pulsar;
 
-void FluxCalibratorExtension::set_S_sys (unsigned ichan, unsigned ireceptor,
-					 const Estimate<double>& _S_sys)
+FluxCalibratorExtension::Solution* 
+FluxCalibratorExtension::get_solution (unsigned c)
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_S_sys");
-  S_sys[ichan].at(ireceptor) = _S_sys;
+  range_check (c, "Pulsar::FluxCalibratorExtension::set_solution");
+  return &solution[c];
+}
+
+const FluxCalibratorExtension::Solution* 
+FluxCalibratorExtension::get_solution (unsigned c) const
+{
+  range_check (c, "Pulsar::FluxCalibratorExtension::set_solution");
+  return &solution[c];
+}
+
+void FluxCalibratorExtension::Solution::resize (unsigned nreceptor)
+{
+  S_cal.resize( nreceptor );
+  S_sys.resize( nreceptor );
+  scale.resize( nreceptor );
+  ratio.resize( nreceptor );
+}
+
+void FluxCalibratorExtension::Solution::set_S_sys (unsigned ireceptor,
+					           const Estimate<double>& _S_sys)
+{
+  S_sys.at(ireceptor) = _S_sys;
 }
 
 Estimate<double> 
-FluxCalibratorExtension::get_S_sys (unsigned ichan, unsigned ireceptor) const
+FluxCalibratorExtension::Solution::get_S_sys (unsigned ireceptor) const
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_S_sys");
-  return S_sys[ichan].at(ireceptor);
+  return S_sys.at(ireceptor);
 }
 
+#if 0
 std::vector< std::vector< Estimate<double> > >
 FluxCalibratorExtension::get_S_sys () const
 {
   return S_sys;
 }
+#endif
 
-void FluxCalibratorExtension::set_S_cal (unsigned ichan, unsigned ireceptor,
+void FluxCalibratorExtension::Solution::set_S_cal (unsigned ireceptor,
 					 const Estimate<double>& _S_cal)
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_S_cal");
-  S_cal[ichan].at(ireceptor) = _S_cal;
+  S_cal.at(ireceptor) = _S_cal;
 }
 
 Estimate<double>
-FluxCalibratorExtension::get_S_cal (unsigned ichan, unsigned ireceptor) const
+FluxCalibratorExtension::Solution::get_S_cal (unsigned ireceptor) const
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_S_cal");
-  return S_cal[ichan].at(ireceptor);
+  return S_cal.at(ireceptor);
 }
 
+#if 0
 std::vector< std::vector< Estimate<double> > >
 FluxCalibratorExtension::get_S_cal () const
 {
   return S_cal;
 }
+#endif
 
-
-void FluxCalibratorExtension::set_scale (unsigned ichan, unsigned ireceptor,
+void FluxCalibratorExtension::Solution::set_scale (unsigned ireceptor,
 					 const Estimate<double>& _scale)
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_scale");
-  scale[ichan].at(ireceptor) = _scale;
+  scale.at(ireceptor) = _scale;
 }
 
 Estimate<double>
-FluxCalibratorExtension::get_scale (unsigned ichan, unsigned ireceptor) const
+FluxCalibratorExtension::Solution::get_scale (unsigned ireceptor) const
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_scale");
-  return scale[ichan].at(ireceptor);
+  return scale.at(ireceptor);
 }
 
-void FluxCalibratorExtension::set_gain_ratio (unsigned ichan,
-					      unsigned ireceptor,
+void FluxCalibratorExtension::Solution::set_gain_ratio ( unsigned ireceptor,
 					      const Estimate<double>& _ratio)
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_gain_ratio");
-  ratio[ichan].at(ireceptor) = _ratio;
+  ratio.at(ireceptor) = _ratio;
 }
 
 Estimate<double>
-FluxCalibratorExtension::get_gain_ratio (unsigned ichan, 
-					 unsigned ireceptor) const
+FluxCalibratorExtension::Solution::get_gain_ratio (unsigned ireceptor) const
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_gain_ratio");
-  return ratio[ichan].at(ireceptor);
+  return ratio.at(ireceptor);
 }
 
 TextInterface::Parser* FluxCalibratorExtension::get_interface()
@@ -206,10 +204,10 @@ Estimate<float> FluxCalibratorExtension::get_Estimate ( unsigned iparam, unsigne
 
   switch (jparam)
   {
-    case 0: return get_S_sys (ichan, ireceptor);
-    case 1: return get_S_cal (ichan, ireceptor);
-    case 2: return get_scale (ichan, ireceptor);
-    case 3: return get_gain_ratio (ichan, ireceptor);
+    case 0: return get_solution(ichan)->get_S_sys (ireceptor);
+    case 1: return get_solution(ichan)->get_S_cal (ireceptor);
+    case 2: return get_solution(ichan)->get_scale (ireceptor);
+    case 3: return get_solution(ichan)->get_gain_ratio (ireceptor);
     default:
       throw Error (InvalidParam, "FluxCalibratorExtension::get_Estimate",
                    "iparam=%u,nreceptor=%u -> jparam=%u,ireceptor=%u", 
@@ -230,10 +228,10 @@ void FluxCalibratorExtension::set_Estimate ( unsigned iparam, unsigned ichan, co
   
   switch (jparam)
   {
-    case 0: set_S_sys (ichan, ireceptor, val); return;
-    case 1: set_S_cal (ichan, ireceptor, val); return;
-    case 2: set_scale (ichan, ireceptor, val); return;
-    case 3: set_gain_ratio (ichan, ireceptor, val); return;
+    case 0: get_solution(ichan)->set_S_sys (ireceptor, val); return;
+    case 1: get_solution(ichan)->set_S_cal (ireceptor, val); return;
+    case 2: get_solution(ichan)->set_scale (ireceptor, val); return;
+    case 3: get_solution(ichan)->set_gain_ratio (ireceptor, val); return;
     default:
       throw Error (InvalidParam, "FluxCalibratorExtension::get_Estimate",
                    "iparam=%u,nreceptor=%u -> jparam=%u,ireceptor=%u",
@@ -270,18 +268,7 @@ void FluxCalibratorExtension::frequency_append (Archive* to,
   bool in_order = in_frequency_order (to, from);
   CalibratorExtension::frequency_append (ext, in_order);
   
-  S_sys.insert ( in_order ? S_sys.end() : S_sys.begin(),
-		 ext->S_sys.begin(), ext->S_sys.end() );
-
-  S_cal.insert ( in_order ? S_cal.end() : S_cal.begin(),
-		 ext->S_cal.begin(), ext->S_cal.end() );
-
-  if (!scale_available)
-    return;
-
-  scale.insert ( in_order ? scale.end() : scale.begin(),
-		 ext->scale.begin(), ext->scale.end() );
-
-  ratio.insert ( in_order ? ratio.end() : ratio.begin(),
-		 ext->ratio.begin(), ext->ratio.end() );
+  solution.insert ( in_order ? solution.end() : solution.begin(),
+		    ext->solution.begin(), ext->solution.end() );
 }
+

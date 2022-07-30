@@ -16,11 +16,8 @@
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/UnloadOptions.h"
 
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::string;
-using std::vector;
+using namespace std;
+using namespace Pulsar;
 
 //! Calibration file (Pulsar Archive) averaging application.
 class calavg : public Pulsar::Application
@@ -228,6 +225,22 @@ void calavg::set_history_command()
   }
 }
 
+template<typename Method>
+vector<vector< Estimate<double> > > extract (FluxCalibratorExtension* ext, Method get)
+{
+  unsigned nchan = ext->get_nchan();
+  unsigned nreceptor = ext->get_nreceptor();
+
+  vector<vector< Estimate<double> > > result (nchan);
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+  {
+    result[ichan].resize (nreceptor);
+    for (unsigned i=0; i < nreceptor; i++)
+      result[ichan][i] = (ext->get_solution(ichan)->*get)(i);
+  }
+  return result;
+}
+
 //! Extract the S_sys and S_cal values from the FLUXCAL table of the given
 //  archive.
 void calavg::process(Pulsar::Archive* archive)
@@ -289,10 +302,10 @@ void calavg::process(Pulsar::Archive* archive)
   }
 
   // Copy all S_sys values from the current fluxcal.
-  S_sys_values.push_back(ext->get_S_sys());
+  S_sys_values.push_back( extract (ext, &FluxCalibratorExtension::Solution::get_S_sys) );
 
   // Copy all S_cal values from the current fluxcal.
-  S_cal_values.push_back(ext->get_S_cal());
+  S_cal_values.push_back( extract (ext, &FluxCalibratorExtension::Solution::get_S_cal) );
 
   // If first file, extract parameters and store them for easy comparison.
   if (average == NULL) {
@@ -346,8 +359,8 @@ void calavg::finalize()
         total_S_cal += S_cal_values[ifile][ichan][ipol];
       }
 
-      ext->set_S_sys(ichan, ipol, total_S_sys);
-      ext->set_S_cal(ichan, ipol, total_S_cal);
+      ext->get_solution(ichan)->set_S_sys(ipol, total_S_sys);
+      ext->get_solution(ichan)->set_S_cal(ipol, total_S_cal);
     }
   }
 
@@ -356,7 +369,7 @@ void calavg::finalize()
   for (unsigned ichan = 0; ichan < nchan; ++ichan) {
     MeanEstimate<double, double> total_S_cal; // ... and get away with this...?
     for (unsigned ipol = 0; ipol < NPOL; ++ipol) {
-      total_S_cal += ext->get_S_cal(ichan, ipol);
+      total_S_cal += ext->get_solution(ichan)->get_S_cal(ipol);
     }
 
     // Calculate channel weight from error.

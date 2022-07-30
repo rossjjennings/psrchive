@@ -543,15 +543,15 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
       if (flux_extension->has_scale())
       {
 	ConstantGain* cg = new ConstantGain;
-	cg->set_scale( flux_extension->scale[ichan] );
-	cg->set_gain_ratio( flux_extension->ratio[ichan] );
+	cg->set_scale( flux_extension->get_solution(ichan)->scale );
+	cg->set_gain_ratio( flux_extension->get_solution(ichan)->ratio );
 	data[ichan] = cg;
       }
       else
 	data[ichan] = new VariableGain;
 
-      data[ichan]->set( flux_extension->S_sys[ichan],
-			flux_extension->S_cal[ichan] );
+      data[ichan]->set( flux_extension->get_solution(ichan)->S_sys,
+			flux_extension->get_solution(ichan)->S_cal );
       
       data[ichan]->set_valid ( flux_extension->get_weight(ichan) != 0 );
     }
