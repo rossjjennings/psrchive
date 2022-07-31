@@ -117,6 +117,9 @@ namespace Pulsar
     friend class FluxCalibrator;
     friend class FluxCalibratorExtension;
 
+    //! Get the number of receptors
+    unsigned get_nreceptor () const;
+
     //! Set the number of receptors
     void resize (unsigned nreceptor);
 
@@ -140,6 +143,13 @@ namespace Pulsar
     void set_gain_ratio (unsigned r, const Estimate<double>&);
     //! Get the gain ratio of the specified channel
     Estimate<double> get_gain_ratio (unsigned receptor) const;
+
+    // Text interface to a FluxCalibratorExtension::Solution instance
+    class Interface : public TextInterface::To<Solution>
+    {
+      public:
+        Interface();
+    };
 
   protected:
 

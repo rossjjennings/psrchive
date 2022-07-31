@@ -108,6 +108,11 @@ FluxCalibratorExtension::get_solution (unsigned c) const
   return &solution[c];
 }
 
+unsigned FluxCalibratorExtension::Solution::get_nreceptor () const
+{
+  return S_cal.size();
+}
+
 void FluxCalibratorExtension::Solution::resize (unsigned nreceptor)
 {
   S_cal.resize( nreceptor );

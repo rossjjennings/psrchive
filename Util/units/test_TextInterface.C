@@ -8,8 +8,11 @@
 // #define _DEBUG 1
 
 #include "TextInterfaceInterpreter.h"
+#include "TextInterfaceEstimate.h"
+
 #include "Functor.h"
 #include "Alias.h"
+#include "Estimate.h"
 
 #include <iostream>
 using namespace std;
@@ -133,6 +136,32 @@ public:
   tester* element (unsigned i) { return &array[i]; }
 };
 
+
+class vector_of_Estimates : public Reference::Able
+{
+public:
+
+  class Interface;
+
+  vector_of_Estimates (unsigned size) : array (size) { }
+  vector< Estimate<double> > array;
+
+  unsigned size () const { return array.size(); }
+  const Estimate<double>& get_element (unsigned i) const { return array[i]; }
+  void set_element (unsigned i, const Estimate<double>& val) { array[i] = val; }
+};
+
+class vector_of_Estimates::Interface : public TextInterface::To<vector_of_Estimates>
+{
+public:
+  Interface ()
+  {
+    VGenerator< Estimate<double> > generator;
+    generator( this, "estimate", "an array of estimates",
+                         &vector_of_Estimates::get_element,
+                         &vector_of_Estimates::size );
+  }
+};
 
 int main () try
 {
@@ -391,6 +420,13 @@ int main () try
 	 << getset.get_value ("child:value") << endl;
     return -1;
   }
+
+  cerr << "test vector of estimates interface" << endl;
+  vector_of_Estimates voe (6);
+  vector_of_Estimates::Interface voe_tui;
+  voe_tui.set_instance (&voe);
+
+  cerr << voe_tui.help(true) << endl;
 
   cerr << "test_TextInterface SUCCESS!" << endl;
   return 0;
