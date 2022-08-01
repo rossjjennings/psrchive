@@ -34,10 +34,6 @@ namespace TextInterface
     VectorOfEstimate (const std::string& p, const std::string& t, Get g, Size s)
       { prefix = p; type = t; get = g; size = s; }
 
-    //! Copy constructor
-    VectorOfEstimate (const VectorOfEstimate& copy)
-      { get=copy.get; size=copy.size; prefix=copy.prefix; type=copy.type; }
-
     //! Retun a newly constructed copy
     Attribute<V>* clone () const { return new VectorOfEstimate(*this); }
 
@@ -132,11 +128,11 @@ namespace TextInterface
                    const std::string& d, Get g, Size z)
       {
         auto get = new VectorOfEstimate<C,T,U,Get,Size> (n, "val", g, z);
-        get->set_description (d);
+        get->set_description (d + " value");
         to->add_value( get );
 
         get = new VectorOfEstimate<C,T,U,Get,Size> (n, "var", g, z);
-        get->set_description (d);
+        get->set_description (d + " variance");
         to->add_value( get );
       }
   };

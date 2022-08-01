@@ -2,7 +2,7 @@
 
 /***************************************************************************
  *
- *   Copyright (C) 2003-2013 by Willem van Straten
+ *   Copyright (C) 2003 - 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -30,11 +30,6 @@ namespace TextInterface
     //! Constructor
     ElementGet (const std::string& _name, Get _get, Size _size)
       { name = _name; get = _get; size = _size; }
-
-    //! Copy constructor
-    ElementGet (const ElementGet& copy)
-      { name = copy.name; description = copy.description; 
-	get = copy.get; size = copy.size; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new ElementGet(*this); }
@@ -108,10 +103,6 @@ namespace TextInterface
     //! Constructor
     ElementGetSet (const std::string& _name, Get _get, Set _set, Size _size)
       : ElementGet<C,Get,Size> (_name, _get, _size) { set = _set; }
-
-    //! Copy constructor
-    ElementGetSet (const ElementGetSet& copy) 
-      : ElementGet<C,Get,Size> (copy) { set = copy.set; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new ElementGetSet(*this); }
