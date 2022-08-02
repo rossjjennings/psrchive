@@ -24,7 +24,6 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 
-#include "Pulsar/CalibrationInterpolator.h"
 #include "Pulsar/CalibrationInterpolatorExtension.h"
 #include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -38,6 +37,7 @@
 #endif
 
 #ifdef HAVE_SPLINTER
+#include "Pulsar/CalibrationInterpolator.h"
 #include "Pulsar/SplineSmooth.h"
 #endif
 
@@ -267,6 +267,7 @@ protected:
 #if HAVE_SPLINTER
 
   void fit_pspline (SplineSmooth2D& spline, vector<row>& table);
+  Reference::To<CalibrationInterpolator> previous_interpolator;
 
 #if HAVE_PGPLOT
   void plot_model (SplineSmooth2D& spline, double x0,
@@ -276,7 +277,6 @@ protected:
   void load_previous_solution (const string& filename);
 
   Reference::To<Archive> previous_solution;
-  Reference::To<CalibrationInterpolator> previous_interpolator;
 
   void compare (const Archive*);
 
@@ -402,6 +402,12 @@ void smint::add_options (CommandLine::Menu& menu)
   arg->set_help ("step in goodness-of-fit threshold"
                  " (default: " + tostring(cross_validated_smoothing_2D->get_gof_step_threshold ()) + ")");
 
+  // add a blank line and a header to the output of -h
+  menu.add ("\n" "Comparison and verification options:");
+
+  arg = menu.add (this, &smint::load_previous_solution, "gof", "solution");
+  arg->set_help ("compare data to spline solution");
+
 #endif
 
   // add a blank line and a header to the output of -h
@@ -409,12 +415,6 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (interquartile_range, "iqr", "double");
   arg->set_help ("outlier threshold as inter-quartile range");
-
-  // add a blank line and a header to the output of -h
-  menu.add ("\n" "Comparison and verification options:");
-
-  arg = menu.add (this, &smint::load_previous_solution, "gof", "solution");
-  arg->set_help ("compare data to spline solution");
 
 #if HAVE_PGPLOT
   // add a blank line and a header to the output of -h
@@ -528,11 +528,13 @@ void smint::check_reference (Pulsar::Archive* archive, Container* ext)
 
 void smint::process (Pulsar::Archive* archive)
 {
+#if HAVE_SPLINTER
   if (previous_solution)
   {
     compare (archive);
     return;
   }
+#endif
 
   data_filename = archive->get_filename();
 
@@ -848,11 +850,12 @@ void smint::unload_row (set& dataset, unsigned irow)
     cerr << "unload row-by-row currently implemented only for pulse profile" << endl;
     return;
   }
-  
+
+#if HAVE_SPLINTER
+
   vector<row>& table = dataset.table;
   unsigned ibin = irow;  
 
-#if HAVE_SPLINTER
   if (use_smoothing_spline())
   {
     cerr << "smint::unload_row ibin=" << ibin
@@ -1010,8 +1013,10 @@ void smint::prepare_solution (Archive* archive)
 
 void smint::finalize ()
 {
+#if HAVE_SPLINTER
   if (previous_solution)
     return;
+#endif
 
   cerr << "smint::finalize" << endl;
 
@@ -1752,6 +1757,8 @@ void smint::plot_model (SplineSmooth2D& spline, double x0,
 
 #endif  // HAVE_PGPLOT
 
+#if HAVE_SPLINTER
+
 void smint::load_previous_solution (const string& filename) try
 {
   previous_solution = Pulsar::Archive::load (filename);
@@ -1842,6 +1849,8 @@ double smint::compute_gof (const Container* ext, const Container* prev,
 
   return chisq / count;
 }
+
+#endif
 
 /*!
 
