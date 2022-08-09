@@ -14,18 +14,16 @@ endif
 
 gunzip -c pgplot5.2.tar.gz | tar xvf -
 
-cd pgplot/drivers
-patch < @abs_srcdir@/pndriv.patch
+patch -p0 < @abs_srcdir@/pgplot.patch
+
+cd pgplot/sys_linux
 
 # make a gfortran configuration
 # Apply patch to generate libcpgplot.so if --enable-shared is in use.
 if ( @enable_shared@ == yes ) then
-  cd ..
   patch < @abs_srcdir@/makemake.sharedcpg.patch
-  cd sys_linux
   cp g77_gcc.conf psrchive.conf
 else
-  cd ../sys_linux
   cp g77_gcc_aout.conf psrchive.conf
 endif
 
