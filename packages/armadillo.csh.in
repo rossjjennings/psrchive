@@ -16,7 +16,7 @@ endif
 tar -xf $file
 cd $armadillo
 
-mkdir build
+mkdir -p build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX:PATH=@prefix@
 make install
