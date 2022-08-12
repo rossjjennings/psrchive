@@ -14,7 +14,7 @@ using namespace std;
 
 int main ()
 {
-  ndArray<3,double> data;
+  ndArray<3,unsigned> data;
 
   int nrow=5;
   int ncol=4;
@@ -30,14 +30,14 @@ int main ()
   for (unsigned i=0; i<nrow; i++)
     for (unsigned j=0; j<ncol; j++)
       for (unsigned k=0; k<ndim; k++)
-        data[i][j][k] = i + j/10.0 + k/100.0;
+        data[i][j][k] = i*100 + j*10 + k;
 
   for (unsigned i=0; i<nrow; i++)
     for (unsigned j=0; j<ncol; j++)
       for (unsigned k=0; k<ndim; k++)
       {
         cerr << "data[" << i << "][" << j << "][" << k << "]=" << data[i][j][k] << endl;
-        double expect = i + j/10.0 + k/100.0;
+        double expect = i*100 + j*10 + k;
         assert (data[i][j][k] == expect);
       }
 
