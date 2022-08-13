@@ -71,15 +71,26 @@ void runtest () try {
   fprintf (stderr, "Backward C->R FFT:%d\n", ndat);
   FTransform::bcr1d (ndat, back, fft1);
 
-  for (idat=0; idat<ndat; idat++) {
+  unsigned err_count = 0;
+  for (idat=0; idat<ndat; idat++)
+  {
     if (FTransform::get_norm() == FTransform::unnormalized)
       back[idat] /= ndat;
     float residual = (back[idat]-data[idat])/data[idat];
-    if (fabs(residual) > 1e-4) {
-      fprintf (stderr, "idat=%d data=%f back=%f diff=%g\n", 
+    if (fabs(residual) > 1e-4)
+    {
+      err_count ++;
+      fprintf (stderr, "idat=%d data=%f back=%f diff=%g\n",
                idat, back[idat], data[idat], residual);
-      exit(-1);
     }
+  }
+
+  unsigned max_count = 3;
+
+  if (err_count > max_count)
+  {
+    fprintf (stderr, "maximum error count exceeded\n");
+    exit(-1);
   }
 
   cerr << "test_real_complex PASS" << endl;
