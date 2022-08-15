@@ -14,9 +14,11 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/LastSignificant.h"
 
+#include "Pulsar/ProfileStatistic.h"
+
 #include <cpgplot.h>
 
-#include<algorithm>
+#include <algorithm>
 
 using namespace std;
 
@@ -185,14 +187,6 @@ Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
 
 }
 
-template<typename T>
-T median (vector<T> data)
-{
-  unsigned mid = data.size() / 2;
-  std::nth_element( data.begin(), data.begin()+mid, data.end() );
-  return data[mid];
-}
-
 void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 {
   plotter.profiles.resize( plot_values.size() );
@@ -282,10 +276,17 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 
       // divide by log(2) because spectral power has exponential distribution
       double log_mean = log( median (upper_half) / log(2.0) );
-    
+
+#if _DEBUG
+      // for comparison with computation in ProfileStatistic
+      ProfileStatistic* stat = ProfileStatistic::factory ("sho");
+      stat->get ( profile->get_Profile(0) );
+      cerr << "log_mean=" << log_mean << endl;
+#endif
+
       for (unsigned i=0; i < prof->get_nbin(); i++)
 	amps[i] = log(amps[i]);
-      
+
       for (unsigned i=0; i+2 < prof->get_nbin(); i++)
 	amps[i] = amps[i+1] - std::max(log_mean, ( amps[i] + amps[i+2] )/2.0);
 
