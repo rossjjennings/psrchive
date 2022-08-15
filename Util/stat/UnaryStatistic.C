@@ -80,7 +80,9 @@ double median_upper_harmonic (const vector<double>& data,
   power_spectral_density (data, *fps);
   vector<double> upper_half (fps->begin() + fps->size()/2, fps->end());
 
-  return median (upper_half);
+  double med = median (upper_half);
+  // cerr << "median_upper_harmonic = " << med << endl;
+  return med;
 }
 
 double robust_variance (const vector<double>& data, vector<float>* fps)
@@ -599,21 +601,43 @@ public:
 
   double get (const vector<double>& data)
   {
+    // fps = fluctuation power spectrum
     vector<float> fps;
     double log_mean = log( robust_variance(data, &fps) );
 
     for (unsigned i=0; i < fps.size(); i++)
       fps[i] = log(fps[i]);
 
-    double log_var = log(threshold*threshold);
- 
+    // 0.5 = extra variance due to detrend
+    double cutoff = 1.5 * log(threshold);
+
+#if _DEBUG
+    cerr << "SumHarmonicOutlier::get log_mean=" << log_mean << endl;
+    cerr << "SumHarmonicOutlier::get cutoff=" << cutoff << endl;
+#endif
+
     double outlier_sum = 0.0;
+    double detrended_max = 0.0;
+    unsigned count = 0;
     for (unsigned i=0; i+2 < fps.size(); i++)
     {
-      fps[i] = fps[i+1] - std::max(log_mean, ( fps[i] + fps[i+2] )/2.0);
-      if (fps[i] > log_var)
-	outlier_sum += exp(fps[i]);
+      double diff = fps[i+1] - std::max(log_mean, ( fps[i] + fps[i+2] )/2.0);
+
+      if (i==0 || diff > detrended_max)
+        detrended_max = diff;
+
+      if (diff > cutoff)
+      {
+	outlier_sum += diff;
+        count ++;
+      }
     }
+
+#if _DEBUG
+    cerr << "SumHarmonicOutlier::get outlier_sum=" << outlier_sum << endl;
+    cerr << "SumHarmonicOutlier::get count=" << count 
+         << " " << double(count)/fps.size()*100 << " %" << endl;
+#endif
 
     return outlier_sum;
   }
