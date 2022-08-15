@@ -136,6 +136,7 @@ endif
 #############################################################################
 #
 
+include $(top_srcdir)/config/Makefile.local
 include $(top_srcdir)/config/Makefile.include
 
 AM_CPPFLAGS += @PGPLOT_CFLAGS@ @GSL_CFLAGS@
