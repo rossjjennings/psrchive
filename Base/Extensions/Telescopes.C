@@ -114,12 +114,20 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             Telescopes::MeerKAT(t);
             break;
 
+        case 'n':
+            Telescopes::NenuFAR(t);
+            break;
+
         case 'i':
             Telescopes::WSRT(t);
             break;
 
         case 's':
             Telescopes::SHAO(t);
+            break;
+
+        case 'u':
+            Telescopes::FR606(t);
             break;
 
         case 'x':
@@ -413,3 +421,10 @@ void Pulsar::Telescopes::SRT(Telescope *t)
     t->set_focus (Telescope::PrimeFocus);
 }
 
+void Pulsar::Telescopes::NenuFAR(Telescope *t)
+{
+    t->set_name("NenuFAR");
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
+}

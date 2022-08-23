@@ -77,6 +77,9 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with PL612 info
     void PL612 (Telescope* t);
 
+    //! Initialize the Telescope Extension with SE607 info
+    void SE607 (Telescope* t);
+
     //! Initialize the Telescope Extension with IE613 info
     void IE613 (Telescope* t);
 
@@ -115,6 +118,9 @@ namespace Pulsar {
 
     //! Initialize the Telescope Extension with SRT info
     void SRT (Telescope* t);
+
+    //! Initialize the Telescope Extension with NenuFAR info
+    void NenuFAR (Telescope* t);
   } 
 
 }
