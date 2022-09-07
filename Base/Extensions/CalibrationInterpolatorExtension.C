@@ -60,6 +60,12 @@ CalibrationInterpolatorExtension::~CalibrationInterpolatorExtension ()
 {
 }
 
+//! Returns true if the Extension contains useful data
+bool CalibrationInterpolatorExtension::has_data () const 
+{ 
+  return parameter.size() > 0; 
+}
+
 void CalibrationInterpolatorExtension::set_type (const Calibrator::Type* _type)
 {
   type = _type;

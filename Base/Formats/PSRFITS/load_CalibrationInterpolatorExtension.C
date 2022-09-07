@@ -78,12 +78,20 @@ void FITSArchive::load_CalibrationInterpolatorExtension (fitsfile* fptr) try
   if (!psrfits_move_hdu (fptr, "PCMINTER", optional))
     return;
 
-  Reference::To<CalibrationInterpolatorExtension> ext;
-  ext = new CalibrationInterpolatorExtension;
-
   // Get CAL_MTHD
   string cal_mthd;
   psrfits_read_key (fptr, "CAL_MTHD", &cal_mthd);
+
+  if (cal_mthd == "")
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_CalibrationInterpolatorExtension"
+              " ignoring CAL_MTHD=''" << endl;
+    return;
+  }
+
+  Reference::To<CalibrationInterpolatorExtension> ext;
+  ext = new CalibrationInterpolatorExtension;
 
   if (verbose > 2)
     cerr << "FITSArchive::load_CalibrationInterpolatorExtension "

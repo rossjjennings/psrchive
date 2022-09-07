@@ -43,6 +43,9 @@ namespace Pulsar {
     CalibrationInterpolatorExtension* clone () const
     { return new CalibrationInterpolatorExtension( *this ); }
 
+    //! Returns true if the Extension contains useful data
+    bool has_data () const;
+
     //! Set the type of the calibrator
     void set_type (const Calibrator::Type* t);// { type = t; }
     //! Get the type of the calibrator
