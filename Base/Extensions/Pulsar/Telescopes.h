@@ -121,6 +121,10 @@ namespace Pulsar {
 
     //! Initialize the Telescope Extension with NenuFAR info
     void NenuFAR (Telescope* t);
+
+    //! Initialize the Telescope Extension with MWA info
+    void MWA (Telescope* t);
+
   } 
 
 }

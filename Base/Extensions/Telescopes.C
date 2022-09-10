@@ -127,7 +127,12 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             break;
 
         case 'u':
+#define u_is_MWA 0
+#if u_is_MWA
+            Telescopes::MWA(t);
+#else
             Telescopes::FR606(t);
+#endif
             break;
 
         case 'x':
@@ -408,6 +413,14 @@ void Pulsar::Telescopes::LWA(Telescope *t)
 void Pulsar::Telescopes::CHIME(Telescope *t)
 {
     t->set_name("CHIME");
+    // XXX Not sure if these are correct...
+    t->set_mount(Telescope::Fixed);
+    t->set_focus(Telescope::PrimeFocus);
+}
+
+void Pulsar::Telescopes::MWA(Telescope *t)
+{
+    t->set_name("MWA");
     // XXX Not sure if these are correct...
     t->set_mount(Telescope::Fixed);
     t->set_focus(Telescope::PrimeFocus);
