@@ -11,6 +11,7 @@
 #include "Pulsar/Telescope.h"
 #include "tempo++.h"
 #include "coord.h"
+#include "Warning.h"
 
 #ifdef HAVE_TEMPO2
 #include "T2Observatory.h"
@@ -18,6 +19,8 @@
 
 #include <iostream>
 using namespace std;
+
+static Warning warn;
 
 void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
@@ -150,6 +153,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
         default: 
             // Unknown code, throw error after calling Telecope::set_coordinates
             emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
+            warn << emsg << endl;
             break;
     }
 
