@@ -99,12 +99,16 @@ static int default_aliases ()
   add_alias ("MK", "MEERKAT");
 
   add_alias ("CH", "chime");
+  add_alias ("CH", "CHIME");
 
   // NenuFAR
   add_alias ("NF", "nenufar");
   add_alias ("NF", "Nenufar");
   add_alias ("NF", "NenuFAR");
   add_alias ("NF", "NenuFar");
+
+  add_alias ("MW", "MWA");
+  add_alias ("MW", "mwa");
 
   return 1;
 }
