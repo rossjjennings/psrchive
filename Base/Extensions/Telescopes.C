@@ -23,9 +23,18 @@ static Warning warn;
 
 void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
-    std::string emsg;
+  std::string emsg;
 
-    char oldcode = ' '; // should replace with new codes before we run out of letters!
+  /* WvS 2020-09-11
+   * The following line makes things a little more robust to errors such as
+   * telescope codes not found, or conflicting one-letter codes in use in
+   * different places.  Without this line, the Telescope::name attribute
+   * is left 'unknown' even when the Archive::telescope attribute is set.
+   */
+
+  t->set_name( a->get_telescope() );
+
+  char oldcode = ' '; // should replace with new codes before we run out of letters!
 
 #ifdef HAVE_TEMPO2
 
@@ -60,8 +69,6 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
   DEBUG("Telescopes::set_telescope_info call Tempo::code");
   oldcode=Tempo::code( a->get_telescope() );
 #endif
-
-  t->set_name( a->get_telescope() );
 
   switch ( oldcode )
     {
