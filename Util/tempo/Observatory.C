@@ -9,6 +9,7 @@
 #include "Observatory.h"
 #include "tempo++.h"
 #include "tempo_impl.h"
+#include "debug.h"
 
 #include <math.h>
 #include <string.h>
@@ -129,6 +130,8 @@ const Tempo::Observatory*
 Tempo::observatory (const string& telescope_name)
 {
   load_obsys ();
+
+  DEBUG("Tempo::observatory name='" << telescope_name << "'");
 
   // if the name is a single character, then it is likely a tempo site number
   if (telescope_name.length() == 1)

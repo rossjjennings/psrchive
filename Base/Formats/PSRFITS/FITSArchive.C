@@ -285,6 +285,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   try
   {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header calling Telescopes::set_telescope_info" << endl;
+
     Telescopes::set_telescope_info (telescope, this);
   }
   catch (Error& error)
