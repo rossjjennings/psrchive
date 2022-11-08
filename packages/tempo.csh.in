@@ -5,30 +5,20 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-mkdir -p tempo
+if ( ! -d tempo ) then
+  git clone git://git.code.sf.net/p/tempo/tempo
+endif
+
 cd tempo
+git pull
 
-if ( ! -f tempo11.010.tar.gz ) then
-  echo "Downloading TEMPO source code"
-  @download@ ftp://ftp.atnf.csiro.au/pub/people/man082/tempo11.010.tar.gz
-endif
+./prepare
+./configure --prefix=@prefix@
+make
+make install
 
-if ( ! -f DE200.1950.2050.gz ) then
-  echo "Downloading DE200"
-  @download@ ftp://ftp.atnf.csiro.au/pub/people/rmanches/DE200.1950.2050.gz
-endif
 
-if ( ! -f DE405.1950.2050.gz ) then
-  echo "Downloading DE405"
-  @download@ ftp://ftp.atnf.csiro.au/pub/people/rmanches/DE405.1950.2050.gz
-endif
-
-if ( ! -f TDB.1950.2050.gz ) then
-  echo "Downloading TDB"
-  @download@ ftp://ftp.atnf.csiro.au/pub/people/rmanches/TDB.1950.2050.gz
-endif
-
-gunzip -c tempo11.010.tar.gz | tar xvf -
+exit 0
 
 cd src
 make
