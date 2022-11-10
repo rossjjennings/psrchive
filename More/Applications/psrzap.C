@@ -489,6 +489,11 @@ int main(int argc, char *argv[]) try
         x0, y0, x1, y1, ch, click);
 #endif
 
+    if (ch=='+')
+    {
+      fprintf (stderr, "test click: %.3f %.3f -- %.3f %.3f\n", x0, y0, x1, y1);
+    }
+
     /* Left mouse click = zoom*/
     if (ch=='A') {
       if (click==0) { click=1; continue; }
@@ -505,10 +510,10 @@ int main(int argc, char *argv[]) try
         }
         if (curs==time_cursor || curs==both_cursor) {
           if (x0>x1) { tmp=x0; x0=x1; x1=tmp; }
-          sprintf(conf,"srange=(%d,%d)",(int)x0,(int)x1);
+          sprintf(conf,"srange=(%d,%d)",(int)x0,(int)ceil(x1));
           dsplot->configure(string(conf));
 	  t0=sub2time(pt_arch,(int) x0);
-	  t1=sub2time(pt_arch,(int) x1);
+	  t1=sub2time(pt_arch,(int) ceil(x1));
 	  sprintf(conf,"y:win=(%.3f,%.3f)",t0,t1);
 	  ptplot->configure(string(conf));
         }

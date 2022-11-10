@@ -40,6 +40,8 @@ std::string process (TextInterface::Parser* interface, const std::string& txt);
 void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data, 
     float *array )
 {
+  if (verbose)
+    cerr << "Pulsar::DynamicBaselineSpectrumPlot::get_plot_array" << endl;
 
   // Make a copy to dedisperse, need to do this for the 
   // PhaseWeight stuff to work correctly.
