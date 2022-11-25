@@ -8,6 +8,7 @@
 
 #include "T2Observatory.h"
 #include "strutil.h"
+#include "debug.h"
 
 #include <strings.h>
 #include <fstream>
@@ -103,10 +104,12 @@ static vector< Reference::To<Tempo2::Observatory> > antennae;
 
 static void load_observatories ();
 
-    const Tempo2::Observatory*
+const Tempo2::Observatory*
 Tempo2::observatory (const string& telescope_name)
 {
     load_observatories ();
+
+    DEBUG("Tempo2::observatory name='" << telescope_name << "'");
 
     // simpler ask the object to check if it is an alias
     for (unsigned i=0; i < antennae.size(); i++) {

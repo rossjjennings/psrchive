@@ -11,6 +11,9 @@
 #include "Horizon.h"
 #include "Meridian.h"
 #include "KrausType.h"
+#include "debug.h"
+
+using namespace std;
 
 //! Default constructor
 Pulsar::Telescope::Telescope ()
@@ -55,7 +58,11 @@ Pulsar::Telescope::~Telescope ()
 //! Set the coordinates of the telescope based on known tempo codes
 void Pulsar::Telescope::set_coordinates (const std::string& code)
 {
+  DEBUG("Telescope::set_coordinates code=" << code);
+
   const Site* site = Site::location (code);
+
+  DEBUG("Telescope::set_coordinates Site::location ptr=" << (void*) site);
 
   double lat, lon, rad;
   site->get_sph (lat, lon, rad);

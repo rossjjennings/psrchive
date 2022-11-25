@@ -158,8 +158,16 @@ void Pulsar::PlotScale::get_range (float& min, float& max) const
   if (num_indeces > 1 && index_range != unset_indeces)
   {
     double span = max - min;
-    max = min + span * (double(index_range.second)/double(num_indeces-1));
-    min = min + span * (double(index_range.first)/double(num_indeces-1));
+    max = min + span * (double(index_range.second)/double(num_indeces));
+    min = min + span * (double(index_range.first)/double(num_indeces));
+
+#if _DEBUG
+    cerr << "Pulsar::PlotScale::get_range num_indeces=" << num_indeces
+         << " span=" << span << " max=" << max << " min=" << min 
+         << " imin=" << index_range.first << " imax=" << index_range.second 
+         << endl;
+#endif
+
     return;
   }
   
@@ -208,7 +216,39 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
     }
     return;
   }
- 
+
+  float min = 0.0;
+  float max = 1.0;
+
+  get_axis_indeces (n, min, max, cyclic);
+
+  imin = unsigned( min );
+  imax = unsigned( ceil(max) );
+
+  if (!cyclic)
+  {
+    if (imin > n)
+      imin = n;
+
+    if (imax > n)
+      imax = n;
+
+    if (imin > imax)
+      std::swap (imin, imax);
+  }
+}
+
+void Pulsar::PlotScale::get_axis_indeces (unsigned n,
+                                          float& imin, float& imax,
+                                          bool cyclic) const 
+{
+  if (num_indeces == n && index_range != unset_indeces)
+  {
+    imin = index_range.first;
+    imax = index_range.second;
+    return;
+  }
+
   float min = 0.0;
   float max = 1.0;
 
@@ -254,18 +294,7 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
       max = 0;
   }
 
-  imin = unsigned( min * n );
-  imax = unsigned( max * n );
-
-  if (!cyclic)
-  {
-    if (imin > n)
-      imin = n;
-
-    if (imax > n)
-      imax = n;
-
-    if (imin > imax)
-      std::swap (imin, imax);
-  }
+  imin = min * n;
+  imax = max * n;
 }
+

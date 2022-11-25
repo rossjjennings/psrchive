@@ -96,6 +96,10 @@ void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
   std::pair<unsigned,unsigned> crange = get_chan_range (data);
   unsigned nchan = crange.second - crange.first;
 
+  if (verbose)
+    cerr << "Pulsar::DynamicSpectrumPlot::draw chan min=" << crange.first 
+         << " max=" << crange.second << endl;
+
   // Fill in data array
   float *plot_array = new float [nchan * nsub];
   get_plot_array(data, plot_array);
@@ -117,16 +121,28 @@ void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
   // cerr << "DynamicSpectrumPlot data min/max = (" << data_min 
   //  << "," << data_max << ")" << endl;
 
-  float x_res = (x_max-x_min)/nsub;
-  float y_res = (y_max-y_min)/nchan;
+  // plot boundaries do not necessarily align with integer array boundaries
+  float x_imin = 0;
+  float x_imax = 0;
+  get_frame()->get_x_scale()->get_axis_indeces (data->get_nsubint(), x_imin, x_imax);
 
-  float trf[6] = { x_min - 0.5f*x_res, x_res, 0.0f,
-		   y_min - 0.5f*y_res, 0.0f, y_res };
+  float x_res = (x_max-x_min)/(x_imax-x_imin);
+  float x_ioff = -x_imin + unsigned(x_imin) - 0.5;
+
+  float y_imin = 0;
+  float y_imax = 0;
+  get_frame()->get_y_scale()->get_axis_indeces (data->get_nchan(), y_imin, y_imax);
+
+  float y_res = (y_max-y_min)/(y_imax-y_imin);
+  float y_ioff = -y_imin + unsigned(y_imin) - 0.5;
+
+  float trf[6] = { x_min + x_ioff*x_res, x_res, 0.0f,
+		   y_min + y_ioff*y_res, 0.0f, y_res };
 
   cpgimag (plot_array, nsub, nchan,
 	   1, nsub, 1, nchan, 
 	   data_min, data_max, trf);
 
   delete [] plot_array;
-
 }
+

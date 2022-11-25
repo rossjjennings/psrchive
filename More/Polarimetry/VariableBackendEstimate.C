@@ -440,7 +440,7 @@ void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap,
     if (backend->get_infit(iparam))
       imap[iparam] = backend_imap[iparam];
 
-  if (cal_gain)
+  if (cal_gain && get_cal_response()->has_index())
   {
     if (gain_imap.size() == 0)
       throw Error (InvalidState, "VariableBackendEstimate::compute_covariance",

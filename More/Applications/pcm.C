@@ -39,12 +39,14 @@
 #include "Pulsar/Interpreter.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/VariableBackend.h"
 #include "Pulsar/ReflectStokes.h"
 #include "Pulsar/ProjectionCorrection.h"
+#include "Pulsar/Receiver.h"
 
 #include "RealTimer.h"
 #include "Error.h"
@@ -707,6 +709,8 @@ vector<string> equation_configuration;
 bool unload_each_calibrated = true;
 bool fscrunch_data_to_template = false;
 
+bool reparallactify = false;
+
 string unload_path;
 string output_filename = "pcm.fits";
 
@@ -980,6 +984,9 @@ void pcm::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &pcm::set_projection, 'P', "file");
   arg->set_help ("load projection transformations from file");
+
+  arg = menu.add (reparallactify, "repara");
+  arg->set_help ("reparallactify the input data");
 
   arg = menu.add (ionospheric_rm, "iono", "rm");
   arg->set_help ("ionospheric Faraday rotation measure");
@@ -1320,6 +1327,29 @@ void pcm::process (Pulsar::Archive* archive)
       cerr << "pcm: preparing pulsar data" << endl;
 
     prepare->prepare (archive);
+  }
+
+  if (reparallactify)
+  {
+     cerr << "pcm: re-parallactifying data" << endl;
+     ProjectionCorrection projection;
+
+     Pulsar::Receiver* rcvr = archive->get<Receiver>();
+     if (!rcvr)
+       throw Error (InvalidState, "pcm reparallactify",
+                    "no Receiver extension available");
+
+     rcvr->set_projection_corrected (false);
+
+     projection.set_archive( archive );
+
+     unsigned nsub = archive->get_nsubint();
+     for (unsigned isub=0; isub < nsub; isub++)
+     {
+       Pulsar::Integration* subint = archive->get_Integration (isub);
+       Jones<double> xform = projection (isub);
+       subint->expert()->transform (xform);
+     }
   }
 
   if (!model)

@@ -17,17 +17,29 @@
 #include "T2Observatory.h"
 #endif
 
-#include <iostream>
-using namespace std;
+#include "debug.h"
 
 static Warning warn;
 
 void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
-    std::string emsg;
+  std::string emsg;
 
-    char oldcode = ' '; // should replace with new codes before we run out of letters!
+  /* WvS 2020-09-11
+   * The following line makes things a little more robust to errors such as
+   * telescope codes not found, or conflicting one-letter codes in use in
+   * different places.  Without this line, the Telescope::name attribute
+   * is left 'unknown' even when the Archive::telescope attribute is set.
+   */
+
+  t->set_name( a->get_telescope() );
+
+  char oldcode = ' '; // should replace with new codes before we run out of letters!
+
 #ifdef HAVE_TEMPO2
+
+  DEBUG("Telescopes::set_telescope_info HAVE_TEMPO2");
+
     try {
         std::string newcode = Tempo2::observatory (a->get_telescope())->get_name();
         if (newcode.compare("JB_42ft")==0){
@@ -42,19 +54,23 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
         }
 
         if (oldcode != 0)
+        {
+          DEBUG("Telescopes::set_telescope_info Tempo2::observatory->get_code");
           oldcode = Tempo2::observatory (a->get_telescope())->get_code();
+        }
     }
     catch (Error& error)
     {
-        oldcode = Tempo::code( a->get_telescope() );
+      DEBUG("Telescopes::set_telescope_info HAVE_TEMPO2 call Tempo::code");
+      oldcode = Tempo::code( a->get_telescope() );
     }
 #else
 
-    oldcode=Tempo::code( a->get_telescope() );
+  DEBUG("Telescopes::set_telescope_info call Tempo::code");
+  oldcode=Tempo::code( a->get_telescope() );
 #endif
 
-
-    switch ( oldcode )
+  switch ( oldcode )
     {
 
         case 0:
@@ -153,7 +169,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
         default: 
             // Unknown code, throw error after calling Telecope::set_coordinates
             emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
-            warn << emsg << endl;
+            warn << emsg << std::endl;
             break;
     }
 
@@ -167,7 +183,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
     }
 
     if (!emsg.empty())
-        throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info", emsg);
+      throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info", emsg);
 }
 
 // Info for each telescope below.  Maybe the coordinate setting

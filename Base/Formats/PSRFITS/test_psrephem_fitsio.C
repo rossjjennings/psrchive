@@ -18,7 +18,7 @@
 using namespace std;
 using Legacy::psrephem;
 
-int main (int argc, char** argv)
+int main (int argc, char** argv) try
 {
   bool verbose = false;
   int arg=1;
@@ -141,3 +141,10 @@ int main (int argc, char** argv)
 
   return 0;
 }
+catch (Error& error)
+{
+  cerr << "test_psrephem_fitsio error" << error << endl;
+  return -1;
+}
+
+

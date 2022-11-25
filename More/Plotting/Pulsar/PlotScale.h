@@ -65,9 +65,13 @@ namespace Pulsar {
     //! Return min and max scaled according to zoom
     void get_range (float& min, float& max) const;
 
-    //! Return indeces scaled according to zoom
+    //! Return array indeces that span the axis indeces
     void get_indeces (unsigned n, unsigned& imin, unsigned& imax,
 		      bool cyclic = false) const;
+
+    //! Return axis indeces scaled according to zoom
+    void get_axis_indeces (unsigned n, float& imin, float& imax,
+                           bool cyclic = false) const;
 
     //! Return min and max scaled according to zoom
     void get_range_external (float& min, float& max) const;
