@@ -68,7 +68,7 @@ protected:
 
   public:
 
-    void process (PolnProfile*);
+    void process (PolnProfile*, double weight = 1.0);
     
     //! Array of 4x4 fourth moments - one for each pulse phase bin
     std::vector< Matrix<4,4,double> > stokes_squared;
@@ -151,6 +151,8 @@ protected:
   bool extract_eigenvectors;
   bool smooth_eigenvectors;
   bool report_execution_times;
+
+  bool compute_weighted_mean_covariance;
  
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -195,6 +197,7 @@ psr4th::psr4th ()
   extract_eigenvectors = false;
   smooth_eigenvectors = false;
   report_execution_times = false;
+  compute_weighted_mean_covariance = false;
 }
 
 
@@ -223,6 +226,9 @@ void psr4th::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (cross_covariance_lags, "c", "nlag");
   arg->set_help ("compute the cross covariances between phase bins");
+
+  arg = menu.add (compute_weighted_mean_covariance, "w");
+  arg->set_help ("compute the weighted covariance");
 
   arg = menu.add (total_baseline, "B");
   arg->set_help ("remove the baseline, found from integrated total");
@@ -548,7 +554,12 @@ void psr4th::compute_moments (Archive* archive)
       Reference::To<PolnProfile> profile 
 	= subint->new_PolnProfile (ichan);
 
-      results[ichan].process (profile);
+      double weight = 1.0;
+
+      if (compute_weighted_mean_covariance)
+        weight = subint->get_weight (ichan);
+
+      results[ichan].process (profile, weight);
     }
 
     clock.stop();
@@ -560,16 +571,20 @@ void psr4th::compute_moments (Archive* archive)
   isub_offset += archive->get_nsubint();
 }
 
-void psr4th::result::process (PolnProfile* profile)
+void psr4th::result::process (PolnProfile* profile, double weight)
 {
   unsigned nbin = profile->get_nbin();
-  
+
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
     Stokes<double> S = profile->get_Stokes (ibin);
 
-    stokes[ibin] += S;
-    stokes_squared[ibin] += outer(S,S);
+    stokes[ibin] += weight * S;
+
+    auto product = outer(S,S);
+    product *= weight;
+
+    stokes_squared[ibin] += product; // outer(S,S) * weight;
   }
 
   if (cross_covariance_lags)
@@ -591,14 +606,17 @@ void psr4th::result::process (PolnProfile* profile)
 
 	  Stokes<double> Si = profiles[ilag]->get_Stokes (ibin);
 	  Stokes<double> Sj = profile->get_Stokes (jbin);
-	
-	  sum += outer(Si,Sj);
+
+          auto product = outer(Si,Sj);
+          product *= weight;
+
+	  sum += product; // outer(Si,Sj) * weight;
 	}
       }
     }
   }
   
-  count ++;
+  count += weight;
   
   if (hist_pa)
     histogram_pa (profile);
@@ -897,7 +915,7 @@ Matrix<4,4,double> psr4th::result::get_cross_covariance (unsigned ibin,
   Matrix<4,4,double> meansq;
   meansq = cross_covar.get_cross_covariance (ibin, jbin, ilag);
 
-  unsigned lag_count = count - ilag;
+  double lag_count = count - ilag;
   meansq /= lag_count;
 
   Stokes<double> imean = get_mean(ibin);
