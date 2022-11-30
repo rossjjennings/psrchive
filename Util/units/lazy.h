@@ -25,7 +25,7 @@
 
   Two symbols are created:
 
-  type* the_name
+  static type* the_name
   type& class::get_name ()
 
   and, when constructed:
@@ -34,7 +34,7 @@
 */
 
 #define LAZY_GLOBAL(class,type,name,value)		 \
-  type* the_##name = 0;					 \
+  static type* the_##name = 0;				 \
   type& class :: get_##name ()				 \
   {							 \
     if (! the_##name)					 \
