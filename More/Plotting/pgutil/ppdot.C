@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -16,16 +17,28 @@ void usage ()
   cerr << 
     "usage: ppdot file\n"
     "where 'file' contains columns with P and PDOT (10^-15)\n"
+    "      -s psr  to add a special symbol for the named pulsar\n"
        << endl;
+}
+
+template<typename Container, typename Type>
+
+bool found (const Container& container, const Type& element)
+{
+  return std::find (container.begin(), container.end(), element) != container.end();
 }
 
 int main (int argc, char** argv)
 {
-  string device = "/xs";
+  string device = "?";
   int c = 0;
 
-  while ((c = getopt(argc, argv, "hD:")) != -1) {
-    switch (c)  {
+  vector<string> special;
+
+  while ((c = getopt(argc, argv, "hD:s:")) != -1)
+  {
+    switch (c)
+    {
     case 'h':
       usage();
       return -1;
@@ -33,16 +46,22 @@ int main (int argc, char** argv)
     case 'D':
       device = optarg;
       break;
+
+    case 's':
+      special.push_back(optarg);
+      break;
     }
   }
 
-  if (optind >= argc) {
+  if (optind >= argc)
+  {
     usage();
     return -1;
   }
 
   FILE* fptr = fopen(argv[optind],"r");
-  if (!fptr) {
+  if (!fptr)
+  {
     fprintf (stderr, "%s not found\n", argv[1]);
     return -1;
   }
@@ -50,32 +69,40 @@ int main (int argc, char** argv)
   char name[32];
   float p1, pdot1, pb1, e;
   vector<float> p, pdot, pb;
-  int psr = -1;
+  vector<unsigned> psr;
 
-  while (fscanf (fptr, "%s %f %f %f %f %f %f\n", 
-		 name, &p1, &e, &pdot1, &e, &pb1, &e) == 7) {
-    if (p1 < 0.001 || p1 > 10) {
-      // cerr << "bad p: " << p1 << " " << pdot1 << endl;
+  int scanned = 0;
+
+  while ((scanned = fscanf (fptr, "%s %f %f %f\n", 
+		 name, &p1, &pdot1, &pb1)) == 4) 
+  {
+    cerr << "psr=" << name << " P=" << p1 << " Pdot=" << pdot1 << endl;
+
+    if (p1 < 0.001 || p1 > 10)
+    {
+      cerr << "bad p: " << p1 << " " << pdot1 << endl;
       continue;
     }
 
-    if (pdot1 < 1e-6 || pdot1 > 1e5) {
-      // cerr << "bad pdot: " << p1 << " " << pdot1 << endl;
+    if (pdot1 < 1e-20 || pdot1 > 1e-9)
+    {
+      cerr << "bad pdot: " << p1 << " " << pdot1 << endl;
       continue;
     }
 
-    if (string(name) == "J0437-4715")
-      psr = p.size();
+    if ( found (special, string(name)) )
+      psr.push_back( p.size() );
 
     p.push_back (p1);
     pdot.push_back (pdot1);
     pb.push_back (pb1);
   }
 
-  if (psr == -1)
-    cerr << "0437 not found" << endl;
-  else
-    cerr << "0437 P: " << p[psr] << endl;
+  cerr << "Columns scanned from last line: " << scanned << endl;
+
+  cerr << "Loaded from file: " << p.size() << endl;
+
+  cerr << "Special pulsars: " << psr.size() << endl;
 
   float xmin=0, xmax=0;
   float ymin=0, ymax=0;
@@ -91,7 +118,7 @@ int main (int argc, char** argv)
     if (ipt==0 || x > xmax)
       xmax = x;
 
-    float y = log(pdot[ipt]) / log10 - 15;
+    float y = log(pdot[ipt]) / log10;
     pdot[ipt] = y;
     if (ipt==0 || y < ymin)
       ymin = y;
@@ -118,7 +145,7 @@ int main (int argc, char** argv)
   cpgsch (1.5);
   unsigned bin = 0;
   for (ipt=1; ipt<p.size(); ipt++) {
-    if (ipt == psr)
+    if ( found (psr, ipt) )
       continue;
     if (pb[ipt] == 0)
       cpgpt1 (p[ipt], pdot[ipt], 1);
@@ -129,11 +156,19 @@ int main (int argc, char** argv)
   }
   cerr << bin << "/" << p.size() << " binaries" << endl;
 
-  // mark 0437
-  cpgsch (2.5);
-  cpgpt1 (p[psr], pdot[psr], 2);
-  cpgsch (1.5);
-  cpgpt1 (p[psr], pdot[psr], 23);
+  // mark special pulsars
+  for (unsigned i=0; i < psr.size(); i++)
+  {
+    cpgslw (5);
+    cpgsci (2);
+    cpgsch (2.5);
+    cpgpt1 (p[psr[i]], pdot[psr[i]], 2);
+    cpgsch (1.5);
+    cpgpt1 (p[psr[i]], pdot[psr[i]], 23);
+  }
+
+  cpgsci(1);
+  cpgslw(1);
 
   // draw lines of constant inferred surface magnetic field strength
   // log(Pdot)+15 = 2(log(B)-12) - log(P)
@@ -144,13 +179,14 @@ int main (int argc, char** argv)
   cpgsls (2);
   
   int power = 9;
-  for (int i=0; i<3; i++) {
+  for (int i=0; i<3; i++) 
+  {
     cpgmove (x1, y1);
     cpgdraw (x2, y2);
 
     if (i<2) {
       char lab[32];
-      sprintf (lab, "10\\u%d\\dG", power);
+      sprintf (lab, "10\\u%d\\d G", power);
       cpgptxt (x1+xm, y1, 0,0, lab);
     }
 
@@ -179,7 +215,7 @@ int main (int argc, char** argv)
 
     if (i>0) {
       char lab[32];
-      sprintf (lab, "10\\u%d\\dyr", power);
+      sprintf (lab, "10\\u%d\\d yr", power);
       cpgptxt (x2-xm, y2, 0,1, lab);
     }
 
