@@ -52,6 +52,7 @@ void usage ()
     " -c sigma  cut-off sigma used in adaptive S/N method \n"
     " -p phs    phase centre of off-pulse baseline (implies -G)\n"
     " -r        reset weights (ie. ignore zero weights)\n"
+    " -t tscr   compute S/N from tscrunched clone \n"
     "\n"
     "Output options:\n"
     " -b scr    add scr phase bins together \n"
@@ -88,6 +89,8 @@ int main (int argc, char** argv) try
   bool snr_chosen = false;
   bool reset_weights = false;
 
+  unsigned from_tscrunched = 1;
+
   FourierSNR fourier_snr;
   StandardSNR standard_snr;
   AdaptiveSNR adaptive_snr;
@@ -100,7 +103,7 @@ int main (int argc, char** argv) try
   Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFGhm:M:no:Pp:qrTUs:S:vVw:";
+  const char* args = "b:c:DdFGhm:M:no:Pp:qrTt:Us:S:vVw:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -233,6 +236,10 @@ int main (int argc, char** argv) try
       tscrunch = 0;
       break;
 
+    case 't':
+      from_tscrunched = atof (optarg);
+      break;
+
     case 'U':
       Profile::rotate_in_phase_domain = true;
       break;
@@ -317,114 +324,123 @@ int main (int argc, char** argv) try
 
     copy -> pscrunch();
 
-    for (unsigned isub=0; isub < copy->get_nsubint(); isub++) {
+    if (from_tscrunched > 1)
+      copy -> tscrunch (from_tscrunched);
 
+    unsigned tscrunch_offset = 0;
+
+    for (unsigned isub=0; isub < copy->get_nsubint(); isub++)
+    {
       Pulsar::Integration* subint = copy->get_Integration (isub);
 
-      for (unsigned ichan=0; ichan < copy->get_nchan(); ichan++) {
+      for (unsigned ichan=0; ichan < copy->get_nchan(); ichan++)
+      {
+        float snr = 0.0;
 
-        if (subint->get_weight(ichan) == 0.0)
-          continue;
+        if (subint->get_weight(ichan) > 0.0)
+        {
+	  if (channel_standard)
+	    standard_snr.set_standard( standard->get_Profile (0,0,ichan) );
 
-	if (channel_standard)
-	  standard_snr.set_standard( standard->get_Profile (0,0,ichan) );
+	  Pulsar::Profile* profile = subint->get_Profile (0,ichan);
 
-	Pulsar::Profile* profile = subint->get_Profile (0,ichan);
+          if (standard)
+            snr = standard_snr.get_snr( profile );
+          else
+            snr = profile->snr ();
 
-	float snr = 0.0;
+	  if (!normal)
+          {
+	    unload_result = false;
 
-        if (standard)
-          snr = standard_snr.get_snr( profile );
-        else
-          snr = profile->snr ();
+	    double mean, variance;
 
-        if (normal)
-	  cout << filenames[ifile] << "(" << isub << ", " << ichan << ")"
-	       << " snr=" << snr << endl;
+	    if (snr_phase >= 0)
+            {
+	      // calculate the mean and variance at the specifed phase
+	      profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
+	    }
+	    else 
+            {
+	      Pulsar::PhaseWeight weight;
 
-	else {
+	      mask.set_Profile (profile);
+	      mask.get_weight (&weight);
+
+	      weight.stats (profile, &mean, &variance);
+	    }
+
+	    // sum the total power above the baseline
+	    double snr = profile->sum() - mean * profile->get_nbin();
 	    
-	  unload_result = false;
-
-	  double mean, variance;
-
-	  if (snr_phase >= 0) {
-
-	    // calculate the mean and variance at the specifed phase
-	    profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
+	    // calculate the rms
+	    float rms = sqrt (variance);
 	    
+	    // find the maximum bin
+	    int maxbin = profile->find_max_bin();
+
+	    // get the maximum value
+	    float max = profile->get_amps()[maxbin] - mean;
+	    
+	    double phase = double(maxbin) / double(subint->get_nbin());
+            if (!quiet)
+              cerr << "phase=" << phase << endl;
+	    double seconds = phase * subint->get_folding_period();
+            if (!quiet)
+              cerr << "seconds=" << seconds << endl;
+	    
+	    // calculate the epoch of the maximum
+	    MJD epoch = subint->get_epoch() + seconds;
+	  
+	    cout << filenames[ifile] << " epoch=" << epoch << " max/rms="
+	         << max/rms << " rms=" << rms << " sum=" << snr;
+	  
+	    snr /= sqrt ( profile->get_nbin() * variance );
+	  
+	    cout << " snr=" << snr << endl;
+	    cout.flush();
+
+	    continue;
 	  }
 
-	  else {
+          cout << filenames[ifile] << "(" << isub << ", " << ichan << ")"
+               << " snr=" << snr << endl;
 
+	  if (snr_threshold && snr < snr_threshold)
+	    snr = 0.0;
+
+	  if (normalize_data)
+          {
 	    Pulsar::PhaseWeight weight;
 
 	    mask.set_Profile (profile);
 	    mask.get_weight (&weight);
-
+	  
+	    double mean, variance;
 	    weight.stats (profile, &mean, &variance);
 
+	    double scale = 1.0/sqrt(variance);
+
+	    for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
+	      archive->get_Profile (isub,ipol,ichan)->scale (scale);
 	  }
+        } // data have weight greater than zero
 
-	  // sum the total power above the baseline
-	  double snr = profile->sum() - mean * profile->get_nbin();
-	    
-	  // calculate the rms
-	  float rms = sqrt (variance);
-	    
-	  // find the maximum bin
-	  int maxbin = profile->find_max_bin();
-
-	  // get the maximum value
-	  float max = profile->get_amps()[maxbin] - mean;
-	    
-	  double phase = double(maxbin) / double(subint->get_nbin());
-          if (!quiet)
-            cerr << "phase=" << phase << endl;
-	  double seconds = phase * subint->get_folding_period();
-          if (!quiet)
-            cerr << "seconds=" << seconds << endl;
-	    
-	  // calculate the epoch of the maximum
-	  MJD epoch = subint->get_epoch() + seconds;
-	  
-	  cout << filenames[ifile] << " epoch=" << epoch << " max/rms="
-	       << max/rms << " rms=" << rms << " sum=" << snr;
-	  
-	  snr /= sqrt ( profile->get_nbin() * variance );
-	  
-	  cout << " snr=" << snr << endl;
-	  cout.flush();
-
-	}
-
-	if (!normal)
-	  continue;
-	
-	if (snr_threshold && snr < snr_threshold)
-	  snr = 0.0;
-
-	if (normalize_data)
+        for (unsigned jsub=0; jsub < from_tscrunched; jsub ++)
         {
-	  Pulsar::PhaseWeight weight;
+          unsigned ksub = isub*from_tscrunched + jsub;
 
-	  mask.set_Profile (profile);
-	  mask.get_weight (&weight);
-	  
-	  double mean, variance;
-	  weight.stats (profile, &mean, &variance);
+          if (ksub < archive->get_nsubint())
+          {
+            Integration* subint = archive->get_Integration (ksub);
+            if (subint->get_weight(ichan) > 0.0)
+	      subint->set_weight(ichan,snr*snr);
+          }
+        }
 
-	  double scale = 1.0/sqrt(variance);
+      } // for each channel
 
-	  for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
-	    archive->get_Profile (isub,ipol,ichan)->scale (scale);
-	}
-
-	for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
-	  archive->get_Profile (isub,ipol,ichan)->set_weight(snr*snr);
-      }
-
-    }
+    } // for each subint
 
     if (bscrunch > 0)
       archive -> bscrunch (bscrunch);
