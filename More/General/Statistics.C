@@ -81,6 +81,35 @@ unsigned Pulsar::Statistics::get_cal_ntrans () const
   return wave.count_transitions (get_Profile());
 }
 
+/* The effective sample size, n_eff = n / D_eff, where D_eff is the design effect; e.g. https://en.wikipedia.org/wiki/Design_effect#Haphazard_weights_with_estimated_ratio-mean_(%7F'%22%60UNIQ--postMath-0000003A-QINU%60%22'%7F)_-_Kish's_design_effect */
+double Pulsar::Statistics::get_design_effect () const
+{
+  const Archive* archive = get_Archive();
+  unsigned nsubint = archive->get_nsubint();
+
+  unsigned count;
+  double sum = 0;
+  double sumsq = 0;
+
+  for (unsigned isub=0; isub < nsubint; isub++)
+  {
+    const Integration* subint = archive->get_Integration(isub);
+    unsigned nchan = subint->get_nchan();
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      double w = subint->get_weight(ichan);
+      sum += w;
+      sumsq += w*w;
+      count ++;
+    }
+  }
+
+  double mean = sum / count;
+  double meansq = sumsq / count;
+
+  return meansq / (mean*mean);
+}
+
 unsigned Pulsar::Statistics::get_nzero () const
 {
   unsigned count = 0;

@@ -48,6 +48,9 @@ namespace Pulsar {
     //! Get the number of profiles that have zero weight
     unsigned get_nzero () const;
 
+    //! Get Kish's design effect
+    double get_design_effect () const;
+
     //! Get the predicted level of 2-bit distortion
     double get_2bit_dist () const;
     

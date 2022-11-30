@@ -65,6 +65,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_nzero,
        "nzap", "Number of zeroed profiles" );
 
+  add( &Statistics::get_design_effect,
+       "Deff", "Kish's design effect of profile weights");
+
   add( &Statistics::get_2bit_dist,
        "d2bit", "2-bit distortion" );
 
