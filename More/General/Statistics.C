@@ -81,6 +81,27 @@ unsigned Pulsar::Statistics::get_cal_ntrans () const
   return wave.count_transitions (get_Profile());
 }
 
+unsigned Pulsar::Statistics::get_nzero () const
+{
+  unsigned count = 0;
+
+  const Archive* archive = get_Archive();
+  unsigned nsubint = archive->get_nsubint();
+
+  for (unsigned isub=0; isub < nsubint; isub++)
+  {
+    const Integration* subint = archive->get_Integration(isub);
+    unsigned nchan = subint->get_nchan();
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (subint->get_weight(ichan) == 0)
+        count ++;
+    }
+  }
+
+  return count;
+}
+
 //! Get the two bit distortion (or distance from theory)
 double Pulsar::Statistics::get_2bit_dist () const
 {

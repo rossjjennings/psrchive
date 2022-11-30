@@ -62,6 +62,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_cal_ntrans,
        "ncal", "Number of CAL transitions" );
 
+  add( &Statistics::get_nzero,
+       "nzap", "Number of zeroed profiles" );
+
   add( &Statistics::get_2bit_dist,
        "d2bit", "2-bit distortion" );
 

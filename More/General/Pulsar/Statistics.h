@@ -45,6 +45,9 @@ namespace Pulsar {
     //! Get the number of cal transitions
     unsigned get_cal_ntrans () const;
 
+    //! Get the number of profiles that have zero weight
+    unsigned get_nzero () const;
+
     //! Get the predicted level of 2-bit distortion
     double get_2bit_dist () const;
     
