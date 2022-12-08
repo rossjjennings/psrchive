@@ -13,6 +13,7 @@
 
 #include "Pulsar/InterpreterExtension.h"
 #include "Pulsar/Config.h"
+#include <vector>
 
 namespace Pulsar {
 
@@ -32,6 +33,9 @@ namespace Pulsar {
     //! delete the specified integrations
     std::string subint (const std::string& args);
 
+    //! delete the specified fraction of the band from the edges
+    std::string edge (const std::string& args);
+
     //! delete the specified ranges of frequencies
     std::string freq (const std::string& args);
 
@@ -45,6 +49,8 @@ namespace Pulsar {
     std::string empty ();
 
   protected:
+
+    void delete_channels (std::vector<unsigned>& channels);
 
     static Option<bool> adjust_metadata_while_deleting_channels;
   };

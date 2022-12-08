@@ -47,8 +47,14 @@ Pulsar::DeleteInterpreter::DeleteInterpreter ()
 
   add_command
     ( &DeleteInterpreter::subint,
-      "subint", "delete specified integrationss",
+      "subint", "delete specified integrations",
       index_help("subint") );
+
+  add_command
+    ( &DeleteInterpreter::edge,
+      "edge", "delete fraction of band edges",
+      "usage: edge <fraction> \n"
+      "  float <fraction> fraction of band deleted from each edge \n");
 
   add_command
     ( &DeleteInterpreter::freq,
@@ -82,6 +88,39 @@ extern void parse_indeces (vector<unsigned>& indeces,
 		    const vector<string>& arguments,
 		    unsigned limit);
 
+void Pulsar::DeleteInterpreter::delete_channels (vector<unsigned>& channels)
+{
+  std::sort (channels.begin(), channels.end(), std::greater<unsigned>());
+
+  Archive* data = get();
+
+  // delete selected channels in all sub-integrations
+  unsigned nsubint = data->get_nsubint();
+
+  if (nsubint == 0)
+    return;
+
+  unsigned new_nchan = 0;
+
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
+    Integration* subint = data->get_Integration(isub);
+    for (unsigned i=0; i<channels.size(); i++)
+      subint->expert()->remove( channels[i] );
+
+    if (isub == 0)
+    {
+      new_nchan = subint->get_nchan();
+    }
+    else
+    {
+      assert (new_nchan == subint->get_nchan());
+    }
+  }
+
+  data->expert()->set_nchan( new_nchan );
+}
+
 string Pulsar::DeleteInterpreter::chan (const string& args) try 
 {
   double org_bw = get()->get_bandwidth();
@@ -92,26 +131,13 @@ string Pulsar::DeleteInterpreter::chan (const string& args) try
   vector<unsigned> channels;
   parse_indeces (channels, arguments, org_nchan);
 
-  std::sort (channels.begin(), channels.end(), std::greater<unsigned>());
-
-  // delete selected channels in all sub-integrations
-  unsigned nsubint = get()->get_nsubint();
-  for (unsigned isub=0; isub<nsubint; isub++)
-  {
-    Integration* subint = get()->get_Integration(isub);
-    for (unsigned i=0; i<channels.size(); i++)
-      subint->expert()->remove( channels[i] );
-  }
-
-  unsigned new_nchan = get()->get_Integration(0)->get_nchan();
-  if (get()->get_nsubint() > 0)
-    get()->expert()->set_nchan( new_nchan );
+  delete_channels (channels);
 
   if (adjust_metadata_while_deleting_channels)
   {
     get()->set_bandwidth(org_bw - (double)channels.size() * chan_bw);
     // Do we always want to reset center freq?
-    if (new_nchan>0) {
+    if (get()->get_nchan()>0) {
       get()->update_centre_frequency();
     }
   }
@@ -139,6 +165,36 @@ string Pulsar::DeleteInterpreter::subint (const string& args) try
   return response (Good);
 }
 catch (Error& error) {
+  return response (error);
+}
+
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::DeleteInterpreter::edge (const string& args)
+try {
+
+  float fraction = setup<float> (args);
+
+  if (fraction <= 0.0 || fraction >= 0.5)
+    return response (Fail, "invalid fraction " + tostring(fraction));
+
+  unsigned nchan = get()->get_nchan();
+  unsigned nedge = unsigned( nchan * fraction );
+
+  vector<unsigned> channels;
+
+  for (unsigned ichan=0; ichan < nedge; ichan++)
+    channels.push_back (ichan);
+
+  for (unsigned ichan=nchan-nedge; ichan < nchan; ichan++)
+    channels.push_back (ichan);
+
+  delete_channels (channels);
+  return response (Good);
+
+}
+catch (Error& error)
+{
   return response (error);
 }
 
