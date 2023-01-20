@@ -11,7 +11,7 @@ using namespace std;
 
 void Pulsar::Archive::remove_chan (unsigned first, unsigned last)
 {
-  unsigned cur_nsub = expert()->get_size();
+  unsigned cur_nsub = get_nsubint();
   unsigned cur_nchan = get_nchan();
   double bw = get_bandwidth();
   double chan_bw = bw / (double)cur_nchan;
