@@ -141,6 +141,15 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 
 %ignore Pulsar::FrontendCorrection::new_Extension() const;
 
+// These return Jones<double> instances which swig 4.x currently
+// seems to have issues wrapping.  If needed from python a better
+// way would be to typemap Jones<double> to 2-by-2 numpy arrays
+// (or some similar approach).
+// https://sourceforge.net/p/psrchive/bugs/471/
+%ignore Pulsar::FrontendCorrection::get_transformation(unsigned);
+%ignore Pulsar::FrontendCorrection::get_basis();
+%ignore Pulsar::FrontendCorrection::get_projection(unsigned);
+
 // Also does not use the assignment operator
 %ignore Pulsar::Archive::operator=(const Archive&);
 %ignore Pulsar::Integration::operator=(const Integration&);
