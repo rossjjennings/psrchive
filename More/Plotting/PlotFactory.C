@@ -120,7 +120,7 @@ Pulsar::PlotFactory::PlotFactory ()
         ( 'd', "dstat", "Dynamic statistic spectrum" ) );
   
   add ( new PlotFactory::Advocate<DynamicBaselineSpectrumPlot>
-        ( 'r', "offdspec", "Dynamic baseline spectrum" ) );
+        ( 'r', "offdspec", "Dynamic baseline spectrum (used by psrzap)" ) );
   
   add ( new PlotFactory::Advocate<DynamicCalSpectrumPlot>
         ( 'l', "dcal", "Calibrator dynamic spectrum" ) );
