@@ -87,9 +87,13 @@ namespace TextInterface
     //! Method of C that returns TextInterface::Parser
     GetParser get_parser_method;
 
-    Parser* get_parser (const C* ptr) const
+    Parser* get_parser (const C* ptr) const try
     { 
       return (const_cast<C*>(ptr)->*get_parser_method)();
+    }
+    catch (Error& error)
+    {
+      throw error += "DirectInterface::get_parser";
     }
   };
 
@@ -113,10 +117,14 @@ namespace TextInterface
     //! Method of C that returns TextInterface::Parser
     GetParser get_parser_method;
 
-    Parser* get_parser (const C* ptr) const
+    Parser* get_parser (const C* ptr) const try
     { 
       Type tptr = (const_cast<C*>(ptr)->*(this->get))();
       return (tptr->*get_parser_method)();
+    }
+    catch (Error& error)
+    {
+      throw error += "IndirectInterface::get_parser";
     }
   };
 
@@ -297,7 +305,7 @@ namespace TextInterface
 
 template<class C, class T, class G, class S> 
 std::string
-TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const
+TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const try
 {
   if (help)
   {
@@ -313,20 +321,28 @@ TextInterface::OptionalInterface<C,T,G,S>::get_value (const C* ptr) const
 
   return AttributeGetSet<C,T,G,S>::get_value (ptr);
 }
+catch (Error& error)
+{
+  return "-";
+}
 
 template<class C, class T, class G, class S>
 void TextInterface::OptionalInterface<C,T,G,S>::set_value (C* ptr,
-							  const std::string& val)
+							  const std::string& val) try
 {
   if (value)
     value->set_value (val);
   else
     AttributeGetSet<C,T,G,S>::set_value (ptr, val);
 }
+catch (Error& error)
+{
+  throw error += "TextInterface::OptionalInterface::set_value";
+}
 
 template<class C, class T, class G, class S>
 bool TextInterface::OptionalInterface<C,T,G,S>::matches
-  (const std::string& text) const
+  (const std::string& text) const try
 {
 #ifdef _DEBUG
   std::cerr << "TextInterface::OptionalInterface::matches"
@@ -372,7 +388,16 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
     " getting Parser" << std::endl;
 #endif
 
-  Parser* parser = get_parser(this->instance);
+  Parser* parser = 0;
+
+  try
+  {
+    parser = get_parser(this->instance);
+  }
+  catch (Error&)
+  {
+    return false;
+  }
 
   if (!parser)
     return false;
@@ -401,10 +426,13 @@ bool TextInterface::OptionalInterface<C,T,G,S>::matches
 
   return true;
 }
-
+catch (Error& error)
+{
+  throw error += "TextInterface::OptionalInterface::matches";
+}
 
 template<class C, class T, class G, class S>
-void TextInterface::OptionalInterface<C,T,G,S>::set_modifiers (const std::string& modifiers) const
+void TextInterface::OptionalInterface<C,T,G,S>::set_modifiers (const std::string& modifiers) const try
 {
   if (value)
   {
@@ -423,16 +451,23 @@ void TextInterface::OptionalInterface<C,T,G,S>::set_modifiers (const std::string
     AttributeGetSet<C,T,G,S>::set_modifiers (modifiers);
   }
 }
+catch (Error& error)
+{
+  throw error += "TextInterface::OptionalInterface::set_modifiers";
+}
 
 template<class C, class T, class G, class S>
-void TextInterface::OptionalInterface<C,T,G,S>::reset_modifiers () const
+void TextInterface::OptionalInterface<C,T,G,S>::reset_modifiers () const try
 {
   if (value)
     value->reset_modifiers ();
   else
     AttributeGetSet<C,T,G,S>::reset_modifiers ();
 }
-
+catch (Error& error)
+{
+  throw error += "TextInterface::OptionalInterface::reset_modifiers";
+}
 
 
 
@@ -443,7 +478,7 @@ void TextInterface::OptionalInterface<C,T,G,S>::reset_modifiers () const
 
 template<class V, class G, class S> 
 std::string
-TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
+TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const try
 {
   std::vector<unsigned> ind;
   parse_indeces (ind, this->range, (ptr->*(this->size))());
@@ -480,10 +515,14 @@ TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
 
   return result;
 }
+catch (Error& error)
+{
+  throw error += "TextInterface::VectorOfInterfaces::get_value";
+}
 
 template<class V, class G, class S>
 void TextInterface::VectorOfInterfaces<V,G,S>::set_value (V* ptr,
-							  const std::string& val)
+							  const std::string& val) try
 {
   std::vector<unsigned> ind;
   parse_indeces (ind, range, (ptr->*size)());
@@ -494,11 +533,14 @@ void TextInterface::VectorOfInterfaces<V,G,S>::set_value (V* ptr,
     parser->set_value (remainder, val);
   }
 }
-
+catch (Error& error)
+{
+  throw error += "TextInterface::VectorOfInterfaces::set_value";
+}
 
 template<class C,class Get,class Size>
  bool TextInterface::VectorOfInterfaces<C,Get,Size>::matches
-  (const std::string& name) const
+  (const std::string& name) const try
 {
 #ifdef _DEBUG
   std::cerr << "TextInterface::VectorOfInterfaces::matches" << std::endl;
@@ -527,11 +569,14 @@ template<class C,class Get,class Size>
   }
   return true;
 }
-
+catch (Error& error)
+{
+  throw error += "TextInterface::VectorOfInterfaces::matches";
+}
 
 template<class M, class K, class G> 
 std::string
-TextInterface::MapOfInterfaces<M,K,G>::get_value (const M* ptr) const
+TextInterface::MapOfInterfaces<M,K,G>::get_value (const M* ptr) const try
 {
   std::vector<K> ind;
   get_indeces (ind, range);
@@ -557,10 +602,14 @@ TextInterface::MapOfInterfaces<M,K,G>::get_value (const M* ptr) const
 
   return result;
 }
+catch (Error& error)
+{
+  throw error += "TextInterface::MapOfInterfaces::get_value";
+}
 
 template<class M, class K, class G>
 void TextInterface::MapOfInterfaces<M,K,G>::set_value (M* ptr,
-						    const std::string& val)
+						    const std::string& val) try
 {
   std::vector<K> ind;
   get_indeces (ind, range);
@@ -571,11 +620,15 @@ void TextInterface::MapOfInterfaces<M,K,G>::set_value (M* ptr,
     parser->set_value (remainder, val);
   }
 }
+catch (Error& error)
+{
+  throw error += "TextInterface::MapOfInterfaces::set_value";
+}
 
 template<class M, class K, class G>
 void
 TextInterface::MapOfInterfaces<M,K,G>::get_indeces (std::vector<K>& indeces,
-						 const std::string& par) const
+						 const std::string& par) const try
 {
 #ifdef _DEBUG
   std::cerr << "MapOfInterfaces::get_indeces " << par << std::endl;
@@ -600,10 +653,14 @@ TextInterface::MapOfInterfaces<M,K,G>::get_indeces (std::vector<K>& indeces,
   for (unsigned i=0; i<key_str.size(); i++)
     indeces[i] = fromstring<K>(key_str[i]);
 }
+catch (Error& error)
+{
+  throw error += "TextInterface::MapOfInterfaces::get_indeces";
+}
 
 template<class M, class K, class G>
  bool TextInterface::MapOfInterfaces<M,K,G>::matches
-  (const std::string& name) const
+  (const std::string& name) const try
 {
 #ifdef _DEBUG
   std::cerr << "TextInterface::MapOfInterfaces::matches" << std::endl;
@@ -628,6 +685,10 @@ template<class M, class K, class G>
       return false;
   }
   return true;
+}
+catch (Error& error)
+{
+  throw error += "TextInterface::MapOfInterfaces::matches";
 }
 
 #endif
