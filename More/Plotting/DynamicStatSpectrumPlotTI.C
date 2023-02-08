@@ -10,11 +10,14 @@
 #include "Pulsar/DynamicSpectrumPlot.h"
 #include "Pulsar/ProfileStatistic.h"
 
+#include <iostream>
+using namespace std;
+
 Pulsar::DynamicStatSpectrumPlot::Interface::Interface( 
-    DynamicStatSpectrumPlot *instance )
+    DynamicStatSpectrumPlot* _instance )
 {
-  if( instance )
-    set_instance( instance );
+  if ( _instance )
+    set_instance( _instance );
 
   add( &DynamicStatSpectrumPlot::get_statistic,
        &DynamicStatSpectrumPlot::set_statistic,
@@ -22,3 +25,4 @@ Pulsar::DynamicStatSpectrumPlot::Interface::Interface(
 
   import( DynamicSpectrumPlot::Interface() );
 }
+
