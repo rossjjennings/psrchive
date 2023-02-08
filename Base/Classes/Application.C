@@ -237,7 +237,7 @@ int Pulsar::Application::main (int argc, char** argv) try
 }
 catch (Error& error)
 {
-  cerr << name << ": " << error.get_message() << endl;
+  cerr << name << ": " << error << endl;
   return -1;
 }
 
