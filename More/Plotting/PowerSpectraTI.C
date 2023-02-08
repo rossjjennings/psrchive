@@ -30,4 +30,8 @@ Pulsar::PowerSpectra::Interface::Interface (PowerSpectra* instance)
   add( &PowerSpectra::get_draw_lines,
        &PowerSpectra::set_draw_lines,
        "lines", "Connect points with lines" );
+
+  add( &PowerSpectra::get_skip_zapped,
+       &PowerSpectra::set_skip_zapped,
+       "skip", "Skip channels with zero weight" );
 }

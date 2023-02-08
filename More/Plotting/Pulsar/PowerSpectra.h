@@ -62,6 +62,11 @@ namespace Pulsar {
     //! Get draw lines flag
     bool get_draw_lines () const { return draw_lines; }
 
+    //! Set skip zapped flag
+    void set_skip_zapped (bool flag) { skip_zapped = flag; }
+    //! Get skip zapped flag
+    bool get_skip_zapped () const { return skip_zapped; }
+
     //! Plot on a logarithmic scale
     void set_logarithmic (bool val) { logarithmic = val; }
     bool get_logarithmic () const { return logarithmic; }
@@ -83,6 +88,7 @@ namespace Pulsar {
 
     unsigned median_window;
     bool draw_lines;
+    bool skip_zapped;
     bool logarithmic;
 
   private:

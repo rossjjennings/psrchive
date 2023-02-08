@@ -24,6 +24,7 @@ Pulsar::PowerSpectra::PowerSpectra ()
 {
   isubint = ipol = 0;
   draw_lines = true;
+  skip_zapped = false;
   median_window = 0;
   logarithmic = false;
 
@@ -128,6 +129,59 @@ void Pulsar::PowerSpectra::draw (const Archive* data)
   }
 }
 
+// Plots the bandpass but places splodges where weights are zero.
+void cpgbpass(int nchan, const float* xaxis, const float* bpass)
+{
+  // determine minimum and maximum - max not used at present
+
+// find out what the PGPLOT CI is now? 
+  int pgplot_ci; 
+  cpgqci(&pgplot_ci);
+
+  float ymin = bpass[0];
+  float ymax = bpass[0];
+  for (int i=1;i<nchan;i++){
+    if (bpass[i]<ymin) ymin=bpass[i];
+    if (bpass[i]>ymax) ymax=bpass[i];
+  }
+  // draw splodges at the bottom in dark grey 
+  //fprintf(stderr,"Setting CI to 14\n");
+  cpgscr(16,0.2,0.2,0.2);
+  cpgsci(16);
+  int istart=-1; // zero region hasn't started
+  int iend=-1;   // zero region hasn't ended
+  for (int i=0;i<nchan;i++){
+    // find the first zeroed bpass
+    if ((fabs(bpass[i]-ymin)/(ymax-ymin)<0.001)&&(istart == (-1))) {
+      //cpgpt1(xaxis[i],bpass[i],17);
+      istart = i;
+    }
+    // determine if it is still zero
+    if ((fabs(bpass[i]-ymin)/(ymax-ymin)<0.001)&&(istart != (-1))) {
+      //cpgpt1(xaxis[i],bpass[i],17);
+      iend = i;
+    }    
+    // once it returns to zero - plot the grey region and reset
+    if ((fabs(bpass[i]-ymin)/(ymax-ymin)>=0.001)) {
+      //cpgpt1(xaxis[i],bpass[i],17);
+      cpgsfs(1);
+      cpgrect(xaxis[istart],xaxis[iend],ymin,ymax);
+      istart=-1;
+      iend=-1;
+    }
+
+  }
+  //draw bandpass between non-null points with original pgplot CI
+  cpgsci(pgplot_ci);
+  for (int i=0;i<nchan-1;i++){
+    if (fabs(bpass[i]-ymin)/(ymax-ymin)>0.001 
+	&& fabs(bpass[i+1]-ymin)/(ymax-ymin)>0.001) {
+      cpgmove(xaxis[i],bpass[i]);
+      cpgdraw(xaxis[i+1],bpass[i+1]);
+    }
+  }
+}
+
 //! draw the profile in the current viewport and window
 void Pulsar::PowerSpectra::draw (const vector<float>& data) const
 {
@@ -148,9 +202,16 @@ void Pulsar::PowerSpectra::draw (const vector<float>& data) const
     swap (x,y);
 
   if (draw_lines)
-    cpgline (data.size(), x, y);
+  {
+    if (skip_zapped)
+      cpgbpass(data.size(), x, y);
+    else
+      cpgline (data.size(), x, y);
+  }
   else
+  {
     cpgpt (data.size(), x, y, -1);
+  }
 }
 
 
