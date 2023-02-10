@@ -14,6 +14,8 @@ Pulsar::SpectrumPlot::Interface::Interface (SpectrumPlot* instance)
   if (instance)
     set_instance (instance);
 
+  import ( "pen", PlotPen::Interface(), &SpectrumPlot::get_pen );
+
   add( &SpectrumPlot::get_bin,
        &SpectrumPlot::set_bin,
        "bin", "Phase bin to plot" );

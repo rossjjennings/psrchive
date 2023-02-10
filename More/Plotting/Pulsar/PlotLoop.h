@@ -47,6 +47,9 @@ namespace Pulsar {
     void set_stack (bool);
     bool get_stack () const;
 
+    //! Set the colour indeces through which to loop
+    void set_colour_indeces (const std::vector<unsigned>& ci);
+
     //! Set the preprocess flag
     void set_preprocess (bool);
 
@@ -59,6 +62,9 @@ namespace Pulsar {
     // execute the plot for each index in the stack
     void plot ();
 
+    // set the colour for the plot
+    void set_colour_index (Plot*, unsigned colour_index);
+
   protected:
 
     std::vector< Reference::To<Plot> > plots;
@@ -70,6 +76,9 @@ namespace Pulsar {
     bool stack;
 
     std::stack< Reference::To<TextIndex> > index_stack;
+
+    std::vector<unsigned> colour_indeces;
+    unsigned current_colour_index;
 
     //! Worker function called recursively down stack
     void plot ( std::stack< Reference::To<TextIndex> >& indeces );

@@ -48,6 +48,9 @@ namespace Pulsar {
     //! Return true if pre-processor has been set
     bool has_preprocessor () const;
 
+    //! Get the managed plot
+    Plot* get_Plot () { return managed_plot; }
+
   protected:
 
     //! The plot that is managed by this instance

@@ -62,6 +62,10 @@ public:
   // -l add loop index
   void add_loop_index (const string& name);
 
+  // -lci set loop colour indeces
+  void parse_loop_colours (const string& name);
+  std::string loop_colours;
+
   //! Very verbose mode
   void set_very_verbose ()
   { 
@@ -236,6 +240,9 @@ void psrplot::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &psrplot::add_loop_index, 'l', "name=<range>");
   arg->set_help ("loop over the range of the named parameter");
+
+  arg = menu.add (loop_colours, "lci", "<range>");
+  arg->set_help ("set the colour indeces to loop over");
 }
 
 void psrplot::add_plot (const string& name)
@@ -313,6 +320,22 @@ void psrplot::add_loop_index (const std::string& arg)
   loop.add_index( new TextIndex(arg) );
 }
 
+void psrplot::parse_loop_colours (const string& txt)
+{
+  vector<unsigned> ci;
+
+  int min, max;
+  cpgqcol (&min, &max);
+
+  // cerr << "psrplot::parse_loop_colours min=" << min << " max=" << max << endl;
+
+  TextInterface::parse_indeces (ci, txt, max);
+
+  // cerr << "psrplot::parse_loop_colours size=" << ci.size() << endl;
+
+  loop.set_colour_indeces (ci);
+}
+
 // load the vector of options into the specified plot
 void set_options (Pulsar::Plot* plot, const vector<string>& options);
 
@@ -330,6 +353,9 @@ void psrplot::setup ()
   loop.set_overlay (overlay_plots);
   loop.set_preprocess (preprocess);
   loop.configure (options);
+
+  if (!loop_colours.empty())
+    parse_loop_colours (loop_colours);
 }
 
 void psrplot::process (Pulsar::Archive* archive)

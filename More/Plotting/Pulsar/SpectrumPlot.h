@@ -12,13 +12,15 @@
 #define __Pulsar_SpectrumPlot_h
 
 #include "Pulsar/PowerSpectra.h"
+#include "Pulsar/HasPen.h"
 
 namespace Pulsar {
 
   class ArchiveStatistic;
 
   //! Plots a single spectrum
-  class SpectrumPlot : public PowerSpectra {
+  class SpectrumPlot : public PowerSpectra, public HasPen
+  {
 
   public:
 

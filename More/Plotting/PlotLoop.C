@@ -10,6 +10,8 @@
 #include "Pulsar/MultiData.h"
 
 #include "Pulsar/Plot.h"
+#include "Pulsar/HasPen.h"
+
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Processor.h"
 
@@ -27,6 +29,8 @@ Pulsar::PlotLoop::PlotLoop ()
   preprocess = true;
   overlay = false;
   stack = false;
+
+  current_colour_index = 0;
 }
 
 //! Add a Plot to be executed
@@ -75,6 +79,9 @@ void Pulsar::PlotLoop::finalize ()
 void Pulsar::PlotLoop::set_Archive (Archive* a)
 {
   archives.resize( plots.size() );
+
+  current_colour_index = 0;
+
   for (unsigned iplot=0; iplot < plots.size(); iplot++)
   {
     archives[iplot] = a;
@@ -124,6 +131,11 @@ bool Pulsar::PlotLoop::get_preprocess () const
   return preprocess;
 }
 
+void Pulsar::PlotLoop::set_colour_indeces (const std::vector<unsigned>& ci)
+{
+  colour_indeces = ci;
+}
+
 //! Add an index over which to loop
 void Pulsar::PlotLoop::add_index (TextIndex* index)
 {
@@ -134,6 +146,44 @@ void Pulsar::PlotLoop::add_index (TextIndex* index)
 void Pulsar::PlotLoop::plot ()
 {
   plot (index_stack);
+}
+
+// set the colour for the plot
+void Pulsar::PlotLoop::set_colour_index (Plot* plot, unsigned colour_index)
+{
+  VERBOSE("PlotLoop::set_colour_index " << colour_index);
+
+  MultiData* multi = dynamic_cast<MultiData*> (plot);
+  if (multi)
+  {
+    VERBOSE("PlotLoop::set_colour_index Plot implements MultiData");
+    set_colour_index (multi->get_Plot(), colour_index);
+    return;
+  }
+
+  HasPen* has_pen = dynamic_cast<HasPen*> (plot);
+  if (has_pen)
+  {
+    VERBOSE("PlotLoop::set_colour_index Plot implements HasPen");
+    has_pen->get_pen()->set_colour_index (colour_index);
+    return;
+  }
+
+  TextInterface::Parser* parser = plot->get_interface ();
+  if (parser)
+  {
+    bool throw_exception = false;
+    TextInterface::Value* value = parser->find ("sci", throw_exception);
+    if (value)
+    {
+      VERBOSE("PlotLoop::set_colour_index Plot Interface has 'sci'");
+      value->set_value (tostring(colour_index));
+      return;
+    }
+  }
+
+  VERBOSE("PlotLoop::set_colour_index cpgsci");
+  cpgsci (colour_index);
 }
 
 void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
@@ -149,7 +199,21 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 
       VERBOSE("PlotLoop::plot iplot="<< i <<" ptr="<< (void*) plots[i].ptr());
 
+      if (colour_indeces.size())
+      {
+        unsigned ci = colour_indeces[current_colour_index];
+        current_colour_index ++;
+
+        // cycle through colours if there are more iterations than indeces
+        if (current_colour_index >= colour_indeces.size())
+          current_colour_index = 0;
+
+        set_colour_index (plots[i], ci);
+      }
+
       plots[i]->plot (archives[i]);
+
+      cpgsci (1);
     }
     return;
   }

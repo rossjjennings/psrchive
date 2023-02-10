@@ -10,6 +10,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/HasPen.h"
 
 #include "Physical.h"
 #include "median_smooth.h"
@@ -113,17 +114,26 @@ void Pulsar::PowerSpectra::draw (const Archive* data)
 {
   get_scale()->get_ordinates (data, frequencies);
 
+  HasPen* has_pen = dynamic_cast<HasPen*> (this);
+  
   for (unsigned iprof=0; iprof < spectra.size(); iprof++)
   {
-    if (plot_sci.size() == spectra.size())
-      cpgsci (plot_sci[iprof]);
+    if (has_pen)
+    {
+      has_pen->get_pen()->setup();
+    }
     else
-      cpgsci (iprof+1);
-
-    if (plot_sls.size() == spectra.size())
-      cpgsls (plot_sls[iprof]);
-    else
-      cpgsls (iprof+1);
+    {
+      if (plot_sci.size() == spectra.size())
+        cpgsci (plot_sci[iprof]);
+      else
+        cpgsci (iprof+1);
+  
+      if (plot_sls.size() == spectra.size())
+        cpgsls (plot_sls[iprof]);
+      else
+        cpgsls (iprof+1);
+    }
 
     draw (spectra[iprof]);
   }
