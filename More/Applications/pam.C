@@ -115,7 +115,7 @@ double get_dm(const Pulsar::Archive* archive);
 double calculate_new_dm(vector<double>& dms, const double dm,
         const double delta_time);
 
-//! Calculates new DM from input ephemeris and sets it in the loaded Archive
+//! Calculates new DM from ephemeris and sets it in the given Archive
 void update_dm(Pulsar::Archive* archive);
 
 //! Correct the absolute auxiliary Farday rotation
@@ -189,7 +189,7 @@ void usage()
     "  --inst inst      Change the instrument name \n"
     "  --site site      Correct 'site' of telescope (One letter tempo code- GBT=1, PKS=7 etc)\n"
     "  --name name      Change source name\n"
-    "  --update_dm      Replace header DM with current value from input ephemeris\n"
+    "  --update_dm      Replace header DM with current value from ephemeris\n"
 
     "\n"
     "See " PSRCHIVE_HTTP "/manuals/pam for more details\n"
@@ -871,15 +871,22 @@ int main (int argc, char *argv[]) try {
       if (new_eph) try
       {
         arch->set_ephemeris(new_eph);
-
-        if (update_dm_from_eph) {
-          update_dm(arch);
-        }
       }
       catch (Error& error)
       {
 	cerr << "Error while installing new ephemeris: " 
 	     << error.get_message() << endl;
+        continue;
+      }
+
+      if (update_dm_from_eph) try
+      {
+        update_dm(arch);
+      }
+      catch (Error& error)
+      {
+        cerr << "Error while updating the DM: "
+             << error.get_message() << endl;
         continue;
       }
 
