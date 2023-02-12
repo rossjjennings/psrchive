@@ -302,6 +302,7 @@ bool Pulsar::PulsarCalibrator::calibrator_match (const Archive* data, std::strin
 
   match.set_check_calibrator (true);
   match.set_check_nbin (false);
+  match.set_check_state (false);
 
   if (mtm.size() == 0)
   {
