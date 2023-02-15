@@ -51,7 +51,7 @@ namespace TextInterface
     //! Set the detailed description of the value
     virtual void set_detailed_description (const std::string&) = 0;
 
-     //! Pointer to the instance from which attribute value will be obtained
+    //! Pointer to the instance from which attribute value will be obtained
     mutable C* instance;
 
   };
@@ -126,6 +126,31 @@ namespace TextInterface
       if (!ptr)
 	return "";
       return tostring( (ptr->*get) () );
+    }
+  };
+
+  template<class C, class Type>
+  class GetToStringPolicy<C, Type (C*)>
+  {
+    ToStringPolicy<Type> tostring;
+
+  public:
+
+    void set_modifiers (const std::string& modifiers) const
+    {
+      tostring.set_modifiers(modifiers);
+    }
+
+    void reset_modifiers () const
+    {
+      tostring.reset_modifiers ();
+    }
+
+    std::string operator () (const C* ptr, Type (*func)(C*)) const
+    {
+      if (!ptr)
+        return "";
+      return tostring( (*func) (ptr) );
     }
   };
 

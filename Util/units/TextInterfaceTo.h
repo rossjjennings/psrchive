@@ -257,7 +257,7 @@ namespace TextInterface
 	add_value (getset);
       }
     
-    //! Factory generates a new DynamicInterface instance with description
+    //! Factory generates a new DirectInterface instance with description
     template<class P, typename T, typename U>
     void add (T(P::*get)()const, void(P::*set)(const U&), 
 	      Parser*(P::*get_parser)(),
@@ -270,7 +270,7 @@ namespace TextInterface
       add_value (getset);
     }
 
-    //! Factory generates a new DynamicInterface instance with description
+    //! Factory generates a new DirectInterface instance with description
     template<class P, typename T, typename U>
     void add (T(P::*get)()const, void(P::*set)(U), 
 	      Parser*(P::*get_parser)(),
@@ -283,7 +283,7 @@ namespace TextInterface
       add_value (getset);
     }
 
-    //! Factory generates a new DynamicInterface instance with description
+    //! Factory generates a new IndirectInterface instance with description
     template<class P, typename U, typename Parent>
     void add (U*(P::*get)()const, void(P::*set)(U*), 
 	      Parser*(Parent::*get_parser)(),
