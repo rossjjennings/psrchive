@@ -13,82 +13,13 @@
 #define __TextInterfaceTo_h
 
 #include "TextInterfaceAttribute.h"
+#include "TextInterfaceFunction.h"
 #include "TextInterfaceElement.h"
 #include "TextInterfaceProxy.h"
 #include "TextInterfaceEmbed.h"
 
 namespace TextInterface
 {
-
-  //! Pointer to a Unary Function that receives C* and returns some type
-  template<class C, class Unary>
-  class UnaryGet : public Attribute<C> {
-
-  public:
-
-    //! Constructor
-    UnaryGet (const std::string& _name, Unary _get)
-      : get (_get) { name = _name; }
-    
-    //! Copy constructor
-    UnaryGet (const UnaryGet& copy)
-      : get (copy.get) { name = copy.name; description = copy.description; }
-
-    //! Return a clone
-    Attribute<C>* clone () const { return new UnaryGet(*this); }
-
-    //! Get the name of the attribute
-    std::string get_name () const { return name; }
-
-    //! Get the description of the attribute
-    std::string get_description () const { return description; }
-
-    //! Get the description of the attribute
-    void set_description (const std::string& d) { description = d; }
-
-    //! Get the detailed description of the attribute
-    std::string get_detailed_description () const
-    { return detailed_description; }
-
-    //! Get the detailed description of the attribute
-    void set_detailed_description (const std::string& d)
-    { detailed_description = d; }
-
-    //! Get the value of the attribute
-    std::string get_value (const C* ptr) const
-      { if (!ptr) return ""; return tostring( get(ptr) ); }
-
-    //! Set the value of the attribute
-    void set_value (C*, const std::string&)
-      { throw Error (InvalidState, "UnaryGet::set_value", 
-		     name + " cannot be set"); }
-
-    void set_modifiers (const std::string& modifiers) const
-    {
-      tostring_precision = fromstring<unsigned> (modifiers);
-    }
-
-    void reset_modifiers () const
-    {
-      tostring_precision = 0;
-    }
-    
-  protected:
-
-    //! The name of the attribute
-    std::string name;
-
-    //! The description of the attribute
-    std::string description;
-
-    //! The detailed description of the attribute
-    std::string detailed_description;
-
-    //! The get function object (functor)
-    Unary get;
-
-  };
-
   //! Class text interface: an instance of C and a vector of Attribute<C>
   template<class C>
   class To : public Parser {
@@ -297,13 +228,23 @@ namespace TextInterface
     }
 
     //! Add adaptable unary function object template
-    template<class U>
-      void add (U get, const char* name, const char* description = 0)
+    template<class Get>
+      void add (Get get, const char* name, const char* description = 0)
       {
-	Attribute<C>* fget = new UnaryGet<C,U> (name, get);
+	Attribute<C>* fget = new GetFunction<C,Get> (name, get);
 	if (description)
 	  fget->set_description (description);
 	add_value (fget);
+      }
+
+    //! Add adaptable unary function object template
+    template<class Get, class Set>
+      void add (Get get, Set set, const char* name, const char* description = 0)
+      {
+        Attribute<C>* fget = new GetSetFunction<C,Get,Set> (name, get, set);
+        if (description)
+          fget->set_description (description);
+        add_value (fget);
       }
 
     //! The instance of the class with which this interfaces

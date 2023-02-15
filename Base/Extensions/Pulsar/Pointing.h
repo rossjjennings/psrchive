@@ -159,6 +159,7 @@ namespace Pulsar {
     Info* find_info (const std::string&);
 
     double get_value (const std::string&) const;
+    void set_value (const std::string&, double value);
 
     std::string list_info () const;
     void edit_info (const std::string&);

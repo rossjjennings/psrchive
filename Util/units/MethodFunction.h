@@ -11,50 +11,102 @@
 #ifndef __MethodFunction_h
 #define __MethodFunction_h
 
-template<class C, class Type, class Get, class Arg>
-class MethodFunction
+template<class C, class T, class Get, class Arg>
+class MethodGetFunction
 {
   Get get;
   Arg arg;
 
  public:
 
-  MethodFunction (Get _get, Arg _arg)
+  MethodGetFunction (Get _get, Arg _arg)
   {
     get = _get;
     arg = _arg;
   }
 
-  Type operator () (C* ptr)
+  T operator () (C* ptr)
   {
     return (ptr->*get) (arg);
   }
 
-  const Type operator () (const C* ptr) const
+  const T operator () (const C* ptr) const
   {
     return (const_cast<C*>(ptr)->*get) (arg);
   }
 };
 
-template<class C, class Type, class Arg>
-MethodFunction<C, Type, Type (C::*)(Arg), Arg> 
-method_function (Type (C::*get)(Arg), Arg arg)
+template<class C, class T, class Arg>
+MethodGetFunction<C, T, T (C::*)(Arg), Arg>
+method_function (T (C::*get)(Arg), Arg arg)
 {
-  return MethodFunction<C, Type, Type (C::*)(Arg), Arg> (get, arg);
+  return MethodGetFunction<C, T, T (C::*)(Arg), Arg> (get, arg);
 }
 
-template<class C, class Type, class Arg>
-MethodFunction<C, Type, Type (C::*)(const Arg&), Arg>
-method_function (Type (C::*get)(const Arg&), Arg arg)
+template<class C, class T, class Arg>
+MethodGetFunction<C, T, T (C::*)(const Arg&), Arg>
+method_function (T (C::*get)(const Arg&), Arg arg)
 {
-  return MethodFunction<C, Type, Type (C::*)(const Arg&), Arg> (get, arg);
+  return MethodGetFunction<C, T, T (C::*)(const Arg&), Arg> (get, arg);
 }
 
-template<class C, class Type, class Arg>
-MethodFunction<C, Type, Type (C::*)(const Arg&) const, Arg>
-method_function (Type (C::*get)(const Arg&) const, Arg arg)
+template<class C, class T, class Arg>
+MethodGetFunction<C, T, T (C::*)(const Arg&) const, Arg>
+method_function (T (C::*get)(const Arg&) const, Arg arg)
 {
-  return MethodFunction<C, Type, Type (C::*)(const Arg&) const, Arg> (get, arg);
+  return MethodGetFunction<C, T, T (C::*)(const Arg&) const, Arg> (get, arg);
+}
+
+template<class C, class T, class Set, class Arg, class Value>
+class MethodSetFunction
+{
+  Set set;
+  Arg arg;
+
+ public:
+
+  typedef C* first_argument_type;
+  typedef Value second_argument_type;
+
+  MethodSetFunction (Set _set, Arg _arg)
+  {
+    set = _set;
+    arg = _arg;
+  }
+
+  void operator () (C* ptr, const Value& value)
+  {
+    (ptr->*set) (arg, value);
+  }
+};
+
+template<class C, class T, class Arg>
+MethodSetFunction<C, T, void (C::*)(Arg, const T&), Arg, T>
+method_function (void (C::*set)(Arg, const T&), const Arg& arg)
+{
+  return MethodSetFunction<C, T, void (C::*)(Arg, const T&), Arg, T> (set, arg);
+}
+
+template<class C, class T, class Arg>
+MethodSetFunction<C, T, void (C::*)(Arg, T), Arg, T>
+method_function (void (C::*set)(Arg, T), const Arg& arg)
+{
+  return MethodSetFunction<C, T, void (C::*)(Arg, T), Arg, T> (set, arg);
+}
+
+template<class C, class T, class Arg>
+MethodSetFunction<C, T, void (C::*)(const Arg&, const T&), Arg, T>
+method_function (void (C::*set)(const Arg&, const T&), const Arg& arg)
+{
+  return MethodSetFunction<C, T, void (C::*)(const Arg&, const T&), Arg, T> (set, arg);
+}
+
+template<class C, class T, class Arg>
+MethodSetFunction<C, T, void (C::*)(const Arg&, T), Arg, T>
+method_function (void (C::*set)(const Arg&, T), const Arg& arg)
+{
+  return MethodSetFunction<C, T, void (C::*)(const Arg&, T), Arg, T> (set, arg);
 }
 
 #endif
+

@@ -46,6 +46,7 @@ include_HEADERS = \
 	TextInterfaceElement.h \
 	TextInterfaceEmbed.h \
 	TextInterfaceEstimate.h \
+	TextInterfaceFunction.h \
 	TextInterfaceInterpreter.h \
 	TextInterfaceName.h \
 	TextInterfaceParser.h \

@@ -154,6 +154,45 @@ namespace TextInterface
     }
   };
 
+  //! Policy for converting a string to a value
+  /*! Specialize this template to customize the behaviour for different types */
+  template<class C, class Set>
+  class SetFromStringPolicy
+  {
+  };
+
+  template<class C, class P, class T>
+  class SetFromStringPolicy<C, void (P::*)(const T&)>
+  {
+  public:
+    void operator () (C* ptr, void (P::*set)(const T&), const std::string& val)
+      { (ptr->*set) (fromstring<T>(val)); }
+  };
+
+  template<class C, class P, class Type>
+  class SetFromStringPolicy<C, void (P::*)(Type)>
+  {
+  public:
+    void operator () (C* ptr, void (P::*set)(Type), const std::string& value)
+      { (ptr->*set) (fromstring<Type>(value)); }
+  };
+
+  template<class C, class P, class T>
+  class SetFromStringPolicy<C, void (*)(P*,const T&)>
+  {
+  public:
+    void operator () (C* ptr, void (*set)(P*, const T&), const std::string& val)
+      { (*set) (ptr, fromstring<T>(val)); }
+  };
+
+  template<class C, class P, class Type>
+  class SetFromStringPolicy<C, void (*)(P*,Type)>
+  {
+  public:
+    void operator () (C* ptr, void (*set)(P*,Type), const std::string& value)
+      { (*set) (ptr, fromstring<Type>(value)); }
+  };
+
   //! Interface to a class attribute with an accessor method, C::Get()
   template<class C, class Get>
   class AttributeGet : public Attribute<C>
@@ -233,13 +272,14 @@ namespace TextInterface
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
-      { (ptr->*set) (fromstring<Type>(value)); }
+      { from_string (ptr, set, value); }
 
   protected:
 
     //! The set method
     Set set;
 
+    SetFromStringPolicy<C,Set> from_string;
   };
 
   //! AttributeGet and AttributeGetSet factory

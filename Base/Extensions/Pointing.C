@@ -5,20 +5,13 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/Pointing.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescope.h"
 #include "Horizon.h"
 #include "strutil.h"
 
-
-
 using namespace std;
-
-
-
 
 Pulsar::Pointing::Pointing () : Extension ("Pointing")
 {
@@ -324,6 +317,11 @@ Pulsar::Pointing::Info* Pulsar::Pointing::find_info (const std::string& name)
 double Pulsar::Pointing::get_value (const std::string& name) const
 {
   return find_info(name)->get_value();
+}
+
+void Pulsar::Pointing::set_value (const std::string& name, double val)
+{
+  find_info(name)->set_value(val);
 }
 
 std::string Pulsar::Pointing::list_info () const

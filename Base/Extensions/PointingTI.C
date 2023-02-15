@@ -58,6 +58,7 @@ Pointing::Interface::Interface ( Pointing *s_instance )
   {
     Info* info = instance->get_info (i);
     add ( method_function (&Pointing::get_value, info->get_name()),
+          method_function (&Pointing::set_value, info->get_name()),
           info->get_name().c_str(), info->get_description().c_str() );
   }
 

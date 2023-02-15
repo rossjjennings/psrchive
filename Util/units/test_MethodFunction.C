@@ -12,20 +12,34 @@ using namespace std;
 
 class Test
 {
-  public:
+  double factor;
 
-  double get (int arg) { return arg * 1.5; }
+  public:
+  Test () { factor = 1.5; }
+
+  double get (int arg) { return arg * factor; }
+  void set (int index, double value) { factor = value; }
 };
 
 int main ()
 {
-  auto thing = method_function (&Test::get, 1);
+  auto get_function = method_function (&Test::get, 1);
 
   Test test;
 
-  double x = thing(&test);
+  double x = get_function(&test);
 
   if ( x == 1.5 )
+    return 0;
+  else
+    return -1;
+
+  auto set_function = method_function (&Test::set, 2);
+
+  set_function (&test, 3.5);
+  x = get_function(&test);
+
+  if ( x == 3.5 )
     return 0;
   else
     return -1;
