@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2023 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -111,7 +111,60 @@ namespace Pulsar {
     //! Get the Telescope zenith angle at subint centre
     Angle get_telescope_zenith () const;
 
-	 std::string get_short_name () const { return "point"; }
+    //! Extra pointing information
+    class Info: public Reference::Able
+    {
+      std::string name;
+      std::string unit;
+      std::string description;
+      double value;
+
+      public:
+
+      //! name of the information
+      const std::string& get_name () const { return name; }
+      void set_name (const std::string& _name) { name = _name; }
+
+      //! physical unit of the information
+      const std::string& get_unit () const { return unit; }
+      void set_unit (const std::string& _unit) { unit = _unit; }
+
+      //! description of the information
+      const std::string& get_description () const { return description; }
+      void set_description (const std::string& _desc) { description = _desc; }
+
+      //! numerical value of the information
+      double get_value () const { return value; }
+      void set_value (double val) { value = val; }
+
+      //! Return a text interfaces that can be used to access this instance
+      TextInterface::Parser* get_interface();
+  
+      // Text interface to a Pointing instance
+      class Interface : public TextInterface::To<Info>
+      {
+        public:
+            Interface( Pointing *s_instance = NULL );
+      };
+
+    };
+
+    unsigned get_ninfo () const;
+    void add_info (Info*);
+
+    Info* get_info (unsigned index);
+    const Info* get_info (unsigned index) const;
+
+    const Info* find_info (const std::string&) const;
+    Info* find_info (const std::string&);
+
+    double get_value (const std::string&) const;
+
+    std::string list_info () const;
+    void edit_info (const std::string&);
+
+
+    std::string get_short_name () const { return "point"; }
 
   protected:
 
@@ -145,6 +198,7 @@ namespace Pulsar {
     //! Telescope zenith angle at subint centre
     MeanRadian<double> telescope_zenith;
 
+    std::vector< Reference::To<Info> > info;
   };
   
 }
