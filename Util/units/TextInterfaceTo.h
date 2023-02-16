@@ -227,6 +227,18 @@ namespace TextInterface
       add_value (getset);
     }
 
+    //! Factory generates a new DirectInterface instance with description
+    template<class Get, class Set, class Parser>
+    void add (Get get, Set set, Parser parser,
+              const char* name, const char* description = 0)
+    {
+      EmbedAllocator<C,typename Set::second_argument_type> gen;
+      Attribute<C>* getset = gen.direct (name, get, set, parser);
+      if (description)
+        getset->set_description (description);
+      add_value (getset);
+    }
+
     //! Add adaptable unary function object template
     template<class Get>
       void add (Get get, const char* name, const char* description = 0)

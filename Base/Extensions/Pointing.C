@@ -324,6 +324,12 @@ void Pulsar::Pointing::set_value (const std::string& name, double val)
   find_info(name)->set_value(val);
 }
 
+TextInterface::Parser* 
+Pulsar::Pointing::get_value_interface (const std::string& name)
+{
+  return find_info(name)->get_interface();
+}
+
 std::string Pulsar::Pointing::list_info () const
 {
   string retval;
@@ -361,5 +367,11 @@ void Pulsar::Pointing::edit_info (const std::string& name)
   else
     throw Error (InvalidParam, "Pulsar::Integration::edit_infos",
                  "command starts with neither '+' nor '-'");
+}
+
+//! Return a text interfaces that can be used to access this instance
+TextInterface::Parser* Pulsar::Pointing::Info::get_interface()
+{
+  return new Interface(this);
 }
 

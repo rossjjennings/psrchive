@@ -144,7 +144,7 @@ namespace Pulsar {
       class Interface : public TextInterface::To<Info>
       {
         public:
-            Interface( Pointing *s_instance = NULL );
+            Interface( Info *s_instance = NULL );
       };
 
     };
@@ -160,6 +160,7 @@ namespace Pulsar {
 
     double get_value (const std::string&) const;
     void set_value (const std::string&, double value);
+    TextInterface::Parser* get_value_interface (const std::string&);
 
     std::string list_info () const;
     void edit_info (const std::string&);

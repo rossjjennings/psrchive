@@ -61,6 +61,8 @@ namespace TextInterface
   template<class Type>
   class ToStringPolicy
   {
+  protected:
+
     mutable ToString tostring;
 
   public:
@@ -92,37 +94,23 @@ namespace TextInterface
   //! Policy for converting a value to a string
   /*! Specialize this template to customize the behaviour for different types */
   template<class C, class Get>
-  class GetToStringPolicy
+  class GetToStringPolicy : public ToStringPolicy<typename Get::result_type>
   {
+  public:
+    std::string operator () (const C* ptr, Get get) const
+    {
+      if (!ptr)
+        return "";
+      return tostring( get (ptr) );
+    }
   };
 
   template<class C, class P, class Type>
-  class GetToStringPolicy<C, Type (P::*)() const>
+  class GetToStringPolicy<C, Type (P::*)() const> : public ToStringPolicy<Type>
   {
-    ToStringPolicy<Type> tostring;
-
   public:
-
-    void set_modifiers (const std::string& modifiers) const
-    {
-#ifdef _DEBUG
-      std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
-		<< ">::set_modifiers " << modifiers << std::endl;
-#endif
-      tostring.set_modifiers(modifiers);
-    }
-
-    void reset_modifiers () const
-    { 
-      tostring.reset_modifiers ();
-    }
-
     std::string operator () (const C* ptr, Type (P::*get)() const) const
     {
-#ifdef _DEBUG
-      std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
-		<< ">::operator ()" << std::endl;
-#endif
       if (!ptr)
 	return "";
       return tostring( (ptr->*get) () );
@@ -130,22 +118,9 @@ namespace TextInterface
   };
 
   template<class C, class Type>
-  class GetToStringPolicy<C, Type (C*)>
+  class GetToStringPolicy<C, Type (C*)> : public ToStringPolicy<Type>
   {
-    ToStringPolicy<Type> tostring;
-
   public:
-
-    void set_modifiers (const std::string& modifiers) const
-    {
-      tostring.set_modifiers(modifiers);
-    }
-
-    void reset_modifiers () const
-    {
-      tostring.reset_modifiers ();
-    }
-
     std::string operator () (const C* ptr, Type (*func)(C*)) const
     {
       if (!ptr)
@@ -159,6 +134,9 @@ namespace TextInterface
   template<class C, class Set>
   class SetFromStringPolicy
   {
+  public:
+    void operator () (C* ptr, Set set, const std::string& value)
+      { (set) (ptr, fromstring<typename Set::second_argument_type>(value)); }
   };
 
   template<class C, class P, class T>
@@ -201,8 +179,8 @@ namespace TextInterface
   public:
 
     //! Constructor
-    AttributeGet (const std::string& _name, Get _get)
-      { name = _name; get = _get; }
+    AttributeGet (const std::string& _name, Get _get) : get(_get)
+      { name = _name; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGet(*this); }
@@ -265,7 +243,7 @@ namespace TextInterface
 
     //! Constructor
     AttributeGetSet (const std::string& _name, Get _get, Set _set)
-      : AttributeGet<C,Get> (_name, _get) { set = _set; }
+      : AttributeGet<C,Get> (_name, _get), set(_set) {  }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGetSet(*this); }

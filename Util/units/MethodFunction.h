@@ -19,6 +19,9 @@ class MethodGetFunction
 
  public:
 
+  typedef C* first_argument_type;
+  typedef T result_type;
+
   MethodGetFunction (Get _get, Arg _arg)
   {
     get = _get;

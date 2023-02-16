@@ -59,9 +59,31 @@ Pointing::Interface::Interface ( Pointing *s_instance )
     Info* info = instance->get_info (i);
     add ( method_function (&Pointing::get_value, info->get_name()),
           method_function (&Pointing::set_value, info->get_name()),
+          method_function (&Pointing::get_value_interface, info->get_name()),
           info->get_name().c_str(), info->get_description().c_str() );
   }
 
 }
 
+Pointing::Info::Interface::Interface ( Pointing::Info *s_instance )
+{
+  if( s_instance )
+    set_instance( s_instance );
+
+  add( &Pointing::Info::get_name,
+       &Pointing::Info::set_name,
+       "name", "name of the information" );
+
+  add( &Pointing::Info::get_unit,
+       &Pointing::Info::set_unit,
+       "unit", "physical unit of the information" );
+
+  add( &Pointing::Info::get_description,
+       &Pointing::Info::set_description,
+       "desc", "description of the information" );
+
+  add( &Pointing::Info::get_value,
+       &Pointing::Info::set_value,
+       "value", "numerical value of the information" );
+}
 
