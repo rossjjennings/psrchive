@@ -121,6 +121,8 @@ namespace Pulsar {
 
       public:
 
+      Info () { value = 0; }
+
       //! name of the information
       const std::string& get_name () const { return name; }
       void set_name (const std::string& _name) { name = _name; }

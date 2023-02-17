@@ -27,7 +27,8 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_FluxCalibratorExtension.C load_FluxCalibratorExtension.C \
 	unload_FITSSUBHdrExtension.C load_FITSSUBHdrExtension.C \
 	unload_Passband.C load_Passband.C \
-	unload_Pointing.C load_Pointing.C clean_Pointing_columns.C \
+	unload_Pointing.C clean_Pointing_columns.C add_Pointing_columns.C \
+	load_Pointing.C load_Pointing_columns.C \
 	unload_Integration.C load_Integration.C \
 	unload_Predictor.C load_Predictor.C \
 	unload_Parameters.C load_Parameters.C \

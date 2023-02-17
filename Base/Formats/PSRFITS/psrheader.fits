@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.6             '   / Header version 
+HDRVER  = '6.7             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -610,6 +610,7 @@ RM      =                    * / [rad m-2] RM for post-detection deFaraday
 NCHNOFFS=                    * / Channel/sub-band offset for split files
 NSBLK   =                    * / Samples/row (SEARCH mode, else 1) 
 NSTOT   =                    * / Total number of samples (SEARCH mode, else 1) 
+NINFO   =                    * / Number of additional information columns
 #
 EXTNAME = SUBINT               / name of this binary table extension
 #

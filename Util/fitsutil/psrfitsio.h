@@ -115,8 +115,15 @@ void psrfits_update_key (fitsfile* fptr, const char* name,
 void psrfits_update_key (fitsfile* fptr,
 			 const char* name,
 			 int column,
-			 const std::string& data,
+			 const std::string& value,
 			 const char* comment = 0);
+
+//! Convenience interface to fits_make_keyn + fits_read_key
+void psrfits_read_key (fitsfile* fptr,
+                       const char* name,
+                       int column,
+                       std::string& value,
+                       std::string& comment);
 
 //! Worker function does not handle status
 template<typename T>

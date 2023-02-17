@@ -37,6 +37,7 @@ void Pulsar::FITSArchive::clean_Pointing_columns (fitsfile* fptr) const
   columns.push_back( "PAR_ANG" );
   columns.push_back( "TEL_AZ" );
   columns.push_back( "TEL_ZEN" );
+  columns.push_back( "NINFO");
 
   for (unsigned icol = 0; icol < columns.size(); icol++)
   {

@@ -145,7 +145,7 @@ namespace Pulsar
     static void unload (fitsfile*, const CoherentDedispersion*);
 
     //! Unload Pointing to the specified row of the subint table
-    static void unload (fitsfile*, const Pointing*, int row);
+    void unload (fitsfile*, const Pointing*, int row) const;
 
     //! Unload AuxColdPlasmaMeausres to the specified row of the subint table
     static void unload (fitsfile*, const AuxColdPlasmaMeasures*, int row);
@@ -294,8 +294,17 @@ namespace Pulsar
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
 
-    //! Delete Pointing related columns, if not needed
+    //! Delete Pointing-related columns, if not needed
     void clean_Pointing_columns (fitsfile*) const;
+
+    //! Add additional Pointing::Info columns, if needed
+    void add_Pointing_columns (fitsfile*) const;
+
+    //! Load additional Pointing::Info column information, if any
+    void load_Pointing_columns (fitsfile* fptr);
+
+    //! Get the column past which to write/read additional Pointing::Info
+    int get_last_pointing_column (fitsfile* fptr) const;
 
     //! Unload Spectral Kurtosis Integration data to the SPECKURT HDU 
     void unload_sk_integrations (fitsfile*) const;
@@ -324,6 +333,16 @@ namespace Pulsar
     /* This attribute enables proper handling of time stamps when there
        is no FITSHdrExtension in use (as is the case in psrconv) */
     mutable MJD reference_epoch;
+
+    struct pointing_info_column 
+    {
+      std::string name;
+      std::string unit;
+      std::string description;
+      int colnum;
+    };
+
+    mutable std::vector<pointing_info_column> extra_pointing_columns;
 
     // Gate duty cycle passed on to all sub-integrations
     mutable double gate_duty_cycle;

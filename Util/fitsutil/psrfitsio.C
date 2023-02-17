@@ -101,6 +101,35 @@ void psrfits_update_key (fitsfile* fptr,
   psrfits_update_key (fptr, keyword, data, comment);
 }
 
+void psrfits_read_key (fitsfile* fptr,
+                       const char* name,
+                       int column,
+                       std::string& val,
+                       std::string& comnt)
+{
+  // double the length just to be sure to avoid stack overflow
+  char keyword [FLEN_KEYWORD*2];
+  char value   [FLEN_VALUE*2];
+  char comment [FLEN_COMMENT*2];
+
+  int status = 0;
+  fits_make_keyn (name, column, keyword, &status);
+  if (status)
+    throw FITSError (status, "psrfits_read_key", "fits_make_keyn");
+
+  fits_read_key (fptr, TSTRING, keyword, value, comment, &status);
+  if (status)
+    throw FITSError (status, "psrfits_read_key", "fits_read_key");
+
+  if (psrfits_verbose)
+    cerr << "psrfits_read_key colnum=" << column 
+         << " value='" << value << "'"
+         << " comment='" << comment << "'" << endl;
+
+  val = value;
+  comnt = comment;
+}
+
 void psrfits_update_key (fitsfile* fptr, const char* name,
 			 const std::string& data,
 			 const char* comment)
