@@ -1347,7 +1347,10 @@ void pcm::process (Pulsar::Archive* archive)
      for (unsigned isub=0; isub < nsub; isub++)
      {
        Pulsar::Integration* subint = archive->get_Integration (isub);
+
+       // the returned matrix transforms from the corrected to the observed
        Jones<double> xform = projection (isub);
+
        subint->expert()->transform (xform);
      }
   }
