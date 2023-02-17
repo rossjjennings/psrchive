@@ -11,6 +11,8 @@
 #include "psrfitsio.h"
 #include "FITSError.h"
 
+#include <cassert>
+
 using namespace std;
 
 /*!
