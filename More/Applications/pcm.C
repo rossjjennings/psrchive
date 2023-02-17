@@ -129,7 +129,9 @@ public:
 
   //! Assume that the specified parameter is not degenerate
   void assume_not_degenerate (const string& text);
-  
+
+  void do_reparallactify (Archive* archive);
+
 protected:
 
   //! Add command line options
@@ -1319,6 +1321,29 @@ void check_phase (Pulsar::Archive* archive)
   }
 }
 
+void pcm::do_reparallactify (Pulsar::Archive* archive)
+{
+  cerr << "pcm: re-parallactifying data" << endl;
+  ProjectionCorrection projection;
+
+  Pulsar::Receiver* rcvr = archive->get<Receiver>();
+  if (!rcvr)
+    throw Error (InvalidState, "pcm reparallactify",
+                 "no Receiver extension available");
+
+  rcvr->set_projection_corrected (false);
+
+  projection.set_archive( archive );
+
+  unsigned nsub = archive->get_nsubint();
+  for (unsigned isub=0; isub < nsub; isub++)
+  {
+    Pulsar::Integration* subint = archive->get_Integration (isub);
+    Jones<double> xform = projection (isub);
+    subint->expert()->transform (xform);
+  }
+}
+
 void pcm::process (Pulsar::Archive* archive)
 {
   if (archive->get_type() == Signal::Pulsar)
@@ -1327,29 +1352,9 @@ void pcm::process (Pulsar::Archive* archive)
       cerr << "pcm: preparing pulsar data" << endl;
 
     prepare->prepare (archive);
-  }
 
-  if (reparallactify)
-  {
-     cerr << "pcm: re-parallactifying data" << endl;
-     ProjectionCorrection projection;
-
-     Pulsar::Receiver* rcvr = archive->get<Receiver>();
-     if (!rcvr)
-       throw Error (InvalidState, "pcm reparallactify",
-                    "no Receiver extension available");
-
-     rcvr->set_projection_corrected (false);
-
-     projection.set_archive( archive );
-
-     unsigned nsub = archive->get_nsubint();
-     for (unsigned isub=0; isub < nsub; isub++)
-     {
-       Pulsar::Integration* subint = archive->get_Integration (isub);
-       Jones<double> xform = projection (isub);
-       subint->expert()->transform (xform);
-     }
+    if (reparallactify)
+      do_reparallactify (archive);
   }
 
   if (!model)
@@ -1446,7 +1451,6 @@ void pcm::finalize ()
     cerr << "pcm: writing total uncalibrated pulsar archive" << endl;
     total->unload ("first.ar");
   }
-
 
 #if HAVE_PGPLOT
 
@@ -1586,6 +1590,9 @@ void pcm::finalize ()
     cout << "pcm: loaded archive: " << filenames[i] << endl;
 
     standard_options->process ( archive );
+
+    if (reparallactify && archive->get_type() == Signal::Pulsar)
+      do_reparallactify (archive);
 
     model->precalibrate( archive );
 
