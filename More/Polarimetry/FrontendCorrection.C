@@ -94,7 +94,8 @@ void Pulsar::FrontendCorrection::calibrate (Archive* archive)
       projection_correction_required = true;
 
     Integration* integration = archive->get_Integration (isub);
-      
+    
+    // the inverse transforms from the observed to the corrected
     Jones<float> xform = inv( get_transformation(isub) );
 
     integration->expert()->transform (xform);
