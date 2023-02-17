@@ -117,6 +117,8 @@ void Pulsar::FITSArchive::load_integration_state (fitsfile* fptr)
 
   interpret_scale ();
   interpret_pol_type ();
+
+  load_Pointing_columns (fptr);
 }
 
 void Pulsar::FITSArchive::interpret_scale ()

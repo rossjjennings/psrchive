@@ -65,18 +65,49 @@ namespace TextInterface
   };
 
 
+  //! Policy for getting a Parser
+  /*! Specialize this template to customize the behaviour for different types */
+  template<class C, class Get>
+  class GetParserPolicy
+  {
+  public:
+    Parser* operator () (const C* ptr, Get func) const
+    {
+      return func (const_cast<C*>(ptr));
+    }
+  };
 
+  template<class C, class P>
+  class GetParserPolicy<C, Parser* (P::*)()>
+  {
+  public:
+    Parser* operator () (const C* ptr, Parser* (P::*get)()) const
+    {
+      return (const_cast<C*>(ptr)->*get)();
+    }
+  };
+
+  template<class C>
+  class GetParserPolicy<C, Parser* (C*)>
+  {
+  public:
+    Parser* operator () (const C* ptr, Parser* (*func)(C*)) const
+    {
+      return func (const_cast<C*>(ptr));
+    }
+  };
 
   template<class C, class Type, class Get, class Set, class GetParser>
   class DirectInterface : public OptionalInterface<C,Type,Get,Set>
   {
 
+    GetParserPolicy<C,GetParser> get_parser_policy;
+
   public:
     
     //! Construct from a pointer to element attribute interface
     DirectInterface (const std::string& t, Get g, Set s, GetParser p)
-      : OptionalInterface<C,Type,Get,Set> (t,g,s)
-    { get_parser_method = p; }
+      : OptionalInterface<C,Type,Get,Set> (t,g,s), get_parser_method (p) {  }
 
     //! Retun a newly constructed copy
     Attribute<C>* clone () const
@@ -89,7 +120,7 @@ namespace TextInterface
 
     Parser* get_parser (const C* ptr) const try
     { 
-      return (const_cast<C*>(ptr)->*get_parser_method)();
+      return get_parser_policy (ptr, get_parser_method);
     }
     catch (Error& error)
     {
@@ -105,8 +136,7 @@ namespace TextInterface
     
     //! Construct from a pointer to element attribute interface
     IndirectInterface (const std::string& t, Get g, Set s, GetParser p)
-      : OptionalInterface<C,Type,Get,Set> (t,g,s)
-    { get_parser_method = p; }
+      : OptionalInterface<C,Type,Get,Set> (t,g,s), get_parser_method (p) {  }
 
     //! Retun a newly constructed copy
     Attribute<C>* clone () const

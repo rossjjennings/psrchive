@@ -46,7 +46,7 @@ Angle angle_units (fitsfile* fptr, int colnum, double angle, const char* name)
 void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
 				         Pulsar::Integration* integ)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_Pointing" << endl;
   
   Reference::To<Pointing> ext = new Pointing;
@@ -272,6 +272,38 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
 
   ext->set_declination( angle_units (fptr, DEC_colnum, DEC_angle,
 				     (verbose > 2) ? "DEC_SUB" : 0) );
+
+  unsigned ninfo = extra_pointing_columns.size();
+
+  for (int i=0; i < ninfo; i++)
+  {
+    pointing_info_column column = extra_pointing_columns[i];
+
+    Pointing::Info* info = new Pointing::Info();
+   
+    colnum = column.colnum;
+    info->set_name (column.name);
+    info->set_unit (column.unit);
+    info->set_description (column.description);
+
+    double nulldouble = 0.0;
+    double value = 0;
+
+    fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+                   &value, &initflag, &status);
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing Info::name=" << info->get_name()
+           << " value=" << value << " colnum=" << colnum 
+           << " init=" << initflag << endl;
+
+    if (status != 0) 
+      throw FITSError (status, "FITSArchive::load_Pointing", 
+                       "fits_read_col " + column.name);
+
+    info->set_value( value );
+    ext->add_info (info);
+  }
 
   integ->add_extension (ext);
 

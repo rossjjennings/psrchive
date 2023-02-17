@@ -51,7 +51,7 @@ namespace TextInterface
     //! Set the detailed description of the value
     virtual void set_detailed_description (const std::string&) = 0;
 
-     //! Pointer to the instance from which attribute value will be obtained
+    //! Pointer to the instance from which attribute value will be obtained
     mutable C* instance;
 
   };
@@ -61,6 +61,8 @@ namespace TextInterface
   template<class Type>
   class ToStringPolicy
   {
+  protected:
+
     mutable ToString tostring;
 
   public:
@@ -92,41 +94,81 @@ namespace TextInterface
   //! Policy for converting a value to a string
   /*! Specialize this template to customize the behaviour for different types */
   template<class C, class Get>
-  class GetToStringPolicy
+  class GetToStringPolicy : public ToStringPolicy<typename Get::result_type>
   {
+  public:
+    std::string operator () (const C* ptr, Get get) const
+    {
+      if (!ptr)
+        return "";
+      return tostring( get (ptr) );
+    }
   };
 
   template<class C, class P, class Type>
-  class GetToStringPolicy<C, Type (P::*)() const>
+  class GetToStringPolicy<C, Type (P::*)() const> : public ToStringPolicy<Type>
   {
-    ToStringPolicy<Type> tostring;
-
   public:
-
-    void set_modifiers (const std::string& modifiers) const
-    {
-#ifdef _DEBUG
-      std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
-		<< ">::set_modifiers " << modifiers << std::endl;
-#endif
-      tostring.set_modifiers(modifiers);
-    }
-
-    void reset_modifiers () const
-    { 
-      tostring.reset_modifiers ();
-    }
-
     std::string operator () (const C* ptr, Type (P::*get)() const) const
     {
-#ifdef _DEBUG
-      std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
-		<< ">::operator ()" << std::endl;
-#endif
       if (!ptr)
 	return "";
       return tostring( (ptr->*get) () );
     }
+  };
+
+  template<class C, class Type>
+  class GetToStringPolicy<C, Type (C*)> : public ToStringPolicy<Type>
+  {
+  public:
+    std::string operator () (const C* ptr, Type (*func)(C*)) const
+    {
+      if (!ptr)
+        return "";
+      return tostring( (*func) (ptr) );
+    }
+  };
+
+  //! Policy for converting a string to a value
+  /*! Specialize this template to customize the behaviour for different types */
+  template<class C, class Set>
+  class SetFromStringPolicy
+  {
+  public:
+    void operator () (C* ptr, Set set, const std::string& value)
+      { (set) (ptr, fromstring<typename Set::second_argument_type>(value)); }
+  };
+
+  template<class C, class P, class T>
+  class SetFromStringPolicy<C, void (P::*)(const T&)>
+  {
+  public:
+    void operator () (C* ptr, void (P::*set)(const T&), const std::string& val)
+      { (ptr->*set) (fromstring<T>(val)); }
+  };
+
+  template<class C, class P, class Type>
+  class SetFromStringPolicy<C, void (P::*)(Type)>
+  {
+  public:
+    void operator () (C* ptr, void (P::*set)(Type), const std::string& value)
+      { (ptr->*set) (fromstring<Type>(value)); }
+  };
+
+  template<class C, class P, class T>
+  class SetFromStringPolicy<C, void (*)(P*,const T&)>
+  {
+  public:
+    void operator () (C* ptr, void (*set)(P*, const T&), const std::string& val)
+      { (*set) (ptr, fromstring<T>(val)); }
+  };
+
+  template<class C, class P, class Type>
+  class SetFromStringPolicy<C, void (*)(P*,Type)>
+  {
+  public:
+    void operator () (C* ptr, void (*set)(P*,Type), const std::string& value)
+      { (*set) (ptr, fromstring<Type>(value)); }
   };
 
   //! Interface to a class attribute with an accessor method, C::Get()
@@ -137,8 +179,8 @@ namespace TextInterface
   public:
 
     //! Constructor
-    AttributeGet (const std::string& _name, Get _get)
-      { name = _name; get = _get; }
+    AttributeGet (const std::string& _name, Get _get) : get(_get)
+      { name = _name; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGet(*this); }
@@ -201,20 +243,21 @@ namespace TextInterface
 
     //! Constructor
     AttributeGetSet (const std::string& _name, Get _get, Set _set)
-      : AttributeGet<C,Get> (_name, _get) { set = _set; }
+      : AttributeGet<C,Get> (_name, _get), set(_set) {  }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGetSet(*this); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
-      { (ptr->*set) (fromstring<Type>(value)); }
+      { from_string (ptr, set, value); }
 
   protected:
 
     //! The set method
     Set set;
 
+    SetFromStringPolicy<C,Set> from_string;
   };
 
   //! AttributeGet and AttributeGetSet factory

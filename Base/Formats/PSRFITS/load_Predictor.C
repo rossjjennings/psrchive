@@ -9,11 +9,11 @@
 #include <config.h>
 #endif
 
-using namespace std;
-
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Pulsar.h"
 #include "Pulsar/Predictor.h"
+
+using namespace std;
 
 // load a tempo polyco, defined in load_polyco.C
 Pulsar::Predictor* load_polyco (fitsfile*, double* phase, bool verbose);

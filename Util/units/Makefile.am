@@ -21,6 +21,7 @@ include_HEADERS = \
 	interface_factory.h \
 	interface_stream.h \
 	lazy.h \
+	MethodFunction.h \
         ModifyRestore.h \
 	NestedTextInterface.h \
 	ndArray.h \
@@ -45,6 +46,7 @@ include_HEADERS = \
 	TextInterfaceElement.h \
 	TextInterfaceEmbed.h \
 	TextInterfaceEstimate.h \
+	TextInterfaceFunction.h \
 	TextInterfaceInterpreter.h \
 	TextInterfaceName.h \
 	TextInterfaceParser.h \
@@ -84,7 +86,7 @@ TESTS = test_ndIndex test_ndArray test_Alias test_tostring test_Error	\
 	test_circular_Reference test_Registry test_Functor		\
 	test_Callback test_separate test_TextInterface			\
 	test_parse_indeces test_TextIndex test_DynamicInterface		\
-	test_substitute test_escape test_ModifyRestore
+	test_substitute test_escape test_ModifyRestore test_MethodFunction
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
@@ -110,6 +112,7 @@ test_parse_indeces_SOURCES	= test_parse_indeces.C
 test_TextIndex_SOURCES		= test_TextIndex.C
 
 test_ModifyRestore_SOURCES      = test_ModifyRestore.C
+test_MethodFunction_SOURCES	= test_MethodFunction.C
 
 many_references_SOURCES		= many_references.C
 many_calls_SOURCES		= many_calls.C

@@ -5,29 +5,22 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/Pointing.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescope.h"
 #include "Horizon.h"
 #include "strutil.h"
 
-
-
 using namespace std;
-
-
-
 
 Pulsar::Pointing::Pointing () : Extension ("Pointing")
 {
 }
 
-Pulsar::Pointing::Pointing (const Pointing& extension)
+Pulsar::Pointing::Pointing (const Pointing& other)
   : Extension ("Pointing")
 {
-  operator = (extension);
+  operator = (other);
 }
 
 const Pulsar::Pointing&
@@ -282,5 +275,103 @@ void Pulsar::Pointing::integrate (const Integration* subint)
 TextInterface::Parser* Pulsar::Pointing::get_interface()
 {
   return new Interface( this );
+}
+
+
+unsigned Pulsar::Pointing::get_ninfo () const
+{
+  return info.size();
+}
+
+void Pulsar::Pointing::add_info (Info* _info)
+{
+  info.push_back( _info );
+}
+
+Pulsar::Pointing::Info* Pulsar::Pointing::get_info (unsigned i)
+{
+  return info.at(i);
+}
+
+const Pulsar::Pointing::Info* Pulsar::Pointing::get_info (unsigned i) const
+{
+  return info.at(i);
+}
+
+const Pulsar::Pointing::Info* 
+Pulsar::Pointing::find_info (const std::string& name) const
+{
+  return const_cast<Pointing*>(this)->find_info (name);
+}
+
+Pulsar::Pointing::Info* Pulsar::Pointing::find_info (const std::string& name)
+{
+  for (auto _info: info)
+    if (_info->get_name() == name)
+      return _info;
+
+  throw Error (InvalidParam, "Pulsar::Pointing::find_info",
+               "no information named '%s'", name.c_str());
+}
+
+double Pulsar::Pointing::get_value (const std::string& name) const
+{
+  return find_info(name)->get_value();
+}
+
+void Pulsar::Pointing::set_value (const std::string& name, double val)
+{
+  find_info(name)->set_value(val);
+}
+
+TextInterface::Parser* 
+Pulsar::Pointing::get_value_interface (const std::string& name)
+{
+  return find_info(name)->get_interface();
+}
+
+std::string Pulsar::Pointing::list_info () const
+{
+  string retval;
+
+  unsigned next = get_ninfo();
+
+  for (unsigned iext=0; iext<next; iext++)
+  {
+    if (iext>0)
+      retval += ",";
+    retval += get_info(iext)->get_name();
+  }
+
+  return retval;
+}
+
+void Pulsar::Pointing::edit_info (const std::string& name)
+{
+  string ext = name.substr(1);
+
+  if (name[0] == '+')
+  {
+    Info* _info = new Info;
+    _info->set_name (ext);
+    add_info ( _info );
+  }
+  else if (name[0] == '-')
+  {
+    unsigned next = get_ninfo();
+
+    for (unsigned i=0; i<next; i++)
+      if (get_info(i)->get_name() == ext)
+        delete get_info(i);
+  }
+  else
+    throw Error (InvalidParam, "Pulsar::Integration::edit_infos",
+                 "command starts with neither '+' nor '-'");
+}
+
+//! Return a text interfaces that can be used to access this instance
+TextInterface::Parser* Pulsar::Pointing::Info::get_interface()
+{
+  return new Interface(this);
 }
 

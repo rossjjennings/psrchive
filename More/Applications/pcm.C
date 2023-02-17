@@ -1323,13 +1323,13 @@ void check_phase (Pulsar::Archive* archive)
 
 void pcm::do_reparallactify (Pulsar::Archive* archive)
 {
-  cerr << "pcm: re-parallactifying data" << endl;
-  ProjectionCorrection projection;
-
   Pulsar::Receiver* rcvr = archive->get<Receiver>();
   if (!rcvr)
     throw Error (InvalidState, "pcm reparallactify",
                  "no Receiver extension available");
+
+  cerr << "pcm: re-parallactifying data" << endl;
+  ProjectionCorrection projection;
 
   rcvr->set_projection_corrected (false);
 
@@ -1340,6 +1340,8 @@ void pcm::do_reparallactify (Pulsar::Archive* archive)
   {
     Pulsar::Integration* subint = archive->get_Integration (isub);
     Jones<double> xform = projection (isub);
+
+    // the returned matrix transforms from the corrected to the observed
     subint->expert()->transform (xform);
   }
 }

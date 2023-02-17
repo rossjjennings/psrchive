@@ -378,6 +378,8 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   }
 
+#if 0  // WvS 9-Feb-2023 - this was frustrating our attempts to understand the eigenvalues!
+
   // remove the off-pulse baseline from the eigenvalue profiles
   for (unsigned i=0; i < 3; i++)
   {
@@ -385,6 +387,8 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     baseline->stats (eigen_value[i], &mean, &variance);
     eigen_value[i]->offset (-mean);
   }
+
+#endif
 
   double off_pulse_mean;
   double off_pulse_var;

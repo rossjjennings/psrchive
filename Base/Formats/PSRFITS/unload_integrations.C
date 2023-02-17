@@ -39,6 +39,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   fits_update_key (ffptr, TSTRING, "EPOCHS", valid, comment, &status);
 
   clean_Pointing_columns (ffptr);
+  add_Pointing_columns (ffptr);
 
   const CalInfoExtension* calinfo = get<CalInfoExtension>();
   bool calfreq_set = calinfo && calinfo->cal_frequency > 0.0;
