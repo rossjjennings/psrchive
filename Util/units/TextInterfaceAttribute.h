@@ -63,7 +63,7 @@ namespace TextInterface
   {
   protected:
 
-    mutable ToString tostring;
+    mutable ToString tostr;
 
   public:
 
@@ -71,23 +71,23 @@ namespace TextInterface
     {
 #ifdef _DEBUG
       std::cerr << "ToStringPolicy<Type=" << typeid(Type).name()
-		<< ">::set_modifiers " << modifiers << std::endl;
+		<< ">::set_modifiers " << modifiers << " tostr=" << (void*) &tostr << std::endl;
 #endif
-      tostring.set_precision ( fromstring<unsigned>(modifiers) );
+      tostr.set_precision ( fromstring<unsigned>(modifiers) );
     }
 
     void reset_modifiers () const
     { 
-      tostring.reset_modifiers ();
+      tostr.reset_modifiers ();
     }
 
     std::string operator () (const Type& t) const
     {
 #ifdef _DEBUG
       std::cerr << "ToStringPolicy<Type=" << typeid(Type).name()
-		<< ">::operator ()" << std::endl;
+		<< ">::operator ()" << " tostr=" << (void*) &tostr << std::endl;
 #endif
-      return tostring( t );
+      return tostr( t );
     }
   };
 
@@ -99,9 +99,13 @@ namespace TextInterface
   public:
     std::string operator () (const C* ptr, Get get) const
     {
+#ifdef _DEBUG
+      std::cerr << "GetToStringPolicy<C=" << typeid(C).name()
+                << ">::operator (const C* ptr, Get get)" << " tostr=" << (void*) &this->tostr << std::endl;
+#endif
       if (!ptr)
         return "";
-      return tostring( get (ptr) );
+      return this->tostr( get (ptr) );
     }
   };
 
@@ -111,9 +115,13 @@ namespace TextInterface
   public:
     std::string operator () (const C* ptr, Type (P::*get)() const) const
     {
+#ifdef _DEBUG
+      std::cerr << "GetToStringPolicy<C=" << typeid(C).name()
+                << ">::operator (const C* ptr, Type (P::*get)() const)" << " tostr=" << (void*) &this->tostr << std::endl;
+#endif
       if (!ptr)
 	return "";
-      return tostring( (ptr->*get) () );
+      return this->tostr( (ptr->*get) () );
     }
   };
 
@@ -123,9 +131,13 @@ namespace TextInterface
   public:
     std::string operator () (const C* ptr, Type (*func)(C*)) const
     {
+#ifdef _DEBUG
+     std::cerr << "GetToStringPolicy<Type=" << typeid(Type).name()
+               << ">::operator (const C* ptr, Type (*func)(C*))" << " tostr=" << (void*) &this->tostr << std::endl;
+#endif
       if (!ptr)
         return "";
-      return tostring( (*func) (ptr) );
+      return this->tostr( (*func) (ptr) );
     }
   };
 
