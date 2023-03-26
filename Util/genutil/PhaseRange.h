@@ -110,7 +110,7 @@ namespace Phase
   {
   protected:
 
-    mutable ToString tostring;
+    mutable ToString tostr;
     mutable Phase::Unit unit;
     mutable bool unit_specified;
 
@@ -140,9 +140,9 @@ namespace Phase
       std::cerr << "ToStringPolicy<Phase::HasUnit>::operator" << std::endl;
 #endif
       if (this->unit_specified)
-	return tostring( t.as(this->unit) );
+	return tostr( t.as(this->unit) );
       else
-	return tostring( t );
+	return tostr( t );
     }
   };
 }
