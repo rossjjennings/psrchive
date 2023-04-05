@@ -282,7 +282,7 @@ test_JonesMueller_SOURCES	= test_JonesMueller.C
 %.ps: %.dvi
 	dvips -Ppdf -G0 -o $@ $<
 
-%.dvi: %.tex $(FIGS) $(TEXS)
+%.dvi: $(srcdir)/%.tex $(FIGS) $(TEXS)
 	latex $*
 	latex $* 
 
