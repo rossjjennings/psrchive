@@ -15,8 +15,6 @@
 
 namespace MEAL {
 
-  class ScalarParameter;
-
   //! Orthometric Rotating Vector Model (RVM)
   class OrthoRVM : public RVM
   {
@@ -38,12 +36,12 @@ namespace MEAL {
     //! colatitude of line of sight with respect to spin axis
     void set_line_of_sight (double radians);
     Estimate<double> get_line_of_sight () const;
-    			    
-    //! slope (dPsi/dphi) at magnetic meridian
-    Reference::To<ScalarParameter> dPsi_dphi;
+ 
+    //! kappa = 1/(dPsi/dphi) (inverse of slope at magnetic meridian)
+    Reference::To<ScalarParameter> kappa;
 
-    //! atanh(cos(zeta)) where zeta is the colatitude of the line of sight
-    Reference::To<ScalarParameter> atanh_cos_zeta;
+    //! lambda = tan (pi/2-zeta) (tangent of latitude of the line of sight)
+    Reference::To<ScalarParameter> lambda; 
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -56,6 +54,7 @@ namespace MEAL {
 
   private:
 
+    ScalarMath cos_zeta;
     void init ();
   };
 
