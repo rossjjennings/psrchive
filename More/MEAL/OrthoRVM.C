@@ -49,7 +49,7 @@ void MEAL::OrthoRVM::init ()
 //! colatitude of line of sight with respect to spin axis
 void MEAL::OrthoRVM::set_line_of_sight (double zeta)
 {
-  lambda->set_param (0, ::tan(M_PI/2.0 - zeta));
+  lambda->set_param (0, 1.0/::tan(zeta));
 }
 
 Estimate<double> MEAL::OrthoRVM::get_line_of_sight () const

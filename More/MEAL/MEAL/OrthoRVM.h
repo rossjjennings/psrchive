@@ -40,7 +40,7 @@ namespace MEAL {
     //! kappa = 1/(dPsi/dphi) (inverse of slope at magnetic meridian)
     Reference::To<ScalarParameter> kappa;
 
-    //! lambda = tan (pi/2-zeta) (tangent of latitude of the line of sight)
+    //! lambda = cot(zeta) (cotangent of colatitude of the line of sight)
     Reference::To<ScalarParameter> lambda; 
 
     // ///////////////////////////////////////////////////////////////////
