@@ -332,11 +332,11 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg = menu.add (this, &psrmodel::use_ortho, "ortho");
   arg->set_help ("use orthometric parameterization");
 
-  arg = menu.add (ortho->dPsi_dphi.get(),
+  arg = menu.add (ortho->kappa.get(),
 		  &MEAL::ScalarParameter::set_value, 'k', "degrees");
   arg->set_help ("kappa: inverse of steepest slope");
 
-  arg = menu.add (ortho->dPsi_dphi.get(),
+  arg = menu.add (ortho->kappa.get(),
 		  &MEAL::ScalarParameter::set_fit, 'K', false);
   arg->set_help ("hold kappa constant");
   
@@ -429,7 +429,7 @@ void psrmodel::setup ()
       ortho->set_line_of_sight ( orig->line_of_sight->get_param(0) );
     }
 
-    ortho->atanh_cos_zeta->set_fit ( orig->line_of_sight->get_fit() );
+    ortho->lambda->set_fit ( orig->line_of_sight->get_fit() );
   }
 
   ortho->magnetic_meridian->copy( orig->magnetic_meridian );
@@ -533,9 +533,9 @@ void psrmodel::process (Pulsar::Archive* data)
     if (ortho_rvm)
     {
       cerr <<
-	"zeta   " << ((ortho_rvm->atanh_cos_zeta->get_infit(0))? "[fit]":"[fix]")
+	"zeta   " << ((ortho_rvm->lambda->get_infit(0))? "[fit]":"[fix]")
 		  << " = " << deg*ortho_rvm->get_line_of_sight().get_value() << " deg\n"
-	"kappa  " << state(ortho_rvm->dPsi_dphi, 1) << endl;
+	"kappa  " << state(ortho_rvm->kappa, 1) << endl;
     }
 	
 #if HAVE_PGPLOT
@@ -574,7 +574,7 @@ void psrmodel::process (Pulsar::Archive* data)
   {
     cerr <<
       "zeta =" << deg*ortho_rvm->get_line_of_sight() << " deg\n"
-      "kappa=" << ortho_rvm->dPsi_dphi->get_value() << endl;
+      "kappa=" << ortho_rvm->kappa->get_value() << endl;
   }
       
   output_residuals();

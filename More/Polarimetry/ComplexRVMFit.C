@@ -130,12 +130,12 @@ void Pulsar::ComplexRVMFit::init (MEAL::OrthoRVM* rvm)
   if (!rvm)
     return;
 
-  if (notset( rvm->dPsi_dphi ))
-    rvm->dPsi_dphi->set_param (0, delpsi_delphi);
+  if (notset( rvm->kappa ))
+    rvm->kappa->set_param (0, 1.0/delpsi_delphi);
 
   // start with most probable value as first guess
-  if (notset( rvm->atanh_cos_zeta ))
-    rvm->atanh_cos_zeta->set_param (0, 0.0);
+  if (notset( rvm->lambda ))
+    rvm->lambda->set_param (0, 0.0);
 }
 
 //! Set the data to which model will be fit
@@ -509,11 +509,11 @@ void Pulsar::ComplexRVMFit::solve ()
 
   MEAL::ComplexRVM* cRVM = get_model();
   MEAL::OrthoRVM* ortho = dynamic_cast<MEAL::OrthoRVM*> (cRVM->get_rvm());
-  bool fit_cos_zeta = false;
+  bool fit_cot_zeta = false;
   if (ortho)
-    fit_cos_zeta = ortho->atanh_cos_zeta->get_infit(0);
+    fit_cot_zeta = ortho->lambda->get_infit(0);
       
-  bool reset_cos_zeta = false;
+  bool reset_cot_zeta = false;
   
   while (not_improving < 25)
   {
@@ -522,25 +522,25 @@ void Pulsar::ComplexRVMFit::solve ()
 
     renormalize ();
 
-    if (fit_cos_zeta)
+    if (fit_cot_zeta)
     {
-      double gamma = ortho->atanh_cos_zeta->get_param(0);
-       double gamma_limit = 5.0;
+      double lambda = ortho->lambda->get_param(0);
+      double lambda_limit = 5.0;
       
-      if (fabs(gamma) > gamma_limit)
+      if (fabs(lambda) > lambda_limit)
 	{
 	  // set zeta to 1 degree away from extreme
 	  double fix_zeta = 1.0; // deg
-	  gamma = sign(gamma) * atanh(cos(fix_zeta*M_PI/180));
+	  lambda = sign(lambda) / tan(fix_zeta*M_PI/180);
 	  cerr << "Pulsar::ComplexRVMFit::solve fix zeta =" << fix_zeta << endl;
 	  
-	  ortho->atanh_cos_zeta->set_param(0, gamma);
-	  ortho->atanh_cos_zeta->set_infit(0, false);
+	  ortho->lambda->set_param(0, lambda);
+	  ortho->lambda->set_infit(0, false);
 
 	  fit.init (data_x, data_y, *model);
 	  
-	  fit_cos_zeta = false;
-	  reset_cos_zeta = true;
+	  fit_cot_zeta = false;
+	  reset_cot_zeta = true;
 	}
     }
     
@@ -578,9 +578,9 @@ void Pulsar::ComplexRVMFit::solve ()
   if (chisq_map)
     return;
 
-  if (reset_cos_zeta)
+  if (reset_cot_zeta)
   {
-    ortho->atanh_cos_zeta->set_infit(0, true);
+    ortho->lambda->set_infit(0, true);
     fit.init (data_x, data_y, *model);
   }
   
@@ -1030,8 +1030,8 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
   ortho_rvm = dynamic_cast<MEAL::OrthoRVM*> (rvm);
   if (ortho_rvm)
   {
-    search = ortho_rvm->atanh_cos_zeta;
-    other = ortho_rvm->dPsi_dphi;
+    search = ortho_rvm->lambda;
+    other = ortho_rvm->kappa;
   }
 
   double initial_other = other->get_param (0);
