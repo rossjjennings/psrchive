@@ -26,7 +26,10 @@ void FTransform::derivative (unsigned npts, float* arr)
 
   FTransform::fcc1d(npts, &(fft_cmplx_arr[0]), &(cmplx_arr[0]));
 
+  // zero the DC
   fft_cmplx_arr[0] = fft_cmplx_arr[1] = 0.0;
+  // zero the Nyquist
+  fft_cmplx_arr[npts] = fft_cmplx_arr[npts+1] = 0.0;
 
   for (unsigned i=1; i<npts/2; ++i)
   {
