@@ -21,7 +21,7 @@
 
 #include "templates.h"
 
-//#define _DEBUG 1
+#define _DEBUG 1
 #include "debug.h"
 
 #include <cassert>
@@ -268,30 +268,6 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 
   delpsi_delphi = 0;
 
-  // the Profile class initializes the amps array = zero
-  Profile real (nbin);
-  float* re = real.get_amps();
-  Profile imag (nbin);
-  float* im = imag.get_amps();
-
-  std::complex< Estimate<double> > cross;
-
-  for (unsigned ibin=0; ibin < nbin; ibin++)
-  {
-    cross = std::conj(linear[ibin]) * linear[ (ibin+1) % nbin ];
-    
-    re[ibin] = cross.real().get_value();
-    im[ibin] = cross.imag().get_value();
-  }
-
-#if _DEBUG
-  {
-    std::ofstream out ("reim.txt");
-    for (unsigned ibin=0; ibin < nbin; ibin++)
-      out << re[ibin] << " " << im[ibin] << endl;
-  }
-#endif
-  
   PhaseWeight mask (nbin, 1.0);
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
@@ -307,60 +283,51 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 #endif
   }
 
-  
-  if (guess_smooth)
-  {
-    {
-      SmoothMean smooth;
-      smooth.set_bins (guess_smooth);
-      
-      smooth (&real);
-      smooth (&imag);
-    }
-
-    {
-      MaskSmooth smooth;
-      smooth.set_bins (guess_smooth);
-      smooth.set_masked_bins (1);
-
-      smooth (&mask);
-    }
-  }
-
 #if _DEBUG
-  for (unsigned ibin=0; ibin < nbin; ibin++)
-    cerr << "smimag: " << ibin << " " << im[ibin] << endl;
-
-  std::ofstream out ("reimphi.txt");  
+  std::ofstream out ("delpsi_delphi.txt");  
 #endif
 
   int max_bin = -1;
-  double max_angle = 0.0;
+  double max_slope = 0.0;
+
+  const Profile* q = data->get_Profile(1);
+  const Profile* u = data->get_Profile(2);
+  const float* Q = q->get_amps();
+  const float* U = u->get_amps();
+
+  Profile* dq = q->clone();
+  Profile* du = u->clone();
+
+  dq->derivative();
+  du->derivative();
+  const float* dQ = dq->get_amps();
+  const float* dU = du->get_amps();
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
     if (mask[ibin] == 0)
       continue;
     
-    double angle = fabs( atan2 (im[ibin], re[ibin]) );
-    
+    double slope = Q[ibin]*dU[ibin] - U[ibin]*dQ[ibin];
+
 #if _DEBUG
-    out << ibin << " " << im[ibin] << " " << re[ibin] << " " << angle << endl;
-    cerr << "angle: " << ibin << " " << angle
-	 << " " << im[ibin] << " " << re[ibin] << " " << mask[ibin] << endl;
+    out << ibin << " " << slope << endl;
 #endif
     
-    if (max_bin < 0 || angle > max_angle) 
+    if (max_bin < 0 || fabs(slope) > max_slope) 
     {
       max_bin = ibin;
-      max_angle = angle;
+      max_slope = fabs(slope);
+      double norm = 2.0 * (Q[ibin]*Q[ibin] + U[ibin]*U[ibin]);
+      delpsi_delphi = slope / norm;
     }
   }
 
   double phi_per_bin = gate * 2*M_PI / nbin;
 
+  delpsi_delphi /= phi_per_bin;
+
   peak_phase = (max_bin + 0.5) * phi_per_bin;
-  delpsi_delphi = 0.5 * atan2(im[max_bin],re[max_bin]) / phi_per_bin;
   
   std::complex< Estimate<double> > L0 = linear[max_bin];
   peak_pa = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
@@ -661,7 +628,7 @@ void Pulsar::ComplexRVMFit::check_parameters (MEAL::RotatingVectorModel* rvm)
     phi0 -= M_PI;
   }
 
-  DEBUG("alpha=" << alpha << " zeta=" << zeta << " neg=" << negative_count);
+  DEBUG("alpha=" << alpha << " zeta=" << zeta);
 
   // ensure that phi0 lies on 0 -> 2pi
   phi0 = twopi (phi0);

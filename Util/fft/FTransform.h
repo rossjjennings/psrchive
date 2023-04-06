@@ -88,7 +88,11 @@ namespace FTransform {
   //! Returns the scale factor associated with the FFT operation
   double get_scale (size_t nfft, type t);
 
+  //! Use the Fourier transform to cyclically shift the elements in array
   void shift (unsigned npts, float* arr, double shift);
+
+  //! Use the Fourier transform to compute the derivative of data
+  void derivative (unsigned npts, float* data);
 
   //! Inplace wrapper-function- performs a memcpy after FFTing
   int inplace_frc1d(size_t nfft, float* srcdest);

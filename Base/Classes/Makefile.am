@@ -88,6 +88,7 @@ libClasses_la_SOURCES = \
 	MoreProfiles.C \
 	PhaseResolvedHistogram.C \
         Profile_average.C \
+	Profile_derivative.C \
 	Profile_rotate.C \
         Profile.C \
 	ProfileAmps.C \

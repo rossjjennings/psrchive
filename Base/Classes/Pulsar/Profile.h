@@ -110,6 +110,9 @@ namespace Pulsar {
     //! rotates the profile by phase (in turns)
     void rotate_phase (double phase);
 
+    //! compute the derivative of profile with respect to index
+    void derivative ();
+
     //! set all amplitudes to zero
     void zero ();
   

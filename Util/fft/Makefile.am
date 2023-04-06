@@ -13,7 +13,7 @@ include_HEADERS = interpolate.h median_smooth.h \
 	FTransform.h FTransformAgent.h FTransformPlan.h FTransformBench.h \
 	QuaternionFT.h
 
-libpsrfft_la_SOURCES = test_libraries.h shift.C fccf.f ffft.f \
+libpsrfft_la_SOURCES = test_libraries.h shift.C derivative.C fccf.f ffft.f \
 	FTransformAgent.C FTransform.C FTransformBench.C QuaternionFT.C
 
 FFT_BENCH =
