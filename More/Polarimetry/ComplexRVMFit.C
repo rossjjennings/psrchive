@@ -131,7 +131,7 @@ void Pulsar::ComplexRVMFit::init (MEAL::OrthoRVM* rvm)
     return;
 
   if (notset( rvm->kappa ))
-    rvm->kappa->set_param (0, 1.0/delpsi_delphi);
+    rvm->kappa->set_param (0, 2.0/delpsi_delphi);  // I don't know why ... factor of two suspected through experiment only
 
   // start with most probable value as first guess
   if (notset( rvm->lambda ))
@@ -190,7 +190,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
         cerr << "Pulsar::ComplexRVMFit::set_observation phase=" << phase 
              << " L=" << L << endl;
 
-      get_model()->add_state (phase, L);
+      get_model()->add_state (phase, linear[ibin]);
 
       count ++;
     }
@@ -303,29 +303,37 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
   const float* dQ = dq->get_amps();
   const float* dU = du->get_amps();
 
+  double phi_per_bin = gate * 2*M_PI / nbin;
+
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
     if (mask[ibin] == 0)
       continue;
     
     double slope = Q[ibin]*dU[ibin] - U[ibin]*dQ[ibin];
+    double norm = 2.0 * (Q[ibin]*Q[ibin] + U[ibin]*U[ibin]) * phi_per_bin;
+    double slope2 = 0.0;
+
+    if (ibin > 0 && mask[ibin-1] != 0)
+    {
+      std::complex< Estimate<double> > L0 = linear[ibin-1];
+      double pa0 = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
+      std::complex< Estimate<double> > L1 = linear[ibin];
+      double pa1 = 0.5 * atan2(L1.imag().get_value(), L1.real().get_value());
+      slope2 = (pa1 - pa0) / phi_per_bin;
+    }
 
 #if _DEBUG
-    out << ibin << " " << slope << endl;
+    out << ibin << " " << slope << " " << slope2*norm << endl;
 #endif
     
     if (max_bin < 0 || fabs(slope) > max_slope) 
     {
       max_bin = ibin;
       max_slope = fabs(slope);
-      double norm = 2.0 * (Q[ibin]*Q[ibin] + U[ibin]*U[ibin]);
       delpsi_delphi = slope / norm;
     }
   }
-
-  double phi_per_bin = gate * 2*M_PI / nbin;
-
-  delpsi_delphi /= phi_per_bin;
 
   peak_phase = (max_bin + 0.5) * phi_per_bin;
   
@@ -421,16 +429,19 @@ double sign (double x)
 }
 
 /*
-  This function effectively marginalizes over L_i 
+  This function effectively marginalizes over L_i
   as in Desvignes et al (2019; see Equations S1 and S2
   of the Supplementary Material).
 */
 void Pulsar::ComplexRVMFit::renormalize()
 {
   MEAL::ComplexRVM* cRVM = get_model();
-  
+
+  if (cRVM->get_gains_maximum_likelihood())
+    return;
+
   cRVM->set_gains_infit (false);
-  
+
   const unsigned nstate = cRVM->get_nstate();
 
   // MEAL::Function::verbose = true;
@@ -460,8 +471,8 @@ void Pulsar::ComplexRVMFit::solve ()
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
 
-  renormalize ();
-      
+  renormalize();
+
   float last_chisq = chisq = fit.init (data_x, data_y, *model);
 
   if (!isfinite(chisq))

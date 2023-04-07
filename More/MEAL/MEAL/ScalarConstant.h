@@ -21,10 +21,13 @@ namespace MEAL {
   public:
 
     //! Default constructor
-    ScalarConstant (double value);
+    ScalarConstant (double value = 0);
 
     //! Assignment operator
     const ScalarConstant& operator = (const ScalarConstant& scalar);
+
+    //! Set the value
+    void set_value (double val) { value = val; }
 
     // ///////////////////////////////////////////////////////////////////
     //

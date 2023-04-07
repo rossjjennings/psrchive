@@ -19,7 +19,8 @@ namespace MEAL {
   template<typename> class VectorRule;
   
   class RVM;
-  
+  class Scalar;
+
   //! Rotating Vector Model of Stokes Q and U as a function of pulse phase
   class ComplexRVM : public ProductRule<Complex>
   {
@@ -42,8 +43,8 @@ namespace MEAL {
     RVM* get_rvm ();
     void set_rvm (RVM*);
     
-    //! Add a state: phase in radians, L is first guess of linear polarization
-    void add_state (double phase, double L);
+    //! Add a state: phase in radians, L is measured linear polarization
+    void add_state (double phase, std::complex< Estimate<double> >& L);
     //! Set the current state for which the model will be evaluated
     void set_state (unsigned i);
 
@@ -60,12 +61,18 @@ namespace MEAL {
     //! Get the linear polarization of the ith state
     Estimate<double> get_linear (unsigned i) const;
 
+#if 0
     //! Correct gain of each state to account for amplitude of complex phase
     void renormalize (double renorm);
+#endif
 
     //! Set the fit flag of every gain parameter
-    void set_gains_infit (bool flag);
-      
+    void set_gains_infit (bool flag=true);
+
+    //! Replace gains with maximum likelihood estimators
+    void set_gains_maximum_likelihood (bool flag=true);
+    bool get_gains_maximum_likelihood () const { return gains_maximum_likelihood; }
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation
@@ -78,10 +85,20 @@ namespace MEAL {
   private:
 
     Reference::To<RVM> rvm;
+
+    Reference::To<Scalar> modelQ;
+    Reference::To<Scalar> modelU;
+
+    //! Free parameters for gains used when gains_maximum_likelihood is false
     Reference::To< VectorRule<Complex> > gain;
+
+    //! Model each gain with its maximum likelihood estimate
+    bool gains_maximum_likelihood;
 
     class State;
     std::vector<State> state;
+
+    class MaximumLikelihoodGain;
 
     void check (unsigned i, const char* method) const;
     void init ();

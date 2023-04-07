@@ -13,6 +13,9 @@
 #include "MEAL/Gain.h"
 #include "MEAL/ComplexCartesian.h"
 #include "MEAL/ScalarMath.h"
+#include "MEAL/ScalarConstant.h"
+#include "MEAL/Cast.h"
+#include "MEAL/Wrap.h"
 
 using namespace std;
 
@@ -51,14 +54,52 @@ void MEAL::ComplexRVM::set_rvm (RVM* new_rvm)
 
   // Set up a complex phase function with phase equal to RVM P.A.
   phase->set_model( new ComplexCartesian );
-  phase->set_constraint( 0, Q.get_expression() );
-  phase->set_constraint( 1, U.get_expression() );
+  phase->set_constraint( 0, modelQ = Q.get_expression() );
+  phase->set_constraint( 1, modelU = U.get_expression() );
 
   // gain->set_verbose (true);
   clear ();
+
   add_model (gain);
   add_model (phase);
 }
+
+class MEAL::ComplexRVM::MaximumLikelihoodGain : public Wrap<Complex>
+{
+  protected:
+    Reference::To<ScalarConstant> valQ, varQ;
+    Reference::To<ScalarConstant> valU, varU;
+    Reference::To<Complex> gain;
+
+  public:
+
+  MaximumLikelihoodGain (Scalar* modelQ, Scalar* modelU)
+  {
+    valQ = new ScalarConstant;
+    varQ = new ScalarConstant;
+    valU = new ScalarConstant;
+    varU = new ScalarConstant;
+
+    // numerator and denominator of Equation (S3) of Desvignes et al (2019)
+    ScalarMath num = (*valQ * *modelQ) / *varQ + (*valU * *modelU) / *varU;
+    ScalarMath den = (*modelQ * *modelQ) / *varQ + (*modelU * *modelU) / *varU;
+    ScalarMath result = num / den;
+ 
+    Scalar* expression = result.get_expression();
+    wrap (new Cast<Complex,Scalar> (expression));
+  }
+
+  std::string get_name () const { return "ComplexRVM::MaximumLikelihoodGain"; }
+
+  void set_measured (std::complex< Estimate<double> >& L)
+  {
+    valQ->set_value( L.real().val );
+    varQ->set_value( L.real().var );
+    valU->set_value( L.imag().val );
+    varU->set_value( L.imag().var );
+  }
+
+};
 
 void MEAL::ComplexRVM::init ()
 {
@@ -69,23 +110,24 @@ class MEAL::ComplexRVM::State
 {
 public:
   double phase_radians;
-  Reference::To< Gain<Complex> > gain;
+  Reference::To< Complex > gain;
 
   State ()
   { 
     phase_radians = 0;
-    gain = new Gain<Complex>;
   }
 };
 
 MEAL::ComplexRVM::ComplexRVM ()
 {
+  gains_maximum_likelihood = false;
   init ();
 }
 
 //! Copy constructor
 MEAL::ComplexRVM::ComplexRVM (const ComplexRVM& copy)
 {
+  gains_maximum_likelihood = copy.gains_maximum_likelihood;
   init ();
   operator = (copy);
 }
@@ -114,14 +156,27 @@ MEAL::RVM* MEAL::ComplexRVM::get_rvm ()
 }
 
 //! Add a state: phase in turns, L is first guess of linear polarization
-void MEAL::ComplexRVM::add_state (double phase, double L)
+void MEAL::ComplexRVM::add_state (double phase, std::complex< Estimate<double> >& linear)
 {
   State s;
   s.phase_radians = phase;
-  s.gain->set_gain (L);
 
-  state.push_back( s );
+  if (!gains_maximum_likelihood)
+  {
+    auto gain = new Gain<Complex> ();
+    double L = ::sqrt( ::norm(linear).val );
+    gain->set_gain(L);
+    s.gain = gain;
+  }
+  else
+  {
+    auto gain = new MaximumLikelihoodGain (modelQ, modelU);
+    gain->set_measured (linear);
+    s.gain = gain;
+  }
+
   gain->push_back( s.gain );
+  state.push_back( s );
 }
 
 //! Get the number of states
@@ -156,22 +211,54 @@ double MEAL::ComplexRVM::get_phase (unsigned i) const
 void MEAL::ComplexRVM::set_linear (unsigned i, const Estimate<double>& L)
 {
   check (i, "set_linear");
-  state[i].gain->set_gain(L);
+
+  auto gain = dynamic_cast< Gain<Complex>* > (state[i].gain.get());
+  if (gain)
+    return gain->set_gain(L);
+#if 0
+  // for now, silently ignore
+  else
+    throw Error (InvalidState, "MEAL::ComplexRVM::set_linear",
+		    "gain object is not of type Gain<Complex>");
+#endif
 }
 
 //! Get the linear polarization of the ith state
 Estimate<double> MEAL::ComplexRVM::get_linear (unsigned i) const
 {
   check (i, "get_linear");
-  return state[i].gain->get_gain();
+
+  auto gain = dynamic_cast< Gain<Complex>* > (state[i].gain.get());
+  if (gain)
+    return gain->get_gain();
+
+  auto mlgain = dynamic_cast< MaximumLikelihoodGain* > (state[i].gain.get());
+  if (mlgain)
+    return mlgain->evaluate().real();
+
+  throw Error (InvalidState, "MEAL::ComplexRVM::get_linear",
+		  "gain object is of unknown type");
 }
 
 void MEAL::ComplexRVM::set_gains_infit (bool flag)
 {
+  if (gains_maximum_likelihood)
+    return;
+
   for (unsigned i=0; i<state.size(); i++)
     state[i].gain->set_infit (0, flag);
 }
 
+void MEAL::ComplexRVM::set_gains_maximum_likelihood (bool flag)
+{
+  if (gain && gain->size() > 0)
+    throw Error (InvalidState, "MEAL::ComplexRVM::set_gains_maximum_likelihood",
+		 "cannot set flag after states have been created");
+
+  gains_maximum_likelihood = flag;
+}
+
+#if 0
 void MEAL::ComplexRVM::renormalize (double renorm)
 {
   // MEAL::Function::verbose = true;
@@ -194,6 +281,7 @@ void MEAL::ComplexRVM::renormalize (double renorm)
     // cerr << " : new L=" << new_L << " abs=" << abs(result) << endl;
   }
 }
+#endif
 
 void MEAL::ComplexRVM::check (unsigned i, const char* method) const
 {

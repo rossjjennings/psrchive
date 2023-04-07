@@ -63,7 +63,10 @@ public:
 
   //! Use the orthometric parameterization of the RVM
   void use_ortho ();
-  
+ 
+  //! Use maximum likelihood gains
+  void ml_gain ();
+
   //! Verify setup
   void setup ();
 
@@ -267,6 +270,11 @@ void psrmodel::use_ortho ()
   rvmfit->get_model()->set_rvm ( ortho );
 }
 
+void psrmodel::ml_gain ()
+{
+  rvmfit->get_model()->set_gains_maximum_likelihood ();
+}
+
 void psrmodel::add_options (CommandLine::Menu& menu)
 {
   orig = new MEAL::RotatingVectorModel;
@@ -318,7 +326,8 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg->set_long_name ("opm");
   arg->set_help ("add a range over which an orthogonal mode dominates");
 
-  menu.add ("");
+  arg = menu.add (this, &psrmodel::ml_gain, "mlgain");
+  arg->set_help ("use maximum likelihood gains");
 
   RotatingVectorModelOptions rvm_options;
   rvm_options.set_model (orig);
