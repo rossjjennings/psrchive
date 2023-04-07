@@ -225,29 +225,7 @@ AM_CONDITIONAL(HAVE_QTDRIV, [test 1 = 0])
 
 else
 
-#
-# Checks for graphics libraries
-#
-SWIN_LIB_GIZA
-
-if test x"$have_giza" == xyes; then
-
-  echo "Replacing PGPLOT with giza"
-
-  # replace PGPLOT with GIZA
-  PGPLOT_CFLAGS=$GIZA_CFLAGS
-  PGPLOT_LIBS=$GIZA_LIBS
-  AC_SUBST(PGPLOT_CFLAGS)
-  AC_SUBST(PGPLOT_LIBS)
-  have_pgplot="yes"
-  AM_CONDITIONAL(HAVE_PGPLOT, [test x"$have_pgplot" == xyes])
-
-else
-
-  SWIN_LIB_PGPLOT
-
-fi  # have_giza
-
+SWIN_LIB_PGPLOT
 BNV_HAVE_QT
 SWIN_LIB_QTDRIV
 
