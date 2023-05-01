@@ -31,6 +31,7 @@ Pulsar::FourthMomentStats::FourthMomentStats (const PolnProfile* _profile)
     covariance = profile->get_covariance();
 
   duration = folding_period = bandwidth = 0.0;
+  remove_eigen_baseline = false;
 }
 
 //! Destructor
@@ -378,17 +379,16 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   }
 
-#if 0  // WvS 9-Feb-2023 - this was frustrating our attempts to understand the eigenvalues!
-
-  // remove the off-pulse baseline from the eigenvalue profiles
-  for (unsigned i=0; i < 3; i++)
+  if (remove_eigen_baseline)
   {
-    double mean, variance;
-    baseline->stats (eigen_value[i], &mean, &variance);
-    eigen_value[i]->offset (-mean);
+    // remove the off-pulse baseline from the eigenvalue profiles
+    for (unsigned i=0; i < 3; i++)
+    {
+      double mean, variance;
+      baseline->stats (eigen_value[i], &mean, &variance);
+      eigen_value[i]->offset (-mean);
+    }
   }
-
-#endif
 
   double off_pulse_mean;
   double off_pulse_var;

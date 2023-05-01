@@ -38,6 +38,9 @@ namespace Pulsar {
     void set_duration (double T) { duration = T; }
     void set_folding_period (double P) { folding_period = P; }
 
+    void set_remove_eigen_baseline (bool flag) { remove_eigen_baseline = flag; }
+    bool get_remove_eigen_baseline () const { return remove_eigen_baseline; }
+
     //! Get the estimated covariance matrix for the specified phase bin
     Matrix< 4,4,Estimate<double> > get_covariance (unsigned ibin) const;
 
@@ -84,6 +87,9 @@ namespace Pulsar {
 
     //! The bandwidth in MHz
     double bandwidth;
+
+    //! Subtract the bias induced by sorting the eigen values
+    bool remove_eigen_baseline;
 
     std::vector< Reference::To<Profile> > eigen_value;
     std::vector< Reference::To<Profile> > regression_coefficient;
