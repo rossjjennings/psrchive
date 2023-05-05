@@ -1,6 +1,6 @@
-#!/bin/tcsh -f
+#!/usr/bin/sh
 
-if ( "$1" == "-h" || "$1" == "--help" || "$1" == "" ) then
+if test "$1" = "-h" || test "$1" = "--help" || test "$1" = ""; then
   echo
   echo "greps: searches psrchive source code for regular expression"
   echo
@@ -8,19 +8,19 @@ if ( "$1" == "-h" || "$1" == "--help" || "$1" == "" ) then
   echo "  greps <regex>"
   echo
   exit
-endif
+fi
 
-ack-grep --help >& /dev/null
-if ( "$?" == "0" ) then
-  set GREP_COMMAND=ack-grep
+if ack-grep --help > /dev/null 2>&1; then
+  GREP_COMMAND=ack-grep
 else
-  ack --help >& /dev/null
-  if ( "$?" == "0" ) then
-    set GREP_COMMAND=ack
+  if ack-grep --help > /dev/null 2>&1; then
+    GREP_COMMAND=ack
   else
-    set GREP_COMMAND=grep
-  endif
-endif
+    GREP_COMMAND=grep
+  fi
+fi
+
+echo "grep: $GREP_COMMAND"
 
 $GREP_COMMAND "$*" `find Util Base More -name "*.[hfcC]"`
 
