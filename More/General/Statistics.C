@@ -87,7 +87,7 @@ double Pulsar::Statistics::get_design_effect () const
   const Archive* archive = get_Archive();
   unsigned nsubint = archive->get_nsubint();
 
-  unsigned count;
+  unsigned count = 0;
   double sum = 0;
   double sumsq = 0;
 
