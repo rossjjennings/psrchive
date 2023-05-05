@@ -420,17 +420,34 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   unsigned nbin = get_nbin();
   float* amps = get_amps();
 
+  vector<bool> below (nbin, false);
+  float min = 0;
+  bool minset = false;
+
   for (unsigned ibin=0; ibin<nbin; ++ibin)
   {
-    if (amps[ibin] > threshold)
-      amps[ibin] = log(amps[ibin])/log(base);
-    else
-      amps[ibin] = log_threshold;
+    if (amps[ibin] <= threshold)
+    {
+      below[ibin] = true;
+      continue;
+    }
+
+    amps[ibin] = log(amps[ibin])/log(base);
     if (!isfinite(amps[ibin]))
       throw Error (InvalidParam, "Pulsar::Profile::logarithm",
 		   "logarithm of amps[%u]=%lf is not finite",
 		   ibin, amps[ibin]);
+
+    if (!minset || amps[ibin] < min)
+    {
+      min = amps[ibin];
+      minset = true;
+    }
   }
+
+  for (unsigned ibin=0; ibin<nbin; ++ibin)
+    if (below[ibin])
+      amps[ibin] = min;
 }
 
 void Pulsar::Profile::pscrunch ()

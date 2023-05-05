@@ -35,6 +35,9 @@ namespace Pulsar {
     //! Scale each profile by a mathematical expression
     std::string scale (const std::string& args);
 
+    //! Compute the logarithm of each profile
+    std::string logarithm (const std::string& args);
+
     //! Form the cummulative profile
     std::string cumulative (const std::string& args);
 

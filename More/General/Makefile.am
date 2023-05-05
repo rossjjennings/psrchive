@@ -68,6 +68,7 @@ nobase_include_HEADERS = \
         Pulsar/IterativeBaseline.h \
 	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
+	Pulsar/Logarithm.h \
 	Pulsar/MaskSmooth.h \
 	Pulsar/ModularSNR.h \
         Pulsar/NoiseStatistics.h \
@@ -228,6 +229,7 @@ libGeneral_la_SOURCES = \
         IterativeBaseline.C \
 	LastHarmonic.C \
         LastSignificant.C \
+	Logarithm.C \
 	MaskSmooth.C \
 	ModularSNR.C \
         NoiseStatistics.C \

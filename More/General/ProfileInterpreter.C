@@ -18,6 +18,7 @@
 #include "Pulsar/Accumulate.h"
 #include "Pulsar/Differentiate.h"
 #include "Pulsar/Detrend.h"
+#include "Pulsar/Logarithm.h"
 #include "Pulsar/SmoothMean.h"
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothSinc.h"
@@ -53,6 +54,11 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
     ( &ProfileInterpreter::scale,
       "scale", "scale by a mathematical expression",
       "usage: scale <exp>\n" );
+
+  add_command
+    ( &ProfileInterpreter::logarithm,
+      "log", "compute the logarithm of each profile",
+      "usage: log <base> [default: base 10]\n" );
 
   add_command 
     ( &ProfileInterpreter::mean,
@@ -218,6 +224,15 @@ catch (Error& error) {
 string Pulsar::ProfileInterpreter::detrend (const string& args) try
 {
   foreach (get(), new Detrend);
+  return response (Good);
+}
+catch (Error& error) {
+  return response (error);
+}
+
+string Pulsar::ProfileInterpreter::logarithm (const string& args) try
+{
+  foreach (get(), new Logarithm);
   return response (Good);
 }
 catch (Error& error) {
