@@ -394,8 +394,9 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   MJD epoch0 = epoch;  // XXX Do this before or after int sec correction?
   epoch += nsamp * pfd.dt;
   Phase midphase;
-  double midfreq;
-  if (has_model()) {                    // Correct to zero phase point
+  double midfreq = 0.0;
+  if (has_model())
+  {                    // Correct to zero phase point
     midphase = model->phase(epoch) - model->phase(epoch0); 
     midfreq = model->frequency(epoch);
     epoch -= midphase.fracturns() / midfreq;
