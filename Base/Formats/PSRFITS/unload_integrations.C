@@ -28,6 +28,9 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   int status = 0;
   char* comment = 0;
 
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::unload_integrations" << endl;
+
   // Move to the SUBINT Binary Table
   
   fits_movnam_hdu (ffptr, BINARY_TBL, "SUBINT", 0, &status);

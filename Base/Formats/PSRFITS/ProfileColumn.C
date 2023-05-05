@@ -24,6 +24,16 @@
 
 using namespace std;
 
+Pulsar::Option<bool> Pulsar::ProfileColumn::output_floats
+(
+ "PSRFITS::write_floats", false,
+
+ "Write single-precision floating point profile amplitudes [boolean]",
+
+ "If true, then the profile amplitudes will be written to file as\n"
+ "single-precision floating point instead of 16-bit fixed point values"
+);
+
 void Pulsar::ProfileColumn::reset ()
 {
   data_colnum = -1;
@@ -33,6 +43,8 @@ void Pulsar::ProfileColumn::reset ()
 
 Pulsar::ProfileColumn::ProfileColumn ()
 {
+  // cerr << "Pulsar::ProfileColumn ctor" << endl;
+
   fptr = 0;
   nbin = nchan = nprof = 0;
   verbose = false;
@@ -125,26 +137,34 @@ void Pulsar::ProfileColumn::create (unsigned start_column)
 		 "fitsfile not set");
 
   int status = 0;
+  string typecode = "E";
 
-  offset_colnum = start_column;
-  fits_insert_col (fptr, offset_colnum,
-		   fits_str(offset_colname), "E", &status);
+  if (!output_floats)
+  {
+    typecode = "I";
 
-  if (status != 0)
-    throw FITSError (status, "Pulsar::ProfileColumn::create", 
-                     "error inserting " + offset_colname);
+    offset_colnum = start_column;
+    fits_insert_col (fptr, offset_colnum,
+		     fits_str(offset_colname), "E", &status);
+    start_column ++;
 
-  scale_colnum = start_column + 1;
-  fits_insert_col (fptr, scale_colnum,
-		   fits_str(scale_colname), "E", &status);
+    if (status != 0)
+      throw FITSError (status, "Pulsar::ProfileColumn::create", 
+                       "error inserting " + offset_colname);
+  
+    scale_colnum = start_column;
+    fits_insert_col (fptr, scale_colnum,
+		     fits_str(scale_colname), "E", &status);
+    start_column ++;
 
-  if (status != 0)
-    throw FITSError (status, "Pulsar::ProfileColumn::create", 
-                     "error inserting " + scale_colname);
+    if (status != 0)
+      throw FITSError (status, "Pulsar::ProfileColumn::create", 
+                       "error inserting " + scale_colname);
+  }
 
-  data_colnum = start_column + 2;
+  data_colnum = start_column;
   fits_insert_col (fptr, data_colnum,
-		   fits_str(data_colname), "I", &status);
+		   fits_str(data_colname), fits_str(typecode), &status);
 
   if (status != 0)
     throw FITSError (status, "Pulsar::ProfileColumn::create", 
@@ -163,18 +183,71 @@ int Pulsar::ProfileColumn::get_colnum (const string& name)
   int colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, fits_str(name), &colnum, &status);
 
-  if (status != 0)
+  if (status != 0 && !output_floats)
     throw FITSError (status, "Pulsar::ProfileColumn::get_colnum", 
                      "fits_get_colnum " + name);
 
   return colnum;
 }
 
+void Pulsar::ProfileColumn::resize_floats ()
+{
+  if (!fptr)
+    throw Error (InvalidState, "Pulsar::ProfileColumn::resize_floats",
+                 "fitsfile not set");
+
+  static bool first_time = true;
+  if (first_time)
+    cerr << "PSRFITS writing floating point amplitudes" << endl;
+  first_time = false;
+
+  int status = 0;
+
+  // delete the scale and offset columns, if they exist
+  int colnum = get_offset_colnum();
+  if (colnum > 0)
+  {
+    fits_delete_col (fptr, colnum, &status);
+    reset ();
+  }
+
+  colnum = get_scale_colnum();
+  if (colnum > 0)
+  {
+    fits_delete_col (fptr, colnum, &status);
+    reset ();
+  }
+
+  colnum = get_data_colnum();
+  fits_delete_col (fptr, colnum, &status);
+  fits_insert_col (fptr, colnum,
+                   fits_str(data_colname), fits_str("E"), &status);
+
+  if (status != 0)
+    throw FITSError (status, "Pulsar::ProfileColumn::resize_floats",
+                     "error inserting " + data_colname);
+
+  // number of values to be written
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+  psrfits_update_tdim (fptr, colnum, nbin, nchan, nprof);
+  fits_modify_vector_len (fptr, colnum, nvalue, &status);
+}
+
+
 void Pulsar::ProfileColumn::resize ()
 {
   if (!fptr)
     throw Error (InvalidState, "Pulsar::ProfileColumn::resize",
 		 "fitsfile not set");
+
+  if (verbose)
+    cerr << "Pulsar::ProfileColumn::resize" << endl;
+
+  if (output_floats)
+  {
+    resize_floats ();
+    return;
+  }
 
   int status = 0;
 
@@ -246,12 +319,54 @@ void Pulsar::ProfileColumn::resize ()
 }
 
 //! Unload the given vector of profiles
+void Pulsar::ProfileColumn::unload_floats (int row, const std::vector<const Profile*>& prof)
+{
+  if (!fptr)
+    throw Error (InvalidState, "Pulsar::ProfileColumn::unload_floats",
+                 "fitsfile not set");
+
+  // number of values to be written
+  uint64_t nvalue = nprof * nchan * uint64_t(nbin);
+
+  vector<float> data (nvalue);
+
+  for (unsigned iprof=0; iprof < prof.size(); iprof++)
+  {
+    const unsigned nbin = prof[iprof]->get_nbin();
+    const float* amps = prof[iprof]->get_amps();
+
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+      data[iprof*nbin+ibin] = amps[ibin];
+  }
+
+  // Write the data
+
+  if (verbose)
+    cerr << "Pulsar::ProfileColumn::unload_floats writing data" << endl;
+
+  int status = 0;
+  int offset = 1;
+  fits_write_col (fptr, TFLOAT, data_colnum, row, offset, nvalue,
+                  &(data[0]), &status);
+
+  if (status != 0)
+    throw FITSError (status, "Pulsar::ProfileColumn::unload_floats",
+                     "fits_write_col DATA");
+}
+
+//! Unload the given vector of profiles
 void Pulsar::ProfileColumn::unload (int row, 
 				    const std::vector<const Profile*>& prof)
 {
   if (!fptr)
     throw Error (InvalidState, "Pulsar::ProfileColumn::unload",
 		 "fitsfile not set");
+
+  if (output_floats)
+  {
+    unload_floats (row, prof);
+    return;
+  }
 
   if (verbose)
     cerr << "Pulsar::ProfileColumn::unload"
@@ -383,57 +498,96 @@ void Pulsar::ProfileColumn::load (int row, const std::vector<Profile*>& prof)
 		     "fits_get_coltype " + data_colname);
     
   if (typecode == TSHORT)
+  {
+    if (verbose)
+      cerr << "Pulsar::ProfileColumn::load typecode=TSHORT" << endl;
     load_amps<short> (row, prof);
+  }
   else if (typecode == TFLOAT)
-    load_amps<float> (row, prof);
+  {
+    if (verbose)
+      cerr << "Pulsar::ProfileColumn::load typecode=TFLOAT" << endl;
+    load_amps<float> (row, prof, false);
+  }
   else
     throw Error( InvalidState, "Pulsar::ProfileColumn::load",
 		 "unhandled DATA typecode=%s", fits_datatype_str(typecode) );
 }
 
+
 template<typename T, typename C>
-void Pulsar::ProfileColumn::load_amps (int row, C& prof) try 
+void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs) try 
 {
   float nullfloat = 0.0;
-  
-  if (verbose)
-    cerr << "Pulsar::ProfileColumn::load_amps<> reading offsets" << endl;
-  
+
+  bool has_scloffs = true;
+
+  try {
+    unsigned colnum = get_offset_colnum ();
+    if (colnum == 0)
+      has_scloffs = false;
+  }
+  catch (Error& error)
+  {
+    has_scloffs = false;
+  }
+
+  try {
+    unsigned colnum = get_scale_colnum ();
+    if (colnum == 0)
+      has_scloffs = false;
+  }
+  catch (Error& error)
+  {
+    has_scloffs = false;
+  }
+
+  if (!has_scloffs && must_have_scloffs)
+    throw Error (InvalidState, "Pulsar::ProfileColumn::load_amps<>",
+                 "required scale and offset columns not found");
+
   vector<float> offsets;
-  psrfits_read_col (fptr, offset_colname.c_str(), offsets, row, nullfloat);
-
-  if (verbose)
-    cerr << "Pulsar::ProfileColumn::load_amps<> reading scales" << endl;
-
   vector<float> scales;
-  psrfits_read_col (fptr, scale_colname.c_str(), scales, row, nullfloat);
-
-  if (offsets.size() != scales.size())
-    throw Error( InvalidState, "Pulsar::ProfileColumn::load_amps<>",
-		 "%s size=%d != %s size=%d",
-		 offset_colname.c_str(), offsets.size(),
-		 scale_colname.c_str(), scales.size() );
-
-  //
-  // offset and scale array size smay be either nprof*nchan or nchan
-  //
   bool nprof_by_nchan = false;
-  if (offsets.size() == nprof * nchan)
+
+  if (has_scloffs)
   {
     if (verbose)
-      cerr << "Pulsar::ProfileColumn::load_amps<> ipol scaled" << endl;
-    nprof_by_nchan = true;
-  }
-  else if (offsets.size() == nchan)
-  {
+      cerr << "Pulsar::ProfileColumn::load_amps<> reading offsets" << endl;
+  
+    psrfits_read_col (fptr, offset_colname.c_str(), offsets, row, nullfloat);
+
     if (verbose)
-      cerr << "Pulsar::ProfileColumn::load_amps<> nprof scaled" << endl;
-    nprof_by_nchan = false;
+      cerr << "Pulsar::ProfileColumn::load_amps<> reading scales" << endl;
+
+    psrfits_read_col (fptr, scale_colname.c_str(), scales, row, nullfloat);
+
+    if (offsets.size() != scales.size())
+      throw Error( InvalidState, "Pulsar::ProfileColumn::load_amps<>",
+		   "%s size=%d != %s size=%d",
+		   offset_colname.c_str(), offsets.size(),
+		   scale_colname.c_str(), scales.size() );
+
+    //
+    // offset and scale array size smay be either nprof*nchan or nchan
+    //
+    if (offsets.size() == nprof * nchan)
+    {
+      if (verbose)
+        cerr << "Pulsar::ProfileColumn::load_amps<> ipol scaled" << endl;
+      nprof_by_nchan = true;
+    }
+    else if (offsets.size() == nchan)
+    {
+      if (verbose)
+        cerr << "Pulsar::ProfileColumn::load_amps<> nprof scaled" << endl;
+      nprof_by_nchan = false;
+    }
+    else
+      throw Error( InvalidState, "Pulsar::ProfileColumn::load_amps<>",
+		   "%s size=%d != nchan=%d or nchan*nprof=%d",
+		   offset_colname.c_str(), offsets.size(), nchan, nchan*nprof );
   }
-  else
-    throw Error( InvalidState, "Pulsar::ProfileColumn::load_amps<>",
-		 "%s size=%d != nchan=%d or nchan*nprof=%d",
-		 offset_colname.c_str(), offsets.size(), nchan, nchan*nprof );
 
   // Load the data
   
@@ -468,28 +622,34 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
     {
       counter += nbin;
 
-      float scale = scales[ichan];
-      float offset = offsets[ichan];
+      float scale = 1.0;
+      float offset = 0.0;
 
-      if (nprof_by_nchan)
+      if (has_scloffs)
       {
-	scale = scales[iprof*nchan + ichan];
-	offset = offsets[iprof*nchan + ichan];
-      }
+        float scale = scales[ichan];
+        float offset = offsets[ichan];
+
+        if (nprof_by_nchan)
+        {
+	  scale = scales[iprof*nchan + ichan];
+	  offset = offsets[iprof*nchan + ichan];
+        }
 
 #ifdef _DEBUG
       cerr << " iprof=" << iprof << " ichan=" << ichan
 	   << " scale=" << scale << " offset=" << offset << endl;
 #endif
 
-      if (scale == 0.0)
-	scale = 1.0;
+        if (scale == 0.0)
+	  scale = 1.0;
 
-      if ( !isfinite(scale) || !isfinite(offset) )
-      {
-	warning << "Pulsar::ProfileColumn::load_amps"
-	  " SCALE or OFFSET NaN in row=" << row << endl;
-	scale = offset = 0.0;
+        if ( !isfinite(scale) || !isfinite(offset) )
+        {
+	  warning << "Pulsar::ProfileColumn::load_amps"
+	    " SCALE or OFFSET NaN in row=" << row << endl;
+	  scale = offset = 0.0;
+        }
       }
 
       prof[index]->resize (nbin);

@@ -11,8 +11,7 @@
 #ifndef __Pulsar_ProfileColumn_h
 #define __Pulsar_ProfileColumn_h
 
-#include "Reference.h"
-
+#include "Pulsar/Config.h"
 #include <fitsio.h>
 
 namespace Pulsar {
@@ -24,6 +23,8 @@ namespace Pulsar {
   class ProfileColumn : public Reference::Able {
 
   public:
+
+    static Option<bool> output_floats;
 
     //! Default constructor
     ProfileColumn ();
@@ -61,6 +62,9 @@ namespace Pulsar {
     //! Resize the columns
     void resize ();
 
+    //! Resize the columns for floating point output
+    void resize_floats ();
+
     //! Get the number of rows required to unload data (after resize)
     unsigned get_nrow () const { return nrow; }
     
@@ -69,6 +73,9 @@ namespace Pulsar {
 
     //! Unload the given vector of profiles
     void unload (int row, const std::vector<const Profile*>&);
+
+    //! Unload the given vector of profiles as single-precision floats
+    void unload_floats (int row, const std::vector<const Profile*>&);
 
     //! Load the given vector of profiles
     void load (int row, const std::vector<Profile*>&);
@@ -97,7 +104,7 @@ namespace Pulsar {
     int get_colnum (const std::string& name);
 
     template<typename T, typename C>
-    void load_amps (int row, C&);
+    void load_amps (int row, C&, bool must_have_scloffs = true);
   };
 
 }
