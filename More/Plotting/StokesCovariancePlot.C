@@ -18,6 +18,8 @@ using namespace std;
 Pulsar::StokesCovariancePlot::StokesCovariancePlot ()
 {
   what = EigenValues;
+  plot_std_deviations = true;
+  remove_eigen_baseline = false;
 }
 
 TextInterface::Parser* Pulsar::StokesCovariancePlot::get_interface ()
@@ -69,16 +71,21 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data) try
     plotter.plot_sls.resize( npol );
     plotter.plot_slw.resize( npol );
     
+    stats->set_remove_eigen_baseline (remove_eigen_baseline);
     stats->eigen();
+
     plotter.profiles[0] = stats->get_covariance()->get_Profile(0);
     for (unsigned i=0; i<3; i++)
       plotter.profiles[i+1] = stats->get_eigen_value(i);
 
     for (unsigned i=0; i<4; i++)
     {
-      Profile* tmp = plotter.profiles[i]->clone();
-      tmp->square_root();
-      plotter.profiles[i] = tmp;
+      if (plot_std_deviations)
+      {
+        Profile* tmp = plotter.profiles[i]->clone();
+        tmp->square_root();
+        plotter.profiles[i] = tmp;
+      }
       plotter.plot_sls[i] = 1;
       plotter.plot_slw[i] = 3;
     }
@@ -295,6 +302,14 @@ Pulsar::StokesCovariancePlot::Interface::Interface (StokesCovariancePlot* obj)
        &StokesCovariancePlot::set_what,
        "what", "What to plot (var, eigen, covar, reg, beta)");
 
+  add( &StokesCovariancePlot::get_std_deviations,
+       &StokesCovariancePlot::set_std_deviations,
+       "sqrt", "Plot square roots of variances and eigenvalues");
+
+  add( &StokesCovariancePlot::get_remove_eigen_baseline,
+       &StokesCovariancePlot::set_remove_eigen_baseline,
+       "eigbase", "Remove the baseline from eigenvalue profiles");
+
   add( &StokesCovariancePlot::get_plot_colours,
        &StokesCovariancePlot::set_plot_colours,
        "ci", "PGPLOT colour index for each value" );
@@ -306,7 +321,6 @@ Pulsar::StokesCovariancePlot::Interface::Interface (StokesCovariancePlot* obj)
   add( &StokesCovariancePlot::get_plot_widths,
        &StokesCovariancePlot::set_plot_widths,
        "lw", "PGPLOT line width for each value" );
-
 }
 
 

@@ -59,14 +59,25 @@ namespace Pulsar {
     void set_plot_widths (const std::string& plot) { plot_widths = plot; }
     std::string get_plot_widths () const { return plot_widths; }
 
+    //! Compute the square roots of variances and eigenvalues
+    void set_std_deviations (bool flag) { plot_std_deviations = flag; }
+    bool get_std_deviations () const { return plot_std_deviations; }
+
+    //! Remove the baseline from eigenvalue plots
+    void set_remove_eigen_baseline (bool flag) { remove_eigen_baseline = flag; }
+    bool get_remove_eigen_baseline () const { return remove_eigen_baseline; }
+
   private:
 
     What what;
 
     std::string plot_colours;
     std::string plot_lines;
+
     std::string plot_widths;
 
+    bool plot_std_deviations;
+    bool remove_eigen_baseline;
   };
 
   std::ostream& operator << (std::ostream& os, StokesCovariancePlot::What);
