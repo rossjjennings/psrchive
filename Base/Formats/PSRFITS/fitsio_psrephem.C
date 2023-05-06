@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -14,6 +15,7 @@
 #include "FITSError.h"
 #include "fitsutil.h"
 #include "coord.h"
+#include "myfinite.h"
 
 #include <fitsio.h> 
 
@@ -249,7 +251,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, ephem->value_double + ieph, &anynul, &status);
 
-        if (ephem->value_double[ieph] == 0.0 || !isfinite(ephem->value_double[ieph]))
+        if (ephem->value_double[ieph] == 0.0 || !myfinite(ephem->value_double[ieph]))
           anynul = true;
 
         if (anynul)
@@ -336,7 +338,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, ephem->value_double + ieph, &anynul, &status);
 
-        if (ephem->value_double[ieph] == 0.0 || !isfinite(ephem->value_double[ieph]))
+        if (ephem->value_double[ieph] == 0.0 || !myfinite(ephem->value_double[ieph]))
           anynul = true;
 
         if (anynul)

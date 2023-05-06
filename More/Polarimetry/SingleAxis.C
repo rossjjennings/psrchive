@@ -14,6 +14,7 @@
 
 #include "Pauli.h"
 #include "Error.h"
+#include "myfinite.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -99,9 +100,9 @@ Estimate<double> Calibration::SingleAxis::get_diff_phase () const
 
 void check (const char* name, const Estimate<double>& g)
 {
-  if (!isfinite (g.val))
+  if (!myfinite (g.val))
     throw Error (InvalidParam, name, "Estimate value = %lf", g.val);
-  if (!isfinite (g.var))
+  if (!myfinite (g.var))
     throw Error (InvalidParam, name, "Estimate variance = %lf", g.var);
 }
 

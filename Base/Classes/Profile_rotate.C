@@ -10,6 +10,7 @@
 
 #include "FTransform.h"
 #include "templates.h"
+#include "myfinite.h"
 
 #include <memory>
 #include <math.h>
@@ -33,7 +34,7 @@ Pulsar::Profile::rotate_in_phase_domain
 */
 void Pulsar::Profile::rotate_phase (double phase)
 {
-  if (!isfinite(phase))
+  if (!myfinite(phase))
     throw Error (InvalidParam, "Pulsar::Profile::rotate_phase",
 		 "non-finite phase = %lf\n", phase);
 

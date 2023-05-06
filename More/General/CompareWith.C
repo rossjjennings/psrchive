@@ -22,7 +22,7 @@
 #include <cassert>
 #include <fstream>
 
-// #define _DEBUG 1
+#define _DEBUG 1
 #include "debug.h"
 
 #if HAVE_ARMADILLO
@@ -184,6 +184,8 @@ void CompareWith::compute (ndArray<2,double>& result)
 
 using namespace BinaryStatistics;
 
+extern "C" { int myfinite (double x); } // defined in myfinite.c
+
 void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 {
   unsigned nbin = profile->get_nbin ();
@@ -192,6 +194,10 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 			  profile->get_amps() + nbin );
 
   double variance = robust_variance (amps);
+
+  if ( ! myfinite(variance) )
+    throw Error (InvalidState, "CompareWith::get_amps"
+                 "robust_variance returns non-finite variance");
 
   if (bscrunch_factor.scrunch_enabled())
   {
@@ -208,6 +214,11 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
   }
 
   double rms = sqrt( variance );
+
+  if ( ! myfinite(variance) )
+    throw Error (InvalidState, "CompareWith::get_amps"
+                 "non-finite rms/normalization");
+
   for (double& element : amps)
     element /= rms;
 }
@@ -219,7 +230,7 @@ void CompareWith::get_residual (vector<double>& amps,
 
   double chisq = chi.get (amps, mamps);
 
-  DEBUG( "CompareWith::get_residual chisq=" << chisq );
+  // DEBUG( "CompareWith::get_residual chisq=" << chisq );
 
 #if _DEBUG
 	
@@ -382,6 +393,7 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
     double IQR = Q3 - Q1;
 
     unsigned icol=0;
+    // WvS TO-DO
     while (row[icol] < Q1 - threshold*IQR)
       icol ++;
 
@@ -392,6 +404,7 @@ void targeted_search_for_best_gmm (arma::gmm_diag* model,
       lowmed = row[ nlow / 2 ];
    
     icol=N-1;
+    // WvS TO-DO
     while (row[icol] > Q3 + threshold*IQR)
      icol --;
 
@@ -736,14 +749,15 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   }
   else
   {
+    // WvS TO-DO
     while (eff_rank < rank && eval[eff_rank] > var)
       eff_rank ++;
 
-    if (eff_rank > 0 && eff_rank+1 >= rank)
+    if (eff_rank > 0 && eff_rank >= rank)
     {
       eff_rank --;
     
-      DEBUG("CompareWith::setup full rank lambda/var=" << eval[eff_rank]/var);
+      DEBUG("CompareWith::setup full rank eff_rank=" << eff_rank << " lambda/var=" << eval[eff_rank]/var);
     }
   
     DEBUG("CompareWith::setup effective rank=" << eff_rank);
@@ -753,6 +767,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   {
     float threshold = 1.5;
 
+    // WvS TO-DO
     while (eff_rank+1 < rank && eval[eff_rank]/eval[eff_rank+1] < threshold)
       eff_rank ++;
 

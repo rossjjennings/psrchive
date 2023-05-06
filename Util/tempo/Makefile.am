@@ -70,7 +70,8 @@ AM_CXXFLAGS = -I$(top_srcdir)/Util/resources
 LDADD = libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/third/libthird.la @FLIBS@
+	$(top_builddir)/Util/third/libthird.la \
+	$(top_builddir)/Util/epsic/src/libepsic.la @FLIBS@
 
 include $(top_srcdir)/config/Makefile.include
 

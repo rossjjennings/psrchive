@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 1999-2009 by Willem van Straten
+ *   Copyright (C) 1999 - 2023 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,7 @@
 #include "Phase.h"
 #include "Error.h"
 #include "tostring.h"
+#include "myfinite.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -83,7 +84,7 @@ string Phase::strprint (int precision) const
   string s = tostring (turns);
   string f = tostring (fturns, precision, std::ios::fixed);
 
-  if (!isfinite(fturns))
+  if (!myfinite(fturns))
     s += ".NaN";
   else
   {

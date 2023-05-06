@@ -7,6 +7,7 @@
 
 #include "fcomp.h"
 #include "machine_endian.h"
+#include "myfinite.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -55,7 +56,7 @@ int fcompread (unsigned nvals, float * vals, FILE * fptr, bool big_endian)
     N_FromLittleEndian (nvals, packed_buf);
   }
 
-  if (scale==0 || !isfinite(scale))
+  if (scale==0 || !myfinite(scale))
   {
     cerr << "fcompread: invalid scale=" << scale << endl;
     return -1;

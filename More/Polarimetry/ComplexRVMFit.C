@@ -20,6 +20,7 @@
 #include "MEAL/LevenbergMarquardt.h"
 
 #include "templates.h"
+#include "myfinite.h"
 
 // #define _DEBUG 1
 #include "debug.h"
@@ -475,7 +476,7 @@ void Pulsar::ComplexRVMFit::solve ()
 
   float last_chisq = chisq = fit.init (data_x, data_y, *model);
 
-  if (!isfinite(chisq))
+  if (!myfinite(chisq))
     throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
 		 "non-finite chisq");
 
@@ -527,7 +528,7 @@ void Pulsar::ComplexRVMFit::solve ()
     if (verbose)
       cerr << "     chisq = " << nchisq << endl;
 
-    if (!isfinite (nchisq))
+    if (!myfinite (nchisq))
       throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
 		   "non-finite chisq");
 

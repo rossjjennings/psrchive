@@ -93,7 +93,7 @@ void sanity_check (const string& context, const Cheby2D& cheby)
 #if _DEBUG
       cerr << "ix="<< ix <<" iy="<< iy <<" "<< cheby.coeff[iy*nx+ix] << endl;
 #endif
-      if (!isfinite (cheby.coeff[iy*nx+ix]))
+      if (!myfinite (cheby.coeff[iy*nx+ix]))
         throw Error (InvalidState, context + " sanity check",
                      "not finite coefficent ix=%d iy=%d", ix, iy);
     }
@@ -301,7 +301,7 @@ Pulsar::Phase Tempo2::Predictor::phase (const MJD& t) const
 		 "epoch %s not spanned by ChebyModelSet",
 		 t.printdays(20).c_str());
 
-  if (!isfinite(p))
+  if (!myfinite(p))
   {
     Error error (InvalidState, "Tempo2::Predictor::phase",
 		 "T2Predictor_GetPhase result = ");

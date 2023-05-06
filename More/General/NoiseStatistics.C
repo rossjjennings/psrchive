@@ -8,6 +8,7 @@
 #include "Pulsar/NoiseStatistics.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Fourier.h"
+#include "myfinite.h"
 
 #include <math.h>
 
@@ -59,7 +60,7 @@ float Pulsar::NoiseStatistics::get_nfnr (const Profile* profile)
   double total = 0.0;
 
   for (unsigned ibin=start; ibin < nbin; ibin++) {
-    if (!isfinite(amps[ibin]))
+    if (!myfinite(amps[ibin]))
       throw Error (InvalidState, "Pulsar::NoiseStatistics::get_nfnr",
 		   "amps[%d] = %f", ibin, amps[ibin]);
     total += amps[ibin];
