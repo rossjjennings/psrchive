@@ -112,6 +112,7 @@ libgenutil_la_SOURCES = \
 	Meridian.C \
         MJD.C \
 	Mount.C \
+	myfinite.c \
 	FITSUTC.C \
 	NormalDistribution.C \
 	PhaseRange.C \
@@ -168,7 +169,7 @@ TESTS = test_coord test_Cartesian test_MJD test_ja98	\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
 	test_Horizon test_LogFile test_Warning test_RunningMedian \
-	test_PhaseRange
+	test_PhaseRange test_myfinite
 
 check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
 	test_Angle test_expand test_VirtualMemory
@@ -202,6 +203,7 @@ test_LogFile_SOURCES		= test_LogFile.C
 test_Warning_SOURCES		= test_Warning.C
 test_RunningMedian_SOURCES	= test_RunningMedian.C
 test_PhaseRange_SOURCES		= test_PhaseRange.C
+test_myfinite_SOURCES		= test_myfinite.C
 
 #############################################################################
 #
