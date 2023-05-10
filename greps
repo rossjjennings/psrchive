@@ -20,8 +20,6 @@ else
   fi
 fi
 
-echo "grep: $GREP_COMMAND"
-
 $GREP_COMMAND $* `find Util Base More -name "*.[hfcC]"`
 
 $GREP_COMMAND $* `find Util Base More -name Makefile.am`

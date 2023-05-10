@@ -168,7 +168,7 @@ TESTS = test_coord test_Cartesian test_MJD test_ja98	\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
 	test_Horizon test_LogFile test_Warning test_RunningMedian \
-	test_PhaseRange
+	test_PhaseRange 
 
 check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
 	test_Angle test_expand test_VirtualMemory

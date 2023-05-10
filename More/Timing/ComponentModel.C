@@ -835,7 +835,7 @@ void ComponentModel::fit (const Profile *profile) try
       cerr << "ComponentModel::fit"
 	" variance[" << iparam << "]=" << variance << endl;
 
-    if (!isfinite(variance))
+    if (!myfinite(variance))
       throw Error (InvalidState, 
 		   "ComponentModel::fit",
 		   "non-finite variance "

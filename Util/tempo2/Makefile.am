@@ -19,7 +19,8 @@ LDADD = libtempo_2.la \
 	$(top_builddir)/Util/tempo/libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/third/libthird.la @FLIBS@
+	$(top_builddir)/Util/third/libthird.la \
+	$(top_builddir)/Util/epsic/src/libepsic.la @FLIBS@
 
 libtempo_2_la_LIBADD = @TEMPO2_LIBS@
 

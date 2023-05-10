@@ -11,6 +11,7 @@
 
 #include "psrfitsio.h"
 #include "templates.h"
+#include "myfinite.h"
 
 #define REPORT_IO_TIMES 0
 
@@ -644,7 +645,7 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
         if (scale == 0.0)
 	  scale = 1.0;
 
-        if ( !isfinite(scale) || !isfinite(offset) )
+        if ( !myfinite(scale) || !myfinite(offset) )
         {
 	  warning << "Pulsar::ProfileColumn::load_amps"
 	    " SCALE or OFFSET NaN in row=" << row << endl;
@@ -660,7 +661,7 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
       for (unsigned ibin = 0; ibin < nbin; ibin++)
       {
 	amps[ibin] = temparray[index*nbin+ibin] * scale + offset;
-	if (!isfinite(amps[ibin]))
+	if (!myfinite(amps[ibin]))
 	{
 	  nans ++;
 	  amps[ibin] = 0.0;

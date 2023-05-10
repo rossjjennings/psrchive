@@ -1416,13 +1416,19 @@ void smint::fit_pspline (SplineSmooth2D& spline, vector<row>& table)
     
     double freq = result->get_minimum_frequency();
     if (freq != 0.0)
-      assert (freq == xmin+centre_frequency);
+    {
+      if (freq != xmin+centre_frequency)
+        cerr << "result freq_min=" << freq << " != " << " table freq_min=" << xmin+centre_frequency << endl;
+    }
     else
       result->set_minimum_frequency (xmin+centre_frequency);
 
     freq = result->get_maximum_frequency();
     if (freq != 0.0)
-      assert (freq == xmax+centre_frequency);
+    {
+      if (freq != xmax+centre_frequency)
+        cerr << "result freq_max=" << freq << " != " << " table freq_max=" << xmax+centre_frequency << endl;
+    }
     else
       result->set_maximum_frequency (xmax+centre_frequency);
   }

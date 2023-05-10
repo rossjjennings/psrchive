@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "CalibratorExtensionIO.h"
+#include "myfinite.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -104,7 +106,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
 	 << " weights read" << endl;
 
   for (ichan=0; ichan < ext->get_nchan(); ichan++)
-    if ( !isfinite(data[ichan]) )
+    if ( !myfinite(data[ichan]) )
       data[ichan] = 0;
 
   for (ichan=0; ichan < ext->get_nchan(); ichan++)
