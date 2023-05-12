@@ -81,8 +81,9 @@ void scrunch (Container* container, getN get_size, doScrunch scrunch,
   {
     unsigned size = (container->*get_size) ();
     unsigned new_size = factor.get_nresult();
-    
-    Pulsar::warning << "scrunch: requested size=" << new_size << " does not divide current size=" << size << std::endl;
+
+    if (size % new_size)    
+      Pulsar::warning << "scrunch: requested size=" << new_size << " does not divide current size=" << size << std::endl;
 
     unsigned nscrunch = size / new_size;
     (container->*scrunch) ( nscrunch );
