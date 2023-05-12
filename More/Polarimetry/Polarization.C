@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -55,21 +56,21 @@ Pulsar::new_Profile (const PolnProfile* data, char code)
 
   case 'L': {
     // total linearly polarized flux
-    profile = new Profile;
+    profile = data->get_Profile(0)->clone();
     data->get_linear(profile);
     return profile.release();
   }
 
   case 'p': {
     // total polarized flux
-    profile = new Profile;
+    profile = data->get_Profile(0)->clone();
     data->get_polarized(profile);
     return profile.release();
   }
 
   case 'S': {
     // polarimetric invariant flux
-    profile = new Profile;
+    profile = data->get_Profile(0)->clone();
     data->invint(profile);
     return profile.release();
   }

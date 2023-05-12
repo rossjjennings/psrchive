@@ -701,7 +701,8 @@ void Pulsar::PolnProfile::get_rss
 
   float* amps = rss->get_amps();
 
-  for (unsigned ipol=jpol; ipol <= kpol; ipol++) {
+  for (unsigned ipol=jpol; ipol <= kpol; ipol++)
+  {
     const float *a = get_Profile(ipol)->get_amps();
     for (ibin=0; ibin<nbin; ibin++)
       amps[ibin] += a[ibin]*a[ibin];

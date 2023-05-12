@@ -165,6 +165,8 @@ void Pulsar::Profile::copy (const Profile* that) try
   for (unsigned iext=0; iext < that->get_nextension(); iext++)
     add_extension( that->get_extension(iext)->clone() );
 
+  if (that->strategy)
+    strategy = that->strategy->clone();
 }
 catch (Error& error)
 {

@@ -21,6 +21,11 @@ Integration* ManagedStrategies::get_container()
   return container;
 }
 
+ManagedStrategies* ManagedStrategies::clone () const
+{
+  return new ManagedStrategies (*this);
+}
+
 ProfileWeightFunction* ManagedStrategies::baseline () const
 {
   throw Error (InvalidState, "ManagedStrategies::baseline",
