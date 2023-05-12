@@ -82,7 +82,7 @@ Pulsar::ArchiveStatistic::ArchiveStatistic (const string& name,
 
 void Pulsar::ArchiveStatistic::fclose ()
 {
-  if (fptr) ::fclose (fptr); fptr = 0;
+  if (fptr) { ::fclose (fptr); fptr = 0; }
 }
 
 #include "Pulsar/ArchiveComparisons.h"

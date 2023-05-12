@@ -11,6 +11,7 @@
 #ifndef __Pulsar_ScrunchFactor_h
 #define __Pulsar_ScrunchFactor_h
 
+#include "Pulsar/Pulsar.h"
 #include "Error.h"
 
 namespace Pulsar {
@@ -81,10 +82,7 @@ void scrunch (Container* container, getN get_size, doScrunch scrunch,
     unsigned size = (container->*get_size) ();
     unsigned new_size = factor.get_nresult();
     
-    if (size % new_size)
-      throw Error (InvalidParam, "scrunch (ScrunchFactor) template",
-		   "requested size=%u modulo current size=%u is non-zero",
-		   new_size, size);
+    Pulsar::warning << "scrunch: requested size=" << new_size << " does not divide current size=" << size << std::endl;
 
     unsigned nscrunch = size / new_size;
     (container->*scrunch) ( nscrunch );
