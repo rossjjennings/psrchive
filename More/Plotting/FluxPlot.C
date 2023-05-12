@@ -85,17 +85,16 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     frame->get_y_axis()->set_displacement (3.0);
 
     double offset = 0;
-    double scale = 1;
     double threshold = 0;
 
     if (logarithmic == 1)
     {
       Reference::To<PhaseWeight> weight = baseline->operate(plotter.profiles[0]);
 
-      double rms = weight->get_rms ();
-      float log_noise = log(rms) / log(10.0);
+      double off_pulse_rms = weight->get_rms ();
+      float log_noise = log(off_pulse_rms) / log(10.0);
       offset = -log_noise;
-      threshold = rms;
+      threshold = off_pulse_rms * 1e-6;
     }
     else if (logarithmic == -1)
     {
@@ -109,7 +108,6 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
       Reference::To<Profile> temp = plotter.profiles[iprof]->clone();
       temp->logarithm (10.0, threshold);
       temp->offset( offset );
-      temp->scale( scale );
       plotter.profiles[iprof] = temp;
     }
   }
@@ -137,6 +135,14 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     if (verbose)
       cerr << "Pulsar::FluxPlot::prepare using all bins" << endl;
     plotter.minmax (get_frame());
+
+    if (logarithmic == 1)
+    {
+      float min=0, max=0;
+      frame->get_y_scale()->get_minmax (min, max);
+      float new_min = -1.0;
+      frame->get_y_scale()->set_minmax (new_min, max);
+    }
 
     /* Added by DS, for pav we want the peak to represent the
      percentage of max above 0 and if the graph has a negative
