@@ -64,7 +64,9 @@ void Pulsar::MatrixTemplateMatching::set_observation (const Archive* archive)
 void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub,
 					       std::vector<Tempo::toa>& toas)
 {
+  engine->reset ();
   engine->add_pulsar (observation, isub);
+  engine->wait ();
 
   const Integration* integration = observation->get_Integration (isub);
   unsigned nchan = integration->get_nchan();
@@ -72,7 +74,10 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub,
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     if (!engine->get_transformation_valid(ichan))
+    {
+      cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan << " " << engine->get_transformation_invalid_reason(ichan) << endl;
       continue;
+    }
 
     const PolnProfileFit* mtm = engine->get_mtm(ichan);
     
