@@ -1853,7 +1853,7 @@ void SystemCalibrator::solve () try
   }
 
   // ensure that calculate_transformation is called again
-  transformation.resize (0);
+  transformation_resize (0);
 
   is_solved = true;
 }
@@ -1961,21 +1961,31 @@ bool SystemCalibrator::has_valid () const
   return false;
 }
 
+void Pulsar::SystemCalibrator::reset ()
+{
+  unsigned nchan = model.size();
+
+  if (verbose)
+    cerr << "Pulsar::SystemCalibrator::reset" << endl;
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    model[ichan]->reset();
+}
+
 /*! Retrieves the transformation from the standard model in each channel */
 void SystemCalibrator::calculate_transformation ()
 {
   unsigned nchan = get_nchan ();
 
-  transformation.resize( nchan );
+  transformation_resize( nchan );
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    transformation[ichan] = 0;
-
     assert (ichan < model.size());
 
     if (model[ichan]->get_valid())
-      transformation[ichan] = model[ichan]->get_transformation();   
+      set_transformation (ichan, model[ichan]->get_transformation());   
+    else
+      set_transformation_invalid(ichan, model[ichan]->get_invalid_reason());
   }
 }
 

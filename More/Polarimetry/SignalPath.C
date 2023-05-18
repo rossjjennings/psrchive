@@ -65,8 +65,12 @@ void SignalPath::set_valid (bool f, const char* reason)
 {
   valid = f;
 
-  if (!valid && reason && verbose)
-    cerr << "SignalPath::set_valid reason: " << reason << endl;
+  if (!valid && reason)
+  {
+    if (verbose)
+      cerr << "SignalPath::set_valid reason: " << reason << endl;
+    invalid_reason = reason;
+  }
 }
 
 void SignalPath::set_response (MEAL::Complex2* x)
@@ -248,6 +252,8 @@ void SignalPath::build () try
     response = Pulsar::new_transformation (type);
   }
 
+  initial_response = response->clone();
+
   // embed the response in a chain rule so that any parameter can optionally
   // be made to vary (e.g. as a function of time)
   //
@@ -289,6 +295,12 @@ void SignalPath::build () try
 catch (Error& error)
 {
   error += "SignalPath::build";
+}
+
+void SignalPath::reset ()
+{
+  invalid_reason = "";
+  response->copy(initial_response);
 }
 
 VariableBackendEstimate* SignalPath::new_backend (Complex2* mine)

@@ -242,7 +242,10 @@ namespace Pulsar
 
     //! Solve equation for each frequency
     virtual void solve ();
-    
+
+    //! Reset the response in each frequency to its initial value
+    virtual void reset ();
+
     //! Get the status of the model
     virtual bool get_solved () const;
 
