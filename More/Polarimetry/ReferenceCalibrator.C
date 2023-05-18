@@ -152,7 +152,7 @@ void ReferenceCalibrator::set_nchan (unsigned nchan)
   requested_nchan = nchan;
 
   // ensure that the transformation matrix is re-computed
-  transformation.resize (0);
+  transformation_resize (0);
 
   PolnCalibrator::set_response_nchan (nchan);
 }
@@ -386,7 +386,7 @@ void ReferenceCalibrator::calculate_transformation ()
 
   baseline.resize (nchan);
 
-  transformation.resize (nchan);
+  transformation_resize (nchan);
 
   // coherency products in a single channel
   vector<Estimate<double> > source (npol);
@@ -408,6 +408,7 @@ void ReferenceCalibrator::calculate_transformation ()
     Estimate<double> cal_BB = source[1];
 
     bool bad = false;
+    string bad_reason;
 
     if (cal_AA.val <= 0 || cal_BB.val <= 0)
     {
@@ -415,6 +416,7 @@ void ReferenceCalibrator::calculate_transformation ()
 	cerr << "ReferenceCalibrator::calculate_transformation"
 	  " ichan=" << ichan << " bad levels" << endl;
       bad = true;
+      bad_reason = "ReferenceCalibrator::calculate_transformation bad levels";
     }
 
     if (det_threshold > 0 && npol == 4)
@@ -450,13 +452,14 @@ void ReferenceCalibrator::calculate_transformation ()
 	       << " error=" << inv.get_error() 
 	       << " bias=" << bias << ")" << endl;
 	bad = true;
+	bad_reason = "ReferenceCalibrator::calculate_transformation invariant less than threshold";
       }
     }
 
     if (bad)
     {
       baseline[ichan] = 0;
-      transformation[ichan] = 0;
+      set_transformation_invalid(ichan, bad_reason);
       // derived classes may need to initialize bad values
       extra (ichan, source, sky);
       continue;
@@ -466,7 +469,7 @@ void ReferenceCalibrator::calculate_transformation ()
     baseline[ichan] = sky[0]/cal_AA + sky[1]/cal_BB;
 
     // store the transformation appropriate for inverting the system response
-    transformation[ichan] = solve (source, sky);
+    set_transformation(ichan, solve (source, sky));
 
     // enable derived classes to store extra information
     extra (ichan, source, sky);
@@ -475,7 +478,7 @@ void ReferenceCalibrator::calculate_transformation ()
   catch (Error& error) {
     cerr << "ReferenceCalibrator::calculate_transformation error"
       " ichan=" << ichan << "\n  " << error.get_message() << endl;
-    transformation[ichan] = 0;
+    set_transformation_invalid(ichan, "ReferenceCalibrator::calculate_transformation " + error.get_message());
   }
 
   if (verbose > 2)

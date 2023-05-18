@@ -135,7 +135,7 @@ void Pulsar::PolnCalibrator::set_calibrator (const Archive* archive)
 
   built = false;
   observation_nchan = 0;
-  transformation.resize(0);
+  transformation_resize(0);
 
   Calibrator::set_calibrator (archive);
 }
@@ -231,9 +231,14 @@ unsigned Pulsar::PolnCalibrator::get_maximum_nchan () const
 
 
 //! Get the number of frequency channels in the calibrator
-unsigned Pulsar::PolnCalibrator::get_nchan () const try
+unsigned Pulsar::PolnCalibrator::get_nchan () const
 {
-  if (transformation.size() == 0)
+  return get_nchan (true);
+}
+
+unsigned Pulsar::PolnCalibrator::get_nchan (bool build_if_needed) const try
+{
+  if (build_if_needed && transformation.size() == 0)
     setup_transformation();
 
   if (verbose > 2)
@@ -266,7 +271,7 @@ catch (Error& error)
 }
 
 //! Return the system response for the specified channel
-void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan) try
+void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan, const string& reason) try
 {
   if (transformation.size() == 0)
     setup_transformation();
@@ -276,12 +281,25 @@ void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan) try
 		 "Pulsar::PolnCalibrator::set_transformation_invalid",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
-  transformation[ichan] = 0;
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::set_transformation_invalid ichan=" << ichan << " reason=" << reason << endl;
 
+  transformation[ichan] = 0;
+  invalid_reason[ichan] = reason;
 }
 catch (Error& error)
 {
   throw error += "Pulsar::PolnCalibrator::set_transformation_invalid";
+}
+
+const std::string& Pulsar::PolnCalibrator::get_transformation_invalid_reason (unsigned ichan) const
+{
+  if (ichan >= invalid_reason.size())
+    throw Error (InvalidParam,
+                 "Pulsar::PolnCalibrator::get_transformation_invalid_reason",
+                 "ichan=%d >= nchan=%d", ichan, invalid_reason.size());
+
+  return invalid_reason[ichan];
 }
 
 //! Return the system response for the specified channel
@@ -318,6 +336,16 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan) try
 catch (Error& error)
 {
   throw error += "Pulsar::PolnCalibrator::get_transformation";
+}
+
+void Pulsar::PolnCalibrator::set_transformation (unsigned ichan, MEAL::Complex2* xform)
+{
+  if (ichan >= transformation.size())
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_transformation",
+                 "ichan=%d >= nchan=%d", ichan, transformation.size());
+
+  transformation[ichan] = xform;
+  invalid_reason[ichan] = "";
 }
 
 //! Return true if parameter covariances are stored
@@ -415,7 +443,7 @@ void Pulsar::PolnCalibrator::calculate_transformation () try
 
   DEBUG("PolnCalibrator::calculate_transformation this=" << (void*)this << " nchan=" << nchan);
 
-  transformation.resize (nchan);
+  transformation_resize (nchan);
 
   if (poln_extension->get_has_covariance())
     covariance.resize(nchan);
@@ -431,7 +459,11 @@ catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::calculate_transformation";
 }
 
-
+void Pulsar::PolnCalibrator::transformation_resize (unsigned nchan)
+{
+  transformation.resize (nchan);
+  invalid_reason.resize (nchan);
+}
 
 /*!  
   The unitary component of each Jones matrix is parameterized by a

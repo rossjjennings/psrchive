@@ -87,17 +87,25 @@ namespace Pulsar {
     // useful for unloading
     //
 
+    void transformation_resize (unsigned nchan);
+
     //! Return true if the transformation for the specified channel is valid
     bool get_transformation_valid (unsigned ch) const;
 
     //! Set the transformation invalid flag for the specified channel
-    void set_transformation_invalid (unsigned ch);
+    void set_transformation_invalid (unsigned ch, const std::string& reason);
+
+    //! Get the reason that the transformation in the specified channel is invalid
+    const std::string& get_transformation_invalid_reason (unsigned ichan) const;
 
     //! Return the transformation for the specified channel
     const MEAL::Complex2* get_transformation (unsigned ichan) const;
 
     //! Return the transformation for the specified channel
     MEAL::Complex2* get_transformation (unsigned ichan);
+
+    //! Set the transformation for the secified channel
+    void set_transformation (unsigned ichan, MEAL::Complex2*);
 
     //! Return true if parameter covariances are stored
     bool has_covariance () const;
@@ -130,6 +138,9 @@ namespace Pulsar {
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const;
 
+    //! Get the number of frequency channels in the calibrator
+    unsigned get_nchan (bool build_if_needed) const;
+
     //! Return a new PolnCalibratorExtension
     CalibratorExtension* new_Extension () const;
 
@@ -142,10 +153,15 @@ namespace Pulsar {
     //! Set up done before calibrating an archive
     void calibration_setup (const Archive* arch);
 
-  protected:
+  private:
 
     //! The array of transformation Model instances
     Reference::Vector<MEAL::Complex2> transformation;
+
+    //! Array of reasons for invalid transformations
+    std::vector< std::string> invalid_reason;
+
+  protected:
 
     //! The array of covariance matrix vectors
     std::vector< std::vector<double> > covariance;

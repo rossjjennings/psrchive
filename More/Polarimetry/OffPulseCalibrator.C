@@ -31,11 +31,11 @@ Pulsar::OffPulseCalibrator::extra (unsigned ichan,
 				   const vector< Estimate<double> >& source,
 				   const vector< Estimate<double> >& sky)
 {
-  if (!transformation[ichan])
+  if (!get_transformation_valid(ichan))
     return;
 
   Calibration::SingleAxis* sa;
-  sa = dynamic_cast<Calibration::SingleAxis*>(transformation[ichan].get());
+  sa = dynamic_cast<Calibration::SingleAxis*>(get_transformation(ichan));
   assert (sa);
 
   sa->set_diff_gain (0.0);

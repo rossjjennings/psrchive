@@ -181,7 +181,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
   if (verbose > 2)
     cerr << "Pulsar::PulsarCalibrator::build nchan=" << nchan << endl;
 
-  transformation.resize (nchan);
+  transformation_resize (nchan);
   solution.resize (nchan);
   reduced_chisq.resize (nchan);
 
@@ -202,7 +202,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::build ichan=" << ichan << endl;
 
-    transformation[ichan] = 0;
+    set_transformation_invalid (ichan, "PulsarCalibrator::build uninitialized");
     solution[ichan] = 0;
     mtm[ichan] = 0;
 
@@ -310,7 +310,7 @@ bool Pulsar::PulsarCalibrator::calibrator_match (const Archive* data, std::strin
     match.set_check_bandwidth_sign (false);
   }
 
-  bool one_channel = standard->get_nchan() == 1 && data->get_nchan() > 1;
+  bool one_channel = standard->get_nchan() == 1 && data->get_nchan() >= 1;
 
   if (one_channel)
   {
@@ -373,10 +373,13 @@ void Pulsar::PulsarCalibrator::add_pulsar
 
   setup (integration, ichan);
 
-  assert (ichan < transformation.size());
+  assert (ichan < PolnCalibrator::get_nchan(false));
 
-  if (!transformation[ichan])
+  if (!get_transformation_valid(ichan))
+  {
+    cerr << "Pulsar::PulsarCalibrator::add_pulsar no transformation for ichan=" << ichan << endl;
     return;
+  }
 
   assert (ichan < mtm.size());
 
@@ -427,6 +430,12 @@ void Pulsar::PulsarCalibrator::add_pulsar
     cerr << "Pulsar::PulsarCalibrator::add_pulsar exit" << endl;
 }
 
+//! Ensure that all queued jobs have finished
+void Pulsar::PulsarCalibrator::wait ()
+{
+  queue.wait ();
+}
+
 //! Add the observation to the set of constraints
 void Pulsar::PulsarCalibrator::add_pulsar (const Archive* data, unsigned isub)
 try
@@ -451,10 +460,10 @@ try
       store_each.clear();
 
     Reference::Vector<MEAL::Complex2>& store = store_each[isub];
-    store.resize( transformation.size() );
+    store.resize( get_nchan() );
     for (unsigned i=0; i < store.size(); i++)
-      if (transformation[i])
-	store[i] = transformation[i]->clone();
+      if (get_transformation_valid(i))
+	store[i] = PolnCalibrator::get_transformation(i)->clone();
   }
 }
 catch (Error& error)
@@ -540,7 +549,7 @@ MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
 
 void Pulsar::PulsarCalibrator::setup (const Integration* data, unsigned ichan)
 {
-  assert (ichan < transformation.size());
+  assert (ichan < PolnCalibrator::get_nchan(false) );
   assert (ichan < mtm.size());
 
   if (!mtm[ichan])
@@ -548,7 +557,7 @@ void Pulsar::PulsarCalibrator::setup (const Integration* data, unsigned ichan)
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::setup standard ichan="
 	   << ichan << " flagged invalid" << endl;
-    transformation[ichan] = 0;
+    set_transformation_invalid(ichan, "PulsarCalibrator::setup no model");
     return;
   }
 
@@ -557,18 +566,18 @@ void Pulsar::PulsarCalibrator::setup (const Integration* data, unsigned ichan)
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::setup observation ichan="
 	   << ichan << " flagged invalid" << endl;
-    transformation[ichan] = 0;
+    set_transformation_invalid(ichan, "PulsarCalibrator::setup data have zero weigth");
     return;
   }
 
-  if (!transformation[ichan]) 
+  if (!get_transformation_valid(ichan)) 
   {
-    transformation[ichan] = new_transformation(ichan);
+    set_transformation(ichan, new_transformation(ichan));
 
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::setup set ichan=" << ichan << endl;
 
-    mtm[ichan]->set_transformation (transformation[ichan]);
+    mtm[ichan]->set_transformation (PolnCalibrator::get_transformation(ichan));
   }
 }
 
@@ -588,7 +597,7 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
 
   Reference::To<MEAL::Function> backup;
 
-  assert (ichan < transformation.size());
+  assert (ichan < PolnCalibrator::get_nchan(false));
 
   CoherencyMeasurementSet measurements (data);
   submit_pulsar_data (measurements);
@@ -597,11 +606,11 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
   {
     // setup (data, ichan);
 
-    if (!transformation[ichan])
+    if (!get_transformation_valid(ichan))
       return;
 
     if (!backup)
-      backup = transformation[ichan]->clone();
+      backup = PolnCalibrator::get_transformation(ichan)->clone();
 
     assert (ichan < solution.size());
     assert (ichan < reduced_chisq.size());
@@ -609,14 +618,14 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
 
     if (solution[ichan])
     {
-      solution[ichan]->update( transformation[ichan] );
-      //cerr << "update gain=" << transformation[ichan]->get_param(0) << endl;
+      solution[ichan]->update( PolnCalibrator::get_transformation(ichan) );
+      //cerr << "update gain=" << get_transformation(ichan)->get_param(0) << endl;
     }
     else if (ichan>0 && tries==0 && solution[ichan-1]
              && reduced_chisq[ichan-1] < 1.2)
     {
-      solution[ichan-1]->update( transformation[ichan] );
-      //cerr << "copy gain=" << transformation[ichan]->get_param(0) << endl;
+      solution[ichan-1]->update( PolnCalibrator::get_transformation(ichan) );
+      //cerr << "copy gain=" << get_transformation(ichan)->get_param(0) << endl;
     }
     else if (tries && backup)
     {
@@ -624,7 +633,7 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
         cerr << "Pulsar::PulsarCalibrator::solve1 backup "
              << get_state(backup) << endl;
 
-      transformation[ichan]->copy (backup);
+      PolnCalibrator::get_transformation(ichan)->copy (backup);
     }
 
     MJD epoch = get_epoch(); 
@@ -634,14 +643,14 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
 
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::solve1 pre-fit " 
-           << get_state(transformation[ichan]) << endl;
+           << get_state(PolnCalibrator::get_transformation(ichan)) << endl;
 
 
     mtm[ichan]->solve ();
 
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::solve1 post-fit " 
-           << get_state(transformation[ichan]) << endl;
+           << get_state(PolnCalibrator::get_transformation(ichan)) << endl;
 
     unsigned nfree = mtm[ichan]->get_equation()->get_solver()->get_nfree ();
     float chisq = mtm[ichan]->get_equation()->get_solver()->get_chisq ();
@@ -659,7 +668,10 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
 	 << " retry reduced chisq=" << reduced_chisq[ichan] << endl;
 
     // try again with a fresh start
-    transformation[ichan] = 0;
+    string reason = "PulsarCalibrator::solve1 reduced chisq = " + tostring(reduced_chisq[ichan]) 
+	    + " above threshold=" + tostring (retry_chisq);
+
+    set_transformation_invalid(ichan, reason);
 
     if (!solution[ichan])
       break;
@@ -679,25 +691,25 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
       cerr << error.get_message() << endl;
 #endif
 
-    transformation[ichan]->copy (backup);
+    PolnCalibrator::get_transformation(ichan)->copy (backup);
 
-    transformation[ichan] = 0;
+    set_transformation_invalid(ichan, error.get_message());
     solution[ichan] = 0;
   }
 
-  if (!transformation[ichan])
+  if (!get_transformation_valid(ichan))
     return;
 
 #ifdef _DEBUG
-  for (unsigned ip=0; ip < transformation[ichan]->get_nparam(); ip++)
-    cerr << "  " << ip << " " << transformation[ichan]->get_Estimate(ip)
+  for (unsigned ip=0; ip < PolnCalibrator::get_transformation(ichan)->get_nparam(); ip++)
+    cerr << "  " << ip << " " << PolnCalibrator::get_transformation(ichan)->get_Estimate(ip)
 	 << endl;
 
 #endif
 
   if (solution[ichan])
   {
-    float chisq = solution[ichan]->chisq(transformation[ichan]);
+    float chisq = solution[ichan]->chisq(PolnCalibrator::get_transformation(ichan));
 
     if (chisq > 5.0)
     {
@@ -712,7 +724,7 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
 	unsigned nparam = test.get_nparam();
 	for (unsigned ip=1; ip < nparam; ip++)
 	  cerr << "  " << ip << " " << test.get_Estimate(ip)
-	       << "\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
+	       << "\t\t" << PolnCalibrator::get_transformation(ichan)->get_Estimate(ip) << endl;
       }
 
       solution[ichan] = 0;
@@ -720,12 +732,12 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data)
     }
   }
 
-  if ( dynamic_cast<Instrument*>( transformation[ichan].ptr() ) )
+  if ( dynamic_cast<Instrument*>( PolnCalibrator::get_transformation(ichan) ) )
   {
     if (!solution[ichan])
       solution[ichan] = new MeanInstrument;
 
-    solution[ichan]->integrate( transformation[ichan] );
+    solution[ichan]->integrate(  PolnCalibrator::get_transformation(ichan) );
   }
 }
 
@@ -736,12 +748,12 @@ void Pulsar::PulsarCalibrator::update_solution ()
   {
     if (solution[ichan])
     {
-      assert (ichan < transformation.size());
+      assert (ichan < PolnCalibrator::get_nchan(false));
 
-      if (!transformation[ichan])
-	transformation[ichan] = new_transformation (ichan);
+      if (!get_transformation_valid(ichan))
+	set_transformation (ichan, new_transformation (ichan));
 
-      solution[ichan]->update( transformation[ichan] );
+      solution[ichan]->update( PolnCalibrator::get_transformation(ichan) );
     }
   }
 }

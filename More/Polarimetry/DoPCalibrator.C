@@ -34,10 +34,11 @@ void Pulsar::DoPCalibrator::extra (unsigned ichan,
 				   const vector< Estimate<double> >& source,
 				   const vector< Estimate<double> >& sky)
 {
-  unsigned nchan = transformation.size();
+  unsigned nchan = get_nchan ();
   dop_scale.resize (nchan);
 
-  if (!transformation[ichan]) {
+  if (!get_transformation_valid(ichan))
+  {
     dop_scale[ichan] = 0.0;
     return;
   }
@@ -46,7 +47,7 @@ void Pulsar::DoPCalibrator::extra (unsigned ichan,
   Stokes< Estimate<double> > obs_cal = coherency( convert (source) );
 
   // Evaluate
-  Jones<double> response = transformation[ichan] -> evaluate ();
+  Jones<double> response = get_transformation(ichan) -> evaluate ();
 
   // Calibrate the observed Stokes parameters
   Stokes<Estimate<double> > cal = transform (obs_cal, inv(response));

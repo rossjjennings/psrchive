@@ -78,6 +78,9 @@ namespace Pulsar {
     //! Unload the solution from each sub-integration
     void set_unload_each (Unloader*);
 
+    //! Ensure that all queued jobs have finished
+    void wait ();
+
     //! Set the solution to the mean
     void update_solution ();
 

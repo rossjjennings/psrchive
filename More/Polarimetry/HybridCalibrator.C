@@ -128,8 +128,9 @@ catch (Error& error)
 
 unsigned Pulsar::HybridCalibrator::get_nchan () const try
 {
-  if (transformation.size() != 0)
-    return transformation.size();
+  unsigned test_nchan = PolnCalibrator::get_nchan(false);
+  if (test_nchan != 0)
+    return test_nchan;
 
   return get_maximum_nchan ();
 }
@@ -396,7 +397,7 @@ void Pulsar::HybridCalibrator::calculate_transformation () try
     basis_correction = correction (receiver);
   }
 
-  transformation.resize (target_nchan);
+  transformation_resize (target_nchan);
 
   // the correction to supplement the PolnCalibrator
   Reference::To<Calibration::SingleAxis> correction;
@@ -499,7 +500,7 @@ void Pulsar::HybridCalibrator::calculate_transformation () try
       result = product;
     }
     
-    transformation[ichan] = result;
+    set_transformation (ichan, result);
 
   }
   catch (Error& error)
@@ -507,7 +508,7 @@ void Pulsar::HybridCalibrator::calculate_transformation () try
     if (verbose > 1)
       cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	" error ichan=" << ichan << error << endl;
-    transformation[ichan] = 0;
+    set_transformation_invalid (ichan, error.get_message());
   }
 
   if (verbose > 2)
