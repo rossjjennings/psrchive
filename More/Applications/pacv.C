@@ -799,7 +799,7 @@ void handle_calibrator (Archive* input)
   if (plot_calibrator_solution)
   {
     for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-      calibrator->set_transformation_invalid (zapchan[ichan]);
+      calibrator->set_transformation_invalid (zapchan[ichan], "pacv: zapped by user");
 
     if (verbose)
       cerr << "pacv: Plotting PolnCalibrator" << endl;

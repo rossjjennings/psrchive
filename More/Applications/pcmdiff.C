@@ -77,7 +77,7 @@ Pulsar::PolnCalibrator* load_calibrator (const string& filename,
   unsigned ichan = 0;
 
   for (ichan=0; ichan<zapchan.size(); ichan++)
-    calibrator->set_transformation_invalid (zapchan[ichan]);
+    calibrator->set_transformation_invalid (zapchan[ichan], "pcmdiff: zapped by user");
 
   calibrator_stokes = archive->get<Pulsar::CalibratorStokes>();
     
@@ -329,7 +329,7 @@ int main (int argc, char** argv) try
 
       if (!compare->get_transformation_valid(comchan))
       {
-	calibrator->set_transformation_invalid(calchan);
+	calibrator->set_transformation_invalid(calchan, "pcmdiff: invalid in solution being compared");
 	calibrator_stokes->set_valid(calchan, false);
       }
 
@@ -373,7 +373,7 @@ int main (int argc, char** argv) try
       cerr << "Zapping calfac=" << calfac << endl;
       for (unsigned ichan=0; ichan < nchan; ichan++)
 	for (unsigned ifac=1; ifac < calfac; ifac++) {
-	  calibrator->set_transformation_invalid(ichan*calfac+ifac);
+	  calibrator->set_transformation_invalid(ichan*calfac+ifac, "pcmdiff: extra channel");
 	  calibrator_stokes->set_valid(ichan*calfac+ifac, false);
 	}
     }
