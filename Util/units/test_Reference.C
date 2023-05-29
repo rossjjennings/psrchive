@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2023 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <iostream>
 #include <vector>
 
@@ -146,6 +147,32 @@ int runtest ()
 
   cerr << "\ntest - Reference::To<parent> assignment to child successful"
        << endl;
+
+  // ////////////////////////////////////////////////////////////////////////
+  //
+  // Test Reference::To<A> copy construct from Reference::To<B>
+  //
+  // ////////////////////////////////////////////////////////////////////////
+  {
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<child>)" << endl;
+    Reference::To<child> child_ref = child_ptr;
+    Reference::To<parent> parent_copy_ref (child_ref);
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<child>) successful" << endl;
+  }
+
+  // ////////////////////////////////////////////////////////////////////////
+  //
+  // Test Reference::To<A,false> copy construct from Reference::To<A>
+  //
+  // ////////////////////////////////////////////////////////////////////////
+  {
+    cerr << "\ntest - Reference::To<parent,false> (Refernce::To<parent>)" << endl;
+    Reference::To<parent,false> passive_parent_ref (parent_ref);
+    cerr << "\ntest - Reference::To<parent,false> (Refernce::To<parent>) successful" << endl;
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<parent,false>)" << endl;
+    Reference::To<parent> parent_copy_ref (passive_parent_ref);
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<parent,false>) successful" << endl;
+  }
 
   // ////////////////////////////////////////////////////////////////////////
   //
@@ -430,6 +457,11 @@ int runtest ()
     return -1;
   }
 
+  {
+    vector< Reference::To<parent> > array (1);
+    array[0] = new child;
+    array.resize (2048);
+  }
 
   cerr << "\n ********** Success. ********** " << endl;
 
