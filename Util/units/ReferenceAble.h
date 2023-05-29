@@ -100,7 +100,7 @@ namespace Reference {
     Able* pointer;
 
     //! Count of all references to this handle
-    unsigned count;
+    unsigned handle_count;
 
     //! Thread-safe decrement and delete
     void decrement (bool active, bool auto_delete);

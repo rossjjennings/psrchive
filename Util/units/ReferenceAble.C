@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+#define _DEBUG 1
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -17,6 +19,8 @@
 #ifdef HAVE_PTHREAD
 
 #include <pthread.h>
+
+using namespace std;
 
 /*
   Returns a new mutex that may be used recursively
@@ -80,8 +84,7 @@ Reference::Able::Able ()
   __reference_handle = 0;
 
 #ifdef _DEBUG
-  cerr << "Reference::Able ctor this=" << this
-       << " instances=" << instance_count << endl;
+  cerr << "Reference::Able ctor this=" << this << " instances=" << instance_count << endl;
 #endif
 }
 
@@ -94,8 +97,7 @@ Reference::Able::Able (const Able&)
   __reference_handle = 0;
 
 #ifdef _DEBUG
-  cerr << "Reference::Able copy ctor this=" << this
-       << " instances=" << instance_count << endl;
+  cerr << "Reference::Able copy ctor this=" << this << " instances=" << instance_count << endl;
 #endif
 }
 
@@ -106,10 +108,15 @@ Reference::Able::~Able ()
   instance_count--;
 
   if (__reference_handle)
+  {
+#ifdef _DEBUG
+    cerr << "Reference::Able dtor this=" << this << " handle_count=" << __reference_handle->handle_count << endl;
+#endif
     __reference_handle->pointer = 0;
+  }
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::~Able instances=" << instance_count << endl;
+  cerr << "Reference::Able dtor this=" << this << " reference_count=" << __reference_count << " instances=" << instance_count << endl;
 #endif
 }
 
@@ -120,8 +127,7 @@ Reference::Able::Handle*
 Reference::Able::__reference (bool active) const
 {
 #ifdef _DEBUG
-  cerr << "Reference::Able::__reference this=" << this 
-       << " active=" << active << endl;
+  cerr << "Reference::Able::__reference this=" << this << " active=" << active << endl;
 #endif
 
   LOCK_REFERENCE
@@ -138,12 +144,11 @@ Reference::Able::__reference (bool active) const
     __reference_handle->pointer = const_cast<Able*>(this);
 
 #ifdef _DEBUG
-    cerr << "Reference::Able::__reference this=" << this 
-         << " new handle=" << __reference_handle << endl;
+    cerr << "Reference::Able::__reference this=" << this << " new handle=" << __reference_handle << endl;
 #endif
   }
 
-  __reference_handle->count ++;
+  __reference_handle->handle_count ++;
 
   if (active)
     __reference_count ++;
@@ -152,7 +157,7 @@ Reference::Able::__reference (bool active) const
 
 #ifdef _DEBUG
   cerr << "Reference::Able::__reference this=" << this 
-       << " count=" << __reference_count << endl;
+       << " reference_count=" << __reference_count << " handle_count=" << __reference_handle->handle_count << endl;
 #endif
 
   assert (__reference_handle);
@@ -170,8 +175,7 @@ void Reference::Able::__dereference (bool auto_delete) const
   __reference_count --;
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::__dereference this=" << this
-       << " count=" << __reference_count << endl;
+  cerr << "Reference::Able::__dereference this=" << this << " count=" << __reference_count << endl;
 #endif
 
   // delete when reference count reaches zero and instance is on heap
@@ -202,31 +206,37 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
 {
   LOCK_REFERENCE
 
-  if (pointer)
+  if (pointer && active)
   {
-    if (count == 1)
-      // this instance is about to be deleted, ensure that Able knows it
-      pointer->__reference_handle = 0;
-
-    if (active)
-      // decrease the active reference count
-      pointer->__dereference (auto_delete);
+    // decrease the active reference count
+    pointer->__dereference (auto_delete);
   }
 
+  // there should never be a handle without any references to it
+  if (handle_count == 0)
+    throw Error (InvalidState, "Reference::Able::Handle::decrement",
+		 "this=%x exists with reference count==0", this);
+
   // decrease the total reference count
-  count --;
+  handle_count --;
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::Handle::decrement count=" << count << endl;
+  cerr << "Reference::Able::Handle::decrement this=" << this << " handle_count=" << handle_count << endl;
 #endif
 
   // delete the handle
-  if (count == 0)
+  if (handle_count == 0)
   {
+    if (pointer)
+    {
+      // this instance is about to be deleted, ensure that Able knows it
+      pointer->__reference_handle = 0;
+    }
+
     UNLOCK_REFERENCE
 
 #ifdef _DEBUG
-    cerr << "Reference::Able::Handle::decrement delete this=" << this << endl;
+    cerr << "Reference::Able::Handle::decrement delete this=" << this << " pointer=" << pointer << endl;
 #endif
 
     delete this;
@@ -243,7 +253,7 @@ Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
   LOCK_REFERENCE
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::Handle::copy from=" << from << endl;
+  cerr << "Reference::Able::Handle::copy to=" << to << " from=" << from << endl;
 #endif
 
   if (!from)
@@ -253,7 +263,7 @@ Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
     return;
   }
 
-  assert (from->count > 0);
+  assert (from->handle_count > 0);
 
   to = const_cast<Handle*>( from );
 
@@ -261,7 +271,7 @@ Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
     to->pointer->__reference (active);
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::Handle::copy count=" << to->count << endl;
+  cerr << "Reference::Able::Handle::copy to=" << to << " handle_count=" << to->handle_count << endl;
 #endif
 
   UNLOCK_REFERENCE
@@ -271,7 +281,7 @@ Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
 Reference::Able::Handle::Handle ()
 {
   pointer = 0;
-  count = 0;
+  handle_count = 0;
 }
 
 //! Copy constructor
@@ -291,5 +301,9 @@ Reference::Able::Handle& Reference::Able::Handle::operator = (const Handle&)
 //! Destructor
 Reference::Able::Handle::~Handle()
 {
+#ifdef _DEBUG
+  cerr << "Reference::Able::Handle dtor this=" << this << " handle_count=" << handle_count << " pointer=" << pointer << endl;
+#endif
 }
+
 
