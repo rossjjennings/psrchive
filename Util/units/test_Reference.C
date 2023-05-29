@@ -88,6 +88,8 @@ int main (int argc, char** argv)
 
 }
 
+void test_passive_reference_circularity ();
+
 int runtest ()
 {
   parent parent_instance(4);
@@ -430,9 +432,60 @@ int runtest ()
     return -1;
   }
 
+  test_passive_reference_circularity ();
 
   cerr << "\n ********** Success. ********** " << endl;
 
 
   return 0;
 }
+
+class Container;
+class Policy : public Reference::Able
+{
+    Reference::To<Container, false> container;
+  public:
+    Policy (Container* c) { cerr << "Policy ctor this=" << this << endl; container = c; }
+    virtual Policy* clone () { cerr << "Policy::clone this=" << this << endl; return new Policy(*this); }
+  protected:
+};
+
+class Component : public Reference::Able
+{
+    Reference::To<Policy> policy;
+  public:
+    Component (Container* parent) { cerr << "Component ctor this=" << this << " new Policy" << endl; policy = new Policy(parent); }
+    virtual Component* clone () const { cerr << "Component::clone this=" << this << endl; return new Component(*this); }
+    Component (const Component& that) { cerr << "Component copy ctor this=" << this << " clone Policy" << endl; policy = that.policy->clone(); }
+};
+
+class Container : public Reference::Able
+{
+    vector< Reference::To<Component> > components;
+  public:
+    Container (unsigned size)
+    {
+      cerr << "Container ctor this=" << this << " resize components" << endl;
+      components.resize(size);
+      cerr << "Container ctor new Component" << endl;
+      Component* ref = new Component (this);
+      cerr << "Container ctor ptr=" << ref << endl;
+
+      for (unsigned i=0; i < components.size(); i++)
+      {
+	cerr << "Container ctor clone i=" << i << endl;
+        components[i] = ref->clone();
+      }
+    }
+    // Container* clone () const { return new Container(*this); }
+};
+
+void test_passive_reference_circularity()
+{
+  cerr << "test_passive_reference_circularity new Container" << endl;
+  Container* ref = new Container (16);
+  cerr << "test_passive_reference_circularity delete Container" << endl;
+  delete ref;
+  cerr << "test_passive_reference_circularity finished" << endl;
+}
+
