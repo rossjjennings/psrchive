@@ -44,7 +44,7 @@ template<class T>
 std::string substitute (const std::string& text, T* resolver,
 			char substitution = '$',
 			Functor< bool(char) > in_name = 
-			Functor< bool(char) > (new TextInterface::Name,
+			Functor< bool(char) > (TextInterface::Name(),
 					       &TextInterface::Name::valid) )
 try
 {

@@ -128,6 +128,10 @@ class Functor< R (), A1, A2 >
   template<class C, typename M> Functor (C* instance, M method)
     { functor = new Method<C, M> (instance, method); }
 
+  //! Construct from a class instance and generator method
+  template<class C, typename M> Functor (const C& instance, M method)
+    { functor = new Method<const C, M> (&instance, method); }
+
   //! Construct from a generator function
   template<typename F> Functor (F function)
     { functor = new Function<F> (function); }
@@ -224,6 +228,10 @@ class Functor< R (A1), A2 >
   //! Construct from a class instance and unary method
   template<class C, typename M> Functor (C* instance, M method)
     { functor = new Method<C, M> (instance, method); }
+
+  //! Construct from a class instance and unary method
+  template<class C, typename M> Functor (const C& instance, M method)
+    { functor = new Method<const C, M> (&instance, method); }
 
   //! Construct from a unary function
   template<typename F> Functor (F function)
@@ -325,6 +333,10 @@ class Functor< R (A1, A2) >
   //! Construct from a class instance and binary method
   template<class C, typename M> Functor (C* instance, M method)
     { functor = new Method<C, M> (instance, method); }
+
+  //! Construct from a class instance and binary method
+  template<class C, typename M> Functor (const C& instance, M method)
+    { functor = new Method<const C, M> (&instance, method); }
 
   //! Construct from a binary function
   template<typename F> Functor (F function)
