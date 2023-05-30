@@ -115,7 +115,6 @@ void Reference::To<Type,active>::hook (const Able* pointer)
 
   if (!pointer)
     the_handle = 0;
-
   else
     the_handle = pointer->__reference (active);
 }
@@ -137,6 +136,7 @@ Reference::To<Type,active>::To (Type* ref_pointer)
   cerr << "Reference::To<"+name()+">::To (Type*="<< (void*)ref_pointer <<")"<< endl;
 #endif
 
+  the_handle = 0;
   hook (ref_pointer);
 }
 
@@ -170,6 +170,7 @@ Reference::To<Type,active>::operator bool () const
   return the_handle && the_handle->pointer;
 }
 
+// copy constructor
 template<class Type, bool active>
 Reference::To<Type,active>::To (const To& another_reference)
 {
@@ -178,12 +179,12 @@ Reference::To<Type,active>::To (const To& another_reference)
 #endif
 
   // thread-safe copy
+  the_handle = 0;
   Able::Handle::copy (the_handle, another_reference.the_handle, active);
-
 }
 
 
-// operator =
+// operator = copy assignment operator
 template<class Type, bool active>
 Reference::To<Type,active>&
 Reference::To<Type,active>::operator = (const To& oref)
@@ -203,7 +204,7 @@ Reference::To<Type,active>::operator = (const To& oref)
   return *this;
 }
 
-
+// operator = assignment operator
 template<class Type, bool active>
 Reference::To<Type,active>& 
 Reference::To<Type,active>::operator = (Type* ref_pointer)
@@ -268,7 +269,7 @@ const Type* Reference::To<Type,active>::ptr () const
 template<class Type, bool active>
 Type* Reference::To<Type,active>::ptr ()
 {
-  if (the_handle)
+  if (the_handle && the_handle->pointer)
     return reinterpret_cast<Type*>( the_handle->pointer );
   else
     return 0;
