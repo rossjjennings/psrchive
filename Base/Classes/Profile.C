@@ -123,6 +123,8 @@ Pulsar::Profile::~Profile()
 //
 Pulsar::Profile* Pulsar::Profile::clone () const
 {
+  DEBUG("Profile::clone this=" << this);
+
   Profile* retval = new Profile (*this);
   if (!retval)
     throw Error (BadAllocation, "Pulsar::Profile::clone");
@@ -149,10 +151,12 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
   return *this;
 }
 
-void Pulsar::Profile::copy (const Profile* that) try
+void Pulsar::Profile::copy (const Profile* that, bool clone_strategy) try
 {
   if (this == that)
     return;
+
+  DEBUG("Profile::copy this=" << this << " that=" << that);
 
   resize( that->get_nbin() );
   set_amps( that->get_amps() );
@@ -165,8 +169,11 @@ void Pulsar::Profile::copy (const Profile* that) try
   for (unsigned iext=0; iext < that->get_nextension(); iext++)
     add_extension( that->get_extension(iext)->clone() );
 
-  if (that->strategy)
+  if (clone_strategy && that->strategy)
+  {
+    DEBUG("Profile::copy this=" << this << " clone that strategy=" << that->strategy.ptr());
     strategy = that->strategy->clone();
+  }
 }
 catch (Error& error)
 {

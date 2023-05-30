@@ -233,17 +233,19 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
 
   resize (npol, nchan, subint->get_nbin());
 
+  // the following loop should copy everything but the strategy
+  bool clone_strategy = false;
+
   for (unsigned ipol=0; ipol<npol; ipol++)
     for (unsigned ichan=0; ichan<nchan; ichan++)
-      *(profiles[ipol][ichan]) = *(subint->profiles[ipol][ichan]);
+      profiles[ipol][ichan]->copy(subint->profiles[ipol][ichan], clone_strategy);
 
   // Using a Reference::To<Extension> ensures that the cloned
   // Extension will be deleted if the derived class chooses not to
   // manage it.
 
   if (verbose)
-    cerr << "Pulsar::Integration::copy " << subint->get_nextension()
-	 << " Extensions" << endl;
+    cerr << "Pulsar::Integration::copy " << subint->get_nextension() << " Extensions" << endl;
 
   extension.resize (0);
 
