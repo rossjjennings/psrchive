@@ -69,9 +69,12 @@ void Pulsar::Application::set_verbose ()
   verbose = true;
 }
 
+static unsigned verbosity = 2;
+
 void Pulsar::Application::set_very_verbose ()
 {
-  Archive::set_verbosity (3);
+  verbosity ++;
+  Archive::set_verbosity (verbosity);
   very_verbose = verbose = true;
 }
 
