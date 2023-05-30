@@ -106,6 +106,8 @@ int main ()
     return -1;
   }
 
+  delete [] parent2_array;
+
   child2 child2_static_array [16];
     
   if ( child2_static_array[0].__is_on_heap() 
