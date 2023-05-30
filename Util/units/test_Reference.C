@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
@@ -490,6 +491,7 @@ class Component : public Reference::Able
     Component (Container* parent) { cerr << "Component ctor this=" << this << " new Policy" << endl; policy = new Policy(parent); }
     virtual Component* clone () const { cerr << "Component::clone this=" << this << endl; return new Component(*this); }
     Component (const Component& that) { cerr << "Component copy ctor this=" << this << " clone Policy" << endl; policy = that.policy->clone(); }
+    void copy (const Component* that) { cerr << "Component::copy this=" << this << " clone Policy" << endl; policy = that->policy->clone(); }
 };
 
 class Container : public Reference::Able
@@ -500,25 +502,48 @@ class Container : public Reference::Able
     {
       cerr << "Container ctor this=" << this << " resize components" << endl;
       components.resize(size);
-      cerr << "Container ctor new Component" << endl;
-      Component* ref = new Component (this);
-      cerr << "Container ctor ptr=" << ref << endl;
 
       for (unsigned i=0; i < components.size(); i++)
       {
-	cerr << "Container ctor clone i=" << i << endl;
-        components[i] = ref->clone();
+	cerr << "Container ctor now Component i=" << i << endl;
+        components[i] = new Component (this);
       }
     }
+
+    void copy (const Container* other)
+    {
+      assert (other->components.size() == components.size());
+      for (unsigned i=0; i < components.size(); i++)
+      {
+        components[i]->copy (other->components[i]);
+      }
+    }
+
+    void resize (unsigned new_size)
+    {
+      components.resize (new_size);
+    }
+
     // Container* clone () const { return new Container(*this); }
 };
 
 void test_passive_reference_circularity()
 {
   cerr << "test_passive_reference_circularity new Container" << endl;
-  Container* ref = new Container (16);
-  cerr << "test_passive_reference_circularity delete Container" << endl;
-  delete ref;
+  Container* c1 = new Container (2048);
+
+  cerr << "test_passive_reference_circularity new Container" << endl;
+  Container* c2 = new Container (2048);
+ 
+  cerr << "test_passive_reference_circularity Container::copy" << endl;
+  c1->copy(c2);
+
+  cerr << "test_passive_reference_circularity delete Container 1" << endl;
+  delete c1;
+
+  cerr << "test_passive_reference_circularity delete Container 2" << endl;
+  delete c2;
+
   cerr << "test_passive_reference_circularity finished" << endl;
 }
 
