@@ -42,15 +42,12 @@ namespace Reference {
     Able ();
 
     //! Copy constructor
-    /*! Disables the compiler-generated copy of __reference_list. */
     Able (const Able&);
 
     //! Assignment operator
-    /*! Disables the compiler-generated copy of __reference_list. */
-    Able& operator = (const Able&) { return *this; }
+    Able& operator = (const Able&);
 
     //! Destructor
-    /*! Invalidates all Reference::To references to this instance. */
     virtual ~Able();
     
     //! Returns the number of references there are to this

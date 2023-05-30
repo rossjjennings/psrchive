@@ -76,7 +76,7 @@ size_t Reference::Able::get_instance_count ()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//
+// default constructor
 Reference::Able::Able ()
 {
   instance_count++;
@@ -87,7 +87,7 @@ Reference::Able::Able ()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//
+// copy constructor
 Reference::Able::Able (const Able&)
 {
   instance_count++;
@@ -98,7 +98,15 @@ Reference::Able::Able (const Able&)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//
+// assignment operator
+Reference::Able& Reference::Able::operator = (const Able& other)
+{
+  DEBUG("Reference::Able::operator= this=" << this);
+  return *this;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// desctructor
 Reference::Able::~Able ()
 { 
   instance_count--;
