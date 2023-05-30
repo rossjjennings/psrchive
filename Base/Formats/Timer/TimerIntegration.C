@@ -69,14 +69,23 @@ void Pulsar::TimerIntegration::insert (Integration* from)
 Pulsar::TimerIntegration::~TimerIntegration ()
 {
   if (verbose)
-    cerr << "TimerIntegration destructor" << endl;
+    cerr << "TimerIntegration dtor this=" << this << endl;
+}
+
+//! Default constructor
+Pulsar::TimerIntegration::TimerIntegration ()
+{
+  if (verbose)
+    cerr << "TimerIntegration ctor this=" << this << endl;
+
+  init();
 }
 
 //! Copy constructor
 Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint)
 {
   if (verbose)
-    cerr << "TimerIntegration construct copy TimerIntegration" << endl;
+    cerr << "TimerIntegration copy ctor this=" << this << " that=" << &t_subint << endl;
 
   init();
   TimerIntegration::copy (&t_subint);
@@ -86,7 +95,7 @@ Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint)
 Pulsar::TimerIntegration::TimerIntegration (const Integration& subint)
 {
   if (verbose)
-    cerr << "TimerIntegration construct copy Integration" << endl;
+    cerr << "TimerIntegration ctor copy Integration" << endl;
 
   init();
   TimerIntegration::copy (&subint);

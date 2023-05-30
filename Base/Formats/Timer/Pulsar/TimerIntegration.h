@@ -32,7 +32,7 @@ namespace Pulsar {
     friend class TimerArchive;
 
     //! Null constructor simply intializes defaults
-    TimerIntegration () { init(); }
+    TimerIntegration ();
 
     //! Copy constructor
     TimerIntegration (const TimerIntegration& t_subint);

@@ -30,8 +30,9 @@ bool Pulsar::TimerArchive::big_endian = true;
 //
 Pulsar::TimerArchive::TimerArchive ()
 {
-  if (verbose == 3) {
-    cerr << "Pulsar::TimerArchive default constructor" << endl;
+  if (verbose > 2)
+  {
+    cerr << "Pulsar::TimerArchive ctor this=" << this << endl;
     Timer::verbose = true;
   }
 
@@ -44,8 +45,8 @@ Pulsar::TimerArchive::TimerArchive ()
 //
 Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
 {
-  if (verbose == 3)
-    cerr << "Pulsar::TimerArchive copy construct" << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::TimerArchive copy ctor this=" << this << endl;
 
   Timer::init (&hdr);
   Archive::copy (arch); // results in call to TimerArchive::copy
@@ -56,8 +57,8 @@ Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
 //
 Pulsar::TimerArchive::~TimerArchive ()
 {
-  if (verbose == 3)
-    cerr << "Pulsar::TimerArchive destructor" << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::TimerArchive dtor this=" << this << endl;
 }
 
 //
@@ -66,8 +67,8 @@ Pulsar::TimerArchive::~TimerArchive ()
 const Pulsar::TimerArchive&
 Pulsar::TimerArchive::operator = (const TimerArchive& arch)
 {
-  if (verbose == 3)
-    cerr << "Pulsar::TimerArchive assignment operator" << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::TimerArchive assignment operator this=" << this << endl;
 
   Archive::copy (arch); // results in call to TimerArchive::copy
   return *this;
@@ -78,7 +79,7 @@ Pulsar::TimerArchive::operator = (const TimerArchive& arch)
 //
 Pulsar::TimerArchive::TimerArchive (const Archive& arch)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive base copy construct" << endl;
 
   Timer::init (&hdr);
@@ -90,18 +91,18 @@ Pulsar::TimerArchive::TimerArchive (const Archive& arch)
 //
 void Pulsar::TimerArchive::copy (const Archive& archive) 
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::copy Entering" << endl;
 
   if (this == &archive)
   {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "Returning from TimerArchive::copy early " << endl;
     return;
   }
   else
   {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "this == &archive passed test " << endl;
   }
   
@@ -113,12 +114,12 @@ void Pulsar::TimerArchive::copy (const Archive& archive)
 
   unsigned good_nsubint = get_nsubint();
 
-  if (verbose == 3) cerr << "Pulsar::TimerArchive::copy copying headers " << endl;
+  if (verbose > 2) cerr << "Pulsar::TimerArchive::copy copying headers " << endl;
   hdr = tarchive->hdr;
 
   set_nsubint( good_nsubint );
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::copy check validity" << endl;
 
   valid = tarchive->valid;
@@ -129,7 +130,7 @@ void Pulsar::TimerArchive::copy (const Archive& archive)
 //
 Pulsar::TimerArchive* Pulsar::TimerArchive::clone () const
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::clone" << endl;
   return new TimerArchive (*this);
 }
@@ -141,7 +142,7 @@ Pulsar::TimerArchive* Pulsar::TimerArchive::clone () const
 Pulsar::Integration* 
 Pulsar::TimerArchive::new_Integration (const Integration* subint)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::new_Integration" << endl;
 
   TimerIntegration* integration;
@@ -261,7 +262,7 @@ sky_coord Pulsar::TimerArchive::get_coordinates () const
   coordinates.ra().setRadians( hdr.ra );
   coordinates.dec().setRadians( hdr.dec );
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::get_coordinates " << coordinates << endl;
 
   return coordinates;
@@ -542,7 +543,7 @@ void Pulsar::TimerArchive::correct_Integrations () try {
 		   "Integration[%d] is not a TimerIntegration", isub);
 
     if (subint->get_duration () <= 0.0) {
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "Pulsar::TimerArchive::correct_Integrations"
 	  " warning empty sub-int " << isub << endl;
       continue;
