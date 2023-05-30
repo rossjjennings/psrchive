@@ -11,8 +11,9 @@
 
 using namespace std;
 
-#define _DEBUG 1
+// #define _DEBUG 1
 #include "Reference.h"
+#include "debug.h"
 
 class parent : public Reference::Able {
 
@@ -479,8 +480,8 @@ class Policy : public Reference::Able
 {
     Reference::To<Container, false> container;
   public:
-    Policy (Container* c) { cerr << "Policy ctor this=" << this << endl; container = c; }
-    virtual Policy* clone () { cerr << "Policy::clone this=" << this << endl; return new Policy(*this); }
+    Policy (Container* c) { DEBUG("Policy ctor this=" << this); container = c; }
+    virtual Policy* clone () { DEBUG("Policy::clone this=" << this); return new Policy(*this); }
   protected:
 };
 
@@ -488,10 +489,10 @@ class Component : public Reference::Able
 {
     Reference::To<Policy> policy;
   public:
-    Component (Container* parent) { cerr << "Component ctor this=" << this << " new Policy" << endl; policy = new Policy(parent); }
-    virtual Component* clone () const { cerr << "Component::clone this=" << this << endl; return new Component(*this); }
-    Component (const Component& that) { cerr << "Component copy ctor this=" << this << " clone Policy" << endl; policy = that.policy->clone(); }
-    void copy (const Component* that) { cerr << "Component::copy this=" << this << " clone Policy" << endl; policy = that->policy->clone(); }
+    Component (Container* parent) { DEBUG("Component ctor this=" << this << " new Policy"); policy = new Policy(parent); }
+    virtual Component* clone () const { DEBUG("Component::clone this=" << this); return new Component(*this); }
+    Component (const Component& that) { DEBUG("Component copy ctor this=" << this << " clone Policy"); policy = that.policy->clone(); }
+    void copy (const Component* that) { DEBUG("Component::copy this=" << this << " clone Policy"); policy = that->policy->clone(); }
 };
 
 class Container : public Reference::Able
@@ -500,12 +501,12 @@ class Container : public Reference::Able
   public:
     Container (unsigned size)
     {
-      cerr << "Container ctor this=" << this << " resize components" << endl;
+      DEBUG("Container ctor this=" << this << " resize components");
       components.resize(size);
 
       for (unsigned i=0; i < components.size(); i++)
       {
-	cerr << "Container ctor now Component i=" << i << endl;
+	DEBUG("Container ctor now Component i=" << i);
         components[i] = new Component (this);
       }
     }
@@ -527,23 +528,19 @@ class Container : public Reference::Able
     // Container* clone () const { return new Container(*this); }
 };
 
+Container* new_container_release()
+{
+  Reference::To<Container> c1 = new Container(2048);
+  Reference::To<Container> c2 = new Container(2048);
+  c1->copy(c2);
+
+  return c1.release();
+}
+
 void test_passive_reference_circularity()
 {
   cerr << "test_passive_reference_circularity new Container" << endl;
-  Container* c1 = new Container (2048);
-
-  cerr << "test_passive_reference_circularity new Container" << endl;
-  Container* c2 = new Container (2048);
- 
-  cerr << "test_passive_reference_circularity Container::copy" << endl;
-  c1->copy(c2);
-
-  cerr << "test_passive_reference_circularity delete Container 1" << endl;
-  delete c1;
-
-  cerr << "test_passive_reference_circularity delete Container 2" << endl;
-  delete c2;
-
+  Reference::To<Container> c = new_container_release();
   cerr << "test_passive_reference_circularity finished" << endl;
 }
 
