@@ -186,6 +186,8 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
 {
   LOCK_REFERENCE
 
+  DEBUG("Reference::Able::Handle::decrement this=" << this << " active=" << active << " auto_delete=" << auto_delete);
+
   if (pointer && active)
   {
     // decrease the active reference count
@@ -194,10 +196,12 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
 
   // there should never be a handle without any references to it
   if (handle_count == 0)
-    throw Error (InvalidState, "Reference::Able::Handle::decrement",
-		 "this=%x exists with reference count==0", this);
+  {
+    cerr << "Reference::Able::Handle::decrement this=" << this << " exists with reference count==0";
+    exit (-1);
+  }
 
-  // decrease the total reference count
+  // decrease the total reference count (both active and passive)
   handle_count --;
 
   DEBUG("Reference::Able::Handle::decrement this=" << this << " handle_count=" << handle_count);
@@ -207,13 +211,14 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
   {
     if (pointer)
     {
-      // this instance is about to be deleted, ensure that Able knows it
+      DEBUG("Reference::Able::Handle::decrement this=" << this << " pointer=" << pointer);
+      // this instance is about to be deleted, ensure that Reference::Able object no longer points to it
       pointer->__reference_handle = 0;
     }
 
     UNLOCK_REFERENCE
 
-    DEBUG("Reference::Able::Handle::decrement delete this=" << this << " pointer=" << pointer);
+    DEBUG("Reference::Able::Handle::decrement this=" << this << " deleting self");
 
     delete this;
     return;
@@ -223,8 +228,7 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
 }
 
 
-void
-Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
+void Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
 {
   LOCK_REFERENCE
 
@@ -242,7 +246,10 @@ Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
   to = const_cast<Handle*>( from );
 
   if (to->pointer)
-    to->pointer->__reference (active);
+  {
+    Handle* ptr = to->pointer->__reference (active);
+    assert (ptr == to);
+  }
 
   DEBUG("Reference::Able::Handle::copy to=" << to << " handle_count=" << to->handle_count);
 
@@ -259,21 +266,22 @@ Reference::Able::Handle::Handle ()
 //! Copy constructor
 Reference::Able::Handle::Handle (const Handle&)
 {
-  throw Error (InvalidState, "Reference::Able::Handle copy ctor",
-	       "unexpected copy of Reference::Able::Handle");
+  cerr << "Reference::Able::Handle copy ctor unexpected copy of Reference::Able::Handle" << endl;
+  exit(-1);
 }
 
 //! Assignment operator
 Reference::Able::Handle& Reference::Able::Handle::operator = (const Handle&)
 {
-  throw Error (InvalidState, "Reference::Able::Handle::operator =",
-	       "unexpected copy of Reference::Able::Handle");
+  cerr << "Reference::Able::Handle::operator = unexpected copy of Reference::Able::Handle" << endl;
+  exit(-1);
 }
 
 //! Destructor
 Reference::Able::Handle::~Handle()
 {
   DEBUG("Reference::Able::Handle dtor this=" << this << " handle_count=" << handle_count << " pointer=" << pointer);
+  assert (handle_count == 0);
 }
 
 

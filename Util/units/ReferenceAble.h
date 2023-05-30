@@ -82,16 +82,18 @@ namespace Reference {
 
   /*! Reference::To<> instances share this handle to an Able instance */
   class Able::Handle {
-  public:
 
-    //! Default constructor
-    Handle ();
-
+  private:
     //! Copy constructor
     Handle (const Handle&);
 
     //! Assignment operator
     Handle& operator = (const Handle&);
+
+  public:
+
+    //! Default constructor
+    Handle ();
 
     //! Destructor
     ~Handle();
