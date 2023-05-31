@@ -81,7 +81,7 @@ namespace Pulsar {
     const Profile& operator = (const Profile& profile);
 
     //! does the work for copy constructor and assignment operator
-    void copy (const Profile*);
+    void copy (const Profile*, bool clone_strategy = true);
 
     //! set this to the weighted average of this and that
     void average (const Profile* that);

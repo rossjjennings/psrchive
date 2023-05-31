@@ -5,14 +5,31 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG 1
+
 #include "Pulsar/ProfileStrategies.h"
 #include "Pulsar/Integration.h"
 
+#include "debug.h"
+
 using namespace Pulsar;
+using namespace std;
 
 ManagedStrategies::ManagedStrategies (Integration* c)
 {
+  DEBUG("ManagedStrategies ctor this=" << this << " container=" << (void*) c);
   container = c;
+}
+
+ManagedStrategies::ManagedStrategies (const ManagedStrategies& that)
+{
+  container = that.container;
+  DEBUG("ManagedStrategies copy ctor this=" << this << " container=" << (void*) container.ptr());
+}
+
+ManagedStrategies::~ManagedStrategies ()
+{
+  DEBUG("ManagedStrategies dtor this=" << this << " container=" << (void*) container.ptr());
 }
 
 //! Return the container

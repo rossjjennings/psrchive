@@ -53,15 +53,12 @@ namespace Reference {
     HeapTracked () { __heap_state = 0; }
 
     //! Copy constructor
-    /*! Disables the compiler-generated copy of the __heap_state attribute */
     HeapTracked (const HeapTracked&) { __heap_state = 0; }
 
     //! Assignment operator
-    /*! Disables the compiler-generated copy of the __heap_state attribute */
     HeapTracked& operator = (const HeapTracked&) { return *this; }
 
     //! Destructor
-    /*! The dynamic_cast in __is_on_heap necessitates a virtual destructor */
     virtual ~HeapTracked () { }
 
     //! Records the addresses of new instances allocated on the heap

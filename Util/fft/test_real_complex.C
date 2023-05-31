@@ -93,6 +93,11 @@ void runtest () try {
     exit(-1);
   }
 
+  delete [] data;
+  delete [] copy;
+  delete [] fft1;
+  delete [] back;
+
   cerr << "test_real_complex PASS" << endl;
 }
 catch (Error& e) {

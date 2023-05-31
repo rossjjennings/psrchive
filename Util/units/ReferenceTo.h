@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 - 2016 by Willem van Straten
+ *   Copyright (C) 2004 - 2023 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,16 +11,13 @@
 #ifndef __ReferenceTo_h
 #define __ReferenceTo_h
 
+// #define _DEBUG 1
+#include "debug.h"
 #include "ReferenceAble.h"
 #include "Error.h"
 
 #include <typeinfo>
 #include <string>
-
-#ifdef _DEBUG
-#include <iostream>
-using namespace std;
-#endif
 
 namespace Reference {
 
@@ -91,9 +88,7 @@ namespace Reference {
 template<class Type, bool active>
 void Reference::To<Type,active>::unhook (bool auto_delete)
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::unhook handle=" << the_handle << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::unhook handle=" << the_handle);
 
   if (!the_handle)
     return;
@@ -109,13 +104,10 @@ void Reference::To<Type,active>::unhook (bool auto_delete)
 template<class Type, bool active>
 void Reference::To<Type,active>::hook (const Able* pointer)
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::handle Able*="<< pointer << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::handle Able*="<< pointer);
 
   if (!pointer)
     the_handle = 0;
-
   else
     the_handle = pointer->__reference (active);
 }
@@ -133,19 +125,16 @@ std::string Reference::To<Type,active>::name () const
 template<class Type, bool active>
 Reference::To<Type,active>::To (Type* ref_pointer)
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::To (Type*="<< (void*)ref_pointer <<")"<< endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::To (Type*="<< (void*)ref_pointer <<")");
 
+  the_handle = 0;
   hook (ref_pointer);
 }
 
 template<class Type, bool active>
 Reference::To<Type,active>::~To ()
 { 
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::~To" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::~To");
 
   unhook ();
 }
@@ -153,9 +142,7 @@ Reference::To<Type,active>::~To ()
 template<class Type, bool active>
 bool Reference::To<Type,active>::operator ! () const
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator !" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::operator !");
 
   return !the_handle || the_handle->pointer == 0;
 }
@@ -163,34 +150,29 @@ bool Reference::To<Type,active>::operator ! () const
 template<class Type, bool active>
 Reference::To<Type,active>::operator bool () const
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator bool" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::operator bool");
 
   return the_handle && the_handle->pointer;
 }
 
+// copy constructor
 template<class Type, bool active>
 Reference::To<Type,active>::To (const To& another_reference)
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::To (To<Type>)" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::To (To<Type>)");
 
   // thread-safe copy
+  the_handle = 0;
   Able::Handle::copy (the_handle, another_reference.the_handle, active);
-
 }
 
 
-// operator =
+// operator = copy assignment operator
 template<class Type, bool active>
 Reference::To<Type,active>&
 Reference::To<Type,active>::operator = (const To& oref)
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator = (To<Type>)" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::operator = (To<Type>)");
 
   if (the_handle == oref.the_handle)
     return *this;
@@ -203,15 +185,12 @@ Reference::To<Type,active>::operator = (const To& oref)
   return *this;
 }
 
-
+// operator = assignment operator
 template<class Type, bool active>
 Reference::To<Type,active>& 
 Reference::To<Type,active>::operator = (Type* ref_pointer)
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator = "
-    "(Type*=" << (void*)ref_pointer <<")"<<endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::operator = (Type*=" << (void*)ref_pointer <<")");
 
   if (the_handle && the_handle->pointer == ref_pointer)
     return *this;
@@ -226,9 +205,7 @@ Reference::To<Type,active>::operator = (Type* ref_pointer)
 template<class Type, bool active>
 Type* Reference::To<Type,active>::get () const
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::get" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::get");
 
   if (!the_handle || the_handle->pointer == 0)
     throw Error (InvalidPointer, "Reference::To<"+name()+">::get");
@@ -240,9 +217,7 @@ Type* Reference::To<Type,active>::get () const
 template<class Type, bool active>
 Type* Reference::To<Type,active>::release ()
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::release" << endl;
-#endif
+  DEBUG("Reference::To<"+name()+">::release");
 
   if (!the_handle || the_handle->pointer == 0)
     throw Error (InvalidPointer, "Reference::To<"+name()+">::release");
@@ -268,7 +243,7 @@ const Type* Reference::To<Type,active>::ptr () const
 template<class Type, bool active>
 Type* Reference::To<Type,active>::ptr ()
 {
-  if (the_handle)
+  if (the_handle && the_handle->pointer)
     return reinterpret_cast<Type*>( the_handle->pointer );
   else
     return 0;
@@ -277,9 +252,7 @@ Type* Reference::To<Type,active>::ptr ()
 template<class Type, bool active>
 void swap (Reference::To<Type,active>& ref1, Reference::To<Type,active>& ref2)
 {
-#ifdef _DEBUG
-  cerr << "swap (Reference::To<Type>, ditto)" << endl;
-#endif
+  DEBUG("swap (Reference::To<Type>, ditto)");
 
   Type* ref1_ptr = ref1.release();
   Type* ref2_ptr = ref2.release();
@@ -293,9 +266,7 @@ template<class Type1, bool active1, class Type2, bool active2>
 bool operator == (const Reference::To<Type1,active1>& ref1,
                   const Reference::To<Type2,active2>& ref2)
 {
-#ifdef _DEBUG
-  cerr << "operator == (Reference::To<Type>&, Reference::To<Type2>&)" << endl;
-#endif
+  DEBUG("operator == (Reference::To<Type>&, Reference::To<Type2>&)");
 
   return ref1.ptr() == ref2.ptr();
 }
@@ -305,9 +276,7 @@ template<class Type1, bool active1, class Type2, bool active2>
 bool operator != (const Reference::To<Type1,active1>& ref1,
                   const Reference::To<Type2,active2>& ref2)
 {
-#ifdef _DEBUG
-  cerr << "operator != (Reference::To<Type>&, Reference::To<Type2>&)" << endl;
-#endif
+  DEBUG("operator != (Reference::To<Type>&, Reference::To<Type2>&)");
 
   return ref1.ptr() != ref2.ptr();
 }
@@ -317,9 +286,7 @@ bool operator != (const Reference::To<Type1,active1>& ref1,
 template<class Type, bool active, class Type2>
 bool operator == (const Reference::To<Type,active>& ref, const Type2* instance)
 {
-#ifdef _DEBUG
-  cerr << "operator == (Reference::To<Type>&, Type*)" << endl;
-#endif
+  DEBUG("operator == (Reference::To<Type>&, Type*)");
 
   return ref.ptr() == instance;
 }
@@ -328,9 +295,7 @@ bool operator == (const Reference::To<Type,active>& ref, const Type2* instance)
 template<class Type, bool active, class Type2>
 bool operator == (const Type2* instance, const Reference::To<Type,active>& ref)
 {
-#ifdef _DEBUG
-  cerr << "operator == (T2*, Reference::To<T1>&)" << endl;
-#endif
+  DEBUG("operator == (T2*, Reference::To<T1>&)");
 
   return ref.ptr() == instance;
 }

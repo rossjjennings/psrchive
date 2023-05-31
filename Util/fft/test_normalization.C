@@ -42,6 +42,9 @@ void runtest1 (int ndat)
   FTransform::fcc1d (ntrans, fft1, data);
 
   runtest2 (ntrans, power(ndat,data), fft1, data);
+
+  delete [] data;
+  delete [] fft1;
 }
 
 double power (unsigned ndat, float* data)
@@ -143,6 +146,7 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
 
   }
 
+  delete [] fft2;
 }
 
 void runtest () try {

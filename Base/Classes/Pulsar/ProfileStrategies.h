@@ -21,7 +21,10 @@ namespace Pulsar {
   class Profile::Strategies : public Reference::Able
   {
   public:
-    
+
+    //! Destructor
+    virtual ~Strategies () {}
+
     //! The implementation of the baseline finding algorithm
     virtual ProfileWeightFunction* baseline () const = 0;
 
@@ -145,6 +148,12 @@ namespace Pulsar {
 
     //! Construct with a pointer to the container
     ManagedStrategies (Integration*);
+
+    //! Copy constructor
+    ManagedStrategies (const ManagedStrategies&);
+
+    //! Destructor
+    ~ManagedStrategies ();
 
     //! Return the container
     Integration* get_container();

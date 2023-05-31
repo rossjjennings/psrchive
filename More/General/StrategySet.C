@@ -12,6 +12,7 @@
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/SNRatioEstimator.h"
 
+// #define _DEBUG 1
 #include "debug.h"
 
 using namespace Pulsar;
@@ -86,7 +87,7 @@ ProfileStats* StrategySet::get_stats () const
 
 StrategySet::StrategySet ()
 {
-  DEBUG("StrategySet ctor this=");
+  DEBUG("StrategySet ctor this=" << this);
 }
 
 StrategySet::StrategySet (const StrategySet& copy)
@@ -105,21 +106,19 @@ Profile::Strategies* Profile::get_strategy() const
 {
   if (!strategy)
   {
-    DEBUG("Profile::get_strategy new this=" << this);
+    DEBUG("Profile::get_strategy this=" << this << " new");
     strategy = new StrategySet;
   }
   else
   {
-    ManagedStrategies* managed
-      = dynamic_cast<ManagedStrategies*>( strategy.get() );
-
+    ManagedStrategies* managed = dynamic_cast<ManagedStrategies*>( strategy.get() );
+    
     if (managed)
     {
-      DEBUG("Profile::get_strategy managed this=" << this);
+      DEBUG("Profile::get_strategy this=" << this << " managed");
       strategy = managed->get_container()->get_strategy();
     }
   }
-  
   return strategy;
 }
 
@@ -171,7 +170,7 @@ StrategySet* Archive::get_strategy() const
       strategy = ext->get_strategy();
     else
     {
-      DEBUG("Archive::get_strategy creating new StrategySet");
+      DEBUG("Archive::get_strategy this=" << this << " creating new StrategySet");
       strategy = new StrategySet;
       const_cast<Archive*>(this)->add_extension( new StrategySet::Extension(strategy) );
     }

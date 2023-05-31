@@ -1,16 +1,19 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004 - 2023 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
-#define _DEBUG 1
+// #define _DEBUG 1
 #include "Reference.h"
+#include "debug.h"
 
 class parent : public Reference::Able {
 
@@ -148,6 +151,32 @@ int runtest ()
 
   cerr << "\ntest - Reference::To<parent> assignment to child successful"
        << endl;
+
+  // ////////////////////////////////////////////////////////////////////////
+  //
+  // Test Reference::To<A> copy construct from Reference::To<B>
+  //
+  // ////////////////////////////////////////////////////////////////////////
+  {
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<child>)" << endl;
+    Reference::To<child> child_ref = child_ptr;
+    Reference::To<parent> parent_copy_ref (child_ref);
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<child>) successful" << endl;
+  }
+
+  // ////////////////////////////////////////////////////////////////////////
+  //
+  // Test Reference::To<A,false> copy construct from Reference::To<A>
+  //
+  // ////////////////////////////////////////////////////////////////////////
+  {
+    cerr << "\ntest - Reference::To<parent,false> (Refernce::To<parent>)" << endl;
+    Reference::To<parent,false> passive_parent_ref (parent_ref);
+    cerr << "\ntest - Reference::To<parent,false> (Refernce::To<parent>) successful" << endl;
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<parent,false>)" << endl;
+    Reference::To<parent> parent_copy_ref (passive_parent_ref);
+    cerr << "\ntest - Reference::To<parent> (Refernce::To<parent,false>) successful" << endl;
+  }
 
   // ////////////////////////////////////////////////////////////////////////
   //
@@ -432,6 +461,12 @@ int runtest ()
     return -1;
   }
 
+  {
+    vector< Reference::To<parent> > array (1);
+    array[0] = new child;
+    array.resize (2048);
+  }
+
   test_passive_reference_circularity ();
 
   cerr << "\n ********** Success. ********** " << endl;
@@ -445,8 +480,8 @@ class Policy : public Reference::Able
 {
     Reference::To<Container, false> container;
   public:
-    Policy (Container* c) { cerr << "Policy ctor this=" << this << endl; container = c; }
-    virtual Policy* clone () { cerr << "Policy::clone this=" << this << endl; return new Policy(*this); }
+    Policy (Container* c) { DEBUG("Policy ctor this=" << this); container = c; }
+    virtual Policy* clone () { DEBUG("Policy::clone this=" << this); return new Policy(*this); }
   protected:
 };
 
@@ -454,9 +489,10 @@ class Component : public Reference::Able
 {
     Reference::To<Policy> policy;
   public:
-    Component (Container* parent) { cerr << "Component ctor this=" << this << " new Policy" << endl; policy = new Policy(parent); }
-    virtual Component* clone () const { cerr << "Component::clone this=" << this << endl; return new Component(*this); }
-    Component (const Component& that) { cerr << "Component copy ctor this=" << this << " clone Policy" << endl; policy = that.policy->clone(); }
+    Component (Container* parent) { DEBUG("Component ctor this=" << this << " new Policy"); policy = new Policy(parent); }
+    virtual Component* clone () const { DEBUG("Component::clone this=" << this); return new Component(*this); }
+    Component (const Component& that) { DEBUG("Component copy ctor this=" << this << " clone Policy"); policy = that.policy->clone(); }
+    void copy (const Component* that) { DEBUG("Component::copy this=" << this << " clone Policy"); policy = that->policy->clone(); }
 };
 
 class Container : public Reference::Able
@@ -465,27 +501,46 @@ class Container : public Reference::Able
   public:
     Container (unsigned size)
     {
-      cerr << "Container ctor this=" << this << " resize components" << endl;
+      DEBUG("Container ctor this=" << this << " resize components");
       components.resize(size);
-      cerr << "Container ctor new Component" << endl;
-      Component* ref = new Component (this);
-      cerr << "Container ctor ptr=" << ref << endl;
 
       for (unsigned i=0; i < components.size(); i++)
       {
-	cerr << "Container ctor clone i=" << i << endl;
-        components[i] = ref->clone();
+	DEBUG("Container ctor now Component i=" << i);
+        components[i] = new Component (this);
       }
     }
+
+    void copy (const Container* other)
+    {
+      assert (other->components.size() == components.size());
+      for (unsigned i=0; i < components.size(); i++)
+      {
+        components[i]->copy (other->components[i]);
+      }
+    }
+
+    void resize (unsigned new_size)
+    {
+      components.resize (new_size);
+    }
+
     // Container* clone () const { return new Container(*this); }
 };
+
+Container* new_container_release()
+{
+  Reference::To<Container> c1 = new Container(2048);
+  Reference::To<Container> c2 = new Container(2048);
+  c1->copy(c2);
+
+  return c1.release();
+}
 
 void test_passive_reference_circularity()
 {
   cerr << "test_passive_reference_circularity new Container" << endl;
-  Container* ref = new Container (16);
-  cerr << "test_passive_reference_circularity delete Container" << endl;
-  delete ref;
+  Reference::To<Container> c = new_container_release();
   cerr << "test_passive_reference_circularity finished" << endl;
 }
 
