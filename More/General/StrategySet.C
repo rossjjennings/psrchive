@@ -105,7 +105,7 @@ Profile::Strategies* Profile::get_strategy() const
 {
   if (!strategy)
   {
-    DEBUG("Profile::get_strategy new");
+    DEBUG("Profile::get_strategy new this=" << this);
     strategy = new StrategySet;
   }
   else
@@ -115,7 +115,7 @@ Profile::Strategies* Profile::get_strategy() const
 
     if (managed)
     {
-      DEBUG("Profile::get_strategy managed");
+      DEBUG("Profile::get_strategy managed this=" << this);
       strategy = managed->get_container()->get_strategy();
     }
   }
@@ -128,17 +128,17 @@ Profile::Strategies* Integration::get_strategy() const
 {
   if (parent)
   {
-    DEBUG("Integration::get_strategy parent");
+    DEBUG("Integration::get_strategy this=" << this << " parent");
     return parent->get_strategy();
   }
 
   if (orphaned)
   {
-    DEBUG("Integration::get_strategy orphaned");
+    DEBUG("Integration::get_strategy this=" << this << " orphaned");
     return orphaned->get_strategy();
   }
 
-  DEBUG("Integration::get_strategy new");
+  DEBUG("Integration::get_strategy this=" << this << " new");
   return new StrategySet;
 }
 
