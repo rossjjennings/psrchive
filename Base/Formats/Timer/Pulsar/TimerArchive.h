@@ -270,6 +270,10 @@ namespace Pulsar {
     //! Unpack the CalInfoExtension
     void unpack (CalInfoExtension* cal);
 
+    //! Double-precision dispersion measure stored for runtime use
+    double dispersion_measure;
+    //! Double-precision rotation measure stored for runtime use
+    double rotation_measure;
   };
 
 

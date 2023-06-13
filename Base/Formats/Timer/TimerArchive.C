@@ -37,6 +37,8 @@ Pulsar::TimerArchive::TimerArchive ()
   }
 
   Timer::init (&hdr);
+  dispersion_measure = 0.0;
+  rotation_measure = 0.0;
   valid = false;
 }
 
@@ -453,24 +455,26 @@ void Pulsar::TimerArchive::set_scale (Signal::Scale scale)
 //! Get the centre frequency of the observation
 double Pulsar::TimerArchive::get_dispersion_measure () const
 {
-  return hdr.dm;
+  return dispersion_measure;
 }
 
 //! Set the centre frequency of the observation
 void Pulsar::TimerArchive::set_dispersion_measure (double dm)
 {
+  dispersion_measure = dm;
   hdr.dm = dm;
 }
 
 //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
 double Pulsar::TimerArchive::get_rotation_measure () const
 {
-  return hdr.rotm;
+  return rotation_measure;
 }
 
 //! Set the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
 void Pulsar::TimerArchive::set_rotation_measure (double rm)
 {
+  rotation_measure = rm;
   hdr.rotm = rm;
 }
 

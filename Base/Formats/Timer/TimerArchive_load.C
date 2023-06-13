@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
@@ -59,6 +60,9 @@ void Pulsar::TimerArchive::load (FILE* fptr)
     cerr << "TimerArchive::load FILE*" << endl;
 
   hdr_load (fptr);
+
+  dispersion_measure = hdr.dm;
+  rotation_measure = hdr.rotm;
 
   backend_load (fptr);
 
