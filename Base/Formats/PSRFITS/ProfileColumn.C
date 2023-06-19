@@ -13,6 +13,9 @@
 #include "templates.h"
 #include "myfinite.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 #define REPORT_IO_TIMES 0
 
 #if REPORT_IO_TIMES
@@ -44,7 +47,7 @@ void Pulsar::ProfileColumn::reset ()
 
 Pulsar::ProfileColumn::ProfileColumn ()
 {
-  // cerr << "Pulsar::ProfileColumn ctor" << endl;
+  DEBUG("Pulsar::ProfileColumn ctor this=" << this);
 
   fptr = 0;
   nbin = nchan = nprof = 0;
@@ -144,6 +147,7 @@ void Pulsar::ProfileColumn::create (unsigned start_column)
   {
     typecode = "I";
 
+    DEBUG("Pulsar::ProfileColumn::create offset_colnum=" << start_column);
     offset_colnum = start_column;
     fits_insert_col (fptr, offset_colnum,
 		     fits_str(offset_colname), "E", &status);
@@ -152,7 +156,8 @@ void Pulsar::ProfileColumn::create (unsigned start_column)
     if (status != 0)
       throw FITSError (status, "Pulsar::ProfileColumn::create", 
                        "error inserting " + offset_colname);
-  
+ 
+    DEBUG("Pulsar::ProfileColumn::create scale_colnum=" << start_column); 
     scale_colnum = start_column;
     fits_insert_col (fptr, scale_colnum,
 		     fits_str(scale_colname), "E", &status);
@@ -163,6 +168,7 @@ void Pulsar::ProfileColumn::create (unsigned start_column)
                        "error inserting " + scale_colname);
   }
 
+  DEBUG("Pulsar::ProfileColumn::create data_colnum=" << start_column);
   data_colnum = start_column;
   fits_insert_col (fptr, data_colnum,
 		   fits_str(data_colname), fits_str(typecode), &status);
@@ -369,7 +375,9 @@ void Pulsar::ProfileColumn::unload (int row,
     return;
   }
 
+#ifndef _DEBUG
   if (verbose)
+#endif
     cerr << "Pulsar::ProfileColumn::unload"
          << " data_colnum=" << data_colnum
          << " offset_colnum=" << offset_colnum 
@@ -403,8 +411,6 @@ void Pulsar::ProfileColumn::unload (int row,
     if (verbose)
       cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
 	   << " offset=" << offsets[iprof] << endl;
-      
-    double scale = 1.0;
       
     // Test for dynamic range
     if (fabs(min - max) > (100.0 * FLT_MIN))
@@ -628,8 +634,8 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
 
       if (has_scloffs)
       {
-        float scale = scales[ichan];
-        float offset = offsets[ichan];
+        scale = scales[ichan];
+        offset = offsets[ichan];
 
         if (nprof_by_nchan)
         {
