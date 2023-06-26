@@ -180,7 +180,8 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
       " truncating receiver name " << receiver->get_name() <<
       " to " << RCVR_ID_STRLEN-1 << " characters" << endl;
 
-  strncpy (hdr.rcvr_id, receiver->get_name().c_str(), RCVR_ID_STRLEN);
+  strncpy (hdr.rcvr_id, receiver->get_name().c_str(), RCVR_ID_STRLEN-1);
+  hdr.rcvr_id[RCVR_ID_STRLEN-1] = '\0'; // ensure that rcvr_id is null-terminated
 
   switch (receiver->get_basis()) {
   case Signal::Linear:

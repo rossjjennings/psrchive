@@ -181,7 +181,8 @@ void Pulsar::TimerArchive::set_telescope (const std::string& code)
 		 "code string='%s' length > TELID_STRLEN=%d",
 		 code.c_str(), TELID_STRLEN);
 
-  strncpy (hdr.telid, code.c_str(), TELID_STRLEN);
+  strncpy (hdr.telid, code.c_str(), TELID_STRLEN-1);
+  hdr.telid[TELID_STRLEN-1] = '\0'; // ensure that telid is null-terminated
 }
 
 Signal::Source Pulsar::TimerArchive::get_type () const

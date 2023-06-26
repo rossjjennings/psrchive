@@ -88,54 +88,59 @@ void Pulsar::TimerIntegration::unpack_Pointing ()
   (meaning that extra variable should be 0 for FB archives). */
 void Pulsar::TimerIntegration::load_extra (FILE* fptr, bool big_endian)
 {
-  if (verbose) cerr << "Pulsar::TimerIntegration::load_extra start offset=" 
-                    << ftell(fptr) << endl;
-
   if (verbose)
-    cerr << "Pulsar::TimerIntegration::load_extra npol=" << npol 
-         << " nchan=" << nchan << endl;
+  {
+    cerr << "Pulsar::TimerIntegration::load_extra start offset=" << ftell(fptr) << endl;
+    cerr << "Pulsar::TimerIntegration::load_extra npol=" << npol << " nchan=" << nchan << endl;
+  }
 
-    if ( fread (&(wts[0]),nchan*sizeof(float),1,fptr) != 1 )
-	throw Error (FailedSys, "TimerIntegration::load", "fread wts");
+  if ( fread (&(wts[0]),nchan*sizeof(float),1,fptr) != 1 )
+    throw Error (FailedSys, "TimerIntegration::load", "fread wts");
 
+  if (big_endian)
+    N_FromBigEndian (nchan, &(wts[0]));
+  else
+    N_FromLittleEndian (nchan, &(wts[0]));
+
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    if (fread(&(med[ipol][0]),nchan*sizeof(float),1,fptr)!=1)
+      throw Error (FailedSys,"TimerIntegration::load", "fread medians");
     if (big_endian)
-	N_FromBigEndian (nchan, &(wts[0]));
+      N_FromBigEndian (nchan, &(med[ipol][0]));
     else
-	N_FromLittleEndian (nchan, &(wts[0]));
+      N_FromLittleEndian (nchan, &(med[ipol][0]));
+  }
 
-    unsigned ipol;
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    if(fread(&(bpass[ipol][0]),nchan*sizeof(float),1,fptr)!=1)
+      throw Error (FailedSys,"TimerIntegration::load", "fread bpass");
+    if (big_endian)
+      N_FromBigEndian (nchan, &(bpass[ipol][0]));
+    else
+      N_FromLittleEndian (nchan, &(bpass[ipol][0]));
+  }
 
-    for (ipol=0; ipol < npol; ipol++) {
-	if (fread(&(med[ipol][0]),nchan*sizeof(float),1,fptr)!=1)
-	    throw Error (FailedSys,"TimerIntegration::load", "fread medians");
-	if (big_endian)
-	    N_FromBigEndian (nchan, &(med[ipol][0]));
-	else
-	    N_FromLittleEndian (nchan, &(med[ipol][0]));
+  if (verbose) 
+  {
+    cerr << "Pulsar::TimerIntegration::load_extra end offset=" << ftell(fptr) << endl;
+    cerr << "Pulsar::TimerIntegration::load loading profiles" << endl;
+  }
+
+  // Read the array of profiles
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    for (unsigned ichan=0; ichan < nchan; ichan++) try
+    {
+      TimerProfile_load (fptr, profiles[ipol][ichan], big_endian);
     }
-
-    for (ipol=0; ipol < npol; ipol++) {
-	if(fread(&(bpass[ipol][0]),nchan*sizeof(float),1,fptr)!=1)
-	    throw Error (FailedSys,"TimerIntegration::load", "fread bpass");
-	if (big_endian)
-	    N_FromBigEndian (nchan, &(bpass[ipol][0]));
-	else
-	    N_FromLittleEndian (nchan, &(bpass[ipol][0]));
+    catch (Error& error)
+    {
+      error << "\n\tprofile[ipol=" << ipol << "][ichan=" << ichan << "]";
+      throw error += "Pulsar::TimerIntegration::load";
     }
-
-  if (verbose) cerr << "Pulsar::TimerIntegration::load_extra end offset="
-                    << ftell(fptr) << endl;
-
-    if (verbose) cerr << "Pulsar::TimerIntegration::load loading profiles\n";
-    // Read the array of profiles
-    for (ipol=0; ipol < npol; ipol++)
-	for (unsigned ichan=0; ichan < nchan; ichan++) try {
-	    TimerProfile_load (fptr, profiles[ipol][ichan], big_endian);
-	}
-	catch (Error& error) {
-	    error << "\n\tprofile[ipol=" << ipol << "][ichan=" << ichan << "]";
-	    throw error += "Pulsar::TimerIntegration::load";
-	}
+  }
 } 
 
 void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
@@ -143,13 +148,11 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
   if (verbose)
     cerr << "TimerIntegration::load in the old style." << endl;
 
-  unsigned ipol, ichan;
-
   // No weights available.
-  for (ichan=0; ichan<nchan; ichan++)
+  for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     wts[ichan] = 1.0;
-    for(ipol=0;ipol<npol;ipol++)
+    for(unsigned ipol=0;ipol<npol;ipol++)
     {
       med[ipol][ichan]   = 1.0;
       bpass[ipol][ichan] = 1.0;
@@ -159,9 +162,9 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
   double centrefreq = get_centre_frequency();
   double bw = get_bandwidth();
 
-  for(ipol=0; ipol<npol; ipol++)
+  for(unsigned ipol=0; ipol<npol; ipol++)
   {
-    for(ichan=0; ichan<nchan; ichan++)
+    for(unsigned ichan=0; ichan<nchan; ichan++)
     {
       profiles[ipol][ichan]->set_weight (1.0);
       double cfreq = centrefreq-(bw/2.0)+(ichan+0.5)*bw/nchan;
@@ -219,3 +222,4 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
   if (!Profile::no_amps)
     unpackprofiles (profiles, npol, nchan, nbin, packed, scale, offset);
 }
+

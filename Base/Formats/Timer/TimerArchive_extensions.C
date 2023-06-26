@@ -117,7 +117,8 @@ void Pulsar::TimerArchive::unpack (TapeInfo* tape)
 
 void Pulsar::TimerArchive::pack (const TapeInfo* tape)
 {
-  strncpy (hdr.tape_label, tape->get_tape_label().c_str(), TLABEL_STRLEN);
+  strncpy (hdr.tape_label, tape->get_tape_label().c_str(), TLABEL_STRLEN-1);
+  hdr.tape_label[TLABEL_STRLEN-1] = '\0';  // ensure that tape label is null-terminated
   hdr.file_number = tape->get_file_number();
 }
 
