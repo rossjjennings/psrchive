@@ -5,7 +5,6 @@ dist_data_DATA = fluxcal.cfg
 
 nobase_include_HEADERS = \
 	find_spike_edges.h \
-        model_profile.h \
         morphological_difference.h \
 	Pulsar/Append.h \
 	Pulsar/counter_drift.h \
@@ -45,6 +44,8 @@ nobase_include_HEADERS = \
 	Pulsar/Extract.h \
 	Pulsar/FixFluxCal.h \
 	Pulsar/FixInterpreter.h \
+	Pulsar/FluctSpectStats.h \
+	Pulsar/FluctuationSpectrumStats.h \
 	Pulsar/Flux.h \
 	Pulsar/ForEachProfile.h \
 	Pulsar/FortranSNR.h \
@@ -103,6 +104,7 @@ nobase_include_HEADERS = \
 	Pulsar/RemoveVariableBaseline.h \
 	Pulsar/RiseFall.h \
         Pulsar/RFIMitigation.h \
+	Pulsar/ScalarTemplateMatching.h \
         Pulsar/ScatteredPowerCorrection.h \
 	Pulsar/ScrunchFactor.h \
         Pulsar/SimPolnTiming.h \
@@ -196,6 +198,7 @@ libGeneral_la_SOURCES = \
 	Extract.C \
 	FixFluxCal.C \
 	FixInterpreter.C \
+	FluctuationSpectrumStats.C \
 	ForEachProfile.C \
 	FortranSNR.C \
         Fourier.C \
@@ -255,7 +258,6 @@ libGeneral_la_SOURCES = \
 	Profile_baseline.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
-        Profile_fftconv.C \
         Profile_find_minmax_phase.C \
         Profile_find_peak_edges.C \
         Profile_find_transitions.C \
@@ -269,6 +271,7 @@ libGeneral_la_SOURCES = \
 	RemoveVariableBaseline.C \
 	RiseFall.C \
         RFIMitigation.C \
+	ScalarTemplateMatching.C \
         ScatteredPowerCorrection.C \
 	ScrunchFactor.C \
         Smooth.C \

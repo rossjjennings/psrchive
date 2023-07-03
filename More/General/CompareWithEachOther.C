@@ -30,8 +30,7 @@ void CompareWithEachOther::compute (unsigned iprimary, ndArray<2,double>& result
   temp * ncompare * ncompare;
 
 #ifdef _DEBUG
-  cerr << "CompareWithEachOther::build nsubint=" << nsubint
-       << " nchan=" << nchan << endl;
+  cerr << "CompareWithEachOther::compute ncompare=" << ncompare << endl;
 #endif
 
   rms.resize (ncompare, 0.0);

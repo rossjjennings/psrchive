@@ -115,23 +115,26 @@ bool Pulsar::Mower::build_mask (Profile* profile)
 #endif
     cerr << "Pulsar::Mower::build_mask computing zap mask" << endl;
 
-  float* amps = difference->get_amps();
-
   unsigned total_mowed = 0;
+
+#if _DEBUG
+  float* amps = difference->get_amps();
   double sumsq=0;
+#endif
 
   for (unsigned ibin=0; ibin<nbin; ibin++)
   {
     if ( (*mowed)[ibin] )
       total_mowed ++;
+#if _DEBUG
     else
       sumsq = sqr(amps[ibin]);
+#endif
   }
 
 #if _DEBUG
   sumsq /= (nbin - total_mowed);
-  cerr << "total mowed=" << total_mowed << endl;
-  cerr << "rms=" << sqrt(sumsq) << " mad=" << madm << endl;
+  cerr << "total mowed=" << total_mowed << " rms=" << sqrt(sumsq) << endl;
 #endif
 
   if (!total_mowed)
@@ -187,10 +190,6 @@ void Pulsar::Mower::transform (Integration* subint)
       Reference::To<Profile> profile = subint->get_Profile (ipol, ichan);
       Reference::To<Profile> smoothed = new Profile( *profile );
       median( smoothed );
-
-#ifdef _DEBUG
-      cerr << ipol << " " << ichan << " rms=" << rms << endl;
-#endif
 
       float* amps = profile->get_amps();
       float* smamps = smoothed->get_amps();

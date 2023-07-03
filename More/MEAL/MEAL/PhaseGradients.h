@@ -91,8 +91,7 @@ namespace MEAL {
   protected:
 
     //! Calculate the Jones matrix and its gradient
-    void calculate (typename T::Result& result,
-		    std::vector<typename T::Result>* gradient);
+    void calculate (typename T::Result& result, std::vector<typename T::Result>* gradient);
    
     //! Parameter policy
     Parameters parameters;
@@ -269,12 +268,4 @@ void MEAL::PhaseGradients<T>::calculate (typename T::Result& result,
   
 }
 
-
-
-
-
-
-
-
-
-#endif
+#endif // __MEAL_PhaseGradients_H

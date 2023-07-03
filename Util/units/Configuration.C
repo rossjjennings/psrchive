@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG 1
+
 #include "Configuration.h"
 #include "stringtok.h"
 #include "Error.h"
@@ -81,9 +83,11 @@ Configuration::Entry* Configuration::find (const string& key) const
 {
   find_count ++;
 
+  DEBUG("Configuration::find key=" << key);
+
   const_cast<Configuration*>(this)->load ();
 
-  DEBUG("Configuration::find size=" << entries.size() << " key=" << key);
+  DEBUG("Configuration::find number of entries: " << entries.size());
 
   for (unsigned i=0; i<entries.size(); i++)
   {
@@ -94,7 +98,7 @@ Configuration::Entry* Configuration::find (const string& key) const
     }
   }
 
-  DEBUG("Configuration::find " << key << " NOT FOUND");
+  DEBUG("Configuration::find " << key << " not found in list of existing entries");
 
   return 0;
 }

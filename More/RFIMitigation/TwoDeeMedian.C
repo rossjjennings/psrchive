@@ -13,6 +13,8 @@
 #include <numeric>
 #include <utility>
 
+using namespace std;
+
 Pulsar::TwoDeeMedian::TwoDeeMedian ()
 {
   med_nchan = 5;

@@ -119,7 +119,11 @@ void resize (T* &ptr, unsigned size)
 
 void CommandLine::Menu::parse (int argc, char* const * argv)
 {
-  string shortopts;
+  /*
+   * If the first character optstring is a colon (':'), then getopt() 
+   * returns ':' instead of '?' to indicate a missing option argument.
+   */
+  string shortopts = ":";
   struct option* longopts = 0;
   unsigned nlong = 0;
 
@@ -167,7 +171,7 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
 
   while ((code = getopt_long_only(argc, argv, optstring, longopts, 0)) != -1) 
   {
-    if (code == '?')
+    if (code == '?' || code == ':')
       code = process_error (code, argv);
 
     for (unsigned i=0; i<item.size(); i++)
@@ -187,10 +191,16 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   }
 }
 
-int CommandLine::Menu::process_error (int, char* const *argv)
+int CommandLine::Menu::process_error (int code, char* const *argv)
 {
-  throw Error (InvalidParam, "CommandLine::Menu::parse",
-	       "invalid option '%s'", argv[optind-1]);
+  if (code == '?')
+    throw Error (InvalidParam, "CommandLine::Menu::parse",
+	         "invalid option '%s'", argv[optind-1]);
+  if (code == ':')
+    throw Error (InvalidParam, "CommandLine::Menu::parse",
+		 "option '%s' missing required argument", argv[optind-1]);
+
+  return code;
 }
 
 //! Find the named Argument

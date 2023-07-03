@@ -11,6 +11,8 @@
 
 #include <algorithm>
 
+using namespace std;
+
 void Pulsar::RobustMower::compute (PhaseWeight* mask,
 				   const Profile* difference)
 {

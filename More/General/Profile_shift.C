@@ -7,11 +7,11 @@
 
 #include "Pulsar/Profile.h"
 #include "Pulsar/PhaseGradShift.h"
+#include "lazy.h"
 
 using namespace std;
 
-Reference::To<Pulsar::ProfileStandardShift> 
-shift_strategy = new Pulsar::PhaseGradShift;
+LAZY_STATIC(Pulsar::PhaseGradShift, shift_strategy, );
 
 /*
   \param std the profile with respect to which the shift will be estimated
@@ -19,8 +19,8 @@ shift_strategy = new Pulsar::PhaseGradShift;
 */
 Estimate<double> Pulsar::Profile::shift (const Profile& std) const
 {
-  shift_strategy->set_standard (&std);
-  shift_strategy->set_observation (this);
-  return shift_strategy->get_shift ();
+  get_shift_strategy().set_standard (&std);
+  get_shift_strategy().set_observation (this);
+  return get_shift_strategy().get_shift ();
 }
 

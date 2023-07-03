@@ -33,9 +33,10 @@ Pulsar::LastHarmonic* Pulsar::LastHarmonic::clone () const
   return new LastHarmonic (*this);
 }
 
-void Pulsar::LastHarmonic::set_Profile (const Profile* p)
+/* The profile passed to this object should be the fluctuation power spectral density */
+void Pulsar::LastHarmonic::set_Profile (const Profile* psd)
 {
-  profile = p;
+  profile = fluctuation_power_spectral_density = psd;
   built = false;
 }
 
@@ -106,7 +107,7 @@ const Pulsar::PhaseWeight* Pulsar::LastHarmonic::get_baseline () const
 
 void Pulsar::LastHarmonic::build ()
 {
-  if (!profile)
+  if (!fluctuation_power_spectral_density)
     throw Error (InvalidState, "Pulsar::LastHarmonic::build",
 		 "Profile not set");
 
@@ -114,7 +115,7 @@ void Pulsar::LastHarmonic::build ()
     throw Error (InvalidState, "Pulsar::LastHarmonic::build",
 		 "Baseline estimator not set");
 
-  Reference::To<PhaseWeight> baseline = baseline_estimator->baseline (profile);
+  Reference::To<PhaseWeight> baseline = baseline_estimator->baseline (fluctuation_power_spectral_density);
 
   Estimate<double> var = baseline->get_variance ();
   Estimate<double> rms = sqrt(var);
@@ -126,7 +127,7 @@ void Pulsar::LastHarmonic::build ()
        << " rms=" << rms << endl;
 #endif
 
-  significant.find (profile, rms.get_value());
+  significant.find (fluctuation_power_spectral_density, rms.get_value());
 
   // skip the DC term
   bin_rise = 1;

@@ -13,6 +13,7 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Config.h"
 
+#include <cstring>
 using namespace std;
 
 string find_and_replace (string text, string replace, string with)
@@ -39,23 +40,43 @@ string find_and_replace (string text, string replace, string with)
 
 int main (int argc, char** argv)
 {
+  bool verbose = argc > 1 && !strcmp(argv[1], "-v");
+
+  if (verbose)
+    cerr << "psrchive_config: Config::ensure_linkage" << endl;
+
   Pulsar::Config::ensure_linkage ();
+
+  if (verbose)
+    cerr << "psrchive_config: Config::get_configuration" << endl;
 
   Pulsar::Config* configuration = Pulsar::Config::get_configuration();
 
+  if (verbose)
+    cerr << "psrchive_config: Config::get_find_count" << endl;
+
   if (configuration->get_find_count ())
   {
-    cerr << "psrchive_config: lazy construction model failure \n\t"
-        "Global configuration variables have been constructed \n\t"
-	"before any operations have taken place. \n" << endl;
+    cerr << "\n"
+      "psrchive_config: lazy construction model failure \n"
+      " \n"
+      "Global configuration variables have been constructed \n"
+      "before any operations have taken place. \n"
+      " \n"
+      "To debug, see " PSRCHIVE_HTTP "/manuals/config/debug.shtml \n"
+         << endl;
+
     return -1;
   }
+
+  if (verbose)
+    cerr << "psrchive_config: Config::get_interface" << endl;
 
   Pulsar::Config::Interface* interface = Pulsar::Config::get_interface();
 
   // find the maximum string length of the name and description
-  for (unsigned i=0; i<interface->get_nvalue(); i++) {
-
+  for (unsigned i=0; i<interface->get_nvalue(); i++)
+  {
     string name = interface->get_name (i);
 
     TextInterface::Value* value = interface->find (name);
@@ -79,7 +100,6 @@ int main (int argc, char** argv)
       "#\n" <<
       commented << value->get_name() << " = " << value->get_value() << "\n"
 	 << endl;
-
   }
 
   return 0;

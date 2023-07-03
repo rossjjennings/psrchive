@@ -19,20 +19,16 @@ namespace Pulsar {
   class PolnProfile;
 
   //! Return the forward Fourier transform of the input Profile
-  Profile* fourier_transform (const Profile*,
-			      FTransform::Plan* = 0);
+  Profile* fourier_transform (const Profile*, FTransform::Plan* = 0);
 
   //! Return the forward Fourier transform of the input PolnProfile
-  PolnProfile* fourier_transform (const PolnProfile*,
-				  FTransform::Plan* = 0);
+  PolnProfile* fourier_transform (const PolnProfile*, FTransform::Plan* = 0);
 
   //! Return the forward Fourier transform of the input Profile
-  Profile* complex_fourier_transform (const Profile*,
-				      FTransform::Plan* = 0);
+  Profile* complex_fourier_transform (const Profile*, FTransform::Plan* = 0);
 
   //! Return the forward Fourier transform of the input PolnProfile
-  PolnProfile* complex_fourier_transform (const PolnProfile*,
-					  FTransform::Plan* = 0);
+  PolnProfile* complex_fourier_transform (const PolnProfile*, FTransform::Plan* = 0);
 
   //! Square-law detect the input complex-valued Profile
   void detect (Profile* input);
@@ -46,6 +42,11 @@ namespace Pulsar {
   //! Compute the phase of the input complex-valued PolnProfile
   void phase (PolnProfile* input);
 
+  //! Divide the output of fourier_transform into its real and imaginary components
+  void fourier_to_re_im (const PolnProfile* fourier, PolnProfile* re, PolnProfile* im);
+
+  //! Divide the output of fourier_transform into its real and imaginary components
+  void fourier_to_re_im (const Profile* fourier, Profile* re, Profile* im);
 }
 
 #endif

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2002 - 2016 by Willem van Straten
+ *   Copyright (C) 2002 - 2023 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -226,10 +226,6 @@ namespace Pulsar {
 
     //! integrate neighbouring sections of the profile
     void fold (unsigned nfold);
-
-    //! interface to model_profile used by Profile::shift
-    void fftconv (const Profile& std, double& shift, float& eshift,
-                  float& snrfft, float& esnrfft) const;
 
     // //////////////////////////////////////////////////////////////////
     //

@@ -154,3 +154,29 @@ void Pulsar::phase (Profile* data) try
 catch (Error& error) {
   throw error += "Pulsar::phase (Profile)";
 }
+
+void Pulsar::fourier_to_re_im (const PolnProfile* fourier, PolnProfile* re, PolnProfile* im)
+{
+  unsigned npol = 4;
+  for (unsigned ipol=0; ipol < npol; ipol++)
+    fourier_to_re_im (fourier->get_Profile(ipol), re->get_Profile(ipol), im->get_Profile(ipol));
+}
+
+void Pulsar::fourier_to_re_im (const Profile* fourier, Profile* re, Profile* im)
+{
+  unsigned nbin = fourier -> get_nbin();
+  unsigned nbin2 = nbin/2;
+
+  re->resize(nbin2);
+  im->resize(nbin2);
+
+  const float* C_ptr = fourier->get_amps();
+  float* re_ptr = re->get_amps();
+  float* im_ptr = im->get_amps();
+
+  for (unsigned ibin=0; ibin < nbin2; ibin++)
+  {
+    re_ptr[ibin] = C_ptr[ibin*2];
+    im_ptr[ibin] = C_ptr[ibin*2+1];
+  }
+}

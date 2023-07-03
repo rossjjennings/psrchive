@@ -11,8 +11,6 @@
 #ifndef __Pulsar_Config_h
 #define __Pulsar_Config_h
 
-// #define _DEBUG
-
 #include "Configuration.h"
 #include "TextInterfaceInterpreter.h"
 #include "CommandParser.h"
@@ -281,8 +279,6 @@ Pulsar::Option<T>::Option (Configuration::Parameter<T>& parameter,
 
   DEBUG("Pulsar::Option<T> wrap parser return");
 }
-
-
 
 #endif
 

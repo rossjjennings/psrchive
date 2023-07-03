@@ -94,7 +94,7 @@ FourierDomainFit::Interface::Interface (FourierDomainFit* instance)
 
   add( &FourierDomainFit::get_error_method,
        &FourierDomainFit::set_error_method,
-       "err", "Unceratinty calculation method");
+       "err", "Uncertainty calculation method");
 }
 
 TextInterface::Parser* FourierDomainFit::get_interface ()

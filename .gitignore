@@ -11,6 +11,7 @@ Makefile
 linux_64
 config/test-driver
 .dirstamp
+.vscode
 
 Base/Applications/psrconv
 Base/Applications/psredit

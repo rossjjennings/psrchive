@@ -271,12 +271,6 @@ void psr4th2txt::process (Pulsar::Archive* archive)
   vector<unsigned> ipols = indeces (npol, pol1_indeces);
   vector<unsigned> jpols = indeces (npol, pol2_indeces);
 
-#if _DEBUG
-  cerr << "subints=" << subints.size() << endl;
-  cerr << "chans=" << chans.size() << endl;
-  cerr << "bins=" << bins.size() << endl;
-#endif
-
   bool ibin_other = bin1_indeces == "other";
   bool jbin_other = bin2_indeces == "other";
   

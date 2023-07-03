@@ -14,6 +14,8 @@
 #include "Pulsar/Config.h"
 #include "Pulsar/Profile.h"
 
+#include "debug.h"
+
 using namespace std;
 
 // defined in Profile.C
@@ -76,6 +78,7 @@ Pulsar::Smooth* Pulsar::BaselineWindow::get_smooth () const
 {
   if (!smooth)
   {
+    DEBUG("Pulsar::BaselineWindow::get_smooth creating default smoothing window");
     BaselineWindow* non_const = const_cast<BaselineWindow*>(this);
     non_const->smooth = Smooth::factory (default_smooth);
   }
@@ -106,7 +109,7 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
 
 #ifdef _DEBUG
   cerr << "Pulsar::BaselineWindow::calculate centre=" << centre
-       << " bins=" << bins << " ibin1=" << ibin1 << " ibin2=" << ibin2 << endl;
+       << " nbin=" << nbin << " ibin1=" << found_bins.first << " ibin2=" << found_bins.second << endl;
 #endif
 
   weight->resize( nbin );

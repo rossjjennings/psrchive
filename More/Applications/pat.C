@@ -157,7 +157,6 @@ void usage ()
     "  -T               Time scrunch before fitting \n"
     "  -j job1[,jobN]   Preprocessing job[s] \n"
     "  -J jobs          Multiple preprocessing jobs in 'jobs' file \n"
-    "  -d               Discard profiles with zero weight\n"
     "  -x               Disable default preprocessing \n"
     "\n"
     "Fitting options:\n"
@@ -218,7 +217,6 @@ int main (int argc, char** argv) try
   arrival->set_shift_estimator (new PhaseGradShift);
   
   bool verbose = false;
-  bool std_given = false;
   bool std_multiple = false;
   bool gaussian = false;
   bool phase_only = false;
@@ -230,7 +228,6 @@ int main (int argc, char** argv) try
 
   vector<string> jobs;
 
-  bool skip_bad = false;
   bool phase_info = false;
   bool tempo2_output = false;
   bool output_profile_residuals = false;
@@ -278,7 +275,6 @@ int main (int argc, char** argv) try
     {
 
     case 'a':
-      std_given = true;
       std_multiple = true;
       stdFile = optarg;
 
@@ -321,10 +317,6 @@ int main (int argc, char** argv) try
     case 'D':
       sinc = new Pulsar::SmoothSinc;
       sinc -> set_bins (8);
-      break;
-
-    case 'd':
-      skip_bad = true;
       break;
 
     case 'e':
@@ -420,7 +412,6 @@ int main (int argc, char** argv) try
     }
 
     case 's':
-      std_given = true;
       stdFile = optarg;
       break;
 

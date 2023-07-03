@@ -24,8 +24,6 @@
 #include "Pulsar/Instrument.h"
 #include "Pulsar/VariableBackend.h"
 
-#include "model_profile.h"
-
 #include "MEAL/Polar.h"
 #include "BoxMuller.h"
 #include "random.h"
@@ -486,7 +484,6 @@ void Pulsar::SimPolnTiming::extrapolate_benefit (unsigned steps)
 }
 
 const static double rdeg = 180/M_PI;
-static long idum = -1;
 
 Estimate<double> variance (const vector<float>& vals, const string& label,
 			   Estimate<double>& mean);
@@ -763,7 +760,7 @@ Pulsar::SimPolnTiming::Result Pulsar::SimPolnTiming::one_step ()
 
     // calculate shift using old method
     if (fit.choose_maximum_harmonic)
-      Pulsar::max_harmonic = fit.get_maximum_harmonic();
+      stm.set_maximum_harmonic( fit.get_maximum_harmonic() );
 
     stm.set_observation (profile->get_Profile(0));
 

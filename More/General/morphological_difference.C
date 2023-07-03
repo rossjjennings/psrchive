@@ -37,8 +37,7 @@ Pulsar::morphological_difference (const Profile* p1, const Profile* p2,
   // First it is essential to align the profiles in phase, so that our
   // subtraction occurs between the equivalent bins in both profiles.
   
-  float ephase;
-  double phase;
+  double phase = 0.0;
   
   // First try the FFT based shift routine and if it fails, revert
   // to an incoherent cross correlation, accurate only to the
@@ -51,7 +50,6 @@ Pulsar::morphological_difference (const Profile* p1, const Profile* p2,
     shift.set_observation (temp1);
     Estimate<double> Ephase = shift.get_shift();
     phase = Ephase.val;
-    ephase = sqrt(Ephase.var);
   }
   catch (Error& error)
   {

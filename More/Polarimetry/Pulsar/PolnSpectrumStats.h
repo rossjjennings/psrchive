@@ -11,54 +11,19 @@
 #ifndef __Pulsar_PolnSpectrumStats_h
 #define __Pulsar_PolnSpectrumStats_h
 
-#include "Pulsar/Algorithm.h"
-#include "Pulsar/PhaseWeight.h"
-
-#include "FTransformAgent.h"
-#include "Stokes.h"
+#include "Pulsar/FluctSpectStats.h"
+#include "Pulsar/PolnProfileStats.h"
+#include "Pulsar/PolnProfile.h"
 
 namespace Pulsar {
 
-  class PolnProfile;
-  class PolnProfileStats;
-
-  //! Computes polarimetric pulse profile statistics
-  class PolnSpectrumStats : public Algorithm
+  //! Computes statistics of full-polarization fluctuation spectra
+  class PolnSpectrumStats : public FluctSpectStats<PolnProfile,PolnProfileStats>
   {   
   public:
 
-    //! Default constructor
-    PolnSpectrumStats (const PolnProfile* profile = 0);
-
-    //! Destructor
-    ~PolnSpectrumStats();
-
-    //! Set the PolnProfile from which statistics will be derived
-    void set_profile (const PolnProfile*);
-
-    //! Set the PolnProfile that defines the last harmonic and baseline
-    void select_profile (const PolnProfile*);
-
-    //! Set the on-pulse and baseline regions
-    void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
-
-    //! Set the on-pulse and baseline regions
-    void get_regions (PhaseWeight& pulse, PhaseWeight& base) const;
-
-    //! Return the last harmonic chosen in the on-pulse signal
-    unsigned get_last_harmonic () const { return last_harmonic; }
-
-    //! Get the fourier transform of the last set profile
-    const PolnProfile* get_fourier () const;
-
     //! Get the Stokes parameters for the specified harmonic
     Stokes< std::complex< Estimate<double> > > get_stokes (unsigned) const;
-
-    //! Get the real component statistics
-    const PolnProfileStats* get_real () const;
-
-    //! Get the imaginary component statistics
-    const PolnProfileStats*  get_imag () const;
 
     //! Returns the total determinant of the on-pulse phase bins
     Estimate<double> get_total_determinant () const;
@@ -66,43 +31,16 @@ namespace Pulsar {
     //! Returns the variance of the baseline for the specified polarization
     std::complex< Estimate<double> > get_baseline_variance (unsigned) const;
 
-    //! Set the fourier transform plan
-    void set_plan (FTransform::Plan*);
-
   protected:
 
-    //! The PolnProfile from which statistics will be derived
-    Reference::To<const PolnProfile> profile;
+    //! Ensure that the PolnProfile is in the Stokes state
+    void preprocess (PolnProfile*);
 
-    //! The Fourier transform of the profile
-    Reference::To<PolnProfile> fourier;
-
-    //! Computes the statistics of the real component
-    Reference::To<PolnProfileStats> real;
-
-    //! Computes the statistics of the imaginary component
-    Reference::To<PolnProfileStats> imag;
-
-    //! When, true the onpulse and baseline estimators have been selected
-    bool regions_set;
-
-    PhaseWeight onpulse;
-    PhaseWeight baseline;
-
-    unsigned last_harmonic;
-
-    //! Computes the phase bin masks
-    void build ();
-
-    //! The fourier transform plan (useful in multi-threaded applications)
-    FTransform::Plan* plan;
+    //! Return the total intensity profile
+    const Profile* reference (const PolnProfile* profile) { return profile->get_Profile(0); }
 
   };
 
 }
 
-
 #endif
-
-
-

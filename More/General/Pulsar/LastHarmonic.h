@@ -18,10 +18,15 @@ namespace Pulsar {
 
   class BaselineEstimator;
 
-  //! Finds the last significant harmonic in a power spectral density
+  //! Finds the last significant harmonic in a flucuation power spectral density
   /*!
-    The last significant harmonic is defined by number of
-    consecutive points above threshold.
+    The last significant harmonic is defined by number of consecutive points above threshold.
+
+    This class violates strong behavioural subtyping (aka Liskov Substitution Principle) by 
+    inheriting RiseFall, which inherits OnPulseEstimator, which inherits ProfileWeightFunction. 
+    It does so only to re-use the machinery of these classes.  The Profile object passed to
+    this object is also not a phase-resolved average; it is the squared modulus of the Fouier
+    transform of what we usually call a Profile.
   */
 
   class LastHarmonic : public RiseFall
@@ -32,8 +37,10 @@ namespace Pulsar {
     //! Default constructor
     LastHarmonic ();
 
-    //! Set the profile from which the last harmonic will be computed
-    void set_Profile (const Profile*);
+    //! Set the flucuation power spectral density from which the last harmonic will be computed
+    /*! The profile passed to this function should be the flucuation power spectral density;
+        i.e. the squared modulus of the Fourier transform of an average pulse profile */
+    void set_Profile (const Profile* psd);
 
     //! Set the threshold
     void set_threshold (float threshold);
@@ -91,6 +98,7 @@ namespace Pulsar {
     //! The algorithm used to find the last signficant harmonic
     LastSignificant significant;
 
+    Reference::To<const Profile> fluctuation_power_spectral_density;
   };
 
 }

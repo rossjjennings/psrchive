@@ -19,6 +19,8 @@
 #include "Pulsar/Flux.h"
 #include "Pulsar/StandardFlux.h"
 
+#include "Pulsar/Pulsar.h"
+
 #include <strings.h>
 
 using namespace std;
@@ -162,15 +164,14 @@ void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
   {
     string reason;
     if (!observation->standard_match (standard, reason))
-      cerr << "Pulsar::ArrivalTime::get_toas WARNING " << reason << endl;
+      warning << "Pulsar::ArrivalTime::get_toas WARNING " << reason.c_str() << endl;
 
     double cf1 = observation->get_centre_frequency();
     double cf2 = standard->get_centre_frequency();
     double dfreq = fabs (cf2 - cf1);
 
     if (dfreq > 0.2 * cf1)
-      cerr << "Pulsar::ArrivalTime::get_toas WARNING centre frequency"
-	" standard= " << cf2 << " != observation=" << cf1 << endl;
+      cerr << "Pulsar::ArrivalTime::get_toas WARNING centre frequency standard= " << cf2 << " != observation=" << cf1 << endl;
   }
 
   const unsigned nsub = observation->get_nsubint();
@@ -236,20 +237,20 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
 
       if (residual)
       {
-	Integration* rsubint = residual->get_Integration (isub);
-	rsubint->expert()->rotate_phase( shift.get_value() );
+        Integration* rsubint = residual->get_Integration (isub);
+        rsubint->expert()->rotate_phase( shift.get_value() );
 
-	const Integration* std = standard->get_Integration (0);
-	foreach (rsubint, std, &Profile::diff);
+        const Integration* std = standard->get_Integration (0);
+        foreach (rsubint, std, &Profile::diff);
       }
     }
     catch (Error& error)
     {
       if (Archive::verbose > 2)
-	cerr << "Pulsar::Integration::toas error" << error << endl;
+        cerr << "Pulsar::Integration::toas error" << error << endl;
 
       else if (Archive::verbose)
-	cerr << error.get_message() << endl;
+        cerr << error.get_message() << endl;
 
       continue;
     }

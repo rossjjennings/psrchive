@@ -61,8 +61,7 @@ void Pulsar::MatrixTemplateMatching::set_observation (const Archive* archive)
 }
 
 //! get the arrival times for the specified sub-integration
-void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub,
-					       std::vector<Tempo::toa>& toas)
+void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub, std::vector<Tempo::toa>& toas)
 {
   engine->reset ();
   engine->add_pulsar (observation, isub);

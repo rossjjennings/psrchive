@@ -284,8 +284,7 @@ void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
     unsigned index = obs->backend->get_path_index();
     measurements.set_transformation_index (index);
     
-    DEBUG ("FluxCalManager::submit ichan=" << ichan);
-    
+    DEBUG ("FluxCalManager::submit index=" << index);
     composite->get_equation()->add_data (measurements);
   }
   catch (Error& error)

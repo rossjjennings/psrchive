@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/NormalizeStokes.h"
 #include "MEAL/ScalarMath.h"
 
