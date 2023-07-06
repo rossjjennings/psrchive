@@ -655,8 +655,13 @@ float MEAL::LevenbergMarquardt<Grad>::iter
 // /////////////////////////////////////////////////////////////////////////
 
 /*! After a call to init or iter, best_alpha contains the last
-   curvature matrix computed.  A call is made to solve_delta with
-   lamda=0; member "alpha" will then contain the covariance matrix.
+   curvature matrix computed.  A call is made to solve_delta with lamda=0; 
+   member "alpha" will then be equal to 2 times the covariance matrix.
+
+   2023-July-6 Willem van Straten
+   Equation 15.5.15 of Numerical Recipes is off by a factor of 2.
+   The covariance matrix is equal to the inverse of the Hessian matrix,
+   and alpha is defined to be 1/2 of the Hessian in equation 15.5.8.
 
    \retval covar the covariance matrix
    \retval curve the curvature matrix
@@ -696,7 +701,7 @@ void MEAL::LevenbergMarquardt<Grad>::result
       for (unsigned jdim=0; jdim < model.get_nparam(); jdim++)
 	if (model.get_infit(jdim))
         {
-	  covar[idim][jdim] = alpha [iindim][jindim];
+	  covar[idim][jdim] = 0.5 * alpha [iindim][jindim];
 	  jindim ++;
 	}
 	else
