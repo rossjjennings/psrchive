@@ -201,18 +201,17 @@ int main (int argc, char** argv) try {
     iter ++;
   }
 
-  double free_parms = data_x.size() + scalar->get_nparam();
+  double dof = data_x.size() - scalar->get_nparam();
 
-  cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
-       << chisq / free_parms << endl;
+  cerr << "Chi-squared = " << chisq << " / " << dof << " = "
+       << chisq / dof << endl;
 
   std::vector<std::vector<double> > covariance;
   fit.result (*scalar, covariance);
 
-  for (unsigned iparm=0; iparm < scalar->get_nparam(); iparm++) {
-    // Bi Qing has uncovered an error in our estimation of parameter error
-    // most likely due to an error in Numerical Recipes
-    scalar->set_variance (iparm, 2.0*covariance[iparm][iparm]);
+  for (unsigned iparm=0; iparm < scalar->get_nparam(); iparm++)
+  {
+    scalar->set_variance (iparm, covariance[iparm][iparm]);
   }
 
 #ifdef HAVE_PGPLOT
