@@ -6,7 +6,6 @@ include_HEADERS = \
 	Barycentre.h \
 	BatchQueue.h \
         Brent.h \
-	BoxMuller.h \
         Cartesian.h \
 	CommandLine.h \
         CommandParser.h \
