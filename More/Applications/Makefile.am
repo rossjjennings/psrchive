@@ -16,7 +16,7 @@ bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 
 pam_SOURCES = pam.C
 
-pat_SOURCES = pat.C
+pat_SOURCES = pat.C test_arrival_time_uncertainty.C
 pat_LDADD = $(LDPLOT) @PTHREAD_LIBS@
 
 paz_SOURCES = paz.C zap_periodic_spikes.C

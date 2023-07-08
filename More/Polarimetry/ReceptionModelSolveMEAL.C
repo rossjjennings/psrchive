@@ -41,8 +41,7 @@ float lmcoff (// input
 	      vector<double>& beta)
 {
   if (Calibration::ReceptionModel::verbose)
-    cerr << "Calibration::ReceptionModel::lmcoff input index=" 
-	 << obs.get_input_index() << endl;
+    cerr << "Calibration::ReceptionModel::lmcoff input index=" << obs.get_input_index() << endl;
 
   /*
     Calibration::CoherencyMeasurement has an index, such as the pulse
@@ -176,13 +175,12 @@ void Calibration::SolveMEAL::fit ()
     if (convergence_chisq)
     {
       if (debug)
-	cerr << "chisq=" << chisq << " convergence="
-	     << convergence_chisq << endl;
+      	cerr << "chisq=" << chisq << " convergence=" << convergence_chisq << endl;
 
       if (chisq < convergence_chisq)
-	break;
+	      break;
       else
-	continue;
+	      continue;
     }
 
     float delta_chisq = chisq - best_chisq;
@@ -190,8 +188,7 @@ void Calibration::SolveMEAL::fit ()
 
     if (Calibration::ReceptionModel::verbose || debug)
       cerr << "chisq=" << chisq << " delta_chisq=" << delta_chisq
-           << " reduced_chisq=" << reduced_chisq
-	   << " lamda=" << fit.lamda << endl;
+           << " reduced_chisq=" << reduced_chisq << " lamda=" << fit.lamda << endl;
 
     if (chisq < best_chisq)
       best_chisq = chisq;
@@ -199,7 +196,7 @@ void Calibration::SolveMEAL::fit ()
     bool reiterate = false;
     for (unsigned i=0; i < convergence_condition.size(); i++)
       if ( !convergence_condition[i](equation) )
-	reiterate = true;
+	      reiterate = true;
 
     if (reiterate)
       continue;
@@ -207,14 +204,14 @@ void Calibration::SolveMEAL::fit ()
     if (fit.lamda == 0.0 && fabs(delta_chisq) < 1.0 && delta_chisq <= 0)
     {
       if (debug)
-	cerr << "fit good" << endl;
+	      cerr << "fit good" << endl;
       break;
     }
 
     if (fit.lamda == 0.0 && delta_chisq > 0)
     {
       if (debug)
-	cerr << "maybe not so good" << endl;
+	      cerr << "maybe not so good" << endl;
       fit.lamda = last_lamda;
 
       // count when Newton's method seems to be doing very poorly
@@ -224,37 +221,35 @@ void Calibration::SolveMEAL::fit ()
     if (delta_chisq <= 0 && fabs(delta_chisq) < 10)
     {
       if (debug)
-	cerr << "fit close" << endl;
+	      cerr << "fit close" << endl;
 
       if (stick_to_steepest_decent >= 5)
       {
-	if (iterations >= maximum_iterations/2 &&
-	    fabs(delta_chisq)/best_chisq < 1e-3)
-	{
-	  if (debug)
-	    cerr << "small change in late stages.  patience="
-		 << patience << endl;
+	      if (iterations >= maximum_iterations/2 && fabs(delta_chisq)/best_chisq < 1e-3)
+        {
+          if (debug)
+            cerr << "small change in late stages.  patience=" << patience << endl;
 
-	  patience --;
+          patience --;
 
-	  if (!patience)
-	  {
-	    if (debug)
-	      cerr << "no more patience" << endl;
-	    break;
-	  }
-	}
+          if (!patience)
+          {
+            if (debug)
+              cerr << "no more patience" << endl;
+            break;
+          }
+        }
 
-	if (debug)
-	  cerr << "remain patient!" << endl;
+        if (debug)
+          cerr << "remain patient!" << endl;
       }
       else
       {
-	if (debug)
-	  cerr << "go for it!" << endl;
-	if (fit.lamda != 0)
-	  last_lamda = fit.lamda;
-	fit.lamda = 0.0;
+        if (debug)
+          cerr << "go for it!" << endl;
+        if (fit.lamda != 0)
+          last_lamda = fit.lamda;
+        fit.lamda = 0.0;
       }
     }
   }

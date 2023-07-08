@@ -138,8 +138,7 @@ void valvar( const Stokes< complex< Estimate<double> > >& data,
   }
 }
 
-void PolnProfileFit::set_regions (const PhaseWeight& on,
-					  const PhaseWeight& off)
+void PolnProfileFit::set_regions (const PhaseWeight& on, const PhaseWeight& off)
 {
   get_spectra()->get_stats()->set_regions ( on, off );
   regions_set = true;

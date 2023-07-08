@@ -23,6 +23,8 @@ static const unsigned ncoef = 3;
 
 double normalized_difference[ncoef] = { 0,0,0 };
 
+static bool verbose = false;
+
 void runtest () try
 {
   double max_coeff = 3.0;
@@ -35,7 +37,9 @@ void runtest () try
   {
     double value = 0;
     random_value (value, max_coeff);
-    cerr << "c_" << i << "=" << value << endl;
+
+    if (verbose)
+      cerr << "c_" << i << "=" << value << endl;
     poly.set_param ( i, value );
     input_values[i] = value;
   }
@@ -71,7 +75,9 @@ void runtest () try
   fit.verbose = MEAL::Function::verbose;
   
   float chisq = fit.init (data_x, data_y, poly);
-  cerr << "initial chisq = " << chisq << endl;
+
+  if (verbose)
+    cerr << "initial chisq = " << chisq << endl;
   
   unsigned iter = 1;
   unsigned not_improving = 0;
@@ -79,9 +85,11 @@ void runtest () try
 
   while (not_improving < 25)
   {
-    cerr << "iteration " << iter << endl;
+    if (verbose)
+      cerr << "iteration " << iter << endl;
     float nchisq = fit.iter (data_x, data_y, poly);
-    cerr << "     chisq = " << nchisq << endl;
+    if (verbose)
+      cerr << "     chisq = " << nchisq << endl;
 
     if (nchisq < chisq) {
       float diffchisq = chisq - nchisq;
@@ -89,7 +97,8 @@ void runtest () try
       not_improving = 0;
       if (diffchisq/chisq < threshold && diffchisq > 0)
       {
-      	cerr << "no big diff in chisq = " << diffchisq << endl;
+      	if (verbose)
+          cerr << "no big diff in chisq = " << diffchisq << endl;
 	      break;
       }
     }
@@ -101,7 +110,8 @@ void runtest () try
 
   double free_parms = data_x.size() - poly.get_nparam();
 
-  cerr << "Chi-squared = " << chisq << " / " << free_parms << " = " << chisq / free_parms << endl;
+  if (verbose)
+    cerr << "Chi-squared = " << chisq << " / " << free_parms << " = " << chisq / free_parms << endl;
 
   std::vector<std::vector<double> > covariance;
   fit.result (poly, covariance);
@@ -118,7 +128,8 @@ void runtest () try
 
   string model_text;
   poly.print (model_text);
-  cout << "ANSWER:\n" << model_text << endl;
+  if (verbose)
+    cout << "ANSWER:\n" << model_text << endl;
 }
 catch (const Error& error) {
   cerr << error << endl;
@@ -129,11 +140,26 @@ catch (...) {
 
 int main ()
 {
-  unsigned ntest = 1000;
+  unsigned ntest = 10000;
+  double tolerance = 0.02;
+
+  cerr << "running " << ntest << " quadratic least-squares fits" << endl;
 
   for (unsigned i=0; i<ntest; i++)
     runtest ();
 
   for (unsigned i=0; i<ncoef; i++)
-    cout << normalized_difference[i]/ntest << endl;
+  {
+    double avg = normalized_difference[i]/ntest;
+    cerr << i << " normalized error=" << avg << endl;
+
+    if ( fabs(avg - 1.0) > tolerance)
+    {
+      cerr << "FAIL: uncertainty-normalized error is not close enough to 1" << endl;
+      return -1;
+    }
+  }
+
+  cerr << "Test Passed! (all uncertainty-normalized errors are close to 1)" << endl;
+  return 0;
 }

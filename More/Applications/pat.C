@@ -128,6 +128,8 @@ void profile_plot(Reference::To<Plot> plot,
 void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
     Pulsar::Profile* profile);
 
+void test_arrival_time_uncertainty (unsigned ntest, const Archive* std, ArrivalTime* estimator);
+
 string get_xrange(const double min, const double max);
 #endif // HAVE_PGPLOT
 
@@ -137,6 +139,7 @@ bool full_freq = false;
 bool fscrunch = false;
 bool tscrunch = false;
 bool preprocess = true;
+unsigned ntest_uncertainty = 0;
 Pulsar::SmoothSinc* sinc = 0;
 Reference::To<ArrivalTime> arrival;
 
@@ -265,7 +268,7 @@ int main (int argc, char** argv) try
 #define PLOT_ARGS
 #endif
 
-  const char* args = "a:A:bcC:Dde:E:f:Fg:G:hij:J:K:m:M:n:pPqRrS:s:TuvVxX:z:" PLOT_ARGS;
+  const char* args = "a:A:bcC:Dde:E:f:Fg:G:hj:J:K:m:M:n:pPqRrS:s:TuU:vVxX:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -280,27 +283,25 @@ int main (int argc, char** argv) try
 
       /* Break up inputs (e.g. have "10cm.std 20cm.std 50*.std") */
       {
-	char *str;
-	str = strtok(optarg," ");
-	do 
-	{
-	  dirglob (&stdprofiles, str);
-	}
-	while ((str = strtok(NULL," "))!=NULL);
+        char *str;
+        str = strtok(optarg," ");
+        do 
+        {
+          dirglob (&stdprofiles, str);
+        }
+        while ((str = strtok(NULL," "))!=NULL);
       }
 
       if (stdprofiles.size() == 0)
       {
-	cerr << "pat -a \"" << optarg << "\" failed: no such file" << endl;
-	return -1;
+        cerr << "pat -a \"" << optarg << "\" failed: no such file" << endl;
+        return -1;
       }
       break;
 
     case 'A':
-    {
       arrival->set_shift_estimator( ShiftEstimator::factory( optarg ) );
       break;
-    }
 
     case 'b':
       output_profile_residuals = true;
@@ -332,13 +333,11 @@ int main (int argc, char** argv) try
       break;
 
     case 'f':
-      {
-	/* Set the output format */
-	outFormat = string(optarg).substr(0,string(optarg).find(flagsep));
-	if (string(optarg).find(flagsep)!=string::npos)
-	  outFormatFlags = string(optarg).substr(string(optarg).find(flagsep));
-	break;
-      }
+      /* Set the output format */
+      outFormat = string(optarg).substr(0,string(optarg).find(flagsep));
+      if (string(optarg).find(flagsep)!=string::npos)
+        outFormatFlags = string(optarg).substr(string(optarg).find(flagsep));
+      break;
 
     case 'G':
       flagsep = optarg;
@@ -351,10 +350,6 @@ int main (int argc, char** argv) try
 
     case 'h':
       usage ();
-      return 0;
-
-    case 'i':
-      cout << "$Id: pat.C,v 1.106 2011/02/23 20:53:38 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -433,6 +428,10 @@ int main (int argc, char** argv) try
       outFormat = "tempo2";
       break;
 
+    case 'U':
+      ntest_uncertainty = atoi (optarg);
+      break;
+      
     case 'v':
       Archive::set_verbosity(2);
       verbose = true;
@@ -478,7 +477,8 @@ int main (int argc, char** argv) try
     for (int ai=optind; ai<argc; ai++)
       dirglob (&archives, argv[ai]);
   
-  if (archives.empty()) {
+  if (archives.empty() && ntest_uncertainty == 0)
+  {
     cerr << "No archives were specified" << endl;
     return -1;
   } 
@@ -508,6 +508,11 @@ int main (int argc, char** argv) try
 #endif
           cout << "FORMAT 1" << endl;
 
+  if (ntest_uncertainty)
+  {
+    test_arrival_time_uncertainty (ntest_uncertainty, stdarch, arrival);
+    return 0;
+  }
 
   if (estimator_config.size())
   {
@@ -560,12 +565,12 @@ int main (int argc, char** argv) try
       unsigned j;
       for (j = 0;j < stdprofiles.size();j++)	    
       {
-	stdarch = Archive::load(stdprofiles[j]);	      
-	if (j==0 || fabs(stdarch->get_centre_frequency() - freq)<minDiff)
-	{
-	  minDiff = fabs(stdarch->get_centre_frequency()-freq);
-	  jDiff   = j;
-	}
+        stdarch = Archive::load(stdprofiles[j]);	      
+        if (j==0 || fabs(stdarch->get_centre_frequency() - freq)<minDiff)
+        {
+          minDiff = fabs(stdarch->get_centre_frequency()-freq);
+          jDiff   = j;
+        }
       }
       stdarch = load_standard (stdprofiles[jDiff]);
     }
@@ -577,17 +582,17 @@ int main (int argc, char** argv) try
       if (stdarch->get_nchan() < arch->get_nchan() && stdarch != stdarch_backup)
       {
         stdarch = stdarch_backup;
-	reset_standard = true;
+        reset_standard = true;
       }
       
       if (stdarch->get_nchan() < arch->get_nchan())
-	arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
+        arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
       
       if (stdarch->get_nchan() > arch->get_nchan())
       {
         stdarch = stdarch->clone();
-	stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
-	reset_standard = true;
+        stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
+        reset_standard = true;
       }
     }
 
@@ -638,35 +643,35 @@ int main (int argc, char** argv) try
     {
       for (unsigned i = 0; i < toas.size(); i++)
       {
-	unsigned isub = toas[i].get_subint();
-	unsigned ichan = toas[i].get_channel();
-	Integration* subint = arch->get_Integration(isub);
-	double P = subint->get_folding_period();
-	MJD epoch = subint->get_epoch();
+        unsigned isub = toas[i].get_subint();
+        unsigned ichan = toas[i].get_channel();
+        Integration* subint = arch->get_Integration(isub);
+        double P = subint->get_folding_period();
+        MJD epoch = subint->get_epoch();
 
-	cout << arch->get_filename() << " " << isub << " " << ichan << " "
-	     << toas[i].get_phase_shift () << " "
-	     << toas[i].get_error()*1e-6 / P 
-	     << " <-turns::microsec-> "
-	     << epoch.printdays(20) << " "
-	     << toas[i].get_phase_shift () * P * 1e6 << " "
-	     << toas[i].get_error() << endl;
+        cout << arch->get_filename() << " " << isub << " " << ichan << " "
+            << toas[i].get_phase_shift () << " "
+            << toas[i].get_error()*1e-6 / P 
+            << " <-turns::microsec-> "
+            << epoch.printdays(20) << " "
+            << toas[i].get_phase_shift () * P * 1e6 << " "
+            << toas[i].get_error() << endl;
       }
     }
     else
     {
       if (phase_info)
-	compute_dt(arch, toas, stdFile);
+        compute_dt(arch, toas, stdFile);
 
       if (tempo2_output)
       {
-	vector<Tempo::toa>::iterator iter;
-	for (iter = toas.begin(); iter != toas.end(); ++iter)
-	  (*iter).set_phase_info(true);
+        vector<Tempo::toa>::iterator iter;
+        for (iter = toas.begin(); iter != toas.end(); ++iter)
+          (*iter).set_phase_info(true);
       }
 
       for (unsigned i = 0; i < toas.size(); i++)
-	toas[i].unload(stdout);
+        toas[i].unload(stdout);
     }
   }
   catch (Error& error)
@@ -736,31 +741,31 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
   static bool firstTime=true;
 
   if (firstTime)
+  {
+    while (!fin.eof())
     {
-      while (!fin.eof())
-	{
-	  fin >> str;
-	  if (str.at(0)=='#') fin.getline(buf,1000);
-	  else if (str.compare("Version:")==0) fin >> version;
-	  else if (str.compare("Pulsar:")==0)  fin >> psr;
-	  else if (str.compare("Freq")==0)     fin >> str >> freq;
-	  else if (str.compare("Tau")==0)      fin >> str >> tau;
-	  else if (str.compare("Components:")==0) fin >> ncomp;
-	  else
-	    {
-	      fin >> spos >> samp >> swidth;  n++;
-	      pos.push_back(spos);
-	      amp.push_back(samp);
-	      width.push_back(swidth);
-	    }
-	}
-      if (n != ncomp)
-	{
-	  cerr << "Warning: number of Gaussian components " << 
-	    ncomp << " does not equal components provided " << n << endl;
-	  ncomp = n;
-	}
+      fin >> str;
+      if (str.at(0)=='#') fin.getline(buf,1000);
+      else if (str.compare("Version:")==0) fin >> version;
+      else if (str.compare("Pulsar:")==0)  fin >> psr;
+      else if (str.compare("Freq")==0)     fin >> str >> freq;
+      else if (str.compare("Tau")==0)      fin >> str >> tau;
+      else if (str.compare("Components:")==0) fin >> ncomp;
+      else
+        {
+          fin >> spos >> samp >> swidth;  n++;
+          pos.push_back(spos);
+          amp.push_back(samp);
+          width.push_back(swidth);
+        }
     }
+    if (n != ncomp)
+    {
+      cerr << "Warning: number of Gaussian components " << 
+        ncomp << " does not equal components provided " << n << endl;
+      ncomp = n;
+    }
+  }
  
   stdarch = arch->clone();
   stdarch->fscrunch();
@@ -783,7 +788,7 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
       double y = 0.0;
 
       for (unsigned j=0;j<ncomp;j++)
-	y+=amp[j]*exp(-sqr(x-pos[j])/sqr(width[j]));
+        y+=amp[j]*exp(-sqr(x-pos[j])/sqr(width[j]));
 
       amps[i] += y;
     }
@@ -836,7 +841,8 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
     plotter->configure("x:range=" + get_xrange(min_phase, max_phase));
 
   ofstream f;
-  if (output_profile_residuals) {
+  if (output_profile_residuals)
+  {
     string output_filename =
       replace_extension(arch->get_filename(), plot_difference_extension);
 
@@ -846,42 +852,45 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
   // Split the plot window into 3 horizontal plots.
   cpgsubp(1, 3);
 
-
   Profile stdcopy = stdarch->get_Profile(0,0,0) ;
   float* amps = stdcopy.get_amps();
   float mean=0;
-  for (unsigned ibin = 0 ; ibin < stdcopy.get_nbin(); ibin++){
-	 mean+=amps[ibin];
+  for (unsigned ibin = 0 ; ibin < stdcopy.get_nbin(); ibin++)
+  {
+	  mean+=amps[ibin];
   }
   mean /= (float)stdcopy.get_nbin();
 
   if (!cal_delay_file and fabs(mean) > 1e-3)
     stdarch->remove_baseline();
+
   const unsigned nbin  = arch->get_nbin();
   const unsigned nsub  = arch->get_nsubint();
   const unsigned nchan = arch->get_nchan();
-  if (nbin > stdcopy.get_nbin()) {
+  if (nbin > stdcopy.get_nbin())
+  {
     if (nbin % stdcopy.get_nbin())
-      throw Error (InvalidState, "pat", 
-		   "profile nbin=%d standard nbin=%d",
+      throw Error (InvalidState, "pat", "profile nbin=%d standard nbin=%d",
                    nbin, stdcopy.get_nbin());
 
     unsigned nscrunch = nbin / stdcopy.get_nbin();
     arch->bscrunch (nscrunch);
   }
 
-  if (nbin < stdcopy.get_nbin()) {
+  if (nbin < stdcopy.get_nbin())
+  {
     if (stdcopy.get_nbin() % nbin)
-      throw Error (InvalidState, "pat", 
-		   "profile nbin=%d standard nbin=%d",
+      throw Error (InvalidState, "pat", "profile nbin=%d standard nbin=%d",
                    nbin, stdcopy.get_nbin());
 
     unsigned nscrunch = stdcopy.get_nbin() / nbin;
     stdcopy.bscrunch (nscrunch);
   }
 
-  for (unsigned isub = 0; isub < nsub; ++isub) {
-    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+  for (unsigned isub = 0; isub < nsub; ++isub)
+  {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan)
+    {
       // Each profile gets its own page.
       cpgpage();
 
@@ -899,11 +908,13 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
 
       profile_plot(plotter, profile_archive, profile, arch, centre_frequency);
 
-      if (output_profile_residuals) {
+      if (output_profile_residuals)
+      {
         // Output (to <filename>.diff):
         //      <subint> <channel> <bin> <bin value>
         float* bins = profile_diff->get_Profile(0,0,0)->get_amps();
-        for (unsigned ibin = 0; ibin < nbin; ++ibin) {
+        for (unsigned ibin = 0; ibin < nbin; ++ibin)
+        {
           f << isub << " " <<
             ichan << " " <<
             ibin << " " <<
@@ -951,8 +962,7 @@ double get_period (const Archive* arch)
   return arch->get_Integration(0)->get_folding_period();
 }
 
-void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
-    string std_name)
+void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas, string std_name)
 {
   const double period = get_period(archive);
   const double stt_offs = get_stt_offs(archive);
@@ -961,7 +971,8 @@ void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
   const bool skip_ms_mod = get_cal_freq(archive) == 1.0;
 
   vector<Tempo::toa>::iterator tit;
-  for (tit = toas.begin(); tit != toas.end(); ++tit) {
+  for (tit = toas.begin(); tit != toas.end(); ++tit)
+  {
     const double phaseShift = (*tit).get_phase_shift();
     double dt = phaseShift * period;
 
@@ -1007,15 +1018,14 @@ void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
 
 string get_xrange(const double min, const double max)
 {
-    if (min >= max)
-        throw Error(InvalidRange, "set_phase_zoom", "min (%g) >= max (%g)",
-                min, max);
+  if (min >= max)
+    throw Error (InvalidRange, "set_phase_zoom", "min (%g) >= max (%g)", min, max);
 
-    return string("(") +
-        tostring<double>(min) +
-        string(")") +
-        tostring<double>(max) +
-        string( ")");
+  return string("(") +
+      tostring<double>(min) +
+      string(")") +
+      tostring<double>(max) +
+      string( ")");
 }
 
 
@@ -1027,13 +1037,13 @@ string get_xrange(const double min, const double max)
 void resize_archives(Reference::To<Archive> archive,
         Reference::To<Archive> diff, Reference::To<Archive> original)
 {
-    const unsigned nsub = original->get_nsubint();
-    const unsigned nchan = original->get_nchan();
-    const unsigned npol = original->get_npol();
-    const unsigned nbin = original->get_nbin();
+  const unsigned nsub = original->get_nsubint();
+  const unsigned nchan = original->get_nchan();
+  const unsigned npol = original->get_npol();
+  const unsigned nbin = original->get_nbin();
 
-    diff->resize(nsub, npol, nchan, nbin);
-    archive->resize(nsub, npol, nchan, nbin);
+  diff->resize(nsub, npol, nchan, nbin);
+  archive->resize(nsub, npol, nchan, nbin);
 }
 
 
@@ -1049,10 +1059,12 @@ void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas)
   const unsigned nsub = archive->get_nsubint();
 
   vector<Tempo::toa>::iterator it = toas.begin();
-  for (unsigned isub = 0; isub < nsub; ++isub) {
-    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-
-      if (isub == (*it).get_subint() && ichan == (*it).get_channel()) {
+  for (unsigned isub = 0; isub < nsub; ++isub)
+  {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan)
+    {
+      if (isub == (*it).get_subint() && ichan == (*it).get_channel())
+      {
         const double phase_shift = (*it).get_phase_shift();
         archive->get_Profile(isub, 0, ichan)->rotate_phase(phase_shift);
         ++it;
@@ -1070,9 +1082,9 @@ void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas)
 void prepare_difference_archive(Reference::To<Archive> diff,
         Reference::To<Archive> arch, Reference::To<Profile> prof)
 {
-    const double freq = truncateDecimals(prof->get_centre_frequency(), 3);
-    diff->set_source(arch->get_source());
-    diff->set_centre_frequency(freq);
+  const double freq = truncateDecimals(prof->get_centre_frequency(), 3);
+  diff->set_source(arch->get_source());
+  diff->set_centre_frequency(freq);
 }
 
 /**
@@ -1084,27 +1096,27 @@ void difference_plot(Reference::To<Plot> plot,
         Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
         vector<Tempo::toa>& toas, const unsigned subint, const unsigned chan)
 {
-    Reference::To<Profile> profile = arch->get_Profile(subint, 0, chan);
-    prepare_difference_archive(diff_arch, arch, profile);
+  Reference::To<Profile> profile = arch->get_Profile(subint, 0, chan);
+  prepare_difference_archive(diff_arch, arch, profile);
 
-    const unsigned i = subint * arch->get_nchan() + chan;
-    const double snr = diff_arch->get_Profile(0,0,0)->snr();
+  const unsigned i = subint * arch->get_nchan() + chan;
+  const double snr = diff_arch->get_Profile(0,0,0)->snr();
 
-    char phaseShift[50];
-    char phaseError[50];
-    sprintf(phaseShift, "%.4f", toas[i].get_phase_shift());
-    sprintf(phaseError, "%.4g", toas[i].get_error());
+  char phaseShift[50];
+  char phaseError[50];
+  sprintf(phaseShift, "%.4f", toas[i].get_phase_shift());
+  sprintf(phaseError, "%.4g", toas[i].get_error());
 
-    // set the heading to read:
-    // filename, subint, channel, snr, phase shift, phase error
-    plot->configure("above:c=File: " + arch->get_filename() +
-            "\nSubint: " + tostring(subint) + " Chan: " + tostring(chan) +
-            " S/N: " + tostring(snr) + " Phase Shift: " + phaseShift +
-            " Phase Error: " + phaseError);
+  // set the heading to read:
+  // filename, subint, channel, snr, phase shift, phase error
+  plot->configure("above:c=File: " + arch->get_filename() +
+          "\nSubint: " + tostring(subint) + " Chan: " + tostring(chan) +
+          " S/N: " + tostring(snr) + " Phase Shift: " + phaseShift +
+          " Phase Error: " + phaseError);
 
-    plot->configure("ch=2");
-    plot->plot(diff_arch);
-    cpgpage();
+  plot->configure("ch=2");
+  plot->plot(diff_arch);
+  cpgpage();
 }
 
 
@@ -1114,9 +1126,9 @@ void difference_plot(Reference::To<Plot> plot,
 
 void template_plot(Reference::To<Plot> plot, Reference::To<Archive> arch)
 {
-    plot->configure("above:c=Template: " + arch->get_filename());
-    plot->plot(arch);
-    cpgpage();
+  plot->configure("above:c=Template: " + arch->get_filename());
+  plot->plot(arch);
+  cpgpage();
 }
 
 void profile_plot(Reference::To<Plot> plot,
@@ -1124,13 +1136,13 @@ void profile_plot(Reference::To<Plot> plot,
         Reference::To<Profile> profile_to_copy, Reference::To<Archive> archive,
         const double freq)
 {
-    *(profile_archive->get_Profile(0,0,0)) = *profile_to_copy;
+  *(profile_archive->get_Profile(0,0,0)) = *profile_to_copy;
 
-    profile_archive->set_source(archive->get_source());
-    profile_archive->set_centre_frequency(freq);
+  profile_archive->set_source(archive->get_source());
+  profile_archive->set_centre_frequency(freq);
 
-    plot->configure("above:c=Profile");
-    plot->plot(profile_archive);
+  plot->configure("above:c=Profile");
+  plot->plot(profile_archive);
 }
 
 /**
@@ -1209,36 +1221,38 @@ void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
 
 void scaleProfile(Reference::To<Profile> profile)
 {
-    float* bins = profile->get_amps();
-    const unsigned nbin = profile->get_nbin();
+  float* bins = profile->get_amps();
+  const unsigned nbin = profile->get_nbin();
 
-    // if baseline removal is not effective, subtract the mean from the profile
-    double stats_mean = profile->mean(1.0);
+  // if baseline removal is not effective, subtract the mean from the profile
+  double stats_mean = profile->mean(1.0);
 
-    if (profile->min(0, profile->get_nbin()) > 0.0)
-        *profile -= stats_mean;
+  if (profile->min(0, profile->get_nbin()) > 0.0)
+    *profile -= stats_mean;
 
-    // calculate mean and rms from all points < 3 * rms
-    // subtract mean from all points
-    // recompute mean and rms of all points < 3 * rms
-    // repeat until delta_mean < 0.01*RMS
+  // calculate mean and rms from all points < 3 * rms
+  // subtract mean from all points
+  // recompute mean and rms of all points < 3 * rms
+  // repeat until delta_mean < 0.01*RMS
 
-    float mean = 0.0;
-    float deviation = 0.0;
-    float oldMean = 0.0;
+  float mean = 0.0;
+  float deviation = 0.0;
+  float oldMean = 0.0;
 
-    while (true) {
-        mean = getMean(deviation, bins, nbin);
-        deviation = getRms(bins, nbin, mean, deviation);
+  while (true)
+  {
+    mean = getMean(deviation, bins, nbin);
+    deviation = getRms(bins, nbin, mean, deviation);
 
-        if (fabs(mean - oldMean) < 0.01 * fabs(deviation)) {
-            *profile -= mean;
-            break;
-        }
-
-        *profile -= mean;
-        oldMean = mean;
+    if (fabs(mean - oldMean) < 0.01 * fabs(deviation))
+    {
+      *profile -= mean;
+      break;
     }
+
+    *profile -= mean;
+    oldMean = mean;
+  }
 }
 
 
@@ -1248,19 +1262,21 @@ void scaleProfile(Reference::To<Profile> profile)
 
 float getMean(const float rms, const float* bins, const unsigned nbin)
 {
-    float mean = 0.0;
-    int count = 0;
+  float mean = 0.0;
+  int count = 0;
 
-    // calculate mean
-    for (unsigned i = 0; i < nbin; ++i) {
-        if (bins[i] < 3.0 * rms) {
-            mean += bins[i];
-            ++count;
-        }
+  // calculate mean
+  for (unsigned i = 0; i < nbin; ++i)
+  {
+    if (bins[i] < 3.0 * rms)
+    {
+      mean += bins[i];
+      ++count;
     }
+  }
 
-    mean /= (float)count;
-    return mean;
+  mean /= (float)count;
+  return mean;
 }
 
 
@@ -1271,18 +1287,18 @@ float getMean(const float rms, const float* bins, const unsigned nbin)
 float getRms(const float* bins, const unsigned nbin, const float mean,
         const float oldRms)
 {
-    float deviation = 0.0;
-    int count = 0;
+  float deviation = 0.0;
+  int count = 0;
 
-    for (unsigned i = 0; i < nbin; ++i) {
-        if (bins[i] < 3.0 * oldRms) {
-            deviation += sqr(bins[i] - mean);
-            ++count;
-        }
+  for (unsigned i = 0; i < nbin; ++i) {
+    if (bins[i] < 3.0 * oldRms) {
+      deviation += sqr(bins[i] - mean);
+      ++count;
     }
+  }
 
-    deviation /= (float)count;
-    return sqrt(deviation);
+  deviation /= (float)count;
+  return sqrt(deviation);
 }
 #endif // if HAVE_PGPLOT
 
@@ -1296,9 +1312,9 @@ float getRms(const float* bins, const unsigned nbin, const float mean,
 
 double truncateDecimals(double d, int decimalPlaces)
 {
-    double result = d * pow(10, (double)decimalPlaces);
-    result = (int)result;
-    result /= pow(10, (double)decimalPlaces);
+  double result = d * pow(10, (double)decimalPlaces);
+  result = (int)result;
+  result /= pow(10, (double)decimalPlaces);
 
-    return result;
+  return result;
 }

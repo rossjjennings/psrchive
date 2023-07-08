@@ -203,8 +203,7 @@ int main (int argc, char** argv) try {
 
   double dof = data_x.size() - scalar->get_nparam();
 
-  cerr << "Chi-squared = " << chisq << " / " << dof << " = "
-       << chisq / dof << endl;
+  cerr << "Chi-squared = " << chisq << " / " << dof << " = " << chisq / dof << endl;
 
   std::vector<std::vector<double> > covariance;
   fit.result (*scalar, covariance);

@@ -581,7 +581,7 @@ void Pulsar::ComplexRVMFit::solve ()
       throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
 		   "nfree <= 0");
 
-    model->set_variance (iparm, 2.0*covariance[iparm][iparm]);
+    model->set_variance (iparm, covariance[iparm][iparm]);
   }
 
   if (verbose)

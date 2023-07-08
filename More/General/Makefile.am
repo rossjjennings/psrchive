@@ -6,6 +6,7 @@ dist_data_DATA = fluxcal.cfg
 nobase_include_HEADERS = \
 	find_spike_edges.h \
         morphological_difference.h \
+	Pulsar/AddNoise.h \
 	Pulsar/Append.h \
 	Pulsar/counter_drift.h \
 	Pulsar/Accumulate.h \
@@ -143,6 +144,7 @@ libGeneral_la_SOURCES = \
 	morphological_difference.C \
 	Accumulate.C \
         AdaptiveSNR.C \
+	AddNoise.C \
 	Append.C \
 	ArchiveComparisons.C \
 	ArchiveStatistic.C \

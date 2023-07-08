@@ -1432,7 +1432,7 @@ void SystemCalibrator::create_model () try
 	     << "SystemCalibrator::create_model receiver=\n  " 
 	     << basis->evaluate() << endl;
     }
-    else
+    else if (verbose)
       cerr << "SystemCalibrator::create_model basis correction not required"
            << endl;
   }
