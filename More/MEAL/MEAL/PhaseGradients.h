@@ -259,13 +259,13 @@ void MEAL::PhaseGradients<T>::calculate (typename T::Result& result,
   {
     for (unsigned i=0; i<grad->size(); i++)
       (*grad)[i] = 0.0;
+
     (*grad)[igradient] = x * std::complex<double>(-sin_phase, cos_phase);
     
     if (this->verbose)
       std::cerr << "MEAL::PhaseGradients<T>::calculate gradient" << std::endl
 		<< "   " << (*grad)[igradient] << std::endl;
   }
-  
 }
 
 #endif // __MEAL_PhaseGradients_H

@@ -178,9 +178,9 @@ void Calibration::SolveMEAL::fit ()
       	cerr << "chisq=" << chisq << " convergence=" << convergence_chisq << endl;
 
       if (chisq < convergence_chisq)
-	      break;
+        break;
       else
-	      continue;
+        continue;
     }
 
     float delta_chisq = chisq - best_chisq;
@@ -196,7 +196,7 @@ void Calibration::SolveMEAL::fit ()
     bool reiterate = false;
     for (unsigned i=0; i < convergence_condition.size(); i++)
       if ( !convergence_condition[i](equation) )
-	      reiterate = true;
+        reiterate = true;
 
     if (reiterate)
       continue;
@@ -204,14 +204,14 @@ void Calibration::SolveMEAL::fit ()
     if (fit.lamda == 0.0 && fabs(delta_chisq) < 1.0 && delta_chisq <= 0)
     {
       if (debug)
-	      cerr << "fit good" << endl;
+        cerr << "fit good" << endl;
       break;
     }
 
     if (fit.lamda == 0.0 && delta_chisq > 0)
     {
       if (debug)
-	      cerr << "maybe not so good" << endl;
+        cerr << "maybe not so good" << endl;
       fit.lamda = last_lamda;
 
       // count when Newton's method seems to be doing very poorly
@@ -221,11 +221,11 @@ void Calibration::SolveMEAL::fit ()
     if (delta_chisq <= 0 && fabs(delta_chisq) < 10)
     {
       if (debug)
-	      cerr << "fit close" << endl;
+        cerr << "fit close" << endl;
 
       if (stick_to_steepest_decent >= 5)
       {
-	      if (iterations >= maximum_iterations/2 && fabs(delta_chisq)/best_chisq < 1e-3)
+        if (iterations >= maximum_iterations/2 && fabs(delta_chisq)/best_chisq < 1e-3)
         {
           if (debug)
             cerr << "small change in late stages.  patience=" << patience << endl;

@@ -539,7 +539,7 @@ Estimate<double> PolnProfileFit::get_phase () const
 
   if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "PolnProfileFit::get_phase",
-		 "no phases have been added to the equation");
+                 "no phases have been added to the equation");
 
   return phases -> get_Estimate (0);
 }

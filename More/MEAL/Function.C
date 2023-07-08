@@ -70,12 +70,11 @@ void MEAL::Function::copy (const Function* model)
     throw Error (InvalidParam, "MEAL::Function::operator =",
 		 "nparam=%d != copy.nparam=%d", nparam, model->get_nparam());
 
-  for (unsigned iparam=0; iparam<nparam; iparam++) {
-
+  for (unsigned iparam=0; iparam<nparam; iparam++)
+  {
     set_param( iparam, model->get_param(iparam) );
     set_variance( iparam, model->get_variance(iparam) );
     set_infit( iparam, model->get_infit(iparam) );
-
   }
 
   // name = model->name;
