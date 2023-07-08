@@ -86,7 +86,11 @@ float lmcoff (// input
      of the WeightingScheme template class used by LevenbergMacquardt.
      The weight depends on the error (sigma-like).
   */
-  return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta);
+
+  //! Curvature correction factor described in Appendix A.2 of Rogers et al (2023)
+  double curvature_factor = 2;
+
+  return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta, curvature_factor);
 }
 
 // template specialization of MEAL::lmcoff

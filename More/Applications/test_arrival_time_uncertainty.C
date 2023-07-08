@@ -22,6 +22,8 @@ void test_arrival_time_uncertainty (unsigned ntest, const Archive* std, ArrivalT
 {
   double total_shift_sq = 0;
   double total_error_sq = 0;
+  double total_chisq = 0;
+  unsigned ntoa = 0;
 
   AddNoise add_noise (0.01);
 
@@ -49,16 +51,21 @@ void test_arrival_time_uncertainty (unsigned ntest, const Archive* std, ArrivalT
       double shift_error_turns = toas[i].get_error()*1e-6 / P; 
       total_shift_sq += shift_turns * shift_turns;
       total_error_sq += shift_error_turns * shift_error_turns;
+
+      total_chisq += toas[i].get_reduced_chisq();
+      ntoa++;
     }
 
     timer.stop();
     if (timer.get_total() > next_update)
     {
-      cerr << "  iteration " << i << " / " << ntest << " efac=" << sqrt(total_shift_sq/total_error_sq) << endl;
+      cerr << "  iteration " << i << " / " << ntest 
+           << " efac=" << sqrt(total_shift_sq/total_error_sq) 
+           << " chisq=" << total_chisq / ntoa << endl;
       next_update += update_period;
     }
   }
 
   double vfac = total_shift_sq / total_error_sq;
-  cout << "efac=" << sqrt(vfac) << " vfac=" << vfac << endl;
+  cout << "efac=" << sqrt(vfac) << " vfac=" << vfac << " chisq=" << total_chisq / ntoa << endl;
 }
