@@ -54,10 +54,11 @@ void test_arrival_time_uncertainty (unsigned ntest, const Archive* std, ArrivalT
     timer.stop();
     if (timer.get_total() > next_update)
     {
-      cerr << "  iteration " << i << " / " << ntest << " efac=" << sqrt(total_error_sq/total_shift_sq) << endl;
+      cerr << "  iteration " << i << " / " << ntest << " efac=" << sqrt(total_shift_sq/total_error_sq) << endl;
       next_update += update_period;
     }
   }
 
-  cout << "relative variance=" << total_shift_sq / total_error_sq << endl;
+  double vfac = total_shift_sq / total_error_sq;
+  cout << "efac=" << sqrt(vfac) << " vfac=" << vfac << endl;
 }
