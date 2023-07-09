@@ -88,11 +88,7 @@ namespace MEAL
       lamda_decrease_factor = 0.1;
       singular_threshold = 1e-8;
       restore_policy = NULL;
-      curvature_factor = 1.0;
     }
-
-    //! Curvature correction factor described in Appendix A.2 of Rogers et al (2023)
-    double curvature_factor;
 
     //! returns initial chi-squared
     /*!
@@ -320,7 +316,7 @@ namespace MEAL
 		 const std::vector<Grad>& gradient,
 		 // output
 		 std::vector<std::vector<double> >& alpha,
-		 std::vector<double>& beta, double curvature_factor = 1.0);
+		 std::vector<double>& beta);
 
   template<class Mt>
   std::string get_name (const Mt& model, unsigned iparam);
@@ -824,7 +820,7 @@ float MEAL::lmcoff1 (
 		     const std::vector<Grad>& gradient,
 		     // output
 		     std::vector<std::vector<double> >& alpha,
-		     std::vector<double>& beta, double curvature_factor
+		     std::vector<double>& beta
 		     )
 {
   //! The traits of the gradient element
@@ -851,11 +847,11 @@ float MEAL::lmcoff1 (
       if (LevenbergMarquardt<Grad>::verbose > 2)
         std::cerr << "MEAL::lmcoff1 add to curvature matrix" << std::endl;
 
-      // Equation 15.5.11 of NR with correction factor described in Appendix A.2 of Rogers et al (2023)
+      // Equation 15.5.11 of NR
       for (unsigned jfit=0; jfit <= ifit; jfit++)
       {
       	if (model.get_infit(jfit))
-          alpha[ifit][jfit] += curvature_factor * traits.to_real (w_gradient * gradient[jfit]);
+          alpha[ifit][jfit] += traits.to_real (w_gradient * gradient[jfit]);
       }
     }
   }

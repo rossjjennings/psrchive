@@ -29,6 +29,20 @@ Calibration::SolveMEAL* Calibration::SolveMEAL::clone () const
 //
 // ///////////////////////////////////////////////////////////////////////////
 
+//! Partial specialization for Jones elements
+template< class E > struct ElementTraits< Jones<E> >
+{
+  //! How to cast a complex type to the Jones element type
+  template< class T >
+  static inline Jones<E> from_complex (const std::complex<T>& value)
+  { return value; }
+
+  /*! 2023-July-09 -- Willem van Straten
+   *  Factor of 2 justified in Appendix A.2 of Rogers et al (2023) */
+  static inline double to_real (const Jones<E>& element)
+  { return 2.0 * trace(element).real(); }
+};
+
 // template specialization of MEAL::lmcoff
 float lmcoff (// input
 	      Calibration::ReceptionModel& model,
@@ -86,11 +100,7 @@ float lmcoff (// input
      of the WeightingScheme template class used by LevenbergMacquardt.
      The weight depends on the error (sigma-like).
   */
-
-  //! Curvature correction factor described in Appendix A.2 of Rogers et al (2023)
-  double curvature_factor = 2;
-
-  return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta, curvature_factor);
+  return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta);
 }
 
 // template specialization of MEAL::lmcoff
