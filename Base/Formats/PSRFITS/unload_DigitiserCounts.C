@@ -76,6 +76,9 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 
 void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
 {
+  if (ext->subints.size() < 1)
+    throw Error (InvalidParam, "UnloadCountsTable", "DigitiserCounts object has no subints");
+
   int status = 0;
   fits_insert_rows (fptr, 0, ext->subints.size(), &status);
 
@@ -158,9 +161,16 @@ void UnloadCountsKeys( fitsfile *fptr, const DigitiserCounts *ext )
  * @param const_ext      The DigitiserCounts extension to unload
  **/
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, 
-    const DigitiserCounts* const_ext ) try
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_ext ) try
 {
+  if (const_ext->subints.size() < 1)
+  {
+    if (verbose)
+      cerr << "Pulsar::FITSArchive::unload DigitiserCounts has no subints - deleting DIG_CNTS HDU" << endl;
+    delete_hdu (fptr, "DIG_CNTS");
+    return;
+  }
+
   psrfits_move_hdu( fptr, "DIG_CNTS" );
 
   UnloadCountsKeys( fptr, const_ext );

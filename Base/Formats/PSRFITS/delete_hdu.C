@@ -16,7 +16,7 @@ using namespace std;
   \param ffptr reference to the PSRFITS file to be modified
   \param hdu_name name of the HDU to remove from ffptr
 */
-void Pulsar::FITSArchive::delete_hdu (fitsfile* ffptr, const char* name) const
+void Pulsar::FITSArchive::delete_hdu (fitsfile* ffptr, const char* name)
 {
   int status = 0;
 
