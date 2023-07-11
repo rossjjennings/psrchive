@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void linear_fit (double& scale, double& offset,
+void linear_fit (Estimate<double>& scale, Estimate<double>& offset,
 		 const vector<double>& dat1, const vector<double>& dat2,
 		 const vector<bool>* mask)
 {
@@ -34,7 +34,7 @@ void linear_fit (double& scale, double& offset,
   linear_fit_work (scale, offset, dat1, dat2, one, wt, false);
 }
 
-void weighted_linear_fit (double& scale, double& offset,
+void weighted_linear_fit (Estimate<double>& scale, Estimate<double>& offset,
 			  const vector<double>& yval,
 			  const vector<double>& xval,
 			  const vector<double>& wt)
@@ -42,8 +42,8 @@ void weighted_linear_fit (double& scale, double& offset,
   vector<double> one (yval.size(), 1.0);
   linear_fit_work (scale, offset, yval, xval, one, wt);
 }
-   
-void linear_fit_work (double& scale, double& offset,
+ 
+void linear_fit_work (Estimate<double>& scale, Estimate<double>& offset,
 		      const vector<double>& dat1,
 		      const vector<double>& dat2,
 		      const vector<double>& one,
@@ -73,13 +73,18 @@ void linear_fit_work (double& scale, double& offset,
     wmu_2 += one[idim] * dat2[idim] * wt[idim];
     norm += one[idim] * one[idim] * wt[idim];
   }
-  
+ 
+  offset.var = var_2; // numerator
+
   mu_1 /= norm;
   mu_2 /= norm;
   covar -= mu_1 * wmu_2;
   var_2 -= mu_2 * wmu_2;
   
-  scale = covar / var_2;
+  scale.val = covar / var_2;
+  scale.var = norm / var_2;
+
+  offset.var /= var_2; // denominator
 
   if (robust_offset)
   {
@@ -91,16 +96,16 @@ void linear_fit_work (double& scale, double& offset,
       if (wt[idim] == 0)
 	continue;
     
-      diff[idiff] = dat1[idim]*wt[idim] - scale * dat2[idim]*wt[idim];
+      diff[idiff] = dat1[idim]*wt[idim] - scale.val * dat2[idim]*wt[idim];
       idiff ++;
     }
   
     assert (idiff == count);  
-    offset = median (diff);
+    offset.val = median (diff);
   }
   else
-    offset = mu_1 - scale * mu_2;
-  
+    offset.val = mu_1 - scale.val * mu_2;
+ 
   // cerr << "scale=" << scale << " offset=" << offset << endl;
 }
 
@@ -122,8 +127,8 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   assert (dat1.size() == dat2.size());
 
   unsigned ndat = dat1.size();
-  double scale = 1.0;
-  double offset = 0.0;
+  Estimate<double> scale = 1.0;
+  Estimate<double> offset = 0.0;
   
   vector<bool> mask (ndat, true);
     
@@ -140,7 +145,7 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
       linear_fit (scale, offset, dat1, dat2, &mask);
 
       double sigma = 2.0 * outlier_threshold;
-      double var = 1 + sqr(scale);
+      double var = 1 + sqr(scale.val);
       double cut = sqr(sigma) * var;
       
       zapped = 0;
@@ -150,7 +155,7 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
 	if (!mask[i])
 	  continue;
 
-	double residual = dat1[i] - scale * dat2[i] - offset;
+	double residual = dat1[i] - scale.val * dat2[i] - offset.val;
 	if ( outlier_threshold > 0 && sqr(residual) > cut )
         {
 	  mask[i] = false;
@@ -174,14 +179,14 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
     
   for (unsigned i=0; i<ndat; i++)
   {
-    residual[i] = dat1[i] - scale * dat2[i] - offset;
+    residual[i] = dat1[i] - scale.val * dat2[i] - offset.val;
     coeff += sqr(residual[i]);
 
     if (!mask[i])
       residual[i] = 0.0;
   }
   
-  double retval = coeff / ( ndat * ( 1 + sqr(scale) ) );
+  double retval = coeff / ( ndat * ( 1 + sqr(scale.val) ) );
 
   // cerr << "chi=" << retval << " scale=" << scale << " offset=" << offset << endl;
   

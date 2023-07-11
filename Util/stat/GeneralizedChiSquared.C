@@ -17,7 +17,7 @@
 
 using namespace std;
 
-void general_linear_fit (double& scale, double& offset,
+void general_linear_fit (Estimate<double>& scale, Estimate<double>& offset,
 			 const ndArray<2,double>& evec,
 			 const ndArray<1,double>& eval,
 			 const vector<double>& dat1,
@@ -88,8 +88,8 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
     }
   }
   
-  double scale = 1.0;
-  double offset = 0.0;
+  Estimate<double> scale = 1.0;
+  Estimate<double> offset = 0.0;
   
   if (robust_linear_fit)
   {
@@ -114,7 +114,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 	break;
       
       double sigma = 2.0 * outlier_threshold;
-      double var = 1 + sqr(scale);
+      double var = 1 + sqr(scale.val);
       double cut = sqr(sigma) * var;
       
       zapped = 0;
@@ -134,7 +134,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
 	  double sum = eigenvectors[idim][i];
 	  norm += sum * sum;
 	  
-	  residual += sqr(pc1 - scale * pc2 - offset * sum) / eigenvalues[i];
+	  residual += sqr(pc1 - scale.val * pc2 - offset.val * sum) / eigenvalues[i];
 	}
 	
 	if ( residual > cut * norm )
@@ -160,7 +160,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
   double coeff = 0.0;
   for (unsigned i=0; i<ndim; i++)
   {
-    residual[i] = pc1[i] - scale * pc2[i] - offset * sum[i];
+    residual[i] = pc1[i] - scale.val * pc2[i] - offset.val * sum[i];
     coeff += residual[i] * residual[i] / eigenvalues[i];
 
     if (fptr)
@@ -171,7 +171,7 @@ double GeneralizedChiSquared::get (const vector<double>& dat1,
     }
   }
   
-  double retval = coeff / ( ndim * ( 1 + sqr(scale) ) );
+  double retval = coeff / ( ndim * ( 1 + sqr(scale.val) ) );
   
   // cerr << "gcs=" << retval << endl;
   

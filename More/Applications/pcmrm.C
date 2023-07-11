@@ -51,8 +51,8 @@ protected:
   //! Update rotation parameter of PolnCalibratorExtension
   void update (PolnCalibratorExtension*);
 
-  double fit_psi0;
-  double fit_rm;
+  Estimate<double> fit_psi0;
+  Estimate<double> fit_rm;
 };
 
 
@@ -133,7 +133,7 @@ void pcmrm::finalize ()
 
     update (ext);
 
-    archive->set_rotation_measure (fit_rm);
+    archive->set_rotation_measure (fit_rm.val);
     archive->set_faraday_corrected (true);
     
     string new_filename = replace_extension (filename, ".rmc");
@@ -156,7 +156,7 @@ void pcmrm::update (PolnCalibratorExtension* ext)
     double freq_MHz = ext->get_centre_frequency(ichan);
     double lambda = Pulsar::speed_of_light / (freq_MHz * 1e6);
 
-    rot.val -= fit_psi0 + fit_rm * lambda * lambda;
+    rot.val -= fit_psi0.val + fit_rm.val * lambda * lambda;
 
     ext->get_transformation(ichan)->set_Estimate(iparam_rot, rot);
   }

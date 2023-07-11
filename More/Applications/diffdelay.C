@@ -106,8 +106,8 @@ void diffdelay::process (Pulsar::Archive* archive)
     yval[idat] = phi[idat].val;
   }
 
-  double fit_phi0 = 0;
-  double fit_tau = 0;
+  Estimate<double> fit_phi0 = 0;
+  Estimate<double> fit_tau = 0;
 
   weighted_linear_fit (fit_tau, fit_phi0, yval, freq_offset, wt);
 
