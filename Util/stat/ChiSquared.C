@@ -74,7 +74,7 @@ void linear_fit_work (Estimate<double>& scale, Estimate<double>& offset,
     norm += one[idim] * one[idim] * wt[idim];
   }
  
-  offset.var = var_2; // numerator
+  offset.var = var_2 / norm; // numerator
 
   mu_1 /= norm;
   mu_2 /= norm;
@@ -82,7 +82,7 @@ void linear_fit_work (Estimate<double>& scale, Estimate<double>& offset,
   var_2 -= mu_2 * wmu_2;
   
   scale.val = covar / var_2;
-  scale.var = norm / var_2;
+  scale.var = 1.0 / var_2;
 
   offset.var /= var_2; // denominator
 

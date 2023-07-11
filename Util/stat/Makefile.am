@@ -12,11 +12,12 @@ if HAVE_ARMADILLO
   libstat_la_SOURCES += GaussianMixtureProbabilityDensity.C
 endif
 
-TESTS = test_evaluate
+TESTS = test_evaluate test_linear_fit
 
 check_PROGRAMS = $(TESTS)
 
 test_evaluate_SOURCES = test_evaluate.C
+test_linear_fit_SOURCES = test_linear_fit.C
 
 #############################################################################
 #
