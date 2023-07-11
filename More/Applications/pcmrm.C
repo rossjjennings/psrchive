@@ -117,7 +117,8 @@ void pcmrm::finalize ()
 
   weighted_linear_fit (fit_rm, fit_psi0, yval, lambda_sq, wt);
 
-  cerr << "pcmrm::finalize ndat=" << ndat << " RM=" << fit_rm << endl;
+  cerr << "pcmrm::finalize ndat=" << ndat 
+       << " RM = " << fit_rm.val << " +/- " << sqrt(fit_rm.var) << endl;
   
   for (unsigned ifile=0; ifile < input_filenames.size(); ifile++)
   {
