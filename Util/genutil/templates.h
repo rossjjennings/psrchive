@@ -196,7 +196,7 @@ void normalize (std::vector<T>& x)
 template <class T, class I>
 void minmax (const I& it1, const I& it2, T& min, T& max, bool follow = false)
 {
-  if (!follow)
+  if (!follow && (it1 != it2))
     max = min = *it1;
 
   for (I it=it1; it != it2; it++) {
