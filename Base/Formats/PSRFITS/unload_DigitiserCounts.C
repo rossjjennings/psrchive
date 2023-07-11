@@ -76,6 +76,11 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 
 void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
 {
+  if (Archive::verbose > 2)
+  {
+    cerr << "UnloadCountsTable subints.size()=" << ext->subints.size() << endl;
+  }
+
   if (ext->subints.size() < 1)
     throw Error (InvalidParam, "UnloadCountsTable", "DigitiserCounts object has no subints");
 
