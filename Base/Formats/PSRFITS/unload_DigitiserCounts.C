@@ -163,6 +163,22 @@ void UnloadCountsKeys( fitsfile *fptr, const DigitiserCounts *ext )
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_ext ) try
 {
+  if (const_ext->get_npthist() == 0)
+  {
+    if (verbose)
+      cerr << "Pulsar::FITSArchive::unload DigitiserCounts NPTHIST == 0 - deleting DIG_CNTS HDU" << endl;
+    delete_hdu (fptr, "DIG_CNTS");
+    return;
+  }
+
+  if (const_ext->get_ndigr() == 0)
+  {
+    if (verbose)
+      cerr << "Pulsar::FITSArchive::unload DigitiserCounts NDIGR == 0 - deleting DIG_CNTS HDU" << endl;
+    delete_hdu (fptr, "DIG_CNTS");
+    return;
+  }
+
   if (const_ext->subints.size() < 1)
   {
     if (verbose)
