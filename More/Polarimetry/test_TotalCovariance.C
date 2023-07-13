@@ -11,6 +11,13 @@
 
 using namespace std;
 
+//! Partial specialization for Jones elements
+template< class E > struct ElementTraits< Jones<E> >
+{
+  static inline double to_real (const Jones<E>& element)
+  { return 2.0 * trace(element).real(); }
+};
+
 int test (string name, Matrix<4,4,double>& covar, Stokes<double>& input)
 {
   double tolerance = 1e-15;
@@ -123,7 +130,7 @@ int main ()
 
     Jones<double> wJ1 = total_covar.get_weighted_conjugate (J1);
 
-    double scalar2 = 2.0 * traits.to_real (wJ1 * J2);
+    double scalar2 = traits.to_real (wJ1 * J2);
 
     diff = fabs( (scalar0 - scalar2)/scalar0 );
     if (diff > 1e-10) {
