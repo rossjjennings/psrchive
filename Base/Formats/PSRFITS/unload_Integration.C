@@ -71,6 +71,8 @@ void Pulsar::FITSArchive::unload_Integration (fitsfile* thefptr, int row,
   const AuxColdPlasmaMeasures* plasma = integ->get<AuxColdPlasmaMeasures>();
   if (plasma)
     unload (thefptr,plasma,row);
+  else if  (verbose > 2)
+    cerr << "FITSArchive::unload_integration no AuxColdPlasmaMeasures extension" << endl;
 
   const CalInfoExtension* calinfo = get<CalInfoExtension>();
   bool calfreq_set = calinfo && calinfo->cal_frequency > 0.0;

@@ -304,7 +304,12 @@ try {
 
   // Load other useful info
 
+  if (verbose > 2)
+    cerr << "FITSArchive::load_Integration call load_Pointing" << endl;
   load_Pointing (read_fptr,row,integ);
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_Integration call load_Plasma" << endl;
   load_Plasma (read_fptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend

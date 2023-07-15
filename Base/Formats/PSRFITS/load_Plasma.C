@@ -18,7 +18,7 @@ void Pulsar::FITSArchive::load_Plasma (fitsfile* fptr, int row,
 				       Pulsar::Integration* integ)
 {
   if (verbose == 3)
-    cerr << "FITSArchive::load_AuxColdPlasmaMeasures" << endl;
+    cerr << "FITSArchive::load_Plasma - AuxColdPlasmaMeasures" << endl;
 
   double zero = 0.0;
 

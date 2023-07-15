@@ -18,9 +18,12 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 				  const AuxColdPlasmaMeasures* ext,
 				  int row)
 {
-  if (verbose == 3)
-    cerr << "FITSArchive::unload_AuxColdPlasmaMeasures" << endl;
+  if (verbose > 2)
+    cerr << "FITSArchive::unload AuxColdPlasmaMeasures"
+	    " DM=" << ext->get_dispersion_measure() <<
+	    " RM=" << ext->get_rotation_measure() << endl;
 
   psrfits_write_col (fptr, "AUX_DM", row, ext->get_dispersion_measure());
   psrfits_write_col (fptr, "AUX_RM", row, ext->get_rotation_measure());
 }
+
