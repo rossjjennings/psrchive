@@ -82,7 +82,8 @@ class TextEditor : public Reference::Able
 template <typename T> 
 bool TextEditor<T>::will_modify () const
 {
-  if (extensions_to_add.size() > 0)
+  if (extensions_to_add.size() > 0 &&
+      extensions_to_add[0] != "help")
     return true;
 
   if (extensions_to_remove.size() > 0)
