@@ -175,7 +175,7 @@ void ArchiveComparisons::build () try
 }
 catch (Error& error)
 {
-  cerr << error << endl;
+  throw error += "ArchiveComparisons::build";
 }
 
 class ArchiveComparisons::Interface

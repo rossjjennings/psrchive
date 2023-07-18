@@ -51,16 +51,23 @@ void CompareWithEachOther::compute (unsigned iprimary, ndArray<2,double>& result
     vector<double> idata (iprof->get_amps(),
 			  iprof->get_amps() + iprof->get_nbin());
     
-    if (irms < icompare)
+    if (irms < icompare) try
     {
       irms = icompare;
       rms[irms] = sqrt( robust_variance (idata) );
     }
-    
+    catch (Error& error)
+    {
+      DEBUG("CompareWithEachOther::compute exception on icompare=" << icompare << " " << error);
+      rms[irms] = 0.0;
+      set (result, iprimary, icompare, 0.0);
+      break;
+    }
+
     for (double& element : idata)
       element /= rms[icompare];
 
-    for (unsigned jcompare=icompare+1; jcompare < ncompare; jcompare++)
+    for (unsigned jcompare=icompare+1; jcompare < ncompare; jcompare++) try
     {
       (data->*compare) (jcompare);
 
@@ -92,7 +99,12 @@ void CompareWithEachOther::compute (unsigned iprimary, ndArray<2,double>& result
       
       temp[icompare][jcompare] = temp[jcompare][icompare] = val;
     }
-    
+    catch (Error& error)
+    {
+      DEBUG("CompareWithEachOther::compute exception on jcompare=" << jcompare << " " << error);
+      temp[icompare][jcompare] = temp[jcompare][icompare] = 0.0;
+    }
+
     std::vector<double> data (ncompare-1);
     unsigned ndat = 0;
     

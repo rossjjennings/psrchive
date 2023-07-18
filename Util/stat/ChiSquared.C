@@ -7,12 +7,14 @@
 
 #include "ChiSquared.h"
 #include "UnaryStatistic.h"
+#include "myfinite.h"
 
 #include <algorithm>
 #include <numeric>
 
 #include <cassert>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -86,6 +88,18 @@ void linear_fit_work (Estimate<double>& scale, Estimate<double>& offset,
 
   offset.var /= var_2; // denominator
 
+  if ( ! myfinite(scale.val) )
+  {
+    ofstream out ("linear_fit_work.dat");
+    for (unsigned idim=0; idim < ndim; idim++)
+      out << idim << " " << dat1[idim] << " " << dat2[idim] << endl;
+
+    throw Error (InvalidState, "linear_fit_work", "non-finite scale=%lf count=%u norm=%lf", scale.val, count, norm);
+  }
+
+  if ( ! myfinite(scale.var) )
+    throw Error (InvalidState, "linear_fit_work", "non-finite scale var=%lf", scale.var);
+
   if (robust_offset)
   {
     vector<double> diff (count);
@@ -105,7 +119,13 @@ void linear_fit_work (Estimate<double>& scale, Estimate<double>& offset,
   }
   else
     offset.val = mu_1 - scale.val * mu_2;
- 
+
+  if ( ! myfinite(offset.val) )
+    throw Error (InvalidState, "linear_fit_work", "non-finite offset=%lf", offset.val);
+
+  if ( ! myfinite(offset.var) )
+    throw Error (InvalidState, "linear_fit_work", "non-finite offset var=%lf", offset.var);
+
   // cerr << "scale=" << scale << " offset=" << offset << endl;
 }
 
@@ -122,7 +142,7 @@ ChiSquared::ChiSquared ()
   outlier_threshold = 3.0;
 }
 
-double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
+double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2) try
 {
   assert (dat1.size() == dat2.size());
 
@@ -180,6 +200,10 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   for (unsigned i=0; i<ndat; i++)
   {
     residual[i] = dat1[i] - scale.val * dat2[i] - offset.val;
+
+    if ( ! myfinite(residual[i]) )
+      throw Error (InvalidState, "ChiSquared::get", "non-finite residual[%u]=%f", i, residual[i]);
+
     coeff += sqr(residual[i]);
 
     if (!mask[i])
@@ -191,5 +215,9 @@ double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2)
   // cerr << "chi=" << retval << " scale=" << scale << " offset=" << offset << endl;
   
   return retval;
+}
+catch (Error& error)
+{
+  throw error += "ChiSquared::get";
 }
 

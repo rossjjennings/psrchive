@@ -18,6 +18,8 @@
 #include "ChiSquared.h"
 #include "UnaryStatistic.h"
 
+#include "myfinite.h"
+
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -174,12 +176,10 @@ void CompareWith::compute (ndArray<2,double>& result)
   }
   catch (Error& error)
   {
+    DEBUG("CompareWith::compute exception on iprimary=" << iprimary << " " << error);
     for (unsigned icompare=0; icompare < ncompare; icompare++)
       set (result, iprimary, icompare, 0.0);
-    
-    continue;
   }
-
 }
 
 using namespace BinaryStatistics;
@@ -196,8 +196,12 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
   double variance = robust_variance (amps);
 
   if ( ! myfinite(variance) )
-    throw Error (InvalidState, "CompareWith::get_amps"
+    throw Error (InvalidState, "CompareWith::get_amps",
                  "robust_variance returns non-finite variance");
+
+  if ( variance <= 0.0 )
+    throw Error (InvalidState, "CompareWith::get_amps",
+                 "robust_variance returns non-positive variance=%lf", variance);
 
   if (bscrunch_factor.scrunch_enabled())
   {
@@ -215,8 +219,8 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 
   double rms = sqrt( variance );
 
-  if ( ! myfinite(variance) )
-    throw Error (InvalidState, "CompareWith::get_amps"
+  if ( ! myfinite(rms) )
+    throw Error (InvalidState, "CompareWith::get_amps",
                  "non-finite rms/normalization");
 
   for (double& element : amps)
@@ -224,7 +228,7 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 }
 
 void CompareWith::get_residual (vector<double>& amps,
-				const vector<double>& mamps)
+				const vector<double>& mamps) try
 {
   chi.set_outlier_threshold (0.0);
 
@@ -247,6 +251,10 @@ void CompareWith::get_residual (vector<double>& amps,
 #endif
 	  
   amps = chi.get_residual();
+}
+catch (Error& error)
+{
+  throw error += "CompareWith::get_residual";
 }
 
 #if HAVE_ARMADILLO
@@ -679,7 +687,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   {
     (data->*primary) (iprim);
     
-    for (unsigned icompare=0; icompare < ncompare; icompare++)
+    for (unsigned icompare=0; icompare < ncompare; icompare++) try
     {
       (data->*compare) (icompare);
 
@@ -717,6 +725,10 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 
       nprofile ++;
     }
+    catch (Error& error)
+    {
+      DEBUG("CompareWith::setup eigen exception on icompare=" << icompare << " " << error);
+    }
   }
   
   if (norm == 0)
@@ -736,7 +748,19 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
   unsigned rank = std::min( covar->get_count(), covar->get_rank() );
 
   DEBUG("CompareWith::setup count=" << covar->get_count() << " dim=" << covar->get_rank() << " rank=" << rank);
-  
+
+#ifdef _DEBUG
+  cerr << "CompareWith::setup eigenvalues:" << endl;
+  for (unsigned i=0; i < rank; i++)
+    cerr << " " << eval[i];
+
+  cerr << endl;
+#endif
+
+  for (unsigned i=0; i < rank; i++)
+    if (!myfinite(eval[i]))
+      throw Error (InvalidState, "CompareWith::setup", "non-finite eigenvalue[%u]=%lf", i, eval[i]);
+
   unsigned eff_rank = 0;
   unsigned offset = 0;
 
@@ -851,10 +875,14 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       
   for (unsigned iprim=start_primary; iprim < start_primary+nprimary; iprim++)
   {
+    // cerr << "iprim=" << iprim << endl;
+
     (data->*primary) (iprim);
     
-    for (unsigned icompare=0; icompare < ncompare; icompare++)
+    for (unsigned icompare=0; icompare < ncompare; icompare++) try
     {
+      // cerr << "icompare=" << icompare << endl;
+
       (data->*compare) (icompare);
 
       Reference::To<const Profile> prof = data->get_Profile ();
@@ -881,6 +909,10 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
       
       pc.col(iprofile) = arma::vec( residual );
       iprofile ++;
+    }
+    catch (Error& error)
+    {
+      DEBUG("CompareWith::setup gmm exception on icompare=" << icompare << " " << error);
     }
   }
 
