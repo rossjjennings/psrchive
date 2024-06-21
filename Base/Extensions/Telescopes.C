@@ -146,7 +146,7 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             break;
 
         case 'u':
-#define u_is_MWA 0
+#define u_is_MWA 1 // e.g. see https://github.com/nanograv/tempo/blob/master/obsys.dat
 #if u_is_MWA
             Telescopes::MWA(t);
 #else

@@ -15,11 +15,7 @@ $(LOCAL_INCLUDE) : $(local_includedir)/% : %
 
 CLEANFILES = $(LOCAL_INCLUDE) $(MOC_SOURCES) $(BUILT_SOURCES)
 
-EPSIC_DIR = $(top_srcdir)/Util/epsic/src
-EPSIC_UTIL = $(top_builddir)/Util/epsic/src/util
-EPSIC_INCLUDE = -I$(EPSIC_DIR) -I$(EPSIC_DIR)/util -I$(EPSIC_UTIL)
-
-AM_CPPFLAGS = -I$(local_includedir) $(EPSIC_INCLUDE) $(INCLUDE_CPPFLAGS)
+AM_CPPFLAGS = -I$(local_includedir) $(INCLUDE_CPPFLAGS)
 
 AM_LDFLAGS = $(INCLUDE_LDFLAGS)
 

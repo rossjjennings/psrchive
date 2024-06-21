@@ -87,6 +87,11 @@ namespace Registry {
     //! Remove the specified entry
     void erase (unsigned i) { entries.erase( entries.begin() + i ); }
 
+    //! Return the iterator that points to the first child
+    auto begin() const -> typename std::vector<Reference::To<Entry<Parent>>>::const_iterator { return entries.begin(); }
+    //! Return the iterator that points to the end of the array after the last child
+    auto end() const -> typename std::vector<Reference::To<Entry<Parent>>>::const_iterator { return entries.end(); }
+
     //! Return pointer to a null-constructed instance of Parent class
     Parent* create (unsigned i) const { return entries[i]->create(); }
 

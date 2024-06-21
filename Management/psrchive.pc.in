@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+aclocal=@datadir@/aclocal
+html=@datadir@/html
+psrplot_libs=-L@libdir@ -lpsrplot @PGPLOT_CFLAGS@ @PGPLOT_LIBS@
+
+Name: @PACKAGE_NAME@
+Description: Various tools for analysis of pulsar profiles
+Version: @PACKAGE_VERSION@
+Libs: -L@libdir@ -lpsrmore -lpsrbase -lpsrutil -lepsic @LDFLAGS@ @PUBLIC_LIBS@
+Cflags: -I@includedir@ -I@includedir@/epsic @PTHREAD_CFLAGS@

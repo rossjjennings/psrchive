@@ -181,8 +181,10 @@ void TextInterface::Parser::add_value (Value* value)
 //! Remove the named value interface
 void TextInterface::Parser::remove (const string& name)
 {
+  Reference::To<Parser> keep_this_alive (this);
   delete find (name);
   clean_invalid ();
+  keep_this_alive.release();
 }
 
 void TextInterface::Parser::clean_invalid () 

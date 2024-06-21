@@ -27,6 +27,9 @@ dist_aclocal_DATA = psrchive.m4
 htmldir = $(datadir)/html
 dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 
+# Install the pkg-config file; the directory is set using PKG_INSTALLDIR in configure.ac.
+pkgconfig_DATA = psrchive.pc
+
 #############################################################################
 #
 
@@ -42,7 +45,6 @@ psrchive_config_LDADD = $(LDPLOT)
 else
 psrchive_config_LDADD = $(LDADD)
 endif
-
 
 include $(top_srcdir)/config/Makefile.include
 

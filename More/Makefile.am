@@ -2,6 +2,7 @@
 SUBDIRS =
 
 lib_LTLIBRARIES = libpsrmore.la
+
 libpsrmore_la_LIBTOOLFLAGS = --tag=CXX
 libpsrmore_la_SOURCES =
 libpsrmore_la_LIBADD =

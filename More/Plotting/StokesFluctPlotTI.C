@@ -35,5 +35,4 @@ Pulsar::StokesFluctPlot::Interface::Interface (StokesFluctPlot* instance)
   add( &StokesFluctPlot::get_plot_lines,
        &StokesFluctPlot::set_plot_lines,
        "sls", "PGPLOT line style for each value" );
-
 }

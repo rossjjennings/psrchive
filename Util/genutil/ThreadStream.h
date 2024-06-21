@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007 - 2024 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,15 +11,7 @@
 #ifndef __ThreadStream_h
 #define __ThreadStream_h
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
-
-#include "Warning.h"
+#include <iostream>
 
 //! Manages a unique std::ostream for each thread
 class ThreadStream
@@ -46,12 +38,8 @@ public:
 
 private:
 
-#ifdef HAVE_PTHREAD
-  pthread_key_t key;
-#else
-  std::ostream* stream;
-#endif
-
+  //! pointer to either a pthread_key_t (HAVE_PTHREAD) or a std::ostream (!HAVE_PTHREAD)
+  void* stream = nullptr;
 };
 
 template<class T>
@@ -60,6 +48,8 @@ ThreadStream& operator<< (ThreadStream& ts, const T& t)
   ts.get() << t;
   return ts;
 }
+
+typedef std::ostream& (*manipulator) ( std::ostream& os );
 
 //! Handle manipulators
 inline ThreadStream& operator<< (ThreadStream& ts, manipulator m)

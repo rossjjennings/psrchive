@@ -11,14 +11,9 @@
 #include "escape.h"
 #include "substitute.h"
 #include "evaluate.h"
+#include "debug.h"
 
 #include <cpgplot.h>
-
-#if 0
-#define DEBUG(x) cerr << x << endl
-#else
-#define DEBUG(X)
-#endif
 
 using namespace std;
 
@@ -52,7 +47,7 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
   vector<string> labels;
   separate (elabel, labels, "\n");
 
-  TextInterface::Parser* parser 
+  Reference::To<TextInterface::Parser> parser 
     = standard_interface( const_cast<Archive*>(archive) );
   parser->set_indentation ("");
 
@@ -60,7 +55,7 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
   {
     DEBUG( "Pulsar::PlotLabel::plot label[" <<i<< "]=" << labels[i] );
 
-    labels[i] = substitute( labels[i], parser );
+    labels[i] = substitute( labels[i], parser.get() );
 
     DEBUG( "Pulsar::PlotLabel::plot subst label=" << labels[i] );
 

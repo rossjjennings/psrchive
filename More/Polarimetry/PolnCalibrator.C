@@ -526,10 +526,6 @@ void interpolate( std::vector< Jones<T> >& to,
     polar (determinant, hermitian, unitary, to[ichan]);
     unitary = sqrt(unitary);
 
-    // I don't remember why I did this, sorry ... WvS 16 Oct 2008
-    if (unitary[0] < 0.05)
-      polar (determinant, hermitian, unitary, from[orig_ichan]);
-
     to[ichan] = determinant * (hermitian * unitary);
   }
 }

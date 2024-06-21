@@ -2,7 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[2023-10-02+],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2024-06-01],[psrchive-developers@lists.sourceforge.net])
+
+# Dependencies
+PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
@@ -28,10 +32,22 @@ else
   fi
 fi
 
+################################################################################
+#
+# Setup to use EPSIC sub-module
+#
+
 # ensure that epsic source is configured
 if test -f $srcdir/config/epsic.sh; then
   $srcdir/config/epsic.sh $srcdir
 fi
+
+EPSIC_SOURCE='$(top_srcdir)/Util/epsic/src'
+EPSIC_BUILD='$(top_builddir)/Util/epsic/src'
+INCLUDE_CPPFLAGS='-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_BUILD) -I$(EPSIC_BUILD)/util'
+AC_SUBST(EPSIC_SOURCE)
+AC_SUBST(EPSIC_BUILD)
+AC_SUBST(INCLUDE_CPPFLAGS)
 
 ################################################################################
 #
@@ -105,7 +121,7 @@ SWIN_TEST_LIMITS
 #
 AC_ARG_ENABLE([existing],
               AC_HELP_STRING([--disable-existing],
-              [Don't look for dependencies in existing installation]))
+              ["Don't look for dependencies in existing installation"]))
 
 if test -d $PSRCHIVE_INSTALL -a x"$enable_existing" != x"no"; then
   CPPFLAGS="-I$PSRCHIVE_INSTALL/include $CPPFLAGS"
@@ -252,6 +268,8 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 #
 SWIN_FUNC_GETOPT_LONG
 
+PUBLIC_LIBS="$FFT_LIBS $CFITSIO_LIBS $PUMA_LIBS $TEMPO2_LIBS $GSL_LIBS $PTHREAD_CFLAGS $PTHREAD_LIBS $FLIBS"
+AC_SUBST(PUBLIC_LIBS)
 
 ################################################################################
 #
@@ -288,11 +306,11 @@ AC_CONFIG_FILES([
 		Base/Formats/Timer/Makefile
 		Base/Formats/PSRFITS/Makefile
 		Base/Formats/PuMa/Makefile
-                Base/Formats/ASCII/Makefile
-                Base/Formats/BPP/Makefile
-                Base/Formats/WAPP/Makefile
-                Base/Formats/PRESTO/Makefile
-                Base/Formats/ASP/Makefile
+		Base/Formats/ASCII/Makefile
+		Base/Formats/BPP/Makefile
+		Base/Formats/WAPP/Makefile
+		Base/Formats/PRESTO/Makefile
+		Base/Formats/ASP/Makefile
 		Base/Formats/UVM/Makefile
 		Base/Formats/UVM/uvmlib/Makefile
 		Base/Formats/pdv_KtZ/Makefile
@@ -317,6 +335,7 @@ AC_CONFIG_FILES([
 		Management/psrchive
 		Management/psrchive_install.h
 		Management/release.csh
+		Management/psrchive.pc
 		Makefile])
 
 AC_CONFIG_SUBDIRS([Util/epsic/src])

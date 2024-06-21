@@ -261,18 +261,18 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
 
       if (new_gof < gof[1])
       {
-	// cerr << "shift to right half" << endl;
-	val[0] = val[1];
-	gof[0] = gof[1];
+        // cerr << "shift to right half" << endl;
+        val[0] = val[1];
+        gof[0] = gof[1];
 
-	val[1] = new_point;
-	gof[1] = new_gof;
+        val[1] = new_point;
+        gof[1] = new_gof;
       }
       else
       {
-	// cerr << "shorten right half" << endl;
-	val[2] = new_point;
-	gof[2] = new_gof;
+        // cerr << "shorten right half" << endl;
+        val[2] = new_point;
+        gof[2] = new_gof;
       }
     }
     else
@@ -286,18 +286,18 @@ void CrossValidatedSmooth2D::find_optimal_smoothing_factor
 
       if (new_gof < gof[1])
       {
-	// cerr << "shift to left half" << endl;
-	val[2] = val[1];
-	gof[2] = gof[1];
+        // cerr << "shift to left half" << endl;
+        val[2] = val[1];
+        gof[2] = gof[1];
 
-	val[1] = new_point;
-	gof[1] = new_gof;
+        val[1] = new_point;
+        gof[1] = new_gof;
       }
       else
       {
-	// cerr << "shorten left half" << endl;
-	val[0] = new_point;
-	gof[0] = new_gof;
+        // cerr << "shorten left half" << endl;
+        val[0] = new_point;
+        gof[0] = new_gof;
       }
     }
 
