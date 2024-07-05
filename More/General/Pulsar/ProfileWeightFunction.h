@@ -26,6 +26,9 @@ namespace Pulsar {
     //! Default constructor
     ProfileWeightFunction ();
 
+    //! Copy constructor
+    ProfileWeightFunction (const ProfileWeightFunction&);
+
     //! Return a copy constructed instance of self
     virtual ProfileWeightFunction* clone () const = 0;
 

@@ -26,6 +26,9 @@ namespace Pulsar {
     //! Default constructor loads up all of the plot types
     PlotFactory ();
 
+    //! Destructor
+    ~PlotFactory ();
+
     //! Return a new instance of the named plot
     Plot* construct (std::string name);
 

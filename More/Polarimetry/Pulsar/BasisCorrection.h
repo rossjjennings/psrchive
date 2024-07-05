@@ -19,7 +19,9 @@ namespace Pulsar
   class Archive;
   class Receiver;
 
-  //! Correct the backend convention
+  //! Corrects the basis, based on FD_POLN, FD_HAND and FD_SANG
+  /*! FD_POLN, FD_HAND and FD_SANG are PSRFITS parameter names described
+      in Table 1 of van Straten, Manchester, Johnston & Reynolds (2010) */
   class BasisCorrection : public Reference::Able
   {
   public:

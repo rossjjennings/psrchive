@@ -554,7 +554,7 @@ int main (int argc, char** argv) try
     parser->process (estimator_config);
   }
 
-  Pulsar::Interpreter* preprocessor = standard_shell();
+  Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
 
   for (unsigned i = 0; i < archives.size(); i++) try
   {

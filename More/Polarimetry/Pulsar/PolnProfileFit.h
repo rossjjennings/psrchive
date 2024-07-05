@@ -92,8 +92,7 @@ namespace Pulsar
     const PolnProfile* get_standard () const;
 
     //! Add the specified observation to the measurement set
-    void add_observation ( Calibration::CoherencyMeasurementSet&,
-			   const PolnProfile* );
+    void add_observation ( Calibration::CoherencyMeasurementSet&, const PolnProfile* );
 
     //! Add the specified observation to the measurement equation
     void add_observation ( const PolnProfile* );

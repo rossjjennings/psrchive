@@ -82,6 +82,35 @@ int main (int argc, char** argv)
   delete managable;
   assert(Manager::instance_count == 0);
 
+
+
+
+  cerr << endl << "test_circular_reference test copy constructor" << endl << endl;
+
+  cerr << endl << "test_circular_reference new Manager" << endl << endl;
+  manager_ptr = new Manager;
+  assert(Manager::instance_count == 1);
+
+  cerr << endl << "test_circular_reference new ManageAble" << endl << endl;
+  managable = new ManageAble;
+
+  cerr << endl << "test_circular_reference Manager::manage" << endl << endl;
+  manager_ptr->manage(managable);
+
+  cerr << endl << "test_circular_reference new copy-constructed ManageAble" << endl << endl;
+  ManageAble* managable_copy = new ManageAble(*managable);
+
+  cerr << endl << "test_circular_reference delete ManageAble" << endl << endl;
+  delete managable;
+
+  // managable_copy should not keep the Manager alive
+  assert(Manager::instance_count == 0);
+
+  cerr << endl << "test_circular_reference delete ManageAble copy" << endl << endl;
+
+  delete managable_copy;
+  assert(Manager::instance_count == 0);
+
   cerr << "Success!" << endl;
   return 0;
 }

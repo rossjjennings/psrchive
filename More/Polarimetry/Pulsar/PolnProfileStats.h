@@ -63,11 +63,17 @@ namespace Pulsar {
     //! Returns the total polarized flux of the on-pulse phase bins
     Estimate<double> get_total_polarized () const;
 
+    //! Returns the total polarized flux of the on-pulse phase bins
+    Estimate<double> get_total_polarized_squared () const;
+
     //! Returns the total determinant of the on-pulse phase bins
     Estimate<double> get_total_determinant () const;
 
     //! Returns the total linearly polarized flux of the on-pulse phase bins
     Estimate<double> get_total_linear () const;
+
+    //! Returns the total linearly polarized flux squared of the on-pulse phase bins
+    Estimate<double> get_total_linear_squared () const;
 
     //! Returns the total circularly polarized flux of the on-pulse phase bins
     Estimate<double> get_total_circular () const;

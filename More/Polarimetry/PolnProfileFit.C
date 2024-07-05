@@ -454,12 +454,12 @@ void PolnProfileFit::add_observation (CoherencyMeasurementSet& measurements,
       
 #ifdef _DEBUG
       if (error->get_transformation() != transformation)
-	{
-	  cerr << "error.xform=" << error->get_transformation() << " != "
-	       << transformation.get() << endl;
-	}
+      {
+        cerr << "error.xform=" << error->get_transformation() << " != "
+            << transformation.get() << endl;
+      }
       else
-	cerr << "clone ok!" << endl;
+        cerr << "clone ok!" << endl;
 #endif
       
       CoherencyMeasurement measurement (ibin-1);

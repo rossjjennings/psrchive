@@ -94,8 +94,6 @@ namespace Pulsar {
 
     //! Initialize all values to null
     void init ();
-
-    void* header_ptr;
     int program;
 
   };

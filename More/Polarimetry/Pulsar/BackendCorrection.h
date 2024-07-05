@@ -19,7 +19,9 @@ namespace Pulsar {
   class Archive;
   class Backend;
 
-  //! Correct the backend convention
+  //! Correct the backend convention, based on BE_PHASE and BE_DCC
+  /*! BE_PHASE and BE_DCC are PSRFITS parameter names described
+      in Table 1 of van Straten, Manchester, Johnston & Reynolds (2010) */
   class BackendCorrection : public Reference::Able
   {
 

@@ -412,14 +412,12 @@ void Pulsar::PulsarCalibrator::add_pulsar
 	   << measurements.get_transformation_index() << endl;
 
     get_data_call ++;
-    mtm[ichan]->add_observation( measurements,
-				 integration->new_PolnProfile (ichan) );
+    mtm[ichan]->add_observation( measurements, integration->new_PolnProfile (ichan) );
   }
   catch (Error& error)
   {
     if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::add_pulsar ichan=" << ichan 
-	   << " error\n\t" << error << endl;
+      cerr << "Pulsar::PulsarCalibrator::add_pulsar ichan=" << ichan << " error\n\t" << error << endl;
     get_data_fail ++;
     return;
   }
@@ -427,11 +425,9 @@ void Pulsar::PulsarCalibrator::add_pulsar
   if (solve_each)
   {
     if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::add_pulsar"
-	" solving ichan=" << ichan << endl;
+      cerr << "Pulsar::PulsarCalibrator::add_pulsar solving ichan=" << ichan << endl;
 
-    queue.submit( this, &Pulsar::PulsarCalibrator::solve1,
-		  measurements );
+    queue.submit( this, &Pulsar::PulsarCalibrator::solve1, measurements );
   }
 
   if (verbose > 2)

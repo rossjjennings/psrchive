@@ -147,6 +147,21 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_polarized () const try
      throw error += "Pulsar::PolnProfileStats::get_total_polarized";
    }
 
+//! Returns the total polarized flux of the on-pulse phase bins
+Estimate<double> Pulsar::PolnProfileStats::get_total_polarized_squared () const try
+{
+  Profile polarized;
+  profile->get_polarized_squared (&polarized);
+
+  stats->set_profile (&polarized);
+
+  return stats->get_total (false);
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PolnProfileStats::get_total_polarized_squared";
+   }
+
 //! Returns the total linearly polarized flux of the on-pulse phase bins
 Estimate<double> Pulsar::PolnProfileStats::get_total_linear () const try
 {
@@ -170,6 +185,31 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_linear () const try
  catch (Error& error)
    {
      throw error += "Pulsar::PolnProfileStats::get_total_linear";
+   }
+
+//! Returns the total linearly polarized flux of the on-pulse phase bins
+Estimate<double> Pulsar::PolnProfileStats::get_total_linear_squared () const try
+{
+  Profile linear;
+  profile->get_linear_squared (&linear);
+
+#if _DEBUG
+  cerr << "Pulsar::PolnProfileStats::get_total_linear_squared  this=" << this << 
+    " calling ProfileStats::set_profile regions_set=" << regions_set << endl;
+#endif
+
+  stats->set_profile (&linear);
+
+#if _DEBUG
+  cerr << "Pulsar::PolnProfileStats::get_total_linear_squared  this=" << this <<
+    " calling ProfileStats::get_total" << endl;
+#endif
+
+  return stats->get_total (false);
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PolnProfileStats::get_total_linear_squared ";
    }
 
 //! Returns the total circularly polarized flux of the on-pulse phase bins

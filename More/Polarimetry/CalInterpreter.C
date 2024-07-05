@@ -55,7 +55,12 @@ Pulsar::CalInterpreter::CalInterpreter ()
 
   add_command
     ( &CalInterpreter::backend,
-      "backend", "backend convention correction" );
+      "backend", "backend convention correction",
+      "backend convention is parameterized by \n"
+      "  BE_PHASE = be:phase = backend conjugation (+1 or -1) \n"
+      "  be:phc = backend conjugation corrected \n"
+      "  BE_DCC = be:dcc = downconversion conjugation corrected \n"
+      "  be:hand = backend hand (+1 or -1)" );
 
   add_command 
     ( &CalInterpreter::cal,
@@ -63,7 +68,11 @@ Pulsar::CalInterpreter::CalInterpreter ()
 
   add_command 
     ( &CalInterpreter::frontend,
-      "frontend", "frontend (basis and projection) correction" );
+      "frontend", "frontend (basis and projection) correction",
+      "basis corrections are parameterized by \n"
+      "  FD_POLN = rcvr:basis = receptor polarization (linear or circular) \n"
+      "  FD_HAND = rcvr:hand = feed hand (+1 or -1) \n"
+      "  FD_SANG = rcvr:sa = symmetry angle" );
 
   add_command 
     ( &CalInterpreter::fluxcal,

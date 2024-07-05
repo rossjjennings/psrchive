@@ -12,6 +12,9 @@
 #include <iostream>
 using namespace std;
 
+static float auto_cutoff = 0.5;
+static float selection_threshold = 3.0;
+
 void usage ()
 {
   cout <<
@@ -26,6 +29,8 @@ void usage ()
     "  -A rad        Compute maximum RM so that delta-Psi<rad across channel \n"
     "  -i nchan      Subdivide the band (fscrunch-x2) until \"nchan\" channels are left (incorporates systematics) \n"
     "  -j ntimes     Subdivide the pulse profile (bscrunch-x2) ntimes (incorporates systematics) \n"
+    "  -s            Integrate L^2 instead of L \n"
+    "  -l cutoff     Fraction of peak at which to cut off data fit to Gaussian (default: " << auto_cutoff << ") \n"
     "  -u max        Set the upper bound on the default maximum RM \n"
     "  -U rm/dm      Set upper bound on default maximum RM = DM * rm/dm \n"
     "\n"
@@ -33,7 +38,7 @@ void usage ()
     "\n"
     "  -r            Refine the RM using two halves of band (enables this mode) \n"
     "  -W            Divide the band in two equal wavelength-squared intervals \n"
-    "  -T sigma_L    Set the threshold used to select bins (default: 3 sigma) \n"
+    "  -T sigma_L    Set the threshold used to select bins (default: " << selection_threshold << " sigma) \n"
     "  -P paas.m     Perform RM refinement for each profile component in model \n"
     "  -b [+/-][i-k] Include/exclude phase bins i through k (inclusive) \n"
     "\n"
@@ -182,7 +187,6 @@ static float auto_step_rad = 0.0;
 static float auto_max_rad = 1.0;
 
 static unsigned auto_minsteps = 10;
-static float selection_threshold = -1;
 static unsigned max_iterations = 10;
 
 Estimate<double> best_search_rm;
@@ -191,6 +195,9 @@ static vector<unsigned> include_bins;
 static vector<unsigned> exclude_bins;
 
 static bool wavelength_squared_spacing = false;
+
+// use the sum of L^2 instead of sum of L
+static bool squared = false;
 
 int main (int argc, char** argv)
 {
@@ -250,7 +257,7 @@ int main (int argc, char** argv)
   // estimate an unique RM for each component in the model
   Reference::To<Pulsar::ComponentModel> component_model;
 
-  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Lm:M:p:P:rR:S:T:tu:U:vVw:WYz:";
+  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Ll:m:M:p:P:rR:sS:T:tu:U:vVw:WYz:";
 
   int gotc = 0;
 
@@ -268,42 +275,42 @@ int main (int argc, char** argv)
 
     case 'b':
       switch (optarg[0])
-	{
-	case '-':
-	  exclude_range = optarg + 1;
-	  cerr << "rmfit: will exclude " << exclude_range << endl;
-	  break;
-	case '+':
-	  include_range = optarg + 1;
-	  cerr << "rmfit: will include " << include_range << endl;
-	  break;
-	default:
-	  cerr << "rmfit: invalid bin inclusion/exclusion string "
-	    "'" << optarg << "'" << endl;
-	  return 0;
-	}
+      {
+      case '-':
+        exclude_range = optarg + 1;
+        cerr << "rmfit: will exclude " << exclude_range << endl;
+        break;
+      case '+':
+        include_range = optarg + 1;
+        cerr << "rmfit: will include " << include_range << endl;
+        break;
+      default:
+        cerr << "rmfit: invalid bin inclusion/exclusion string "
+          "'" << optarg << "'" << endl;
+        return 0;
+      }
       break;
 
     case 'B':
       bscrunchme = true;
       if (sscanf(optarg, "%d", &bscr) != 1) {
-	cerr << "That is not a valid scrunch factor!" << endl;
-	return -1;
+        cerr << "That is not a valid scrunch factor!" << endl;
+        return -1;
       }
       break;
 
     case 'c':
       {
-	TextInterface::Parser* interface = poln_stats->get_interface();
-	cerr << interface->process (optarg) << endl;
-	break;
+        TextInterface::Parser* interface = poln_stats->get_interface();
+        cerr << interface->process (optarg) << endl;
+        break;
       }
 
     case 'p':
       singlebin = true;
       if (sscanf(optarg, "%f,%f", &x1, &x2) != 2) {
-	cerr << "That is not a valid phase window!" << endl;
-	return -1;
+        cerr << "That is not a valid phase window!" << endl;
+        return -1;
       }
 
       break;
@@ -319,8 +326,8 @@ int main (int argc, char** argv)
     case 'F':
       fscrunchme = true;
       if (sscanf(optarg, "%d", &fscr) != 1) {
-	cerr << "That is not a valid scrunch factor!" << endl;
-	return -1;
+        cerr << "That is not a valid scrunch factor!" << endl;
+        return -1;
       }
       break;
 
@@ -335,12 +342,12 @@ int main (int argc, char** argv)
       fscr = 2;
       fscr_init = 16;
       if (sscanf(optarg, "%d", &nchannels) != 1) {
-	cerr << "That is not a valid number of channels!" << endl;
-	return -1;
+        cerr << "That is not a valid number of channels!" << endl;
+        return -1;
       }
       if (nchannels < 8) {
-	cerr << "Very few channels; it will compromise the statistics!" << endl;
-	return -1;
+        cerr << "Very few channels; it will compromise the statistics!" << endl;
+        return -1;
       }
 
       break;
@@ -350,12 +357,12 @@ int main (int argc, char** argv)
       bscrunchme = true;
       bscr=2;
       if (sscanf(optarg, "%u", &nbscr) != 1) {
-	cerr << "That is not a valid number of scrunches!" << endl;
-	return -1;
+        cerr << "That is not a valid number of scrunches!" << endl;
+        return -1;
       }
       if (nbscr > 8) {
-	cerr << "Too many bscrunch times; it will compromise the statistics!" << endl;
-	return -1;
+        cerr << "Too many bscrunch times; it will compromise the statistics!" << endl;
+        return -1;
       }
 
       break;
@@ -368,20 +375,24 @@ int main (int argc, char** argv)
       log_results = true;
       break;
 
+    case 'l':
+      auto_cutoff = atof(optarg);
+      break;
+
     case 'm':
       maxmthd = true;
-      if (sscanf(optarg, "%f,%f,%ud", &minrm, &maxrm, &rmsteps) != 3) {
-	cerr << "Invalid paramaters!" << endl;
-	return -1;
+      if (sscanf(optarg, "%f,%f,%ud", &minrm, &maxrm, &rmsteps) != 3)
+      {
+        cerr << "Invalid paramaters!" << endl;
+        return -1;
       }
-      if ((maxrm < minrm) || (rmsteps < 2)) {
-	cerr << "Invalid paramaters!" << endl;
-	return -1;
+      if ((maxrm < minrm) || (rmsteps < 2))
+      {
+        cerr << "Invalid paramaters!" << endl;
+        return -1;
       }
       
       rmstep = fabs(maxrm-minrm)/float(rmsteps);
-
-      
       break;
 
     case 'M':
@@ -394,8 +405,8 @@ int main (int argc, char** argv)
 
     case 'C':
       if (sscanf(optarg, "%f", &channel_weight_threshold) != 1) {
-	cerr << "That is not a valid channel weight threshold!" << endl;
-	return -1;
+        cerr << "That is not a valid channel weight threshold!" << endl;
+        return -1;
       }
       break;
 
@@ -405,6 +416,8 @@ int main (int argc, char** argv)
       break;
 
     case 'S': nsigma = atof(optarg); break;
+
+    case 's': squared = true; break;
 
     case 't':
       maxmthd = true;
@@ -450,8 +463,8 @@ int main (int argc, char** argv)
     case 'w':
       window = true;
       if (sscanf(optarg, "%f,%f", &x1, &x2) != 2) {
-	cerr << "That is not a valid phase window!" << endl;
-	return -1;
+        cerr << "That is not a valid phase window!" << endl;
+        return -1;
       }
       break;
 
@@ -463,18 +476,18 @@ int main (int argc, char** argv)
       plotv = true;
       if (fin)
       {
-	 fin.close();
-	 system("rm -f QUVflux.out");
+        fin.close();
+        system("rm -f QUVflux.out");
       }
       
       break;
 
     case 'z': 
       {
-	vector<string> words = stringdecimate(optarg," \t");
-	for( unsigned i=0; i<words.size(); i++)
-	  zap_chans.push_back( fromstring<unsigned>(words[i]) );
-	break;
+        vector<string> words = stringdecimate(optarg," \t");
+        for( unsigned i=0; i<words.size(); i++)
+          zap_chans.push_back( fromstring<unsigned>(words[i]) );
+        break;
       }
 
 
@@ -1070,8 +1083,7 @@ Reference::To<Pulsar::Archive> get_data(string filename)
   return data;
 }
 
-double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
-		   Reference::To<Pulsar::Archive> data)
+double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Reference::To<Pulsar::Archive> data)
 {
   if (auto_maxmthd)
   {
@@ -1193,8 +1205,12 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     profile = useful->get_Integration(0)->new_PolnProfile(0);
     
     poln_stats->set_profile( profile );
-    Estimate<float> rval = poln_stats->get_total_linear ();
-    
+    Estimate<float> rval;
+    if (squared)
+      rval = poln_stats->get_total_linear_squared ();
+    else
+      rval = poln_stats->get_total_linear ();
+
     fluxes[step] = rval.get_value();
     err[step] = rval.get_error();
     rms[step] = rm;
@@ -1263,13 +1279,18 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
   
   float max = fluxes[index];
 
+  auto imin = min_element(fluxes.begin(), fluxes.end());
+  float min = *imin;
+
   // fit data only to the first set of minima
   unsigned index_min = index;
-  while (index_min > 0 && (fluxes[index_min] > fluxes[index_min-1]))
+  while (index_min > 0
+        && (((fluxes[index_min] - min) > auto_cutoff * max) || (fluxes[index_min] > fluxes[index_min-1])))
     index_min --;
 
   unsigned index_max = index;
-  while (index_max +1 < rmsteps && (fluxes[index_max] > fluxes[index_max+1]))
+  while (index_max +1 < rmsteps 
+        && (((fluxes[index_max] - min) > auto_cutoff * max) || (fluxes[index_max] > fluxes[index_max+1])))
     index_max ++;
 
   double bestrm = rms[index];
@@ -1280,8 +1301,8 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
   MEAL::Gaussian gm;
 
   gm.set_centre (bestrm);
-  gm.set_width  (rms[index_max] - rms[index_min]);
-  gm.set_height (max);
+  gm.set_width  ((rms[index_max] - rms[index_min]) / 6.0);
+  gm.set_height (max - min);
 
   cerr << "initial peak index=" << index 
        << "  (" << index_min << "->" << index_max << ") or\n"
@@ -1296,7 +1317,7 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
 
   for (unsigned j = index_min; j < index_max; j++) {
     data_x.push_back ( argument.get_Value(rms[j]) );
-    data_y.push_back( Estimate<double>(fluxes[j],err[j]) );
+    data_y.push_back( Estimate<double>(fluxes[j],err[j]) - min );
   }
 
   if (data_x.size() == 0) {
@@ -1403,7 +1424,7 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
 
     for (unsigned k = 1; k < rms.size(); k++) {
       gm.set_abscissa(rms[k]);
-      cpgdraw(rms[k],gm.evaluate());
+      cpgdraw(rms[k],gm.evaluate() + min);
     }
 
     cpgsci(1);
@@ -1419,12 +1440,8 @@ void do_refine (Reference::To<Pulsar::Archive> data,
 		PhaseWeight* onpulse_weights)
 {
   Pulsar::DeltaRM delta_rm;
-
-  if (selection_threshold != -1)
-  {
-    cerr << "rmfit: do_refine set threshold = " << selection_threshold << endl;
-    delta_rm.set_threshold (selection_threshold);
-  }
+  cerr << "rmfit: do_refine set threshold = " << selection_threshold << endl;
+  delta_rm.set_threshold (selection_threshold);
 
   if (wavelength_squared_spacing)
     delta_rm.set_policy (new FrequencyIntegrate::WavelengthSquaredSpaced);

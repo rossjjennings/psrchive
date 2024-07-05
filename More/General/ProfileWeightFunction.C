@@ -16,6 +16,15 @@ Pulsar::ProfileWeightFunction::ProfileWeightFunction ()
 {
 }
 
+Pulsar::ProfileWeightFunction::ProfileWeightFunction (const ProfileWeightFunction& that)
+{
+  if (that.include)
+    include = new PhaseWeight(that.include);
+
+  if (that.exclude)
+    exclude = new PhaseWeight(that.exclude);
+}
+
 //! Set the Profile from which the PhaseWeight will be derived
 void Pulsar::ProfileWeightFunction::set_Profile (const Profile* _profile)
 {

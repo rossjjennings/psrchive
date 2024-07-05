@@ -15,6 +15,9 @@
 #include <errno.h>
 #include <assert.h>
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 
 BatchQueue::BatchQueue (unsigned nthread)
@@ -32,6 +35,23 @@ BatchQueue::BatchQueue (unsigned nthread)
 
 BatchQueue::~BatchQueue ()
 {
+  DEBUG("BatchQueue::~BatchQueue this=" << this << " active.size=" << active.size());
+
+#if HAVE_PTHREAD
+  {
+    ThreadContext::Lock lock (context);
+
+    for (unsigned ithread = 0; ithread < active.size(); ithread++)
+    {
+      if ( active[ithread] )
+      {
+        DEBUG("BatchQueue dtor deleting active job=" << active[ithread]);
+        delete active[ithread];
+      }
+    }
+  }
+#endif
+
   if (context)
     delete context;
 }
@@ -67,9 +87,7 @@ static void* solve_thread (void* instance)
 {
   BatchQueue::Job* thiz = static_cast<BatchQueue::Job*>(instance);
 
-#ifdef _DEBUG
-  cerr << "BatchQueue::solve_thread this=" << thiz << endl;
-#endif
+  DEBUG("BatchQueue::solve_thread this=" << thiz);
 
   thiz -> run ();
 
@@ -79,26 +97,28 @@ static void* solve_thread (void* instance)
 
 void BatchQueue::Job::run ()
 {
-
   try {
     execute ();
   }
   catch (Error& e) {
-    cerr << e.get_message() << endl;
+    DEBUG(e.get_message());
   }
 
   queue->remove (this);
-
 }
 
 void BatchQueue::remove (Job* job)
 {
   ThreadContext::Lock lock (context);
 
+  DEBUG("BatchQueue::remove this=" << this << " job=" << job);
+
   unsigned ithread = 0;
 
   for (ithread = 0; ithread < active.size(); ithread++)
-    if ( active[ithread] == job ) {
+    if ( active[ithread] == job )
+    {
+      DEBUG("BatchQueue::remove deleting job=" << job);
       delete job;
       active[ithread] = 0;
       break;
@@ -121,30 +141,30 @@ void BatchQueue::add (Job* job)
     bool currently_solving = false;
 
     for (ithread = 0; ithread < active.size(); ithread++)
+    {
       if ( active[ithread] == job )
-	currently_solving = true;
-    
-    if (currently_solving)
-      cerr << "BatchQueue::solve_wait job=" << job
-	   << " is currently being solved" << endl;
+        currently_solving = true;
+    }
 
+    if (currently_solving)
+    {
+      DEBUG("BatchQueue::solve_wait job=" << job << " is currently being solved");
+    }
     else {
 
       for (ithread = 0; ithread < active.size(); ithread++)
-	if ( active[ithread] == 0 )
-	  break;
+      {
+        if ( active[ithread] == 0 )
+          break;
+      }
 
       if ( ithread < active.size() )
-	break;
-
+        break;
     }
 
-#ifdef _DEBUG
-    cerr << "BatchQueue::solve waiting for next available thread" << endl;
-#endif
+    DEBUG("BatchQueue::solve waiting for next available thread");
 
     context->wait ();
-
   }
 
   if ( !active.size() )
@@ -165,14 +185,12 @@ void BatchQueue::wait ()
     
     for (unsigned ithread = 0; ithread < active.size(); ithread++)
       if ( active[ithread] )
-	current ++;
+        current ++;
     
     if (!current)
       break;
 
-#ifdef _DEBUG
-    cerr << "BatchQueue::wait waiting for " << current << " threads" << endl;
-#endif
+    DEBUG("BatchQueue::wait waiting for " << current << " threads");
 
     context->wait ();
 
@@ -181,15 +199,13 @@ void BatchQueue::wait ()
 
 void BatchQueue::submit (Job* job)
 {
-#ifdef _DEBUG
-  cerr << "BatchQueue::solve using " << active.size() << " threads" << endl;
-#endif
+  DEBUG("BatchQueue::solve using " << active.size() << " threads");
 
-  if (active.size() == 0) {
-#ifdef _DEBUG
-    cerr << "BatchQueue::solve calling Job::execute" << endl;
-#endif
+  if (active.size() == 0)
+  {
+    DEBUG("BatchQueue::solve calling Job::execute");
     job->execute();
+    delete job;
     return;
   }
 
@@ -202,9 +218,7 @@ void BatchQueue::submit (Job* job)
   pthread_attr_setdetachstate (&pat, PTHREAD_CREATE_DETACHED);
   pthread_t thread_ID;
 
-#ifdef _DEBUG
-  cerr << "BatchQueue::solve creating solve thread job=" << job << endl;
-#endif
+  DEBUG("BatchQueue::solve creating solve thread job=" << job);
 
   errno = pthread_create (&thread_ID, &pat, solve_thread, job);
 

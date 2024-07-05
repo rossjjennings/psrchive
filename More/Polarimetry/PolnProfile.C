@@ -673,7 +673,7 @@ void remove_baseline (Pulsar::Profile* profile,
 
 
 /*!
-  rss stands for root-sum-squared
+  Return the square root of the sum of the squared values of the specified polarizations
 
   \pre The PolnProfile must contain Stokes parameters; so as to reduce the
   amount of behind the scenes cloning and state conversion
@@ -686,32 +686,19 @@ void remove_baseline (Pulsar::Profile* profile,
   \post The bias due to noise is removed before the square root is taken
 
  */
-void Pulsar::PolnProfile::get_rss 
+void Pulsar::PolnProfile::get_root_sum_squared 
 ( Profile* rss, unsigned jpol, unsigned kpol,
   BaselineEstimator* baseline_estimator) const
 {
-  if (state != Signal::Stokes)
-    throw Error (InvalidState, "Pulsar::PolnProfile::get_sqrt_sumsq",
-		 "must first convert to Stokes parameters");
-
-  unsigned ibin, nbin = get_nbin();
-  
-  rss->resize (nbin);
-  rss->zero ();
-
-  float* amps = rss->get_amps();
-
-  for (unsigned ipol=jpol; ipol <= kpol; ipol++)
-  {
-    const float *a = get_Profile(ipol)->get_amps();
-    for (ibin=0; ibin<nbin; ibin++)
-      amps[ibin] += a[ibin]*a[ibin];
-  }
+  get_sum_squared (rss, jpol, kpol);
 
   if (!pav_backward_compatibility)
     remove_baseline (rss, baseline_estimator);
 
-  for (ibin=0; ibin<nbin; ibin++)
+  float* amps = rss->get_amps();
+  unsigned nbin = rss->get_nbin();
+
+  for (unsigned ibin=0; ibin<nbin; ibin++)
     if (amps[ibin] < 0.0)
       amps[ibin] = -sqrt(-amps[ibin]);
     else
@@ -719,25 +706,79 @@ void Pulsar::PolnProfile::get_rss
 
   if (pav_backward_compatibility)
     remove_baseline (rss, baseline_estimator);
-
 }
 
-void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
-try {
-  get_rss (polarized, 1,3);
+
+/*!
+  Return the sum of the squared values of the specified polarizations
+
+  \pre The PolnProfile must contain Stokes parameters; so as to reduce the
+  amount of behind the scenes cloning and state conversion
+
+  \pre The Profile baselines should have been removed; so as not to
+  interfere with any baseline removal algorithms already applied
+
+  \post The polarization profiles from jpol to kpol inclusive are added
+
+  \post The bias due to noise is removed before the square root is taken
+
+ */
+void Pulsar::PolnProfile::get_sum_squared
+  (Profile* sumsq, unsigned start_pol, unsigned end_pol) const
+{
+  if (state != Signal::Stokes)
+    throw Error (InvalidState, "Pulsar::PolnProfile::get_sqrt_sumsq",
+		 "must first convert to Stokes parameters");
+
+  unsigned nbin = get_nbin();
+  
+  sumsq->resize (nbin);
+  sumsq->zero ();
+
+  float* amps = sumsq->get_amps();
+
+  for (unsigned ipol=start_pol; ipol <= end_pol; ipol++)
+  {
+    const float *a = get_Profile(ipol)->get_amps();
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+      amps[ibin] += a[ibin]*a[ibin];
+  }
 }
-catch (Error& error) {
+
+void Pulsar::PolnProfile::get_polarized (Profile* polarized) const try
+{
+  get_root_sum_squared (polarized, 1,3);
+}
+catch (Error& error)
+{
   throw error += "Pulsar::PolnProfile::get_polarized";
+}
+
+void Pulsar::PolnProfile::get_polarized_squared (Profile* psq) const try
+{
+  get_sum_squared (psq, 1,3);
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnProfile::get_polarized_squared";
 }
 
 void Pulsar::PolnProfile::get_linear (Profile* linear) const
 try {
 
   ExponentialBaseline estimator;
-  get_rss (linear, 1,2, &estimator);
-
+  get_root_sum_squared (linear, 1,2, &estimator);
 }
 catch (Error& error) {
+  throw error += "Pulsar::PolnProfile::get_linear";
+}
+
+void Pulsar::PolnProfile::get_linear_squared (Profile* Lsq) const try
+{
+  get_sum_squared (Lsq, 1,2);
+}
+catch (Error& error)
+{
   throw error += "Pulsar::PolnProfile::get_linear";
 }
 

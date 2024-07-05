@@ -165,6 +165,12 @@ Pulsar::PlotFactory::PlotFactory ()
 
 }
 
+Pulsar::PlotFactory::~PlotFactory ()
+{
+  for (auto agent: agents)
+    delete agent;
+}
+
 //! Return a new instance of the named plotter
 Pulsar::Plot* Pulsar::PlotFactory::construct (std::string name)
 {

@@ -13,6 +13,7 @@
 #include "utc.h"
 
 #include <fstream>
+#include <memory>
 #include <string.h>
 
 using namespace std;
@@ -94,9 +95,9 @@ void Pulsar::UVMArchive::load_header (const char* filename)
 {
   int newscan = 0;
 
-  uvm_header* header = new uvm_header;
-  header_ptr = header;
-  
+  std::unique_ptr<uvm_header> managed_header (new uvm_header);
+  uvm_header* header = managed_header.get();
+
   if (uvm_getheader (filename, &program, &newscan, header) < 0)
     throw Error (InvalidState, "Pulsar::UVMArchive::load_header",
 		 "%s is not a UVM archive", filename);

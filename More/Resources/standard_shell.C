@@ -21,7 +21,7 @@ Pulsar::Interpreter* standard_shell ()
     By default, print/parse angles in degrees.
 
     It would be nice if this function didn't have to change a global
-    variable, but at the moment I don't see any around this problem
+    variable, but at the moment I don't see any way around this problem
     
     https://sourceforge.net/tracker/?func=detail&aid=3530973&group_id=159762&atid=813132
 

@@ -48,8 +48,7 @@ namespace Calibration {
 		     const Stokes<double>& variance);
 
     //! Set the measured complex Stokes parameters and the variance function
-    void set_stokes (const Stokes< std::complex<double> >& stokes, 
-		     const Uncertainty* var);
+    void set_stokes (const Stokes< std::complex<double> >& stokes, const Uncertainty*);
 
     //! Get the number of constraints provided by this measurement
     unsigned get_nconstraint () const;

@@ -134,10 +134,13 @@ namespace Pulsar {
     void invint (Profile* invint, bool second = true) const;
 
     //! Return the invariant autoconvolution
-    void invconv (Profile* invconv) const;
+    void invconv (Profile*) const;
 
     //! Return the linear polarization profile
-    void get_linear (Profile* linear) const;
+    void get_linear (Profile*) const;
+
+    //! Return the linear polarization squared profile
+    void get_linear_squared (Profile*) const;
 
     //! Return the variance of L estimated from off-pulse Q and U
     double get_linear_variance () const;
@@ -146,10 +149,13 @@ namespace Pulsar {
     double get_linear_variance (std::pair<double,double>& qu_var) const;
 
     //! Return the absolute circular polarization profile
-    void get_circular (Profile* circular) const;
+    void get_circular (Profile*) const;
 
     //! Return the total polarization profile
-    void get_polarized (Profile* polarized) const;
+    void get_polarized (Profile*) const;
+
+    //! Return the total polarization squared profile
+    void get_polarized_squared (Profile*) const;
 
     //! Return the orientation and its estimated error for each pulse phase
     void get_orientation (std::vector< Estimate<double> >&, float sigma) const;
@@ -157,8 +163,7 @@ namespace Pulsar {
     //! Return the ellipticity and its estimated error for each pulse phase
     void get_ellipticity (std::vector< Estimate<double> >&, float sigma) const;
 
-    void get_linear (std::vector< std::complex< Estimate<double> > >& L,
-		     float sigma) const;
+    void get_linear (std::vector< std::complex< Estimate<double> > >& L, float sigma) const;
 
     const StokesCovariance* get_covariance () const;
     StokesCovariance* get_covariance ();
@@ -184,9 +189,7 @@ namespace Pulsar {
     Reference::To<StokesCovariance> covariance;
 
     //! Throw an exception if want_state != state or want_ibin >= nbin
-    void check (const char* method, 
-		Signal::State want_state,
-		unsigned want_ibin) const;
+    void check (const char* method, Signal::State want_state, unsigned want_ibin) const;
 
     //! Efficiently forms the inplace sum and difference of two profiles
     void sum_difference (Profile* sum, Profile* difference);
@@ -195,9 +198,11 @@ namespace Pulsar {
     void init ();
 
     //! Does the work for get_polarized and get_linear
-    void get_rss( Profile* rss, unsigned jpol, unsigned kpol,
-		  BaselineEstimator* baseline_estimator = 0 ) const;
+    void get_root_sum_squared(Profile* rss, unsigned jpol, unsigned kpol,
+                              BaselineEstimator* baseline_estimator = 0) const;
 
+    //! Does the work for get_root_sum_squared, get_polarized_squared and get_linear_squared
+    void get_sum_squared(Profile* rss, unsigned jpol, unsigned kpol) const;
   };
 
 }
