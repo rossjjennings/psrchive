@@ -19,10 +19,6 @@
 #include <string>
 #include <stdio.h>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 //! Class for representing modified Julian dates with high precision.
 class MJD {
 
@@ -149,14 +145,6 @@ class MJD {
 
   // more convenient interface, with optional fractional seconds
   std::string datestr (const char* format, unsigned fractional_second_digits = 0) const;
-
-#ifdef HAVE_MPI
-  friend int mpiPack_size (const MJD&, MPI_Comm comm, int* size);
-  friend int mpiPack   (const MJD&, void* outbuf, int outcount, 
-			int* position, MPI_Comm comm);
-  friend int mpiUnpack (void* inbuf, int insize, int* position, 
-			MJD*, MPI_Comm comm);
-#endif
 
  protected:
   friend bool equal (const MJD &m1, const MJD &m2);

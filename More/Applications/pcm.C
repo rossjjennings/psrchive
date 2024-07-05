@@ -1846,7 +1846,7 @@ SystemCalibrator* matrix_template_matching (const string& stdname)
 
   for (unsigned ical=0; ical < calibrator_filenames.size(); ical++)
   {
-    Archive* cal = Archive::load (calibrator_filenames[ical]);
+    Reference::To<Archive> cal = Archive::load (calibrator_filenames[ical]);
     standard_options->process (cal);
     model->add_observation (cal);
   }

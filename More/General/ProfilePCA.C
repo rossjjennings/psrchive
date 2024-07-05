@@ -87,7 +87,7 @@ void Pulsar::ProfilePCA::reset()
     cov[i]=0.0;
 }
 
-void Pulsar::ProfilePCA::add_Profile(const Profile *p) 
+void Pulsar::ProfilePCA::add_Profile(const Profile* p) 
 {
   // Check that we have enough time resolution
   // If not, continue with a warning.
@@ -216,7 +216,7 @@ Pulsar::ProfilePCA::get_pc_vector(int i, unsigned nbin)
     throw Error (InvalidParam, "Pulsar::ProfilePCA::get_pc_vector",
         "requested out of range component (%d)", i);
 
-  Profile *prof = new Profile(nbin);
+  Reference::To<Profile> prof = new Profile(nbin);
   float *fprof = new float[nbin+2];
   for (unsigned ii=0; ii<nbin+2; ii++) fprof[ii]=0.0;
 
@@ -238,11 +238,11 @@ Pulsar::ProfilePCA::get_pc_vector(int i, unsigned nbin)
   FTransform::bcr1d(nbin, prof->get_amps(), fprof);
   // TODO : set other Profile attributes?
   delete [] fprof;
-  return(prof);
+  return prof.release();
 }
 
 std::vector<double> 
-Pulsar::ProfilePCA::decompose(const Profile *p, unsigned n_pc)
+Pulsar::ProfilePCA::decompose(const Profile* p, unsigned n_pc)
 {
   if (n_pc>2*nharm_pca)
     throw Error (InvalidParam, "Pulsar::ProfilePCA::decompose",

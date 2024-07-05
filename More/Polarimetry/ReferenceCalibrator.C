@@ -61,7 +61,7 @@ void ReferenceCalibrator::set_calibrator (const Archive* archive)
 		 "invalid state=" + State2string(state));
 #endif
 
-  Archive* clone = 0;
+  Reference::To<Archive> clone;
 
   if (fullStokes && state != Signal::Coherence)
   {
@@ -493,8 +493,7 @@ void ReferenceCalibrator::calculate_transformation ()
 #include "Pulsar/CalibratorTypes.h"
 
 ReferenceCalibrator* 
-ReferenceCalibrator::factory (const Calibrator::Type* type,
-					const Archive* archive)
+ReferenceCalibrator::factory (const Calibrator::Type* type, const Archive* archive)
 {
   if ( type->is_a<CalibratorTypes::Hybrid>() ||
        type->is_a<CalibratorTypes::SingleAxis>() )

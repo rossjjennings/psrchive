@@ -7,8 +7,7 @@
 
 #include "MJD.h"
 #include "Error.h"
-
-#include "ieee.h"
+#include "myfinite.h"
 
 #include <iostream>
 #include <iomanip>
@@ -21,10 +20,6 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#if defined(sun) && !defined(__GNUC__)
-#include <float.h>
-#include <sunmath.h>
-#endif
 #include <math.h>
 #include <limits.h>
 
@@ -53,8 +48,17 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 
 // #define _DEBUG 1
 
+const unsigned precision_limit = 80;
+
 string MJD::printdays (unsigned prec) const
 {
+  if (prec > precision_limit)
+  {
+    cerr << "MJD::printdays WARNING reducing " << prec 
+        << " to " << precision_limit << " digits of precision" << endl;
+    prec = precision_limit;
+  }
+
 #ifdef _DEBUG
   cerr << "MJD::printdays prec=" << prec << " days=" << days 
        << " secs=" << secs << " fracsec=" << fracsec << endl;
@@ -70,7 +74,13 @@ string MJD::printdays (unsigned prec) const
 
   if (prec > 0)
   {
-    snprintf (temp, size, "%*.*lf", prec+3, prec, fracday());
+    double fractional = fracday();
+    if (!myfinite(fractional))
+    {
+      return output + ".NaN";
+    }
+    
+    snprintf (temp, size, "%*.*lf", prec+3, prec, fractional);
     char* period = strchr (temp, '.');
     if (!period)  {
       output += ".";
@@ -665,6 +675,9 @@ ostream& operator << (ostream& ostr, const MJD& mjd)
     precision = MJD::ostream_precision;
 
   double ddays = mjd.in_days();
+
+  if (!myfinite(ddays))
+    return ostr << ddays << endl;
 
   if (precision < std::numeric_limits<double>::digits10)
     return ostr << ddays;

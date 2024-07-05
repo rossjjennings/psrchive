@@ -82,7 +82,7 @@ void Pulsar::StokesCovariancePlot::get_profiles (const Archive* data) try
     {
       if (plot_std_deviations)
       {
-        Profile* tmp = plotter.profiles[i]->clone();
+	Reference::To<Profile> tmp = plotter.profiles[i]->clone();
         tmp->square_root();
         plotter.profiles[i] = tmp;
       }

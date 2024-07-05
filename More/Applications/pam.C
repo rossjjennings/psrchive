@@ -1219,7 +1219,7 @@ Pulsar::Profile* hat_profile (int nbin, float duty_cycle)
   if (nbin <= 0)
     throw Error (InvalidParam, "hat_profile invalid nbin");
   
-  Pulsar::Profile* ptr = new Pulsar::Profile();
+  Reference::To<Pulsar::Profile> ptr = new Pulsar::Profile();
 
   ptr->set_centre_frequency(0.0);
   ptr->set_weight(1.0);
@@ -1255,7 +1255,7 @@ Pulsar::Profile* hat_profile (int nbin, float duty_cycle)
       ptr->get_amps()[i] = 1.0;
   }
 
-  return ptr;
+  return ptr.release();
 }
 
 

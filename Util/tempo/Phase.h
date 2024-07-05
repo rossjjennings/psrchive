@@ -14,10 +14,6 @@
 #include <string>
 #include <math.h>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 namespace Pulsar
 {
  class Phase {
@@ -79,14 +75,6 @@ namespace Pulsar
    int64_t  intturns() const;
    double fracturns() const;
    std::string strprint(int precision) const;
-   
-#ifdef HAVE_MPI
-   friend int mpiPack_size (const Phase&, MPI_Comm comm, int* size);
-   friend int mpiPack   (const Phase&, void* outbuf, int outcount, 
-			 int* position, MPI_Comm comm);
-   friend int mpiUnpack (void* inbuf, int insize, int* position, 
-			 Phase*, MPI_Comm comm);
-#endif
    
  };
  

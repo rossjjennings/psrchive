@@ -40,12 +40,10 @@ vector<float> Pulsar::RFIMitigation::zap_mask (Pulsar::Integration* integ) {
   vector<double> mean;
   mean.resize(nchan);
   
-  float phase = 0.0;
-  Pulsar::Profile* profile = 0;
-  
-  for (int i = 0; i < nchan; i++) {
-    profile = integ->get_Profile(0, i);
-    phase = profile->find_min_phase();
+  for (int i = 0; i < nchan; i++)
+  {
+    Pulsar::Profile* profile = integ->get_Profile(0, i);
+    double phase = profile->find_min_phase();
     mean[i] = profile->mean(phase);
   }
   

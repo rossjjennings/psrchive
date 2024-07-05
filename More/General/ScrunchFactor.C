@@ -63,19 +63,3 @@ unsigned Pulsar::ScrunchFactor::get_nscrunch (unsigned size) const
 }
 
 
-#if 0
-
-#include "Pulsar/Archive.h"
-
-static void test ()
-{
-  Archive* archive = 0;
-  ScrunchFactor factor;
-
-  fscrunch (archive, factor);
-  tscrunch (archive, factor);
-  bscrunch (archive, factor);
-}
-
-#endif
-

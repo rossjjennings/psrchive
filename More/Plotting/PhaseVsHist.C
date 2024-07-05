@@ -164,8 +164,8 @@ Pulsar::PhaseVsHist::get_Profile (const Archive* data, unsigned row)
   // This is a hack to return a row of the histogram as a Profile
   // object.  Could be cleaned up if needed.
   unsigned nbin = data->get_nbin();
-  Profile *p = new Profile(nbin);
+  Reference::To<Profile> p = new Profile(nbin);
   p->set_weight(1.0);
   p->set_amps(&histarray[row*nbin]);
-  return p;
+  return p.release();
 }

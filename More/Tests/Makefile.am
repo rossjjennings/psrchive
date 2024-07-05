@@ -350,16 +350,6 @@ endif
 
 SUBDIRS += .
 
-if HAVE_QT
-if HAVE_PGPLOT
-SUBDIRS += GUI
-endif
-endif
-
-if HAVE_QTDRIV
-SUBDIRS += rhythm
-endif
-
 # ######################################################################
 #
 # PGPLOT specific code
@@ -479,5 +469,5 @@ libpsrchive_la_LIBADD += @FFT_LIBS@ @CFITSIO_LIBS@ @FLIBS@
 
 include $(top_srcdir)/config/Makefile.local
 
-# AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
+# AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
 

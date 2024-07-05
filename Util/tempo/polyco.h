@@ -17,10 +17,6 @@
 #include <string>
 #include <vector>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 //! Describes a single Tempo polyco set
 class polynomial {
   
@@ -161,16 +157,6 @@ public:
   
   friend bool operator == (const polynomial &, const polynomial &);
   friend bool operator != (const polynomial &, const polynomial &);
-
-  // MPI functions
-#ifdef HAVE_MPI
-  friend int mpiPack_size (const polynomial&, MPI_Comm comm, int* size);
-  friend int mpiPack (const polynomial&, void* outbuf, int outcount,
-                      int* position, MPI_Comm comm);
-  friend int mpiUnpack (void* inbuf, int insize, int* position, 
-                        polynomial*, MPI_Comm comm);
-#endif
-
 };
 
 //! Expert interface to polynomial attributes
@@ -330,14 +316,6 @@ public:
 
   friend bool operator == (const polyco &, const polyco &);
   friend bool operator != (const polyco &, const polyco &);
-
-#ifdef HAVE_MPI
-  friend int mpiPack_size (const polyco&, MPI_Comm comm, int* size);
-  friend int mpiPack   (const polyco&, void* outbuf, int outcount,
-                        int* position, MPI_Comm comm);
-  friend int mpiUnpack (void* inbuf, int insize, int* position, 
-                        polyco*, MPI_Comm comm);
-#endif
 
 private:
 

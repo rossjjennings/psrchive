@@ -219,7 +219,7 @@ int main (int argc, char** argv) try
     return -1;
   } 
 
-  Pulsar::Archive* std_archive = Pulsar::Archive::load( std_filename );
+  Reference::To<Pulsar::Archive> std_archive = Pulsar::Archive::load( std_filename );
 
   unsigned std_nsub = std_archive->get_nsubint();
   unsigned std_nchan = std_archive->get_nchan();

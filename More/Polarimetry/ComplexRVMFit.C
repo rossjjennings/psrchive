@@ -296,8 +296,8 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
   const float* Q = q->get_amps();
   const float* U = u->get_amps();
 
-  Profile* dq = q->clone();
-  Profile* du = u->clone();
+  Reference::To<Profile> dq = q->clone();
+  Reference::To<Profile> du = u->clone();
 
   dq->derivative();
   du->derivative();

@@ -60,7 +60,7 @@ test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
+AM_CPPFLAGS += @CFITSIO_CFLAGS@ @TEMPO2_CFLAGS@
 
 LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la \
 	$(top_builddir)/Util/epsic/src/libepsic.la @CFITSIO_LIBS@

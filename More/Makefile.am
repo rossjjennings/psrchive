@@ -38,16 +38,6 @@ libpsrmore_la_LIBADD += Resources/libResources.la
 
 SUBDIRS += . Applications Simulation
 
-if HAVE_QTDRIV
-SUBDIRS += rhythm
-endif
-
-if HAVE_PGPLOT
-if HAVE_QT
-SUBDIRS += psrgui
-endif
-endif
-
 endif # not MAKE_LEAN
 
 if HAVE_PYTHON

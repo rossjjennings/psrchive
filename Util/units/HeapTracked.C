@@ -109,8 +109,7 @@ bool Reference::HeapTracked::__is_on_heap () const
 
   const void* raw_address = dynamic_cast<const void*>(this);
 
-  DEBUG("Reference::HeapTracked::is_on_heap void*=" 
-       << raw_address);
+  DEBUG("Reference::HeapTracked::is_on_heap void*=" << raw_address);
 
   if (raw_address == NULL)
     throw Error (InvalidPointer, "Reference::HeapTracked::is_on_heap",

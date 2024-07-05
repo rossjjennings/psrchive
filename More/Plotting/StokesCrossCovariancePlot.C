@@ -91,7 +91,7 @@ void Pulsar::StokesCrossCovariancePlot::plot_bin ()
     {
       if (jpol == ipol)
       {
-	Profile* profile = new Profile(nbin);
+        Reference::To<Profile> profile = new Profile(nbin);
 	plotter.profiles[idim] = profile;
 	plotter.plot_sls[idim] = 1;
 	plotter.plot_slw[idim] = 2;
@@ -139,7 +139,7 @@ void Pulsar::StokesCrossCovariancePlot::plot_lags ()
   
   for (unsigned ilag=0; ilag < lags+1; ilag++)
   {
-    Profile* profile = new Profile(nbin);
+    Reference::To<Profile> profile = new Profile(nbin);
     plotter.profiles[ilag] = profile;
     plotter.plot_sls[ilag] = 1;
     plotter.plot_slw[ilag] = 2;
@@ -162,7 +162,7 @@ void Pulsar::StokesCrossCovariancePlot::plot_stats ()
   plotter.plot_slw.resize( 1 );
 
   unsigned nbin = stokes_crossed->get_nbin();
-  Profile* profile = new Profile(nbin);
+  Reference::To<Profile> profile = new Profile(nbin);
   float* amps = profile->get_amps();
 
   plotter.profiles[0] = profile;

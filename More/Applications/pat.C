@@ -663,7 +663,7 @@ int main (int argc, char** argv) try
 
     if (output_profile_residuals)
     {
-      Archive* residual = arrival->get_residual ();
+      Reference::To<Archive> residual = arrival->get_residual ();
       string filename = arch->get_filename() + ".resid";
       residual->unload (filename);
     }
