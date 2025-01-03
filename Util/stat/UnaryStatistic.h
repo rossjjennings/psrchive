@@ -13,6 +13,9 @@
 
 #include "Identifiable.h"
 
+#include <algorithm>
+#include <cmath>
+
 //! Commmon statistics that can be derived from a single array of floats
 class UnaryStatistic : public Identifiable
 {
@@ -38,6 +41,54 @@ private:
   //! thread-safe build for factory
   static void build (); 
 };
+
+//! worker function for variance, skewness, kurtosis, etc.
+void central_moments (std::vector<double> data, std::vector<double>& mu);
+
+//! worker function for outlier detection
+/*! pass a pointer to vector<float> as the second argument
+  to retain the power spectral density used in this calculation */
+double robust_variance (const std::vector<double>& data, std::vector<float>* psd = 0);
+
+template<typename T>
+T median (std::vector<T> data)
+{
+  if (data.size() == 0)
+    return nan("");
+  unsigned mid = data.size() / 2;
+  std::nth_element( data.begin(), data.begin()+mid, data.end() );
+  return data[mid];
+}
+
+template<typename T>
+T mean (const std::vector<T>& data)
+{
+  T sum (0.0);
+  for (auto element: data)
+    sum += element;
+  return sum / data.size();
+}
+
+template<typename T>
+void Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3)
+{
+  std::sort( data.begin(), data.end() );
+  unsigned ndat = data.size();
+  Q1 = data[ndat / 4];
+  Q2 = data[ndat / 2];
+  Q3 = data[(3 * ndat) / 4];
+}
+
+template<typename T>
+void filtered_Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3, T value)
+{
+  std::remove( data.begin(), data.end(), value );
+  std::sort( data.begin(), data.end() );
+  unsigned ndat = data.size();
+  Q1 = data[ndat / 4];
+  Q2 = data[ndat / 2];
+  Q3 = data[(3 * ndat) / 4];
+}
 
 #endif
 

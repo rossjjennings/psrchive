@@ -12,6 +12,7 @@
 #define __Pulsar_PhaseVsPlot_h
 
 #include "Pulsar/PhasePlot.h"
+#include "ColourBar.h"
 #include "ColourMap.h"
 
 namespace Pulsar {
@@ -50,6 +51,9 @@ namespace Pulsar {
     //! Provide access to the colour map
     pgplot::ColourMap* get_colour_map () { return &colour_map; }
 
+    //! Provide access to the colour bar
+    pgplot::ColourBar* get_colour_bar () { return &colour_bar; }
+
     //! Set the style
     void set_style (const std::string&);
     //! Get the style
@@ -75,6 +79,7 @@ namespace Pulsar {
     PlotScale z_scale;
 
     pgplot::ColourMap colour_map;
+    pgplot::ColourBar colour_bar;
 
     //! The style in which the data will be plotted
     std::string style;

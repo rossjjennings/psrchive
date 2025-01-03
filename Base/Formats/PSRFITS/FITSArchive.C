@@ -34,6 +34,7 @@
 #include "Pulsar/CoherentDedispersion.h"
 #include "Pulsar/SpectralKurtosis.h"
 #include "Pulsar/CrossCovarianceMatrix.h" 
+#include "Pulsar/DynamicResponse.h" 
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
@@ -110,16 +111,17 @@ Pulsar::FITSArchive::~FITSArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::FITSArchive dtor this=" << this << endl;
-  if (read_fptr)
-  {
-    int status = 0;
-    fits_close_file (read_fptr, &status);
-  
-    if (status)
-      throw FITSError (status, "Pulsar::FITSArchive::~FITSArchive",
-         "fits_close_file");
-    read_fptr = 0;
-  }
+
+  if (!read_fptr)
+    return;
+
+  int status = 0;
+  fits_close_file (read_fptr, &status);
+
+  if (status)
+    cerr << "Pulsar::FITSArchive::~FITSArchive fits_close_file failed" << endl;
+
+  read_fptr = 0;
 }
 
 //
@@ -745,6 +747,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the Cross Covariance Matrix Data from COV_MAT
   load_CrossCovarianceMatrix (read_fptr);
 
+  // Load the DynamicResponse extension from DYN_RESP
+  load_DynamicResponse (read_fptr);
+
   // Load the pulsar parameters
   if (get_type() == Signal::Pulsar)
     load_Parameters (read_fptr);
@@ -1127,6 +1132,8 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   unload <CalibrationInterpolatorExtension> (fptr, "PCMINTER");
 
   unload <CrossCovarianceMatrix> (fptr, "COV_MAT");
+
+  unload <DynamicResponse> (fptr, "DYN_RESP");
 
   // Write the Spectral Kurtosis integrations to file
 

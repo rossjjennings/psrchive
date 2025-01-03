@@ -11,6 +11,7 @@
 
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/PolnCalibratorExtensionUtils.h"
 
 #ifdef HAVE_SPLINTER
 #include "Pulsar/CalibrationInterpolator.h"
@@ -36,7 +37,7 @@
 #include "median_smooth.h"
 #include "strutil.h"
 #include "debug.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -450,7 +451,7 @@ void Pulsar::PolnCalibrator::calculate_transformation () try
 
   for (unsigned i=0; i < nchan; i++)
   {
-    transformation[i] = new_transformation (poln_extension, i);
+    transformation[i] = Calibration::new_transformation (poln_extension, i);
     if (poln_extension->get_has_covariance())
       poln_extension->get_transformation(i)->get_covariance(covariance[i]);
   }
@@ -545,7 +546,7 @@ void Pulsar::PolnCalibrator::build_response ()
       // sanity check of model parameters
       unsigned nparam = transformation[ichan]->get_nparam();
       for (unsigned iparam=0; iparam < nparam; iparam++)
-        if ( !myfinite(transformation[ichan]->get_param(iparam)) )
+        if ( !true_math::finite(transformation[ichan]->get_param(iparam)) )
 	{
 	  if (verbose > 2)
 	    cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
@@ -557,7 +558,7 @@ void Pulsar::PolnCalibrator::build_response ()
 
       double normdet = norm(det( transformation[ichan]->evaluate() ));
 
-      if ( !myfinite(normdet) )
+      if ( !true_math::finite(normdet) )
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<

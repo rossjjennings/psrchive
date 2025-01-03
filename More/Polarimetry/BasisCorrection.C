@@ -105,6 +105,11 @@ bool Pulsar::BasisCorrection::required (const Archive* archive) const
     return false;
   }
 
+  return required (receiver);
+}
+
+bool Pulsar::BasisCorrection::required (const Receiver* receiver) const
+{
   bool required = 
     receiver->get_orientation() != 0 ||
     receiver->get_hand() != Signal::Right ||

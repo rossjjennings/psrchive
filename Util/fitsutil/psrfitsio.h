@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <complex>
 
 extern bool psrfits_verbose;
 
@@ -75,6 +76,20 @@ template<> struct FITS_traits<std::string>
 {
   static inline int datatype() { return TSTRING; }
   static inline std::string null () { return ""; }
+};
+
+//! Template specialization for complex<float>
+template<> struct FITS_traits<std::complex<float>>
+{
+  static inline int datatype() { return TCOMPLEX; }
+  static inline float null () { return 0; }
+};
+
+//! Template specialization for complex<double>
+template<> struct FITS_traits<std::complex<double>>
+{
+  static inline int datatype() { return TDBLCOMPLEX; }
+  static inline double null () { return 0; }
 };
 
 template<typename T>

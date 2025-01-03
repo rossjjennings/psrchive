@@ -22,6 +22,7 @@ nobase_include_HEADERS = \
         Pulsar/DigitiserStatistics.h \
 	Pulsar/DigitiserCounts.h \
         Pulsar/dspReduction.h \
+        Pulsar/DynamicResponse.h \
 	Pulsar/Effelsberg.h \
         Pulsar/ExampleExtension.h \
         Pulsar/FeedExtension.h \
@@ -79,6 +80,7 @@ libExtensions_la_SOURCES = \
 	DigitiserCounts.C \
         dspReduction.C \
 	dspReductionTI.C \
+        DynamicResponse.C \
 	Effelsberg.C \
         ExampleExtension.C \
         CrossCovarianceMatrix.C \

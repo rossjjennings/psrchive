@@ -16,20 +16,19 @@
 
 namespace Pulsar {
 
-  //! Computes the difference between two profiles
+  //! Computes the cross-correlation between two profiles
   class Correlate : public Combination<Profile>
   {
-
   public:
 
-    //! By default, call Profile::correlate_normalized
-    Correlate () { normalize = true; }
-
-    void transform (Profile*);
+    //! Set argument amplitudes equal to the cross-correlation between argument and operand
+    /*! operand is a member of the Combination<Profile> base class*/
+    void transform (Profile* argument) override;
 
   protected:
 
-    bool normalize;
+    //! By default, call Profile::correlate_normalized to compute the power-normalized cross-correlation
+    bool normalize = true;
   }; 
 
 }

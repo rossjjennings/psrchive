@@ -56,12 +56,14 @@ using Pulsar::FITSArchive;
 
 
 const char TEXT_HEADERS_KEY     = 'A';
+const char TEXT_FREQ_PREC       = 'a';
 const char BSCRUNCH_KEY         = 'B';
 const char IBIN_KEY             = 'b';
 const char CENTRE_KEY           = 'C';
 const char CALIBRATOR_KEY       = 'c';
 const char FSCRUNCH_KEY         = 'F';
 const char PULSE_WIDTHS_KEY     = 'f';
+const char PRINT_FREQ_KEY       = 'G';
 const char HISTORY_KEY          = 'H';
 const char HELP_KEY             = 'h';
 const char PULSE_FLUX_KEY       = 'I';
@@ -111,6 +113,7 @@ using Pulsar::AuxColdPlasmaMeasures;
 
 bool bandpass_text = false;
 bool cmd_text = false;
+bool print_freq = false;
 bool cmd_flux = false;
 bool cmd_flux2 = false;
 bool cmd_subints = false;
@@ -133,6 +136,8 @@ int ibin = -1;
 int isub = -1;
 float phase = 0.0;
 float pa_threshold = 3.0;
+unsigned org_precision;
+unsigned freq_precision = 3;
 
 vector<string> jobs;
 
@@ -179,6 +184,8 @@ void Usage( void )
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
+  "   -" << TEXT_FREQ_PREC <<     " prec     Number of digits to use in after decimal point for frequency (defaults to 3) \n"
+  "   -" << PRINT_FREQ_KEY <<     "          Also print frequency as the 4th column \n"
 #ifdef HAVE_PGPLOT
   "   -" << BANDPASS_KEY <<       "          Print out the original bandpass as ASCII text \n"
 #endif
@@ -414,7 +421,10 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 	    if( per_channel_headers )
 	    {
 	      IntegrationHeader( intg );
+              org_precision = tostring_precision;
+              tostring_precision = freq_precision;
 	      cout << " Freq: " << tostring<double>( intg->get_centre_frequency( c ) );
+              tostring_precision = org_precision;
 	      cout << " BW: " << intg->get_bandwidth() / nchn;
 	      cout << endl;
 		}
@@ -422,6 +432,12 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 		for (int b = fbin; b <= lbin; b++)
 		{
 		   cout << s << " " << c << " " << b;
+                   if ( print_freq ) {
+                     org_precision = tostring_precision;
+                     tostring_precision = freq_precision;
+                     cout << " " << tostring<double>(intg->get_centre_frequency( c ));
+                     tostring_precision = org_precision;
+                   }
 		   for(int ipol=0; ipol<npol; ipol++)
 		   {
 			  Profile *p = intg->get_Profile( ipol, c );
@@ -1188,6 +1204,8 @@ int main( int argc, char *argv[] ) try
    args += PULSE_FLUX_KEY;
    args += TEXT_KEY;
    args += TEXT_HEADERS_KEY;
+   args += TEXT_FREQ_PREC; args += ':';
+   args += PRINT_FREQ_KEY;
 #ifdef HAVE_PGPLOT
    args += BANDPASS_KEY;
 #endif
@@ -1230,6 +1248,12 @@ int main( int argc, char *argv[] ) try
 			cmd_text = true;
 			per_channel_headers = true;
 			break;
+                case TEXT_FREQ_PREC:
+                        freq_precision = fromstring<unsigned>( string(optarg) );
+                        break;
+                case PRINT_FREQ_KEY:
+                        print_freq = true;
+                        break;
 #ifdef HAVE_PGPLOT
                  case BANDPASS_KEY:
                         bandpass_text = true;

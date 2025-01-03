@@ -828,27 +828,27 @@ int main (int argc, char *argv[]) try {
 
       if (new_cfreq)
       {
-	unsigned nc = arch->get_nchan();
-	double bw = arch->get_bandwidth();
-	double cw = bw / nc;
-    double old_fr = arch->get_Integration(0)->get_centre_frequency(nc/2);
-    if ( (nc&1) == 0) {
-      old_fr = 0.5*(old_fr+arch->get_Integration(0)->get_centre_frequency(nc/2-1));
-    }
+        unsigned nc = arch->get_nchan();
+        double bw = arch->get_bandwidth();
+        double cw = bw / nc;
+          double old_fr = arch->get_Integration(0)->get_centre_frequency(nc/2);
+          if ( (nc&1) == 0) {
+            old_fr = 0.5*(old_fr+arch->get_Integration(0)->get_centre_frequency(nc/2-1));
+          }
 
-	double fr = new_fr - (bw / 2.0) + (cw / 2.0);
-	
-	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    arch->get_Integration(i)->set_centre_frequency(j,(fr + (j*cw)));
-	  }
-	}
-	
-    /* MTK - 07 Oct 2014
-    Do not update the centre frequency directly as it is now associated
-    with OBSFREQ.  Instead, adjust it by the change in frequency.
-    */
-	arch->set_centre_frequency(arch->get_centre_frequency()+(new_fr-old_fr));
+        double fr = new_fr - (bw / 2.0) + (cw / 2.0);
+        
+        for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+          for (unsigned j = 0; j < arch->get_nchan(); j++) {
+            arch->get_Integration(i)->set_centre_frequency(j,(fr + (j*cw)));
+          }
+        }
+        
+          /* MTK - 07 Oct 2014
+          Do not update the centre frequency directly as it is now associated
+          with OBSFREQ.  Instead, adjust it by the change in frequency.
+          */
+        arch->set_centre_frequency(arch->get_centre_frequency()+(new_fr-old_fr));
       }
 
       if( new_type != Signal::Unknown )

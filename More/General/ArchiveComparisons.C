@@ -198,13 +198,13 @@ class ArchiveComparisons::Interface
     name = _instance->get_identity ();
     description = _instance->get_description ();
 
-    add( &ArchiveComparisons::get_what,
-	 &ArchiveComparisons::set_what,
-	 "what", "'each' or 'sum'" );
+    add(&ArchiveComparisons::get_what,
+        &ArchiveComparisons::set_what,
+        "what", "'each' or 'sum'");
 
-    add( &ArchiveComparisons::get_way,
-	 &ArchiveComparisons::set_way,
-	 "way", "'time' or 'freq' or 'all'" );
+    add(&ArchiveComparisons::get_way,
+        &ArchiveComparisons::set_way,
+        "way", "'time' or 'freq' or 'all'" );
   }
 };
 

@@ -312,8 +312,7 @@ void ReceptionCalibrator::set_previous (const Archive* data)
   const PolnCalibratorExtension* ext = data->get<PolnCalibratorExtension>();
   if (ext->get_type() == get_type())
   {
-    cerr << "Pulsar::ReceptionCalibrator::set_previous solution of same type"
-	 << endl;
+    cerr << "Pulsar::ReceptionCalibrator::set_previous solution of same type" << endl;
     previous = new PolnCalibrator (data);
     previous_cal = data->get<CalibratorStokes>();
   }
@@ -342,8 +341,13 @@ void ReceptionCalibrator::add_pulsar
   standard_data->set_profile( integration->new_PolnProfile (ichan) );
 
   for (unsigned istate=0; istate < pulsar.size(); istate++)
-    add_data (measurements, pulsar.at(istate).at(ichan),
-	      integration->get_epoch(), ichan);
+  {
+    if (ichan >= pulsar[istate].size())
+      throw Error (InvalidParam, "ReceptionCalibrator::add_pulsar",
+                  "ichan=%u >= pulsar[%u].size=%u", ichan, istate, pulsar[istate].size());
+
+    add_data (measurements, pulsar[istate][ichan], integration->get_epoch(), ichan);
+  }
 }
 
 

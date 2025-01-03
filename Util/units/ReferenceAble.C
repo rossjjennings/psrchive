@@ -242,7 +242,8 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
   // there should never be a handle without any references to it
   if (handle_count == 0)
   {
-    cerr << "Reference::Able::Handle::decrement this=" << this << " exists with reference count==0";
+    cerr << "Reference::Able::Handle::decrement this=" << this 
+         << " exists with reference count==0 (active=" << active << " pointer=" << pointer << ")" << endl;
     exit (-1);
   }
 

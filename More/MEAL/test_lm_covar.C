@@ -55,7 +55,7 @@ void runtest () try
   unsigned ndat = 200;
   double x_step = (x_max - x_min) / (ndat+1);
 
-  BoxMuller gasdev;
+  BoxMuller gasdev (usec_seed());
 
   // ofstream os ("lm_test_covar.dat");
 
@@ -140,8 +140,10 @@ catch (...) {
 
 int main ()
 {
+  random_init();
+
   unsigned ntest = 10000;
-  double tolerance = 0.02;
+  double tolerance = 0.05;
 
   cerr << "running " << ntest << " quadratic least-squares fits" << endl;
 

@@ -27,8 +27,7 @@ void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row& drow,
 
 }
 
-void 
-Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats) const
 {
   int status = 0;
 

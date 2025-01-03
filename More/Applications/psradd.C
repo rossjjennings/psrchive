@@ -282,6 +282,9 @@ void psradd::add_options (CommandLine::Menu& menu)
   arg = menu.add (phase_align, 'P');
   arg->set_help ("Phase align archive with total before adding");
 
+  arg = menu.add (Pulsar::Profile::rotate_phase_enabled, "const_phase");
+  arg->set_help ("Leave amplitudes alone, but update metadata");
+
   arg = menu.add (phase_alignment_threshold, "phath", "turns");
   arg->set_help ("Omit data if phase offset from total > phath");
 

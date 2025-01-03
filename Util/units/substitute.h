@@ -15,6 +15,7 @@
 
 #include <string>
 #include <algorithm>
+#include <functional>
 #include <ctype.h>
 
 //! Return first character in text such that pred(c) is true

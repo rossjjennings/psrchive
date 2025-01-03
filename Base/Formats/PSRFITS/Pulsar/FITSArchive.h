@@ -39,6 +39,7 @@ namespace Pulsar
   class SpectralKurtosis;
   class ObsDescription;
   class CrossCovarianceMatrix;
+  class DynamicResponse;
 
   class Pointing;
   class AuxColdPlasmaMeasures;
@@ -121,10 +122,10 @@ namespace Pulsar
     static void unload (fitsfile*, const Passband*);
     
     //! Unload DigitiserStatistics to the DIG_STAT HDU
-    static void unload (fitsfile*, const DigitiserStatistics*);
+    void unload (fitsfile*, const DigitiserStatistics*) const;
     
     //! Unload DigitiserCounts to DIG_CNTS HDU
-    static void unload (fitsfile*, const DigitiserCounts*);
+    void unload (fitsfile*, const DigitiserCounts*) const;
     
     //! Unload PolnCalibratorExtension to the FEEDPAR HDU
     static void unload (fitsfile*, const PolnCalibratorExtension*);
@@ -155,6 +156,9 @@ namespace Pulsar
 
     //! Unload the Cross-Covariance Matrix Data
     static void unload (fitsfile*, const CrossCovarianceMatrix*);
+
+    //! Unload the Dynamic Response Data
+    static void unload (fitsfile*, const DynamicResponse*);
 
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
@@ -269,6 +273,7 @@ namespace Pulsar
     void load_CoherentDedispersion (fitsfile*);
     void load_ObsDescription (fitsfile*);
     void load_CrossCovarianceMatrix (fitsfile*);
+    void load_DynamicResponse(fitsfile*);
 
     template<class Ext>
     void unload (fitsfile*, const char* hdu_name) const;

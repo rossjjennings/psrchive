@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "CalibratorExtensionIO.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -106,7 +106,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
 	 << " weights read" << endl;
 
   for (ichan=0; ichan < ext->get_nchan(); ichan++)
-    if ( !myfinite(data[ichan]) )
+    if ( !true_math::finite(data[ichan]) )
       data[ichan] = 0;
 
   for (ichan=0; ichan < ext->get_nchan(); ichan++)

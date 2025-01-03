@@ -218,6 +218,10 @@ void psrsim::process (Pulsar::Archive* data)
     value << setfill('0') << setw(12) << i;
     string unload = value.str() + string("_psrsim.ar");
   
+    // ensure that sub-integration metadata are loaded before resize, if required
+    for (unsigned isub=0; isub < nsubint; isub++)
+      data->get_Integration(isub);
+
     if (npol != 4)
     {
       npol = 4;
@@ -230,11 +234,11 @@ void psrsim::process (Pulsar::Archive* data)
     for (unsigned isub=0; isub < nsubint; isub++)
     {
       Integration* subint = data->get_Integration(isub);
-
       for (unsigned ichan=0; ichan < nchan; ichan++)
       {
-	simulator->get_PolnProfile(subint->new_PolnProfile(ichan));
-	subint->set_weight(ichan, 1.0);
+        Reference::To<PolnProfile> profile = subint->new_PolnProfile(ichan);
+        simulator->get_PolnProfile(profile.ptr());
+        subint->set_weight(ichan, 1.0);
       }
     }
 

@@ -8,7 +8,7 @@
 #include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/ReceptionModelReport.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <fstream>
 #include <assert.h>
@@ -182,7 +182,7 @@ void Calibration::ReceptionModel::Solver::check_solution ()
   if (report_chisq)
     cerr << "  reduced chisq " << reduced_chisq << endl;
 
-  if (!myfinite(reduced_chisq) ||
+  if (!true_math::finite(reduced_chisq) ||
       (maximum_reduced && reduced_chisq > maximum_reduced))
     throw Error (InvalidState,
 		 "Calibration::ReceptionModel::Solver::check_solution",
@@ -205,7 +205,7 @@ void Calibration::ReceptionModel::Solver::set_variances ()
       cerr << "Calibration::ReceptionModel::Solver::set_variances"
 	      " variance[" << iparam << "]=" << variance << endl;
 
-    if (!myfinite(variance))
+    if (!true_math::finite(variance))
       throw Error (InvalidState, "Calibration::ReceptionModel::Solver::set_variances",
 		   "non-finite variance " + equation->get_param_name(iparam));
 

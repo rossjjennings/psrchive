@@ -41,5 +41,5 @@ LDADD += $(top_builddir)/Util/tempo/libtempo.la
 LDADD += $(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la \
-	$(top_builddir)/Util/epsic/src/libepsic.la @FLIBS@
+	$(top_builddir)/Util/epsic/src/util/libutil.la @FLIBS@
 

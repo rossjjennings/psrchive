@@ -18,7 +18,7 @@
 #include "ChiSquared.h"
 #include "statutil.h"
 
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <algorithm>
 #include <cassert>
@@ -184,8 +184,6 @@ void CompareWith::compute (ndArray<2,double>& result)
 
 using namespace BinaryStatistics;
 
-extern "C" { int myfinite (double x); } // defined in myfinite.c
-
 void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 {
   unsigned nbin = profile->get_nbin ();
@@ -195,7 +193,7 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 
   double variance = robust_variance (amps);
 
-  if ( ! myfinite(variance) )
+  if ( ! true_math::finite(variance) )
     throw Error (InvalidState, "CompareWith::get_amps",
                  "robust_variance returns non-finite variance");
 
@@ -219,7 +217,7 @@ void CompareWith::get_amps (vector<double>& amps, const Profile* profile)
 
   double rms = sqrt( variance );
 
-  if ( ! myfinite(rms) )
+  if ( ! true_math::finite(rms) )
     throw Error (InvalidState, "CompareWith::get_amps",
                  "non-finite rms/normalization");
 
@@ -765,7 +763,7 @@ void CompareWith::setup (unsigned start_primary, unsigned nprimary)
 #endif
 
   for (unsigned i=0; i < rank; i++)
-    if (!myfinite(eval[i]))
+    if (!true_math::finite(eval[i]))
       throw Error (InvalidState, "CompareWith::setup", "non-finite eigenvalue[%u]=%lf", i, eval[i]);
 
   unsigned eff_rank = 0;

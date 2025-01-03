@@ -43,7 +43,11 @@ namespace Pulsar {
     unsigned get_used_bins () { return used_bins; }
 
     //! Set the archive from which to derive the refined rotation measure
-    void set_data (Archive*);
+    void set_data (const Archive*);
+
+    //! Set the sub-integration index from which to derive the refined rotation measure
+    void set_subint (unsigned idx) { isubint = idx; }
+    unsigned get_subint () const { return isubint; }
 
     //! Refine the rotation measure estimate
     void refine ();
@@ -55,7 +59,7 @@ namespace Pulsar {
      //! Set the on-pulse mask
     void set_onpulse (PhaseWeight* w) { onpulse_weights = w; }
     
-   //! Set the phase bins to be included in the computation
+    //! Set the phase bins to be included in the computation
     void set_include (const std::vector<unsigned>& bins);
 
     //! Set the phase bins to be excluded from the computation
@@ -79,7 +83,10 @@ namespace Pulsar {
     Estimate<double> rotation_measure;
 
     //! The archive from which the rotation measure will be refined
-    Reference::To<Archive> data;
+    Reference::To<const Archive> data;
+
+    //! The index of the sub-integration from which the rotation measure will be refined
+    unsigned isubint = 0;
 
     //! Weights applied to each phase bin (defines on-pulse region)
     Reference::To<PhaseWeight> onpulse_weights;

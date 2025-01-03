@@ -11,7 +11,7 @@
 #ifndef __P_inverse_phase_h
 #define __P_inverse_phase_h
 
-#include "myfinite.h"
+#include "true_math.h"
 #include "MJD.h"
 #include "Phase.h"
 
@@ -63,7 +63,7 @@ namespace Pulsar {
 
       dt = (predictor.phase(guess) - p) / predictor.frequency(guess);
 
-      if (!::myfinite(dt.in_seconds()))
+      if (!::true_math::finite(dt.in_seconds()))
         throw Error (InvalidState, "inverse_phase",
                      "dt not finite; freq=%lf", predictor.frequency(guess));
  

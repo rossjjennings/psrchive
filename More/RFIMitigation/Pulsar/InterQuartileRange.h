@@ -21,7 +21,7 @@ namespace Pulsar
     
   public:
     
-    InterQuartileRange();
+    InterQuartileRange() = default;
     
     //! Smooth the data given in raw, output to smoothed
     /*! Both data arrays have dims (nsub, nchan, npol), slow to fast.  weight
@@ -55,7 +55,10 @@ namespace Pulsar
     //! Get the duty cycle used to find the 'minimum slope median'
     float get_minimum_slope_median_duty_cycle () const
     { return minimum_slope_median_duty_cycle; }
-      
+
+    const std::string& get_way () const { return way; }
+    void set_way (const std::string& t) { way = t; }
+
     // Text interface to the InterQuartileRange class
     class Interface : public TextInterface::To<InterQuartileRange> {
     public:
@@ -72,11 +75,14 @@ namespace Pulsar
   protected:
     
     //! Fraction of IQR
-    float cutoff_threshold_max;
-    float cutoff_threshold_min;
+    float cutoff_threshold_max = 1.5;
+    float cutoff_threshold_min = 1.5;
 
     //! Duty cycle used to find the 'minimum slope median'
-    float minimum_slope_median_duty_cycle;
+    float minimum_slope_median_duty_cycle = 0.0;
+
+    // dimension along which to compare
+    std::string way = "all";
   };
 
 }

@@ -31,35 +31,37 @@ namespace Factory {
 
     T* instance = 0;
 
-    while (!input.eof()) {
-
+    while (input)
+    {
       std::getline (input, line);
       line = stringtok (line, "#\n", false);  // get rid of comments
 
       if (!line.length())
-	continue;
+        continue;
 
-      if (!instance) {
+      if (!instance)
+      {
+        // the first key loaded should be the name of the instance
+        std::string key = stringtok (line, WHITESPACE);
 
-	// the first key loaded should be the name of the instance
-	std::string key = stringtok (line, WHITESPACE);
+        if (verbose)
+          std::cerr << "Factory::load construct new " << key << std::endl;
 
-	if (verbose)
-	  std::cerr << "Factory::load construct new " << key << std::endl;
-
-	instance = constructor (key);
-	
-	if (!line.length())
-	  continue;
-
+        instance = constructor (key);
+        
+        if (!line.length())
+          continue;
       }
 
       if (verbose)
-	std::cerr << "Factory::load parse line '" << line << "'" << std::endl;
+        std::cerr << "Factory::load parse line '" << line << "'" << std::endl;
       
       instance->parse (line);
 
     }
+
+    if (!instance)
+      throw Error (InvalidParam, "Factory::load", "nothing constructed from '" + filename + "'");
 
     return instance;
  

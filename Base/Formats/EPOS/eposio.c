@@ -102,6 +102,7 @@ int check_file(const char* filename, eposhdr_t *eposhdr, int verbose)
           fprintf(stderr, "EPOS check_file: Source name contains non-printable characters");
         return -1;
      }
+     c++;
   }
 
   if (c == MAX_SOURCE_STRLEN)

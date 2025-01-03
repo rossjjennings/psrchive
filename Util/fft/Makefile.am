@@ -58,7 +58,7 @@ LDADD = libpsrfft.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la \
-	$(top_builddir)/Util/epsic/src/libepsic.la
+	$(top_builddir)/Util/epsic/src/util/libutil.la
 
 libpsrfft_la_LIBADD = @FFT_LIBS@
 

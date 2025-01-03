@@ -14,6 +14,9 @@
 #include <algorithm>
 #include <cassert>
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 using namespace Pulsar;
 
@@ -99,7 +102,7 @@ static void instances_build ()
   if (instances != NULL)
     return;
 
-  // cerr << "Pulsar::ArchiveStatistic::build" << endl;
+  DEBUG("Pulsar::ArchiveStatistic::build");
  
   instances = new std::vector< Pulsar::ArchiveStatistic* >;
  
@@ -115,7 +118,7 @@ static void instances_build ()
 
   assert (instances->size() == instance_count - start_count);
 
-  // cerr << "Pulsar::ArchiveStatistic::build instances=" << instances << endl;
+  DEBUG("Pulsar::ArchiveStatistic::build instances=" << instances);
 }
 
 #include "interface_factory.h"
@@ -123,19 +126,19 @@ static void instances_build ()
 Pulsar::ArchiveStatistic*
 Pulsar::ArchiveStatistic::factory (const std::string& name)
 {
-  // cerr << "Pulsar::ArchiveStatistic::factory instances=" << instances << endl;
+  DEBUG("Pulsar::ArchiveStatistic::factory instances=" << instances);
 
   if (instances == NULL)
     instances_build ();
 
   assert (instances != NULL);
 
-  // cerr << "ArchiveStatistic::factory instances=" << instances << endl;
+  DEBUG("ArchiveStatistic::factory instances=" << instances);
 
   ArchiveStatistic* stat = 0;
   stat = TextInterface::factory<ArchiveStatistic> (*instances, name);
 
-  // cerr << "Pulsar::ArchiveStatistic::factory return=" << stat << endl;
+  DEBUG("Pulsar::ArchiveStatistic::factory return=" << stat);
   return stat;
 }
 
@@ -143,14 +146,12 @@ Pulsar::ArchiveStatistic::factory (const std::string& name)
 
 namespace Pulsar
 {
-  std::ostream& operator<< (std::ostream& ostr,
-                            ArchiveStatistic* stat)
+  std::ostream& operator<< (std::ostream& ostr, ArchiveStatistic* stat)
   {
     return interface_insertion (ostr, stat);
   }
 
-  std::istream& operator>> (std::istream& istr,
-                            ArchiveStatistic* &stat)
+  std::istream& operator>> (std::istream& istr, ArchiveStatistic* &stat)
   {
     return interface_extraction (istr, stat);
   }

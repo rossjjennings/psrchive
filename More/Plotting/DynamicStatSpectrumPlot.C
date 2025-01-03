@@ -30,8 +30,7 @@ TextInterface::Parser* Pulsar::DynamicStatSpectrumPlot::get_interface ()
 }
 
 // Calculate values to fill in to plot array
-void Pulsar::DynamicStatSpectrumPlot::get_plot_array ( const Archive *data, 
-						       float *array )
+void Pulsar::DynamicStatSpectrumPlot::get_plot_array (const Archive *data, float *array)
 {
   if (!statistic)
     throw Error (InvalidState, "DynamicStatSpectrumPlot::get_plot_array",
@@ -55,9 +54,9 @@ void Pulsar::DynamicStatSpectrumPlot::get_plot_array ( const Archive *data,
 
       if (subint->get_weight(ichan)!=0.0)
       {
-	statistic->set_subint (isub);
-	statistic->set_chan (ichan);
-	value = statistic->get();
+        statistic->set_subint (isub);
+        statistic->set_chan (ichan);
+        value = statistic->get();
       }
 
       array[ii] = value;
@@ -71,7 +70,6 @@ void DynamicStatSpectrumPlot::set_statistic (ArchiveStatistic* stat)
 {
   statistic = stat;
 }
-
 
 //! Get the profile statistic
 Pulsar::ArchiveStatistic* DynamicStatSpectrumPlot::get_statistic () const

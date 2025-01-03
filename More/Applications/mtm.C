@@ -30,21 +30,22 @@ void usage ()
 {
   cout << "mtm - matrix template matching analysis \n"
     "Usage: mtm [options] filenames \n"
-    "  -q            Quiet mode \n"
-    "  -v            Verbose mode \n"
-    "  -V            Very verbose mode \n"
+    "  -q       Quiet mode \n"
+    "  -v       Verbose mode \n"
+    "  -V       Very verbose mode \n"
     "\n"
     "Preprocessing options:\n"
-    "  -F            Frequency scrunch template \n"
-    "  -T            Time scrunch template \n"
+    "  -F       Frequency scrunch template \n"
+    "  -T       Time scrunch template \n"
     "\n"
     "Fitting options:\n"
-    "  -c            Choose the maximum harmonic \n"
-    "  -n harmonics  Use up to the specified number of harmonics\n"
+    "  -c       Choose the maximum harmonic \n"
+    "  -n harm  Use up to the specified number of harmonics\n"
     "\n"
     "Output options: \n"
-    "  -b            Print the systematic phase shifts induced by boosts \n"
-    "  -t            Output latex table like Figure 1 of van Straten (2006) \n"
+    "  -b       Print the systematic phase shifts induced by boosts \n"
+    "  -d       Print the three components of the boost distortion vector (units: seconds) \n"
+    "  -t       Output latex table like Figure 1 of van Straten (2006) \n"
        << endl;
 
 }
@@ -52,6 +53,7 @@ void usage ()
 static bool verbose = false;
 static bool tabular = false;
 static bool boost_analysis = false;
+static bool output_distorion_vector = false;
 
 static string source;
 static double folding_period = 0.0;
@@ -62,9 +64,9 @@ static vector< sky_coord > coordinates;
 static vector< Vector<3,double> > susceptibility;
 
 void mtm_analysis (PolnProfileFit::Analysis& analysis,
-		   PolnProfileFit& fit,
-		   const std::string& name,
-                   double period)
+                    PolnProfileFit& fit,
+                    const std::string& name,
+                    double period)
 {
   if (verbose)
     cerr << "mtm: set fit" << endl;
@@ -86,9 +88,9 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
     cout << setprecision(2);
 
     cout << source 
-	 << " & " << analysis.get_relative_conditional_error().get_value()
-	 << " & " << analysis.get_multiple_correlation().get_value()
-	 << " & " << analysis.get_relative_error().get_value();
+        << " & " << analysis.get_relative_conditional_error().get_value()
+        << " & " << analysis.get_multiple_correlation().get_value()
+        << " & " << analysis.get_relative_error().get_value();
   }
   else
   {
@@ -101,11 +103,11 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
 
     cout << "\nFull Polarization TOA (matrix template matching): "
       "\n MTM Relative conditional error = "
-	 << analysis.get_relative_conditional_error () <<
+        << analysis.get_relative_conditional_error () <<
       "\n Multiple correlation = "
-	 << analysis.get_multiple_correlation() << 
+        << analysis.get_multiple_correlation() << 
       "\n MTM Relative error = "
-	 << analysis.get_relative_error () << endl;
+        << analysis.get_relative_error () << endl;
   }
 
   ScalarProfileFitAnalysis scalar;
@@ -157,12 +159,12 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
 
       cout.setf(ios::fixed);
       cout << setprecision(0)
-	   << " & " << folding_period * delshift * ns * boost0;
+           << " & " << folding_period * delshift * ns * boost0;
     }
     else
       cout << "BOOST factor=" << delshift
-	   << " or " << folding_period * delshift * ns * boost0
-	   << " ns per unit of boost" << endl;
+           << " or " << folding_period * delshift * ns * boost0
+           << " ns per unit of boost" << endl;
   }
 
   if (tabular)
@@ -179,7 +181,7 @@ int main (int argc, char *argv[])
 
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, "bcFhn:qTtvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "bcdFhn:qTtvV")) != -1) {
     switch (gotc) {
 
     case 'h':
@@ -208,6 +210,10 @@ int main (int argc, char *argv[])
 
     case 'c':
       choose_maximum_harmonic = true;
+      break;
+
+    case 'd':
+      output_distorion_vector = true;
       break;
 
     case 't':
@@ -269,13 +275,12 @@ int main (int argc, char *argv[])
 
     if (boost_analysis)
       cout <<
-	" & $\\dot\\varphi_\\beta$ "
-	" & $\\tau_\\beta$ (ns)";
+          " & $\\dot\\varphi_\\beta$ "
+          " & $\\tau_\\beta$ (ns)";
 
     cout <<
       "\\\\ \n"
-      "\\tableline \n"
-	 << endl;
+      "\\tableline \n" << endl;
   }
 
   for (unsigned i = 0; i < filenames.size(); i++) try
@@ -331,7 +336,18 @@ int main (int argc, char *argv[])
 
     folding_period = arch->get_Integration(0)->get_folding_period();
 
-    mtm_analysis (analysis, fit, arch->get_source(), folding_period);
+    if (output_distorion_vector)
+    {
+      Pulsar::BoostShiftAnalysis boost;
+      boost.set_profile (fit.get_standard());
+
+      for (unsigned i=1; i<=3; i++)
+        cout << boost.delvarphi_delb (i) * folding_period << " ";
+
+      cout << endl;
+    }
+    else
+      mtm_analysis (analysis, fit, arch->get_source(), folding_period);
   }
   catch (Error& error) {
     cerr << "Error processing " << filenames[i] << endl;
@@ -361,15 +377,15 @@ int main (int argc, char *argv[])
 
       for (unsigned j=i; j<susceptibility.size(); j++)
       {
-	Vector<3,double> B = susceptibility[j];
-	double Bnorm = sqrt(B*B);
-	sky_coord Bcoord = coordinates[j];
+        Vector<3,double> B = susceptibility[j];
+        double Bnorm = sqrt(B*B);
+        sky_coord Bcoord = coordinates[j];
 
-	out << names[i] << " " << names[j] << " "
-	    << Anorm << " " << Bnorm << " "
-	    << Acoord.angularSeparation(Bcoord).getDegrees() << " "
-	    << A*B/(Anorm*Bnorm) << " "
-            << A*B * periods[i] * periods[j] << endl;
+        out << names[i] << " " << names[j] << " "
+            << Anorm << " " << Bnorm << " "
+            << Acoord.angularSeparation(Bcoord).getDegrees() << " "
+            << A*B/(Anorm*Bnorm) << " "
+                  << A*B * periods[i] * periods[j] << endl;
       }
     }
   }

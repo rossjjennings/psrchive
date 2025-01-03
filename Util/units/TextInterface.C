@@ -11,6 +11,9 @@
 #include "stringtok.h"
 #include "pad.h"
 
+// #define _DEBUG
+#include "debug.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -20,16 +23,11 @@ using namespace std;
 
 bool TextInterface::label_elements = false;
 
-// #define _DEBUG
-
 bool TextInterface::matches (const string& name,
 			     const string& prefix,
 			     const Value* value)
 {
-#ifdef _DEBUG
-  cerr << "TextInterface::matches prefix=" << prefix 
-       << " name=" << name;
-#endif
+  DEBUG("TextInterface::matches prefix=" << prefix << " name=" << name);
 
   string::size_type length = prefix.length();
 
@@ -37,17 +35,13 @@ bool TextInterface::matches (const string& name,
   {
     if ( name.length() <= length || name[length] != ':' )
     {
-#ifdef _DEBUG
-      cerr << " false (no colon)" << endl;
-#endif
+      DEBUG(" false (no colon)");
       return false;
     }
 
     if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
     {
-#ifdef _DEBUG
-      cerr << " false (prefix mismatch)" << endl;
-#endif
+      DEBUG(" false (prefix mismatch)");
       return false;
     }
 
@@ -56,16 +50,11 @@ bool TextInterface::matches (const string& name,
 
   string remainder = name.substr (length);
 
-#ifdef _DEBUG
-  cerr << "TextInterface::matches nested name="
-       << value->get_name() << " remain=" << remainder << endl;
-#endif
+  DEBUG("TextInterface::matches nested name=" << value->get_name() << " remain=" << remainder);
 
   bool result = value->matches (remainder);
 
-#ifdef _DEBUG
-  cerr << "TextInterface::matches result=" << result << endl;
-#endif
+  DEBUG("TextInterface::matches result=" << result);
   return result;
 }
 
@@ -76,17 +65,13 @@ bool TextInterface::matches (const string& name,
 bool TextInterface::match (const string& name, const string& text,
 			   string* range, string* remainder)
 {
-#ifdef _DEBUG
-  cerr << "TextInterface::match name=" << name << " text=" << text;
-#endif
+  DEBUG("TextInterface::match name=" << name << " text=" << text)
 
   string::size_type length = name.length();
 
   if ( length && strncmp (text.c_str(), name.c_str(), length) != 0 )
   {
-#ifdef _DEBUG
-    cerr << " false" << endl;
-#endif
+    DEBUG(" false");
     return false;
   }
 
@@ -95,33 +80,25 @@ bool TextInterface::match (const string& name, const string& text,
   {
     if (remainder)
     {
-#ifdef _DEBUG
-      cerr << " false" << endl; 
-#endif
+      DEBUG(" false");
       return false;
     }
     else
       end = text.length();
   }
 
-#ifdef _DEBUG
-  cerr << " maybe" << endl;
-#endif
+  DEBUG(" maybe");
 
   // the range is everything between the end of the variable name and the colon
   *range = text.substr (length, end-length);
 
-#ifdef _DEBUG
-  cerr << "TextInterface::match range=" << *range << endl;
-#endif
+  DEBUG("TextInterface::match range=" << *range);
 
   // the remainder is everything following the colon
   if (remainder)
   {
     *remainder = text.substr (end+1);
-#ifdef _DEBUG
-    cerr << "TextInterface::match remainder=" << *remainder << endl;
-#endif
+    DEBUG("TextInterface::match remainder=" << *remainder);
   }
 
   // a map may have no name
@@ -142,9 +119,7 @@ bool TextInterface::match (const string& name, const string& text,
   if ((*range)[0] == '[' && (*range)[length-1] == ']')
     return true;
 
-#ifdef _DEBUG
-  cerr << "FALSE" << endl;
-#endif
+  DEBUG("FALSE");
 
   return false;
 }

@@ -155,7 +155,7 @@ void FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 
     add_extension( ext );
   }
-  catch( Error e )
+  catch( Error& e )
   {
     // If any problem occured, we simply fail to load the extension.
     if( Archive::verbose > 2 )

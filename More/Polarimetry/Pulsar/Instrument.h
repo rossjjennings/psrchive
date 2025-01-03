@@ -12,7 +12,7 @@
 #define __CalibrationInstrument_H
 
 #include "Pulsar/BackendFeed.h"
-
+#include "Pulsar/HasOrientation.h"
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ChainRule.h"
 
@@ -23,7 +23,8 @@ namespace Calibration {
   //! Phenomenological description of the instrument
   /*! The transformation is represented by the product of a SingleAxis
     transformation and Feed transformation. */
-  class Instrument : public BackendFeed {
+  class Instrument : public BackendFeed, public HasOrientation
+  {
 
   public:
 
@@ -82,6 +83,18 @@ namespace Calibration {
     //! Provide access to the Feed model
     const Feed* get_feed () const;
     Feed* get_feed ();
+
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // HasOrientation implementation
+    //
+    // ///////////////////////////////////////////////////////////////////
+
+    //! Get the rotation of the feed about the line of sight, in radians
+    Estimate<double> get_orientation () const override;
+
+    //! Offset the rotation of the feed about the line of sight by delta, in radians
+    void offset_orientation (double delta_rad) override;
 
     // ///////////////////////////////////////////////////////////////////
     //

@@ -47,28 +47,28 @@ namespace Pulsar {
     class Interface : public TextInterface::To<PolnCalibratorExtension>
     {
       public:
-	Interface( PolnCalibratorExtension *s_instance = NULL );
+        Interface( PolnCalibratorExtension *s_instance = NULL );
     };
 
     //! Construct from a PolnCalibrator instance
     PolnCalibratorExtension (const PolnCalibrator*);
 
     //! Return a short name
-    std::string get_short_name () const { return "pcal"; }
+    std::string get_short_name () const override { return "pcal"; }
 
     //! Set the type of the instrumental response parameterization
-    void set_type (const Calibrator::Type* type);
+    void set_type (const Calibrator::Type* type) override;
 
     //! Set the number of frequency channels
-    void set_nchan (unsigned nchan);
+    void set_nchan (unsigned nchan) override;
 
     //! Remove the inclusive range of channels
-    void remove_chan (unsigned first, unsigned last);
+    void remove_chan (unsigned first, unsigned last) override;
 
     //! Set the weight of the specified channel
-    void set_weight (unsigned ichan, float weight);
+    void set_weight (unsigned ichan, float weight) override;
     //! Get the weight of the specified channel
-    float get_weight (unsigned ichan) const;
+    float get_weight (unsigned ichan) const override;
 
     //! Get the number of parameters describing each transformation
     unsigned get_nparam () const;
@@ -95,7 +95,7 @@ namespace Pulsar {
     const Transformation* get_transformation (unsigned c) const;
 
     //! Append PolnCalibrator Extension data from another Archive
-    void frequency_append (Archive* to, const Archive* from);
+    void frequency_append (Archive* to, const Archive* from) override;
 
     void fscrunch (unsigned factor = 0);
     void fscrunch_to_nchan (unsigned new_nchan);
@@ -201,7 +201,7 @@ namespace Pulsar {
     class Interface : public TextInterface::To<Transformation>
     {
       public:
-	Interface();
+        Interface();
     };
 
   protected:

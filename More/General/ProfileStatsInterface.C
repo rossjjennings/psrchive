@@ -1,14 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2024 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/ProfileStatsInterface.h"
 #include "Pulsar/PhaseWeightInterface.h"
-
 #include "Pulsar/ProfileWeightFunction.h"
+#include "Pulsar/IntegrationTI.h"
 
 #include <iostream>
 using namespace std;
@@ -63,6 +63,8 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance,
        &ProfileStats::set_snr_estimator,
        &ProfileStats::get_snr_interface,
        "snr", "Signal-to-noise ratio" );
+
+  import( "int", Integration::Interface(), &ProfileStats::get_Integration );
 }
 
 

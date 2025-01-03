@@ -73,6 +73,7 @@ void usage ()
 #include "Pulsar/DeltaRM.h"
 #include "Pulsar/PolnProfileStats.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 #include "Pulsar/ComponentModel.h"
 
 #include "MEAL/LevenbergMarquardt.h"
@@ -160,21 +161,19 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 	 bool display,Reference::To<Pulsar::Archive> data,vector<int> good_chans);
 
 
-void do_refine(Reference::To<Pulsar::Archive> data,
-	       bool log_results,
-	       PhaseWeight* onpulse_weights=NULL);
+void do_refine(Pulsar::Archive* data,
+              bool log_results,
+              PhaseWeight* onpulse_weights=NULL);
 
 Reference::To<Pulsar::Archive> get_data (string archive_filename);
 
-double do_maxmthd(double minrm,double maxrm,unsigned rmsteps,
-		  Reference::To<Pulsar::Archive> data);
+double do_maxmthd(double minrm,double maxrm,unsigned rmsteps, Pulsar::Archive* data);
 
 // The polarization statistics estimator used by do_maxmthd
 Reference::To<Pulsar::PolnProfileStats> poln_stats;
 
 // prints various numbers out to file
-void
-rmresult (Pulsar::Archive* archive, const Estimate<double>& rm, unsigned used);
+void rmresult (Pulsar::Archive* archive, const Estimate<double>& rm, unsigned used);
 
 static bool display = false;
 
@@ -198,6 +197,10 @@ static bool wavelength_squared_spacing = false;
 
 // use the sum of L^2 instead of sum of L
 static bool squared = false;
+
+// do not tscrunch and compute RM for each sub-integration
+// setting the aux:rm with the result
+static bool set_auxrm = false;
 
 int main (int argc, char** argv)
 {
@@ -257,12 +260,14 @@ int main (int argc, char** argv)
   // estimate an unique RM for each component in the model
   Reference::To<Pulsar::ComponentModel> component_model;
 
-  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Ll:m:M:p:P:rR:sS:T:tu:U:vVw:WYz:";
+  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Ll:m:M:p:P:rR:sS:T:tu:U:vVw:WxYz:";
 
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, args)) != -1) {
-    switch (gotc) {
+  while ((gotc = getopt(argc, argv, args)) != -1)
+  {
+    switch (gotc)
+    {
 
     case 'a':
       auto_step_rad = atof (optarg);
@@ -471,7 +476,11 @@ int main (int argc, char** argv)
     case 'W':
       wavelength_squared_spacing = true;
       break;
-      
+
+    case 'x':
+      set_auxrm = true;
+      break;
+
     case 'Y':
       plotv = true;
       if (fin)
@@ -490,7 +499,6 @@ int main (int argc, char** argv)
         break;
       }
 
-
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -502,19 +510,20 @@ int main (int argc, char** argv)
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
 
-  if (archives.empty()) {
+  if (archives.empty())
+  {
     cerr << "No archives were specified" << endl;
     return -1;
   }
 
 #if HAVE_PGPLOT
   if (display)
-    {
-      unsigned nx = 1;
-      unsigned ny = 1;
-      cpgopen(cpg_device.c_str());
-      cpgsubp(nx,ny);
-    }
+  {
+    unsigned nx = 1;
+    unsigned ny = 1;
+    cpgopen(cpg_device.c_str());
+    cpgsubp(nx,ny);
+  }
 #endif
 
   Reference::To<Pulsar::Archive> data;
@@ -526,7 +535,7 @@ int main (int argc, char** argv)
     if (rm_set)
     { 
       data->set_rotation_measure (rotation_measure);
-      data -> defaraday();
+      data->defaraday();
     }
 
     if (mtm_std)
@@ -547,24 +556,24 @@ int main (int argc, char** argv)
 	    
       if (the_freq<2000.0 && the_freq>1000.0)
       {
-	cerr << "*** 20cm data ***" <<endl; 
-	if (the_date > 53900.0)
-	  the_channo = 800;
-	else
-	  the_channo = 768;//OLD DATA
+        cerr << "*** 20cm data ***" <<endl; 
+        if (the_date > 53900.0)
+          the_channo = 800;
+        else
+          the_channo = 768;//OLD DATA
       }
       else if (the_freq<4000.0 && the_freq>2000.0)
       {
-	cerr << "*** 10cm data ***" <<endl; 
-	if (the_date > 53900.0)
-	  the_channo = 829; 
-	else
-	  the_channo = 888;//OLD DATA
+        cerr << "*** 10cm data ***" <<endl; 
+        if (the_date > 53900.0)
+          the_channo = 829; 
+        else
+          the_channo = 888;//OLD DATA
       }
       else if (the_freq<1000.0 && the_freq>500.0)
       {
-	cerr << "*** 50cm data ***" <<endl; 
-	the_channo = 308;
+        cerr << "*** 50cm data ***" <<endl; 
+        the_channo = 308;
       }
 
       nfscr = 1+int(ceil( (  log10(float(the_channo)/float(fscr_init)) - log10(float(nchannels))  ) / log10(2.) )); //10cm
@@ -584,170 +593,193 @@ int main (int argc, char** argv)
 
     for (unsigned ifscr=0; ifscr<nfscr; ifscr++)
     {
-      if(fscrunchme){
-	if(iter_fscr){
-	  if(ifscr>0){
-	    
-	    cerr <<endl<<endl<< "***************************************" <<endl;
-	    cerr << "Scrunching frequency channels by factor" << fscr <<endl;
-	    cerr << "***************************************" <<endl<<endl;
-	    
-	    data -> fscrunch(fscr);
-	    
-	  }
-	  else
-	    data -> fscrunch(fscr_init);
-	}
-	else
-	  data -> fscrunch(fscr);
+      if(fscrunchme)
+      {
+        if(iter_fscr)
+        {
+          if(ifscr>0)
+          {
+            cerr <<endl<<endl<< "***************************************" <<endl;
+            cerr << "Scrunching frequency channels by factor" << fscr <<endl;
+            cerr << "***************************************" <<endl<<endl;
+
+            data -> fscrunch(fscr);
+          }
+          else
+            data -> fscrunch(fscr_init);
+        }
+        else
+          data -> fscrunch(fscr);
       }
 
       cerr << endl << endl
-	   << "Number of frequency channels = " << data -> get_nchan() 
-	   << endl << endl;
+          << "Number of frequency channels = " << data -> get_nchan() 
+          << endl << endl;
 
       for(unsigned ibscr=0; ibscr<nbscr+1; ibscr++)
       {
-	if (bscrunchme){   
-	  if(iter_bscr){
-	    if(ibscr>0){
-	      	
-	      cerr <<endl<<endl<< "***************************************" <<endl;
-	      cerr << "Scrunching phase bins by factor" << bscr <<endl;
-	      cerr << "***************************************" <<endl<<endl;
-	      
-	      data -> bscrunch(bscr);      
-	      
-	    }
-	  }
-	  else{
-	    data -> bscrunch(bscr);
-	    cerr <<endl<<endl<<endl<<"Scrunched by factor "<< bscr <<endl<<endl;
-	  }
-	}
-	
-	
-	for( unsigned izap=0; izap<zap_chans.size(); izap++)
-	  for( unsigned iint=0; iint<data->get_nsubint(); iint++)
-	    data->get_Integration(iint)->set_weight(zap_chans[izap],0.0);
-	
-	if (maxmthd && !(singlebin || window)) {
-	  
-	  double best_rm = do_maxmthd (minrm, maxrm, rmsteps, data);
-	  
+        if (bscrunchme)
+        {
+          if(iter_bscr)
+          {
+            if(ibscr>0)
+            {
+              cerr <<endl<<endl<< "***************************************" <<endl;
+              cerr << "Scrunching phase bins by factor" << bscr <<endl;
+              cerr << "***************************************" <<endl<<endl;
 
-	  data->set_rotation_measure (best_rm);
+              data -> bscrunch(bscr);
+            }
+          }
+	        else
+          {
+            data -> bscrunch(bscr);
+            cerr <<endl<<endl<<endl<<"Scrunched by factor "<< bscr <<endl<<endl;
+          }
+        }
 
-	  if( verbose )
-	    fprintf(stderr,"Completed do_maxmthd and got out best_rm=%f\n",
-		    best_rm);
-	  
-	  if( !refine )
-	    continue;
-	}
+        for( unsigned izap=0; izap<zap_chans.size(); izap++)
+          for( unsigned iint=0; iint<data->get_nsubint(); iint++)
+            data->get_Integration(iint)->set_weight(zap_chans[izap],0.0);
 
-	  if( verbose )
-	    fprintf(stderr,"Continuing with specialist methods\n");
+        if (maxmthd && !(singlebin || window))
+        {
+          double best_rm = do_maxmthd (minrm, maxrm, rmsteps, data);
 
+          data->set_rotation_measure (best_rm);
 
-	  if (component_model)
-	  {
-	    component_estimate (component_model, data);
-	    continue;
-	  }
-    
-	  // This must be done after maxmthd because it re-labels
-	  // all the channel frequencies.
+          if( verbose )
+            fprintf(stderr,"Completed do_maxmthd and got out best_rm=%f\n",
+              best_rm);
 
-	  if (refine) try {
+          if( !refine )
+            continue;
+        }
 
-	    if (!include_range.empty())
-	      parse_indeces (include_bins, include_range, data->get_nbin());
-
-	    if (!exclude_range.empty())
-	      parse_indeces (exclude_bins, exclude_range, data->get_nbin());
-
-	    do_refine (data,log_results);
-	    continue;
-
-	  }
-	  catch (Error& error) { 
-	    cerr << "rmfit: Error during refine" << error << endl; 
-	    return -1;
-	  } 
-
-	  if( verbose )
-	    fprintf(stderr,"Going to generate good_chans\n");
-
-	  vector<int> goodchans;
-          ofstream test_goodchans;
-
-	  for (unsigned i = 0; i < data->get_nchan(); i++) {
-	    if (data->get_Integration(0)->get_weight(i) > channel_weight_threshold){ 
-	      goodchans.push_back(i);
-
-	      }
-	   }
+        if( verbose )
+          fprintf(stderr,"Continuing with specialist methods\n");
 
 
-	  if (goodchans.size() < 2) {
-	    cerr << "Not enough channels above threshold!" << endl;
-	    return -1;
-	  }
+        if (component_model)
+        {
+          component_estimate (component_model, data);
+          continue;
+        }
+        
+        // This must be done after maxmthd because it re-labels
+        // all the channel frequencies.
 
-	  int good_nchan = goodchans.size();
+        if (refine) try
+        {
+          if (!include_range.empty())
+            parse_indeces (include_bins, include_range, data->get_nbin());
 
-	  vector<double> pa(good_nchan);
-	  vector<double> pa_stddev(good_nchan);  
-	  vector<double> freqs(good_nchan);
+          if (!exclude_range.empty())
+            parse_indeces (exclude_bins, exclude_range, data->get_nbin());
 
-	  for (int i = 0; i < good_nchan; i++)
-	    freqs[i] = data->get_Profile(0,0,goodchans[i])->get_centre_frequency();
+          do_refine (data,log_results);
+
+          if (set_auxrm)
+          {
+            std::string filename = data->get_filename();
+            filename += ".auxrmfit";
+
+            cerr << "rmfit: unloading " << filename << " with auxiliary RM set for each sub-integration" << endl;
+            data->unload(filename);
+
+            filename += ".psh";
+            cerr << "rmfit: unloading " << filename << " with psrsh commands that set auxiliary RM set for each sub-integration" << endl;
+            std::ofstream out (filename.c_str());
+            unsigned nsubint = data->get_nsubint();
+            for (unsigned isubint = 0; isubint < nsubint; isubint++)
+            {
+              Integration* subint = data->get_Integration(isubint);
+              auto aux = subint->get<AuxColdPlasmaMeasures>();
+              assert (aux != nullptr);
+              double auxRM = aux->get_rotation_measure();
+              out << "int[" << isubint << "]:aux:rm=" << auxRM << endl;
+            }
+          }
+
+          continue;
+        }
+        catch (Error& error) { 
+          cerr << "rmfit: Error during refine" << error << endl; 
+          return -1;
+        } 
+
+        if( verbose )
+          fprintf(stderr,"Going to generate good_chans\n");
+
+        vector<int> goodchans;
+        ofstream test_goodchans;
+
+        for (unsigned i = 0; i < data->get_nchan(); i++)
+        {
+          if (data->get_Integration(0)->get_weight(i) > channel_weight_threshold)
+          { 
+            goodchans.push_back(i);
+          }
+        }
+
+        if (goodchans.size() < 2)
+        {
+          cerr << "Not enough channels above threshold!" << endl;
+          return -1;
+        }
+
+        int good_nchan = goodchans.size();
+
+        vector<double> pa(good_nchan);
+        vector<double> pa_stddev(good_nchan);  
+        vector<double> freqs(good_nchan);
+
+        for (int i = 0; i < good_nchan; i++)
+          freqs[i] = data->get_Profile(0,0,goodchans[i])->get_centre_frequency();
 
 
-	  if (singlebin)	      do_singlebin    (data,x1,x2,display,goodchans,freqs,
-						     pa, pa_stddev, nsigma);
-	  else if (window)	      do_window       (data,x1,x2,display, goodchans, freqs,
-						     pa, pa_stddev, nsigma);	  
+        if (singlebin)	      do_singlebin    (data,x1,x2,display,goodchans,freqs,
+                    pa, pa_stddev, nsigma);
+        else if (window)	      do_window       (data,x1,x2,display, goodchans, freqs,
+                    pa, pa_stddev, nsigma);
 
-	  if( verbose )
-	    fprintf(stderr,"Going to go in to fitstuff\n");
+        if( verbose )
+          fprintf(stderr,"Going to go in to fitstuff\n");
 
 
 
-          if(good_fbscrunch) fitstuff(goodfreqs,goodpa,goodpa_stddev,display,data,goodchans);
+        if(good_fbscrunch) fitstuff(goodfreqs,goodpa,goodpa_stddev,display,data,goodchans);
 
-        }//bscrunching iteration loop (end)
-      }// fscrunching iteration loop (end)
+      }//bscrunching iteration loop (end)
+    }// fscrunching iteration loop (end)
 
-      float fbscr_RM_weight = 0.;
-      float fbscr_RM_weight_sum = 0.;
-      fbscr_RMs_weighted_mean = 0.;
-      fbscr_RMs_var = 0.;
+    float fbscr_RM_weight = 0.;
+    float fbscr_RM_weight_sum = 0.;
+    fbscr_RMs_weighted_mean = 0.;
+    fbscr_RMs_var = 0.;
+
+    for(unsigned i=0; i<fbscr_RMs.size(); i++)
+    {
+      fbscr_RM_weight =
+              1./fabs(fbscr_RM_probmax[i])*
+              1./fabs(fbscr_RM_probmax[i]);
+
+      fbscr_RM_weight_sum += fbscr_RM_weight;
       
-      for(unsigned i=0; i<fbscr_RMs.size(); i++)
-      {	 
-	 fbscr_RM_weight =
-	        1./fabs(fbscr_RM_probmax[i])*
-	        1./fabs(fbscr_RM_probmax[i]);
-
-		
-	 fbscr_RM_weight_sum += fbscr_RM_weight;
-	 
-	 fbscr_RMs_weighted_mean += fbscr_RM_weight*fbscr_RMs[i];
-      }
-
-      fbscr_RMs_weighted_mean /= fbscr_RM_weight_sum;
-      
-      for (unsigned i=0; i<fbscr_RMs.size(); i++)
-	 fbscr_RMs_var += (fbscr_RMs[i]-fbscr_RMs_weighted_mean)*(fbscr_RMs[i]-fbscr_RMs_weighted_mean);
-
-      fbscr_RMs_var /= float(fbscr_RMs.size()-1);
-      fbscr_RMs_var = sqrt(fbscr_RMs_var);
-
-
-
+      fbscr_RMs_weighted_mean += fbscr_RM_weight*fbscr_RMs[i];
     }
+
+    fbscr_RMs_weighted_mean /= fbscr_RM_weight_sum;
+
+    for (unsigned i=0; i<fbscr_RMs.size(); i++)
+      fbscr_RMs_var += (fbscr_RMs[i]-fbscr_RMs_weighted_mean)*(fbscr_RMs[i]-fbscr_RMs_weighted_mean);
+
+    fbscr_RMs_var /= float(fbscr_RMs.size()-1);
+    fbscr_RMs_var = sqrt(fbscr_RMs_var);
+
+
+
+  }
   catch (Error& error)
     { 
       cerr << error << endl;
@@ -760,8 +792,6 @@ int main (int argc, char** argv)
   ofstream test_bestRMs;
   test_bestRMs.open("all_bestRMs.out",ios::app);
 
-
-  
   for (unsigned k=0; k<fbscr_RMs.size();k++)
   {
       test_bestRMs <<setw(12) << data->get_source()                   << " "
@@ -825,12 +855,9 @@ int main (int argc, char** argv)
                  << setw(12)  << fbscr_RM_errs[k]                     << " "                    
  		 << setw(10)   << delta_L[k]                          << " " 
 		 << setw(10)   << delta_Lerr[k]                       << " " <<endl;
-
   }
 
   StokeStats.close();
-
-
 
 #if HAVE_PGPLOT
   if (display)
@@ -1073,17 +1100,16 @@ Reference::To<Pulsar::Archive> get_data(string filename)
   // data -> set_filename( "Archive: " + filename );
 
   data -> convert_state(Signal::Stokes);
-
   data -> dedisperse();
-  data -> tscrunch();
+
+  if (!set_auxrm)
+    data -> tscrunch();
 
   data -> remove_baseline();
-//  data -> defaraday();
-
   return data;
 }
 
-double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Reference::To<Pulsar::Archive> data)
+double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive* data)
 {
   if (auto_maxmthd)
   {
@@ -1435,9 +1461,13 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Reference::To<P
   return bestrm;
 }
 
-void do_refine (Reference::To<Pulsar::Archive> data,
-		bool log_results,
-		PhaseWeight* onpulse_weights)
+void do_refine (Pulsar::DeltaRM& delta_rm,
+                Pulsar::Archive* data,
+                bool log_results);
+
+void do_refine (Pulsar::Archive* data,
+                bool log_results,
+                PhaseWeight* onpulse_weights)
 {
   Pulsar::DeltaRM delta_rm;
   cerr << "rmfit: do_refine set threshold = " << selection_threshold << endl;
@@ -1449,7 +1479,30 @@ void do_refine (Reference::To<Pulsar::Archive> data,
   delta_rm.set_include (include_bins);
   delta_rm.set_exclude (exclude_bins);
   delta_rm.set_onpulse (onpulse_weights);
-  
+
+  delta_rm.set_data (data);
+
+  if (set_auxrm)
+  {
+    unsigned nsubint = data->get_nsubint();
+
+    cerr << "rmfit: do_refine for each of " << nsubint << " sub-integrations" << endl;
+    for (unsigned isubint=0; isubint < nsubint; isubint++)
+    {
+      delta_rm.set_subint(isubint);
+      do_refine (delta_rm, data, log_results);
+    }
+  }
+  else
+  {
+    do_refine (delta_rm, data, log_results);
+  }
+}
+
+void do_refine (Pulsar::DeltaRM& delta_rm,
+                Pulsar::Archive* data,
+                bool log_results)
+{
   bool converged = false;
   unsigned iterations = 0;
 
@@ -1460,8 +1513,7 @@ void do_refine (Reference::To<Pulsar::Archive> data,
   {
     if (iterations > max_iterations)
     {
-      cerr << "rmfit: maximum iterations (" << max_iterations << ") exceeded"
-	   << endl;
+      cerr << "rmfit: maximum iterations (" << max_iterations << ") exceeded" << endl;
 
       cerr << "new=" << new_rm << " old=" << old_rm << endl;
 
@@ -1469,13 +1521,13 @@ void do_refine (Reference::To<Pulsar::Archive> data,
       double diff_old = fabs( best_search_rm.get_value() - old_rm.get_value() );
 
       if ( diff_old < diff_new )
-	new_rm = old_rm;
+        new_rm = old_rm;
 
       cerr << "rmfit: best search RM=" << best_search_rm 
-	   << " using closest RM=" << new_rm << endl;
+          << " using closest RM=" << new_rm << endl;
 
       if (log_results)
-	rmresult (data, new_rm, data->get_nbin());
+        rmresult (data, new_rm, data->get_nbin());
 
       return;
     }
@@ -1483,14 +1535,14 @@ void do_refine (Reference::To<Pulsar::Archive> data,
     old_rm = new_rm;
 
     try {
-      delta_rm.set_data (data->clone());
       delta_rm.refine ();
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       cerr << "\nrmfit: DeltaRM::refine failed \n\t" << error << endl;
       cerr << "rmfit: using best search RM=" << best_search_rm << endl;
       if (log_results)
-	rmresult (data, best_search_rm, data->get_nbin());
+        rmresult (data, best_search_rm, data->get_nbin());
       return;
     }
 
@@ -1504,13 +1556,28 @@ void do_refine (Reference::To<Pulsar::Archive> data,
     converged = fabs (old_RM - new_RM) <= err_RM;
     iterations ++;
 
-    if (iterations > max_iterations / 2) {
+    if (iterations > max_iterations / 2)
+    {
       new_RM = (new_RM + old_RM) / 2.0;
-      cerr << "Getting old ... try mean=" << new_RM << endl;
+      cerr << "Getting old ... try mean of last two = " << new_RM << endl;
     }
 
-    data->set_rotation_measure (new_RM);
+    if (set_auxrm)
+    {
+      unsigned isubint = delta_rm.get_subint();
+      Integration* subint = data->get_Integration(isubint);
+      auto aux = subint->getadd<AuxColdPlasmaMeasures>();
 
+      double dRM = new_RM - data->get_rotation_measure();
+      double auxRM = aux->get_rotation_measure();
+      aux->set_rotation_measure(auxRM + dRM);
+
+      cerr << "rmfit: set_auxrm header RM=" << data->get_rotation_measure() << " new RM=" << new_RM << " int[" << isubint << "]:aux:rm=" << auxRM << " new aux:rm=" << auxRM+dRM << endl;
+    }
+    else
+    {
+      data->set_rotation_measure (new_RM);
+    }
   }
 
   cerr << "rmfit: converged in " << iterations << " iterations" << endl;

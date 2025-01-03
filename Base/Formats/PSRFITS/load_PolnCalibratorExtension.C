@@ -11,7 +11,7 @@
 
 #include "psrfitsio.h"
 #include "strutil.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 // #define _DEBUG 1
 #include "debug.h"
@@ -148,7 +148,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
       {
 	pce->get_transformation(ichan)->set_param_name (j, param_names[j]);
 
-	if (!myfinite(data[count]))
+	if (!true_math::finite(data[count]))
 	  valid = false;
 	else
         {
@@ -209,7 +209,7 @@ void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
       {
 	float err = data[count];
 
-	if (!myfinite(err))
+	if (!true_math::finite(err))
 	  valid = false;
 	else
 	  pce->get_transformation(ichan)->set_variance (j,err*err);

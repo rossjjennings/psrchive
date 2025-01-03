@@ -390,8 +390,8 @@ string CommandParser::help (const string& command)
 {
   unsigned icmd = 0;
 
-  if (command.empty()) {
-
+  if (command.empty())
+  {
     bool have_shortcuts = false;
     unsigned maxlen = 0;
 
@@ -405,12 +405,13 @@ string CommandParser::help (const string& command)
     /* determine the maximum command string length, 
        and if any shortcut keys are enabled */
 
-    for (icmd=0; icmd < commands.size(); icmd++) {
+    for (icmd=0; icmd < commands.size(); icmd++)
+    {
       string cmd = nested_prefix + commands[icmd]->command;
       if (cmd.length() > maxlen)
-	maxlen = cmd.length();
+        maxlen = cmd.length();
       if (commands[icmd]->shortcut)
-	have_shortcuts = true;
+        have_shortcuts = true;
     }
 
     /* include a space after the command column */
@@ -434,18 +435,19 @@ string CommandParser::help (const string& command)
     if (nested.empty())
       help_str += "\n";
 
-    for (icmd=0; icmd < commands.size(); icmd++) {
-
+    for (icmd=0; icmd < commands.size(); icmd++)
+    {
       /* pad command strings with spaces on the right, up to the maximum
-	 command string length (plus one space) */
+        command string length (plus one space) */
       help_str += pad(maxlen, nested_prefix + commands[icmd]->command);
 
       /* if any shortcut keys are enabled, print these */
-      if (have_shortcuts) {
-	if (commands[icmd]->shortcut)
-	  help_str += string("[") + commands[icmd]->shortcut + "] ";
-	else
-	  help_str += "    ";
+      if (have_shortcuts)
+      {
+        if (commands[icmd]->shortcut)
+          help_str += string("[") + commands[icmd]->shortcut + "] ";
+        else
+          help_str += "    ";
       }
 
       /* then print the help string */
@@ -458,8 +460,8 @@ string CommandParser::help (const string& command)
 
     if (nested.empty())
       help_str += "\n" +
-	pad(maxlen, "quit")    + "quit program\n" +
-	pad(maxlen, "verbose") + "increase verbosity\n";
+        pad(maxlen, "quit")    + "quit program\n" +
+        pad(maxlen, "verbose") + "increase verbosity\n";
 
     help_str += "\n"
       "Type \"" + nested_prefix + "help <command>\" "
@@ -476,13 +478,26 @@ string CommandParser::help (const string& command)
   if (command == "verbose")
     return "verbose makes the program more verbose\n";
 
+  string arguments = command;
+  string cmd = stringtok (arguments, whitespace);
+  if (arguments != "")
+  {
+    for (icmd=0; icmd < commands.size(); icmd++)
+      if (cmd == commands[icmd]->command)
+      {
+        return commands[icmd]->execute ("help " + arguments);
+      }
+    return "invalid command: " + cmd + "\n";
+  }
+
   for (icmd=0; icmd < commands.size(); icmd++)
-    if (command == commands[icmd]->command) {
+    if (command == commands[icmd]->command)
+    {
       string help_str = command +": "+ commands[icmd]->help +"\n\n";
       if (commands[icmd]->detail().empty())
-	return help_str + "\t no detailed help available\n";
+        return help_str + "\t no detailed help available\n";
       else
-	return help_str + commands[icmd]->detail() + "\n";
+        return help_str + commands[icmd]->detail() + "\n";
     }
       
   return "invalid command: " + command + "\n";
@@ -490,8 +505,8 @@ string CommandParser::help (const string& command)
 
 void CommandParser::add_command (Method* command)
 {
-  for (unsigned icmd=0; icmd < commands.size(); icmd++) {
-
+  for (unsigned icmd=0; icmd < commands.size(); icmd++)
+  {
     if (command->command == commands[icmd]->command)
       throw Error (InvalidParam, "CommandParser::add_command",
 		   "command name='" + command->command + "' already taken");
@@ -499,7 +514,6 @@ void CommandParser::add_command (Method* command)
     if (command->shortcut && command->shortcut == commands[icmd]->shortcut)
       throw Error (InvalidParam, "CommandParser::add_command",
 		   "command shortcut=%c already taken", command->shortcut);
-
   }
 
   commands.push_back (command);

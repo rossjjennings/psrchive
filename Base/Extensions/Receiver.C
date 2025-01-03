@@ -142,7 +142,6 @@ Angle Pulsar::Receiver::get_X_offset () const
   return get<Linear>()->get_X_offset ();
 }
 
-
 /*
   \param offset either 0 or +/- 180 degrees
 */
@@ -215,13 +214,11 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
   return result;
 }
 
-
-
 Stokes<double> Pulsar::Receiver::get_reference_source () const
 {
   if (Archive::verbose == 3)
     cerr << "Pulsar::Receiver::get_reference_source phase="
-	 << get_reference_source_phase().getDegrees() << " deg" << endl;
+        << get_reference_source_phase().getDegrees() << " deg" << endl;
 
   /* The following line provides a basis-independent representation of a
    reference source that illuminates both receptors equally and in phase. */
@@ -247,36 +244,36 @@ public:
       set_instance( s_instance );
 
     add( &Receiver::get_name,
-	 &Receiver::set_name,
-	 "name", "Receiver name" );
+        &Receiver::set_name,
+        "name", "Receiver name" );
     
     add( &Receiver::get_basis,
-	 &Receiver::set_basis,
-	 "basis", "Basis of receptors" );
+        &Receiver::set_basis,
+        "basis", "Basis of receptors" );
     
     add( &Receiver::get_hand,
-	 &Receiver::set_hand,
-	 "hand", "Hand of receptor basis" );
+        &Receiver::set_hand,
+        "hand", "Hand of receptor basis" );
     
     add( &Receiver::get_field_orientation,
-	 &Receiver::set_field_orientation,
-	 "sa", "Symmetry angle of receptor basis" );
+        &Receiver::set_field_orientation,
+        "sa", "Symmetry angle of receptor basis" );
 
     add( &Receiver::get_reference_source_phase,
-	 &Receiver::set_reference_source_phase,
-	 "rph", "Reference source phase" );
+        &Receiver::set_reference_source_phase,
+        "rph", "Reference source phase" );
 
     add( &Receiver::get_basis_corrected,
-	 &Receiver::set_basis_corrected,
-	 "fdc", "Receptor basis corrected" );
+        &Receiver::set_basis_corrected,
+        "fdc", "Receptor basis corrected" );
 
     add( &Receiver::get_projection_corrected,
-	 &Receiver::set_projection_corrected,
-	 "prc", "Receptor projection corrected" );
+        &Receiver::set_projection_corrected,
+        "prc", "Receptor projection corrected" );
 
     add( &Receiver::get_tracking_angle,
-	 &Receiver::set_tracking_angle,
-	 "ta", "Tracking angle of feed" );
+        &Receiver::set_tracking_angle,
+        "ta", "Tracking angle of feed" );
   }
   
   virtual std::string get_interface_name() const { return "ReceiverTI"; }

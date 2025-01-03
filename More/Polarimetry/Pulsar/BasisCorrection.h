@@ -26,8 +26,11 @@ namespace Pulsar
   {
   public:
 
-    //! Return true if the correction is required
-    bool required (const Archive* archive) const;
+    //! Return true if basis correction is required
+    bool required (const Archive*) const;
+
+    //! Return true if basis correction is required
+    bool required (const Receiver*) const;
 
     //! Return the basis correction transformation for the given archive
     Jones<double> operator () (const Archive*) const;

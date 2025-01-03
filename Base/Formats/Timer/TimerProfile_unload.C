@@ -11,7 +11,7 @@
 
 #include "fcomp.h"
 #include "convert_endian.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <stdio.h>
 #ifdef sun
@@ -35,7 +35,7 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile, int poln)
 
   const float* amps = profile->get_amps();
   for (int ibin=0; ibin < nbin; ibin++)
-    if (!myfinite(amps[ibin]))
+    if (!true_math::finite(amps[ibin]))
       throw Error (InvalidParam, "Pulsar::TimerProfile_unload",
                    "amps[%d]=%f is not finite", ibin, amps[ibin]);
 

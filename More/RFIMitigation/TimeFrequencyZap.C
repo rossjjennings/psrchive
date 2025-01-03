@@ -522,8 +522,7 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
 
     if (aux_filename != "")
     {
-      cerr << "TimeFrequencyZap::compute_stat opening "
-	"'" << aux_filename << "'" << endl;
+      cerr << "TimeFrequencyZap::compute_stat opening '" << aux_filename << "'" << endl;
       
       FILE* f = fopen (aux_filename.c_str(), "w");
       statistic->set_file (f);
@@ -571,26 +570,28 @@ void Pulsar::TimeFrequencyZap::compute_stat (Archive* data)
         continue;
 
       if (statistic)
-	statistic->set_chan (ichan);
+        statistic->set_chan (ichan);
     
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
         float fval = 0;
         if (statistic)
         {
-	  statistic->set_pol (pol_i[ipol]);
-	  // cerr << "calling Statistic::get" << endl;
+          statistic->set_pol (pol_i[ipol]);
+          // cerr << "calling Statistic::get" << endl;
           fval = statistic->get();
-	  // cerr << "Statistic::get returned" << endl;
+          // cerr << "Statistic::get returned" << endl;
           if (logarithmic)
             fval = log(fval);
         }
         else
         {
-	  Reference::To<const Profile> prof;
-	  prof = subint->get_Profile(pol_i[ipol],ichan);
+          Reference::To<const Profile> prof;
+          prof = subint->get_Profile(pol_i[ipol],ichan);
 
           stats->set_Profile(prof);
+          stats->set_Integration(subint);
+
           string val = process(parser,expression);
           fval = fromstring<float>(val);
         }

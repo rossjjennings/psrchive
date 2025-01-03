@@ -118,7 +118,6 @@ string Pulsar::Calibrator::get_filenames () const
     names += "\n\t" + filenames[i];
 
   return names;
-
 }
 
 //! Return a const reference to the calibrator archive

@@ -536,7 +536,7 @@ void add_step (char code, const MJD& mjd)
     diff_phase_steps.push_back (mjd);;
     return;
   }
-  throw Error (InvalidParam, "set_time_variation",
+  throw Error (InvalidParam, "add_step",
                "unrecognized PAR code = %c", code);
 }
 
@@ -751,16 +751,16 @@ void pcm::add_calibrator_database (const string& arg)
 void pcm::set_model (const string& filename)
 {
   try
-    {
-      response = Pulsar::load_transformation (filename);
-      cerr << "pcm: response model loaded from " << filename << endl;
-      return;
-    }
+  {
+    response = Pulsar::load_transformation (filename);
+    cerr << "pcm: response model loaded from " << filename << endl;
+    return;
+  }
   catch (Error& error)
-    {
-      if (verbose)
-	cerr << "pcm: error" << error << endl;
-    }
+  {
+    if (verbose)
+      cerr << "pcm: error" << error << endl;
+  }
 
   model_type = Pulsar::Calibrator::Type::factory (filename);
 }
@@ -829,7 +829,7 @@ void pcm::add_variation (const string& text)
     throw Error (InvalidParam, "pcm",
 		 "error parsing '" + text + "' as PAR:N");
 
-  cerr << "pcm: using a polynomial of degree " << order << " to model ";
+  cerr << "pcm: using a polynomial of order " << order << " to model ";
   set_time_variation( code, new MEAL::Polynomial (order+1) );
 }
 
@@ -1046,7 +1046,7 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg->set_long_help (par_help);
 
   arg = menu.add (this, &pcm::add_variation, 'o', "PAR:N");
-  arg->set_help ("model PAR as N degree polyomial");
+  arg->set_help ("model PAR as polyomial of order N");
   arg->set_long_help (par_help);
 
   arg = menu.add (this, &pcm::set_selection_policy, 'B', "choose");

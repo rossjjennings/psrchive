@@ -15,7 +15,7 @@
 #include "MEAL/Axis.h"
 #include "Estimate.h"
 #include "Error.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <iostream>
 #include <cmath>
@@ -448,7 +448,7 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha, const T
           << "\t" << names[irow] << " = " << ival << std::endl;
       }
 
-      if (!myfinite(degen))
+      if (!true_math::finite(degen))
       {
         std::cerr << "NaN or Inf in curvature matrix" << std::endl;
         return;

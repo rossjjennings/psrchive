@@ -115,6 +115,9 @@ try {
 
   if (get<Pulsar::IntegrationOrder>())
   {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Integration load IntegrationOrder INDEXVAL" << endl;
+
     colnum = 0;
     fits_get_colnum (read_fptr, CASEINSEN, "INDEXVAL", &colnum, &status);
     
@@ -135,8 +138,7 @@ try {
   
   if (!hdr_ext)
   {
-    throw Error (InvalidParam, "FITSArchive::load_Integration",
-		 "No FITSHdrExtension found");
+    throw Error (InvalidParam, "FITSArchive::load_Integration", "no FITSHdrExtension");
   }
   
   // Set the duration of the integration
@@ -195,6 +197,9 @@ try {
 
   if (hdr_model)
   {
+    if (verbose > 2)
+      cerr << "Pulsar::FITSArchive::load_Integration with phase predictor" << endl;
+
     // Set the folding period, using the polyco from the file header
     // This was taken out of the condition clause below because period
     // wasn't set when TSUB was 0
@@ -216,21 +221,18 @@ try {
 
     if (duration && correct_epoch_phase)
     {
-
       if (verbose > 2)
-	cerr << "Pulsar::FITSArchive::load_Integration correcting epoch phase"
-	     << endl;
+        cerr << "Pulsar::FITSArchive::load_Integration correcting epoch phase" << endl;
 
       Phase reference_phs = 0.0;
 
       if (phase_match_start_time)
       {
-	// Correct epoch such that its phase equals that of the start time
-	if (verbose > 2)
-	  cerr << "Pulsar::FITSArchive::load_Integration matching phase(start)"
-	       << endl;
+        // Correct epoch such that its phase equals that of the start time
+        if (verbose > 2)
+          cerr << "Pulsar::FITSArchive::load_Integration matching phase(start)" << endl;
 
-	reference_phs = hdr_model->phase(hdr_ext->get_start_time());
+        reference_phs = hdr_model->phase(hdr_ext->get_start_time());
       }
 
       Phase off_phs = hdr_model->phase(epoch);
@@ -243,23 +245,26 @@ try {
       if (verbose > 2)
       {
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
-	  "\n  PRED_PHS=" << predicted_phase;
+          "\n  PRED_PHS=" << predicted_phase;
 
-	if (phase_match_start_time)
-	  cerr << "\n  reference epoch=" 
-	       << hdr_ext->get_start_time().printdays(13);
+        if (phase_match_start_time)
+          cerr << "\n  reference epoch=" 
+              << hdr_ext->get_start_time().printdays(13);
 
-	cerr <<
-	  "\n  reference phase=" << reference_phs <<
-	  "\n      input phase=" << off_phs <<
-	  "\n     phase offset=" << dphase << " = " << dtime << "s" 
-	  "\n     subint epoch=" << epoch.printdays(13) << 
-	  "\n     subint phase=" << hdr_model->phase(epoch) << endl;
+        cerr <<
+          "\n  reference phase=" << reference_phs <<
+          "\n      input phase=" << off_phs <<
+          "\n     phase offset=" << dphase << " = " << dtime << "s" 
+          "\n     subint epoch=" << epoch.printdays(13) << 
+          "\n     subint phase=" << hdr_model->phase(epoch) << endl;
       }
     }
   }
   else
   {
+
+    if (verbose > 2)
+      cerr << "Pulsar::FITSArchive::load_Integration without phase predictor" << endl;
 
     /* *******************************************************************
 
@@ -291,7 +296,7 @@ try {
     if (status == 0 && period > 0.0)
     {
       if (verbose > 2)
-	cerr << "FITSArchive::load_Integration PERIOD=" << period << endl;
+        cerr << "FITSArchive::load_Integration PERIOD=" << period << endl;
       integ->set_folding_period (period);
     }
 
@@ -333,8 +338,7 @@ try {
   // Load the channel centre frequencies
   
   if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_Integration reading channel freqs" 
-	 << endl;
+    cerr << "Pulsar::FITSArchive::load_Integration reading channel freqs" << endl;
   
   int counter = 1;
   vector<double> chan_freqs(get_nchan());
@@ -352,8 +356,7 @@ try {
   // Set the profile channel centre frequencies
   
   if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_Integration setting frequencies" 
-	 << endl;
+    cerr << "Pulsar::FITSArchive::load_Integration setting frequencies" << endl;
 
   bool all_ones = true;
   for (unsigned j = 0; j < get_nchan(); j++)
@@ -365,8 +368,8 @@ try {
   if ( all_ones )
   {
     if (verbose > 2)
-      cerr << "FITSArchive::load_Integration all frequencies unity - reseting"
-	   << endl;
+      cerr << "FITSArchive::load_Integration all frequencies unity - reseting" << endl;
+
     for (unsigned j = 0; j < get_nchan(); j++)
       integ->set_centre_frequency (j, get_centre_frequency()
 				   -0.5*(get_bandwidth()+chanbw)+j*chanbw);
@@ -383,8 +386,7 @@ try {
   // Load the profile weights
 
   if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_Integration reading weights" 
-	 << endl;
+    cerr << "Pulsar::FITSArchive::load_Integration reading weights" << endl;
   
   counter = 1;
   vector<float> weights(get_nchan());
@@ -406,8 +408,7 @@ try {
   // Set the profile weights
   
   if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_Integration setting weights" 
-	 << endl;
+    cerr << "Pulsar::FITSArchive::load_Integration setting weights" << endl;
   
   for(unsigned j = 0; j < get_nchan(); j++)
     integ->set_weight(j, weights[j]);
@@ -422,16 +423,15 @@ try {
     setup_dat (read_fptr, load_dat_io);
 
     if (verbose > 2)
-      cerr << "FITSArchive::load_Integration dat_io=" << load_dat_io.ptr()
-           << endl;
+      cerr << "FITSArchive::load_Integration dat_io=" << load_dat_io.ptr() << endl;
 
     load_dat_io->load (isubint + 1, profiles);
 
     if (scale_cross_products && integ->get_state() == Signal::Coherence)
       for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       {
-	integ->get_Profile(2, ichan)->scale(2.0);
-	integ->get_Profile(3, ichan)->scale(2.0);
+        integ->get_Profile(2, ichan)->scale(2.0);
+        integ->get_Profile(3, ichan)->scale(2.0);
       }
 
     if (naux_profile)

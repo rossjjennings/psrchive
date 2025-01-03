@@ -34,10 +34,9 @@ Pulsar::DeltaRM::~DeltaRM ()
 }
 
 //! Set the archive from which to derive the refined rotation measure
-void Pulsar::DeltaRM::set_data (Archive* archive)
+void Pulsar::DeltaRM::set_data (const Archive* archive)
 {
   data = archive;
-  data->defaraday();
 }
 
 #if FIX_PGPLOT
@@ -45,7 +44,7 @@ void Pulsar::DeltaRM::set_data (Archive* archive)
 #include "Pulsar/StokesCylindrical.h"
 #include <cpgplot.h>
 
-static void plot (const Pulsar::Archive* archive, unsigned chan)
+static void plot (const Pulsar::Archive* archive, isubint, unsigned chan)
 {
   string name = "band" + tostring(chan) + ".ps/cps";
 
@@ -55,6 +54,7 @@ static void plot (const Pulsar::Archive* archive, unsigned chan)
   
   Pulsar::StokesCylindrical plot;
 
+  plot.set_subint (subint);
   plot.set_chan (chan);
   plot.plot (archive);
 
@@ -87,15 +87,12 @@ void Pulsar::DeltaRM::refine ()
   if (!data)
     throw Error (InvalidState, "Pulsar::DeltaRM::refine", "no data");
 
-  Reference::To<Archive> archive_clone = data->clone();
-
-  Reference::To<Integration> clone = archive_clone->get_Integration(0);
+  Reference::To<Integration> clone = data->get_Integration(isubint)->clone();
 
   FrequencyIntegrate fscr;
   
   policy->set_ndivide (2);
-  fscr.set_range_policy ( policy );
-
+  fscr.set_range_policy (policy);
   fscr.transform (clone);
 
 #if FIX_PGPLOT
@@ -104,11 +101,10 @@ void Pulsar::DeltaRM::refine ()
      likely have to be added as a plugin; e.g. in the main() of the
      executable that uses this class */
 
-  cerr << "Pulsar::DeltaRM::refine plotting half-band integrated profiles"
-       << endl;
+  cerr << "Pulsar::DeltaRM::refine plotting half-band integrated profiles" << endl;
 
-  plot (archive_clone, 0);
-  plot (archive_clone, 1);
+  plot (data, isubint, 0);
+  plot (data, isubint, 1);
 
 #endif
 

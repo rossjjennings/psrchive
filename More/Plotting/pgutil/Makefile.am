@@ -2,10 +2,10 @@
 noinst_LTLIBRARIES = libpgutil.la
 
 include_HEADERS = ColourMap.h pgutil.h quickplot.h Plot3D.h \
-	BandpassPlotter.h EstimatePlotter.h
+	BandpassPlotter.h EstimatePlotter.h ColourBar.h
 
 libpgutil_la_SOURCES = ColourMap.C pgutil.C quickimage.C Plot3D.C \
-	EstimatePlotter.C
+	EstimatePlotter.C ColourBar.C
 
 libpgutil_la_LIBADD = @PGPLOT_LIBS@
 

@@ -23,7 +23,6 @@ RobustEstimateZapper::RobustEstimateZapper ()
 
   // smaller error bars are ok
   threshold_min = 0.0;
-
 }
 
 

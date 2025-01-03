@@ -13,7 +13,7 @@
 
 #include "Estimate.h"
 #include "Error.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <vector>
 #include <iostream>
@@ -201,7 +201,7 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   {
     x[ipt] = xrange_min + xscale * double(ipt);
 
-    if (!myfinite( data[ipt].val ))
+    if (!true_math::finite( data[ipt].val ))
       ye[ipt] = 0;
     else 
     {

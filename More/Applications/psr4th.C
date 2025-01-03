@@ -278,8 +278,14 @@ void psr4th::process (Archive* archive)
     return;
   }
 
+  if (verbose)
+    cerr << "psr4th: compute tscrunched total start" << endl;
+
   // for now, simply add the data to the total
   Reference::To<Archive> tscrunched = archive->tscrunched();
+
+  if (verbose)
+    cerr << "psr4th: compute tscrunched total finish" << endl;
 
   if (!output)
   {
@@ -457,7 +463,13 @@ void psr4th::compute_moments (Archive* archive)
   Reference::To<Pulsar::PhaseWeight> baseline;
 
   if (total_baseline)
+  {
+    if (verbose)
+      cerr << "psr4th: compute baseline start" << endl;
     baseline = output->baseline();
+    if (verbose)
+      cerr << "psr4th: compute baseline finish" << endl;
+  }
 
   if (verbose && running_mean_profiles)
     cerr << "removing running mean profiles nsub=" << running_mean_profiles->get_nsubint()
@@ -538,8 +550,14 @@ void psr4th::compute_moments (Archive* archive)
           baselines_out << mean[i][0].val << " ";
         baselines_out << endl;
       }
-    
+
+      if (verbose)
+        cerr << "psr4th: subint remove baseline start" << endl;
+
       subint->remove_baseline( baseline.ptr() );
+
+      if (verbose)
+        cerr << "psr4th: subint remove baseline finish" << endl;
     }
 
     RealTimer clock;

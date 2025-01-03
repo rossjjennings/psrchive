@@ -226,10 +226,6 @@ namespace Pulsar {
 
   };
 
-  //! Create a new transformation instance described by the extension
-  MEAL::Complex2*
-  new_transformation (const PolnCalibratorExtension*, unsigned ichan);
-
   //! Create a new transformation instance described by the type
   MEAL::Complex2* new_transformation( const Calibrator::Type* type );
 

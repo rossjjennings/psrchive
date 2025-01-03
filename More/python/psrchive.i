@@ -25,6 +25,7 @@
 #include "load_factory.h"
 
 #include "Pulsar/Dispersion.h"
+#include "Pulsar/FaradayRotation.h"
 #include "Pulsar/IntegrationBarycentre.h"
 
 #include "Pulsar/Interpreter.h"
@@ -43,6 +44,7 @@
 #include "polyco.h"
 #include "toa.h"
 
+#include "Pulsar/DynamicResponse.h"
 #include "Pulsar/ManualPolnCalibrator.h"
 
 #include "Pulsar/CalibratorExtension.h"
@@ -57,7 +59,6 @@
 #include "Pulsar/PeakConsecutive.h"
 
 #include "Pulsar/ArchiveStatistic.h"
-
 #if HAVE_CFITSIO
 #include <fitsio.h>
 #endif
@@ -80,10 +81,13 @@ using Pulsar::Predictor;
 // Language independent exception handler
 %include exception.i       
 %include std_string.i
-
+%include std_complex.i
 %include std_vector.i
+
 namespace std {
   %template(StringVector) vector<string>;
+  %template(DoubleVector) vector<double>;
+  %template(ComplexDoubleVector) vector<complex<double>>;
 }
 
 using namespace std;
@@ -149,6 +153,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::FrontendCorrection::get_transformation(unsigned);
 %ignore Pulsar::FrontendCorrection::get_basis();
 %ignore Pulsar::FrontendCorrection::get_projection(unsigned);
+%ignore Pulsar::FaradayRotation::get_identity();
 
 // Also does not use the assignment operator
 %ignore Pulsar::Archive::operator=(const Archive&);
@@ -261,6 +266,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/TextParameters.h"
 %include "Pulsar/ArrivalTime.h"
 %include "Pulsar/ProfileShiftFit.h"
+%include "Pulsar/FaradayRotation.h"
 
 %include "Pulsar/BackendCorrection.h"
 %include "Pulsar/FrontendCorrection.h"
@@ -278,6 +284,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/PeakConsecutive.h"
 %include "Pulsar/ITRFExtension.h"
 %include "Pulsar/ManualPolnCalibrator.h"
+%include "Pulsar/DynamicResponse.h"
+
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
@@ -831,6 +839,18 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
     Pulsar::Predictor* get_predictor() {
       return self->get_model()->clone();
     }
+
+    // Return the DynamicResponse Extension
+    Pulsar::DynamicResponse* get_dynamic_response()
+    {
+      return self->get<Pulsar::DynamicResponse>();
+    }
+
+    // Add a DynamicResponse Extension and return it
+    Pulsar::DynamicResponse* add_dynamic_response()
+    {
+      return self->getadd<Pulsar::DynamicResponse>();
+    }
 }
 
 %extend Pulsar::PeakCumulative
@@ -906,6 +926,20 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         }
         return (PyObject*) arr;
     }
+}
 
+%extend Pulsar::FaradayRotation
+{
+    // SWIG doesn't seem to wrap methods of ColdPlasma template base class
+    //! Set the reference wavelength in metres
+    void set_reference_wavelength (double metres)
+    {
+        self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::set_reference_wavelength(metres);
+    }
 
+    //! Get the reference wavelength
+    double get_reference_wavelength () const
+    {
+        return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::get_reference_wavelength();
+    }
 }

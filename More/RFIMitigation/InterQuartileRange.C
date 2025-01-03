@@ -16,60 +16,60 @@
 
 using namespace std;
 
-Pulsar::InterQuartileRange::InterQuartileRange ()
-{
-  set_cutoff_threshold (1.5);
-  minimum_slope_median_duty_cycle = 0;
-}
+unsigned get_minimum_slope_index (const std::vector<float>& data, float duty_cycle);
 
-unsigned get_minimum_slope_index (const std::vector<float>& data,
-				  float duty_cycle);
-  
-unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask, 
-						  std::vector<float> &stat,
-						  std::vector<float> &model,
-						  unsigned nsubint,
-						  unsigned nchan,
-						  unsigned npol)
+class IQRHelper
 {
-  // number of values tested per polarization
-  const unsigned ntest = nsubint * nchan;
+  std::vector<float> &mask;
+	const std::vector<float> &stat;
+	const std::vector<float> &model;
 
-#if _DEBUG
-  cerr << "InterQuartileRange::update_mask nsubint=" << nsubint
-       << " nchan=" << nchan << " npol=" << npol << " ntest=" << ntest 
-       << " stat.sz=" << stat.size() << " model.sz=" << model.size()
-       << " mask.sz=" << mask.size() << endl;
-#endif
+  public:
+
+  IQRHelper (std::vector<float> &_mask, const std::vector<float> &_stat, const std::vector<float> &_model)
+  : mask(_mask), stat(_stat), model(_model) {}
+
+  unsigned nsubint = 0;
+  unsigned nchan = 0;
+  unsigned npol = 0;
+
+  std::vector<float> data;
+  unsigned valid;
+
+  double Q1 = 0;
+  double Q3 = 0;
+  double IQR = 0;
+
+  float cutoff_threshold_max = 1.5;
+  float cutoff_threshold_min = 1.5;
+
+  float minimum_slope_median_duty_cycle = 0.0;
 
   unsigned too_high = 0;
   unsigned too_low = 0;
 
-  for (unsigned ipol=0; ipol < npol; ipol++)
-  { 
-    std::vector<float> data (ntest, 0.0);
-    unsigned valid = 0;
+  void set_ntest (unsigned ntest) 
+  { data.resize(ntest); std::fill(data.begin(), data.end(), 0.0); valid = 0; }
 
-    for (unsigned isub=0; isub<nsubint; isub++)
-    {
-      for (unsigned ichan=0; ichan<nchan; ichan++)
-      {
-        unsigned idat = isub*nchan*npol + ichan*npol + ipol;
-        unsigned imask = isub*nchan + ichan;
+  void add_data (unsigned isubint, unsigned ichan, unsigned ipol)
+  {
+    unsigned idat = isubint*nchan*npol + ichan*npol + ipol;
+    unsigned imask = isubint*nchan + ichan;
 
-        if (mask[imask] == 0.0)
-          continue;
+    if (mask[imask] == 0.0)
+      return;
 
-        data[valid] = stat[idat];
+    data[valid] = stat[idat];
 
-        if (model.size() == stat.size())
-          data[valid] -= model[idat];
+    if (model.size() == stat.size() && model[idat] != 0.0)
+      data[valid] -= model[idat];
 
-        valid ++;
-      }
-    }
+    valid ++;
+  }
 
-    assert (valid <= ntest);
+  void compute ()
+  {
+    assert (valid <= data.size());
     data.resize(valid);
     std::sort (data.begin(), data.begin()+valid);
 
@@ -77,34 +77,30 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
     
     if (minimum_slope_median_duty_cycle != 0.0)
     {
-      unsigned msi = get_minimum_slope_index (data,
-					      minimum_slope_median_duty_cycle);
+      unsigned msi = get_minimum_slope_index (data, minimum_slope_median_duty_cycle);
       unsigned medi = valid / 2;
 
       if (msi < medi)
       {
-	DEBUG( "msmi=" << msi << " less than medi=" << medi );
-	valid = msi * 2;
+        DEBUG("msmi=" << msi << " less than medi=" << medi);
+        valid = msi * 2;
       }
       else
       {
-	DEBUG( "msmi=" << msi << " greater than medi=" << medi );
-	offset = (msi - medi) * 2;
-	valid -= offset;
+        DEBUG("msmi=" << msi << " greater than medi=" << medi);
+        offset = (msi - medi) * 2;
+        valid -= offset;
       }
     }
 
     unsigned iq1 = valid/4;
     unsigned iq3 = (valid*3)/4;
 
-#ifdef _DEBUG
-    cerr << "iQ1=" << iq1 << " iQ3=" << iq3 << endl;
-#endif
+    DEBUG("iQ1=" << iq1 << " iQ3=" << iq3);
 
-    double Q1 = data[ iq1+offset ];
-    double Q3 = data[ iq3+offset ];
-  
-    double IQR = Q3 - Q1;
+    Q1 = data[ iq1+offset ];
+    Q3 = data[ iq3+offset ];
+    IQR = Q3 - Q1;
 
 #ifdef _DEBUG
     if (cutoff_threshold_min > 0)
@@ -117,57 +113,136 @@ unsigned Pulsar::InterQuartileRange::update_mask (std::vector<float> &mask,
            << " Q3=" << Q3 << " IQR=" << IQR
            << " max=" << Q3 + cutoff_threshold_max * IQR << endl;
 #endif
+  }
 
-    for (unsigned isub=0; isub<nsubint; isub++)
+  void test_data (unsigned isubint, unsigned ichan, unsigned ipol)
+  {
+    unsigned idat = isubint*nchan*npol + ichan*npol + ipol;
+    unsigned imask = isubint*nchan + ichan;
+
+    if (mask[imask] == 0.0)
+      return;
+
+    float value = stat[idat];
+
+    if (model.size() == stat.size())
+      value -= model[idat];
+
+    bool zap = false;
+
+    if (cutoff_threshold_min > 0 && value < Q1 - cutoff_threshold_min * IQR)
+    {
+      DEBUG("TOO LOW isubint=" << isub << " ichan=" << ichan << " ipol=" << ipol);
+      zap = true;
+      too_low ++;
+    }
+
+    if (cutoff_threshold_max > 0 && value > Q3 + cutoff_threshold_max * IQR)
+    {
+      DEBUG("TOO HIGH isubint=" << isub << " ichan=" << ichan << " ipol=" << ipol);
+
+      zap = true;
+      too_high ++;
+    }
+
+    if (zap)
+      mask[imask] = 0;
+  }
+};
+
+unsigned Pulsar::InterQuartileRange::update_mask
+(
+  std::vector<float> &mask, 
+  std::vector<float> &stat,
+  std::vector<float> &model,
+  unsigned nsubint,
+  unsigned nchan,
+  unsigned npol)
+{
+  IQRHelper helper (mask, stat, model);
+  helper.nsubint = nsubint;
+  helper.nchan = nchan;
+  helper.npol = npol;
+  helper.cutoff_threshold_max = cutoff_threshold_max;
+  helper.cutoff_threshold_min = cutoff_threshold_min;
+  helper.minimum_slope_median_duty_cycle = minimum_slope_median_duty_cycle;
+
+  // number of values tested per polarization
+
+#if _DEBUG
+  cerr << "InterQuartileRange::update_mask nsubint=" << nsubint
+       << " nchan=" << nchan << " npol=" << npol << " ntest=" << ntest 
+       << " stat.sz=" << stat.size() << " model.sz=" << model.size()
+       << " mask.sz=" << mask.size() << endl;
+#endif
+
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    if (way == "all")
+    {
+      helper.set_ntest(nsubint * nchan);
+
+      for (unsigned isub=0; isub<nsubint; isub++)
+      {
+        for (unsigned ichan=0; ichan<nchan; ichan++)
+        {
+          helper.add_data(isub,ichan,ipol);
+        }
+      }
+
+      helper.compute();
+
+      for (unsigned isub=0; isub<nsubint; isub++)
+      {
+        for (unsigned ichan=0; ichan<nchan; ichan++)
+        {
+          helper.test_data (isub, ichan, ipol);
+        }
+      }
+    }
+    else if (way == "time")
     {
       for (unsigned ichan=0; ichan<nchan; ichan++)
       {
-        unsigned idat = isub*nchan*npol + ichan*npol + ipol;
-        unsigned imask = isub*nchan + ichan;
+        helper.set_ntest(nsubint);
 
-        if (mask[imask] == 0.0)
-          continue;
+        for (unsigned isub=0; isub<nsubint; isub++)
+        {
+          helper.add_data(isub,ichan,ipol);
+        }
 
-        float value = stat[idat];
+        helper.compute();
 
-        if (model.size() == stat.size())
-          value -= model[idat];
-
-        bool zap = false;
-
-        if (cutoff_threshold_min > 0 &&
-	    value < Q1 - cutoff_threshold_min * IQR)
-          {
-#ifdef _DEBUG
-	    cerr << "TOO LOW isubint=" << isub 
-                 << " ichan=" << ichan << " ipol=" << ipol  << endl;
-#endif
-	    zap = true;
-	    too_low ++;
-          }
-    
-        if (cutoff_threshold_max > 0 &&
-	    value > Q3 + cutoff_threshold_max * IQR)
-          {
-#ifdef _DEBUG
-	    cerr << "TOO HIGH isubint=" << isub
-                 << " ichan=" << ichan << " ipol=" << ipol  << endl;
-#endif
-	
-            zap = true;
-            too_high ++;
-          }
-    
-        if (zap)
-          mask[imask] = 0;
+        for (unsigned isub=0; isub<nsubint; isub++)
+        {
+          helper.test_data (isub, ichan, ipol);
+        }
       }
     }
-  }
-#ifdef _DEBUG
-  cerr << "too high=" << too_high << " too low=" << too_low << endl;
-#endif
+    else if (way == "freq")
+    {
+      for (unsigned isub=0; isub<nsubint; isub++)
+      {
+        helper.set_ntest(nchan);
 
-  return too_high + too_low;
+        for (unsigned ichan=0; ichan<nchan; ichan++)
+        {
+          helper.add_data(isub,ichan,ipol);
+        }
+
+        helper.compute();
+
+        for (unsigned ichan=0; ichan<nchan; ichan++)
+        {
+          helper.test_data (isub, ichan, ipol);
+        }
+      }
+    }    
+  }
+
+  DEBUG("too high=" << helper.too_high << " too low=" << helper.too_low);
+
+  return helper.too_high + helper.too_low;
 }
 
 //! Get the text interface to the configuration attributes
@@ -191,23 +266,25 @@ Pulsar::InterQuartileRange::Interface::Interface (InterQuartileRange* instance)
 
   add( &InterQuartileRange::get_minimum_slope_median_duty_cycle,
        &InterQuartileRange::set_minimum_slope_median_duty_cycle,
-       "msm", "Duty cycle used to find the minimum slope median" ); 
+       "msm", "Duty cycle used to find the minimum slope median" );
+
+  add(&InterQuartileRange::get_way,
+      &InterQuartileRange::set_way,
+      "way", "'time' or 'freq' or 'all'" );
 }
 
-double get_slope (const std::vector<float>& data,
-		  unsigned istart, unsigned iend)
+double get_slope (const std::vector<float>& data, unsigned istart, unsigned iend)
 {
   double xmean = 0.0;
   double ymean = 0.0;
   unsigned n = 0;
   for (unsigned i=istart; i<=iend; i++)
-    {
-      xmean += i;
-      ymean += data[i];
-      n++;
-    }
+  {
+    xmean += i;
+    ymean += data[i];
+    n++;
+  }
 
-  
   xmean /= n;
   ymean /= n;
 
@@ -225,8 +302,7 @@ double get_slope (const std::vector<float>& data,
   return covar / xvar;
 }
 
-unsigned get_minimum_slope_index (const std::vector<float>& data,
-				  float duty_cycle)
+unsigned get_minimum_slope_index (const std::vector<float>& data, float duty_cycle)
 {
   unsigned ndat = data.size();
   unsigned nslope = ndat * duty_cycle;

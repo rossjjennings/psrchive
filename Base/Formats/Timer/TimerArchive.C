@@ -453,13 +453,13 @@ void Pulsar::TimerArchive::set_scale (Signal::Scale scale)
 }
 
 
-//! Get the centre frequency of the observation
+//! Get the dispersion measure of the observed pulsar
 double Pulsar::TimerArchive::get_dispersion_measure () const
 {
   return dispersion_measure;
 }
 
-//! Set the centre frequency of the observation
+//! Set the dispersion measure of the observed pulsar
 void Pulsar::TimerArchive::set_dispersion_measure (double dm)
 {
   dispersion_measure = dm;

@@ -46,6 +46,7 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
 					    unsigned nchan,
 					    unsigned npol)
 {
+  // std::cerr << "Pulsar::SumThreshold::update_mask stat.size=" << stat.size() << " model.size=" << model.size() << std::endl;
   const unsigned ntest = nsubint * nchan;
   std::vector<float> dattmp (ntest);
   std::vector<float> xn (npol);
@@ -64,9 +65,14 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
         if (mask[imask] == 0.0)
           continue;
 
-        if (model[idat]!=0.0 && stat[idat]!=0.0 && mask[imask]!=0.0)
+        float scale = 1.0;
+
+        if (model.size() && model[idat]!=0.0)
+          scale = 1.0 / model[idat];
+
+        if (stat[idat]!=0.0)
         {
-          dattmp[valid] = stat[idat]/model[idat];
+          dattmp[valid] = stat[idat] * scale;
           valid++;
         }
       }
@@ -108,15 +114,18 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
           for (unsigned ichan=0; ichan<nchan; ichan++)
           {
             unsigned ii = isub*nchan*npol + ichan*npol + ipol;
-            if (model[ii]!=0.0) 
+            wttmp[ichan] = mask[isub*nchan + ichan];
+            float scale = 1.0;
+
+            if (model.size())
             {
-              dattmp[ichan] = stat[ii]/model[ii];
-              wttmp[ichan] = mask[isub*nchan + ichan];
+              if (model[ii]==0.0) 
+                wttmp[ichan] = 0.0;
+              else
+                scale = 1.0 / model[ii];
             }
-            else
-            {
-              wttmp[ichan] = 0.0;
-            }
+
+            dattmp[ichan] = stat[ii] * scale;
           }
           sumthreshold1(dattmp,wttmp,nwin,1.0+xn[ipol]);
           for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -138,15 +147,18 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
           for (unsigned isub=0; isub<nsubint; isub++)
           {
             unsigned ii = isub*nchan*npol + ichan*npol + ipol;
-            if (model[ii]!=0.0) 
+            wttmp[isub] = mask[isub*nchan + ichan];
+            float scale = 1.0;
+
+            if (model.size())
             {
-              dattmp[isub] = stat[ii]/model[ii];
-              wttmp[isub] = mask[isub*nchan + ichan];
+              if (model[ii]==0.0) 
+                wttmp[isub] = 0.0;
+              else
+                scale = 1.0 / model[ii];
             }
-            else
-            {
-              wttmp[isub] = 0.0;
-            }
+
+            dattmp[isub] = stat[ii] * scale;
           }
           sumthreshold1(dattmp,wttmp,nwin,1.0+xn[ipol]);
           for (unsigned isub=0; isub<nsubint; isub++)
@@ -160,7 +172,7 @@ unsigned Pulsar::SumThreshold::update_mask (std::vector<float> &mask,
     for (unsigned i=0; i<nsubint*nchan; i++)
       if (mask1[i]==0.0 && mask[i] != 0.0)
       {
-	total_masked ++;
+        total_masked ++;
         mask[i] = 0.0;
       }
 

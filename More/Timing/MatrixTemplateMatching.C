@@ -8,10 +8,13 @@
 #include "Pulsar/MatrixTemplateMatching.h"
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/PolnProfileFit.h"
+#include "Pulsar/SystemCalibratorUnloader.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
+
+#include "strutil.h"
 
 using namespace std;
 
@@ -101,6 +104,18 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub, std::vector<Tempo:
       Reference::To<const PolnProfile> stdprof = std->new_PolnProfile (ichan);
       rprof->diff (stdprof);
     }
+  }
+
+  if (unload_matrix_model)
+  {
+    std::string filename = observation->get_filename();
+    std::string new_ext = stringprintf ("%04d.mtm", isub);
+    filename = replace_extension (filename, new_ext);
+
+    Pulsar::SystemCalibrator::Unloader unloader;
+    unloader.set_program ( "pat" );
+    unloader.set_filename( filename );
+    unloader.unload(engine);
   }
 
 #if 0

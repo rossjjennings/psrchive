@@ -13,7 +13,7 @@ using namespace std;
 //! Override the default Estimate insertion operator
 std::ostream& operator<< (std::ostream& ostr, const Estimate<double>& estimate)
 {
-  return ostr << estimate.val;
+  return ostr << estimate.get_value() << " +/- " << estimate.get_error();
 }
 
 Pulsar::PolnProfileStats::Interface::Interface (PolnProfileStats* instance)

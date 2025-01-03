@@ -13,7 +13,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Warning.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 // #define _DEBUG 1
 #include "debug.h"
@@ -131,7 +131,7 @@ void TimeDomainCovariance::add_Profile ( const Profile* p, float wt )
 		 "nbin=%u != rank=%u", p->get_nbin(), rank);
   }
 
-  if (!myfinite(wt))
+  if (!true_math::finite(wt))
     throw Error (InvalidParam, "TimeDomainCovariance::addProfile", "non-finite weight=%f", wt);
 
   count += 1;
@@ -146,7 +146,7 @@ void TimeDomainCovariance::add_Profile ( const Profile* p, float wt )
   
   for (unsigned i=0; i<rank; i++)
   {
-    if (!myfinite(fprof[i]))
+    if (!true_math::finite(fprof[i]))
       throw Error (InvalidParam, "TimeDomainCovariance::addProfile", "non-finite amp[%u]=%f", i, fprof[i]);
 
     mean[i] += wt*fprof[i];
@@ -260,13 +260,13 @@ void TimeDomainCovariance::finalize ()
   if (wt_sum == 0.0)
     throw Error (InvalidState, "TimeDomainCovariance::finalize", "no valid data (weighted sum == 0)");
 
-  if (!myfinite(wt_sum))
+  if (!true_math::finite(wt_sum))
     throw Error (InvalidState, "TimeDomainCovariance::finalize", "non-finite weight sum=%lf", wt_sum);
 
   for (unsigned i=0; i<rank; i++)
   {
     mean[i] /= wt_sum;
-    if (!myfinite(mean[i]))
+    if (!true_math::finite(mean[i]))
       throw Error (InvalidState, "TimeDomainCovariance::finalize", "non-finite mean[%u]=%lf", i, mean[i]);
 
     for (unsigned j=0; j<rank; j++)
@@ -283,7 +283,7 @@ void TimeDomainCovariance::finalize ()
 
   for (unsigned i=0; i<rank; i++)
     for (unsigned j=0; j<rank; j++)
-      if ( !myfinite(covariance_matrix[i*rank + j]) )
+      if ( !true_math::finite(covariance_matrix[i*rank + j]) )
         throw Error (InvalidState, "TimeDomainCovariance::finalize", "non-finite covar[%u][%u]=%lf", i,j,covariance_matrix[i*rank + j]);
 
   finalized = true;
@@ -348,13 +348,13 @@ void TimeDomainCovariance::eigen ()
   for (unsigned i=0; i<rank; i++)
   {
     eigenvalues[i] = gsl_vector_get(eval, i);
-    if ( !myfinite(eigenvalues[i]) )
+    if ( !true_math::finite(eigenvalues[i]) )
       throw Error (InvalidState, "TimeDomainCovariance::eigen", "non-finite value[%u]=%lf", i,eigenvalues[i]);
 
     for (unsigned j=0; j<rank; j++)
     {
       eigenvectors[i*rank + j] = gsl_matrix_get(evec, j, i);
-      if ( !myfinite(eigenvectors[i*rank + j]) )
+      if ( !true_math::finite(eigenvectors[i*rank + j]) )
         throw Error (InvalidState, "TimeDomainCovariance::eigen", "non-finite vector[%u][%u]=%lf", i,j,eigenvectors[i*rank + j]);
     }
   }

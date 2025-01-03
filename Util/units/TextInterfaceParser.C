@@ -11,14 +11,15 @@
 #include "stringtok.h"
 #include "pad.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 #include <stdio.h>
 #include <string.h>
-
 #include <algorithm>
 
 using namespace std;
 
-// #define _DEBUG
 
 void TextInterface::Parser::set_delimiter (const std::string& text)
 {
@@ -26,9 +27,7 @@ void TextInterface::Parser::set_delimiter (const std::string& text)
 
   size_t found = 0;
 
-#ifdef _DEBUG
-  cerr << "TextInterface::Parser::set_delimiter text='" << text << "'" << endl;
-#endif
+  DEBUG("TextInterface::Parser::set_delimiter text='" << text << "'");
 
   // transform backslash-n into newline
   while ((found = delimiter.find( "\\n" )) != string::npos)
@@ -41,9 +40,7 @@ void TextInterface::Parser::set_delimiter (const std::string& text)
 
 string TextInterface::Parser::process (const string& command)
 {
-#ifdef _DEBUG
-  cerr << "TextInterface::Parser::process command='" << command << "'" << endl;
-#endif
+  DEBUG("TextInterface::Parser::process command='" << command << "'");
 
   if (command == "help")
     return help ();
@@ -73,12 +70,17 @@ string TextInterface::Parser::process (const string& command)
 
   try
   {
+    DEBUG("TextInterface::Parser::process param='" << param << "' after='" << after << "'");
     set_value (param, after);
   }
   catch (Error& error)
   {
+    DEBUG("TextInterface::Parser::process exception code=" << error.get_code())
     if (error.get_code() == HelpMessage)
+    {
+      DEBUG("TextInterface::Parser::process throw HelpMessage");
       throw error;
+    }
     else
       throw Error (InvalidParam, "TextInterface::Parser::process",
 		   "failed to parse '" + after + "' as '" + param + "'");
@@ -109,9 +111,7 @@ string TextInterface::Parser::help (bool default_value,
   unsigned max_namelen = name_label.length();
   unsigned max_descriptionlen = description_label.length();
 
-#ifdef _DEBUG
-  cerr << "TextInterface::Parser::help nvalue=" << get_nvalue() << endl;
-#endif
+  DEBUG("TextInterface::Parser::help nvalue=" << get_nvalue());
 
   // find the maximum string length of the name and description
   for (i=0; i<get_nvalue(); i++)
@@ -166,10 +166,8 @@ static bool alphabetical_lt (const Reference::To<TextInterface::Value>& v1,
 //! Add a new value interface
 void TextInterface::Parser::add_value (Value* value)
 {
-#ifdef _DEBUG
-  cerr << "TextInterface::Parser::add_value this=" << this << " name="
-       << value->get_name() << endl;
-#endif
+  DEBUG("TextInterface::Parser::add_value this=" << this << " name="
+       << value->get_name());
 
   value->set_parent (this);
   values.push_back (value);
@@ -197,9 +195,7 @@ void TextInterface::Parser::clean_invalid ()
       i++;
 }
 
-#if _DEBUG
 static unsigned instance_count = 0;
-#endif
 
 TextInterface::Parser::Parser ()
 {
@@ -207,18 +203,14 @@ TextInterface::Parser::Parser ()
   import_filter = false;
   prefix_name = true;
   delimiter = ",";
-#if _DEBUG
   instance_count ++;
-  cerr << "Parser ctor count=" << instance_count << endl;
-#endif
+  DEBUG("TextInterface::Parser ctor count=" << instance_count);
 }
 
 TextInterface::Parser::~Parser ()
 {
-#if _DEBUG
   instance_count --;
-  cerr << "Parser dtor count=" << instance_count << endl;
-#endif
+  DEBUG("TextInterface::Parser dtor count=" << instance_count);
 }
 
 //! Get the value of the value
@@ -229,7 +221,7 @@ string TextInterface::Parser::get_value (const string& name) const
 }
 
 //! Get the value of the value
-string TextInterface::Parser::get_name_value (string& name) const
+string TextInterface::Parser::get_name_value (string& name) const try
 {
   // an optional precision may be specified
   string::size_type dot = name.find('%');
@@ -252,6 +244,13 @@ string TextInterface::Parser::get_name_value (string& name) const
   value->reset_modifiers();
 
   return result;
+}
+catch (Error& error)
+{
+  if (error.get_code() == InvalidPointer)
+    return "-";
+  else
+    throw error;
 }
 
 //! Set the value of the value
@@ -305,10 +304,7 @@ bool TextInterface::Parser::found (const string& p, const string& name) const
 TextInterface::Value* 
 TextInterface::Parser::find (const string& name, bool throw_exception) const
 {
-#ifdef _DEBUG
-  cerr << "TextInterface::Parser::find (" << name << ")"
-    " size=" << values.size() << endl;
-#endif
+  DEBUG("TextInterface::Parser::find (" << name << ") size=" << values.size());
 
   string key = name;
 
@@ -320,10 +316,7 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
     const_cast<Parser*>(this)->setup( values[i] );
     if (values[i]->matches (key))
     {
-#ifdef _DEBUG
-      cerr << "TextInterface::Parser::find value[" << i << "]"
-	"=" << values[i]->get_name() << " matches" << endl;
-#endif
+      DEBUG("TextInterface::Parser::find value[" << i << "]=" << values[i]->get_name() << " matches");
       return values[i];
     }
   }
@@ -363,9 +356,7 @@ void TextInterface::Parser::insert (const string& prefix, Parser* other)
   {
     Value* value = other->values[i];
 
-#ifdef _DEBUG
-    cerr << "TextInterface::Parser::insert " << prefix + ":" + value->get_name() << endl;
-#endif
+    DEBUG("TextInterface::Parser::insert " << prefix + ":" + value->get_name());
 
     if ( !import_filter || !find( prefix + ":" + value->get_name(), false ) )
     {

@@ -8,7 +8,9 @@
 #include "Pulsar/Application.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/PolnCalibratorExtensionUtils.h"
+#include "Pulsar/HasOrientation.h"
+#include "MEAL/Complex2.h"
 
 #include "LinearRegression.h"
 #include "Physical.h"
@@ -35,9 +37,6 @@ public:
 
 protected:
 
-  //! Rotation parameter index
-  unsigned iparam_rot;
-
   //! Position angle
   std::vector< Estimate<double> > psi;
   //! wavelength squared
@@ -45,37 +44,19 @@ protected:
 
   vector<string> input_filenames;
 
-  //! Add command line options
-  void add_options (CommandLine::Menu&);
-
   //! Update rotation parameter of PolnCalibratorExtension
   void update (PolnCalibratorExtension*);
 
   Estimate<double> fit_psi0;
   Estimate<double> fit_rm;
+
+  void add_options (CommandLine::Menu&) override { /* none */ }
 };
-
-
 
 pcmrm::pcmrm ()
   : Application ("pcmrm", "estimates RM from a set of pcm outputs")
 {
-  // default set up for bri00e19
-  iparam_rot = 6;
 }
-
-
-void pcmrm::add_options (CommandLine::Menu& menu)
-{
-  CommandLine::Argument* arg;
-
-  // add a blank line and a header to the output of -h
-  menu.add ("\n" "General options:");
-
-  arg = menu.add (iparam_rot, 'i', "index");
-  arg->set_help ("model index of rotation about line of sight");
-}
-
 
 void pcmrm::process (Pulsar::Archive* archive)
 {
@@ -86,8 +67,16 @@ void pcmrm::process (Pulsar::Archive* archive)
 
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
+    MEAL::Complex2* xform = Calibration::new_transformation(ext, ichan);
+    if (!xform)
+      continue;
+    
+    auto feed = dynamic_cast<Calibration::HasOrientation*>(xform);
+    if (!feed)
+      continue;
+
     Estimate<double> rot;
-    rot = ext->get_transformation(ichan)->get_Estimate(iparam_rot);
+    rot = feed->get_orientation();
 
     if (rot.var == 0.0)
       continue;
@@ -156,18 +145,21 @@ void pcmrm::update (PolnCalibratorExtension* ext)
 
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
-    Estimate<double> rot;
-    rot = ext->get_transformation(ichan)->get_Estimate(iparam_rot);
-
-    if (rot.var == 0.0)
+    MEAL::Complex2* xform = Calibration::new_transformation(ext, ichan);
+    if (!xform)
       continue;
     
+    auto feed = dynamic_cast<Calibration::HasOrientation*>(xform);
+    if (!feed)
+      continue;
+
     double freq_MHz = ext->get_centre_frequency(ichan);
     double lambda = Pulsar::speed_of_light / (freq_MHz * 1e6);
 
-    rot.val -= fit_psi0.val + fit_rm.val * lambda * lambda;
+    double Faraday_orientation = fit_psi0.val + fit_rm.val * lambda * lambda;
+    feed->offset_orientation(-Faraday_orientation);
 
-    ext->get_transformation(ichan)->set_Estimate(iparam_rot, rot);
+    Calibration::copy (ext->get_transformation(ichan), xform);
   }
 }
 

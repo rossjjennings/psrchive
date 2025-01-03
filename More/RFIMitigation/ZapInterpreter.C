@@ -366,7 +366,7 @@ string Pulsar::ZapInterpreter::cal (const string& args)
       string value = process( &parser, expression );
 
       if ( compute(value) )
-	ext->set_weight( ichan, 0.0 );
+        ext->set_weight( ichan, 0.0 );
     }
   }
   

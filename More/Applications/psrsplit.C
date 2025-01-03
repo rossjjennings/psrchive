@@ -185,7 +185,7 @@ B) after deleting these sub-integrations, the Archive tries to reload them
     // resize extensions to avoid bloating of the disk space used
     if ( resize_extensions )
       for ( unsigned iext = 0; iext < sub_archive->get_nextension (); iext++ )
-	sub_archive->get_extension ( iext )->resize( nsubint );
+        sub_archive->get_extension ( iext )->resize( nsubint );
 
     while ( ichan < nchan )
     {
@@ -195,27 +195,27 @@ B) after deleting these sub-integrations, the Archive tries to reload them
       if ( nchannel > 0 )
       {
 
-	ichan += nchannel ;
+        ichan += nchannel ;
 
-	if ( ichan < nchan )
-	  sub_chan_archive->remove_chan (ichan, nchan - 1);
-	if ( ichan - nchannel > 0 )
-	  sub_chan_archive->remove_chan (0, ichan - nchannel - 1 );
-	if ( was_dedispersed )
-	  sub_chan_archive->dedisperse ();
-	if (sub_chan_archive->has_model() && archive->get_type() == Signal::Pulsar)
-	    sub_chan_archive->update_model ();
+        if ( ichan < nchan )
+          sub_chan_archive->remove_chan (ichan, nchan - 1);
+        if ( ichan - nchannel > 0 )
+          sub_chan_archive->remove_chan (0, ichan - nchannel - 1 );
+        if ( was_dedispersed )
+          sub_chan_archive->dedisperse ();
+        if (sub_chan_archive->has_model() && archive->get_type() == Signal::Pulsar)
+            sub_chan_archive->update_model ();
       }
 
       string ext;
       string filename = archive->get_filename();
       if ( nchannel == 0)
       {
-	ext = stringprintf ("%04d", isplit) + get_extension (filename);
-	ichan = nchan;
+        ext = stringprintf ("%04d", isplit) + get_extension (filename);
+        ichan = nchan;
       }
       else 
-	ext = stringprintf ("%04d_%04d", ichansplit, isplit) + get_extension (filename);
+        ext = stringprintf ("%04d_%04d", ichansplit, isplit) + get_extension (filename);
 
       filename = replace_extension( filename, ext );
 

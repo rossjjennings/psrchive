@@ -66,7 +66,6 @@ protected:
 
 int main (int argc, char** argv)
 {
-  bool verbose = false;
   bool plot = false;
 
   int c = 0;
@@ -86,7 +85,6 @@ int main (int argc, char** argv)
       Calibration::ReceptionModel::verbose = true;
       MEAL::Argument::verbose = true;
     case 'v':
-      verbose = true;
       break;
 
     }

@@ -47,6 +47,9 @@ namespace Pulsar {
     //! flag controls the amount output to stderr by Profile methods
     static bool verbose;
 
+    //! Rotation of pulse phase is enabled by default
+    static bool rotate_phase_enabled;
+
     //! When true, Profile::rotate shifts bins in the phase domain
     static Option<bool> rotate_in_phase_domain;
 

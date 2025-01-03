@@ -12,9 +12,10 @@
 #define __CalibrationBritton2000_H
 
 #include "Pulsar/BackendFeed.h"
+#include "Pulsar/HasOrientation.h"
 
-namespace Calibration {
-
+namespace Calibration
+{
   class Feed;
 
   //! Phenomenological description of the instrument
@@ -27,7 +28,8 @@ namespace Calibration {
 
     b_1 = \delta_theta / 2
   */
-  class Britton2000 : public BackendFeed {
+  class Britton2000 : public BackendFeed, public HasOrientation
+  {
 
   public:
 
@@ -59,7 +61,19 @@ namespace Calibration {
     const MEAL::Complex2* get_frontend () const;
 
     bool get_degeneracy_isolated() const { return isolate_degeneracy; }
-    
+
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // HasOrientation implementation
+    //
+    // ///////////////////////////////////////////////////////////////////
+
+    //! Get the rotation of the feed about the line of sight, in radians
+    Estimate<double> get_orientation () const override;
+
+    //! Offset the rotation of the feed about the line of sight by delta, in radians
+    void offset_orientation (double delta_rad) override;
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Model implementation

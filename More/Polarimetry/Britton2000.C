@@ -13,6 +13,9 @@
 
 using namespace std;
 
+constexpr unsigned delta_theta_index = 0;
+constexpr unsigned sigma_theta_index = 3;
+
 class Calibration::Britton2000::Feed
   : public MEAL::ProductRule<MEAL::Complex2>
 {
@@ -109,22 +112,26 @@ string Calibration::Britton2000::get_name () const
 
 void Calibration::Britton2000::equal_ellipticities ()
 {
+  unsigned delta_chi_index = 1;
+  if (isolate_degeneracy)
+    delta_chi_index = 2;
+
   if (verbose)
     cerr << "Calibration::Britton2000::equal_ellipticities name="
-	 << feed->get_param_name (1) << endl;
+        << feed->get_param_name (delta_chi_index) << endl;
   
-  feed->set_param (1, 0.0);
-  feed->set_infit (1, false);
+  feed->set_param (delta_chi_index, 0.0);
+  feed->set_infit (delta_chi_index, false);
 }
 
 void Calibration::Britton2000::equal_orientations ()
 {
   if (verbose)
     cerr << "Calibration::Britton2000::equal_orientations name="
-	 << feed->get_param_name (0) << endl;
+        << feed->get_param_name (delta_theta_index) << endl;
 
-  feed->set_param (0, 0.0);
-  feed->set_infit (0, false);
+  feed->set_param (delta_theta_index, 0.0);
+  feed->set_infit (delta_theta_index, false);
 }
 
 //! Fix the orientation of the frontend
@@ -132,12 +139,22 @@ void Calibration::Britton2000::set_constant_orientation (bool flag)
 {
   if (verbose)
     cerr << "Calibration::Britton2000::set_constant_orientation name="
-	 << feed->get_param_name (3) << endl;
-  feed->set_infit (3, !flag);
+        << feed->get_param_name (sigma_theta_index) << endl;
+  feed->set_infit (sigma_theta_index, !flag);
 }
 
 bool Calibration::Britton2000::get_constant_orientation () const
 {
-  return !feed->get_infit (3);
+  return !feed->get_infit (sigma_theta_index);
 }
 
+Estimate<double> Calibration::Britton2000::get_orientation () const
+{
+  return feed->get_Estimate(sigma_theta_index);
+}
+
+void Calibration::Britton2000::offset_orientation (double delta_rad)
+{
+  double current = feed->get_param(sigma_theta_index);
+  feed->set_param(sigma_theta_index, current+delta_rad);
+}

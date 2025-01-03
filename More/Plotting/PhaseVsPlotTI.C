@@ -33,5 +33,5 @@ Pulsar::PhaseVsPlot::Interface::Interface (PhaseVsPlot* instance)
        "crop", "Crop the data at this percentage of max" );
 
   import("cmap", pgplot::ColourMap::Interface(), &PhaseVsPlot::get_colour_map);
-
+  import("cbar", pgplot::ColourBar::Interface(), &PhaseVsPlot::get_colour_bar);
 }

@@ -25,6 +25,7 @@ namespace Pulsar
   class ProfileWeightFunction;
   class SNRatioEstimator;
   class WidthEstimator;
+  class Integration;
 
   //! Computes pulse profile statistics
   class ProfileStats : public Algorithm, public HasBaselineEstimator
@@ -57,6 +58,11 @@ namespace Pulsar
     //! Set the Profile from which statistics will be derived
     void set_profile (const Profile*);
     void set_Profile (const Profile* profile) { set_profile(profile); }
+
+    //! Set the Integration from which additional metadata can be obtained
+    void set_integration (const Integration*);
+    void set_Integration (const Integration* subint) { set_integration(subint); }
+    Integration* get_Integration() const;
 
     //! Set the Profile that defines the baseline and on-pulse regions
     void select_profile (const Profile*);
@@ -143,6 +149,9 @@ namespace Pulsar
 
     //! The Profile from which statistics will be derived
     Reference::To<const Profile, false> profile;
+
+    //! The Integration from which additional metadata can be obtained
+    Reference::To<const Integration, false> integration;
 
     //! The algorithm used to find the on-pulse phase bins
     Reference::To<ProfileWeightFunction> onpulse_estimator;

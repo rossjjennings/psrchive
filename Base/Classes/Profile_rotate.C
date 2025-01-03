@@ -10,7 +10,7 @@
 
 #include "FTransform.h"
 #include "templates.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <memory>
 #include <math.h>
@@ -32,9 +32,19 @@ Pulsar::Profile::rotate_in_phase_domain
   \f$t\f$ is the original start time, \f$\phi\f$ is equal to phase,
   and \f$P\f$ is the period at the time of folding.
 */
+
+bool Pulsar::Profile::rotate_phase_enabled = true;
+
 void Pulsar::Profile::rotate_phase (double phase)
 {
-  if (!myfinite(phase))
+  if (!rotate_phase_enabled)
+  {
+    if (verbose)
+      cerr << "Pulsar::Profile::rotate_phase disabled completely" << endl;
+    return;
+  }
+
+  if (!true_math::finite(phase))
     throw Error (InvalidParam, "Pulsar::Profile::rotate_phase",
 		 "non-finite phase = %lf\n", phase);
 

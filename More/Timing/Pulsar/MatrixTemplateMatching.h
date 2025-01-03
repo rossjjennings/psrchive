@@ -16,7 +16,7 @@
 namespace Pulsar {
 
   class PulsarCalibrator;
-
+  
   //! Estimates phase shift in Fourier domain using matrix template matching
   class MatrixTemplateMatching : public ArrivalTime
   {
@@ -41,6 +41,9 @@ namespace Pulsar {
     //! Set the standard/template to which observation will be matched
     void set_standard (const Archive*);
 
+    //! unload the best-fit Jones matrix model parameters for each sub-integration
+    void set_unload_matrix_model(bool flag=true) { unload_matrix_model = flag; }
+
   protected:
 
     //! The PulsarCalibrator class takes care of many details
@@ -48,6 +51,9 @@ namespace Pulsar {
 
     //! get the arrival times for the specified sub-integration
     void get_toas (unsigned subint, std::vector<Tempo::toa>& toas);
+
+    //! unload the best-fit Jones matrix model parameters for each sub-integration
+    bool unload_matrix_model = false;
   };
 
 }

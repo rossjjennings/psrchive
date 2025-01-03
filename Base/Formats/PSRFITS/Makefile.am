@@ -1,13 +1,13 @@
 
 noinst_LTLIBRARIES = libpsrfits.la
 
-include_HEADERS = Pulsar/FITSArchive.h Pulsar/FITSSKLoader.h
+nobase_include_HEADERS = Pulsar/FITSArchive.h Pulsar/FITSSKLoader.h Pulsar/ProfileColumn.h
 
 dist_data_DATA = psrheader.fits
 
 libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	CalibratorExtensionIO.h FITSArchive.C  FITSSKLoader.C \
-	ProfileColumn.C Pulsar/ProfileColumn.h \
+	ProfileColumn.C \
 	unload_Plasma.C load_Plasma.C \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
 	unload_ObsDescription.C load_ObsDescription.C \
@@ -41,7 +41,8 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	P236_reference_epoch_correction.C \
 	refmjd_rounding_correction.C \
 	fitsio_psrephem.C fitsio_polyco.C fitsio_tempo.h \
-        unload_CrossCovarianceMatrix.C load_CrossCovarianceMatrix.C
+    unload_CrossCovarianceMatrix.C load_CrossCovarianceMatrix.C \
+	unload_DynamicResponse.C load_DynamicResponse.C 
 
 if HAVE_TEMPO2
 libpsrfits_la_SOURCES += unload_T2Predictor.C load_T2Predictor.C
@@ -63,5 +64,5 @@ include $(top_srcdir)/config/Makefile.include
 AM_CPPFLAGS += @CFITSIO_CFLAGS@ @TEMPO2_CFLAGS@
 
 LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la \
-	$(top_builddir)/Util/epsic/src/libepsic.la @CFITSIO_LIBS@
+	$(top_builddir)/Util/epsic/src/util/libutil.la @CFITSIO_LIBS@
 

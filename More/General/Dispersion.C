@@ -97,6 +97,16 @@ void Pulsar::Dispersion::revert (Archive* arch)
 
 void Pulsar::Dispersion::apply (Integration* data, unsigned ichan) try
 {
+  folding_period = data->get_folding_period();
+  if (barycentric_correction)
+  {
+    bary.set_Integration(data);
+    earth_doppler = bary.get_Doppler();
+
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::Dispersion::apply barycentric Doppler correction=1+" << earth_doppler - 1.0 << endl;
+  }
+
   for (unsigned ipol=0; ipol < data->get_npol(); ipol++)
     data->get_Profile(ipol,ichan) -> rotate_phase( get_shift() );
 }

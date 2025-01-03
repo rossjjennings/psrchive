@@ -35,14 +35,14 @@ namespace Pulsar {
 			    std::vector<float> &model,
 			    unsigned nsubint, unsigned nchan, unsigned npol);
 
-      void set_nlevel ( int n ) { nlevel = n; }
-      int get_nlevel () const { return nlevel; }
+      void set_nlevel ( unsigned n ) { nlevel = n; }
+      unsigned get_nlevel () const { return nlevel; }
     
       // Text interface to the SumThreshold class
       class Interface : public TextInterface::To<SumThreshold> {
       public:
         Interface (SumThreshold* = 0);
-	std::string get_interface_name () const { return "sumthresh"; }
+        std::string get_interface_name () const { return "sumthresh"; }
       };
 
       //! Return a text interface that can be used to configure this instance
@@ -54,7 +54,7 @@ namespace Pulsar {
     protected:
 
       //! Number of levels
-      int nlevel;
+      unsigned nlevel;
 
   };
 

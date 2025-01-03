@@ -6,18 +6,18 @@
  *
  ***************************************************************************/
 
-// psrchive/Util/pgutil/ColourMap.h
+// psrchive/More/Plotting/pgutil/ColourMap.h
 
 #ifndef __ColourMap_H
 #define __ColourMap_H
 
-#include "TextInterface.h"
 #include "Pulsar/Config.h"
+#include "TextInterface.h"
 #include <string>
 
 namespace pgplot {
 
-  //! Convenience interface to a bunch of regularly used colour maps
+  //! Colour map manager
   class ColourMap : public Reference::Able {
 
   public:
@@ -85,10 +85,10 @@ namespace pgplot {
     Interface (ColourMap* = 0);
   };
 
-  //! Basis output operator
+  //! ColourMap::Name stream insertion operator
   std::ostream& operator << (std::ostream&, ColourMap::Name);
 
-  //! Basis input operator
+  //! ColourMap::Name stream extraction operator
   std::istream& operator >> (std::istream&, ColourMap::Name&);
 
 

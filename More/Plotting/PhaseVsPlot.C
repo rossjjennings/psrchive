@@ -160,10 +160,14 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
                        y_min - 0.5f*y_res,        0.0f, y_res };
 
       if (get_frame()->get_transpose())
-	for (unsigned i=0; i<3; i++)
-	  std::swap (trf[i], trf[i+3]);
+      {
+        for (unsigned i=0; i<3; i++)
+          std::swap (trf[i], trf[i+3]);
+      }
 
       cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
+
+      colour_bar.plot(min, max);
     }
 
   }

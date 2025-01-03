@@ -32,12 +32,26 @@ void Pulsar::Plot::configure (const std::string& option)
     tui = get_interface();
     tui->process (option);
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
+    if (error.get_code() == HelpMessage)
+    {
+      std::cout << error.get_message() << std::endl;
+      return;
+    }
+
     try {
       fui = get_frame_interface();
       fui->process (option);
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
+      if (error.get_code() == HelpMessage)
+      {
+        std::cout << error.get_message() << std::endl;
+        return;
+      }
+
       throw error += "Pulsar::Plot::configure";
     }
   }

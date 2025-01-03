@@ -406,8 +406,7 @@ void SystemCalibrator::add_pulsar (const Archive* data) try
     add_pulsar( data, isub );
 
   if (get_data_fail)
-    cerr << "\t" << get_data_fail << " failures in " << get_data_call
-	 << " data points" << endl;
+    cerr << "\t" << get_data_fail << " failures in " << get_data_call << " data points" << endl;
 }
 catch (Error& error)
 {
@@ -482,8 +481,8 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
       iono_rm = aux->get_rotation_measure();
 
       if (iono_rm != 0)
-	cerr << " correcting auxiliary Faraday rotation - RM=" 
-	     << aux->get_rotation_measure () << endl;
+        cerr << " correcting auxiliary Faraday rotation - RM=" 
+            << aux->get_rotation_measure () << endl;
     }
   }
 
@@ -500,8 +499,7 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   if ( correct_interstellar_Faraday_rotation &&
        ( data->get_rotation_measure() != 0.0 ) )
   {
-    cerr << " correcting interstellar Faraday rotation - RM=" 
-	   << data->get_rotation_measure () << endl;
+    cerr << " correcting interstellar Faraday rotation - RM=" << data->get_rotation_measure () << endl;
     
     ism_faraday = new Faraday;
     ism_faraday->set_rotation_measure( data->get_rotation_measure() );
@@ -515,8 +513,7 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   string identifier = data->get_filename() + " " + tostring(isub);
 
   if (verbose)
-    cerr << "SystemCalibrator::add_pulsar identifier="
-	 << identifier << endl;
+    cerr << "SystemCalibrator::add_pulsar identifier=" << identifier << endl;
 
   pulsar_data.push_back ( vector<CoherencyMeasurementSet>() );
 
@@ -525,8 +522,8 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     if (integration->get_weight (ichan) == 0)
     {
       if (verbose > 2)
-	cerr << "SystemCalibrator::add_pulsar ichan="
-	     << ichan << " flagged invalid" << endl;
+        cerr << "SystemCalibrator::add_pulsar ichan="
+            << ichan << " flagged invalid" << endl;
       continue;
     }
     
@@ -579,16 +576,21 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     try
     {
       if (verbose > 2)
-	cerr << "SystemCalibrator::add_pulsar call add_pulsar ichan="
-	     << ichan << endl;
+        cerr << "SystemCalibrator::add_pulsar call add_pulsar ichan=" << ichan << endl;
   
       add_pulsar (measurements, integration, ichan);
     }
     catch (Error& error)
     {
       if (verbose > 2 || error.get_code() != InvalidParam)
-	cerr << "SystemCalibrator::add_pulsar ichan=" << ichan
-	     << "error" << error << endl;
+        cerr << "SystemCalibrator::add_pulsar ichan=" << ichan
+             << " error=" << error << endl;
+    }
+    catch (std::exception& error)
+    {
+      if (verbose > 2)
+        cerr << "SystemCalibrator::add_pulsar ichan=" << ichan
+             << " exception=" << error.what() << endl;
     }
 
     pulsar_data.back().push_back (measurements);
@@ -596,7 +598,7 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   catch (Error& error)
   {
     cerr << "SystemCalibrator::add_pulsar ichan="
-	 << ichan << " error\n" << error.get_message() << endl;
+        << ichan << " error\n" << error.get_message() << endl;
   }
 
   if (verbose > 2)
@@ -1409,7 +1411,7 @@ void SystemCalibrator::create_model () try
 
   MEAL::Complex2* basis = 0;
 
-  // if not basis correction is required, then default to identity matrix
+  // if no basis correction is required, then default to identity matrix
   invert_basis = 1.0;
 
   if (has_Receiver())
@@ -1418,23 +1420,24 @@ void SystemCalibrator::create_model () try
       cerr << "SystemCalibrator::create_model receiver set" << endl;
 
     Pauli::basis().set_basis( get_Receiver()->get_basis() );
-    
-    if (!get_Receiver()->get_basis_corrected())
+
+    BasisCorrection basis_correction;
+
+    if (basis_correction.required(get_Receiver()))
     {
-      BasisCorrection basis_correction;
       basis = new MEAL::Complex2Constant( basis_correction(get_Receiver()) );
 
       invert_basis = inv( basis->evaluate() );
 
-      if (verbose)
-	cerr << "SystemCalibrator::create_model basis corrections:\n"
-	     << basis_correction.get_summary () << endl
-	     << "SystemCalibrator::create_model receiver=\n  " 
-	     << basis->evaluate() << endl;
+      cerr << "SystemCalibrator::create_model basis corrections:\n"
+          << basis_correction.get_summary () << endl;
+
+      if (verbose) cerr
+          << "SystemCalibrator::create_model receiver=\n  " 
+          << basis->evaluate() << endl;
     }
     else if (verbose)
-      cerr << "SystemCalibrator::create_model basis correction not required"
-           << endl;
+      cerr << "SystemCalibrator::create_model basis correction not required" << endl;
   }
   else if (verbose)
     cerr << "SystemCalibrator::create_model receiver not set" << endl;

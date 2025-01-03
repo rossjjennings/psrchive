@@ -11,7 +11,7 @@
 
 #include "psrfitsio.h"
 #include "templates.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 // #define _DEBUG 1
 #include "debug.h"
@@ -651,7 +651,7 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
         if (scale == 0.0)
 	  scale = 1.0;
 
-        if ( !myfinite(scale) || !myfinite(offset) )
+        if ( !true_math::finite(scale) || !true_math::finite(offset) )
         {
 	  warning << "Pulsar::ProfileColumn::load_amps"
 	    " SCALE or OFFSET NaN in row=" << row << endl;
@@ -667,7 +667,7 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
       for (unsigned ibin = 0; ibin < nbin; ibin++)
       {
 	amps[ibin] = temparray[index*nbin+ibin] * scale + offset;
-	if (!myfinite(amps[ibin]))
+	if (!true_math::finite(amps[ibin]))
 	{
 	  nans ++;
 	  amps[ibin] = 0.0;

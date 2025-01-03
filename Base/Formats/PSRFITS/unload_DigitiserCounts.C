@@ -5,24 +5,16 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserCounts.h"
 #include <psrfitsio.h>
 #include <templates.h>
-
-
-
 
 using Pulsar::DigitiserCounts;
 using Pulsar::FITSArchive;
 using Pulsar::Archive;
 using std::endl;
 using std::cerr;
-
-
-
 
 /**
  * CompressCounts     This function takes a vector of long values and compresses the data into a
@@ -38,7 +30,7 @@ using std::cerr;
 void CompressCounts( const vector<long> &data, vector<int> &target_data, float &scale, float &offset )
 {
   // get the range of vlues
-  long min, max;
+  long min = 0, max = 0;
   minmax( data, min, max );
 
   // determine the scale and offset
@@ -101,7 +93,7 @@ void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
   dimensions[1] = ext->get_ndigr();
 
   int num_subints = ext->subints.size();
-  for( int s = 0; s < num_subints; s ++ )
+  for( int s = 0; s < num_subints; s ++ ) try
   {
     vector<int> int_data;
     float scale;
@@ -112,6 +104,10 @@ void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
     psrfits_write_col( fptr, "DAT_SCL", s+1, scale );
     psrfits_write_col( fptr, "DAT_OFFS", s+1, offset );
     psrfits_write_col( fptr, "DATA", s+1, int_data, dimensions );
+  }
+  catch (Error& error)
+  {
+    throw error += "UnloadCountsTable";
   }
 }
 
@@ -166,7 +162,7 @@ void UnloadCountsKeys( fitsfile *fptr, const DigitiserCounts *ext )
  * @param const_ext      The DigitiserCounts extension to unload
  **/
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_ext ) try
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_ext ) const try
 {
   if (const_ext->get_npthist() == 0)
   {
@@ -184,12 +180,26 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_e
     return;
   }
 
-  if (const_ext->subints.size() < 1)
+  if (const_ext->subints.size() != get_nsubint())
   {
     if (verbose)
-      cerr << "Pulsar::FITSArchive::unload DigitiserCounts has no subints - deleting DIG_CNTS HDU" << endl;
+      cerr << "Pulsar::FITSArchive::unload DigitiserCounts subints size=" << const_ext->subints.size()
+           << " does not equal nsubint=" << get_nsubint() << " - deleting DIG_CNTS HDU" << endl;
     delete_hdu (fptr, "DIG_CNTS");
     return;
+  }
+
+  unsigned nvalue = const_ext->get_npthist() * const_ext->get_ndigr();
+  for (unsigned isubint=0; isubint < get_nsubint(); isubint++)
+  {
+    if (const_ext->subints[isubint].data.size() != nvalue)
+    {
+      if (verbose)
+        cerr << "Pulsar::FITSArchive::unload DigitiserCounts subints[" << isubint << "] data size=" << const_ext->subints[isubint].data.size()
+            << " does not equal npthist*ndigr = " << nvalue << " - deleting DIG_CNTS HDU" << endl;
+      delete_hdu (fptr, "DIG_CNTS");
+      return;
+    }
   }
 
   psrfits_move_hdu( fptr, "DIG_CNTS" );
@@ -200,5 +210,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_e
 }
 catch (Error &error)
 {
-  throw error += "FITSArchive::unload(DigitiserCounts)";
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::unload DigitiserCounts exception thrown " << error << " - deleting DIG_CNTS HDU" << endl;
+  delete_hdu (fptr, "DIG_CNTS");
 }

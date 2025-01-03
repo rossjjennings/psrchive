@@ -1,5 +1,21 @@
-#include "Pulsar/Parameters.h"
+/***************************************************************************
+ *
+ *   Copyright (C) 2021 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#if HAVE_TEMPO2
 #include "T2Generator.h"
+#else
+#include "Pulsar/Generator.h"
+#endif
+
+#include "Pulsar/Parameters.h"
 #include "Pulsar/Predictor.h"
 #include "load_factory.h"
 #include "RealTimer.h"
@@ -25,6 +41,7 @@ int main (int argc, char** argv) try
  
   Pulsar::Generator* generator = Pulsar::Generator::factory (params);
 
+#if HAVE_TEMPO2
   Tempo2::Generator* t2g = dynamic_cast<Tempo2::Generator*> (generator);
 
   if (t2g)
@@ -32,7 +49,8 @@ int main (int argc, char** argv) try
     t2g -> set_time_ncoeff (16);
     t2g -> set_frequency_ncoeff (8);
   }
-  
+#endif
+
   /*
    * Tempo2 predictor code:
    *

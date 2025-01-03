@@ -8,7 +8,7 @@
 #include "Phase.h"
 #include "Error.h"
 #include "tostring.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -84,7 +84,7 @@ string Phase::strprint (int precision) const
   string s = tostring (turns);
   string f = tostring (fturns, precision, std::ios::fixed);
 
-  if (!myfinite(fturns))
+  if (!true_math::finite(fturns))
     s += ".NaN";
   else
   {

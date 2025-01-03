@@ -7,6 +7,7 @@
 
 #include "Barycentre.h"
 #include "slalib.h"
+#include <cassert>
 
 Barycentre::Barycentre ()
 {
@@ -104,16 +105,15 @@ double lmst2(double mjd,double olong,double *tsid,double *tsid_der)
 
 double sqr (double x) { return x*x; }
 
+// Astronomical unit in light seconds
+static const double AUS     = 499.004786;  // seconds
+static const double TWOPI   = 2*M_PI;
+static const double RTOD    = (double)360/TWOPI;
+
 void Barycentre::build () const
 {
   double in_days = epoch.in_days();
   double in_seconds = epoch.in_seconds();
-
-  // Astronomical unit in light seconds
-  double AUS     = 499.004786;
-
-  double TWOPI   = 2*M_PI;
-  double RTOD    = (double)360/TWOPI;
   
   Angle ra_angle = coordinates.ra();
   Angle dec_angle = coordinates.dec();
@@ -166,15 +166,46 @@ void Barycentre::build () const
   double g = (357.53 + 0.9856003 * (in_days - 51544.5)) / RTOD;
   double tdb = tdt + 0.001658 * sin (g) + 0.000014 * sin(2 * g);
 
+  // SLA_EVP - Earth Position & Velocity
+  // Barycentric and heliocentric velocity and position of the Earth.
+  // DVB barycentric $[\,\dot{x},\dot{y},\dot{z}\,]$, AU s-1
+  // DPB barycentric $[\,x,y,z\,]$, AU
+
   slaEvp (tdb/(double)86400, (double)2000, dvb, dpb, dvh, dph);
 
-  double sitera = 0;
+  Vector<3,double> site_velocity = 0;
 
-  // The velocity of the observatory
-  double site_vel[3];
+  if (norm(observatory) > 0)
+    site_velocity = get_geocentric_velocity(epoch);
 
-  // Cylindrical coordinates of observatory
-  double site[3];
+  // ///////////////////////////////
+  // /// Based on psrephd.f
+  ////////////
+  
+  // Add the EC-observatory vectors to the barycentre-EC vectors.
+  for (int i = 0; i < 3; i++)
+  {
+    // Convert from AUS per second to metres per second
+    dvb[i] *= AUS;
+    dvb[i] = dvb[i] + site_velocity[i];
+  }
+
+  // SLA_DVDV - Scalar Product   
+  // Scalar product of two 3-vectors (double precision).
+  double evel = slaDvdv(dvb, dps);
+  const double edelay = AUS * slaDvdv(dpb, dps);
+  const double btdb = tdb + edelay;
+
+  barycentric_epoch = btdb / 86400;
+  Doppler = 1 - evel;
+  
+  if (verbose)
+    printf("Barycentre::build dopps = %3.20g\n", Doppler);
+}
+
+Vector<3,double> Barycentre::get_geocentric_velocity(const MJD& epoch) const
+{
+  double in_days = epoch.in_days();
 
   // ///////////////////////////////
   // Based on tempo's setup.f
@@ -185,7 +216,9 @@ void Barycentre::build () const
   double z = observatory[2];
 
   double erad = sqrt( sqr(x) + sqr(y) + sqr(z) );
-    
+
+  assert(erad > 0.0);
+
   double siteLatitude = asin(z/erad);
   double siteLongitude = atan2(-y, x);
   double sphericalRadius = erad/(2.99792458e8*AUS);
@@ -197,6 +230,9 @@ void Barycentre::build () const
   // ///////////////////////////////
   // Based on tempo's arrtim.f
   // //////////
+
+  // Cylindrical coordinates of observatory
+  double site[3] = {0,0,0};
 
   site[0] = sphericalRadius * cos(siteLatitude) * AUS;
   site[1] = site[0] * tan(siteLatitude);
@@ -226,7 +262,7 @@ void Barycentre::build () const
   EEQ[1] = site[0] * sin(ph);
   EEQ[2] = site[1];
 
-  sitera = atan2(EEQ[1], EEQ[0]);
+  double sitera = atan2(EEQ[1], EEQ[0]);
 
   if (verbose) {
     printf("pdmp: getDopplerFactor: LST = %3.10g, ph = %3.10g, EEQ[0] = %3.10g, EEQ[1] = %3.10g, EEQ[2] = %3.10g, sitera = %3.10g\n" ,
@@ -235,6 +271,9 @@ void Barycentre::build () const
   
   double speed = TWOPI*site[0]/((double)86400/ 1.00273);
   
+  // The velocity of the observatory in m/s
+  Vector<3,double> site_vel = {0,0,0};
+
   site_vel[0] = -speed * sin(sitera);
   site_vel[1] =  speed * cos(sitera);
   site_vel[2] = 0;
@@ -243,26 +282,6 @@ void Barycentre::build () const
     printf("pdmp: getDopplerFactor: site_vel[0] = %3.10g, site_vel[1] = %3.10g, site_vel[2] = %3.10g, speed = %3.10g\n" ,
 	   site_vel[0], site_vel[1], site_vel[2], speed);
   }
-  
-  // ///////////////////////////////
-  // /// Based on psrephd.f
-  ////////////
-  
-  // Add the EC-observatory vectors to the barycentre-EC vectors.
-  for (int i = 0; i < 3; i++)
-  {
-    // Convert from AUS per second to metres per second
-    dvb[i] *= AUS;
-    dvb[i] = dvb[i] + site_vel[i];
-  }
 
-  double evel = slaDvdv(dvb, dps);
-  const double edelay = AUS * slaDvdv(dpb, dps);
-  const double btdb = tdb + edelay;
-
-  barycentric_epoch = btdb / 86400;
-  Doppler = 1 - evel;
-  
-  if (verbose)
-    printf("pdmp: getDopplerFactor: dopps = %3.20g\n", Doppler);
+  return site_vel;
 }

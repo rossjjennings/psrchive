@@ -14,7 +14,7 @@
 #include "Physical.h"
 #include "Error.h"
 #include "typeutil.h"
-#include "myfinite.h"
+#include "true_math.h"
 #include "debug.h"
 
 #include <iostream>
@@ -422,7 +422,7 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   { 
     log_threshold = log(threshold)/log(base);
 
-    if (!myfinite(log_threshold))
+    if (!true_math::finite(log_threshold))
       throw Error (InvalidParam, "Pulsar::Profile::logarithm",
 		   "logarithm of threshold=%lf is not finite", threshold);
   }
@@ -443,7 +443,7 @@ void Pulsar::Profile::logarithm (double base, double threshold)
     }
 
     amps[ibin] = log(amps[ibin])/log(base);
-    if (!myfinite(amps[ibin]))
+    if (!true_math::finite(amps[ibin]))
       throw Error (InvalidParam, "Pulsar::Profile::logarithm",
 		   "logarithm of amps[%u]=%lf is not finite",
 		   ibin, amps[ibin]);

@@ -21,7 +21,7 @@ Pulsar::DynamicStatSpectrumPlot::Interface::Interface(
 
   add( &DynamicStatSpectrumPlot::get_statistic,
        &DynamicStatSpectrumPlot::set_statistic,
-       "stat", "Statistc to evaluate" );
+       "stat", "Statistic to evaluate" );
 
   import( DynamicSpectrumPlot::Interface() );
 }

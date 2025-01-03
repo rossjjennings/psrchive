@@ -7,7 +7,7 @@
 
 #include "CalibratorExtensionIO.h"
 #include "psrfitsio.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 using namespace std;
 
@@ -39,7 +39,7 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   for (idim=0; idim < dimension; idim++)
   {
     data[idim].val = temp[idim];
-    if (!myfinite( data[idim].val ))
+    if (!true_math::finite( data[idim].val ))
     {
       cerr << "Pulsar::load_Estimates not finite data[" << idim << "].val=" << data[idim].val << endl;
       data[idim].val = 0.0;
@@ -71,7 +71,7 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
     float err = temp[idim];
     data[idim].var = err*err;
 
-    if (!myfinite( data[idim].var ))
+    if (!true_math::finite( data[idim].var ))
     {
       cerr << "Pulsar::load_Estimates not finite data[" << idim << "].var=" << data[idim].var << endl;
       data[idim].var = 0.0;
@@ -100,7 +100,7 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
   // Write the data values
   for (idim = 0; idim < dimension; idim++)
   {
-    if (!myfinite( data[idim].val ))
+    if (!true_math::finite( data[idim].val ))
       throw Error (InvalidParam, "Pulsar::unload_Estimates",
                    "not finite data[%u].val=%lf", idim, data[idim].val);
     temp[idim] = data[idim].val;
@@ -131,7 +131,7 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
   // Write the data errors
   for (idim = 0; idim < dimension; idim++)
   {
-    if (!myfinite( data[idim].var ))
+    if (!true_math::finite( data[idim].var ))
       throw Error (InvalidParam, "Pulsar::unload_Estimates",
                    "not finite data[%u].var=%lf", idim, data[idim].var);
 

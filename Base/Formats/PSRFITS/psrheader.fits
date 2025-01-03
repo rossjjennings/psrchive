@@ -516,7 +516,7 @@ END
 #
 ###############################################################################
 #
-# Covariance Matrix Test PSRFITS File
+# Covariance Matrix extension describes SWIMS
 #
 ###############################################################################
 #
@@ -571,6 +571,34 @@ TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
 TFORM#  = E                    / NPOL*NCHAN floats
 TTYPE#  = UNFIL_HIT            / Unfiltered SK hits
 TFORM#  = K                    / 64 bit signed integer
+END
+#
+###############################################################################
+#
+# Dynamic Frequency Response
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Covariance Matrix Data *****
+BITPIX  =                    8 / N/A 
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    * / Number of fields per row
+#
+EXTNAME = DYN_RESP             / name of this binary table extension
+NCHAN   =                    * / Number of frequency channels
+NTIME   =                    * / Number of time samples
+NPOL    =                    * / Number of polarisations
+MINFREQ =                    * / [MHz] Minimum frequency of response (D)
+MAXFREQ =                    * / [MHz] Maximum frequency of response (D)
+MINEPOCH=                    * / [MJD] Minimum epoch of dynamic response (D)
+MAXEPOCH=                    * / [MJD] Maximum epoch of dynamic response (D)
+#
+TTYPE#  = DATA                 / Elements of the covariance matrix
+TFORM#  = M                    / NPOL*NCHAN*NTIME double precision complex
 END
 #
 ###############################################################################

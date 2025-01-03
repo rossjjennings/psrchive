@@ -184,3 +184,17 @@ const Calibration::Feed* Calibration::Instrument::get_feed () const
   return feed;
 }
 
+Estimate<double> Calibration::Instrument::get_orientation () const
+{
+  // overall orientation is defined as the average of the orientations of the two receptors
+  return 0.5 * (feed->get_orientation(0) + feed->get_orientation(1));
+}
+
+void Calibration::Instrument::offset_orientation (double delta)
+{
+  for (unsigned ipol=0; ipol < 2; ipol++)
+  {
+    double orig = feed->get_orientation_transformation(ipol)->get_param(0);
+    feed->get_orientation_transformation(ipol)->set_param(0, orig + delta);
+  }
+}

@@ -12,7 +12,7 @@
 #define __fft_BandpassPlotter_h
 
 #include "templates.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <cpgplot.h>
 #include <algorithm>
@@ -59,7 +59,7 @@ namespace fft {
     //! Set minimum and maximum values on frequency axis
     void set_fminmax (float min, float max)
     {
-      if (!myfinite(min) || !myfinite(max))
+      if (!true_math::finite(min) || !true_math::finite(max))
         throw Error (InvalidParam, "BandpassPlotter::set_fminmax", "min=%f max=%f", min, max);
       user_fmin = min; 
       user_fmax = max;

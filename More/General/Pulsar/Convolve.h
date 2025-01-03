@@ -16,13 +16,15 @@
 
 namespace Pulsar {
 
-  //! Computes the difference between two profiles
+  //! Computes the convolution between two profiles
   class Convolve : public Combination<Profile>
   {
 
   public:
 
-    void transform (Profile*);
+    //! Set argument amplitudes equal to the convolution between argument and operand
+    /*! operand is a member of the Combination<Profile> base class*/
+    void transform (Profile* argument);
 
   }; 
 

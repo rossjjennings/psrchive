@@ -64,11 +64,12 @@ namespace Pulsar
     class SubintCounts
     {
       public:
-	SubintCounts() {};
-	~SubintCounts() {};
-	
-	vector<long> data;
+        SubintCounts() {};
+        ~SubintCounts() {};
+        
+        vector<long> data;
     };
+    
     vector<SubintCounts> subints;
 
     //! Resize the extension

@@ -10,7 +10,7 @@
 
 #include "psrfitsio.h"
 #include "FITSError.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -78,7 +78,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr) try
   for (int ichan=0; ichan < nchan; ichan++)
   {
     float weight = data[ichan];
-    stokes->set_valid (ichan, myfinite(weight) && weight != 0);
+    stokes->set_valid (ichan, true_math::finite(weight) && weight != 0);
   }
 
   // Read the data itself

@@ -1,16 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2024 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#include "Pulsar/PolnCalibratorExtension.h"
-#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/PolnCalibratorExtensionUtils.h"
 
 using namespace std;
 
-void copy_name (MEAL::Complex2* to,
+void Calibration::handle_parameter_names (MEAL::Complex2* to,
 		const Pulsar::PolnCalibratorExtension::Transformation* from)
 {
   for (unsigned i=0; i<to->get_nparam(); i++)
@@ -23,7 +22,7 @@ void copy_name (MEAL::Complex2* to,
   }
 }
 
-void copy_name (Pulsar::PolnCalibratorExtension::Transformation* to,
+void Calibration::handle_parameter_names (Pulsar::PolnCalibratorExtension::Transformation* to,
 		const MEAL::Complex2* from)
 {
   for (unsigned i=0; i<to->get_nparam(); i++)
@@ -31,20 +30,6 @@ void copy_name (Pulsar::PolnCalibratorExtension::Transformation* to,
     to->set_param_name(i, from->get_param_name(i));
     to->set_param_description(i, from->get_param_description(i));
   }
-}
-
-template<class T, class F>
-void copy (T* to, const F* from)
-{
-  if (to->get_nparam() != from->get_nparam())
-    throw Error (InvalidParam, "copy<To,From>",
-		 "to nparam=%d != from nparam=%d",
-		 to->get_nparam(), from->get_nparam());
-
-  for (unsigned i=0; i<to->get_nparam(); i++)
-    to->set_Estimate(i, from->get_Estimate(i));
-
-  copy_name (to, from);
 }
 
 //! Construct from a PolnCalibrator instance
@@ -79,15 +64,14 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
     if ( ! calibrator->get_transformation_valid(ichan) )
     {
       if (Calibrator::verbose > 2)
-	cerr << "Pulsar::PolnCalibratorExtension ichan=" << ichan 
-	     << " flagged invalid" << endl;
+        cerr << "Pulsar::PolnCalibratorExtension ichan=" << ichan 
+            << " flagged invalid" << endl;
       
       set_valid (ichan, false);
       continue;
     }
 
-    copy( get_transformation(ichan), 
-	  calibrator->get_transformation(ichan) );
+    Calibration::copy( get_transformation(ichan), calibrator->get_transformation(ichan) );
     
     set_valid (ichan, true);
 
@@ -95,8 +79,8 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
     {
       const MEAL::Function* f = calibrator->get_transformation(ichan);
       for (unsigned i=0; i<f->get_nparam(); i++)
-	cerr << "Pulsar::PolnCalibratorExtension name[" << i << "]=" 
-	     << f->get_param_name(i) << endl;
+        cerr << "Pulsar::PolnCalibratorExtension name[" << i << "]=" 
+            << f->get_param_name(i) << endl;
     }
 
     first = false;
@@ -123,7 +107,7 @@ catch (Error& error)
 
 //! Return a new MEAL::Complex2 instance, based on type attribute
 MEAL::Complex2*
-Pulsar::new_transformation (const PolnCalibratorExtension* ext, unsigned ichan)
+Calibration::new_transformation (const Pulsar::PolnCalibratorExtension* ext, unsigned ichan)
 try
 {
   if( !ext->get_valid(ichan) )
@@ -131,13 +115,13 @@ try
 
   MEAL::Complex2* xform = new_transformation( ext->get_type() );
 
-  if (Calibrator::verbose)
-    cerr << "Pulsar::new_transformation name=" << xform->get_name() << endl;
+  if (Pulsar::Calibrator::verbose)
+    cerr << "Calibration::new_transformation name=" << xform->get_name() << endl;
 
-  const PolnCalibratorExtension::Transformation* info;
+  const Pulsar::PolnCalibratorExtension::Transformation* info;
   info = ext->get_transformation(ichan);
   
-  copy( xform, info );
+  Calibration::copy( xform, info );
 
   for (unsigned iparam=0; iparam < xform->get_nparam(); iparam++)
     if (info->get_variance(iparam) == 0)
@@ -147,6 +131,6 @@ try
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::new_transformation";
+  throw error += "Calibration::new_transformation";
 }
 
