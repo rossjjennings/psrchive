@@ -7,7 +7,7 @@
 
 #include "MJD.h"
 #include "Error.h"
-#include "myfinite.h"
+#include "true_math.h"
 
 #include <iostream>
 #include <iomanip>
@@ -75,7 +75,7 @@ string MJD::printdays (unsigned prec) const
   if (prec > 0)
   {
     double fractional = fracday();
-    if (!myfinite(fractional))
+    if (!true_math::finite(fractional))
     {
       return output + ".NaN";
     }
@@ -676,7 +676,7 @@ ostream& operator << (ostream& ostr, const MJD& mjd)
 
   double ddays = mjd.in_days();
 
-  if (!myfinite(ddays))
+  if (!true_math::finite(ddays))
     return ostr << ddays << endl;
 
   if (precision < std::numeric_limits<double>::digits10)

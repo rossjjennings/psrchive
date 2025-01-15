@@ -7,7 +7,7 @@
 
 #include "LinearRegression.h"
 #include "statutil.h"
-#include "myfinite.h"
+#include "true_math.h"
 #include "Error.h"
 
 #include <algorithm>
@@ -116,7 +116,7 @@ void LinearRegression::generalized_least_squares
 
   covariance = -bar_x * scale.var;
 
-  if ( ! myfinite(scale.val) )
+  if ( ! true_math::finite(scale.val) )
   {
     ofstream out ("linear_fit_work.dat");
     for (unsigned idim=0; idim < ndim; idim++)
@@ -125,7 +125,7 @@ void LinearRegression::generalized_least_squares
     throw Error (InvalidState, "linear_fit_work", "non-finite scale=%lf count=%u alpha_2=%lf", scale.val, count, alpha_2);
   }
 
-  if ( ! myfinite(scale.var) )
+  if ( ! true_math::finite(scale.var) )
     throw Error (InvalidState, "linear_fit_work", "non-finite scale var=%lf", scale.var);
 
   if (robust_offset)
@@ -148,10 +148,10 @@ void LinearRegression::generalized_least_squares
     offset.val = median (diff);
   }
 
-  if ( ! myfinite(offset.val) )
+  if ( ! true_math::finite(offset.val) )
     throw Error (InvalidState, "linear_fit_work", "non-finite offset=%lf", offset.val);
 
-  if ( ! myfinite(offset.var) )
+  if ( ! true_math::finite(offset.var) )
     throw Error (InvalidState, "linear_fit_work", "non-finite offset var=%lf", offset.var);
 
   // cerr << "scale=" << scale << " offset=" << offset << endl;

@@ -9,7 +9,6 @@
 #include "LinearRegression.h"
 
 #include "statutil.h"
-#include "myfinite.h"
 
 #include <algorithm>
 #include <numeric>
