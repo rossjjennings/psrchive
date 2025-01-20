@@ -207,6 +207,10 @@ SWIN_LIB_EIGEN
 # Check for psrxml io library
 MJK_LIB_PSRXML
 
+# Expand/substitute the @enable_shared@ variable in output files
+# e.g. in packages/pgplot.csh
+AC_SUBST(enable_shared)
+
 #
 # Generate python module if --enable-shared is used 
 # but not if --disable-python is also used.
