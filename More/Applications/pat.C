@@ -284,7 +284,7 @@ int main (int argc, char** argv) try
 
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, args)) != -1)
+  while ((gotc = getopt(argc, argv, args)) != -1) try
   {
     switch (gotc)
     {
@@ -369,11 +369,14 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'I':
+    {
       mean_arrival_time = new MeanArrivalTime;
-      mean_arrival_time->set_num_subbands(atoi(optarg));
+      unsigned nsubband = fromstring<unsigned>(optarg);
+      cerr << "pat: averaging arrival times over " << nsubband << " sub-bands" << endl;
+      mean_arrival_time->set_num_subbands(nsubband);
       full_freq = true;
       break;
-
+    }
     case 'j':
       separate (optarg, jobs, ",");
       break;
@@ -490,6 +493,11 @@ int main (int argc, char** argv) try
       cout << "Unrecognised option " << gotc << endl;
     }
   }
+  catch (Error& error)
+  {
+    cerr << "pat: error while processing '" << (char)gotc << "' command-line option: " << error << endl;
+    return -1;
+  }
 
 #if HAVE_PGPLOT
   if (plot_difference)
@@ -549,6 +557,11 @@ int main (int argc, char** argv) try
 
   if (ntest_uncertainty)
   {
+    if (!stdarch)
+    {
+      cerr << "pat: cannot test_arrival_time_uncertainty without standard/template profile" << endl;
+      return -1;
+    }
     test_arrival_time_uncertainty (ntest_uncertainty, stdarch, arrival);
     return 0;
   }
@@ -572,6 +585,7 @@ int main (int argc, char** argv) try
       cerr << "Loading " << archives[i] << endl;
       
     arch = Archive::load(archives[i]);
+
     if (i==0 && gaussian)
     {
       loadGaussian(gaussFile, stdarch, arch);
@@ -618,6 +632,12 @@ int main (int argc, char** argv) try
     
     if (full_freq)
     {
+      if (!stdarch)
+      {
+        cerr << "pat: cannot perform full_freq without standard/template profile" << endl;
+        return -1;
+      }
+
       if (stdarch->get_nchan() < arch->get_nchan() && stdarch != stdarch_backup)
       {
         stdarch = stdarch_backup;
@@ -635,11 +655,11 @@ int main (int argc, char** argv) try
       }
     }
 
-    if (reset_standard)
+    if (reset_standard && stdarch)
       arrival->set_standard (stdarch);
     
 #if HAVE_PGPLOT
-    if (centre_template_peak)
+    if (centre_template_peak && stdarch)
       stdarch->centre_max_bin(0.5);
 #endif
 
@@ -662,7 +682,7 @@ int main (int argc, char** argv) try
       cerr << "pat: got " << toas.size() << " TOAs" << endl;
 
 #if HAVE_PGPLOT
-    if (plot_difference)
+    if (plot_difference && stdarch)
     {
       arch->remove_baseline();
       rotate_archive(arch, toas);

@@ -219,7 +219,7 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 /*!
   Copy the common information from another Integration
 */
-void Pulsar::Integration::copy (const Integration* subint, bool management)
+void Pulsar::Integration::copy (const Integration* subint, bool management) try
 {
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::Integration::copy entered; management="
@@ -271,6 +271,10 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
     orphaned = new Meta( *(subint->orphaned) );
 
   zero_phase_aligned = false;
+}
+catch (Error& error)
+{
+  throw error += "Integration::copy";
 }
 
 //! Connect to a new parent archive (also useful after cloning)
@@ -546,8 +550,6 @@ catch (Error& error)
   throw error += "Pulsar::Integration::get_auxiliary_dispersion_corrected ";
 }
 
-
-
 double Pulsar::Integration::get_effective_rotation_measure () const try
 {
   double rm = 0;
@@ -667,7 +669,7 @@ catch (Error& error)
   \pre  This method should only be called through the Archive class
   \post The calling Archive method should update state to Signal::Intensity
  */    
-void Pulsar::Integration::pscrunch()
+void Pulsar::Integration::pscrunch() try
 {
   Signal::State state = get_state();
 
@@ -694,6 +696,10 @@ void Pulsar::Integration::pscrunch()
   if (orphaned)
     orphaned->set_state( Signal::pscrunch(state) );
 } 
+catch (Error& error)
+{
+  throw error += "Integration::pscrunch";
+}
 
 MJD Pulsar::Integration::get_start_time () const
 {
