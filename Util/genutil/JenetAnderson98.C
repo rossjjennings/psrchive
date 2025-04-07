@@ -14,8 +14,9 @@
 
 double JenetAnderson98::get_optimal_spacing (unsigned bits)
 {
-  assert (bits > 1 && bits < 9);
+  assert (bits > 1);
 
+  // copied from Table 3 of JA98
   static double spacing [9] = { 0, 0,  // 0 and 1 bit not handled
 				0.9674,
 				0.5605,
@@ -25,7 +26,16 @@ double JenetAnderson98::get_optimal_spacing (unsigned bits)
 				0.05445,
 				0.02957 };
 
-  return spacing[bits];
+  if (bits < 9)
+    return spacing[bits];
+
+  // A line fit to the two extreme values of x, y=log(spacing)
+  unsigned x_0 = 2;
+  unsigned x_1 = 8;
+  double log_spacing_0 = log(spacing[x_0]);
+  double log_spacing_1 = log(spacing[x_1]);
+  double slope = (log_spacing_1 - log_spacing_0) / (x_1 - x_0);
+  return exp( log_spacing_0 + (bits - x_0) * slope );
 }
 
 JenetAnderson98::JenetAnderson98 ()

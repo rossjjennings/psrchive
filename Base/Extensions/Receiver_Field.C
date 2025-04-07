@@ -8,14 +8,14 @@
 
 Pulsar::Receiver::Field::Field ()
 {
-  field_orientation = false;
+  symmetry_angle = false;
 }
 
 //! Get the orientation of the basis about the line of sight
 Angle Pulsar::Receiver::Field::get_orientation () const
 {
   Angle offset;
-  if (field_orientation && basis == Signal::Linear)
+  if (symmetry_angle && basis == Signal::Linear)
     offset.setDegrees (-45);
 
   return orientation + offset;
@@ -25,22 +25,22 @@ Angle Pulsar::Receiver::Field::get_orientation () const
 void Pulsar::Receiver::Field::set_orientation (const Angle& angle)
 {
   orientation = angle;
-  field_orientation = false;
+  symmetry_angle = false;
 }
 
 //! Get the orientation of the equal in-phase electric field vector
-Angle Pulsar::Receiver::Field::get_field_orientation () const
+Angle Pulsar::Receiver::Field::get_symmetry_angle () const
 {
   Angle offset = 0.0;
-  if (!field_orientation && basis == Signal::Linear)
+  if (!symmetry_angle && basis == Signal::Linear)
     offset.setDegrees (45.0);
   
   return orientation + offset;
 }
 
 //! Set the orientation of the equal in-phase electric field vector
-void Pulsar::Receiver::Field::set_field_orientation (const Angle& angle)
+void Pulsar::Receiver::Field::set_symmetry_angle (const Angle& angle)
 {
   orientation = angle;
-  field_orientation = true;
+  symmetry_angle = true;
 }

@@ -103,10 +103,55 @@ void Pulsar::FrontendCorrection::calibrate (Archive* archive)
 
   Receiver* receiver = archive->get<Receiver>();
 
+  if (!receiver)
+    throw Error (InvalidState, "Pulsar::FrontendCorrection::calibrate",
+                "no Receiver extension available");
+
   if (basis_correction.required (archive))
     receiver->set_basis_corrected (true);
 
   if (projection_correction_required)
     receiver->set_projection_corrected (true);
+}
+
+void Pulsar::FrontendCorrection::undo (Archive* archive)
+{
+  if (!archive->get_nsubint())
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::FrontendCorrection::undo no data to correct" << endl;
+    return;
+  }
+
+  Receiver* receiver = archive->get<Receiver>();
+
+  if (receiver && !receiver->get_projection_corrected() && !receiver->get_basis_corrected())
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::FrontendCorrection::undo no correction to undo" << endl;
+    return;
+  }
+
+  if (receiver)
+  {
+    receiver->set_projection_corrected (false);
+    receiver->set_basis_corrected (false);
+  }
+
+  set_archive (archive);
+
+  unsigned nsub = archive->get_nsubint();
+  for (unsigned isub=0; isub < nsub; isub++)
+  {
+    if (!projection_correction.required (isub))
+      continue;
+
+    Integration* integration = archive->get_Integration (isub);
+    
+    // the returned matrix transforms from the intrinsic/corrected to the observed
+    Jones<float> xform = get_transformation(isub);
+
+    integration->expert()->transform (xform);
+  }
 }
 

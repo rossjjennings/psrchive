@@ -89,6 +89,11 @@ Pulsar::CalInterpreter::CalInterpreter ()
       "  unsigned chans    number of desired frequency channels \n"
       "                    if not specified, fscrunch all (chans=1)\n" );
 
+  add_command
+  ( &CalInterpreter::undo,
+    "undo", "undo a correction that has been done",
+    "usage: undo frontend \n"
+    "(currently, only the frontend correction can be inverted)\n" );
 }
 
 Pulsar::CalInterpreter::~CalInterpreter ()
@@ -346,3 +351,23 @@ catch (Error& error) {
 }
 
 
+string Pulsar::CalInterpreter::undo (const string& args) try
+{
+  vector<string> arguments = setup(args);
+
+  if (arguments.size() == 0)
+    return response (Fail, "correction to undo not specified");
+
+  if (arguments[0] == "frontend")
+  {
+    Pulsar::FrontendCorrection correct;
+    correct.undo( get() );
+    return response (Good);
+  }
+
+  return response (Fail, "unknown correction='" + arguments[0] + "'");
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}

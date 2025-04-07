@@ -4,49 +4,33 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
 [
   AC_PROVIDE([SWIN_LIB_CFITSIO])
 
-  AC_ARG_WITH([cfitsio-dir],
-              AC_HELP_STRING([--with-cfitsio-dir=DIR],
-                             [cfitsio is installed in DIR]))
-
   CFITSIO_CFLAGS=""
   CFITSIO_LIBS=""
 
-  if test x"$with_cfitsio_dir" = xno; then
-    # user disabled cfitsio. Leave cache alone.
-    have_cfitsio="User disabled cfitsio."
-  else
+  AC_MSG_CHECKING([for cfitsio installation])
 
-    AC_MSG_CHECKING([for cfitsio installation])
+  CFITSIO_CFLAGS="`pkg-config --cflags cfitsio`"
+  CFITSIO_LIBS="`pkg-config --libs cfitsio`"
 
-    # "yes" is not a specification
-    if test x"$with_cfitsio_dir" = xyes; then
-      with_cfitsio_dir=
-    fi
+  have_cfitsio="not found"
 
-    CFITSIO_CFLAGS="`pkg-config --cflags cfitsio`"
-    CFITSIO_LIBS="`pkg-config --libs cfitsio`"
+  ac_save_CPPFLAGS="$CPPFLAGS"
+  ac_save_LIBS="$LIBS"
 
-    have_cfitsio="not found"
+  CPPFLAGS="$CFITSIO_CFLAGS $CPPFLAGS"
+  LIBS="$CFITSIO_LIBS $LIBS"
 
-    ac_save_CPPFLAGS="$CPPFLAGS"
-    ac_save_LIBS="$LIBS"
+  AC_TRY_LINK([#include <fitsio.h>], 
+              [fits_movnam_hdu(0,0,0,0,0);],
+              have_cfitsio=yes, have_cfitsio=no)
 
-    CPPFLAGS="$CFITSIO_CFLAGS $CPPFLAGS"
-    LIBS="$CFITSIO_LIBS $LIBS"
-
-    AC_TRY_LINK([#include <fitsio.h>], 
-                [fits_movnam_hdu(0,0,0,0,0);],
-                have_cfitsio=yes, have_cfitsio=no)
-
-    if test "$have_cfitsio" != "yes"; then
-      CFITSIO_CFLAGS=""
-      CFITSIO_LIBS=""
-    fi
-
-    LIBS="$ac_save_LIBS"
-    CPPFLAGS="$ac_save_CPPFLAGS"
-
+  if test "$have_cfitsio" != "yes"; then
+    CFITSIO_CFLAGS=""
+    CFITSIO_LIBS=""
   fi
+
+  LIBS="$ac_save_LIBS"
+  CPPFLAGS="$ac_save_CPPFLAGS"
 
   AC_MSG_RESULT([$have_cfitsio])
 
@@ -57,7 +41,6 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     AC_MSG_NOTICE([Ensure that the PKG_CONFIG_PATH environment variable points to])
     AC_MSG_NOTICE([the lib/pkgconfig sub-directory of the root directory where])
     AC_MSG_NOTICE([the cfitsio library was installed.])
-    AC_MSG_NOTICE([Alternatively, use the --with-cfitsio-dir option.])
     [$2]
   fi
 

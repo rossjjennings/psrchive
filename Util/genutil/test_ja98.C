@@ -56,14 +56,21 @@ int main ()
   }
 
   cout.precision(20);
-  for (ipt = 0; ipt < npt; ipt++) {
+  for (ipt = 0; ipt < npt; ipt++)
+  {
     double variance = min_variance + ipt * interval;
     cout << variance/mean_variance
-	 << " " << 1-mark2_A[ipt]
-	 << " " << 1-mark3_A[ipt]
-	 << " " << 1-mark4_A[ipt]
- 	 << " " << 1-mark5_A[ipt] << endl;
+      << " " << 1-mark2_A[ipt]
+      << " " << 1-mark3_A[ipt]
+      << " " << 1-mark4_A[ipt]
+      << " " << 1-mark5_A[ipt] << endl;
   }
 
+  for (unsigned nbit=2; nbit <= 16; nbit++)
+  {
+    double spacing = JenetAnderson98::get_optimal_spacing(nbit);
+    cout << nbit << " " << spacing << endl;
+  }
+  
   return 0;
 }

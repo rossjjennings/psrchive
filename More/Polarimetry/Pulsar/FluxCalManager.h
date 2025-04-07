@@ -66,8 +66,7 @@ namespace Calibration
     void integrate (Signal::Source type, const MEAL::Complex2*);
 
     //! Integrate an estimate of the source
-    void integrate (const Jones< Estimate<double> >& correct,
-		    const SourceObservation& data);
+    void integrate (const Jones< Estimate<double> >& correct, const SourceObservation& data);
 
     void submit (CoherencyMeasurementSet&, const SourceObservation&);
 
@@ -134,9 +133,9 @@ namespace Calibration
 
   private:
 
-    bool multiple_source_states;
-    bool subtract_off_from_on;
-    bool StokesV_may_vary;
+    bool multiple_source_states = false;
+    bool subtract_off_from_on = false;
+    bool StokesV_may_vary = false;
 
     mutable std::string not_constrained_reason;
   };

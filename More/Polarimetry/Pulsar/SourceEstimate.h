@@ -101,7 +101,7 @@ namespace Calibration
     //! The baseline
     Stokes< Estimate<double> > baseline;
 
-    //! Estimate of response at time of observation
+    //! Estimate of inverse of instrumental response at time of observation
     Jones< Estimate<double> > response;
 
     //! Model of response at time of observation

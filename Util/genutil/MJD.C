@@ -476,8 +476,8 @@ void MJD::settle()
 
 }
 
-MJD::MJD (const char* mjdstring) {
-
+MJD::MJD (const char* mjdstring)
+{
   if (verbose)
     cerr << "MJD (const char*=" << mjdstring << ")"  << endl;
 
@@ -485,7 +485,8 @@ MJD::MJD (const char* mjdstring) {
     throw string ("MJD::MJD(char*) construct error");
 }
 
-MJD::MJD (const string& mjd) {
+MJD::MJD (const string& mjd)
+{
   if (Construct (mjd.c_str()) < 0)
     throw string ("MJD::MJD(string&) construct error");
 }
@@ -666,6 +667,23 @@ int MJD::Construct (const char* mjdstr)
     add_day (fracday);
   }
   return 0;
+}
+
+void MJD::from_datestr (const std::string& datestr, const std::string& format)
+{
+  if (verbose)
+    cerr << "MJD::from_datestr datestr='" << datestr << "' format='" << format << "'" << endl;
+
+  struct tm time;
+  if ( strptime (datestr.c_str(), format.c_str(), &time) == NULL )
+  {
+    throw Error (InvalidParam, "MJD::from_datestr",
+                 "Error parsing datestr='" + datestr + "' format='" + format + "'");
+  }
+
+  if (Construct (time) < 0)
+    throw Error (InvalidParam, "MJD::from_datestr",
+                 "MJD::Construct(struct tm) error");
 }
 
 ostream& operator << (ostream& ostr, const MJD& mjd)

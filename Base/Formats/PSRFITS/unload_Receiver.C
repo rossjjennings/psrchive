@@ -40,7 +40,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   
   float temp;
 
-  temp = ext->get_field_orientation().getDegrees();
+  temp = ext->get_symmetry_angle().getDegrees();
   fits_update_key (fptr, TFLOAT, "FD_SANG", &temp, comment, &status);
 
   int hand = (int) ext->get_hand();

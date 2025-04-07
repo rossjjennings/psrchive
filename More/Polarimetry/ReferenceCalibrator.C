@@ -444,15 +444,15 @@ void ReferenceCalibrator::calculate_transformation ()
 
       if (inv.get_value() < cutoff)
       {
-	if (verbose)
-	  cerr << "ReferenceCalibrator::calculate_transformation"
-	    " ichan=" << ichan << "\n  invariant=" << inv.get_value()
-	       << " < cutoff=" << cutoff << 
-	    " (threshold=" << det_threshold 
-	       << " error=" << inv.get_error() 
-	       << " bias=" << bias << ")" << endl;
-	bad = true;
-	bad_reason = "ReferenceCalibrator::calculate_transformation invariant less than threshold";
+        if (verbose)
+          cerr << "ReferenceCalibrator::calculate_transformation"
+            " ichan=" << ichan << "\n  invariant=" << inv.get_value()
+              << " < cutoff=" << cutoff << 
+            " (threshold=" << det_threshold 
+              << " error=" << inv.get_error() 
+              << " bias=" << bias << ")" << endl;
+        bad = true;
+        bad_reason = "ReferenceCalibrator::calculate_transformation invariant less than threshold";
       }
     }
 

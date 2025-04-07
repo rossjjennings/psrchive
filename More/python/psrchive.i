@@ -41,11 +41,14 @@
 #include "Pulsar/PatchFrequency.h"
 #include "Pulsar/Contemporaneity.h"
 #include "Pulsar/Predictor.h"
+#include "tempo++.h"
+#include "Observatory.h"
 #include "polyco.h"
 #include "toa.h"
 
 #include "Pulsar/DynamicResponse.h"
 #include "Pulsar/ManualPolnCalibrator.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include "Pulsar/CalibratorExtension.h"
 #include "Pulsar/BackendCorrection.h"
@@ -60,6 +63,7 @@
 
 #include "Pulsar/ArchiveStatistic.h"
 #if HAVE_CFITSIO
+#include "Pulsar/FITSArchive.h"
 #include <fitsio.h>
 #endif
 
@@ -121,6 +125,7 @@ using namespace std;
 %newobject Pulsar::Integration::total;
 %newobject Pulsar::Profile::clone;
 %newobject Pulsar::Predictor::clone;
+%newobject as_psrfits;
 
 // Track any pointers handed off to python with a global list
 // of Reference::To objects.  Prevents the C++ routines from
@@ -128,18 +133,26 @@ using namespace std;
 // variables act like Reference::To pointers.
 %feature("ref")   Reference::Able "pointer_tracker_add($this);"
 %feature("unref") Reference::Able "pointer_tracker_remove($this);"
+
+%feature("ref")   Pulsar::ProfileShiftFit "pointer_tracker_add($this);"
+%feature("unref") Pulsar::ProfileShiftFit "pointer_tracker_remove($this);"
+
 %header %{
 std::vector< Reference::To<Reference::Able> > _pointer_tracker;
-void pointer_tracker_add(Reference::Able *ptr) {
-    _pointer_tracker.push_back(ptr);
+void pointer_tracker_add(Reference::Able *ptr)
+{
+  _pointer_tracker.push_back(ptr);
 }
-void pointer_tracker_remove(Reference::Able *ptr) {
-    std::vector< Reference::To<Reference::Able> >::iterator it;
-    for (it=_pointer_tracker.begin(); it<_pointer_tracker.end(); it++) 
-        if ((*it).ptr() == ptr) {
-            _pointer_tracker.erase(it);
-            break;
-        }
+void pointer_tracker_remove(Reference::Able *ptr)
+{
+  auto it = _pointer_tracker.begin();
+  while (it<_pointer_tracker.end()) 
+  {
+    if ((*it).ptr() == ptr)
+      _pointer_tracker.erase(it);
+    else 
+      it++;
+  }
 }
 %}
 
@@ -285,6 +298,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/ITRFExtension.h"
 %include "Pulsar/ManualPolnCalibrator.h"
 %include "Pulsar/DynamicResponse.h"
+%include "Pulsar/AuxColdPlasmaMeasures.h"
 
 %include "Angle.h"
 %include "sky_coord.h"
@@ -299,7 +313,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %inline %{
 
 // Least I/O intensive way to grab observation time
-double get_tobs(const char* filename) {
+double get_tobs(const char* filename)
+{
     int status=0,colnum=0;
     long numrows=0;
     double tobs=0;
@@ -316,7 +331,30 @@ double get_tobs(const char* filename) {
     fits_close_file(fp, &status);
     return tobs;
 }
+
+Pulsar::Archive* as_psrfits (Pulsar::Archive* archive)
+{
+    auto fits = dynamic_cast<Pulsar::FITSArchive*> (archive);
+    if (!fits)
+    {
+        fits = new Pulsar::FITSArchive;
+        fits->copy(*archive);
+    } 
+    return fits;
+}
+
 %}
+#endif
+
+#if NEEDED && (SWIG_VERSION >= 0x040000)
+
+Pulsar::Archive* Archive_load (const std::string& name)
+{
+  return Pulsar::Archive::load(name);
+}
+
+%newobject Archive_load;
+
 #endif
 
 // Python-specific extensions to the classes:
@@ -598,6 +636,11 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return (PyObject *)arr;
     }
 
+    // Add a AuxColdPlasmaMeasures Extension and return it
+    Pulsar::AuxColdPlasmaMeasures* add_aux_cold_plasma_measures()
+    {
+      return self->getadd<Pulsar::AuxColdPlasmaMeasures>();
+    }
 }
 
 %extend Pulsar::Archive
@@ -646,22 +689,49 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
     // Return telescope ITRF position as tuple.
     // If ITRF coordinates are not present in the data then the position
     // will be returned as "undefined".
-    PyObject *get_ant_xyz() {
+    PyObject *get_ant_xyz() 
+    {
         double itrf_x, itrf_y, itrf_z;
-        Pulsar::ITRFExtension *p = self->get<Pulsar::ITRFExtension>();
-        if (p==NULL) {
-            PyObject *result = (PyObject *)PyString_FromString("undefined");
-            return (PyObject *)result;
-        } else {
+        bool coords_valid = false;
+        auto p = self->get<Pulsar::ITRFExtension>();
+        if (p) 
+        {
             itrf_x = p->get_ant_x();
             itrf_y = p->get_ant_y();
             itrf_z = p->get_ant_z();
+            coords_valid = true;
+        }
+        else try
+        {
+            auto obs = Tempo::observatory (self->get_telescope());
+            if (obs)
+            {
+                auto itrf = dynamic_cast<const Tempo::ObservatoryITRF*>(obs);
+                if (itrf)
+                {
+                    itrf->get_xyz(itrf_x, itrf_y, itrf_z);
+                    coords_valid = true;
+                }
+            }
+        }
+        catch (Error&)
+        {
+            // most likely "RuntimeError: TEMPO environment variable not defined"
+        }
+
+        if (coords_valid)
+        {
             PyTupleObject *result = (PyTupleObject *)PyTuple_New(3);
             PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyFloat_FromDouble(itrf_x));
             PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyFloat_FromDouble(itrf_y));
             PyTuple_SetItem((PyObject *)result, 2, (PyObject *)PyFloat_FromDouble(itrf_z));
             return (PyObject *)result;
         }
+        else
+        {
+            PyObject *result = (PyObject *)PyString_FromString("undefined");
+            return (PyObject *)result;
+        } 
     }
 
     // Allow timing model to be updated via eph filename
@@ -835,8 +905,10 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
                 }
         return (PyObject *)arr;
     }
+
     // Return a copy of the predictor
-    Pulsar::Predictor* get_predictor() {
+    Pulsar::Predictor* get_predictor()
+    {
       return self->get_model()->clone();
     }
 
@@ -855,8 +927,8 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
 %extend Pulsar::PeakCumulative
 {
-    PyObject *get_indeces() {
-
+    PyObject *get_indeces()
+    {
         // Call C++ routine for values
         int hi, lo;
         self->get_indeces(hi, lo);
@@ -943,3 +1015,5 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::get_reference_wavelength();
     }
 }
+
+

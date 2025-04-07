@@ -513,12 +513,14 @@ double Pulsar::Integration::get_effective_dispersion_measure () const try
     const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
     if (aux)
     {
-      cerr << "Integration::get_effective_dispersion_measure"
-              " aux dm = " << aux->get_dispersion_measure() << endl;
+      if (verbose)
+        cerr << "Integration::get_effective_dispersion_measure"
+                " aux dm = " << aux->get_dispersion_measure() << endl;
 
       dm += aux->get_dispersion_measure();
     }
   }
+
   return dm;
 }
 catch (Error& error)

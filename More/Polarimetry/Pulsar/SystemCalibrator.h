@@ -501,11 +501,12 @@ namespace Pulsar
     //! Flag set after the first pulsar observation is added
     bool has_pulsar;
 
+    //! Transformation that inverts the receptor basis
+    Jones<double> invert_basis;
+
   private:
 
     std::vector<bool> epoch_added;
-
-    Jones<double> invert_basis;
 
     //! Flag set after the solve method has been called
     bool is_solved;

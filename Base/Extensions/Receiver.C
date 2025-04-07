@@ -100,7 +100,7 @@ void Pulsar::Receiver::set_basis (Signal::Basis basis)
 }
 
 /*! If this method is called, then any previous changes due to
- set_X_offset, set_Y_offset, or set_field_orientation will be
+ set_X_offset, set_Y_offset, or set_symmetry_angle will be
  reset. */
 void Pulsar::Receiver::set_orientation (const Angle& angle)
 {
@@ -120,18 +120,18 @@ void Pulsar::Receiver::set_reference_source_phase (const Angle& angle)
   get<Native>()->set_reference_source_phase (angle);
 }
 
-void Pulsar::Receiver::set_field_orientation (const Angle& angle)
+void Pulsar::Receiver::set_symmetry_angle (const Angle& angle)
 {
-  get<Field>()->set_field_orientation (angle);
+  get<Field>()->set_symmetry_angle (angle);
 }
 
-Angle Pulsar::Receiver::get_field_orientation () const
+Angle Pulsar::Receiver::get_symmetry_angle () const
 {
-  return get<Field>()->get_field_orientation ();
+  return get<Field>()->get_symmetry_angle ();
 }
 
 /*! If this method is called, then any previous changes due to
-  set_orientation or set_field_orientation will be reset. */
+  set_orientation or set_symmetry_angle will be reset. */
 void Pulsar::Receiver::set_X_offset (const Angle& offset)
 {
   get<Linear>()->set_X_offset (offset);
@@ -255,8 +255,8 @@ public:
         &Receiver::set_hand,
         "hand", "Hand of receptor basis" );
     
-    add( &Receiver::get_field_orientation,
-        &Receiver::set_field_orientation,
+    add( &Receiver::get_symmetry_angle,
+        &Receiver::set_symmetry_angle,
         "sa", "Symmetry angle of receptor basis" );
 
     add( &Receiver::get_reference_source_phase,

@@ -275,11 +275,10 @@ void Pulsar::BPPArchive::load_header (const char* filename)
     throw Error (InvalidState, "Pulsar::BPPArchive::load_header",
         "invalid bds=%d", hdr.bds);
   }
-  int i;
   orig_rfs = new double[hdr.chsbd*hdr.bds];
   int means_array_size = sizeof(float)*hdr.chsbd*hdr.polns;
   int data_array_size = sizeof(float)*hdr.bins*hdr.chsbd*hdr.polns;
-  for (i=0; i<hdr.bds; i++) {
+  for (int i=0; i<hdr.bds; i++) {
     rv = fread(&orig_rfs[i*hdr.chsbd], sizeof(double), hdr.chsbd, f);
     if (rv!=hdr.chsbd) { 
       fclose(f);
@@ -307,7 +306,8 @@ void Pulsar::BPPArchive::load_header (const char* filename)
   fix_orig_rfs();
   rf_min = orig_rfs[0];
   rf_max = orig_rfs[0];
-  for (i=0; i<nchan; i++) { 
+  for (unsigned i=0; i<nchan; i++)
+  { 
     rf_avg += orig_rfs[i];
     if (orig_rfs[i]<rf_min) rf_min = orig_rfs[i];
     if (orig_rfs[i]>rf_max) rf_max = orig_rfs[i];
@@ -338,7 +338,6 @@ void Pulsar::BPPArchive::load_header (const char* filename)
 
   // Fill extensions
   load_extensions();
-
 }
 
 int Pulsar::BPPArchive::get_mjd_from_hdr() 

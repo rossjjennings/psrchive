@@ -40,6 +40,7 @@ class JenetAnderson98 : public Reference::Able {
  public:
 
   //! Table 3 - Optimum Input Threshold Spacing for a Uniform Digitizer
+  /*! Beyond 8 bits per sample, optimal spacing is extrapolated using an exponential. */
   static double get_optimal_spacing (unsigned bits);
 
   //! Default constructor

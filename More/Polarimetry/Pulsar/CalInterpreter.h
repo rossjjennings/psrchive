@@ -63,6 +63,9 @@ namespace Pulsar {
     //! frequency integrate the loaded PolnCalibrator
     std::string fscrunch (const std::string& arg);
 
+    //! undo a correction that has been done
+    std::string undo (const std::string& arg);
+
   protected:
 
     //! The type of calibrator to be used

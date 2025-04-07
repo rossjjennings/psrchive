@@ -476,16 +476,15 @@ void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
       if (!model[ichan])
-	{
-	  cerr << "no model ichan=" << ichan;
-	  continue;
-	}
+      {
+        cerr << "no model ichan=" << ichan;
+        continue;
+      }
       
       if (!model[ichan]->get_valid())
-	continue;
+        continue;
 
       fluxcal[ichan] = new Calibration::FluxCalManager( model[ichan] );
-
       fluxcal[ichan]->model_multiple_source_states( multiple_flux_calibrators );
       fluxcal[ichan]->model_on_minus_off( model_fluxcal_on_minus_off );
     }
@@ -605,8 +604,7 @@ void ReceptionCalibrator::submit_calibrator_data
   if (fluxcal[data.ichan])
   {
     if (verbose > 2)
-      cerr << "ReceptionCalibrator::submit_calibrator_data fluxcal ichan="
-	   << data.ichan << endl;
+      cerr << "ReceptionCalibrator::submit_calibrator_data fluxcal ichan=" << data.ichan << endl;
     
     if (!fluxcal_observation_added[data.ichan])
       fluxcal[data.ichan]->add_observation (data.source);
@@ -617,25 +615,23 @@ void ReceptionCalibrator::submit_calibrator_data
   }
 }
 
-
-
 void ReceptionCalibrator::integrate_calibrator_data
 (const Calibration::SourceObservation& data)
 {
-  Jones< Estimate<double> > use;
-  if (previous)
-    use = previous->get_response (data.ichan);
-  else
-    use = data.response;
-
   if (data.source == Signal::FluxCalOn || data.source == Signal::FluxCalOff)
   {
     if (verbose > 2)
-      cerr << "ReceptionCalibrator::integrate_calibrator_data fluxcal ichan="
-	   << data.ichan << endl;
-    
+      cerr << "ReceptionCalibrator::integrate_calibrator_data fluxcal ichan=" << data.ichan << endl;
+
+    Jones< Estimate<double> > apply = data.response;
+
+    if (previous)
+     apply = previous->get_response (data.ichan);
+
+    apply = invert_basis * apply;
+
     if (fluxcal[data.ichan])
-      fluxcal[data.ichan]->integrate (use, data);
+      fluxcal[data.ichan]->integrate (apply, data);
   }
   else
     SystemCalibrator::integrate_calibrator_data (data);
@@ -647,8 +643,7 @@ void ReceptionCalibrator::integrate_calibrator_solution
   if (data.source == Signal::FluxCalOn || data.source == Signal::FluxCalOff)
   {
     if (verbose > 2)
-      cerr << "ReceptionCalibrator::integrate_calibrator_solution fluxcal"
-	" ichan=" << data.ichan << endl;
+      cerr << "ReceptionCalibrator::integrate_calibrator_solution fluxcal ichan=" << data.ichan << endl;
 
     if (fluxcal[data.ichan])
       fluxcal[data.ichan]->integrate (data.source, data.xform);
@@ -732,12 +727,12 @@ void ReceptionCalibrator::initialize ()
 
   if (previous_cal)
   {
-    cerr << "Pulsar::ReceptionCalibrator::initialize using previous solution"
-	 << endl;
+    cerr << "Pulsar::ReceptionCalibrator::initialize using previous solution" << endl;
     for (unsigned ichan=0; ichan<model.size(); ichan++)
-      calibrator_estimate[ichan].source
-	-> set_stokes( (Stokes< Estimate<double> >)
-		       previous_cal->get_stokes (ichan) );
+    {
+      Stokes< Estimate<double> > calS = previous_cal->get_stokes (ichan);
+      calibrator_estimate[ichan].source-> set_stokes( calS );
+    }
   }
  
   SystemCalibrator::solve_prepare ();

@@ -608,7 +608,7 @@ string get_fd_sang( Reference::To<Archive> archive )
   if( !recv )
     return "UNDEF";
   else
-    return tostring( recv->get_field_orientation() );
+    return tostring( recv->get_symmetry_angle() );
 }
 
 string get_xoffset( Reference::To<Archive> archive )

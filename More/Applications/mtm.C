@@ -341,6 +341,8 @@ int main (int argc, char *argv[])
       Pulsar::BoostShiftAnalysis boost;
       boost.set_profile (fit.get_standard());
 
+      cout << source << " ";
+
       for (unsigned i=1; i<=3; i++)
         cout << boost.delvarphi_delb (i) * folding_period << " ";
 

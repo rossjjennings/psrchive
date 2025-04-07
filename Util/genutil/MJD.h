@@ -100,8 +100,7 @@ class MJD {
   friend const MJD operator + (const MJD &, double);  // Add seconds to an MJD
   friend const MJD operator - (const MJD &, double);  // Take seconds from MJD
   friend const MJD operator * (const MJD &, double);  
-  friend const MJD operator * (double a, const MJD& m)
-    { return m * a; }
+  friend const MJD operator * (double a, const MJD& m) { return m * a; }
   friend const MJD operator / (const MJD &, double);  
 
   // return the -ve of m
@@ -143,8 +142,19 @@ class MJD {
   // e.g. format = "%Y-%m-%d %H:%M:%S"
   char* datestr (char* dstr, int len, const char* format) const;
 
-  // more convenient interface, with optional fractional seconds
+  //! Convenient interface to datestr, with optional fractional seconds
   std::string datestr (const char* format, unsigned fractional_second_digits = 0) const;
+
+  //! Parse MJD from the given datestr using strptime and the specified format
+  void from_datestr (const std::string& datestr, const std::string& format = "%Y-%m-%d-%H:%M:%S");
+
+#ifdef HAVE_MPI
+  friend int mpiPack_size (const MJD&, MPI_Comm comm, int* size);
+  friend int mpiPack   (const MJD&, void* outbuf, int outcount, 
+			int* position, MPI_Comm comm);
+  friend int mpiUnpack (void* inbuf, int insize, int* position, 
+			MJD*, MPI_Comm comm);
+#endif
 
  protected:
   friend bool equal (const MJD &m1, const MJD &m2);

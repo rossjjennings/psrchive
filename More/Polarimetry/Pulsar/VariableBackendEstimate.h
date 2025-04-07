@@ -50,7 +50,7 @@ namespace Calibration
     Reference::To<VariableBackend> variable_backend;
 
     //! The calibrator is transformed by only the variable_backend
-    bool cal_backend_only;
+    bool cal_backend_only = false;
     
     //! Instrumental gain experienced only by the calibrator
     /*! If the instrumental gain must be held constant for the pulsar

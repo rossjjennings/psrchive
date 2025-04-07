@@ -1,5 +1,5 @@
---- makemake.orig	2014-11-25 14:26:28.468283898 +0100
-+++ makemake	2014-11-25 14:26:49.832283851 +0100
+--- pgplot/makemake	2014-11-25 14:26:28.468283898 +0100
++++ pgplot/makemake	2014-11-25 14:26:49.832283851 +0100
 @@ -622,7 +622,7 @@
  # Fortran compiler and compilation flags
  #

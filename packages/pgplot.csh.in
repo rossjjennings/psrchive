@@ -16,12 +16,15 @@ gunzip -c pgplot5.2.tar.gz | tar xvf -
 
 patch -p0 < @abs_srcdir@/pgplot.patch
 
+# Apply patch to generate libcpgplot.so if --enable-shared is in use.
+if ( @enable_shared@ == yes ) then
+  patch -p0 < @abs_srcdir@/makemake.sharedcpg.patch
+endif
+
 cd pgplot/sys_linux
 
 # make a gfortran configuration
-# Apply patch to generate libcpgplot.so if --enable-shared is in use.
 if ( @enable_shared@ == yes ) then
-  patch < @abs_srcdir@/makemake.sharedcpg.patch
   cp g77_gcc.conf psrchive.conf
 else
   cp g77_gcc_aout.conf psrchive.conf

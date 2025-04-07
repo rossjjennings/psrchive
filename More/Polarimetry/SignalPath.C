@@ -614,8 +614,7 @@ VariableBackendEstimate* SignalPath::get_backend (const MJD& epoch) const
 	       "epoch=" + epoch.printdays(13) + " not spanned");
 }
 
-void SignalPath::integrate_calibrator (const MJD& epoch,
-				       const MEAL::Complex2* xform) try
+void SignalPath::integrate_calibrator (const MJD& epoch, const MEAL::Complex2* xform) try
 {
   get_backend (epoch)->integrate (xform);
 }

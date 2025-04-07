@@ -115,7 +115,7 @@ protected:
   //gsl_matrix *evec;
   //gsl_vector *eval;
   gsl_vector *mean_calc_vector;
-  float nbin;
+  unsigned nbin;
 
 #ifdef HAVE_CULA
   //! Cula variables:
@@ -379,10 +379,15 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 		  "Are: prefix_diffs.ar, prefix_evecs.ar, prefix_evals.dat, prefix_covar.fits, respectively");
 }
 
+static bool first = true;
+
 void psrpca::process (Archive* archive)
 {
   if ( verbose )
-    cerr << "psrpca::process () entered and processing " << archive->get_filename() << endl;
+    cerr << "psrpca::process filename " << archive->get_filename() << endl;
+  else if (first)
+    cerr << "psrpca::process loading files ..." << endl;
+  first = false;
 
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
@@ -415,13 +420,13 @@ void psrpca::process (Archive* archive)
   }
   total_count += archive->get_nsubint();
   if ( verbose )
-    cerr << "psrpca::process () finished" << endl;
+    cerr << "psrpca::process finished" << endl;
 }
 
 void psrpca::finalize ()
 {
   if ( verbose )
-    cerr << "psrpca::finalize () entered" << endl;
+    cerr << "psrpca::finalize entered" << endl;
 
   evecs_archive = total->clone();
 
@@ -478,7 +483,9 @@ void psrpca::finalize ()
   if ( full_stokes_pca )
     nbin = 4 * nbin;
 
-  DEBUG("psrpca::finalize calling get_covariance_matrix");
+  if (verbose)
+    cerr << "psrpca::finalize calling get_covariance_matrix" << endl;
+
   get_covariance_matrix(); // assuming that this calls the function in TimeDomainCovariance.C - row vector
   
 
@@ -563,11 +570,13 @@ void psrpca::checkStatus(culaStatus status)
 
 void psrpca::fit_data( Reference::To<Profile> std_prof )
 {
+  cerr << "psrpca::fit_data subtracting template from observations with"
+          " apply_shift=" << apply_shift << " apply_scale=" << apply_scale << " apply_offset=" << apply_offset << endl;
+
   double scale, offset, snr;
   if ( total_count < nbin )
-    cerr << "WARNING: psrpca::finalize - not enough observations provided, "
+    cerr << "WARNING: psrpca::fit_data - not enough observations provided, "
 	    "covariance matrix will not have full rank" << endl;
-  //total->remove_baseline();
 
   unsigned nsubint = total->get_nsubint();
   assert (nsubint == total_count);
@@ -576,14 +585,15 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
   if (full_stokes_pca)
     effective_nbin = nbin * 4;
   
-  DEBUG("psrpca::fit_data gsl_matrix_alloc full_stokes=" << full_stokes_pca
-       << " nbin=" << nbin << " nsubint=" << total->get_nsubint());
+  if (verbose)
+    cerr << "psrpca::fit_data gsl_matrix_alloc full_stokes=" << full_stokes_pca
+         << " nbin=" << nbin << " effective_nbin=" << effective_nbin << " nsubint=" << total->get_nsubint() << endl;
 
   profiles = gsl_matrix_alloc ( effective_nbin, total_count );
 
-  vector<double> damps (nbin);
+  vector<double> damps (effective_nbin);
   gsl_vector_const_view damps_view
-    = gsl_vector_const_view_array( &(damps[0]), nbin );
+    = gsl_vector_const_view_array( &(damps[0]), effective_nbin );
 
   for (unsigned i_subint = 0; i_subint < total->get_nsubint(); i_subint++ )
   {
@@ -596,17 +606,17 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
     }
     else
     {
-      prof = new Profile ( (unsigned)(4 * nbin) );
-      float *prof_amps = new float[ (unsigned)(4 * nbin) ];
+      prof = new Profile ( effective_nbin );
+
       // the memcpy below only needed if not applying shift, otherwise the memcpy will happen after shifting
       if ( !apply_shift )
       {
-	prof_amps = prof->get_amps();
-	for ( unsigned i_pol = 0; i_pol < 4; i_pol++ )
-	{
-	  memcpy ( prof_amps + (unsigned)nbin*i_pol, total->get_Profile ( i_subint, i_pol, 0 )->get_amps(), (unsigned)nbin*sizeof(float) );
-	}
-	prof->set_amps ( prof_amps );
+        auto prof_amps = prof->get_amps();
+        for ( unsigned i_pol = 0; i_pol < 4; i_pol++ )
+        {
+          memcpy ( prof_amps + (unsigned)nbin*i_pol, total->get_Profile ( i_subint, i_pol, 0 )->get_amps(), (unsigned)nbin*sizeof(float) );
+        }
+        prof->set_amps ( prof_amps );
       }
       DEBUG("set amps for prof");
     } // full_stokes_pca is true
@@ -620,12 +630,11 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       total->get_Integration( i_subint )->expert()->rotate_phase( toas[i_subint].get_phase_shift() );
       if ( full_stokes_pca )
       {
-	float *prof_amps = new float[ (unsigned)(4 * nbin) ];
-	prof_amps = prof->get_amps();
-	for ( unsigned i_pol = 0; i_pol < 4; i_pol++) {
-	  memcpy ( prof_amps + (unsigned)nbin*i_pol, total->get_Profile ( i_subint, i_pol, 0 )->get_amps(), (unsigned)nbin*sizeof(float) ); 
-	}
-	prof->set_amps ( prof_amps );
+        auto prof_amps = prof->get_amps();
+        for ( unsigned i_pol = 0; i_pol < 4; i_pol++) {
+          memcpy ( prof_amps + (unsigned)nbin*i_pol, total->get_Profile ( i_subint, i_pol, 0 )->get_amps(), (unsigned)nbin*sizeof(float) ); 
+        }
+        prof->set_amps ( prof_amps );
       }
     }
 
@@ -658,14 +667,10 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
     else
     {
       offset = -1; // TODO why am I postponing the offset calculation? I think the only reason is not to store 4 offsets, still, pretty dumb
-      cerr << "Baseline calculation postponed as full stokes mode is on" << endl;
+      if (verbose)
+        cerr << "Baseline calculation postponed as full stokes mode is on" << endl;
     }
 
-
-    if ( full_stokes_pca )
-    {
-      nbin = 4 * nbin; // TODO: this is kinda confusing, maybe best to stick with original NBIN and just adjust it by a factor of 4 where necessary
-    }
     if ( prof_to_std )
     {
       DEBUG(" prof to std ");
@@ -679,11 +684,13 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
 	  // calculate offset for each Stokes parameter separately
 	  float* amps = prof->get_amps();
 	  DEBUG("pre-offset amps for pols 0 and 1 are: " << amps[0] << " " << amps[1024]);
-	  for (unsigned i_pol = 0; i_pol < 4; i_pol++) {
+	  for (unsigned i_pol = 0; i_pol < 4; i_pol++)
+    {
 	    offset = (scale * std_archive->get_Profile ( 0, i_pol, 0 )->sum() - total->get_Profile ( i_subint, i_pol, 0 )->sum()) / nbin * 4.0; 
 	    DEBUG("Otained an offset of " << offset << " for pol " << i_pol);
 	    DEBUG("Looping through the subints with nbin = " << nbin);
-	    for (unsigned i_bin = (unsigned)(nbin/4)*i_pol; i_bin < (unsigned)(nbin/4)*(i_pol + 1 ); i_bin++) { //nbin/4 cause when full_stokes_pca is true I adjust the nbin to be 4*nbin but here I'm actually interested in the original nbin
+	    for (unsigned i_bin = nbin*i_pol; i_bin < nbin*(i_pol + 1 ); i_bin++)
+      {
 	      amps[i_bin] += offset;
 	    }
 	  }
@@ -699,7 +706,7 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
 	{
 	  for ( unsigned i_pol = 0; i_pol < 4; i_pol++ )
 	  {
-	    total_matched->get_Profile( i_subint, i_pol, 0 )->set_amps( prof->get_amps() + i_pol * (unsigned)(nbin / 4 ) );
+	    total_matched->get_Profile( i_subint, i_pol, 0 )->set_amps( prof->get_amps() + i_pol * nbin );
 	  }
 	}
 	else
@@ -719,17 +726,18 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
 	// Copy the 4*nbin profile back into a normal nbin * 4 pol packages:
 	for (unsigned i_pol = 0; i_pol < 4; i_pol++)
 	{
-	  // I think the nbin is still pumped up to 4 times the original value
-	  total->get_Profile( i_subint, i_pol, 0 )->set_amps( prof->get_amps() + i_pol * (unsigned)(nbin / 4) );
+	  total->get_Profile( i_subint, i_pol, 0 )->set_amps( prof->get_amps() + i_pol * nbin );
 	}
       }
 
       DEBUG("calling transform");
-      transform( prof->get_amps(), prof->get_amps() + unsigned(nbin),
-		 damps.begin(), CastToDouble() );
+      transform( prof->get_amps(), prof->get_amps() + unsigned(effective_nbin), damps.begin(), CastToDouble() );
       
-      DEBUG("calling  gsl_matrix_set_col");
+ 
+      DEBUG("gsl_matrix profiles size1=" << profiles->size1 << " size2=" << profiles->size2);
+      DEBUG("gsl_vector damps_view size=" << damps_view.vector.size);
 
+      DEBUG("calling gsl_matrix_set_col i_subint=" << i_subint);
       gsl_matrix_set_col ( profiles, i_subint, &damps_view.vector );
 
       DEBUG("calling add_Profile");
@@ -770,8 +778,7 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       diff->diff ( prof );
       diff->scale (-1);
 
-      transform( diff->get_amps(), diff->get_amps() + unsigned(nbin),
-		 damps.begin(), CastToDouble() );
+      transform( diff->get_amps(), diff->get_amps() + unsigned(effective_nbin), damps.begin(), CastToDouble() );
 
       gsl_matrix_set_col ( profiles, i_subint, &damps_view.vector );
 
@@ -781,8 +788,6 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
         t_cov->add_Profile ( diff, snr );
       prof->set_amps ( diff->get_amps() );
     }
-    if ( full_stokes_pca )
-      nbin = nbin / 4;
   }
 }
 

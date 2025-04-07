@@ -28,16 +28,16 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
   {
     if (verbose)
       cerr << "BackendEstimate::set_response this=" << this <<
-	" SingleAxis=" << (void*) single_axis << endl;
+              " SingleAxis=" << (void*) single_axis << endl;
 
     backend = single_axis;
 
 #if _DEBUG
     if (mean)
       {
-	cerr << "before condition" << endl;
-	mean->update (single_axis);
-	MEAL::print (cerr, single_axis);
+        cerr << "before condition" << endl;
+        mean->update (single_axis);
+        MEAL::print (cerr, single_axis);
       }
 #endif
     
@@ -73,10 +73,9 @@ void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
 {
   if (verbose)
     cerr << "BackendEstimate::integrate this=" << this
-	 << " mean=" << (void*) mean << " xform=" << xform << endl;
+         << " mean=" << (void*) mean << " xform=" << xform << endl;
 
   try {
-
     if (verbose)
       MEAL::Function::very_verbose = true;
 
@@ -89,14 +88,13 @@ void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
     }
       
     return;
-    
   }
   catch (Error& error)
-    {
-      if (verbose)
-	cerr << "BackendEstimate::integrate Mean::integrate failed: "
-	     << error.get_message() << endl;
-    }
+  {
+    if (verbose)
+      cerr << "BackendEstimate::integrate Mean::integrate failed: "
+          << error.get_message() << endl;
+  }
 
   // search for recognized backend component
   
@@ -110,24 +108,20 @@ void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)
     for (unsigned imodel=0; imodel<product->get_nmodel(); imodel++)
     {
       try {
-
-	mean->integrate ( product->get_model(imodel) );
-	return;
-    
+        mean->integrate ( product->get_model(imodel) );
+        return;
       }
       catch (Error& error)
       {
-	if (verbose)
-	  cerr << "BackendEstimate::integrate Mean::integrate"
-	    " ProductRule[" << imodel << " failed: "
-	       << error.get_message() << endl;
+        if (verbose)
+          cerr << "BackendEstimate::integrate Mean::integrate"
+            " ProductRule[" << imodel << " failed: "
+              << error.get_message() << endl;
       }
     }
   }
 
-  throw Error (InvalidParam, "BackendEstimate::integrate"
-	       "unrecognized transformation");
-
+  throw Error (InvalidParam, "BackendEstimate::integrate", "unrecognized transformation");
 }
 
 void Calibration::BackendEstimate::update ()
@@ -135,7 +129,7 @@ void Calibration::BackendEstimate::update ()
   if (verbose)
   {
     cerr << "BackendEstimate::update this=" << this
-	 << " backend=" << (void*) backend << endl;
+         << " backend=" << (void*) backend << endl;
 
     MEAL::Function::very_verbose = true;
   }
@@ -150,8 +144,8 @@ bool Calibration::BackendEstimate::spans (const MJD& epoch)
 {
   if (verbose)
     cerr << "BackendEstimate::spans epoch=" << epoch
-	 << " start=" << start_time
-	 << " end=" << end_time << endl;
+         << " start=" << start_time
+         << " end=" << end_time << endl;
   
   return epoch > start_time && epoch < end_time;
 }

@@ -7,9 +7,8 @@ cd @prefix@/src
 
 setenv URL http://www.atnf.csiro.au/research/pulsar/psrcat/downloads
 
-if ( ! -f psrcat.tar.gz ) then
-  @download@ ${URL}/psrcat_pkg.tar.gz
-endif
+rm -rf psrcat_pkg.tar.gz
+@download@ ${URL}/psrcat_pkg.tar.gz
 
 gunzip -c psrcat_pkg.tar.gz | tar xvf -
 cd psrcat_tar

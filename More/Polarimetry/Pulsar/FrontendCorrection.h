@@ -55,6 +55,9 @@ namespace Pulsar
     //! Calibrate the Pulsar::Archive
     void calibrate (Archive* archive);
 
+    //! Undo any frontend calibration of the Pulsar::Archive
+    void undo (Archive* archive);
+
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const { return 0; }
 

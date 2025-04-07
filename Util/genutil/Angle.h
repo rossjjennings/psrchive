@@ -207,6 +207,9 @@ class AnglePair
   friend int operator == (const AnglePair &, const AnglePair &);
   friend int operator != (const AnglePair &, const AnglePair &);
 
+  //! For use in Python
+  bool equals (const AnglePair& that) { return *this == that; }
+  
   friend std::ostream& operator<< (std::ostream&, const AnglePair&);
 };
 

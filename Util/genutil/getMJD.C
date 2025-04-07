@@ -79,17 +79,8 @@ int main (int argc, char* argv[])
   if (!use_strptime.empty())
   {
     if (verbose)
-      cerr << "Converting '" << use_strptime << "' to date" << endl;
-
-    struct tm time;
-    if ( strptime (use_strptime.c_str(), format, &time) == NULL )
-    {
-      cerr << "Error parsing '" << use_strptime
-	   << "' using '" << format << "'" << endl;
-      return -1;
-    }
-
-    mjd = MJD (time);
+      cerr << "Converting '" << use_strptime << "' using format='" << format << "'" << endl;
+    mjd.from_datestr (use_strptime, format);
   }
   
   else if (optind < argc)

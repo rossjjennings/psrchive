@@ -29,7 +29,7 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path) try
 
   //
   // It must be possible to separate the frontend and backend
-  // transformations , so that the temporal variations applied to
+  // transformations, so that the temporal variations applied to
   // pulsar and reference source are not applied to the flux
   // calibrator
   //
@@ -93,19 +93,19 @@ void Calibration::FluxCalManager::add_backend (FluxCalObservation* obs)
 {
   obs->backend = new BackendEstimate;
 
+  if (!backend)
+    throw Error (InvalidState, "Calibration::FluxCalManager::add_backend", "no backend");
+
+  Reference::To<MEAL::Complex2> model = backend->clone(); 
+  obs->backend->set_response (model);
+
   Reference::To< MEAL::ProductRule<MEAL::Complex2> > fcal_path;
   fcal_path = new MEAL::ProductRule<MEAL::Complex2>;
+  fcal_path->add_model (model);
+  fcal_path->add_model (frontend);
+  model = fcal_path;
 
-  if (backend)
-  {
-    MEAL::Complex2* clone = backend->clone(); 
-    obs->backend->set_response (clone);
-    fcal_path->add_model (clone);
-  }
-
-  fcal_path->add_model ( frontend );
-
-  composite->add_transformation ( fcal_path );
+  composite->add_transformation (model);
 
   obs->backend->path_index 
     = composite->get_equation()->get_transformation_index ();
@@ -204,7 +204,7 @@ void Calibration::FluxCalManager::model_multiple_source_states (bool flag)
 {
   if (on_observations.size() > 0 || off_observations.size() > 0)
     throw Error (InvalidState, "FluxCalManager::model_multiple_source_states",
-		 "observations already added; set this flag before adding");
+                "observations already added; set this flag before adding");
 
   multiple_source_states = flag;
 }
@@ -213,7 +213,7 @@ void Calibration::FluxCalManager::model_on_minus_off (bool flag)
 {
   if (on_observations.size() > 0 || off_observations.size() > 0)
     throw Error (InvalidState, "FluxCalManager::model_on_minus_off",
-		 "observations already added; set this flag before adding");
+                "observations already added; set this flag before adding");
 
   subtract_off_from_on = flag;
 }
@@ -231,8 +231,7 @@ void FluxCalManager::set_StokesV_infit (FluxCalObsVector& observations)
 }
 
 //! Integrate an estimate of the backend
-void FluxCalManager::integrate (Signal::Source type,
-				const MEAL::Complex2* xform)
+void FluxCalManager::integrate (Signal::Source type, const MEAL::Complex2* xform)
 {
   FluxCalObsVector& observations = get_observations (type);
   
@@ -244,8 +243,7 @@ void FluxCalManager::integrate (Signal::Source type,
   observations.back()->backend->integrate (xform);
 }
 
-void FluxCalManager::integrate (const Jones< Estimate<double> >& correct,
-				const SourceObservation& data)
+void FluxCalManager::integrate (const Jones< Estimate<double> >& correct, const SourceObservation& data)
 {
   FluxCalObsVector& observations = get_observations (data.source);
 
@@ -260,8 +258,7 @@ void FluxCalManager::integrate (const Jones< Estimate<double> >& correct,
 }
 
 
-void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
-			     const SourceObservation& data)
+void FluxCalManager::submit (CoherencyMeasurementSet& measurements, const SourceObservation& data)
 {
   FluxCalObsVector& observations = get_observations (data.source);
    

@@ -57,8 +57,7 @@ namespace Calibration
     void reset ();
 
     //! Allow the specified response parameter to vary as a function of time
-    void set_response_variation (unsigned iparam,
-				 MEAL::Univariate<MEAL::Scalar>*);
+    void set_response_variation (unsigned iparam, MEAL::Univariate<MEAL::Scalar>*);
 
     //! Get the specified response parameter temporal variation function
     const MEAL::Univariate<MEAL::Scalar>*

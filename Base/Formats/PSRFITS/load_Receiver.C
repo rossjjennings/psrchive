@@ -119,7 +119,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   }
   else {
     angle.setDegrees( temp );
-    ext->set_field_orientation( angle );
+    ext->set_symmetry_angle( angle );
   }
 
   // Read angle of Y-probe wrt platform zero

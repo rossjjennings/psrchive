@@ -29,6 +29,8 @@ int main ()
   char tempstr1 [256];
   char tempstr2 [256];
 
+  const char* format = "%Y/%m/%d-%H:%M:%S";
+
   present = time (NULL);
 
   date = gmtime (&present);
@@ -36,11 +38,11 @@ int main ()
     perror ("Error calling gmtime");
     return -1;
   }
-  strftime (tempstr1, 50, "%Y/%m/%d-%H:%M:%S", date);
+  strftime (tempstr1, 50, format, date);
 
   MJD mjd (*date);
 
-  if (mjd.datestr (tempstr2, 50, "%Y/%m/%d-%H:%M:%S") == NULL) {
+  if (mjd.datestr (tempstr2, 50, format) == NULL) {
     perror ("Error calling MJD::datestr");
     return -1;
   }
@@ -52,6 +54,17 @@ int main ()
 	     tempstr1, tempstr2);
     return -1;
   }
+
+  // test conversion back to MJD from date string
+  MJD mjd2;
+  mjd2.from_datestr (tempstr1, format);
+
+  if (mjd2 != mjd)
+  {
+    cerr << "MJD(struct tm)=" << mjd.printdays(13) << " does not equal MJD(string)=" << mjd2.printdays(13) << endl;
+    return -1;
+  }
+
   printf ("\n**********************************************************\n");
   printf ("              MJD to TM operations test completed ok.");
   printf ("\n**********************************************************\n");

@@ -178,8 +178,7 @@ SystemCalibrator::StepFinder* SystemCalibrator::get_step_finder ()
   return step_finder;
 }
 
-Calibrator::Info*
-SystemCalibrator::get_Info () const
+Calibrator::Info* SystemCalibrator::get_Info () const
 {
   export_prepare ();
 
@@ -190,7 +189,6 @@ void SystemCalibrator::set_refcal_through_frontend (bool flag)
 {
   refcal_through_frontend = flag;
 }
-
 
 MJD SystemCalibrator::get_epoch () const
 {
@@ -749,8 +747,7 @@ void SystemCalibrator::add_calibrator (const Archive* data)
   if (!has_pulsar)
   {
     if (verbose)
-      cerr << "SystemCalibrator::add_calibrator"
-	" postponed until pulsar added" << endl;
+      cerr << "SystemCalibrator::add_calibrator postponed until pulsar added" << endl;
 
     calibrator_filenames.push_back( data->get_filename() );
 
@@ -767,16 +764,14 @@ void SystemCalibrator::add_calibrator (const Archive* data)
     if (type->is_a<CalibratorTypes::van09_Eq>())
     {
       if (verbose > 2)
-	cerr << "SystemCalibrator::add_calibrator"
-	  " new PolarCalibrator" << endl;
+        cerr << "SystemCalibrator::add_calibrator new PolarCalibrator" << endl;
     
       polncal = new PolarCalibrator (data);
     }
     else
     {
       if (verbose > 2)
-	cerr << "SystemCalibrator::add_calibrator"
-	  " new SingleAxisCalibrator" << endl;
+        cerr << "SystemCalibrator::add_calibrator new SingleAxisCalibrator" << endl;
       
       polncal = new SingleAxisCalibrator (data);
     }
@@ -793,8 +788,7 @@ void SystemCalibrator::add_calibrator (const Archive* data)
 }
 
 //! Add the ReferenceCalibrator observation to the set of constraints
-void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
-  try 
+void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try 
 {
   unsigned nchan = get_nchan ();
 
@@ -802,8 +796,7 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
     cerr << "SystemCalibrator::add_calibrator nchan=" << nchan << endl;
 
   if (!nchan)
-    throw Error (InvalidState, "SystemCalibrator::add_calibrator",
-		 "nchan == 0");
+    throw Error (InvalidState, "SystemCalibrator::add_calibrator", "nchan == 0");
 
   const Archive* cal = p->get_Archive();
 
@@ -837,7 +830,7 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
   if (verbose > 2)
     cerr << "SystemCalibrator::add_calibrator prepare calibrator source="
-	 << source << endl;
+         << source << endl;
 
   prepare_calibrator_estimate( source );
 
@@ -867,7 +860,6 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
     solution = hybrid_cal;
   }
 
-
   vector< Jones<double> > response (nchan, 0.0);
   vector< Reference::To<const MEAL::Complex2> > xform (nchan);
 
@@ -878,17 +870,17 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
     {
       if ( solution->get_transformation_valid (ichan) )
       {
-       if (verbose > 2)
-         cerr << "SystemCalibrator::add_calibrator ichan="
-              << ichan << " saving response" << endl;
+        if (verbose > 2)
+          cerr << "SystemCalibrator::add_calibrator ichan="
+                << ichan << " saving response" << endl;
 
-       response[ichan] = solution->get_response(ichan);
+        response[ichan] = solution->get_response(ichan);
 
-       if (verbose > 2)
-         cerr << "SystemCalibrator::add_calibrator ichan="
-              << ichan << " saving transformation" << endl;
+        if (verbose > 2)
+          cerr << "SystemCalibrator::add_calibrator ichan="
+                << ichan << " saving transformation" << endl;
 
-       xform[ichan] = solution->get_transformation(ichan);
+        xform[ichan] = solution->get_transformation(ichan);
       }
       else if (verbose > 2)
        cerr << "SystemCalibrator::add_calibrator ichan="
@@ -906,7 +898,7 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
     if (verbose)
       cerr << "SystemCalibrator::add_calibrator nchan=" << nchan
-	<< " outlier_threshold=" << cal_outlier_threshold << endl;
+           << " outlier_threshold=" << cal_outlier_threshold << endl;
     
     ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo,
 				     cal_outlier_threshold);
@@ -919,10 +911,10 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
     {
       if (integration->get_weight (ichan) == 0 || !model[ichan]->get_valid())
       {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::add_calibrator ichan="
-	       << ichan << " flagged invalid" << endl;
-	continue;
+        if (verbose > 2)
+          cerr << "SystemCalibrator::add_calibrator ichan="
+               << ichan << " flagged invalid" << endl;
+        continue;
       }
 
       // transpose [ipol][ichan] output of ReferenceCalibrator::get_levels
@@ -931,8 +923,8 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
       for (unsigned ipol = 0; ipol<npol; ipol++)
       {
-	calibtor[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
-	baseline[ipol] = cal_lo[ipol][ichan];
+        calibtor[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
+        baseline[ipol] = cal_lo[ipol][ichan];
       }
 
       SourceObservation data;
@@ -967,8 +959,8 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p)
 
       if ( xform[ichan] )
       {
-	data.response = response[ichan];
-	data.xform = xform[ichan];
+        data.response = response[ichan];
+        data.xform = xform[ichan];
       }
       
       calibrator_data.back().push_back (data);
@@ -1021,8 +1013,8 @@ void SystemCalibrator::submit_calibrator_data () try
       measurements.push_back( state );
 
       if (verbose > 2)
-	cerr << "SystemCalibrator::submit_calibrator_data ichan="
-	     << ichan << " submit_calibrator_data" << endl;
+        cerr << "SystemCalibrator::submit_calibrator_data ichan="
+            << ichan << " submit_calibrator_data" << endl;
 	
       submit_calibrator_data( measurements, data );
 
@@ -1030,27 +1022,27 @@ void SystemCalibrator::submit_calibrator_data () try
 
       if ( data.response != zero )
       {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::submit_calibrator_data ichan="
-	       << ichan << " integrate_calibrator_data" << endl;
-      
-	integrate_calibrator_data( data );
+        if (verbose > 2)
+          cerr << "SystemCalibrator::submit_calibrator_data ichan="
+               << ichan << " integrate_calibrator_data" << endl;
+
+        integrate_calibrator_data( data );
       }
 
       if ( data.xform )
       {
-	if (verbose > 2)
-	  cerr << "SystemCalibrator::submit_calibrator_data ichan="
-	       << ichan << " integrate_calibrator_solution" << endl;
+        if (verbose > 2)
+          cerr << "SystemCalibrator::submit_calibrator_data ichan="
+               << ichan << " integrate_calibrator_solution" << endl;
 
-	integrate_calibrator_solution( data );
+        integrate_calibrator_solution( data );
       }
     }
     catch (Error& error)
     {
       cerr << "SystemCalibrator::submit_calibrator_data ichan="
-	   << ichan << " integrate_calibrator_solution error\n"
-	   << error << endl;
+           << ichan << " integrate_calibrator_solution error\n"
+           << error << endl;
 
       calibrator_estimate[ichan].add_data_failures ++;
       
@@ -1081,15 +1073,15 @@ void SystemCalibrator::submit_pulsar_data () try
 
     if (verbose > 2)
       cerr << "SystemCalibrator::submit_pulsar_data isub="
-	   << isub << " nchan=" << nchan << endl;
+           << isub << " nchan=" << nchan << endl;
 
     if (nchan == 0)
       continue;
 
     if (nchan && verbose > 2)
       cerr << "SystemCalibrator::submit_pulsar_data isub="
-	   << isub << " name="
-	   << pulsar_data[isub][0].get_name() << endl;
+           << isub << " name="
+           << pulsar_data[isub][0].get_name() << endl;
 
     for (unsigned jchan=0; jchan<nchan; jchan++) try
     {
@@ -1098,8 +1090,8 @@ void SystemCalibrator::submit_pulsar_data () try
       ichan = data.get_ichan();
       
       if (verbose > 2)
-	cerr << "SystemCalibrator::submit_pulsar_data ichan="
-	     << ichan << " submit_pulsar_data" << endl;
+        cerr << "SystemCalibrator::submit_pulsar_data ichan="
+             << ichan << " submit_pulsar_data" << endl;
 
       // add pulsar data constraints to measurement equation
       submit_pulsar_data( data );
@@ -1110,8 +1102,8 @@ void SystemCalibrator::submit_pulsar_data () try
     catch (Error& error)
     {
       cerr << "SystemCalibrator::submit_pulsar_data ichan="
-	   << ichan << " error\n"
-	   << error << endl;
+           << ichan << " error\n"
+           << error << endl;
       continue;
     }
   }
@@ -1129,7 +1121,7 @@ void SystemCalibrator::submit_pulsar_data
 
 #if _DEBUG
     cerr << "SystemCalibrator::submit_pulsar_data ichan=" << mchan
-	 << " model.size=" << model.size() << endl;
+         << " model.size=" << model.size() << endl;
 #endif
     
   VariableBackendEstimate* backend = model[mchan]->get_backend (epoch);
@@ -1272,8 +1264,7 @@ void SystemCalibrator::submit_calibrator_data
   backend->add_weight (1.0);
 }
 
-void SystemCalibrator::integrate_calibrator_data
-( const SourceObservation& data )
+void SystemCalibrator::integrate_calibrator_data(const SourceObservation& data)
 {
   Jones< Estimate<double> > zero (0.0);
   if (data.response == zero)
@@ -1284,7 +1275,7 @@ void SystemCalibrator::integrate_calibrator_data
   Jones< Estimate<double> > apply = data.response;
 
   if (refcal_through_frontend)
-    apply = invert_basis * data.response;
+    apply = invert_basis * apply;
 
   if (verbose)
     cerr << "SystemCalibrator::integrate_calibrator_data"
@@ -1301,12 +1292,12 @@ void SystemCalibrator::integrate_calibrator_data
     if (p > I)
     {
       cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
-	   << " correcting over polarization=" << (p-I)/I << endl;
+           << " correcting over polarization=" << (p-I)/I << endl;
 
       // 99% polarized is assumed to be close enough to a good guess
       double scale = 0.99 * I.val / p.val;
       for (unsigned i=1; i<4; i++)
-	observed[i] *= scale;
+        observed[i] *= scale;
     }
   }
   
@@ -1322,14 +1313,13 @@ void SystemCalibrator::integrate_calibrator_data
   Estimate<double> p = result.abs_vect();
   if (p.val > 1 + p.var)
     cerr << "SystemCalibrator::integrate_calibrator_data ichan=" << data.ichan
-	 << " overpolarized by more than 1 sigma " << p-1 << endl;
+         << " overpolarized by more than 1 sigma " << p-1 << endl;
 #endif
   
   calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
 
-void SystemCalibrator::integrate_calibrator_solution
- ( const SourceObservation& data )
+void SystemCalibrator::integrate_calibrator_solution(const SourceObservation& data)
 {
   if (!model[data.ichan])
     throw Error (InvalidState,
@@ -1340,7 +1330,7 @@ void SystemCalibrator::integrate_calibrator_solution
   {
     if (verbose > 2)
       cerr << "SystemCalibrator::integrate_calibrator_solution"
-	" SignalPath::integrate_calibrator ichan=" << data.ichan << endl;
+              " SignalPath::integrate_calibrator ichan=" << data.ichan << endl;
     
     model[data.ichan]->integrate_calibrator (data.epoch, data.xform);
   }
@@ -1388,7 +1378,7 @@ SystemCalibrator::get_CalibratorStokes () const
   catch (Error& error)
   {
     cerr << "SystemCalibrator::get_CalibratorStokes ichan="
-	 << ichan << " error\n" << error.get_message() << endl;
+         << ichan << " error\n" << error.get_message() << endl;
     ext->set_valid (ichan, false);
   }
 
@@ -1430,7 +1420,7 @@ void SystemCalibrator::create_model () try
       invert_basis = inv( basis->evaluate() );
 
       cerr << "SystemCalibrator::create_model basis corrections:\n"
-          << basis_correction.get_summary () << endl;
+           << basis_correction.get_summary () << endl;
 
       if (verbose) cerr
           << "SystemCalibrator::create_model receiver=\n  " 
@@ -1487,8 +1477,7 @@ void SystemCalibrator::init_model (unsigned ichan)
   if (response)
   {
     if (verbose > 2)
-      cerr << "SystemCalibrator::init_model response name="
-	   << response->get_name() << endl;
+      cerr << "SystemCalibrator::init_model response name=" << response->get_name() << endl;
     model[ichan]->set_response( response->clone() );
   }
 
@@ -1667,8 +1656,8 @@ void SystemCalibrator::solve_prepare ()
     if (model[ichan]->get_equation()->get_ndata() == 0)
     {
       if (verbose)
-	cerr << "SystemCalibrator::solve_prepare warning"
-	  " ichan=" << ichan << " has no data" << endl;
+        cerr << "SystemCalibrator::solve_prepare warning"
+                " ichan=" << ichan << " has no data" << endl;
 
       model[ichan]->set_valid( false, "no data" );
     }
@@ -1693,8 +1682,8 @@ void SystemCalibrator::solve_prepare ()
       }
 
       if (fabs(I.get_value()-1.0) > I.get_error() && verbose)
-	cerr << "SystemCalibrator::solve_prepare warning"
-	  " ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
+        cerr << "SystemCalibrator::solve_prepare warning"
+          " ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
     }
 
     model[ichan]->set_reference_epoch ( epoch );

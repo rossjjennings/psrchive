@@ -122,9 +122,9 @@ namespace Pulsar {
     //@{
 
     //! Get the orientation of the equal in-phase electric field vector
-    Angle get_field_orientation () const;
+    Angle get_symmetry_angle () const;
     //! Set the orientation of the equal in-phase electric field vector
-    void set_field_orientation (const Angle& celestial_position_angle);
+    void set_symmetry_angle (const Angle& celestial_position_angle);
 
     //@}
 
@@ -192,7 +192,6 @@ namespace Pulsar {
 
       //! Get the orientation of the basis about the line of sight
       virtual Angle get_orientation () const = 0;
-
 
       //! Get the phase of the reference source
       virtual Angle get_reference_source_phase () const = 0;
