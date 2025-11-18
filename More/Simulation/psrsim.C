@@ -128,7 +128,10 @@ void psrsim::add_options (CommandLine::Menu& menu)
   MEAL::ScaledVonMises* svm = simulator->get_Intensity();
 
   arg = menu.add (svm, &MEAL::ScaledVonMises::set_width, deg_to_rad, 'w', "degrees");
-  arg->set_help ("width of pulse in degrees");
+  arg->set_help ("width of pulse as a standard deviation in degrees");
+
+  arg = menu.add (svm, &MEAL::ScaledVonMises::set_fwhm, deg_to_rad, "fwhm", "degrees");
+  arg->set_help ("full width at half maximum of pulse in degrees");
 
   arg = menu.add (this, &psrsim::load_component_model, 'P', "paas.m");
   arg->set_help ("load component model as output by paas");

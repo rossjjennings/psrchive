@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Russell Edwards
+ *   Copyright (C) 2006-2025 by Russell Edwards and Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,6 +12,10 @@
 #include "MEAL/ScaledVonMises.h"
 #include "MEAL/InverseRule.h"
 #include "MEAL/ScalarConstant.h"
+
+#include "debug.h"
+
+#include <cmath>
 
 using namespace std;
  
@@ -125,18 +129,29 @@ Estimate<double> MEAL::ScaledVonMises::get_concentration () const
   return concentration.get_value ();
 } 
 
-//! Set the width in radians
+//! Set the full width at half maximum (FWHM) in radians
+void MEAL::ScaledVonMises::set_fwhm (double FWHM)
+{
+  double _kappa = std::log(2.0) / (1.0 - std::cos(FWHM/2));
+  double _kappa2 = 8.0 * std::log(2.0) / (FWHM*FWHM);
+
+  DEBUG("MEAL::ScaledVonMises::set_fwhm"
+    " fwhm=" << FWHM <<
+    " kappa=" << _kappa << " kappa2=" << _kappa2); 
+
+  concentration.set_value ( _kappa );
+}
+
+//! Set the width as a standard deviation in radians
 void MEAL::ScaledVonMises::set_width (double width)
 {
   double circular_variance = width*width;
   double _kappa = kappa(circular_variance);
 
-#if 1
-  cerr << "MEAL::ScaledVonMises::set_width"
+  DEBUG("MEAL::ScaledVonMises::set_width"
     " width=" << width <<
     " var=" << circular_variance <<
-    " kappa=" << _kappa << endl;
-#endif
+    " kappa=" << _kappa);
 
   concentration.set_value ( _kappa );
 }
