@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -42,6 +43,7 @@
 #include "Pulsar/ThresholdMatch.h"
 
 #include "Pulsar/Predictor.h"
+#include "Pulsar/psrchive.h"
 
 #include "psrfitsio.h"
 #include "strutil.h"
@@ -50,11 +52,18 @@
 
 using namespace std;
 
-//! null constructor
-// //////////////////////////
-// //////////////////////////
+Pulsar::Option<bool> Pulsar::FITSArchive::search_mode_warning
+(
+ "PSRFITS::search_mode_warning", true,
 
+ "Print a warning when loading a SEARCH-mode PSRFITS file [boolean]",
 
+ "PSRCHIVE does not load SEARCH-mode time series data; however, it can \n"
+ "be used to query the metadada from a SEARCH-mode file.  By default, \n"
+ "a warning message is printed with a pointer to further information. "
+);
+
+//! Initialize attributes to default values
 void Pulsar::FITSArchive::init ()
 {
   psrfits_version = 0.0;
@@ -367,8 +376,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     search_mode = true;
     set_type ( Signal::Unknown );
-    if (verbose > 2)
-      cerr << "FITSArchive::load_header search mode file" << endl;
+    if (search_mode_warning)
+      warning << "FITSArchive::load_header WARNING data are not loaded from SEARCH-mode PSRFITS files.\n"
+	         "See " PSRCHIVE_HTTP "/manuals/psrfits for more information." << endl;
   }
   else
   {

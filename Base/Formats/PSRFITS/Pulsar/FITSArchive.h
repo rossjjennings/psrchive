@@ -61,6 +61,9 @@ namespace Pulsar
 
   public:
 
+    //! Print a warning when loading a SEARCH-mode PSRFITS files
+    static Option<bool> search_mode_warning;
+
     //! Default constructor
     FITSArchive ();
 
