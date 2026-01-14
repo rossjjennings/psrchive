@@ -27,7 +27,8 @@ dist_aclocal_DATA = psrchive.m4
 htmldir = $(datadir)/html
 dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 
-# Install the pkg-config file; the directory is set using PKG_INSTALLDIR in configure.ac.
+# Install the pkg-config file
+pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = psrchive.pc
 
 #############################################################################
