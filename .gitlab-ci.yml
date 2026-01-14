@@ -1,0 +1,56 @@
+# PSRCHIVE GitLab CI/CD Configuration
+# Demo configuration for shared runners (gitlab.com)
+
+stages:
+  - build
+  - test
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+# Use Ubuntu 22.04 LTS as base image
+image: ubuntu:22.04
+
+.install_dependencies: &install_dependencies
+  - apt-get update -qq
+  - apt-get install -y -qq
+      autoconf
+      automake
+      libtool
+      g++
+      gfortran
+      make
+      pkg-config
+      libfftw3-dev
+      libgsl-dev
+      libreadline-dev
+      git
+
+build:
+  stage: build
+  before_script:
+    - *install_dependencies
+  script:
+    - ./bootstrap
+    - ./configure --enable-lean
+    - make -j$(nproc)
+  artifacts:
+    paths:
+      - .
+    expire_in: 1 hour
+
+test:
+  stage: test
+  needs:
+    - build
+  before_script:
+    - *install_dependencies
+  script:
+    - make check
+  allow_failure: true  # Some tests may fail on fresh environment
+  artifacts:
+    when: always
+    paths:
+      - "*/test-suite.log"
+      - "*/*/test-suite.log"
+    expire_in: 1 week
