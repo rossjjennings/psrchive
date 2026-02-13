@@ -620,13 +620,13 @@ bool Pulsar::Integration::get_absolute_rotation_corrected () const try
   if (!history)
   {
     if (verbose)
-      cerr << "Integration::get_absolute_dispersion_corrected no DeFaraday history - returning false" << endl;
+      cerr << "Integration::get_absolute_rotation_corrected no DeFaraday history - returning false" << endl;
     return false;
   }
 
   bool val = history->get_absolute()->get_corrected();
   if (verbose)
-    cerr << "Integration::get_absolute_dispersion_corrected val=" << val << endl;
+    cerr << "Integration::get_absolute_rotation_corrected val=" << val << endl;
 
   return val;
 }
