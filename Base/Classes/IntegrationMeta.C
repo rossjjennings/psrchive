@@ -30,12 +30,12 @@ Pulsar::Integration::Meta::Meta (const Archive* parent)
   if (aux)
   {
     set_absolute_dispersion_corrected (aux->get_dispersion_corrected());
-    set_absolute_birefringence_corrected (aux->get_birefringence_corrected());
+    set_absolute_rotation_corrected (aux->get_birefringence_corrected());
   }
   else
   {
     set_absolute_dispersion_corrected (false);
-    set_absolute_birefringence_corrected (false);
+    set_absolute_rotation_corrected (false);
   }
 
   set_state( parent->get_state() );
@@ -162,13 +162,13 @@ void Pulsar::Integration::Meta::set_absolute_dispersion_corrected (bool flag)
 }
 
 //! Auxiliary inter-channel birefringence has been removed
-bool Pulsar::Integration::Meta::get_absolute_birefringence_corrected () const
+bool Pulsar::Integration::Meta::get_absolute_rotation_corrected () const
 {
-  return absolute_birefringence_corrected;
+  return absolute_rotation_corrected;
 }
 
-void Pulsar::Integration::Meta::set_absolute_birefringence_corrected (bool f)
+void Pulsar::Integration::Meta::set_absolute_rotation_corrected (bool f)
 {
-  absolute_birefringence_corrected = f;
+  absolute_rotation_corrected = f;
 }
 

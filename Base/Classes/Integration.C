@@ -525,14 +525,20 @@ double Pulsar::Integration::get_relative_dispersion_measure () const
 double Pulsar::Integration::get_absolute_dispersion_measure () const try
 {
   if (get_absolute_dispersion_corrected())
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_dispersion_measure aux:dm corrected - returning zero" << endl;
     return 0.0;
+  }
 
-  if (verbose)
-    cerr << "Integration::get_absolute_dispersion_measure aux dm not corrected" << endl;
 
   const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
   if (!aux)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_dispersion_measure no aux:dm - returning zero" << endl;
     return 0.0;
+  }
 
   if (verbose)
     cerr << "Integration::get_absolute_dispersion_measure aux:dm=" << aux->get_dispersion_measure() << endl;
@@ -548,11 +554,26 @@ catch (Error& error)
 bool Pulsar::Integration::get_absolute_dispersion_corrected () const try
 {
   if (orphaned)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_dispersion_corrected returning orphaned value =" 
+           << orphaned->get_absolute_dispersion_corrected () << endl;
+
     return orphaned->get_absolute_dispersion_corrected ();
+  }
 
   const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
   if (aux)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_dispersion_corrected returning parent archive value =" 
+           << aux->get_dispersion_corrected() << endl;
+
     return aux->get_dispersion_corrected();
+  }
+
+  if (verbose)
+    cerr << "Integration::get_absolute_dispersion_corrected no record - returning false" << endl;
 
   return false;
 }
@@ -575,12 +596,20 @@ double Pulsar::Integration::get_relative_rotation_measure () const
 
 double Pulsar::Integration::get_absolute_rotation_measure () const try
 {
-  if (get_absolute_birefringence_corrected())
+  if (get_absolute_rotation_corrected())
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_measure aux:rm corrected - returning zero" << endl;
     return 0.0;
+  }
 
   const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
   if (!aux)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_measure no aux:rm - returning zero" << endl;
     return 0.0;
+  }
 
   if (verbose)
     cerr << "Integration::get_absolute_rotation_measure aux:rm=" << aux->get_rotation_measure() << endl;
@@ -593,20 +622,35 @@ catch (Error& error)
 }
 
 //! Auxiliary inter-channel birefringence has been removed
-bool Pulsar::Integration::get_absolute_birefringence_corrected () const try
+bool Pulsar::Integration::get_absolute_rotation_corrected () const try
 {
   if (orphaned)
-    return orphaned->get_absolute_birefringence_corrected ();
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_corrected returning orphaned value =" 
+           << orphaned->get_absolute_rotation_corrected () << endl;
+
+    return orphaned->get_absolute_rotation_corrected ();
+  }
 
   const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
   if (aux)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_corrected returning parent archive value =" 
+           << aux->get_birefringence_corrected() << endl;
+
     return aux->get_birefringence_corrected();
+  }
+
+  if (verbose)
+    cerr << "Integration::get_absolute_rotation_corrected no record - returning false" << endl;
 
   return false;
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Integration::get_absolute_birefringence_corrected ";
+  throw error += "Pulsar::Integration::get_absolute_rotation_corrected ";
 }
 
 //! Get the feed configuration of the receiver

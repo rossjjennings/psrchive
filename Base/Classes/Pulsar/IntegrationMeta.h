@@ -71,8 +71,8 @@ namespace Pulsar {
     void set_absolute_dispersion_corrected (bool);
 
     //! Absolute inter-channel birefringence has been removed
-    bool get_absolute_birefringence_corrected () const;
-    void set_absolute_birefringence_corrected (bool);
+    bool get_absolute_rotation_corrected () const;
+    void set_absolute_rotation_corrected (bool);
 
     Profile::Strategies* get_strategy ();
     void set_strategy (Profile::Strategies*);
@@ -92,7 +92,7 @@ namespace Pulsar {
     Signal::State state;
 
     bool absolute_dispersion_corrected = false;
-    bool absolute_birefringence_corrected = false;
+    bool absolute_rotation_corrected = false;
 
     std::string telescope;
     sky_coord coordinates;

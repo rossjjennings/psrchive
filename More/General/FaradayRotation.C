@@ -55,9 +55,9 @@ bool Pulsar::FaradayRotation::get_absolute_corrected (const Integration* data) c
 {
   if (Archive::verbose > 2)
     cerr << "Pulsar::DisFaradayRotationpersion::get_relative_corrected corrected=" 
-	       << data->get_absolute_birefringence_corrected() << endl;
+	       << data->get_absolute_rotation_corrected() << endl;
 
-  return data->get_absolute_birefringence_corrected ();
+  return data->get_absolute_rotation_corrected ();
 }
 
 //! Execute the correction for an entire Pulsar::Archive

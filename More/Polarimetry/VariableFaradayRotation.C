@@ -91,7 +91,7 @@ void VariableFaradayRotation::build () const try
     transformation.label += " RM_iono=" + tostring(ionospheric_rotation_measure);
     is_required = true;
   }
-  else if (! integration->get_absolute_birefringence_corrected ())
+  else if (! integration->get_absolute_rotation_corrected ())
   {
     const AuxColdPlasmaMeasures* aux = integration->get<AuxColdPlasmaMeasures> ();
 
