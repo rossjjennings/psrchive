@@ -15,6 +15,8 @@
 
 #include "Pulsar/AuxColdPlasma.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
+#include "Pulsar/Dedisperse.h"
+#include "Pulsar/DeFaraday.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -553,29 +555,19 @@ catch (Error& error)
 //! Auxiliary inter-channel dispersion delay has been removed
 bool Pulsar::Integration::get_absolute_dispersion_corrected () const try
 {
-  if (orphaned)
+  auto history = get<Dedisperse>();
+  if (!history)
   {
     if (verbose)
-      cerr << "Integration::get_absolute_dispersion_corrected returning orphaned value =" 
-           << orphaned->get_absolute_dispersion_corrected () << endl;
-
-    return orphaned->get_absolute_dispersion_corrected ();
+      cerr << "Integration::get_absolute_dispersion_corrected no Dedisperse history - returning false" << endl;
+    return false;
   }
 
-  const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
-  if (aux)
-  {
-    if (verbose)
-      cerr << "Integration::get_absolute_dispersion_corrected returning parent archive value =" 
-           << aux->get_dispersion_corrected() << endl;
-
-    return aux->get_dispersion_corrected();
-  }
-
+  bool val = history->get_absolute()->get_corrected();
   if (verbose)
-    cerr << "Integration::get_absolute_dispersion_corrected no record - returning false" << endl;
+    cerr << "Integration::get_absolute_dispersion_corrected val=" << val << endl;
 
-  return false;
+  return val;
 }
 catch (Error& error)
 {
@@ -624,29 +616,19 @@ catch (Error& error)
 //! Auxiliary inter-channel birefringence has been removed
 bool Pulsar::Integration::get_absolute_rotation_corrected () const try
 {
-  if (orphaned)
+  auto history = get<DeFaraday>();
+  if (!history)
   {
     if (verbose)
-      cerr << "Integration::get_absolute_rotation_corrected returning orphaned value =" 
-           << orphaned->get_absolute_rotation_corrected () << endl;
-
-    return orphaned->get_absolute_rotation_corrected ();
+      cerr << "Integration::get_absolute_dispersion_corrected no DeFaraday history - returning false" << endl;
+    return false;
   }
 
-  const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
-  if (aux)
-  {
-    if (verbose)
-      cerr << "Integration::get_absolute_rotation_corrected returning parent archive value =" 
-           << aux->get_birefringence_corrected() << endl;
-
-    return aux->get_birefringence_corrected();
-  }
-
+  bool val = history->get_absolute()->get_corrected();
   if (verbose)
-    cerr << "Integration::get_absolute_rotation_corrected no record - returning false" << endl;
+    cerr << "Integration::get_absolute_dispersion_corrected val=" << val << endl;
 
-  return false;
+  return val;
 }
 catch (Error& error)
 {

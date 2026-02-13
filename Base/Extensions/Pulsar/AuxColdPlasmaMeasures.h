@@ -57,15 +57,9 @@ namespace Pulsar {
 
     //! The difference in dispersion measure
     double dispersion_measure = 0.0;
-
-    //! Flag set when the difference in dispersion is corrected with respect to infinite frequency
-    bool absolute_dispersion_corrected = false;
-
+    
     //! The difference in rotation measure
     double rotation_measure = 0.0;
-
-    //! Flag set when the difference in rotation is corrected with respect to infinite frequency
-    bool absolute_rotation_corrected = false;
   };
   
 

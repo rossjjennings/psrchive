@@ -26,18 +26,6 @@ Pulsar::Integration::Meta::Meta (const Archive* parent)
   set_rotation_measure( parent->get_rotation_measure() );
   set_faraday_corrected( parent->get_faraday_corrected() );
 
-  const AuxColdPlasma* aux = parent->get<AuxColdPlasma> ();
-  if (aux)
-  {
-    set_absolute_dispersion_corrected (aux->get_dispersion_corrected());
-    set_absolute_rotation_corrected (aux->get_birefringence_corrected());
-  }
-  else
-  {
-    set_absolute_dispersion_corrected (false);
-    set_absolute_rotation_corrected (false);
-  }
-
   set_state( parent->get_state() );
   set_basis( parent->get_basis() );
 }
@@ -149,26 +137,3 @@ void Pulsar::Integration::Meta::set_state (Signal::State v)
 {
   state = v;
 }
-
-//! Auxiliary inter-channel dispersion delay has been removed
-bool Pulsar::Integration::Meta::get_absolute_dispersion_corrected () const
-{
-  return absolute_dispersion_corrected;
-}
-
-void Pulsar::Integration::Meta::set_absolute_dispersion_corrected (bool flag)
-{
-  absolute_dispersion_corrected = flag;
-}
-
-//! Auxiliary inter-channel birefringence has been removed
-bool Pulsar::Integration::Meta::get_absolute_rotation_corrected () const
-{
-  return absolute_rotation_corrected;
-}
-
-void Pulsar::Integration::Meta::set_absolute_rotation_corrected (bool f)
-{
-  absolute_rotation_corrected = f;
-}
-
