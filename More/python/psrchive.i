@@ -1010,13 +1010,13 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
     //! Set the reference wavelength in metres
     void set_reference_wavelength (double metres)
     {
-        self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::set_reference_wavelength(metres);
+        self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::BirefringenceHistory>::set_reference_wavelength(metres);
     }
 
     //! Get the reference wavelength
     double get_reference_wavelength () const
     {
-        return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::get_reference_wavelength();
+        return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::BirefringenceHistory>::get_reference_wavelength();
     }
 }
 
