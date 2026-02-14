@@ -78,7 +78,7 @@ bool Pulsar::Dispersion::get_absolute_corrected (const Integration* data) const
 //! Execute the correction for an entire Pulsar::Archive
 void Pulsar::Dispersion::execute (Archive* arch)
 {
-  ColdPlasma<DispersionDelay,Dedisperse>::execute (arch);
+  ColdPlasma<DispersionDelay,DispersionHistory>::execute (arch);
   arch->set_dispersion_measure( get_dispersion_measure() );
   arch->set_dedispersed( true );
   arch->get<AuxColdPlasma>()->set_dispersion_corrected( true );
@@ -87,7 +87,7 @@ void Pulsar::Dispersion::execute (Archive* arch)
 //! Undo the correction for an entire Pulsar::Archive
 void Pulsar::Dispersion::revert (Archive* arch)
 {
-  ColdPlasma<DispersionDelay,Dedisperse>::revert (arch);
+  ColdPlasma<DispersionDelay,DispersionHistory>::revert (arch);
   arch->set_dedispersed( false );
 }
 
@@ -118,7 +118,7 @@ catch (Error& error)
 //! Set attributes in preparation for execute
 void Pulsar::Dispersion::update (const Integration* data)
 {
-  ColdPlasma<DispersionDelay,Dedisperse>::update (data);
+  ColdPlasma<DispersionDelay,DispersionHistory>::update (data);
   folding_period = data->get_folding_period ();
 
   if (Integration::verbose)

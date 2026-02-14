@@ -520,11 +520,11 @@ namespace Pulsar {
     void defaraday (unsigned ichan, unsigned kchan,
                     double reference_frequency);
 
-    //! Update the Dedispersed extension, as needed
+    //! Update the DispersionHistory extension, as needed
     /*! Assumes that the dedisperse worker function has been applied to all channels */
     void update_absolute_dispersion();
 
-    //! Update the DeFaradayed extension, as needed
+    //! Update the BirefringenceHistory extension, as needed
     /*! Assumes that the defaraday worker function has been applied to all channels */
     void update_absolute_rotation();
 

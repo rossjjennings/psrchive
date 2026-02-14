@@ -15,7 +15,7 @@
 #include "Pulsar/VariableFaradayRotation.h"
 #include "Pulsar/ConfigurableProjection.h"
 #include "Pulsar/AuxColdPlasma.h"
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 #include "Pulsar/VariableBackendEstimate.h"
 #include "Pulsar/SystemCalibratorStepFinder.h"
@@ -2393,7 +2393,7 @@ void SystemCalibrator::precalibrate (Archive* data)
 
       if (ism_rm != 0 || iono_rm != 0)
       {
-        auto corrected = integration->getadd<DeFaraday>();
+        auto corrected = integration->getadd<BirefringenceHistory>();
 
         double reference_wavelength = ism->get_reference_wavelength();
 

@@ -7,14 +7,14 @@ nobase_dist_data_DATA = fluxcal.on fluxcal.off \
 
 nobase_include_HEADERS = \
         Pulsar/CalSource.h \
-	Pulsar/Dedispersed.h \
-	Pulsar/DeFaradayed.h \
+	Pulsar/DispersionCheck.h \
+	Pulsar/BirefringenceCheck.h \
 	Pulsar/SetReceiver.h
 
 libChecks_la_SOURCES = Check_registry.C \
 	CalSource.C \
-	Dedispersed.C \
-	DeFaradayed.C \
+	DispersionCheck.C \
+	BirefringenceCheck.C \
 	SetReceiver.C
 
 #############################################################################

@@ -17,7 +17,7 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FaradayRotation.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
-#include "Pulsar/Dedisperse.h"
+#include "Pulsar/DispersionHistory.h"
 
 #include "Pulsar/ComponentModel.h"
 #include "Pulsar/SimplePolnProfile.h"
@@ -261,7 +261,7 @@ void psrsim::process (Pulsar::Archive* data)
         aux->set_rotation_measure(rm);
       }
 
-      auto history = subint->get<Dedisperse>();
+      auto history = subint->get<DispersionHistory>();
       if (history)
         delete history;
     }

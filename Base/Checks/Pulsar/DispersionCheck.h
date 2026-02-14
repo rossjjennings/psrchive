@@ -1,35 +1,35 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2025 by Willem van Straten
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-// psrchive/Base/Checks/Pulsar/DeFaradayed.h
+// psrchive/Base/Checks/Pulsar/DispersionCheck.h
 
-#ifndef __Pulsar_DeFaradayed_h
-#define __Pulsar_DeFaradayed_h
+#ifndef __Pulsar_DispersionCheck_h
+#define __Pulsar_DispersionCheck_h
 
 #include "Pulsar/Verification.h"
 
 namespace Pulsar {
   
-  //! Verifies that each Integration has a consistent DeFaraday Extension
-  /*! If the Archive::faraday_corrected attribute is set then, for each
+  //! Verifies that each Integration has a consistent DispersionHistory Extension
+  /*! If the Archive::dedispersed attribute is set then, for each
     Integration, ensure that
     <OL>
-    <LI> the DeFaraday Extension has been added;
-    <LI> DeFaraday::rotation_measure == Archive::rotation_measure; and
-    <LI> DeFaraday::reference_frequency == Archive::centre_frequency.
+    <LI> the DispersionHistory Extension has been added;
+    <LI> DispersionHistory::dispersion_measure == Archive::dispersion_measure; and
+    <LI> DispersionHistory::reference_frequency == Archive::centre_frequency.
     </OL>
   */
-  class DeFaradayed : public Verification
-  {
+  class DispersionCheck : public Verification {
+
   public:
     
     //! Return the name of the check
-    std::string get_name () { return "DeFaradayed"; }
+    std::string get_name () { return "DispersionCheck"; }
 
     //! Perform the check
     void apply (const Archive* archive);

@@ -15,8 +15,8 @@
 
 #include "Pulsar/AuxColdPlasma.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
-#include "Pulsar/Dedisperse.h"
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/DispersionHistory.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -555,11 +555,11 @@ catch (Error& error)
 //! Auxiliary inter-channel dispersion delay has been removed
 bool Pulsar::Integration::get_absolute_dispersion_corrected () const try
 {
-  auto history = get<Dedisperse>();
+  auto history = get<DispersionHistory>();
   if (!history)
   {
     if (verbose)
-      cerr << "Integration::get_absolute_dispersion_corrected no Dedisperse history - returning false" << endl;
+      cerr << "Integration::get_absolute_dispersion_corrected no DispersionHistory history - returning false" << endl;
     return false;
   }
 
@@ -616,11 +616,11 @@ catch (Error& error)
 //! Auxiliary inter-channel birefringence has been removed
 bool Pulsar::Integration::get_absolute_rotation_corrected () const try
 {
-  auto history = get<DeFaraday>();
+  auto history = get<BirefringenceHistory>();
   if (!history)
   {
     if (verbose)
-      cerr << "Integration::get_absolute_rotation_corrected no DeFaraday history - returning false" << endl;
+      cerr << "Integration::get_absolute_rotation_corrected no BirefringenceHistory history - returning false" << endl;
     return false;
   }
 

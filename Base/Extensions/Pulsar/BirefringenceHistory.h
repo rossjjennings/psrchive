@@ -6,31 +6,31 @@
  *
  ***************************************************************************/
 
-// psrchive/Base/Extensions/Pulsar/DeFaraday.h
+// psrchive/Base/Extensions/Pulsar/BirefringenceHistory.h
 
-#ifndef __Pulsar_DeFaraday_h
-#define __Pulsar_DeFaraday_h
+#ifndef __Pulsar_BirefringenceHistory_h
+#define __Pulsar_BirefringenceHistory_h
 
 #include "Pulsar/ColdPlasmaHistory.h"
 
 namespace Pulsar {
   
   //! Stores parameters used to correct Faraday rotation in each Integration
-  class DeFaraday : public ColdPlasmaHistory
+  class BirefringenceHistory : public ColdPlasmaHistory
   {
   public:
     
     //! Default constructor
-    DeFaraday ();
+    BirefringenceHistory ();
 
     //! Copy constructor
-    DeFaraday (const DeFaraday& extension);
+    BirefringenceHistory (const BirefringenceHistory& extension);
 
     //! Assignment operator
-    const DeFaraday& operator= (const DeFaraday& extension);
+    const BirefringenceHistory& operator= (const BirefringenceHistory& extension);
     
     //! Clone method
-    DeFaraday* clone () const { return new DeFaraday( *this ); }
+    BirefringenceHistory* clone () const { return new BirefringenceHistory( *this ); }
   };
   
 }

@@ -1,29 +1,29 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#include "Pulsar/Dedisperse.h"
+#include "Pulsar/DispersionHistory.h"
 
 //! Default constructor
-Pulsar::Dedisperse::Dedisperse ()
-  : ColdPlasmaHistory ("Dedisperse")
+Pulsar::DispersionHistory::DispersionHistory ()
+  : ColdPlasmaHistory ("DispersionHistory")
 {
   set_measurement (ColdPlasmaMeasure::DispersionMeasure);
 }
 
 //! Copy constructor
-Pulsar::Dedisperse::Dedisperse (const Dedisperse& extension)
-  : ColdPlasmaHistory ("Dedisperse")
+Pulsar::DispersionHistory::DispersionHistory (const DispersionHistory& extension)
+  : ColdPlasmaHistory ("DispersionHistory")
 {
   ColdPlasmaHistory::operator= (extension);
 }
 
 //! Operator =
-const Pulsar::Dedisperse&
-Pulsar::Dedisperse::operator= (const Dedisperse& extension)
+const Pulsar::DispersionHistory&
+Pulsar::DispersionHistory::operator= (const DispersionHistory& extension)
 {
   ColdPlasmaHistory::operator= (extension);
   return *this;

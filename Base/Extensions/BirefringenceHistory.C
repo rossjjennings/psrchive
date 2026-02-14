@@ -4,25 +4,25 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 //! Default constructor
-Pulsar::DeFaraday::DeFaraday ()
-  : ColdPlasmaHistory ("DeFaraday")
+Pulsar::BirefringenceHistory::BirefringenceHistory ()
+  : ColdPlasmaHistory ("BirefringenceHistory")
 {
   set_measurement (ColdPlasmaMeasure::RotationMeasure);
 }
 
 //! Copy constructor
-Pulsar::DeFaraday::DeFaraday (const DeFaraday& extension)
-  : ColdPlasmaHistory ("DeFaraday")
+Pulsar::BirefringenceHistory::BirefringenceHistory (const BirefringenceHistory& extension)
+  : ColdPlasmaHistory ("BirefringenceHistory")
 {
   ColdPlasmaHistory::operator= (extension);
 }
 
 //! Operator =
-const Pulsar::DeFaraday&
-Pulsar::DeFaraday::operator= (const DeFaraday& extension)
+const Pulsar::BirefringenceHistory&
+Pulsar::BirefringenceHistory::operator= (const BirefringenceHistory& extension)
 {
   ColdPlasmaHistory::operator= (extension);
   return *this;

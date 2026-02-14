@@ -33,8 +33,8 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
    */
 
   bool overwrite_absolute = true;
-  init_Dedisperse (subint, overwrite_absolute);
-  init_DeFaraday (subint, overwrite_absolute);
+  init_DispersionHistory (subint, overwrite_absolute);
+  init_BirefringenceHistory (subint, overwrite_absolute);
 
   return subint.release();
 }

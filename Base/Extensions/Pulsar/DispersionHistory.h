@@ -1,36 +1,36 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2025 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-// psrchive/Base/Extensions/Pulsar/Dedisperse.h
+// psrchive/Base/Extensions/Pulsar/DispersionHistory.h
 
-#ifndef __Pulsar_Dedisperse_h
-#define __Pulsar_Dedisperse_h
+#ifndef __Pulsar_DispersionHistory_h
+#define __Pulsar_DispersionHistory_h
 
 #include "Pulsar/ColdPlasmaHistory.h"
 
 namespace Pulsar {
   
   //! Stores parameters used to correct dispersion in each Integration
-  class Dedisperse : public ColdPlasmaHistory {
+  class DispersionHistory : public ColdPlasmaHistory {
     
   public:
     
     //! Default constructor
-    Dedisperse ();
+    DispersionHistory ();
 
     //! Copy constructor
-    Dedisperse (const Dedisperse& extension);
+    DispersionHistory (const DispersionHistory& extension);
 
     //! Assignment operator
-    const Dedisperse& operator= (const Dedisperse& extension);
+    const DispersionHistory& operator= (const DispersionHistory& extension);
     
     //! Clone method
-    Dedisperse* clone () const { return new Dedisperse( *this ); }
+    DispersionHistory* clone () const { return new DispersionHistory( *this ); }
   };
   
 }

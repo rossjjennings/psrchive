@@ -1,35 +1,35 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-// psrchive/Base/Checks/Pulsar/Dedispersed.h
+// psrchive/Base/Checks/Pulsar/BirefringenceCheck.h
 
-#ifndef __Pulsar_Dedispersed_h
-#define __Pulsar_Dedispersed_h
+#ifndef __Pulsar_BirefringenceCheck_h
+#define __Pulsar_BirefringenceCheck_h
 
 #include "Pulsar/Verification.h"
 
 namespace Pulsar {
   
-  //! Verifies that each Integration has a consistent Dedisperse Extension
-  /*! If the Archive::dedispersed attribute is set then, for each
+  //! Verifies that each Integration has a consistent BirefringenceHistory Extension
+  /*! If the Archive::faraday_corrected attribute is set then, for each
     Integration, ensure that
     <OL>
-    <LI> the Dedisperse Extension has been added;
-    <LI> Dedisperse::dispersion_measure == Archive::dispersion_measure; and
-    <LI> Dedisperse::reference_frequency == Archive::centre_frequency.
+    <LI> the BirefringenceHistory Extension has been added;
+    <LI> BirefringenceHistory::rotation_measure == Archive::rotation_measure; and
+    <LI> BirefringenceHistory::reference_frequency == Archive::centre_frequency.
     </OL>
   */
-  class Dedispersed : public Verification {
-
+  class BirefringenceCheck : public Verification
+  {
   public:
     
     //! Return the name of the check
-    std::string get_name () { return "Dedispersed"; }
+    std::string get_name () { return "BirefringenceCheck"; }
 
     //! Perform the check
     void apply (const Archive* archive);

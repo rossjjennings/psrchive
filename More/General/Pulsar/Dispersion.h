@@ -14,7 +14,7 @@
 #include "Pulsar/ColdPlasma.h"
 #include "Pulsar/Config.h"
 #include "Pulsar/DispersionDelay.h"
-#include "Pulsar/Dedisperse.h"
+#include "Pulsar/DispersionHistory.h"
 #include "Pulsar/IntegrationBarycentre.h"
 
 namespace Pulsar {
@@ -25,7 +25,7 @@ namespace Pulsar {
 
     \post All profiles will be phase-aligned to the reference frequency
   */
-  class Dispersion : public ColdPlasma<DispersionDelay,Dedisperse> {
+  class Dispersion : public ColdPlasma<DispersionDelay,DispersionHistory> {
 
   public:
 

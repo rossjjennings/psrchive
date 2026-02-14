@@ -63,7 +63,7 @@ bool Pulsar::FaradayRotation::get_absolute_corrected (const Integration* data) c
 //! Execute the correction for an entire Pulsar::Archive
 void Pulsar::FaradayRotation::execute (Archive* arch)
 {
-  ColdPlasma<Calibration::Faraday,DeFaraday>::execute (arch);
+  ColdPlasma<Calibration::Faraday,BirefringenceHistory>::execute (arch);
   arch->set_rotation_measure( get_rotation_measure() );
   arch->set_faraday_corrected( true );
   arch->getadd<AuxColdPlasma>()->set_birefringence_corrected( true );
@@ -72,7 +72,7 @@ void Pulsar::FaradayRotation::execute (Archive* arch)
 //! Undo the correction for an entire Pulsar::Archive
 void Pulsar::FaradayRotation::revert (Archive* arch)
 {
-  ColdPlasma<Calibration::Faraday,DeFaraday>::revert (arch);
+  ColdPlasma<Calibration::Faraday,BirefringenceHistory>::revert (arch);
   arch->set_faraday_corrected( false );
 }
 

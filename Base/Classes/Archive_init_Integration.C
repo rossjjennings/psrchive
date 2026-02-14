@@ -12,8 +12,8 @@
 // Extension classes used to store state information
 #include "Pulsar/AuxColdPlasma.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
-#include "Pulsar/Dedisperse.h"
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/DispersionHistory.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 #include <iostream>
 
@@ -26,10 +26,10 @@ Pulsar::Integration* Pulsar::Archive::use_Integration (Integration* subint)
   return subint;
 }
 
-void Pulsar::Archive::init_Dedisperse (Integration* subint, bool overwrite_absolute)
+void Pulsar::Archive::init_DispersionHistory (Integration* subint, bool overwrite_absolute)
 {
-  bool has_prior_history = subint->get<Dedisperse>() != nullptr;
-  auto history = subint->getadd<Dedisperse>();
+  bool has_prior_history = subint->get<DispersionHistory>() != nullptr;
+  auto history = subint->getadd<DispersionHistory>();
 
   // start with the assumption that nothing is corrected
   history->get_relative()->set_corrected(false);
@@ -37,7 +37,7 @@ void Pulsar::Archive::init_Dedisperse (Integration* subint, bool overwrite_absol
   if ( get_dedispersed() )
   {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::init_Dedisperse dedispersed DM=" << get_dispersion_measure() << endl;
+      cerr << "Pulsar::Archive::init_DispersionHistory dedispersed DM=" << get_dispersion_measure() << endl;
     history->get_relative()->set_corrected(true);
     history->get_relative()->set_reference_frequency( get_centre_frequency() );
     history->get_relative()->set_measure( get_dispersion_measure() );
@@ -46,7 +46,7 @@ void Pulsar::Archive::init_Dedisperse (Integration* subint, bool overwrite_absol
   if (has_prior_history && !overwrite_absolute)
   {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::init_Dedisperse preserving existing absolute correction history" << endl;
+      cerr << "Pulsar::Archive::init_DispersionHistory preserving existing absolute correction history" << endl;
     return;
   }
 
@@ -59,13 +59,13 @@ void Pulsar::Archive::init_Dedisperse (Integration* subint, bool overwrite_absol
   {
     auto aux = get<AuxColdPlasma>();
     if (!aux)
-      throw Error (InvalidState, "Pulsar::Archive::init_Dedisperse",
+      throw Error (InvalidState, "Pulsar::Archive::init_DispersionHistory",
                    "Integration has AuxColdPlasmaMeasures extension but Archive does not have AuxColdPlasma extension");
 
     if (aux->get_dispersion_corrected())
     {
       if (verbose > 2)
-        cerr << "Pulsar::Archive::init_Dedisperse absolute dedispersed DM=" << subaux->get_dispersion_measure() << endl;
+        cerr << "Pulsar::Archive::init_DispersionHistory absolute dedispersed DM=" << subaux->get_dispersion_measure() << endl;
 
       history->get_absolute()->set_corrected(true);
       history->get_absolute()->set_measure( subaux->get_dispersion_measure() );
@@ -73,10 +73,10 @@ void Pulsar::Archive::init_Dedisperse (Integration* subint, bool overwrite_absol
   }
 }
 
-void Pulsar::Archive::init_DeFaraday (Integration* subint, bool overwrite_absolute)
+void Pulsar::Archive::init_BirefringenceHistory (Integration* subint, bool overwrite_absolute)
 {
-  bool has_prior_history = subint->get<DeFaraday>() != nullptr;
-  auto history = subint->getadd<DeFaraday>();
+  bool has_prior_history = subint->get<BirefringenceHistory>() != nullptr;
+  auto history = subint->getadd<BirefringenceHistory>();
 
   // start with the assumption that nothing is corrected
   history->get_relative()->set_corrected(false);
@@ -84,7 +84,7 @@ void Pulsar::Archive::init_DeFaraday (Integration* subint, bool overwrite_absolu
   if ( get_faraday_corrected() )
   {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::init_DeFaraday derotated RM=" << get_rotation_measure() << endl;
+      cerr << "Pulsar::Archive::init_BirefringenceHistory derotated RM=" << get_rotation_measure() << endl;
     history->get_relative()->set_corrected(true);
     history->get_relative()->set_reference_frequency( get_centre_frequency() );
     history->get_relative()->set_measure( get_rotation_measure() );
@@ -93,7 +93,7 @@ void Pulsar::Archive::init_DeFaraday (Integration* subint, bool overwrite_absolu
   if (has_prior_history && !overwrite_absolute)
   {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::init_DeFaraday preserving existing absolute correction history" << endl;
+      cerr << "Pulsar::Archive::init_BirefringenceHistory preserving existing absolute correction history" << endl;
     return;
   }
 
@@ -106,15 +106,15 @@ void Pulsar::Archive::init_DeFaraday (Integration* subint, bool overwrite_absolu
   {
     auto aux = get<AuxColdPlasma>();
     if (!aux)
-      throw Error (InvalidState, "Pulsar::Archive::init_DeFaraday",
+      throw Error (InvalidState, "Pulsar::Archive::init_BirefringenceHistory",
                    "Integration has AuxColdPlasmaMeasures extension but Archive does not have AuxColdPlasma extension");
 
     if (aux->get_birefringence_corrected())
     {
       if (verbose > 2)
-        cerr << "Pulsar::Archive::init_DeFaraday absolute derotated RM=" << subaux->get_rotation_measure() << endl;
+        cerr << "Pulsar::Archive::init_BirefringenceHistory absolute derotated RM=" << subaux->get_rotation_measure() << endl;
  
-      auto history = subint->getadd<DeFaraday>();
+      auto history = subint->getadd<BirefringenceHistory>();
       history->get_absolute()->set_corrected(true);
       history->get_absolute()->set_measure( subaux->get_rotation_measure() );
     }
@@ -138,13 +138,13 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
     Overwrite the absolute correction history only if the Integration does not already own such history.
     This is to stop an Archive from over-writing important history when it adopts an Integration
     from another source (note that Archive::use_Integration calls Archive::init_Integration).
-    To ensure that history is initialized correctly when loading, Archive::init_Dedisperse
-    and Archive::init_DeFaraday are called in Archive::load_Integration with overwrite_absolute = true
+    To ensure that history is initialized correctly when loading, Archive::init_DispersionHistory
+    and Archive::init_BirefringenceHistory are called in Archive::load_Integration with overwrite_absolute = true
   */
 
   bool overwrite_absolute = false;
-  init_Dedisperse (subint, overwrite_absolute);
-  init_DeFaraday (subint, overwrite_absolute);
+  init_DispersionHistory (subint, overwrite_absolute);
+  init_BirefringenceHistory (subint, overwrite_absolute);
 
   subint->zero_phase_aligned = false;
 
