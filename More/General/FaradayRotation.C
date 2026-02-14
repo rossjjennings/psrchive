@@ -54,7 +54,7 @@ bool Pulsar::FaradayRotation::get_relative_corrected (const Integration* data) c
 bool Pulsar::FaradayRotation::get_absolute_corrected (const Integration* data) const
 {
   if (Archive::verbose > 2)
-    cerr << "Pulsar::DisFaradayRotationpersion::get_relative_corrected corrected=" 
+    cerr << "Pulsar::FaradayRotation::get_relative_corrected corrected=" 
 	       << data->get_absolute_rotation_corrected() << endl;
 
   return data->get_absolute_rotation_corrected ();

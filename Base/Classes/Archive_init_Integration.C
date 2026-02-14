@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2025 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -26,22 +26,32 @@ Pulsar::Integration* Pulsar::Archive::use_Integration (Integration* subint)
   return subint;
 }
 
-void Pulsar::Archive::init_Dedisperse (Integration* subint)
+void Pulsar::Archive::init_Dedisperse (Integration* subint, bool overwrite_absolute)
 {
-  auto corrected = subint->getadd<Dedisperse>();
+  bool has_prior_history = subint->get<Dedisperse>() != nullptr;
+  auto history = subint->getadd<Dedisperse>();
 
   // start with the assumption that nothing is corrected
-  corrected->get_relative()->set_corrected(false);
-  corrected->get_absolute()->set_corrected(false);
+  history->get_relative()->set_corrected(false);
 
   if ( get_dedispersed() )
   {
     if (verbose > 2)
       cerr << "Pulsar::Archive::init_Dedisperse dedispersed DM=" << get_dispersion_measure() << endl;
-    corrected->get_relative()->set_corrected(true);
-    corrected->get_relative()->set_reference_frequency( get_centre_frequency() );
-    corrected->get_relative()->set_measure( get_dispersion_measure() );
+    history->get_relative()->set_corrected(true);
+    history->get_relative()->set_reference_frequency( get_centre_frequency() );
+    history->get_relative()->set_measure( get_dispersion_measure() );
   }
+
+  if (has_prior_history && !overwrite_absolute)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_Dedisperse preserving existing absolute correction history" << endl;
+    return;
+  }
+
+  // start with the assumption that nothing is corrected
+  history->get_absolute()->set_corrected(false);
 
   auto subaux = subint->get<AuxColdPlasmaMeasures>();
 
@@ -57,29 +67,38 @@ void Pulsar::Archive::init_Dedisperse (Integration* subint)
       if (verbose > 2)
         cerr << "Pulsar::Archive::init_Dedisperse absolute dedispersed DM=" << subaux->get_dispersion_measure() << endl;
 
-      corrected->get_absolute()->set_corrected(true);
-      corrected->get_absolute()->set_measure( subaux->get_dispersion_measure() );
+      history->get_absolute()->set_corrected(true);
+      history->get_absolute()->set_measure( subaux->get_dispersion_measure() );
     }
   }
 }
 
-void Pulsar::Archive::init_DeFaraday (Integration* subint)
+void Pulsar::Archive::init_DeFaraday (Integration* subint, bool overwrite_absolute)
 {
-  auto corrected = subint->getadd<Dedisperse>();
+  bool has_prior_history = subint->get<DeFaraday>() != nullptr;
+  auto history = subint->getadd<DeFaraday>();
 
   // start with the assumption that nothing is corrected
-  corrected->get_relative()->set_corrected(false);
-  corrected->get_absolute()->set_corrected(false);
+  history->get_relative()->set_corrected(false);
 
   if ( get_dedispersed() )
   {
     if (verbose > 2)
       cerr << "Pulsar::Archive::init_DeFaraday derotated RM=" << get_rotation_measure() << endl;
-    auto corrected = subint->getadd<DeFaraday>();
-    corrected->get_relative()->set_corrected(true);
-    corrected->get_relative()->set_reference_frequency( get_centre_frequency() );
-    corrected->get_relative()->set_measure( get_rotation_measure() );
+    history->get_relative()->set_corrected(true);
+    history->get_relative()->set_reference_frequency( get_centre_frequency() );
+    history->get_relative()->set_measure( get_rotation_measure() );
   }
+
+  if (has_prior_history && !overwrite_absolute)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_DeFaraday preserving existing absolute correction history" << endl;
+    return;
+  }
+
+  // start with the assumption that nothing is corrected
+  history->get_absolute()->set_corrected(false);
 
   auto subaux = subint->get<AuxColdPlasmaMeasures>();
 
@@ -95,14 +114,14 @@ void Pulsar::Archive::init_DeFaraday (Integration* subint)
       if (verbose > 2)
         cerr << "Pulsar::Archive::init_DeFaraday absolute derotated RM=" << subaux->get_rotation_measure() << endl;
  
-      auto corrected = subint->getadd<DeFaraday>();
-      corrected->get_absolute()->set_corrected(true);
-      corrected->get_absolute()->set_measure( subaux->get_rotation_measure() );
+      auto history = subint->getadd<DeFaraday>();
+      history->get_absolute()->set_corrected(true);
+      history->get_absolute()->set_measure( subaux->get_rotation_measure() );
     }
-  }  
+  }
 }
 
-/*!  
+/*!
   After an Integration has been loaded from disk, this method
   ensures that various internal book-keeping attributes are
   initialized.
@@ -114,31 +133,18 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
 
   subint->parent = this;
 
-  // Add and initialize a Dedisperse extension only if the Integration does not already own one
-  {
-    auto corrected = subint->get<Dedisperse>();
-    if (!corrected)
-    {
-      if (verbose > 2)
-        cerr << "Pulsar::Archive::init_Integration initializing Dedisperse extension" << endl;
-      init_Dedisperse (subint);
-    }
-    else if (verbose > 2)
-      cerr << "Pulsar::Archive::init_Integration Integration already has Dedisperse extension" << endl;
-  }
+  /*
+    bugs/509 - part 1
+    Overwrite the absolute correction history only if the Integration does not already own such history.
+    This is to stop an Archive from over-writing important history when it adopts an Integration
+    from another source (note that Archive::use_Integration calls Archive::init_Integration).
+    To ensure that history is initialized correctly when loading, Archive::init_Dedisperse
+    and Archive::init_DeFaraday are called in Archive::load_Integration with overwrite_absolute = true
+  */
 
-  // Add and initialize a DeFaraday extension only if the Integration does not already own one
-  {
-    auto corrected = subint->get<DeFaraday>();
-    if (!corrected)
-    {
-      if (verbose > 2)
-        cerr << "Pulsar::Archive::init_Integration initializing DeFaraday extension" << endl;
-      init_DeFaraday (subint);
-    }
-    else if (verbose > 2)
-      cerr << "Pulsar::Archive::init_Integration Integration already has DeFaraday extension" << endl;
-  }
+  bool overwrite_absolute = false;
+  init_Dedisperse (subint, overwrite_absolute);
+  init_DeFaraday (subint, overwrite_absolute);
 
   subint->zero_phase_aligned = false;
 

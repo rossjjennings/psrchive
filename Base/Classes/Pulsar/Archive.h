@@ -664,9 +664,18 @@ namespace Pulsar
     void init_Integration (Integration* subint, bool check_phase = false);
 
     //! Initialize the dispersion correction history of the Integration
-    void init_Dedisperse (Integration*);
+    /*! bugs/509 
+      By default, the absolute dipserion correction history is not overwritten 
+      if the Integration already has a Dedisperse extension 
+    */
+    void init_Dedisperse (Integration*, bool overwrite_absolute = false);
+
     //! Initialize the Faraday rotation correction history of the Integration
-    void init_DeFaraday (Integration*);
+    /*! bugs/509 
+      By default, the absolute Faraday rotation correction history is not overwritten 
+      if the Integration already has a DeFaraday extension 
+    */
+    void init_DeFaraday (Integration*, bool overwrite_absolute = false);
 
     //! Provide Integration::resize access to Archive-derived classes
     void resize_Integration (Integration*);

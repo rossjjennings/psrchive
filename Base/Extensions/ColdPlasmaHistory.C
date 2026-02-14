@@ -15,10 +15,11 @@ Pulsar::ColdPlasmaHistory::ColdPlasmaHistory (const char* name)
 }
 
 //! Copy constructor
-Pulsar::ColdPlasmaHistory::ColdPlasmaHistory (const ColdPlasmaHistory& cph)
-  : Extension (cph)
+Pulsar::ColdPlasmaHistory::ColdPlasmaHistory (const ColdPlasmaHistory& that)
+  : Extension (that)
 {
-  *this = cph;
+  relative = that.relative;
+  absolute = that.absolute;
 }
 
 void Pulsar::ColdPlasmaMeasure::set_reference_frequency (double MHz)

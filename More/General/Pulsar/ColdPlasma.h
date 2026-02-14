@@ -105,7 +105,9 @@ namespace Pulsar {
     { relative.set_frequency(frequency); absolute.set_frequency(frequency); }
 
     //! Execute the correction for the current get_reference_frequency and get_measure
-    /* \post All data will be corrected to the reference frequency */
+    /* \post All data will be corrected to the reference frequency 
+    
+      Calls update and range, then updates the history. */
     void execute1 (Integration*);
 
     //! Undo the relative correction
@@ -458,7 +460,8 @@ catch (Error& error)
 }
 
 
-/*! 
+/*! Calls setup, update, and range, but does not modify history
+
    \param start_chan the first channel to be corrected
    \param end_chan one greater than the last channel to be corrected
    \param reference_frequency the reference frequency
