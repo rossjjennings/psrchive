@@ -1,5 +1,11 @@
 # PSRCHIVE GitLab CI/CD Configuration
-# Demo configuration for shared runners (gitlab.com)
+# Runs on gitlab.com shared runners
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^adacs\//
 
 stages:
   - build
