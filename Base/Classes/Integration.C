@@ -95,12 +95,12 @@ void Pulsar::Integration::add_extension (Extension* ext)
 
   if (index < extension.size())  {
     if (verbose)
-      cerr << "Pulsar::Integration::add_extension replacing" << endl;
+      cerr << "Pulsar::Integration::add_extension replacing " << ext->get_extension_name() << endl;
     extension[index] = ext;
   }
   else {
     if (verbose)
-      cerr << "Pulsar::Integration::add_extension appending" << endl;
+      cerr << "Pulsar::Integration::add_extension appending " << ext->get_extension_name() << endl;
     extension.push_back(ext);
   }
 }

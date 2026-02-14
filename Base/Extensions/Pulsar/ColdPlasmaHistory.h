@@ -26,7 +26,7 @@ namespace Pulsar {
     double get_measure () const { return measure; }
 
     //! Set true when the measure has been corrected
-    void set_corrected (bool flag) { corrected = flag; }
+    void set_corrected (bool flag);
     //! Return true when the measure has been corrected
     bool get_corrected () const { return corrected; }
 
@@ -40,6 +40,14 @@ namespace Pulsar {
     //! Get the reference frequency
     double get_reference_frequency () const;
 
+    //! The type of measurement
+    typedef enum { DispersionMeasure, RotationMeasure, Unknown } Measurement;
+    void set_measurement (Measurement m) { measurement = m; }
+
+    //! The reference frequency policy
+    typedef enum { Relative, Absolute, None } Reference;
+    void set_reference (Reference r) { reference = r; }
+
   protected:
 
     //! The corrected measure
@@ -50,6 +58,12 @@ namespace Pulsar {
 
     //! Set true when the measure has been corrected
     bool corrected = false;
+
+    //! The type of measure
+    Measurement measurement = Unknown;
+
+    //! The reference frequency policy
+    Reference reference = None;
   };
 
   //! Stores parameters used to correct dispersion and Faraday rotation in each Integration
@@ -76,6 +90,9 @@ namespace Pulsar {
     //! Get the correction history for the measure corrected with respect to infinite frequency
     ColdPlasmaMeasure* get_absolute() { return &absolute; }
     const ColdPlasmaMeasure* get_absolute() const { return &absolute; }
+
+    //! Set the measurement type
+    void set_measurement (ColdPlasmaMeasure::Measurement);
   };
   
 }

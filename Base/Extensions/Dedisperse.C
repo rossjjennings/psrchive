@@ -11,6 +11,7 @@
 Pulsar::Dedisperse::Dedisperse ()
   : ColdPlasmaHistory ("Dedisperse")
 {
+  set_measurement (ColdPlasmaMeasure::DispersionMeasure);
 }
 
 //! Copy constructor

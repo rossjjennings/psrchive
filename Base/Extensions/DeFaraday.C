@@ -10,6 +10,7 @@
 Pulsar::DeFaraday::DeFaraday ()
   : ColdPlasmaHistory ("DeFaraday")
 {
+  set_measurement (ColdPlasmaMeasure::RotationMeasure);
 }
 
 //! Copy constructor

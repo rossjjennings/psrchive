@@ -81,7 +81,7 @@ void Pulsar::Archive::init_DeFaraday (Integration* subint, bool overwrite_absolu
   // start with the assumption that nothing is corrected
   history->get_relative()->set_corrected(false);
 
-  if ( get_dedispersed() )
+  if ( get_faraday_corrected() )
   {
     if (verbose > 2)
       cerr << "Pulsar::Archive::init_DeFaraday derotated RM=" << get_rotation_measure() << endl;
