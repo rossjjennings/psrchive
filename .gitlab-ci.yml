@@ -41,7 +41,7 @@ image: ubuntu:22.04
 
 .install_dependencies: &install_dependencies
   - apt-get update -qq
-  - apt-get install -y -qq
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq
       autoconf
       automake
       libtool
@@ -101,7 +101,7 @@ python-bindings:
     - when: on_success
   before_script:
     - *install_dependencies
-    - apt-get install -y -qq python3-dev python3-numpy swig
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
   script:
     - ./bootstrap
     - ./configure --prefix=/tmp/psrchive --enable-shared
