@@ -21,12 +21,13 @@ variables:
 # has diverged (--ff-only fails), indicating SourceForge is deprecated.
 sync-sourceforge:
   stage: sync
-  image: alpine/git:latest
+  image: alpine:latest
   variables:
     GIT_STRATEGY: none
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
+    - apk add --no-cache git
     - git clone --branch master
         "https://oauth2:${GITLAB_PUSH_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git" repo
     - cd repo
