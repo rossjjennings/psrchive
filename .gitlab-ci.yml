@@ -3,16 +3,37 @@
 
 workflow:
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_BRANCH =~ /^adacs\//
 
 stages:
+  - sync
   - build
   - test
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+
+# Sync SourceForge master into GitLab master (one-way).
+# Runs only on scheduled pipelines. Stops cleanly if GitLab master
+# has diverged (--ff-only fails), indicating SourceForge is deprecated.
+sync-sourceforge:
+  stage: sync
+  image: alpine/git:latest
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - git clone --branch master
+        "https://oauth2:${GITLAB_PUSH_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git" repo
+    - cd repo
+    - git remote add sourceforge https://git.code.sf.net/p/psrchive/code
+    - git fetch sourceforge master
+    - git merge --ff-only sourceforge/master
+    - git push origin master
 
 # Use Ubuntu 22.04 LTS as base image
 image: ubuntu:22.04
@@ -34,6 +55,10 @@ image: ubuntu:22.04
 
 build:
   stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: on_success
   before_script:
     - *install_dependencies
   script:
@@ -47,6 +72,10 @@ build:
 
 test:
   stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: on_success
   needs:
     - build
   before_script:
