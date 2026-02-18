@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2025 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -192,6 +192,8 @@ catch (Error& error)
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::execute (Archive* arch)
 {
+  if (Archive::verbose > 2)
+    std::cerr << "Pulsar::" + name + "::execute (Archive*)" << std::endl;
   for (unsigned i=0; i<arch->get_nsubint(); i++)
     execute1( arch->get_Integration(i) );
 }

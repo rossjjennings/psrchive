@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 - 2023 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -1263,6 +1263,8 @@ string Pulsar::Interpreter::defaraday (const string& args) try
 {
   if (!args.length())
   {
+    if (VERBOSE)
+      cerr << "Pulsar::Interpreter::defaraday calling Archive::defaraday" << endl;
     get()->defaraday();
     return response (Good);
   }
@@ -1281,8 +1283,15 @@ string Pulsar::Interpreter::defaraday (const string& args) try
   }
 
   xform.set_rotation_measure( get()->get_rotation_measure() );
-  xform.execute( get() );
 
+  if (VERBOSE)
+    cerr << "Pulsar::Interpreter::defaraday calling FaradayRotation::execute with"
+         << " reference_frequency=" << xform.get_reference_frequency()
+         << " reference_wavelength=" << xform.get_reference_wavelength()
+         << " rotation_measure=" << xform.get_rotation_measure() << endl;
+
+  // FaradayRotation::execute sets the correction history flags
+  xform.execute( get() );
   return response (Good);
 }
 catch (Error& error)

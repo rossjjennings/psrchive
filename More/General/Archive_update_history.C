@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2025 by Willem van Straten
+ *   Copyright (C) 2025-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/AuxColdPlasma.h"
+#include "Pulsar/BirefringenceHistory.h"
+#include "Pulsar/DispersionHistory.h"
 
 using namespace std;
 
@@ -21,9 +23,10 @@ void Pulsar::Archive::update_absolute_dispersion () try
   for (unsigned isub=0; isub < get_nsubint(); isub++)
   {
     auto subint = get_Integration(isub);
-
-    double dm = subint->get_absolute_dispersion_measure();
-    if (dm != 0.0)
+    auto history = subint->get<DispersionHistory>();
+    if (!history)
+      continue;
+    if (history->get_absolute()->get_corrected())
       absolute_dm_corrected = true;
   }
 
@@ -48,9 +51,10 @@ void Pulsar::Archive::update_absolute_rotation () try
   for (unsigned isub=0; isub < get_nsubint(); isub++)
   {
     auto subint = get_Integration(isub);
-
-    double rm = subint->get_absolute_rotation_measure();
-    if (rm != 0.0)
+    auto history = subint->get<BirefringenceHistory>();
+    if (!history)
+      continue;
+    if (history->get_absolute()->get_corrected())
       absolute_rm_corrected = true;
   }
 
