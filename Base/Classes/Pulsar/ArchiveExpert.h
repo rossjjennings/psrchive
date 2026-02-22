@@ -85,6 +85,16 @@ namespace Pulsar {
     static void get_agent_list( std::vector< std::pair< std::string,std::string > > &details )
     { return Archive::Agent::get_list( details ); }
 
+    //! Update the AuxColdPlasma extension, as needed
+    /*! Assumes that the dedisperse worker function has been applied to all channels */
+    void update_absolute_dispersion()
+    { instance->update_absolute_dispersion(); }
+
+    //! Update the AuxColdPlasma extension, as needed
+    /*! Assumes that the defaraday worker function has been applied to all channels */
+    void update_absolute_rotation()
+    { instance->update_absolute_rotation(); }
+
   private:
 
     //! instance

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,8 +9,8 @@
 
 #include "Pulsar/Dispersion.h"
 
+#include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/AuxColdPlasmaMeasures.h"
@@ -81,7 +81,7 @@ void Pulsar::Dispersion::execute (Archive* arch)
   ColdPlasma<DispersionDelay,DispersionHistory>::execute (arch);
   arch->set_dispersion_measure( get_dispersion_measure() );
   arch->set_dedispersed( true );
-  arch->get<AuxColdPlasma>()->set_dispersion_corrected( true );
+  arch->expert()->update_absolute_dispersion();
 }
 
 //! Undo the correction for an entire Pulsar::Archive
