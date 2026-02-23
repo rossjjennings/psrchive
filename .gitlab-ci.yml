@@ -229,3 +229,50 @@ python-bindings-ska:
     - export LD_LIBRARY_PATH=/tmp/psrchive/lib
     - export PYTHONPATH=$(find /tmp/psrchive -name psrchive.py -printf '%h\n' | head -1)
     - python3 -c "import psrchive; print('Python bindings OK')"
+
+# Static analysis (informational, does not block pipeline)
+cppcheck:
+  stage: analysis
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: on_success
+  before_script:
+    - apt-get update -qq
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cppcheck
+  script:
+    - cppcheck --enable=warning,performance,portability
+        --suppress=missingIncludeSystem
+        --xml --xml-version=2
+        -I Util -I Base -I More
+        Util Base More 2> cppcheck-report.xml
+    - cppcheck --enable=warning,performance,portability
+        --suppress=missingIncludeSystem
+        Util Base More
+  artifacts:
+    when: always
+    paths:
+      - cppcheck-report.xml
+    expire_in: 1 week
+
+clang-tidy:
+  stage: analysis
+  needs:
+    - build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: on_success
+  before_script:
+    - *install_dependencies
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
+  script:
+    - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
+        | head -50
+        | xargs -r clang-tidy -p . --quiet 2>&1
+        | tee clang-tidy-report.txt || true
+  artifacts:
+    when: always
+    paths:
+      - clang-tidy-report.txt
+    expire_in: 1 week
