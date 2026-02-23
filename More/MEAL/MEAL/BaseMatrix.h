@@ -7,11 +7,11 @@ class Matrix
 public:
 	//Resizes the matrix to the specifications
 	//(SHOULD IT ONLY RESIZE SMALLER OR CAN IT RESIZE TO A LARGER SIZE?, IF IT CAN DOES IT FILL IT WITH ZEROES?) AM I ASSUMING ALL MATRICES WILL BE SQUARE?
-	virtual void resize( int nRow,  int nCol) = 0;
+	virtual void resize( size_t nRow,  size_t nCol) = 0;
 	virtual T getElement(int i, int j)const = 0;
 	virtual void setElement(int i, int j, T value) = 0;
-	
-	virtual int getSize()const = 0; //Assumes Matrix is Square
+
+	virtual size_t getSize()const = 0; //Assumes Matrix is Square
 
 	virtual void setZero() = 0; //Sets all elements in the matrix to zero
 	virtual void setIdentity(); //Sets the matrix to the identity matrix
@@ -32,7 +32,7 @@ void Matrix<T>::setIdentity()
 {
 	setZero();
 
-	for(int i = 0; i < this->getSize(); i++)
+	for(size_t i = 0; i < this->getSize(); i++)
 	{
 		setElement(i, i, 1);
 	}
@@ -46,9 +46,9 @@ void Matrix<T>::operator=(const Matrix<T>* RHS)
 		this->resize(RHS->getSize(), RHS->getSize() );
 
 	//Set the elements
-	for(int i = 0; i < RHS->getSize(); i++)
+	for(size_t i = 0; i < RHS->getSize(); i++)
 	{
-		for(int j = 0; j < RHS->getSize(); j++)
+		for(size_t j = 0; j < RHS->getSize(); j++)
 		{
 			this->setElement(i, j, RHS->getElement(i, j));
 		}

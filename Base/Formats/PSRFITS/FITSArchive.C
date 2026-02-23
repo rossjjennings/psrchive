@@ -106,6 +106,7 @@ Pulsar::FITSArchive::FITSArchive()
 //
 //
 Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "FITSArchive copy construct" << endl;

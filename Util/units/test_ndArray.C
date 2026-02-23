@@ -16,9 +16,9 @@ int main ()
 {
   ndArray<3,unsigned> data;
 
-  int nrow=5;
-  int ncol=4;
-  int ndim=3;
+  unsigned nrow=5;
+  unsigned ncol=4;
+  unsigned ndim=3;
 
   // resize an nrow by ncol by nchan 3-dimensional array
   data*nrow*ncol*ndim;

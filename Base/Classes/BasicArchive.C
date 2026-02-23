@@ -53,6 +53,7 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
 }
 
 Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy)
+  : Archive()
 {
   if (verbose == 3)
     cerr << "Pulsar::BasicArchive:: copy ctor this=" << this << endl;
@@ -134,13 +135,13 @@ void Pulsar::BasicArchive::set_nbin (unsigned numbins)
   nbin = numbins;
 }
 
-//! Get the name of the telescope
+//!ï¿½Get the name of the telescope
 std::string Pulsar::BasicArchive::get_telescope () const
 {
   return telescope;
 }
 
-//! Set the name of the telescope
+//!ï¿½Set the name of the telescope
 void Pulsar::BasicArchive::set_telescope (const std::string& tel)
 {
   telescope = tel;

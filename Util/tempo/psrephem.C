@@ -190,8 +190,8 @@ int Legacy::psrephem::unload (const std::string& filename) const
     if (parmStatus[ieph] && parmTypes[ieph] == EPH_TYPE_STRING)
     {
       assert (value_str[ieph].length() < EPH_STR_LEN -1);
-      strncpy (ephemstr[ieph], value_str[ieph].c_str(), EPH_STR_LEN);
-      assert (ephemstr[ieph][EPH_STR_LEN-1] == '\0');
+      strncpy (ephemstr[ieph], value_str[ieph].c_str(), EPH_STR_LEN - 1);
+      ephemstr[ieph][EPH_STR_LEN - 1] = '\0';
     }
     else
       ephemstr[ieph][0] = '\0';
@@ -736,8 +736,8 @@ int Legacy::psrephem::unload (string* outstr) const
     if (parmTypes[ieph] == EPH_TYPE_STRING)
     {
       assert (value_str[ieph].length() < EPH_STR_LEN - 1);
-      strncpy (ephstr, value_str[ieph].c_str(), EPH_STR_LEN);
-      assert (ephstr[EPH_STR_LEN-1] == '\0');
+      strncpy (ephstr, value_str[ieph].c_str(), EPH_STR_LEN - 1);
+      ephstr[EPH_STR_LEN - 1] = '\0';
     }
     else
       ephstr[0] = '\0';

@@ -52,7 +52,7 @@ namespace Pulsar {
   protected:
 
     //! Number of coeffs kept
-    int ncoeff;
+    unsigned ncoeff;
 
     //! Threshold type
     Threshold thresh;

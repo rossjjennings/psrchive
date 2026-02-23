@@ -20,7 +20,7 @@ class Counter: public Reference::Able
 public:
 
   Counter () { instance_count ++; }
-  Counter (const Counter&) { instance_count ++; }
+  Counter (const Counter&) : Reference::Able() { instance_count ++; }
   ~Counter () { instance_count --; }
   static unsigned get_instance_count() { return instance_count; }
 };
@@ -182,7 +182,7 @@ class Component: public Reference::Able
 public:
 
   Component (Composite* c) { instance_count ++; composite = c; }
-  Component (const Component& that) { instance_count ++; composite = that.composite; }
+  Component (const Component& that) : Reference::Able() { instance_count ++; composite = that.composite; }
   ~Component () { instance_count --; }
   bool has_composite () { return composite; }
   static unsigned get_instance_count() { return instance_count; }
@@ -201,7 +201,7 @@ class Composite: public Reference::Able
 public:
 
   Composite () { instance_count ++; component = new Component(this); }
-  Composite (const Composite&) { instance_count ++; component = new Component(this); }
+  Composite (const Composite&) : Reference::Able() { instance_count ++; component = new Component(this); }
   ~Composite () { instance_count --; }
   Component* get_component() { return component; }
   static unsigned get_instance_count() { return instance_count; }

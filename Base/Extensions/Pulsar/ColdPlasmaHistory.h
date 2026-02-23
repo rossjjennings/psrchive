@@ -83,6 +83,9 @@ namespace Pulsar {
     //! Copy constructor
     ColdPlasmaHistory (const ColdPlasmaHistory&);
 
+    //! Copy assignment operator
+    ColdPlasmaHistory& operator= (const ColdPlasmaHistory&) = default;
+
     //! Get the correction history for the measure corrected with respect to centre frequency
     ColdPlasmaMeasure* get_relative() { return &relative; }
     const ColdPlasmaMeasure* get_relative() const { return &relative; }

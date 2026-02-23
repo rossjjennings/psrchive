@@ -26,6 +26,9 @@ namespace Pulsar {
     //! Copy constructor
     ObsDescription (const ObsDescription&);
 
+    //! Copy assignment operator
+    ObsDescription& operator= (const ObsDescription&) = default;
+
     //! Clone method
     ObsDescription* clone () const;
 

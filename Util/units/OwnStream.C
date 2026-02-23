@@ -16,7 +16,7 @@ OwnStream::OwnStream ()
 
 //! Constructor
 OwnStream::OwnStream (const OwnStream& copy)
-  : cout (copy.cout.rdbuf()), cerr (copy.cerr.rdbuf())
+  : Reference::Able(copy), cout (copy.cout.rdbuf()), cerr (copy.cerr.rdbuf())
 {
 }
 

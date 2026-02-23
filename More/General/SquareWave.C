@@ -298,10 +298,10 @@ void Pulsar::SquareWave::levels (const Pulsar::Integration* subint,
   // something more intelligent at some point.
   if (nstate==3)
   { 
-    int high_mid = (hightolow > lowtohigh) 
+    unsigned high_mid = (hightolow > lowtohigh)
       ? (lowtohigh + hightolow) / 2
       : (lowtohigh + nbin + hightolow) / 2;
-    if (high_mid > nbin) 
+    if (high_mid > nbin)
       high_mid -= nbin;
     high_end = high_mid - buffer;
     if (verbose) 

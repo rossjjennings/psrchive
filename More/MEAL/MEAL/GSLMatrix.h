@@ -13,21 +13,21 @@ private:
 	void setMatrix(gsl_matrix* newMatrix);
 
 public:
-	GSLMatrix(int nRow, int nCol);
+	GSLMatrix(size_t nRow, size_t nCol);
 	~GSLMatrix();
 
-	void resize(int nRow, int nCol); //If the matrix has elements in it should it keep those elements or is it ok if they are lost?
-	
+	void resize(size_t nRow, size_t nCol); //If the matrix has elements in it should it keep those elements or is it ok if they are lost?
+
 	T getElement(int i, int j) const;
 	void setElement(int i, int j, T value);
 	gsl_matrix* getMatrix() const;
-	
-	int getSize() const;
+
+	size_t getSize() const;
 	void setZero();
 	void invert();
 
-	Matrix<T>* operator*(const Matrix<T>* RHS); 
-	Matrix<T>* operator+(const Matrix<T>* RHS); 
+	Matrix<T>* operator*(const Matrix<T>* RHS);
+	Matrix<T>* operator+(const Matrix<T>* RHS);
 	Matrix<T>* operator-(const Matrix<T>* RHS);
 	void operator=(const GSLMatrix<T>* RHS);
 
@@ -35,7 +35,7 @@ public:
 
 
 template<typename T>
-GSLMatrix<T>::GSLMatrix(int nRow, int nCol)
+GSLMatrix<T>::GSLMatrix(size_t nRow, size_t nCol)
 {
 	_matrix = gsl_matrix_alloc(nRow, nCol);
 }
@@ -61,7 +61,7 @@ void GSLMatrix<T>::setMatrix(gsl_matrix* newMatrix)
 
 
 template<typename T>
-void GSLMatrix<T>::resize(int nRow, int nCol)
+void GSLMatrix<T>::resize(size_t nRow, size_t nCol)
 {
 	if(_matrix != NULL)
 		gsl_matrix_free(_matrix);
@@ -90,7 +90,7 @@ template<typename T>
 void GSLMatrix<T>::invert()
 {
 	int sigNum;
-	
+
 	//gsl_matrix for the output
 	gsl_matrix* outputMatrix = gsl_matrix_alloc(_matrix->size1, _matrix->size1 );
 
@@ -104,7 +104,7 @@ void GSLMatrix<T>::invert()
 	gsl_linalg_LU_invert(_matrix, permutationM, outputMatrix);
 
 	this->setMatrix(outputMatrix);
-	
+
 	gsl_permutation_free(permutationM);
 }
 
@@ -118,7 +118,7 @@ gsl_matrix* GSLMatrix<T>::getMatrix() const
 
 
 template<typename T>
-int GSLMatrix<T>::getSize() const
+size_t GSLMatrix<T>::getSize() const
 {
 	return _matrix->size1;
 }
@@ -147,19 +147,19 @@ Matrix<T>* GSLMatrix<T>::operator*(const Matrix<T>* RHS)
   result->setZero();
 
   //For each row
-  for(int row = 0; row < _matrix->size1; row++)
+  for(size_t row = 0; row < _matrix->size1; row++)
   {
     //for each element in that row
-    for(int element = 0; element < _matrix->size2; element++)
+    for(size_t element = 0; element < _matrix->size2; element++)
     {
       //calculate the value for the current element
-      for(int i = 0; i < _matrix->size1; i++)
+      for(size_t i = 0; i < _matrix->size1; i++)
       {
 	result->setElement(row, element, (result->getElement(row, element) ) + this->getElement(row, i) * RHS->getElement(i,element));
       }
     }
   }
-  
+
   return result;
 }
 
@@ -180,10 +180,10 @@ Matrix<T>* GSLMatrix<T>::operator+(const Matrix<T>* RHS)
 	result->setZero();
 
 	//For each row
-	for(int row = 0; row < _matrix->size1; row++)
+	for(size_t row = 0; row < _matrix->size1; row++)
 	{
 		//for each element in that row
-		for(int element = 0; element < _matrix->size1; element++)
+		for(size_t element = 0; element < _matrix->size1; element++)
 		{
 			result->setElement(row, element, this->getElement(row, element) + RHS->getElement(row, element) );
 		}
@@ -208,10 +208,10 @@ Matrix<T>* GSLMatrix<T>::operator-(const Matrix<T>* RHS)
 	result->setZero();
 
 	//For each row
-	for(int row = 0; row < _matrix->size1; row++)
+	for(size_t row = 0; row < _matrix->size1; row++)
 	{
 		//for each element in that row
-		for(int element = 0; element < _matrix->size1; element++)
+		for(size_t element = 0; element < _matrix->size1; element++)
 		{
 			result->setElement(row, element, this->getElement(row, element) - RHS->getElement(row, element) );
 		}

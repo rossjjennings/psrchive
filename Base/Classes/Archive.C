@@ -77,6 +77,7 @@ Pulsar::Archive::Archive ()
 
 //! The Archive copy constructor must never be called, call Archive::copy
 Pulsar::Archive::Archive (const Archive& archive)
+  : IntegrationManager()
 {
   throw Error (Undefined, "Pulsar::Archive copy constructor",
                "sub-classes must define copy constructor");

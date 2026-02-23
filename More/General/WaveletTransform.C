@@ -57,8 +57,8 @@ void Pulsar::WaveletTransform::free_mem() {
   if (wave!=NULL) gsl_wavelet_free(wave);
 }
 
-static int log2i(int n) {
-  int rv=0;
+static unsigned log2i(unsigned n) {
+  unsigned rv=0;
   while ((n>>rv)>1) { rv++; }
   return(rv);
 }
@@ -66,19 +66,18 @@ static int log2i(int n) {
 void Pulsar::WaveletTransform::init_mem() {
 
   // Check that n is valid
-  unsigned tmp, tmp_log;
-  tmp_log = log2i(npts);
-  tmp = 1 << tmp_log;
-  if (npts != tmp) 
+  unsigned tmp_log = log2i(npts);
+  unsigned tmp = 1 << tmp_log;
+  if (npts != tmp)
     throw Error (InvalidParam, "Pulsar::WaveletTransform::init_mem",
-        "npts=%d is not a power of two", npts);
+        "npts=%u is not a power of two", npts);
   log2_npts = tmp_log;
   
   if (decimate) {
     data = new double[npts];
     work = gsl_wavelet_workspace_alloc(npts);
   } else {
-    data = new double[npts*log2_npts];
+    data = new double[npts*(unsigned)log2_npts];
   }
     
   wave = gsl_wavelet_alloc(type, order);
@@ -193,7 +192,7 @@ void Pulsar::WaveletTransform::invert() {
   state = Time;
 }
 
-const int Pulsar::WaveletTransform::get_ncoeff(int level) const {
+unsigned Pulsar::WaveletTransform::get_ncoeff(int level) const {
   if (level==-1) return 1;
   if (decimate)
     return 1<<level;
@@ -215,9 +214,9 @@ double Pulsar::WaveletTransform::get_data(int level, int k) {
    throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
       "level %d out of range (log2_npts=%d)", level, log2_npts); 
 
-  if ((k<0) || (k>=get_ncoeff(level)))
+  if ((k<0) || ((unsigned)k>=get_ncoeff(level)))
     throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
-      "index %d out of range (level=%d, log2_npts=%d, npts=%d, decimate=%s)", 
+      "index %d out of range (level=%d, log2_npts=%d, npts=%u, decimate=%s)",
       k, level, log2_npts, npts, decimate?"true":"false");
 
   if (decimate) { 
@@ -231,7 +230,7 @@ double Pulsar::WaveletTransform::get_data(int level, int k) {
 
     if (level==-1) return mean;
 
-    int idx = ((log2_npts - level) - 1)*npts + k;
+    unsigned idx = (unsigned)((log2_npts - level) - 1)*npts + k;
     return data[idx];
 
   }
@@ -242,10 +241,10 @@ double Pulsar::WaveletTransform::get_data(int n) {
   if (data==NULL) 
     throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
         "data array not allocated");
-  unsigned max_n = decimate ? npts : log2_npts*npts;
-  if ((n<0) || (n>=max_n)) 
+  unsigned max_n = decimate ? npts : (unsigned)log2_npts*npts;
+  if ((n<0) || ((unsigned)n>=max_n))
     throw Error (InvalidRange, "Pulsar:WaveletTransform::get_data",
-        "index %d out of range (max_n=%d)", n, max_n);
+        "index %d out of range (max_n=%u)", n, max_n);
   return data[n];
 }
 

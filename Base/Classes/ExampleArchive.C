@@ -38,6 +38,7 @@ Pulsar::ExampleArchive::ExampleArchive (const Archive& arch)
 }
 
 Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::ExampleArchive construct copy ExampleArchive" << endl;

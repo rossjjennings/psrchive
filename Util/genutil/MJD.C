@@ -101,11 +101,11 @@ string MJD::printdays() const
 
 string MJD::printhhmmss() const
 {
-  char dummy[10];
+  char dummy[32];
   int hh, mm, ss;
 
   ss2hhmmss (&hh, &mm, &ss, secs);
-  snprintf (dummy, 10, "%2.2d%2.2d%2.2d", hh,mm,ss);
+  snprintf (dummy, sizeof(dummy), "%2.2d%2.2d%2.2d", hh,mm,ss);
   return dummy;
 }
 

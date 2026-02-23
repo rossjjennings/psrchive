@@ -25,11 +25,13 @@ public:
   {
     text = "tui import failure";
   }
-  extension (const extension& ext) 
+  extension (const extension& ext)
+    : Reference::Able()
   {
     text = ext.text;
   }
-  ~extension () 
+  extension& operator= (const extension&) = default;
+  ~extension ()
   {
   }
 

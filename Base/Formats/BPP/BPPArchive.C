@@ -60,6 +60,7 @@ Pulsar::BPPArchive::BPPArchive (const Archive& arch)
 }
 
 Pulsar::BPPArchive::BPPArchive (const BPPArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::BPPArchive construct copy BPPArchive" << endl;

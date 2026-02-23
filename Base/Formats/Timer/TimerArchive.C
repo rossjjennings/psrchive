@@ -46,6 +46,7 @@ Pulsar::TimerArchive::TimerArchive ()
 //
 //
 Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
+  : Archive()
 {
   if (verbose > 2)
     cerr << "Pulsar::TimerArchive copy ctor this=" << this << endl;

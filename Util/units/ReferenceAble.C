@@ -90,6 +90,7 @@ Reference::Able::Able ()
 //////////////////////////////////////////////////////////////////////////
 // copy constructor
 Reference::Able::Able (const Able&)
+  : HeapTracked()
 {
   instance_count++;
   __reference_count = 0;

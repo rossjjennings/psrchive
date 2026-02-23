@@ -23,7 +23,7 @@ double mean(float* x, int N){
 double covariance(float* x, float* y, int N){
    int i;
    float mx,my;
-   float vx,vy;
+   [[maybe_unused]] float vx,vy;
    float *z;
 
    mx=mean(x,N);
