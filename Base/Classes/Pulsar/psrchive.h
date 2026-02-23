@@ -118,6 +118,6 @@
 
  */
 
-#define PSRCHIVE_HTTP "http://psrchive.sourceforge.net"
+#define PSRCHIVE_HTTP "https://gitlab.com/pulsar-astronomy/psrchive"
 
 #endif

@@ -395,7 +395,7 @@ polyco Tempo::Predict::generate_work () const
             warn << "Tempo::Predict::generate WARNING rms=" 
                  << rms_turns * 1e3 << " milliturns" << endl;
             warn << "Tempo::Predict::generate "
-                    "http://psrchive.sourceforge.net/warnings/tempo" << endl;
+                    "https://gitlab.com/pulsar-astronomy/psrchive/-/issues" << endl;
           }
         }
       }

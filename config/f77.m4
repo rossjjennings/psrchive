@@ -35,7 +35,7 @@ FLIBS=$FLIBS
 
 cause the linker to choose the wrong standard C++ libraries.
 
-Please see http://psrchive.sourceforge.net/third/cxx#f77
+Please see https://gitlab.com/pulsar-astronomy/psrchive/-/blob/master/packages/
 
 ])
     fi
