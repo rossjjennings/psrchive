@@ -1,0 +1,83 @@
+Installing PSRCHIVE
+===================
+
+Prerequisites
+-------------
+
+Required:
+  - C++11 compiler (g++ >= 4.8 or clang++ >= 3.3)
+  - Fortran compiler (gfortran)
+  - FFT library: FFTW3 (recommended), Intel MKL, or Intel IPP
+  - GNU autotools: autoconf >= 2.69, automake, libtool
+  - pkg-config
+
+Optional:
+  - CFITSIO    — PSRFITS file format support
+  - TEMPO2     — pulsar timing predictor library
+  - PGPLOT     — plotting support
+  - GSL        — GNU Scientific Library (statistical routines)
+  - readline   — command-line editing in psrsh
+  - SWIG + Python dev headers — Python bindings (requires --enable-shared)
+
+On Debian/Ubuntu:
+  apt-get install autoconf automake libtool g++ gfortran make pkg-config \
+      libfftw3-dev libgsl-dev libreadline-dev
+
+On Arch Linux:
+  pacman -S gcc-fortran fftw gsl readline
+
+Basic Build
+-----------
+
+  git submodule update --init     # Initialize epsic math library
+  ./bootstrap
+  ./configure --prefix=/usr/local
+  make -j$(nproc)
+  make install
+
+Configure Options
+-----------------
+
+Build scope:
+  --enable-lean         Disable MEAL, Polarimetry, Timing, RFIMitigation,
+                        and Plotting modules. Produces a smaller build but
+                        is insufficient for DSPSR (which needs Faraday.h
+                        from Polarimetry).
+
+Library type:
+  --enable-shared       Build shared libraries (.so). Required for Python/SWIG
+                        bindings. Default is static libraries only.
+
+Developer options:
+  --enable-debug        Keep debugging symbols (-g) in compiled objects.
+                        Without this flag, -g is stripped from compiler flags
+                        to reduce binary size.
+  --enable-werror       Treat all compiler warnings as errors (-Werror).
+                        Used in CI to prevent introduction of new warnings.
+                        Not recommended for end users as different compiler
+                        versions may produce different warnings.
+
+Dependency paths:
+  --with-fftw3-dir=DIR        FFTW3 installation prefix
+  --with-cfitsio-dir=DIR      CFITSIO installation prefix
+  --with-tempo2-dir=DIR       TEMPO2 installation prefix
+  --with-pgplot-dir=DIR       PGPLOT installation prefix
+  --with-gsl-dir=DIR          GSL installation prefix
+  --with-readline-dir=DIR     readline installation prefix
+
+Python Bindings
+---------------
+
+  ./configure --prefix=/usr/local --enable-shared
+  make -j$(nproc)
+  make install
+  export LD_LIBRARY_PATH=/usr/local/lib
+  python3 -c "import psrchive"
+
+Running Tests
+-------------
+
+  make check
+
+Tests are self-contained and generate synthetic data internally.
+No external test data files are required.
