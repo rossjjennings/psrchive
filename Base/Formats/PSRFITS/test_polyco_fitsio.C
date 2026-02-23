@@ -131,7 +131,7 @@ int main (int argc, char** argv)
   string system_call = "diff .test_fitsio.in .test_fitsio.out";
   cerr << system_call << endl;
  
-  system (system_call.c_str());
+  (void) system (system_call.c_str());
 
   return 0;
 }
