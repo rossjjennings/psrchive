@@ -1,0 +1,21 @@
+# Doxygen override for Sphinx/Breathe XML generation
+# Inherits all settings from the existing psrchive.dox
+
+@INCLUDE = ../Documentation/psrchive.dox
+
+# Redirect output into docs/_doxygen/psrchive/
+OUTPUT_DIRECTORY       = _doxygen/psrchive
+
+# Generate XML for Breathe, disable HTML
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+
+# Disable tag files (not needed for Breathe)
+TAGFILES               =
+GENERATE_TAGFILE       =
+
+# Disable custom HTML header/footer (not generating HTML)
+HTML_HEADER            =
+HTML_FOOTER            =
