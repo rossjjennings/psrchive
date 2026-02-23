@@ -337,7 +337,8 @@ polyco Tempo::Predict::generate_work () const
     {
       fprintf (stderr, "Tempo::predict loading polyco.dat\n");
       fprintf (stderr, "****** BEGINNING OF FILE ******\n");
-      (void) system( ("cat " + polyco_dat).c_str() );
+      if (system( ("cat " + polyco_dat).c_str() ) != 0)
+        fprintf (stderr, "Tempo::predict failed to cat polyco.dat\n");
       fprintf (stderr, "********* END OF FILE *********\n");
     }
 
