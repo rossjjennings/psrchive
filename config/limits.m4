@@ -12,10 +12,10 @@ AC_DEFUN([SWIN_TEST_LIMITS],
 
   AC_LANG_PUSH(C++)
 
-  AC_TRY_LINK([#include <limits>
-               #include <iostream>],
-              [std::cerr << std::numeric_limits<double>::digits10;],
-              has_numeric_limits=yes, has_numeric_limits=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <limits>
+               #include <iostream>]],
+              [[std::cerr << std::numeric_limits<double>::digits10;]])],
+              [has_numeric_limits=yes], [has_numeric_limits=no])
 
   AC_LANG_POP(C++)
 

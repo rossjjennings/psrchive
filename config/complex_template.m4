@@ -11,9 +11,8 @@ dnl @license AllPermissive
 AC_DEFUN([SWIN_COMPLEX_TEMPLATE],
 [AC_CACHE_CHECK(for good complex<T> template implementation,
 ac_cv_cxx_complex_template,
-[AC_LANG_SAVE
- AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE([
+[AC_LANG_PUSH([C++])
+ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include<complex>
 
 class X {
@@ -34,13 +33,13 @@ public:
  friend X abs (const X&);
  friend X sqrt (const X&);
 };
-],[
+]],[[
 std::complex<X> x;
 std::complex<X> z = sqrt(x);
-],
- ac_cv_cxx_complex_template=yes,
- ac_cv_cxx_complex_template=no)
- AC_LANG_RESTORE
+]])],
+ [ac_cv_cxx_complex_template=yes],
+ [ac_cv_cxx_complex_template=no])
+ AC_LANG_POP([C++])
 ])
 if test "$ac_cv_cxx_complex_template" = yes; then
   AC_DEFINE(HAVE_COMPLEX_TEMPLATE,1,[define if complex template is good])

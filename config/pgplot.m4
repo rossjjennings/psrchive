@@ -34,7 +34,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_REQUIRE([SWIN_LIB_X11])
 
   AC_ARG_WITH([pgplot-extra],
-              AC_HELP_STRING([--with-pgplot-extra=LIBS],
+              AS_HELP_STRING([--with-pgplot-extra=LIBS],
                              [Specify LIBS required by PGPLOT drivers]))
 
   AC_MSG_CHECKING([for PGPLOT installation])
@@ -59,37 +59,37 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   LIBS="$ac_save_LIBS $PGPLOT_LIBS"
   CFLAGS="$ac_save_CFLAGS $PGPLOT_CFLAGS"
 
-  AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
-              have_pgplot=yes, have_pgplot=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cpgplot.h>]], [[cpgopen(""); cpgend();]])],
+                 [have_pgplot=yes], [have_pgplot=no])
 
   if test $have_pgplot = no; then
     PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11"
     LIBS="$ac_save_LIBS $PGPLOT_LIBS"
-    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
-                have_pgplot=yes, have_pgplot=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cpgplot.h>]], [[cpgopen(""); cpgend();]])],
+                   [have_pgplot=yes], [have_pgplot=no])
   fi
 
   if test $have_pgplot = no; then
     PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11 -lpng"
     LIBS="$ac_save_LIBS $PGPLOT_LIBS"
-    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
-                have_pgplot=yes, have_pgplot=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cpgplot.h>]], [[cpgopen(""); cpgend();]])],
+                   [have_pgplot=yes], [have_pgplot=no])
   fi
 
   if test $have_pgplot = no; then
     # Blade libs
     PGPLOT_LIBS="$PGPLOT_LIBS -L/usr/X11R6/lib -lX11 -lcpgplot -lpgplot -lpng"
     LIBS="$ac_save_LIBS $PGPLOT_LIBS"
-    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
-                have_pgplot=yes, have_pgplot=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cpgplot.h>]], [[cpgopen(""); cpgend();]])],
+                   [have_pgplot=yes], [have_pgplot=no])
   fi
 
   if test $have_pgplot = no; then
     # fink installed:
     PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11 -Wl,-framework -Wl,Foundation -lz -L/sw/lib -lpng -laquaterm"
     LIBS="$ac_save_LIBS $PGPLOT_LIBS"
-    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
-                have_pgplot=yes, have_pgplot=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cpgplot.h>]], [[cpgopen(""); cpgend();]])],
+                   [have_pgplot=yes], [have_pgplot=no])
   fi
 
   AC_MSG_RESULT($have_pgplot)

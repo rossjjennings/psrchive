@@ -16,7 +16,7 @@ AC_DEFUN([MJK_LIB_PSRXML],
   AC_REQUIRE([AM_PATH_XML2])
 
   AC_ARG_WITH([psrxml-dir],
-	  AC_HELP_STRING([--with-psrxml-dir=DIR],
+	  AS_HELP_STRING([--with-psrxml-dir=DIR],
 		  [Specify dir where the PsrXML io library is installed]))
 
 
@@ -37,8 +37,8 @@ AC_DEFUN([MJK_LIB_PSRXML],
   ac_save_CFLAGS=$CFLAGS
   LIBS="$LIBS $PSRXML_LIBS"
   CFLAGS="$CFLAGS $PSRXML_CFLAGS"
-  AC_TRY_LINK([#include <psrxml.h>],[writePsrXml((psrxml*)NULL, "");],
-              have_psrxml=yes, have_psrxml=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <psrxml.h>]], [[writePsrXml((psrxml*)NULL, "");]])],
+                 [have_psrxml=yes], [have_psrxml=no])
 
   AC_MSG_RESULT($have_psrxml)
 

@@ -30,8 +30,8 @@ AC_DEFUN([SWIN_LIB_PUMA],
   LIBS="$ac_save_LIBS $PUMA_LIBS"
   CFLAGS="$ac_save_CFLAGS $PUMA_CFLAGS"
 
-  AC_TRY_LINK([#include <libpuma.h>],[prheader(0,0);],
-              have_puma=yes, have_puma=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libpuma.h>]], [[prheader(0,0);]])],
+                 [have_puma=yes], [have_puma=no])
 
   AC_MSG_RESULT($have_puma)
 

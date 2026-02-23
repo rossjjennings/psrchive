@@ -5,10 +5,10 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
   AC_PROVIDE([SWIN_LIB_PSRCHIVE])
 
   AC_ARG_WITH([psrchive-dir],
-              AC_HELP_STRING([--with-psrchive-dir=DIR],
+              AS_HELP_STRING([--with-psrchive-dir=DIR],
                              [PSRCHIVE is installed in DIR]))
   AC_ARG_WITH([psrchive],
-              AC_HELP_STRING([--with-psrchive=PATH],
+              AS_HELP_STRING([--with-psrchive=PATH],
                              ['psrchive' program to use]))
 
 
@@ -56,8 +56,8 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
       LIBS="$PSRCHIVE_LIBS $LIBS"
 
       AC_LANG_PUSH(C++)
-      AC_TRY_LINK([#include "Pulsar/Archive.h"], [Pulsar::Archive::load("");],
-                  have_psrchive=yes, have_psrchive=no)
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "Pulsar/Archive.h"]], [[Pulsar::Archive::load("");]])],
+                     [have_psrchive=yes], [have_psrchive=no])
       AC_LANG_POP(C++)
 
       if test $have_psrchive = no; then

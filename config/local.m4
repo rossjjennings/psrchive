@@ -13,7 +13,7 @@ AC_DEFUN([SWIN_LOCAL],
 # Set up to use the standard package installation directories
 #
 AC_ARG_ENABLE([local],
-              AC_HELP_STRING([--disable-local],
+              AS_HELP_STRING([--disable-local],
               [Don't use packages in /usr/local or /sw or /opt/local]))
 
 if test x"$enable_local" != x"no"; then
@@ -30,7 +30,7 @@ fi
 # Set up to use the pulsar group package installation directory
 #
 AC_ARG_ENABLE([psrhome],
-              AC_HELP_STRING([--disable-psrhome],
+              AS_HELP_STRING([--disable-psrhome],
               [Don't use packages in $PSRHOME/packages/$LOGIN_ARCH]))
 
 if test -d $PSRHOME/packages/$LOGIN_ARCH -a x"$enable_psrhome" != x"no"; then

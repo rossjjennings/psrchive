@@ -31,20 +31,20 @@ AC_DEFUN([SWIN_LIB_READLINE],
   LIBS="$ac_save_LIBS $READLINE_LIBS"
   CFLAGS="$ac_save_CFLAGS $READLINE_CFLAGS"
 
-  AC_TRY_LINK([#include <stdio.h>
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 	       #include <readline/readline.h>
-               #include <readline/history.h>],
-              [readline(0); rl_completion_matches(0,0);],
-              have_readline=yes, have_readline=no)
+               #include <readline/history.h>]],
+              [[readline(0); rl_completion_matches(0,0);]])],
+              [have_readline=yes], [have_readline=no])
 
   if test $have_readline = no; then
     READLINE_LIBS="-lreadline -ltermcap"
     LIBS="$ac_save_LIBS $READLINE_LIBS"
-    AC_TRY_LINK([#include <stdio.h>
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
                  #include <readline/readline.h>
-                 #include <readline/history.h>],
-                [readline(0); rl_completion_matches(0,0);],
-                have_readline=yes, have_readline=no)
+                 #include <readline/history.h>]],
+                [[readline(0); rl_completion_matches(0,0);]])],
+                [have_readline=yes], [have_readline=no])
   fi
 
   AC_MSG_RESULT($have_readline)
