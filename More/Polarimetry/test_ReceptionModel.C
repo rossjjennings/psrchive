@@ -5,6 +5,35 @@
  *
  ***************************************************************************/
 
+/*
+ 
+ Simulates the observation of some randomly polarized states using
+ an instrument with a random Jones matrix over a range of parallactic angles,
+ then fits a model to the simulated observations.  On each iteration, the 
+ model of the Jones matrix toggles between Britton (2000) and Hamaker (2000).
+
+ By default, this application runs a unit test over 100 random trials.
+
+ Lately, I've also be using this application to explore how different models
+ have different levels of parameter collinearity, as characterized by the 
+ logarithm of the condition number of the Hessian matrix, log_cond.  
+ e.g. to explore how log_cond varies with difficulty:
+
+ #!/usr/bin/bash
+ for difficulty in 0.2 0.3 0.4; do
+  ./test_ReceptionModel -d $difficulty -b0 -o32 -s8 -i 1000 |& grep "mean log(cond(Hessian)"
+ done
+
+ The above loop takes a few minutes to complete, yielding
+
+ mean log(cond(Hessian) Hamaker=11.4376 Britton=11.4773
+ mean log(cond(Hessian) Hamaker=13.9012 Britton=14.5261
+ mean log(cond(Hessian) Hamaker=15.932 Britton=16.8871
+
+ To explore greater levels of difficulty, this code will need to be updated
+ to start with a better first guess for the model parameters.
+*/
+
 #include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/Parallactic.h"
 #include "Pulsar/CelestialProjection.h"
@@ -335,6 +364,11 @@ double mean_AIC = 0.0;
 double mean_GIC = 0.0;
 double mean_SIC = 0.0;
 
+double log_cond_Hamaker = 0.0;
+unsigned count_Hamaker = 0;
+double log_cond_Britton = 0.0;
+unsigned count_Britton = 0;
+
 template<typename T>
 int runtest (T& projection, unsigned iteration)
 {
@@ -628,8 +662,20 @@ int runtest (T& projection, unsigned iteration)
     cerr << error << endl;
     return -1;
   }
- 
-  cerr << "log(condition(Hessian)) " << model.get_solver()->get_log_cond_curvature() << endl;
+
+  double log_cond = model.get_solver()->get_log_cond_curvature(); 
+  cerr << "log(condition(Hessian)) " << log_cond << endl;
+
+  if (hamaker)
+  {
+    log_cond_Hamaker += log_cond;
+    count_Hamaker ++;
+  }
+  else
+  {
+    log_cond_Britton += log_cond;
+    count_Britton ++;
+  }
 
   unsigned nparam = system->get_nparam();
   for (unsigned iparam=0; iparam < nparam; iparam++)
@@ -942,6 +988,13 @@ int main (int argc, char** argv)
     cerr << "Error " << error << endl;
     errors ++;
   }
+
+  cerr << "count Hamaker=" << count_Hamaker << " Britton=" << count_Britton << endl;
+
+  log_cond_Hamaker /= count_Hamaker;
+  log_cond_Britton /= count_Britton;
+
+  cerr << "mean log(cond(Hessian) Hamaker=" << log_cond_Hamaker << " Britton=" << log_cond_Britton << endl;
 
   float percent = ((errors*1000)/nloop)/10.0;
 
