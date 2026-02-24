@@ -40,7 +40,7 @@ namespace Pulsar {
     virtual void set_frame (PlotFrame*);
 
     //! Derived classes must prepare to draw
-    virtual void prepare (const Archive*) {}
+    virtual void prepare (const Archive*);
 
   protected:
 

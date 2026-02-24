@@ -115,8 +115,14 @@ void Pulsar::MultiDataPlot<Type>::finalize ()
 
   Type* main_plot = plots[0];
 
+  if (verbose)
+    cerr << "Pulsar::MultiDataPlot<Type>::finalize include range of all in first" << endl;
+
   for (unsigned i=1; i < plots.size(); i++)
     main_plot->get_frame()->include( plots[i]->get_frame() );
+
+  if (verbose)
+    cerr << "Pulsar::MultiDataPlot<Type>::finalize copy range of first to all" << endl;
 
   for (unsigned i=0; i < plots.size(); i++)
   {
@@ -124,8 +130,14 @@ void Pulsar::MultiDataPlot<Type>::finalize ()
     plots[i]->get_frame()->freeze();
   }
 
+  if (verbose)
+    cerr << "Pulsar::MultiDataPlot<Type>::finalize plot all" << endl;
+
   for (unsigned i=0; i < plots.size(); i++)
     plots[i]->plot( data_sets[i] );
+
+  if (verbose)
+    cerr << "Pulsar::MultiDataPlot<Type>::finalize delete all" << endl;
 
   plots.resize(0);
   data_sets.resize(0);

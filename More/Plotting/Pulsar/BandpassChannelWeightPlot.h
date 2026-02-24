@@ -30,17 +30,17 @@ namespace Pulsar
       Interface( BandpassChannelWeightPlot *s_instance = NULL );
     };
 
-    TextInterface::Parser *get_interface();
+    TextInterface::Parser *get_interface() override;
 
-    void prepare( const Archive *data );
+    void prepare( const Archive *data ) override;
 
-    virtual void preprocess( Archive *data ) {};
+    virtual void preprocess( Archive *data ) override {};
 
     SpectrumPlot *get_psd() { return &psd; }
     ChannelWeightsPlot *get_weights() { return &weights; }
 
-    PlotScale *get_x_scale() { return psd.get_frame()->get_x_scale(); }
-    PlotScale *get_y_scale() { return psd.get_frame()->get_y_scale(); }
+    PlotScale* get_x_scale() { return psd.get_frame()->get_x_scale(); }
+    PlotScale* get_y_scale() { return psd.get_frame()->get_y_scale(); }
 
   private:
     SpectrumPlot psd;

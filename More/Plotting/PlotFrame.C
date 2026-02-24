@@ -262,6 +262,9 @@ void Pulsar::PlotFrame::set_viewport (float x0, float x1,
 
 void Pulsar::PlotFrame::include (PlotFrame* frame)
 {
+  if (Plot::verbose)
+    cerr << "Pulsar::PlotFrame::include this=" << this << " frame=" << frame << endl;
+
   get_x_scale()->include( frame->get_x_scale() );
   get_y_scale()->include( frame->get_y_scale() );
 }

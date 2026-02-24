@@ -88,9 +88,10 @@ void Pulsar::CalibratorParameter::prepare (const Archive* data)
     prepare ( get_Info(data, subint, outlier_threshold), data );
 }
 
-void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
-					   const Archive* data)
+void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info, const Archive* data)
 {
+  cerr << "Pulsar::CalibratorParameter::prepare info=" << _info << endl;
+
   info = _info;
 
   double cfreq = data->get_centre_frequency();
@@ -136,11 +137,10 @@ void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
     plotter.add_plot (y);
   }
 
-  get_frame()->get_x_scale()->set_minmax (plotter.get_x_min(), 
-					  plotter.get_x_max());
-
-  get_frame()->get_y_scale()->set_minmax (plotter.get_y_min(), 
-					  plotter.get_y_max());
+  cerr << "Pulsar::CalibratorParameter::prepare get_x,y_scale()->set_minmax" << endl;
+  get_frame()->get_x_scale()->set_minmax (plotter.get_x_min(), plotter.get_x_max());
+  get_frame()->get_y_scale()->set_minmax (plotter.get_y_min(), plotter.get_y_max());
+  cerr << "Pulsar::CalibratorParameter::prepare done" << endl;
 }
 
 
