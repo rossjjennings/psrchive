@@ -12,34 +12,12 @@
 #include <assert.h>
 #include <algorithm>
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 
 bool EstimatePlotter::report_mean = false;
-
-EstimatePlotter::EstimatePlotter ()
-{
-  x_border = 0.02;
-  y_border = 0.08;
-  xrange_min = x_min = y_min = 0.0;
-  xrange_max = x_max = y_max = 1.0;
-
-  i_min = i_max = 0;
-
-  minimum_error = maximum_error = -1.0;
-
-  plot_error_bars = true;
-  
-  graph_marker = -1;
-
-  xrange_set = yrange_set = false;
-  viewports_set = false;
-  control_viewport = true;
-
-  report_mean_on_single_line = false;
-
-  log_err_madm_threshold = 0.0;
-  log_err_madm_applied = false;
-}
 
 //! Set the border used when setting the world coordinates of the viewport
 void EstimatePlotter::set_border (float fraction_x, float fraction_y)
@@ -105,13 +83,13 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
     {
       if (vertical)
       {
-	xmin = x_min;
-	xmax = y_max;
+        xmin = x_min;
+        xmax = y_max;
       }
       else
       {
-	ymin = y_min;
-	ymax = y_max;
+        ymin = y_min;
+        ymax = y_max;
       }
     }
 
@@ -123,14 +101,14 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
     }
 
     // cerr << "index=" << index << " xmin=" << xmin << " xmax=" << xmax
-	 // << " ymin=" << ymin << " ymax=" << ymax << endl;
+	  // << " ymin=" << ymin << " ymax=" << ymax << endl;
 
     if (scaled)
     {
       if (vertical)
-	yrange = false;
+        yrange = false;
       else
-	xrange = false;
+        xrange = false;
     }
   }
 
@@ -139,14 +117,14 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
     if (vertical)
       for (index=0; index<xval.size(); index++)
       {
-	data_xmin[index] = x_min;
-	data_xmax[index] = x_max;
+        data_xmin[index] = x_min;
+        data_xmax[index] = x_max;
       }
     else
       for (index=0; index<xval.size(); index++)
       {
-	data_ymin[index] = y_min;
-	data_ymax[index] = y_max;
+        data_ymin[index] = y_min;
+        data_ymax[index] = y_max;
       }
   }
 
@@ -277,20 +255,6 @@ void EstimatePlotter::set_world (float x1, float x2, float y1, float y2)
 
 unsigned EstimatePlotter::plot ()
 {
-  if (log_err_madm_threshold != 0 && ! log_err_madm_applied)
-  {
-    unsigned excised = 0;
-
-    for (unsigned index=0; index<xval.size(); index++)
-      excised += plot (index);
-
-    if (excised)
-      cerr << "EstimatePlotter::plot warning - excised " 
-           << excised << " outliers" << endl;
-
-    log_err_madm_applied = true;
-  }
-
   unsigned plotted = 0;
 
   for (unsigned index=0; index<xval.size(); index++)
@@ -299,52 +263,44 @@ unsigned EstimatePlotter::plot ()
   return plotted;
 }
 
-unsigned EstimatePlotter::excise (unsigned index)
+unsigned EstimatePlotter::excise (vector<float>& x, vector<float>& y, vector<float>& yerr)
 {
-  unsigned npt = xval[index].size();
+  unsigned npt = x.size();
 
   std::vector<float> work (npt);
   unsigned excised = 0;
 
-  const unsigned ndim = yval.size() / xval.size();
+  unsigned valid = 0;
 
-  for (unsigned idim=0; idim < ndim; idim++)
+  for (unsigned ipt=0; ipt<npt; ipt++)
   {
-    unsigned yndex = index*ndim + idim;
-    unsigned valid = 0;
-
-    for (unsigned ipt=0; ipt<npt; ipt++)
+    if (yerr[ipt] > 0)
     {
-      if (yerr[yndex][ipt] > 0)
-      {
-        work[valid] = log (yerr[yndex][ipt]);
-        valid ++;
-      }
+      work[valid] = log (yerr[ipt]);
+      valid ++;
     }
+  }
 
-#ifdef _DEBUG
-  cerr << "npt=" << npt << " valid=" << valid << endl;
-#endif
+  DEBUG("EstimatePlotter::excise npt=" << npt << " valid=" << valid);
 
-    // find the median value
-    std::nth_element (work.begin(), work.begin()+valid/2, work.begin()+valid);
-    float median = work[ valid/2 ];
+  // find the median value
+  std::nth_element (work.begin(), work.begin()+valid/2, work.begin()+valid);
+  float median = work[ valid/2 ];
 
-    // compute the absolute deviation from the median
-    for (unsigned ipt=0; ipt < valid; ipt++)
-      work[ipt] = fabs(work[ipt] - median);
+  // compute the absolute deviation from the median
+  for (unsigned ipt=0; ipt < valid; ipt++)
+    work[ipt] = fabs(work[ipt] - median);
 
-    // find the median absolute deviation from the median 
-    std::nth_element (work.begin(), work.begin()+valid/2, work.begin()+valid);
-    float madm = work[ valid/2 ];
+  // find the median absolute deviation from the median 
+  std::nth_element (work.begin(), work.begin()+valid/2, work.begin()+valid);
+  float madm = work[ valid/2 ];
 
-    for (unsigned ipt=0; ipt<npt; ipt++)
+  for (unsigned ipt=0; ipt<npt; ipt++)
+  {
+    if (yerr[ipt] > log_err_madm_threshold * madm)
     {
-      if (yerr[yndex][ipt] > log_err_madm_threshold * madm)
-      {
-        yerr[yndex][ipt] = 0;
-        excised ++;
-      }
+      yerr[ipt] = 0;
+      excised ++;
     }
   }
 
@@ -381,13 +337,14 @@ unsigned EstimatePlotter::plot (unsigned index)
     for (unsigned ipt=0; ipt<npt; ipt++)
     {
       if (minimum_error >= 0.0 && yerr[yndex][ipt] <= minimum_error)
-	continue;
+        continue;
 
       if (maximum_error >= 0.0 && yerr[yndex][ipt] >= maximum_error)
-	continue;
+        continue;
 
       if (plot_error_bars)
-	cpgerr1 (6, xval[index][ipt], yval[yndex][ipt], yerr[yndex][ipt], 1.0);
+        cpgerr1 (6, xval[index][ipt], yval[yndex][ipt], yerr[yndex][ipt], 1.0);
+
       cpgpt1 (xval[index][ipt], yval[yndex][ipt], graph_marker);
 
       plotted ++;
@@ -407,10 +364,20 @@ void EstimatePlotter::set_minmax_range (unsigned imin, unsigned imax)
 
 void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
 			      bool& yrange, float& ymin, float& ymax,
-			      const vector<float>& x,
-			      const vector<float>& y,
-			      const vector<float>& ye)
+			      vector<float>& x,
+			      vector<float>& y,
+			      vector<float>& ye)
 {
+  if (log_err_madm_threshold > 0.0)
+  {
+    unsigned excised = 0;
+
+    for (unsigned index=0; index<xval.size(); index++)
+      excised += excise (x, y, ye);
+
+    DEBUG("EstimatePlotter::minmax warning - excised " << excised << " outliers");
+  }
+
   unsigned npt = x.size();
 
   assert (y.size() == npt);

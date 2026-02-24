@@ -26,10 +26,7 @@ class EstimatePlotter {
   //! Flag controls verbosity
   static bool report_mean;
 
-  bool report_mean_on_single_line;
-
-  //! Default constructor
-  EstimatePlotter ();
+  bool report_mean_on_single_line = false;
 
   //! Clear all data
   void clear ();
@@ -90,7 +87,7 @@ class EstimatePlotter {
   //! Plot the specified member of the current data set
   unsigned plot (unsigned index);
 
-  unsigned excise (unsigned index);
+  unsigned excise (std::vector<float>& x, std::vector<float>& y, std::vector<float>& ye);
 
   //! Plot the current data set in one window
   unsigned plot ();
@@ -99,54 +96,62 @@ class EstimatePlotter {
   void set_minmax_range (unsigned i_min, unsigned i_max);
 
   void minmax (bool& xrange_set, float& xmin, float& xmax,
-	       bool& yrange_set, float& ymin, float& ymax,
-	       const std::vector<float>& x,
-	       const std::vector<float>& y,
-	       const std::vector<float>& yerr);
+              bool& yrange_set, float& ymin, float& ymax,
+              std::vector<float>& x,
+              std::vector<float>& y,
+              std::vector<float>& yerr);
 
   void set_plot_error_bars (bool flag)
   { plot_error_bars = flag; }
   
+  void set_log_err_madm_threshold (float threshold)
+  { log_err_madm_threshold = threshold; }
+
  protected:
 
   //! Set the viewport and/or world coordinates before plotting
-  bool control_viewport;
+  bool control_viewport = true;
 
   //! Borders
-  float x_border, y_border;
+  float x_border = 0.02;
+  float y_border = 0.08;
 
   //! add_plot X range
-  float xrange_min, xrange_max;
+  float xrange_min = 0.0;
+  float xrange_max = 1.0;
 
   //! total X range
-  float x_min, x_max;
+  float x_min = 0.0;
+  float x_max = 1.0;
 
   //! total Y range
-  float y_min, y_max;
+  float y_min = 0.0;
+  float y_max = 1.0;
 
   //! range of indeces to be added on next call to add_plot
-  unsigned i_min, i_max;
+  unsigned i_min = 0;
+  unsigned i_max = 0;
 
   //! range set
-  bool xrange_set;
-  bool yrange_set;
+  bool xrange_set = false;
+  bool yrange_set = false;
 
   //! The minimum error in plot
-  float minimum_error;
+  float minimum_error = -1.0;
 
   //! The maximum error in plot
-  float maximum_error;
+  float maximum_error = -1.0;
 
   //! PGPLOT Standard Graph Marker
-  int graph_marker;
+  int graph_marker = -1;
 
   //! Plot error bars
-  bool plot_error_bars;
+  bool plot_error_bars = true;
 
   //! Use the MADM of the logarithm of the error values to excise outliers
-  float log_err_madm_threshold;
-  bool log_err_madm_applied;
-  
+  float log_err_madm_threshold = 0.0;
+  bool log_err_madm_applied = false;
+
   std::vector< std::vector<float> > xval;
   std::vector< std::vector<float> > yval;
   std::vector< std::vector<float> > yerr;
@@ -158,11 +163,14 @@ class EstimatePlotter {
   std::vector<float> data_ymin;
   std::vector<float> data_ymax;
 
-  float vp_x1, vp_x2, vp_y1, vp_y2;
+  float vp_x1 = 0.0;
+  float vp_x2 = 0.0;
+  float vp_y1 = 0.0;
+  float vp_y2 = 0.0;
 
-  bool viewports_set;
-  bool viewports_vertical;
-  bool viewports_scaled;
+  bool viewports_set = false;
+  bool viewports_vertical = true;
+  bool viewports_scaled = false;
 
 };
 
@@ -209,7 +217,7 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
       ye[ipt] = sqrt (data[ipt].var);
 
       if (data[ipt].var)
-	mean += data[ipt];
+        mean += data[ipt];
     }
 
   }
@@ -250,7 +258,8 @@ void EstimatePlotter::add_plot (const std::vector<Xt>& xdata,
   std::vector<float>& y = yval.back();
   std::vector<float>& ye = yerr.back();
 
-  for (ipt=0; ipt<npt; ipt++) {
+  for (ipt=0; ipt<npt; ipt++)
+  {
     ye[ipt] = sqrt (ydata[ipt].var);
     x[ipt] = xdata[ipt];
     y[ipt] = ydata[ipt].val;
