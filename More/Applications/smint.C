@@ -79,6 +79,8 @@ protected:
 
   Reference::To< CalibrationInterpolatorExtension > result;
   
+  float log_err_madm_threshold = 0.0;
+
   bool convert_epochs;
   bool use_native_scale;
 
@@ -426,6 +428,9 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (plot_device, 'D', "dev");
   arg->set_help ("print all plots to a single device");
+
+  arg = menu.add (log_err_madm_threshold, "lem", "double");
+  arg->set_help ("excise outliers with log(error) > median + lem * MADM");
 #endif
 
 }
@@ -1748,6 +1753,9 @@ void smint::plot_data (const vector< double >& data_x,
   //
 
   EstimatePlotter plot;
+  plot.set_log_err_madm_threshold (log_err_madm_threshold);
+  plot.set_minimum_error (0.0);
+
   plot.add_plot (data_x, data_y);
 
   cpgsch (1.5);

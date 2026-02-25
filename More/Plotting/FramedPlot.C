@@ -4,8 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FramedPlot.h"
 #include "Pulsar/PlotFrame.h"
+
+//#define _DEBUG 1
+#include "debug.h"
 
 Pulsar::FramedPlot::FramedPlot ()
 {
@@ -41,3 +45,8 @@ void Pulsar::FramedPlot::set_frame (PlotFrame* f)
   frame = f;
 }
 
+void Pulsar::FramedPlot::prepare (const Archive*)
+{
+  // default does nothing
+  DEBUG("Pulsar::FramedPlot::prepare do nothing");
+}

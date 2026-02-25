@@ -76,16 +76,19 @@ namespace Pulsar {
     Reference::To<const Calibrator::Info> info;
 
     // The index of the class of parameters to be plotted
-    unsigned iclass;
+    unsigned iclass = 0;
 
     // Flag set to true when data are managed externally (disables prepare)
-    bool managed;
+    bool managed = false;
 
     // Sub-integration from which to derive a solution
     Index subint;
     
     // Threshold used to detect outliers when creating a SingleAxis calibrator
-    float outlier_threshold;
+    float outlier_threshold = 0.0;
+
+    //! The Archive for which this instance is prepared to plot
+    const Archive* prepared = nullptr;
   };
 
 }

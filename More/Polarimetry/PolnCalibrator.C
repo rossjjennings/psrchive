@@ -245,7 +245,7 @@ unsigned Pulsar::PolnCalibrator::get_nchan (bool build_if_needed) const try
   if (build_if_needed && transformation.size() == 0)
     setup_transformation();
 
-  if (verbose > 2)
+  if (verbose > 4)
     cerr << "Pulsar::PolnCalibrator::get_nchan nchan=" << transformation.size() << endl;
 
   return transformation.size();

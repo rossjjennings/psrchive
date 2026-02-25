@@ -24,9 +24,7 @@
 using namespace std;
 
 Pulsar::Calibrator::Info* 
-Pulsar::CalibratorParameter::get_Info (const Archive* data,
-				       Index subint,
-				       float threshold)
+Pulsar::CalibratorParameter::get_Info (const Archive* data, Index subint, float threshold)
 {
   DEBUG("CalibratorParameter::get_Info");
 
@@ -73,24 +71,37 @@ Pulsar::CalibratorParameter::CalibratorParameter ()
   plotter.set_control_viewport (false);
   plotter.set_minimum_error (0.0);
 
-  iclass = 0;
-  managed = false;
-
-  outlier_threshold = 0.0;
-
   subint.set_integrate( true );
 }
 
 
 void Pulsar::CalibratorParameter::prepare (const Archive* data)
 {
-  if (!managed)
-    prepare ( get_Info(data, subint, outlier_threshold), data );
+  if (managed)
+  {
+    if (verbose)
+      cerr << "Pulsar::CalibratorParameter::prepare managed externally" << endl;
+    return;
+  }
+
+  prepare ( get_Info(data, subint, outlier_threshold), data );
 }
 
-void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
-					   const Archive* data)
+void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info, const Archive* data)
 {
+  if (verbose)
+    cerr << "Pulsar::CalibratorParameter::prepare info=" << _info << " data=" << data << " prepared=" << prepared << endl;
+
+  if (data == prepared && info == _info)
+  {
+    if (verbose)
+      cerr << "Pulsar::CalibratorParameter::prepare already prepared for this info and data" << endl;
+    return;
+  }
+
+  if (verbose)
+    cerr << "Pulsar::CalibratorParameter::prepare new preparation" << endl;
+
   info = _info;
 
   double cfreq = data->get_centre_frequency();
@@ -136,11 +147,16 @@ void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
     plotter.add_plot (y);
   }
 
-  get_frame()->get_x_scale()->set_minmax (plotter.get_x_min(), 
-					  plotter.get_x_max());
+  if (verbose)
+    cerr << "Pulsar::CalibratorParameter::prepare get_x,y_scale()->set_minmax" << endl;
 
-  get_frame()->get_y_scale()->set_minmax (plotter.get_y_min(), 
-					  plotter.get_y_max());
+  get_frame()->get_x_scale()->set_minmax (plotter.get_x_min(), plotter.get_x_max());
+  get_frame()->get_y_scale()->set_minmax (plotter.get_y_min(), plotter.get_y_max());
+  
+  if (verbose)
+    cerr << "Pulsar::CalibratorParameter::prepare done" << endl;
+
+  prepared = data;
 }
 
 
