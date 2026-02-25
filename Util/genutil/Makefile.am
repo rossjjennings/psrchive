@@ -212,7 +212,8 @@ LDADD = libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la \
 	$(top_builddir)/Util/epsic/src/libepsic.la \
-	$(top_builddir)/Util/epsic/src/true_math/libtrue_math.la
+	$(top_builddir)/Util/epsic/src/true_math/libtrue_math.la \
+	-lm
 
 include $(top_srcdir)/config/Makefile.include
 
