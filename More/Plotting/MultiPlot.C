@@ -39,14 +39,24 @@ void Pulsar::MultiPlot::prepare (const Archive* data)
     FramedPlot* plot = ptr->second;
     plot->prepare (data);
   }
+
+  prepared = data;
 }
 
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
-  if (verbose)
-    cerr << "Pulsar::MultiPlot::plot call prepare" << endl;
+  if (prepared == data)
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::plot already prepared for this Archive" << endl;
+  }
+  else
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::plot prepare for new Archive" << endl;
 
-  prepare (data);
+    prepare (data);
+  }
 
   if (verbose)
     cerr << "Pulsar::MultiPlot::plot done prepare" << endl;

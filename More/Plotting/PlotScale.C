@@ -9,6 +9,9 @@
 #include "Pulsar/PlotLabel.h"
 #include "pairutil.h"
 
+//#define _DEBUG 1
+#include "debug.h"
+
 #include <math.h>
 
 using namespace std;
@@ -32,25 +35,21 @@ void Pulsar::PlotScale::init (const Archive*)
 //! Expand as necessary to include another PlotScale
 void Pulsar::PlotScale::include (PlotScale* other)
 {
-  //if (verbose)
-    cerr << "Pulsar::PlotScale::include this=" << this << " that=" << other << endl;
+  DEBUG("Pulsar::PlotScale::include this=" << this << " that=" << other);
 	     
   if (frozen)
   {
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::include frozen - ignoring" << endl;
+    DEBUG("Pulsar::PlotScale::include frozen - ignoring");
     return;
   }
 
   if (!other->minmaxvalset)
   {
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::include other not set - ignoring" << endl;
+    DEBUG("Pulsar::PlotScale::include other not set - ignoring");
     return;
   }
 
-  //if (verbose)
-    cerr << "Pulsar::PlotScale::include calling update_minmax" << endl;
+  DEBUG("Pulsar::PlotScale::include calling update_minmax");
   update_minmax (other->minval, other->maxval);
 }
 
@@ -67,13 +66,11 @@ void Pulsar::PlotScale::set_minmax (float min, float max)
 {
   if (frozen)
   {
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::set_minmax frozen - ignoring" << endl;
+    DEBUG("Pulsar::PlotScale::set_minmax frozen - ignoring");
     return;
   }
 
-  //if (verbose)
-    cerr << "Pulsar::PlotScale::set_minmax min=" << min << " max=" << max << endl;
+  DEBUG("Pulsar::PlotScale::set_minmax min=" << min << " max=" << max);
 
   minval = min;
   maxval = max;
@@ -84,29 +81,24 @@ void Pulsar::PlotScale::update_minmax (float min, float max)
 {
   if (frozen)
   {
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::update_minmax frozen - ignoring" << endl;
+    DEBUG("Pulsar::PlotScale::update_minmax frozen - ignoring");
     return;
   }
 
-  //if (verbose)
-    cerr << "Pulsar::PlotScale::update_minmax incoming min=" << min << " max=" << max << endl;
+  DEBUG("Pulsar::PlotScale::update_minmax incoming min=" << min << " max=" << max);
 
   if (!minmaxvalset)
   {
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::update_minmax currently unset - setting to incoming" << endl;
+    DEBUG("Pulsar::PlotScale::update_minmax currently unset - setting to incoming");
     minval = min;
     maxval = max;
   }
   else
   {
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::update_minmax current min=" << minval << " max=" << maxval << endl;
+    DEBUG("Pulsar::PlotScale::update_minmax current min=" << minval << " max=" << maxval);
     minval = std::min (min, minval);
     maxval = std::max (max, maxval);
-    //if (verbose)
-      cerr << "Pulsar::PlotScale::update_minmax new min=" << minval << " max=" << maxval << endl;
+    DEBUG("Pulsar::PlotScale::update_minmax new min=" << minval << " max=" << maxval);
   }
  
   minmaxvalset = true;
@@ -190,12 +182,9 @@ void Pulsar::PlotScale::get_range (float& min, float& max) const
     max = min + span * (double(index_range.second)/double(num_indeces));
     min = min + span * (double(index_range.first)/double(num_indeces));
 
-#if _DEBUG
-    cerr << "Pulsar::PlotScale::get_range num_indeces=" << num_indeces
+    DEBUG("Pulsar::PlotScale::get_range num_indeces=" << num_indeces
          << " span=" << span << " max=" << max << " min=" << min 
-         << " imin=" << index_range.first << " imax=" << index_range.second 
-         << endl;
-#endif
+         << " imin=" << index_range.first << " imax=" << index_range.second);
 
     return;
   }

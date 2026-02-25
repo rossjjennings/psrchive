@@ -8,8 +8,8 @@
 #include "Pulsar/FramedPlot.h"
 #include "Pulsar/PlotFrame.h"
 
-#include <iostream>
-using namespace std;
+//#define _DEBUG 1
+#include "debug.h"
 
 Pulsar::FramedPlot::FramedPlot ()
 {
@@ -48,5 +48,5 @@ void Pulsar::FramedPlot::set_frame (PlotFrame* f)
 void Pulsar::FramedPlot::prepare (const Archive*)
 {
   // default does nothing
-  cerr << "Pulsar::FramedPlot::prepare does nothing" << endl;
+  DEBUG("Pulsar::FramedPlot::prepare do nothing");
 }

@@ -30,7 +30,14 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
 {
   if (Plot::verbose)
-    cerr << "Pulsar::CalibratorInfo::prepare" << endl;
+    cerr << "Pulsar::CalibratorInfo::prepare data=" << data << " prepared=" << prepared << endl;
+
+  if (data == prepared)
+  {
+    if (Plot::verbose)
+      cerr << "Pulsar::CalibratorInfo::prepare already prepared for this Archive" << endl;
+    return;
+  }
 
   Calibrator::Info* info = 0;
 
@@ -159,6 +166,8 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
 
   if (Plot::verbose)
     cerr << "Pulsar::CalibratorInfo::prepare done" << endl;
+
+  prepared = data;
 }
 
 void Pulsar::CalibratorInfo::set_calibrator_stokes_degree (bool x)
