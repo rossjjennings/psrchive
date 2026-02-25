@@ -25,7 +25,7 @@ int main ()
   SplineFit sf;
 
   // Make fake data set
-  int npts = 1024;
+  unsigned npts = 1024;
   double nfac = 0.25;
   std::vector<double> x;
   std::vector< Estimate<double> > y;
