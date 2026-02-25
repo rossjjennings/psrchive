@@ -1,11 +1,10 @@
 
-TESTS = psrchive_config
-
-bin_PROGRAMS = psrchive_info 
+bin_PROGRAMS = psrchive_info
 
 psrchive_info_SOURCES   = psrchive_info.C
 
 if !MAKE_LEAN
+TESTS = psrchive_config
 bin_PROGRAMS += psrchive_config
 psrchive_config_SOURCES = psrchive_config.C Config_ensure_linkage.C
 endif
