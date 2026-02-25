@@ -90,7 +90,7 @@ void benchmark (int argc, char** argv)
   vector<double> samples (nsamp);
   generate (samples.begin(), samples.end(), noise);
 
-  volatile double median = 0;
+  double median = 0;
 
   //
   // time the old method
@@ -142,6 +142,6 @@ void benchmark (int argc, char** argv)
 
   double new_method = timer.get_elapsed();
 
-  cerr << "RunningMedian benchmark runtime old/new=" << old_method/new_method 
-       << endl;
+  cerr << "RunningMedian benchmark runtime old/new=" << old_method/new_method
+       << " median=" << median << endl;
 }
