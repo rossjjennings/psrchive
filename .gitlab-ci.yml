@@ -16,9 +16,11 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
-# Sync SourceForge master into GitLab master (one-way).
-# Runs only on scheduled pipelines. Stops cleanly if GitLab master
-# has diverged (--ff-only fails), indicating SourceForge is deprecated.
+# Sync all SourceForge branches into GitLab (one-way, fast-forward only).
+# Runs only on scheduled pipelines. New SourceForge branches are created
+# on GitLab; existing branches are fast-forwarded. Branches that have
+# diverged on GitLab (e.g. adacs/*) are skipped. Branches that only
+# exist on GitLab are left untouched.
 sync-sourceforge:
   stage: sync
   image: alpine:latest
@@ -28,13 +30,20 @@ sync-sourceforge:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     - apk add --no-cache git
-    - git clone --branch master
+    - git clone
         "https://oauth2:${GITLAB_PUSH_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git" repo
     - cd repo
     - git remote add sourceforge https://git.code.sf.net/p/psrchive/code
-    - git fetch sourceforge master
-    - git merge --ff-only sourceforge/master
-    - git push origin master
+    - git fetch sourceforge
+    - |
+      for ref in $(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/sourceforge/); do
+        [ "$ref" = "HEAD" ] && continue
+        if git push origin "refs/remotes/sourceforge/${ref}:refs/heads/${ref}" 2>&1; then
+          echo "Synced branch: $ref"
+        else
+          echo "Skipped branch (diverged or protected): $ref"
+        fi
+      done
 
 # Use Ubuntu 22.04 LTS as base image
 image: ubuntu:22.04
