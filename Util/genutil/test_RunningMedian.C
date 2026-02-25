@@ -90,7 +90,7 @@ void benchmark (int argc, char** argv)
   vector<double> samples (nsamp);
   generate (samples.begin(), samples.end(), noise);
 
-  double median = 0;
+  volatile double median = 0;
 
   //
   // time the old method
