@@ -92,7 +92,6 @@ test:
     - *install_dependencies
   script:
     - make check
-  allow_failure: true  # Some tests may fail on fresh environment
   artifacts:
     when: always
     paths:
@@ -119,4 +118,3 @@ python-bindings:
     - export LD_LIBRARY_PATH=/tmp/psrchive/lib
     - export PYTHONPATH=$(find /tmp/psrchive -name psrchive.py -printf '%h\n' | head -1)
     - python3 -c "import psrchive; print('Python bindings OK')"
-  allow_failure: true
