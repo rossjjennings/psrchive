@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[2025-10-31],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2026-02-26],[psrchive-developers@lists.sourceforge.net])
 
 AUTOCONF_VERSION=m4_defn([AC_AUTOCONF_VERSION])
 AC_SUBST(AUTOCONF_VERSION)
