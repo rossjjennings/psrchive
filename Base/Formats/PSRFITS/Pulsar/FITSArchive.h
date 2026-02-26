@@ -295,6 +295,8 @@ namespace Pulsar
     void interpret_scale ( );
     void interpret_pol_type ( );
 
+    static Signal::State get_state_from_pol_type (const std::string& pol_type);
+
     //! Delete the HDU with the specified name
     static void delete_hdu (fitsfile*, const char* hdu_name);
 
