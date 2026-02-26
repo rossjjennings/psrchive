@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,7 +14,7 @@
 #include "Pulsar/ColdPlasma.h"
 #include "Pulsar/Config.h"
 #include "Pulsar/DispersionDelay.h"
-#include "Pulsar/Dedisperse.h"
+#include "Pulsar/DispersionHistory.h"
 #include "Pulsar/IntegrationBarycentre.h"
 
 namespace Pulsar {
@@ -25,7 +25,7 @@ namespace Pulsar {
 
     \post All profiles will be phase-aligned to the reference frequency
   */
-  class Dispersion : public ColdPlasma<DispersionDelay,Dedisperse> {
+  class Dispersion : public ColdPlasma<DispersionDelay,DispersionHistory> {
 
   public:
 

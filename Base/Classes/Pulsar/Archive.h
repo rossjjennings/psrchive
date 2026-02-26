@@ -663,8 +663,22 @@ namespace Pulsar
     /*! This should be performed after the integration is considered complete. */
     void init_Integration (Integration* subint, bool check_phase = false);
 
+    //! Initialize the dispersion correction history of the Integration
+    /*! bugs/509 
+      By default, the absolute dispersion correction history is not overwritten
+      if the Integration already has a DispersionHistory extension 
+    */
+    void init_DispersionHistory (Integration*, bool overwrite_absolute = false);
+
+    //! Initialize the Faraday rotation correction history of the Integration
+    /*! bugs/509 
+      By default, the absolute Faraday rotation correction history is not overwritten
+      if the Integration already has a BirefringenceHistory extension 
+    */
+    void init_BirefringenceHistory (Integration*, bool overwrite_absolute = false);
+
     //! Provide Integration::resize access to Archive-derived classes
-    void resize_Integration (Integration* integration);
+    void resize_Integration (Integration*);
 
     //! Apply the current model to the Integration
     void apply_model (Integration* subint, const Predictor* old = 0);

@@ -274,7 +274,7 @@ namespace Pulsar {
     bool get_absolute_dispersion_corrected () const;
 
     //! Absolute inter-channel birefringence has been removed
-    bool get_absolute_birefringence_corrected () const;
+    bool get_absolute_rotation_corrected () const;
 
     //! Get the effective dispersion measure that remains to be corrected
     /*! Returns the sum of get_relative_dispersion_measure and get_absolute_dispersion_measure. */
@@ -520,11 +520,11 @@ namespace Pulsar {
     void defaraday (unsigned ichan, unsigned kchan,
                     double reference_frequency);
 
-    //! Update the Dedispersed extension, as needed
+    //! Update the DispersionHistory extension, as needed
     /*! Assumes that the dedisperse worker function has been applied to all channels */
     void update_absolute_dispersion();
 
-    //! Update the DeFaradayed extension, as needed
+    //! Update the BirefringenceHistory extension, as needed
     /*! Assumes that the defaraday worker function has been applied to all channels */
     void update_absolute_rotation();
 

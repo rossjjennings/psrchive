@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/DeFaradayed.h"
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/BirefringenceCheck.h"
+#include "Pulsar/BirefringenceHistory.h"
 #include "Pulsar/AuxColdPlasma.h"
 
 using namespace std;
@@ -16,10 +16,10 @@ bool diff (double x, double y)
   return fabs(x-y)/(x+y) > 1e-15;
 }
 
-void Pulsar::DeFaradayed::apply (const Archive* archive)
+void Pulsar::BirefringenceCheck::apply (const Archive* archive)
 {
   if (Archive::verbose > 2)
-    cerr << "Pulsar::DeFaradayed::apply verification" << endl;
+    cerr << "Pulsar::BirefringenceCheck::apply verification" << endl;
 
   unsigned nsubint = archive->get_nsubint();
 
@@ -30,62 +30,62 @@ void Pulsar::DeFaradayed::apply (const Archive* archive)
   }
 }
 
-void Pulsar::DeFaradayed::check_relative (const Archive* archive, unsigned isubint)
+void Pulsar::BirefringenceCheck::check_relative (const Archive* archive, unsigned isubint)
 {
   const Integration* subint = archive->get_Integration (isubint);
-  const DeFaraday* ext = subint->get<DeFaraday>();
+  const BirefringenceHistory* ext = subint->get<BirefringenceHistory>();
 
   if (!archive->get_faraday_corrected())
   {
     if (ext && ext->get_relative()->get_corrected())
-    throw Error (InvalidState, "Pulsar::DeFaradayed::apply",
+    throw Error (InvalidState, "Pulsar::BirefringenceCheck::apply",
                 "Archive::faraday_corrected is not set and Integration[%d]\n\t"
-                "has a DeFaraday Extension with the relative correction flag set", isubint);
+                "has a BirefringenceHistory Extension with the relative correction flag set", isubint);
   }
   else
   {
     if (!ext)
-        throw Error (InvalidState, "Pulsar::DeFaradayed::apply",
+        throw Error (InvalidState, "Pulsar::BirefringenceCheck::apply",
                 "Archive::faraday_corrected is set and Integration[%d]\n\t"
-                "has no DeFaraday Extension", isubint);
+                "has no BirefringenceHistory Extension", isubint);
 
     if (!ext->get_relative()->get_corrected())
-        throw Error (InvalidState, "Pulsar::DeFaradayed::apply",
+        throw Error (InvalidState, "Pulsar::BirefringenceCheck::apply",
                 "Archive::faraday_corrected is set and Integration[%d]\n\t"
-                "has a DeFaraday Extension without the relative correction flag set", isubint);
+                "has a BirefringenceHistory Extension without the relative correction flag set", isubint);
 
     if (diff( ext->get_relative()->get_reference_frequency(), archive->get_centre_frequency() ))
-        throw Error (InvalidState, "Pulsar::DeFaradayed::apply",
+        throw Error (InvalidState, "Pulsar::BirefringenceCheck::apply",
                 "Archive::faraday_corrected is set and Integration[%d]\n\t"
-                "DeFaraday::reference_frequency = %lf doesn't equal\n\t"
+                "BirefringenceHistory::reference_frequency = %lf doesn't equal\n\t"
                 "Archive::centre_frequency = %lf", isubint,
                 ext->get_relative()->get_reference_frequency(),
                 archive->get_centre_frequency());
 
     if (diff( ext->get_relative()->get_measure(), archive->get_rotation_measure() ))
-        throw Error (InvalidState, "Pulsar::DeFaradayed::apply",
+        throw Error (InvalidState, "Pulsar::BirefringenceCheck::apply",
                 "Archive::faraday_corrected is set and Integration[%d]\n\t"
-                "DeFaraday::get_relative()->measure = %lf does not equal\n\t"
+                "BirefringenceHistory::get_relative()->measure = %lf does not equal\n\t"
                 "Archive::rotation_measure = %lf", isubint,
                 ext->get_relative()->get_measure(),
                 archive->get_rotation_measure());
   }
 }
 
-void Pulsar::DeFaradayed::check_absolute (const Archive* archive, unsigned isubint)
+void Pulsar::BirefringenceCheck::check_absolute (const Archive* archive, unsigned isubint)
 {
   if (Integration::verbose)
-    cerr << "Pulsar::DeFaradayed::check_absolute isubint=" << isubint << endl;
+    cerr << "Pulsar::BirefringenceCheck::check_absolute isubint=" << isubint << endl;
 
   const Integration* subint = archive->get_Integration (isubint);
-  const DeFaraday* ext = subint->get<DeFaraday>();
+  const BirefringenceHistory* ext = subint->get<BirefringenceHistory>();
 
   bool integration_corrected = false;
   string integration_description;
 
   if (ext)
   {
-    integration_description = "Integration has DeFaraday extension";
+    integration_description = "Integration has BirefringenceHistory extension";
     if (ext->get_absolute()->get_corrected())
     {
       integration_corrected = true;
@@ -98,11 +98,11 @@ void Pulsar::DeFaradayed::check_absolute (const Archive* archive, unsigned isubi
   }
   else
   {
-    integration_description = "Integration has no DeFaraday extension";
+    integration_description = "Integration has no BirefringenceHistory extension";
   }
 
   if (Integration::verbose)
-    cerr << "Pulsar::DeFaradayed::check_absolute Integration description='" << integration_description << "'" << endl;
+    cerr << "Pulsar::BirefringenceCheck::check_absolute Integration description='" << integration_description << "'" << endl;
   
   const AuxColdPlasma* aux = archive->get<AuxColdPlasma>();
 
@@ -128,7 +128,7 @@ void Pulsar::DeFaradayed::check_absolute (const Archive* archive, unsigned isubi
   }
   
   if (Integration::verbose)
-    cerr << "Pulsar::DeFaradayed::check_absolute Archive description='" << archive_description << "'" << endl;
+    cerr << "Pulsar::BirefringenceCheck::check_absolute Archive description='" << archive_description << "'" << endl;
 
   if (archive_corrected != integration_corrected)
   {
@@ -136,11 +136,11 @@ void Pulsar::DeFaradayed::check_absolute (const Archive* archive, unsigned isubi
     if (!integration_corrected && ext->get_absolute()->get_measure() == 0.0)
     {
       if (Integration::verbose)
-        cerr << "Pulsar::DeFaradayed::check_absolute allowing correction mismatch for 0 RM" << endl;
+        cerr << "Pulsar::BirefringenceCheck::check_absolute allowing correction mismatch for 0 RM" << endl;
       return;
     }
 
-    throw Error (InvalidState, "Pulsar::DeFaradayed::apply",
+    throw Error (InvalidState, "Pulsar::BirefringenceCheck::apply",
                  archive_description + "\n\tAND\n\t" + integration_description); 
   }
 }

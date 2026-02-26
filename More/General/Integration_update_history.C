@@ -7,8 +7,8 @@
 
 #include "Pulsar/Integration.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
-#include "Pulsar/Dedisperse.h"
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/DispersionHistory.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 using namespace std;
 
@@ -33,7 +33,7 @@ void Pulsar::Integration::update_absolute_dispersion () try
   
   if (aux_dm != 0.0)
   {   
-    auto history = getadd<Dedisperse>();
+    auto history = getadd<DispersionHistory>();
     history->get_absolute()->set_corrected(true);
     history->get_absolute()->set_measure(aux_dm);
   }
@@ -64,7 +64,7 @@ void Pulsar::Integration::update_absolute_rotation () try
 
   if (aux_rm != 0.0)
   {
-    auto history = getadd<DeFaraday>();
+    auto history = getadd<BirefringenceHistory>();
     history->get_absolute()->set_corrected(true);
     history->get_absolute()->set_measure(aux_rm);
   }

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,7 +14,7 @@
 #include "Pulsar/ColdPlasma.h"
 
 #include "Pulsar/Faraday.h"
-#include "Pulsar/DeFaraday.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 namespace Pulsar {
 
@@ -29,7 +29,7 @@ namespace Pulsar {
     \post All profiles will have a position angle aligned to the
           reference frequency
   */
-  class FaradayRotation : public ColdPlasma<Calibration::Faraday,DeFaraday>
+  class FaradayRotation : public ColdPlasma<Calibration::Faraday,BirefringenceHistory>
   {
 
   public:
@@ -63,10 +63,10 @@ namespace Pulsar {
     void apply (Integration*, unsigned channel, Jones<double> rotation) override;
 
     //! Apply the current correction to all sub-integrations in an archive
-    void execute (Archive*);
+    void execute (Archive*) override;
 
     //! Undo the correction
-    void revert (Archive*);
+    void revert (Archive*) override;
 
     //! Set the rotation measure
     void set_rotation_measure (double rotation_measure)

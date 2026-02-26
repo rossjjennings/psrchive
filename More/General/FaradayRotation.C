@@ -1,14 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/FaradayRotation.h"
 
+#include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/Archive.h"
 #include "Pulsar/PolnProfile.h"
 
 #include "Pulsar/AuxColdPlasmaMeasures.h"
@@ -54,25 +54,29 @@ bool Pulsar::FaradayRotation::get_relative_corrected (const Integration* data) c
 bool Pulsar::FaradayRotation::get_absolute_corrected (const Integration* data) const
 {
   if (Archive::verbose > 2)
-    cerr << "Pulsar::DisFaradayRotationpersion::get_relative_corrected corrected=" 
-	       << data->get_absolute_birefringence_corrected() << endl;
+    cerr << "Pulsar::FaradayRotation::get_relative_corrected corrected=" 
+          << data->get_absolute_rotation_corrected() << endl;
 
-  return data->get_absolute_birefringence_corrected ();
+  return data->get_absolute_rotation_corrected ();
 }
 
 //! Execute the correction for an entire Pulsar::Archive
 void Pulsar::FaradayRotation::execute (Archive* arch)
 {
-  ColdPlasma<Calibration::Faraday,DeFaraday>::execute (arch);
+  ColdPlasma<Calibration::Faraday,BirefringenceHistory>::execute (arch);
+
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::FaradayRotation::execute record status" << endl;
+
   arch->set_rotation_measure( get_rotation_measure() );
   arch->set_faraday_corrected( true );
-  arch->getadd<AuxColdPlasma>()->set_birefringence_corrected( true );
+  arch->expert()->update_absolute_rotation();
 }
 
 //! Undo the correction for an entire Pulsar::Archive
 void Pulsar::FaradayRotation::revert (Archive* arch)
 {
-  ColdPlasma<Calibration::Faraday,DeFaraday>::revert (arch);
+  ColdPlasma<Calibration::Faraday,BirefringenceHistory>::revert (arch);
   arch->set_faraday_corrected( false );
 }
 

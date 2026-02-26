@@ -19,7 +19,7 @@ Pulsar::ConfigurableProjectionExtension::Interface::Interface
   add( &ConfigurableProjectionExtension::get_nchan,
        "nchan", "Number of frequency channels" );
 
-  add( &ConfigurableProjectionExtension::get_nchan,
+  add( &ConfigurableProjectionExtension::get_nparam,
        "nparam", "Number of model parameters" );
 
   add( &ConfigurableProjectionExtension::get_configuration,

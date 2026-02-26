@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2025 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -105,7 +105,9 @@ namespace Pulsar {
     { relative.set_frequency(frequency); absolute.set_frequency(frequency); }
 
     //! Execute the correction for the current get_reference_frequency and get_measure
-    /* \post All data will be corrected to the reference frequency */
+    /* \post All data will be corrected to the reference frequency 
+    
+      Calls update and range, then updates the history. */
     void execute1 (Integration*);
 
     //! Undo the relative correction
@@ -190,6 +192,8 @@ catch (Error& error)
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::execute (Archive* arch)
 {
+  if (Archive::verbose > 2)
+    std::cerr << "Pulsar::" + name + "::execute (Archive*)" << std::endl;
   for (unsigned i=0; i<arch->get_nsubint(); i++)
     execute1( arch->get_Integration(i) );
 }
@@ -458,7 +462,8 @@ catch (Error& error)
 }
 
 
-/*! 
+/*! Calls setup, update, and range, but does not modify history
+
    \param start_chan the first channel to be corrected
    \param end_chan one greater than the last channel to be corrected
    \param reference_frequency the reference frequency
