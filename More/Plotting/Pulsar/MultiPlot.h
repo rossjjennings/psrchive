@@ -69,10 +69,11 @@ namespace Pulsar {
     //! The plots
     std::map< std::string, Reference::To<FramedPlot> > plots;
 
-    void set_viewport (PlotFrame* frame, 
-		       std::pair<float,float>& sub_xvp,
-		       std::pair<float,float>& sub_yvp);
+    //! Set the viewport of the frame in device-normalized coordinates
+    void set_viewport (PlotFrame* frame, std::pair<float,float>& sub_xvp, std::pair<float,float>& sub_yvp);
 
+    //! The Archive for which this instance is prepared to plot
+    const Archive* prepared = nullptr;
   };
 
 }

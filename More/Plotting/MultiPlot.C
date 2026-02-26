@@ -30,7 +30,8 @@ Pulsar::PlotAttributes* Pulsar::MultiPlot::get_attributes ()
 
 void Pulsar::MultiPlot::prepare (const Archive* data)
 {
-  cerr << "Pulsar::MultiPlot::prepare nplot=" << plots.size() << endl;
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::prepare nplot=" << plots.size() << endl;
 
   std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++)
@@ -38,14 +39,24 @@ void Pulsar::MultiPlot::prepare (const Archive* data)
     FramedPlot* plot = ptr->second;
     plot->prepare (data);
   }
+
+  prepared = data;
 }
 
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
-  if (verbose)
-    cerr << "Pulsar::MultiPlot::plot call prepare" << endl;
+  if (prepared == data)
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::plot already prepared for this Archive" << endl;
+  }
+  else
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::plot prepare for new Archive" << endl;
 
-  prepare (data);
+    prepare (data);
+  }
 
   if (verbose)
     cerr << "Pulsar::MultiPlot::plot done prepare" << endl;
@@ -53,7 +64,6 @@ void Pulsar::MultiPlot::plot (const Archive* data)
   std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++)
   {
-
     FramedPlot* plot = ptr->second;
     PlotFrame* frame = plot->get_frame();
 
@@ -104,23 +114,25 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
   std::pair<float,float> xvp = frames.get_x_edge()->get_viewport();
   std::pair<float,float> yvp = frames.get_y_edge()->get_viewport();
 
-#if _DEBUG
-  cerr << "Pulsar::MultiPlot::set_viewport total"
-    " x=" << xvp << " y=" << yvp << endl;
-#endif
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::set_viewport cur"
+            " x=" << xvp << " y=" << yvp << endl;
 
   // get the fraction allocated to this sub-plot
   sub_xvp = frame->get_x_scale(true)->get_viewport();
   sub_yvp = frame->get_y_scale(true)->get_viewport();
 
-#if _DEBUG
-  cerr << "Pulsar::MultiPlot::set_viewport sub"
-    " x=" << sub_xvp << " y=" << sub_yvp << endl;
-#endif
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::set_viewport sub"
+            " x=" << sub_xvp << " y=" << sub_yvp << endl;
 
   // calculate the total viewport allocated to this sub-plot
   stretch (sub_xvp, xvp);
   stretch (sub_yvp, yvp);
+
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::set_viewport new"
+            " x=" << sub_xvp << " y=" << sub_yvp << endl;
 
   // set the viewport accordingly
   frame->get_x_scale(true)->set_viewport( xvp );
@@ -154,11 +166,11 @@ void Pulsar::MultiPlot::manage (Plot* plot)
 
       if (counter > 0)
       {
-	// remove the above frame labels
-	frame->get_label_above()->set_all ("");
+        // remove the above frame labels
+        frame->get_label_above()->set_all ("");
 
-	// remove the below frame labels
-	frame->get_label_below()->set_all ("");
+        // remove the below frame labels
+        frame->get_label_below()->set_all ("");
       }
 
       frame->set_viewport (0,1, 1.0-(counter+1)*y_each, 1.0-counter*y_each);
@@ -167,11 +179,11 @@ void Pulsar::MultiPlot::manage (Plot* plot)
 
       if (plots.size() > 1 && counter < plots.size())
       {
-	// remove the x label
-	frame->get_x_axis()->set_label(" ");
+        // remove the x label
+        frame->get_x_axis()->set_label(" ");
 
-	// remove the x enumeration
-	frame->get_x_axis()->rem_opt('N');
+        // remove the x enumeration
+        frame->get_x_axis()->rem_opt('N');
       }
     }
   }

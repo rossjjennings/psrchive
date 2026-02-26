@@ -123,6 +123,9 @@ void foreach (Iterator beginA, Iterator endA, Iterator beginB, Iterator endB,
 
 void Pulsar::MultiFrame::include (MultiFrame* other)
 {
+  if (Plot::verbose)
+    cerr << "Pulsar::MultiFrame::include this=" << this << " that=" << other << endl;
+
   foreach( frames.begin(), frames.end(),
 	   other->frames.begin(), other->frames.end(),
 	   &PlotFrame::include );

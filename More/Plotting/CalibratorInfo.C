@@ -29,7 +29,15 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
 
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
 {
-  DEBUG("Pulsar::CalibratorInfo::prepare");
+  if (Plot::verbose)
+    cerr << "Pulsar::CalibratorInfo::prepare data=" << data << " prepared=" << prepared << endl;
+
+  if (data == prepared)
+  {
+    if (Plot::verbose)
+      cerr << "Pulsar::CalibratorInfo::prepare already prepared for this Archive" << endl;
+    return;
+  }
 
   Calibrator::Info* info = 0;
 
@@ -63,9 +71,10 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     auto projection = new ConfigurableProjection (ext);
     info = new ConfigurableProjection::Info (projection);
   }
-
   else
+  {
     info = CalibratorParameter::get_Info (data, subint, outlier_threshold);
+  }
 
   get_frame()->get_label_above()->set_centre("$file\n"+info->get_title());
 
@@ -112,7 +121,8 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     plot->set_managed (true);
     plot->set_class (jclass);
 
-    DEBUG("Pulsar::CalibratorInfo::prepare call CalibratorParameter::prepare");
+    if (Plot::verbose)
+      cerr << "Pulsar::CalibratorInfo::prepare call CalibratorParameter::prepare plot=" << (void*)plot.get() << " info=" << info << endl;
 
     plot->prepare (info, data);
 
@@ -150,8 +160,14 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     }
   }
 
+  if (Plot::verbose)
+    cerr << "Pulsar::CalibratorInfo::prepare get_scale()->set_minmax" << endl;
   get_scale()->set_minmax (xmin, xmax);
 
+  if (Plot::verbose)
+    cerr << "Pulsar::CalibratorInfo::prepare done" << endl;
+
+  prepared = data;
 }
 
 void Pulsar::CalibratorInfo::set_calibrator_stokes_degree (bool x)

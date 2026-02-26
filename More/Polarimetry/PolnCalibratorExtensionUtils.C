@@ -117,7 +117,7 @@ try
 
   MEAL::Complex2* xform = new_transformation( ext->get_type() );
 
-  if (Pulsar::Calibrator::verbose)
+  if (Pulsar::Calibrator::verbose > 3)
     cerr << "Calibration::new_transformation name=" << xform->get_name() << endl;
 
   const Pulsar::PolnCalibratorExtension::Transformation* info;
