@@ -25,8 +25,6 @@ int main (int argc, char** argv)
 
   filename += "test.polyco";
 
-  bool verbose = false;
-
   int c;
   while ((c = getopt(argc, argv, "hm:v")) != -1) {
     switch (c)  {
@@ -34,7 +32,6 @@ int main (int argc, char** argv)
       return 0;
     case 'v':
       polyco::verbose = true;
-      verbose = true;
       break;
     }
   }
