@@ -80,6 +80,8 @@ int main (int argc, char **argv) try
 
     }
 
+  (void) quiet;
+
   if (optind >= argc)
   {
     usage ();
