@@ -10,6 +10,7 @@
 int main() try
 {
   Pulsar::Generator* generator = Pulsar::Generator::get_default ();
+  (void) generator;
   return 0;
 }
 catch (...)
