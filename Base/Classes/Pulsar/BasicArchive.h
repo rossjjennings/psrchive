@@ -50,9 +50,9 @@ namespace Pulsar {
     // implement the pure virtual methods of the Archive base class
     //
 
-    //! Get the name of the telescope
+    //! Get the name of the telescope
     virtual std::string get_telescope () const;
-    //! Set the name of the telescope
+    //! Set the name of the telescope
     virtual void set_telescope (const std::string&);
 
     //! Get the state of the profiles
@@ -154,7 +154,7 @@ namespace Pulsar {
     /*! This attribute may be set only through Archive::resize */
     virtual void set_nsubint (unsigned nsubint);
 
-    //! The name of the telescope
+    //! The name of the telescope
     std::string telescope;
 
     //! The feed configuration of the receiver

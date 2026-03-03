@@ -142,7 +142,7 @@ int main (int argc, char* argv[])
   Angle latitude;
   Angle longitude;
 
-  // Parkes Observatory: 32.9983°S, 148.2636°E
+  // Parkes Observatory: 32.9983Â°S, 148.2636Â°E
   latitude.setDegrees( -32.9983 );
   longitude.setDegrees( 148.2636 );
 
