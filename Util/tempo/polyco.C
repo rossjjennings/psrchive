@@ -737,7 +737,7 @@ void polyco::load (FILE* fptr)
   if (load (&total) <= 0)
     throw Error (InvalidState, "polyco::load(FILE*)", 
                  "no polynomials loaded\n\n"
-    "see https://gitlab.com/pulsar-astronomy/psrchive/-/issues");
+    "see http://psrchive.sourceforge.net/qa/?qa=95/no-polynomials-loaded");
 }
 
 int polyco::load (string* instr)
