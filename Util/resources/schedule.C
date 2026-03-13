@@ -85,7 +85,6 @@ bool by_integration_length (const source& a, const source& b)
 
 pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
 {
-  [[maybe_unused]] Horizon* horizon = dynamic_cast<Horizon*> (mount);
 
   vector< pair<double,Mount*> > slew_times;
   slew_times = mount->slew_times (coord);

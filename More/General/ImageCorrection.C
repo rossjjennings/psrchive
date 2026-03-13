@@ -62,7 +62,6 @@ void sumdiff (Pulsar::Profile* thiz, const Pulsar::Profile* that, float factor);
 void Pulsar::ImageCorrection::transform (Integration* data)
 {
   const unsigned nchan = data->get_nchan();
-  [[maybe_unused]] const unsigned nbin  = data->get_nbin();
   unsigned npol  = data->get_npol();
 
   if (npol == 4)
@@ -113,7 +112,6 @@ void Pulsar::ImageCorrection::transform (Integration* data)
     // Channel and image frequencies
     const double f_chan = data->get_centre_frequency(ichan);
     const double f_img = f_cent_sky - (f_chan - f_cent_sky);
-    [[maybe_unused]] const double f_bb = f_adc(f_chan);
     const int iimg = match_channel(data, f_img);
 
     //cerr << ichan << " " << f_chan << " " << iimg << " " << f_img << 

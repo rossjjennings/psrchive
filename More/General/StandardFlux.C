@@ -68,7 +68,6 @@ Estimate<double> Pulsar::StandardFlux::get_flux(const Profile *p)
 
     unsigned nb = p->get_nbin();
     double sumdata = p->sum();
-    [[maybe_unused]] double sumdata2 = p->sumsq();
     double xsum = 0.0;
     for (unsigned i=0; i<nb; i++) 
       xsum += p->get_amps()[i] * stdprof->get_amps()[i];
