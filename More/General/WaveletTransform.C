@@ -77,7 +77,7 @@ void Pulsar::WaveletTransform::init_mem() {
     data = new double[npts];
     work = gsl_wavelet_workspace_alloc(npts);
   } else {
-    data = new double[npts*(unsigned)log2_npts];
+    data = new double[npts*log2_npts];
   }
     
   wave = gsl_wavelet_alloc(type, order);
@@ -200,7 +200,7 @@ unsigned Pulsar::WaveletTransform::get_ncoeff(int level) const {
     return npts;
 }
 
-double Pulsar::WaveletTransform::get_data(int level, int k) {
+double Pulsar::WaveletTransform::get_data(int level, unsigned k) {
 
   if (data==NULL) 
     throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
@@ -214,7 +214,7 @@ double Pulsar::WaveletTransform::get_data(int level, int k) {
    throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
       "level %d out of range (log2_npts=%d)", level, log2_npts); 
 
-  if ((k<0) || ((unsigned)k>=get_ncoeff(level)))
+  if (k>=get_ncoeff(level))
     throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
       "index %d out of range (level=%d, log2_npts=%d, npts=%u, decimate=%s)",
       k, level, log2_npts, npts, decimate?"true":"false");

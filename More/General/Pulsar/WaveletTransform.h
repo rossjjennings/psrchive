@@ -81,7 +81,7 @@ namespace Pulsar {
       State get_state() { return state; }
 
       //! Get wavelet data
-      double get_data(int level, int k);
+      double get_data(int level, unsigned k);
 
       //! Get data element
       double get_data(int n);
@@ -93,10 +93,10 @@ namespace Pulsar {
       const double* get_data() const;
 
       //! Get number of pts currently in use
-      int get_npts() const { return npts; };
+      unsigned get_npts() const { return npts; };
 
       //! Get log2 of number of pts currently in use
-      int get_log2_npts() const { return log2_npts; };
+      unsigned get_log2_npts() const { return log2_npts; };
 
       //! Get total number of wavelet coeffs computed
       unsigned get_ncoeff() const { return decimate ? npts : (unsigned)log2_npts*npts; }
@@ -122,7 +122,7 @@ namespace Pulsar {
       unsigned npts;
 
       //! Log2 of npts
-      int log2_npts;
+      unsigned log2_npts;
 
       //! Data storage
       double *data;
