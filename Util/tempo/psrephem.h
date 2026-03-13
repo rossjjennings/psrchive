@@ -168,7 +168,7 @@ class psrephem : public Pulsar::Parameters
   int P_ddot (double& pddot, double& pddot_err) const;
 
   // returns the characteristic age in Gyr
-  int characteristic_age (double& age, double age_err);
+  int characteristic_age (double& age, double& age_err);
 
   // stability parameter of antt94
   int Delta_t (double& delta_t) const;
