@@ -17,7 +17,7 @@ using namespace std;
 
 void runtest () try {
 
-  int idat, ndat = 16 * 1024;  // 16kpt set of random, Gaussian noise
+  unsigned idat, ndat = 16 * 1024;  // 16kpt set of random, Gaussian noise
   float* data = new float [ndat];
   float* copy = new float [ndat];
   float* fft1 = new float [ndat+2];
@@ -39,7 +39,7 @@ void runtest () try {
   fprintf (stderr, "Forward R->C FFT:%d\n", ndat);
   FTransform::frc1d (ndat, fft1, data);
 
-  for (int j=0; j < ndat; j++)
+  for (unsigned j=0; j < ndat; j++)
     if (copy[j] != data[j])  {
       fprintf(stderr,"idat=%d before=%f after=%f\n", j, data[j], copy[j]);
       fprintf(stderr,"Out-of-place transform does not preserve input!\n");
