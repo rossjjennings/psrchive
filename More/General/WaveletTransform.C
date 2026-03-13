@@ -132,7 +132,7 @@ void Pulsar::WaveletTransform::transform(unsigned n, const float *in) {
     for (unsigned i=0; i<npts; i++) tmp[i] = in[i] - mean;
 
     int rv = dwt_undec_transform(tmp, data, npts, wave);
-    if (rv!=log2_npts)
+    if (rv!=(int)log2_npts)
       throw Error (FailedCall, "Pulsar::WaveletTransform::transform",
           "dwt_undec_transform failed (rv=%d)", rv);
 
@@ -177,7 +177,7 @@ void Pulsar::WaveletTransform::invert() {
     double *tmp = new double[npts];
 
     int rv = dwt_undec_inverse(data, tmp, npts, wave);
-    if (rv!=log2_npts)
+    if (rv!=(int)log2_npts)
       throw Error (FailedCall, "Pulsar::WaveletTransform::invert",
           "dwt_undec_inverse failed (rv=%d)", rv);
 
@@ -210,7 +210,7 @@ double Pulsar::WaveletTransform::get_data(int level, unsigned k) {
     throw Error (InvalidState, "Pulsar:WaveletTransform::get_data",
         "data is not in Wavelet state");
 
-  if ((level<-1) || (level>=log2_npts))
+  if ((level<-1) || (level>=(int)log2_npts))
    throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
       "level %d out of range (log2_npts=%d)", level, log2_npts); 
 
