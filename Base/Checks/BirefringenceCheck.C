@@ -133,10 +133,17 @@ void Pulsar::BirefringenceCheck::check_absolute (const Archive* archive, unsigne
   if (archive_corrected != integration_corrected)
   {
     // special case: in old files, aux:rmc may equal 1 even when there is no int:aux:rm to correct
-    if (!integration_corrected && ext->get_absolute()->get_measure() == 0.0)
+    if (!integration_corrected && (!ext || ext->get_absolute()->get_measure() == 0.0))
     {
       if (Integration::verbose)
-        cerr << "Pulsar::BirefringenceCheck::check_absolute allowing correction mismatch for 0 RM" << endl;
+      {
+        cerr << "Pulsar::BirefringenceCheck::check_absolute allowing correction mismatch for integration ";
+        if (!ext)
+          cerr << "without aux:rm" << endl;
+        else
+          cerr << "with aux:rm=0" << endl;
+      }
+
       return;
     }
 
