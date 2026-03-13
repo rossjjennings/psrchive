@@ -11,10 +11,13 @@
 
 int main ()
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
   Pulsar::IntegrationManager* manager = 0;
+#pragma GCC diagnostic pop
 
-  // verify that expert() can be called on a valid manager
-  (void) manager;
+  if (manager)
+    manager->expert()->sort();
 
   return 0;
 }
