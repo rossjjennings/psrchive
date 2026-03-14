@@ -22,7 +22,7 @@ breathe_default_project = "psrchive"
 # -- General configuration ---------------------------------------------------
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "_doxygen"]
+exclude_patterns = ["_build", "_doxygen", ".venv"]
 
 # -- Options for HTML output -------------------------------------------------
 
