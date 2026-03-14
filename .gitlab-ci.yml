@@ -26,6 +26,8 @@ variables:
 sync-sourceforge:
   stage: sync
   image: alpine:latest
+  tags:
+    - $GITLAB_CI_TAG
   variables:
     GIT_STRATEGY: none
   rules:
