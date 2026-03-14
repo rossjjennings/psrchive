@@ -8,6 +8,8 @@ build:
   tools:
     python: "3.14"
   jobs:
+    post_checkout:
+      - git submodule update --init
     pre_build:
       - curl -sL https://github.com/doxygen/doxygen/releases/download/Release_1_16_1/doxygen-1.16.1.linux.bin.tar.gz | tar xz -C /tmp
       - export PATH="/tmp/doxygen-1.16.1/bin:$PATH" && cd docs && make doxygen
