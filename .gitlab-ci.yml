@@ -1,5 +1,8 @@
 # PSRCHIVE GitLab CI/CD Configuration
-# Runs on gitlab.com shared runners
+#
+# Two CI modes (mutually exclusive):
+#   1. Shared-runner CI: ubuntu:22.04 on gitlab.com (when ENABLE_SKA_CI is unset)
+#   2. SKA infrastructure CI: tagged runners (when ENABLE_SKA_CI is "true")
 
 workflow:
   rules:
@@ -12,15 +15,14 @@ stages:
   - sync
   - build
   - test
+  - analysis
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  GITLAB_CI_TAG: k8srunner-psi-low
 
 # Sync all SourceForge branches into GitLab (one-way, fast-forward only).
-# Runs only on scheduled pipelines. New SourceForge branches are created
-# on GitLab; existing branches are fast-forwarded. Branches that have
-# diverged on GitLab (e.g. adacs/*) are skipped. Branches that only
-# exist on GitLab are left untouched.
+# Runs only on scheduled pipelines.
 sync-sourceforge:
   stage: sync
   image: alpine:latest
@@ -63,17 +65,26 @@ image: ubuntu:22.04
       libreadline-dev
       git
 
-build:
-  stage: build
+# ============================================================
+# Shared-runner CI (when ENABLE_SKA_CI is not set)
+# ============================================================
+
+.shared_rules:
   rules:
+    - if: $ENABLE_SKA_CI == "true"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
     - when: on_success
+
+build:
+  stage: build
+  extends: .shared_rules
   before_script:
     - *install_dependencies
   script:
     - ./bootstrap
-    - ./configure --enable-lean
+    - ./configure --enable-lean --enable-werror
     - make -j$(nproc)
   artifacts:
     paths:
@@ -82,10 +93,7 @@ build:
 
 test:
   stage: test
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - when: on_success
+  extends: .shared_rules
   needs:
     - build
   before_script:
@@ -99,14 +107,115 @@ test:
       - "*/*/test-suite.log"
     expire_in: 1 week
 
-# Full build with Python/SWIG bindings (not --enable-lean).
-# Runs in parallel with the lean build+test jobs.
 python-bindings:
   stage: build
+  extends: .shared_rules
+  before_script:
+    - *install_dependencies
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
+  script:
+    - ./bootstrap
+    - ./configure --prefix=/tmp/psrchive --enable-shared
+    - make -j$(nproc)
+    - make install
+    - export LD_LIBRARY_PATH=/tmp/psrchive/lib
+    - export PYTHONPATH=$(find /tmp/psrchive -name psrchive.py -printf '%h\n' | head -1)
+    - python3 -c "import psrchive; print('Python bindings OK')"
+
+cppcheck:
+  stage: analysis
+  extends: .shared_rules
+  before_script:
+    - apt-get update -qq
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cppcheck
+  script:
+    - cppcheck --enable=warning,performance,portability
+        --suppress=missingIncludeSystem
+        --xml --xml-version=2
+        -I Util -I Base -I More
+        Util Base More 2> cppcheck-report.xml
+    - cppcheck --enable=warning,performance,portability
+        --suppress=missingIncludeSystem
+        Util Base More
+  artifacts:
+    when: always
+    paths:
+      - cppcheck-report.xml
+    expire_in: 1 week
+
+clang-tidy:
+  stage: analysis
+  extends: .shared_rules
+  needs:
+    - build
+  before_script:
+    - *install_dependencies
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
+  script:
+    - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
+        | head -50
+        | xargs -r clang-tidy -p . --quiet 2>&1
+        | tee clang-tidy-report.txt || true
+  artifacts:
+    when: always
+    paths:
+      - clang-tidy-report.txt
+    expire_in: 1 week
+
+# ============================================================
+# SKA infrastructure CI (when ENABLE_SKA_CI is "true")
+# ============================================================
+
+.ska_rules:
   rules:
+    - if: $ENABLE_SKA_CI != "true"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
     - when: on_success
+
+build-ska:
+  stage: build
+  extends: .ska_rules
+  image: ubuntu:22.04
+  tags:
+    - $GITLAB_CI_TAG
+  before_script:
+    - *install_dependencies
+  script:
+    - ./bootstrap
+    - ./configure --enable-lean --enable-werror
+    - make -j$(nproc)
+  artifacts:
+    paths:
+      - .
+    expire_in: 1 hour
+
+test-ska:
+  stage: test
+  extends: .ska_rules
+  image: ubuntu:22.04
+  tags:
+    - $GITLAB_CI_TAG
+  needs:
+    - build-ska
+  before_script:
+    - *install_dependencies
+  script:
+    - make check
+  artifacts:
+    when: always
+    paths:
+      - "*/test-suite.log"
+      - "*/*/test-suite.log"
+    expire_in: 1 week
+
+python-bindings-ska:
+  stage: build
+  extends: .ska_rules
+  image: ubuntu:22.04
+  tags:
+    - $GITLAB_CI_TAG
   before_script:
     - *install_dependencies
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
