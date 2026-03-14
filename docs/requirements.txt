@@ -1,4 +1,4 @@
-sphinx>=7.0
-breathe>=4.35
-sphinx-rtd-theme>=2.0
-myst-parser>=2.0
+sphinx==9.1.0
+breathe==4.36.0
+sphinx-rtd-theme==3.1.0
+myst-parser==5.0.0
