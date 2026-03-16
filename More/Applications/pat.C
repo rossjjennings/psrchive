@@ -532,20 +532,19 @@ int main (int argc, char** argv) try
     full_poln->set_choose_maximum_harmonic (choose_maximum_harmonic);
     full_poln->set_unload_matrix_model(output_matrix_model_parameters);
   }
-
-  auto hmh = dynamic_cast<HasMaxHarmonic*>(arrival->get_shift_estimator());
-  if (hmh)
+  else if (maximum_harmonic || choose_maximum_harmonic)
   {
+    auto hmh = dynamic_cast<HasMaxHarmonic*>(arrival->get_shift_estimator());
+    if (!hmh)
+    {
+      cerr << "pat: estimator does not have a maximum harmonic" << endl;
+      return -1;
+    }
     if (verbose)
       cerr << "pat: estimator has a maximum harmonic" << endl;
     if (maximum_harmonic)
       hmh->set_maximum_harmonic (maximum_harmonic);
     hmh->set_choose_maximum_harmonic (choose_maximum_harmonic);
-  }
-  else if (maximum_harmonic || choose_maximum_harmonic)
-  {
-    cerr << "pat: estimator does not have a maximum harmonic" << endl;
-    return -1;
   }
 
   if (full_freq && mean_arrival_time)
