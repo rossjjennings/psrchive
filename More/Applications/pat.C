@@ -179,7 +179,6 @@ void usage ()
     "  -e cfg1[,cfgN]   Estimator configuration option[s] \n"
     "  -E cfg           Estimator configuration options in 'cfg' text file \n"
     "  -g datafile      Gaussian model fitting \n"
-    "  -P               Enable frequency-dependent template matching \n"
     "  -s stdfile       Location of standard profile \n"
     "  -S period        Zap harmonics due to periodic spikes in profile \n"
     "                   (use of this option implies SIS) \n"
