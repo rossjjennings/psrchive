@@ -130,12 +130,12 @@ class Angle
 
   friend double operator * (const Angle &, const Angle &);
 
-  friend int operator > (const Angle &, const Angle &);
-  friend int operator < (const Angle &, const Angle &);
-  friend int operator >= (const Angle &, const Angle &);
-  friend int operator <= (const Angle &, const Angle &);
-  friend int operator == (const Angle &, const Angle &);
-  friend int operator != (const Angle &, const Angle &);
+  friend bool operator > (const Angle &, const Angle &);
+  friend bool operator < (const Angle &, const Angle &);
+  friend bool operator >= (const Angle &, const Angle &);
+  friend bool operator <= (const Angle &, const Angle &);
+  friend bool operator == (const Angle &, const Angle &);
+  friend bool operator != (const Angle &, const Angle &);
 
   inline friend double cast_double(const Angle &a) {return a.radians;}
 };
@@ -204,8 +204,8 @@ class AnglePair
 
   friend AnglePair operator * (const AnglePair&, const double);
 
-  friend int operator == (const AnglePair &, const AnglePair &);
-  friend int operator != (const AnglePair &, const AnglePair &);
+  friend bool operator == (const AnglePair &, const AnglePair &);
+  friend bool operator != (const AnglePair &, const AnglePair &);
 
   //! For use in Python
   bool equals (const AnglePair& that) { return *this == that; }

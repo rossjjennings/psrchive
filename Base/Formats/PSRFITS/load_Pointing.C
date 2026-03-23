@@ -98,6 +98,7 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
 
   Angle RA_angle = angle_units (fptr, colnum, double_angle,
                                 (verbose > 2) ? "RA_SUB" : 0);
+  RA_angle.setWrapPoint (2*M_PI);
 
   initflag = 0;
   colnum = 0;
