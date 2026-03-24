@@ -20,9 +20,15 @@ namespace Pulsar {
   class Subtract : public Combination<Profile>
   {
 
+    //! subtract the best linear fit of the second profile from the first
+    bool subtract_linear_fit = false;
+
   public:
 
     void transform (Profile*);
+
+    //! Set whether to subtract the best linear fit of the second profile from the first
+    void set_linear_fit (bool fit) { subtract_linear_fit = fit; }
 
   }; 
 

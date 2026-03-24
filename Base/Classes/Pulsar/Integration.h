@@ -538,33 +538,20 @@ namespace Pulsar {
     void update_nbin ();
   };
 
-  template<typename UnaryProfileMethod, typename Argument>
+  template<typename Argument>
   void foreach (Integration* integration,
-		UnaryProfileMethod method, const Argument& arg)
+                void (Profile::*method) (Argument), Argument arg)
   {
     const unsigned npol = integration->get_npol();
     const unsigned nchan = integration->get_nchan();
 
     for (unsigned ipol=0; ipol<npol; ipol++)
       for (unsigned ichan=0; ichan<nchan; ichan++)
-	(integration->get_Profile(ipol, ichan)->*(method)) (arg);
+        (integration->get_Profile(ipol, ichan)->*(method)) (arg);
   }
 
-  template<typename BinaryProfileMethod>
   void foreach (Integration* integration, const Integration* operand,
-                BinaryProfileMethod method)
-  {
-    const unsigned npol = integration->get_npol();
-    const unsigned nchan = integration->get_nchan();
-
-    for (unsigned ipol=0; ipol<npol; ipol++)
-      for (unsigned ichan=0; ichan<nchan; ichan++)
-      {
-	Profile* into = integration->get_Profile(ipol, ichan);
-	const Profile* from = operand->get_Profile(ipol, ichan);
-        (into->*(method)) (from);
-      }
-  }
+                void (Pulsar::Profile::*method) (const Pulsar::Profile*));
 }
 
 #endif
