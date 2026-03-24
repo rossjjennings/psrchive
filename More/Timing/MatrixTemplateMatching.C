@@ -77,8 +77,9 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub, std::vector<Tempo:
   {
     if (!engine->get_transformation_valid(ichan))
     {
-      cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan 
-           << " " << engine->get_transformation_invalid_reason(ichan) << endl;
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan 
+             << " " << engine->get_transformation_invalid_reason(ichan) << endl;
       continue;
     }
 

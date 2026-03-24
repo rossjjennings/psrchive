@@ -1584,12 +1584,12 @@ void SystemCalibrator::create_model () try
 
       invert_basis = inv( basis->evaluate() );
 
-      cerr << "SystemCalibrator::create_model basis corrections:\n"
-           << basis_correction.get_summary () << endl;
+      std::string summary = basis_correction.get_summary();
+      if (summary.size())
+        cerr << "SystemCalibrator::create_model basis corrections:\n" << summary << endl;
 
-      if (verbose) cerr
-          << "SystemCalibrator::create_model receiver=\n  " 
-          << basis->evaluate() << endl;
+      if (verbose)
+        cerr << "SystemCalibrator::create_model receiver=\n\t" << basis->evaluate() << endl;
     }
     else if (verbose)
       cerr << "SystemCalibrator::create_model basis correction not required" << endl;
