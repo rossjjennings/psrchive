@@ -28,7 +28,7 @@ Pulsar::ProfileWeightFunction::ProfileWeightFunction (const ProfileWeightFunctio
 //! Set the Profile from which the PhaseWeight will be derived
 void Pulsar::ProfileWeightFunction::set_Profile (const Profile* _profile)
 {
-  profile = _profile;
+  profile.set(_profile);
 }
 
 //! Returns a PhaseWeight with the Profile attribute set

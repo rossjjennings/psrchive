@@ -11,10 +11,15 @@
 #ifndef __MEAL_BoostUnion_H
 #define __MEAL_BoostUnion_H
 
-#include "MEAL/Complex2.h"
-#include "MEAL/Composite.h"
+/*
+ * It is necessary to include Vector.h first in order to define true_math::finite(Vector)
+ * before the Evaluable::evaluate method is encountered
+ */
 
 #include "Vector.h"
+
+#include "MEAL/Complex2.h"
+#include "MEAL/Composite.h"
 
 namespace MEAL {
 

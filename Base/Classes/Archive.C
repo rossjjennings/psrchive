@@ -289,11 +289,20 @@ const Pulsar::Parameters* Pulsar::Archive::get_ephemeris () const
 
 const Pulsar::Predictor* Pulsar::Archive::get_model () const
 {
+  // unload_model can override the actual model during Archive::unload
+  if (unload_model)
+    return unload_model;
+
   if (!model)
-    throw Error (InvalidState,
-                 "Pulsar::Archive::get_model", "no model");
+    throw Error (InvalidState, "Pulsar::Archive::get_model", "no model");
 
   return model;
+}
+
+void Pulsar::Archive::set_predictor (Pulsar::Predictor* _model)
+{
+  model = _model;
+  unload_model = nullptr;
 }
 
 MJD Pulsar::Archive::start_time() const

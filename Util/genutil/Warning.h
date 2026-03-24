@@ -62,6 +62,9 @@ class Warning {
   {
     ThreadContext::Lock (warning.context);
 
+    if (verbose)
+      std::cerr << "Warning::operator<<(T) t=" << t << std::endl;
+
     warning.buffer << t;
     warning.message += "*";
     return warning;

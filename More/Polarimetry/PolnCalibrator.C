@@ -245,7 +245,7 @@ unsigned Pulsar::PolnCalibrator::get_nchan (bool build_if_needed) const try
   if (build_if_needed && transformation.size() == 0)
     setup_transformation();
 
-  if (verbose > 2)
+  if (verbose > 4)
     cerr << "Pulsar::PolnCalibrator::get_nchan nchan=" << transformation.size() << endl;
 
   return transformation.size();
@@ -856,7 +856,7 @@ void Pulsar::PolnCalibrator::calibration_setup (const Archive* arch)
       DEBUG("PolnCalibrator::calibration_setup calling Variation::update");
       variation->update (arch->get_Integration(0));
     }
-    
+
     build( arch->get_nchan() );
   }
   catch (Error& error)
@@ -892,12 +892,13 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
     {
       Integration* subint = arch->get_Integration (isub);
 
+      bool rebuild_needed = false;
+
       if (variation)
-      {
-	bool rebuild_needed = variation->update (subint);
-	if (rebuild_needed)
-	  build (subint->get_nchan());
-      }
+	rebuild_needed |= variation->update (subint);
+
+      if (rebuild_needed)
+        build (subint->get_nchan());
       
       subint->expert()->transform (response);
     }
@@ -986,10 +987,5 @@ Pulsar::PolnCalibrator::new_Extension () const
     cerr << "Pulsar::PolnCalibrator::new_Extension" << endl;
 
   return new PolnCalibratorExtension (this);
-}
-
-Pulsar::Calibrator::Info* Pulsar::PolnCalibrator::get_Info () const
-{
-  return PolnCalibrator::Info::create (this);
 }
 

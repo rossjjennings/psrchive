@@ -9,6 +9,8 @@
 
 #include "Horizon.h"
 #include "Meridian.h"
+#include "KrausType.h"
+
 #include "Fixed.h"
 #include "Pauli.h"
 
@@ -30,6 +32,7 @@ void usage ()
     "  -m mjd     time (MJD) of observation (start time if -d is used) \n"
     "  -l lst     time (LST) of observation (start time if -d is used) \n"
     "  -M         use Meridian (X-Y) coordinates \n"
+    "  -K         use Kraus-type projection \n"
     "  -F         simulate fixed receptors \n"
     "  -o deg:deg compute delta-parallactic angle for offset antenna \n"
     "  -t site    telescope \n"
@@ -37,7 +40,7 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char* argv[]) 
+int main (int argc, char* argv[]) try
 {
   MJD mjd;
   sky_coord coord;
@@ -45,8 +48,13 @@ int main (int argc, char* argv[])
   bool use_lst = false;
   double lst = 0.0;
 
+  bool set_observatory_latitude = false;
+  double observatory_latitude = 0.0;
+
   Horizon horizon;
   Meridian meridian;
+  KrausType kraus;
+
   Fixed* fixed = 0;
 
   Directional* directional = &horizon;
@@ -59,7 +67,7 @@ int main (int argc, char* argv[])
   string offset;
 
   int c;
-  while ((c = getopt(argc, argv, "hc:d:FMl:m:o:t:")) != -1)
+  while ((c = getopt(argc, argv, "hc:d:FMKl:L:m:o:t:")) != -1)
   {
     switch (c)
     {
@@ -79,13 +87,22 @@ int main (int argc, char* argv[])
       fixed = new Fixed;
       break;
 
-    case 'M':
-      directional = &meridian;
+    case 'K':
+      directional = &kraus;
+      break;
+
+    case 'L':
+      observatory_latitude = atof(optarg);
+      set_observatory_latitude = true;
       break;
 
     case 'l':
       lst = atof (optarg);
       use_lst = true;
+      break;
+
+    case 'M':
+      directional = &meridian;
       break;
 
     case 'm':
@@ -132,6 +149,9 @@ int main (int argc, char* argv[])
 
   latitude.setRadians( lat );
   longitude.setRadians( lon );
+
+  if (set_observatory_latitude)
+    latitude.setDegrees(observatory_latitude);
 
   double rad2deg = 180.0/M_PI;
   double rad2hr = 12.0/M_PI;
@@ -254,5 +274,9 @@ int main (int argc, char* argv[])
 
   return 0;
 }
-
+catch (Error& error)
+{
+  cerr << "getHorizon exception " << error << endl;
+  return -1;
+}
 

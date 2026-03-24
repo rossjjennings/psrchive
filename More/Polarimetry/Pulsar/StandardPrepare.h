@@ -42,6 +42,9 @@ namespace Calibration
     //! Return the selected bins
     virtual void get_bins (std::vector<unsigned>&) const;
 
+    //! Align data to the phase model in prepare method
+    void set_align_phase (bool flag) { align_phase = flag; }
+
   protected:
 
     friend class MultipleRanking;
@@ -55,6 +58,8 @@ namespace Calibration
     //! The chosen phase bins
     std::vector<unsigned> bins;
 
+    //! Align data to the phase model
+    bool align_phase = true;
   };
 
   class MaximumPolarization : public StandardPrepare

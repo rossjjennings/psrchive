@@ -7,6 +7,13 @@ libpsrmore_la_LIBTOOLFLAGS = --tag=CXX
 libpsrmore_la_SOURCES =
 libpsrmore_la_LIBADD =
 
+if !MAKE_LEAN
+
+SUBDIRS += MEAL
+libpsrmore_la_LIBADD += MEAL/libMEAL.la
+
+endif
+
 SUBDIRS += General
 libpsrmore_la_LIBADD += General/libGeneral.la
 
@@ -16,9 +23,6 @@ libpsrmore_la_LIBADD += General/libGeneral.la
 #
 
 if !MAKE_LEAN
-
-SUBDIRS += MEAL
-libpsrmore_la_LIBADD += MEAL/libMEAL.la
 
 SUBDIRS += Polarimetry
 libpsrmore_la_LIBADD += Polarimetry/libPolarimetry.la

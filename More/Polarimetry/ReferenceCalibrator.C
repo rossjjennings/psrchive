@@ -98,8 +98,7 @@ void ReferenceCalibrator::init ()
   const Archive* archive = get_calibrator();
   
   if (verbose > 2)
-    cerr << "ReferenceCalibrator archive nchan="
-	 << archive->get_nchan() << endl;
+    cerr << "ReferenceCalibrator archive nchan=" << archive->get_nchan() << endl;
 
   requested_nchan = archive->get_nchan();
 
@@ -126,8 +125,7 @@ ReferenceCalibrator::ReferenceCalibrator (const ReferenceCalibrator& other)
 }
 
 //! Set the Stokes parameters of the reference source
-void ReferenceCalibrator::set_reference_source
- (const Stokes< Estimate<double> >& stokes)
+void ReferenceCalibrator::set_reference_source (const Stokes< Estimate<double> >& stokes)
 {
   reference_source = stokes;
   source_set = true;
@@ -157,8 +155,7 @@ void ReferenceCalibrator::set_nchan (unsigned nchan)
   PolnCalibrator::set_response_nchan (nchan);
 }
 
-void distribute_variance (vector<Estimate<double> >& to,
-                          const vector<Estimate<double> >& from)
+void distribute_variance (vector<Estimate<double> >& to, const vector<Estimate<double> >& from)
 {
   unsigned ratio = to.size() / from.size();
   assert (to.size() % from.size() == 0);
@@ -222,7 +219,7 @@ void ReferenceCalibrator::get_levels
     if (integration->get_weight (ichan) == 0)
     {
       for (ipol=0; ipol<npol; ipol++)
-	cal_hi[ipol][ichan] = cal_lo[ipol][ichan] = 0.0;
+        cal_hi[ipol][ichan] = cal_lo[ipol][ichan] = 0.0;
     }
 
   if (smooth_bandpass)
@@ -230,8 +227,7 @@ void ReferenceCalibrator::get_levels
     unsigned window = unsigned (integration->get_nchan() * median_smoothing);
 
     if (verbose > 2)
-      cerr << "ReferenceCalibrator::get_levels median window = "
-	   << window << " channels" << endl;
+      cerr << "ReferenceCalibrator::get_levels median window="<< window << " channels" << endl;
 
     // even a 3-window sort can zap a single channel birdie
     if (window < 3)
@@ -325,8 +321,8 @@ try
       total_lo.resize (cal_lo.size());
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
-	total_hi[ipol].resize (nchan);
-	total_lo[ipol].resize (nchan);
+        total_hi[ipol].resize (nchan);
+        total_lo[ipol].resize (nchan);
       }
     }
     
@@ -334,8 +330,8 @@ try
     {
       for (unsigned ichan=0; ichan<nchan; ichan++)
       {
-	total_hi[ipol][ichan] += cal_hi[ipol][ichan];
-	total_lo[ipol][ichan] += cal_lo[ipol][ichan];
+        total_hi[ipol][ichan] += cal_hi[ipol][ichan];
+        total_lo[ipol][ichan] += cal_lo[ipol][ichan];
       }
     }
   }
@@ -395,8 +391,7 @@ void ReferenceCalibrator::calculate_transformation ()
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
     if (verbose > 2)
-      cerr << "ReferenceCalibrator::calculate_transformation"
-	" ichan=" << ichan << endl;
+      cerr << "ReferenceCalibrator::calculate_transformation ichan=" << ichan << endl;
 
     for (unsigned ipol=0; ipol<npol; ++ipol)
     {
@@ -413,8 +408,8 @@ void ReferenceCalibrator::calculate_transformation ()
     if (cal_AA.val <= 0 || cal_BB.val <= 0)
     {
       if (verbose > 2)
-	cerr << "ReferenceCalibrator::calculate_transformation"
-	  " ichan=" << ichan << " bad levels" << endl;
+        cerr << "ReferenceCalibrator::calculate_transformation"
+          " ichan=" << ichan << " bad levels" << endl;
       bad = true;
       bad_reason = "ReferenceCalibrator::calculate_transformation bad levels";
     }
@@ -431,13 +426,11 @@ void ReferenceCalibrator::calculate_transformation ()
       double bias = invariant.get_bias();
 
       /*
-
-	data are considered bad if: inv - T*bias < -T*err
-	where:
-	inv = inv.get_value()
-	err = inv.get_error()
-	T   = det_threshold
-
+        data are considered bad if: inv - T*bias < -T*err
+        where:
+        inv = inv.get_value()
+        err = inv.get_error()
+        T   = det_threshold
       */
 
       double cutoff = det_threshold * (bias - inv.get_error());
@@ -475,15 +468,15 @@ void ReferenceCalibrator::calculate_transformation ()
     extra (ichan, source, sky);
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "ReferenceCalibrator::calculate_transformation error"
       " ichan=" << ichan << "\n  " << error.get_message() << endl;
     set_transformation_invalid(ichan, "ReferenceCalibrator::calculate_transformation " + error.get_message());
   }
 
   if (verbose > 2)
-    cerr << "ReferenceCalibrator::calculate_transformation exit"
-	 << endl;
+    cerr << "ReferenceCalibrator::calculate_transformation exit" << endl;
 }
 
 #include "Pulsar/SingleAxisCalibrator.h"

@@ -1,18 +1,23 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Predictor.h"
 
-// Integration Extension classes used to store state information
-#include "Pulsar/DeFaraday.h"
-#include "Pulsar/Dedisperse.h"
+// Extension classes used to store state information
+#include "Pulsar/AuxColdPlasma.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
+#include "Pulsar/DispersionHistory.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 #include <iostream>
+
+using namespace Pulsar;
 using namespace std;
 
 Pulsar::Integration* Pulsar::Archive::use_Integration (Integration* subint)
@@ -21,7 +26,102 @@ Pulsar::Integration* Pulsar::Archive::use_Integration (Integration* subint)
   return subint;
 }
 
-/*!  
+void Pulsar::Archive::init_DispersionHistory (Integration* subint, bool overwrite_absolute)
+{
+  bool has_prior_history = subint->get<DispersionHistory>() != nullptr;
+  auto history = subint->getadd<DispersionHistory>();
+
+  // start with the assumption that nothing is corrected
+  history->get_relative()->set_corrected(false);
+
+  if ( get_dedispersed() )
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_DispersionHistory dedispersed DM=" << get_dispersion_measure() << endl;
+    history->get_relative()->set_corrected(true);
+    history->get_relative()->set_reference_frequency( get_centre_frequency() );
+    history->get_relative()->set_measure( get_dispersion_measure() );
+  }
+
+  if (has_prior_history && !overwrite_absolute)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_DispersionHistory preserving existing absolute correction history" << endl;
+    return;
+  }
+
+  // start with the assumption that nothing is corrected
+  history->get_absolute()->set_corrected(false);
+
+  auto subaux = subint->get<AuxColdPlasmaMeasures>();
+
+  if (subaux)
+  {
+    auto aux = get<AuxColdPlasma>();
+    if (!aux)
+      throw Error (InvalidState, "Pulsar::Archive::init_DispersionHistory",
+                   "Integration has AuxColdPlasmaMeasures extension but Archive does not have AuxColdPlasma extension");
+
+    if (aux->get_dispersion_corrected())
+    {
+      if (verbose > 2)
+        cerr << "Pulsar::Archive::init_DispersionHistory absolute dedispersed DM=" << subaux->get_dispersion_measure() << endl;
+
+      history->get_absolute()->set_corrected(true);
+      history->get_absolute()->set_measure( subaux->get_dispersion_measure() );
+    }
+  }
+}
+
+void Pulsar::Archive::init_BirefringenceHistory (Integration* subint, bool overwrite_absolute)
+{
+  bool has_prior_history = subint->get<BirefringenceHistory>() != nullptr;
+  auto history = subint->getadd<BirefringenceHistory>();
+
+  // start with the assumption that nothing is corrected
+  history->get_relative()->set_corrected(false);
+
+  if ( get_faraday_corrected() )
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_BirefringenceHistory derotated RM=" << get_rotation_measure() << endl;
+    history->get_relative()->set_corrected(true);
+    history->get_relative()->set_reference_frequency( get_centre_frequency() );
+    history->get_relative()->set_measure( get_rotation_measure() );
+  }
+
+  if (has_prior_history && !overwrite_absolute)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_BirefringenceHistory preserving existing absolute correction history" << endl;
+    return;
+  }
+
+  // start with the assumption that nothing is corrected
+  history->get_absolute()->set_corrected(false);
+
+  auto subaux = subint->get<AuxColdPlasmaMeasures>();
+
+  if (subaux)
+  {
+    auto aux = get<AuxColdPlasma>();
+    if (!aux)
+      throw Error (InvalidState, "Pulsar::Archive::init_BirefringenceHistory",
+                   "Integration has AuxColdPlasmaMeasures extension but Archive does not have AuxColdPlasma extension");
+
+    if (aux->get_birefringence_corrected())
+    {
+      if (verbose > 2)
+        cerr << "Pulsar::Archive::init_BirefringenceHistory absolute derotated RM=" << subaux->get_rotation_measure() << endl;
+ 
+      auto history = subint->getadd<BirefringenceHistory>();
+      history->get_absolute()->set_corrected(true);
+      history->get_absolute()->set_measure( subaux->get_rotation_measure() );
+    }
+  }
+}
+
+/*!
   After an Integration has been loaded from disk, this method
   ensures that various internal book-keeping attributes are
   initialized.
@@ -33,21 +133,18 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
 
   subint->parent = this;
 
-  if ( get_dedispersed() )
-  {
-    Dedisperse* corrected = new Dedisperse;
-    corrected->set_reference_frequency( get_centre_frequency() );
-    corrected->set_dispersion_measure( get_dispersion_measure() );
-    subint->add_extension( corrected );
-  }
+  /*
+    bugs/509 - part 1
+    Overwrite the absolute correction history only if the Integration does not already own such history.
+    This is to stop an Archive from over-writing important history when it adopts an Integration
+    from another source (note that Archive::use_Integration calls Archive::init_Integration).
+    To ensure that history is initialized correctly when loading, Archive::init_DispersionHistory
+    and Archive::init_BirefringenceHistory are called in Archive::load_Integration with overwrite_absolute = true
+  */
 
-  if ( get_faraday_corrected() )
-  {
-    DeFaraday* corrected = new DeFaraday;
-    corrected->set_reference_frequency( get_centre_frequency() );
-    corrected->set_rotation_measure( get_rotation_measure() );
-    subint->add_extension( corrected );
-  }
+  bool overwrite_absolute = false;
+  init_DispersionHistory (subint, overwrite_absolute);
+  init_BirefringenceHistory (subint, overwrite_absolute);
 
   subint->zero_phase_aligned = false;
 
@@ -69,5 +166,4 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
       cerr << "Pulsar::Archive::init_Integration frac=" << frac
            << " aligned=" << subint->zero_phase_aligned << endl;
   }
-
 }

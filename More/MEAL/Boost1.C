@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Boost1.h"
 #include "MEAL/OneParameter.h"
 #include "Pauli.h"
@@ -15,6 +16,7 @@ void MEAL::Boost1::init ()
 {
   OneParameter* param = new OneParameter (this);
   param->set_name ("boost");
+  param->set_description ("Hyperbolic angle");
 }
 
 MEAL::Boost1::Boost1 (const Vector<3,double>& _axis) 
@@ -78,14 +80,12 @@ Estimate<double> MEAL::Boost1::get_beta () const
 }
 
 //! Return the Jones matrix and its gradient
-void MEAL::Boost1::calculate (Jones<double>& result,
-			      vector<Jones<double> >* grad)
+void MEAL::Boost1::calculate (Jones<double>& result, vector<Jones<double> >* grad)
 {
   double beta = get_param(0);
 
   if (verbose)
-    cerr << "MEAL::Boost1::calculate axis=" << axis 
-	 << " beta=" << beta << endl;
+    cerr << "MEAL::Boost1::calculate axis=" << axis << " beta=" << beta << endl;
 
   double sinh_beta = sinh (beta);
   double cosh_beta = cosh (beta);

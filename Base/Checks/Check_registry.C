@@ -7,9 +7,9 @@ void Pulsar::Archive::Check::ensure_linkage ()
 #include "Pulsar/CalSource.h"
 Registry::List<Pulsar::Archive::Check>::Enter<Pulsar::CalSource> calsource;
 
-#include "Pulsar/Dedispersed.h"
-Registry::List<Pulsar::Archive::Check>::Enter<Pulsar::Dedispersed> dedispersed;
+#include "Pulsar/DispersionCheck.h"
+Registry::List<Pulsar::Archive::Check>::Enter<Pulsar::DispersionCheck> dedispersed;
 
-#include "Pulsar/DeFaradayed.h"
-Registry::List<Pulsar::Archive::Check>::Enter<Pulsar::DeFaradayed> deFaradayed;
+#include "Pulsar/BirefringenceCheck.h"
+Registry::List<Pulsar::Archive::Check>::Enter<Pulsar::BirefringenceCheck> deFaradayed;
 

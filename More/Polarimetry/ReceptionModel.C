@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,15 +10,17 @@
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/ReceptionModelSolveMEAL.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 #include <assert.h>
 
 using namespace std;
 
-// #define _DEBUG 1
-
 Calibration::ReceptionModel::ReceptionModel ()
 {
   set_solver( new_default_Solver() );
+  DEBUG("Calibration::ReceptionModel::ctor this=" << this << " solver=" << (void*) solver);
 }
 
 Calibration::ReceptionModel::Solver*
@@ -29,9 +31,7 @@ Calibration::ReceptionModel::new_default_Solver ()
 
 Calibration::ReceptionModel::~ReceptionModel ()
 {
-#ifdef _DEBUG
-  cerr << "Calibration::ReceptionModel::~ReceptionModel" << endl;
-#endif
+  DEBUG("Calibration::ReceptionModel::~ReceptionModel");
 }
 
 //! Return the name of the class
@@ -44,6 +44,9 @@ string Calibration::ReceptionModel::get_name () const
 void Calibration::ReceptionModel::set_solver (Solver* s)
 {
   solver = s;
+
+  DEBUG("Calibration::ReceptionModel::set_solver this=" << this << " solver=" << (void*) solver);
+
   if (solver)
     solver->set_equation (this);
 }
@@ -79,6 +82,8 @@ void Calibration::ReceptionModel::add_postfit_report (Report* report)
 //! Solve the measurement equation using the current algorithm
 void Calibration::ReceptionModel::solve ()
 {
+  DEBUG("Calibration::ReceptionModel::solve this=" << this << " solver=" << (void*) solver);
+
   for (unsigned i=0; i<prefit_reports.size(); i++)
     prefit_reports[i]->report();
 
@@ -174,3 +179,29 @@ void Calibration::ReceptionModel::range_check (unsigned idata,
 		 idata, data.size());
 }
 
+void Calibration::ReceptionModel::erase_input (unsigned index)
+{
+  MeasurementEquation::erase_input (index);
+
+  for (auto& datum: data)
+  {
+    for (auto& meas: datum)
+    {
+      unsigned input_index = meas.get_input_index();
+      if (input_index >= index)
+        meas.set_input_index(input_index - 1);
+    }
+  }
+}
+
+void Calibration::ReceptionModel::erase_transformation (unsigned index)
+{
+  MeasurementEquation::erase_transformation (index);
+
+  for (auto& datum: data)
+  {
+    unsigned xform_index = datum.get_transformation_index();
+    if (xform_index >= index)
+      datum.set_transformation_index(xform_index - 1);
+  } 
+}

@@ -114,7 +114,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   cerr << "load polynomial PSRFITS 2.5" << endl;
 #endif
 
-  vector<char> site (8);
+  vector<char> site (8, '\0');
   char* c_site = site.data();
 
   fits_get_colnum (fptr, CASEINSEN, "NSITE", &colnum, &status);

@@ -162,7 +162,10 @@ char * crad2dmse( double pos, double err, int ra, char * name )
   double sec, sece, tmp, tmpe;
   int deg, min, ip;
   char isign;
-  char * it, fmt[16];
+
+#define FMT_STRLEN 16
+
+  char* it, fmt[FMT_STRLEN];
   int expo,i;
   double mant;
   int  ierr;
@@ -200,7 +203,7 @@ char * crad2dmse( double pos, double err, int ra, char * name )
 	      mant = sece * pow ( 10.0, (double)expo );
 	      ierr =
 		mant - floor ( mant ) < .5 ? (int) floor(mant) : (int) ceil(mant);
-	      sprintf(fmt,"%%0%d.%dlf %%%dd",3 + expo - (expo == 0),
+	      snprintf(fmt,FMT_STRLEN,"%%0%d.%dlf %%%dd",3 + expo - (expo == 0),
 		      expo, 5-expo- (expo==0));
 	      i=sprintf(name+ip-6,fmt,sec,ierr);
 	    }
@@ -229,14 +232,5 @@ void add_name_suffix(char * inname, char *outname)
   i=strspn(inname+1,"0123456789+-");
   strcat(outname,inname+1+i);
 }
-
-
-
-
-
-
-
-
-
 
 

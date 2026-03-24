@@ -1,12 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/AuxColdPlasma.h"
 
 using namespace std;
 
@@ -20,9 +21,14 @@ void Pulsar::Archive::fscrunch (unsigned nscrunch)
     return;
 
   for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> fscrunch (nscrunch);
+  {
+    auto subint = get_Integration(isub);
+    subint->fscrunch (nscrunch);
+  }
 
   set_nchan (get_Integration(0)->get_nchan());
+  update_absolute_dispersion();
+  update_absolute_rotation();
 }
 
 /*!

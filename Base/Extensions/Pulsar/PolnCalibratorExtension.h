@@ -73,14 +73,19 @@ namespace Pulsar {
     //! Get the number of parameters describing each transformation
     unsigned get_nparam () const;
 
-    //! Get if the covariances of the transformation parameters
+    //! Set the number of abscissa / dimensions in the model
+    void set_ndim (unsigned);
+    //! Get the number of abscissa / dimensions in the model
+    unsigned get_ndim () const;
+
+    //! Return true if the covariances of the model parameters are available
     bool get_has_covariance () const;
-    //! Set if the covariances of the transformation parameters
+    //! Set true when the covariances of the model parameters are available
     void set_has_covariance (bool);
 
-    //! Get if the covariances of the transformation parameters
+    //! Return true if information about the solution is available
     bool get_has_solver () const;
-    //! Set if the covariances of the transformation parameters
+    //! Return true if information about the solution is available
     void set_has_solver (bool);
 
     //! Return true if the transformation for the specified channel is valid
@@ -109,13 +114,16 @@ namespace Pulsar {
     std::vector<Transformation> response;
 
     //! The number of parameters that describe the transformation
-    unsigned nparam;
+    unsigned nparam = 0;
+
+    //! The number of abscissa / dimensions in the model
+    unsigned ndim = 0;
 
     //! The covariances of the transformation parameters are available
-    bool has_covariance;
+    bool has_covariance = false;
 
     //! The solver statistics are available
-    bool has_solver;
+    bool has_solver = false;
 
     //! Construct the response array according to the current attributes
     void construct ();
@@ -184,6 +192,16 @@ namespace Pulsar {
     //! Set the best fit value of chi squared
     void set_chisq (double);
 
+    //! Get the logarithm of the determinant of the curvature matrix
+    double get_log_det_curvature () const;
+    //! Set the logarithm of the determinant of the curvature matrix
+    void set_log_det_curvature (double);
+
+    //! Get the logarithm of the condition number of the curvature matrix
+    double get_log_cond_curvature () const;
+    //! Set the logarithm of the condition number of the curvature matrix
+    void set_log_cond_curvature (double);
+
     //! Get the number of degrees of freedom
     unsigned get_nfree() const;
     //! Set the number of degress of freedom
@@ -194,8 +212,25 @@ namespace Pulsar {
     //! Set the number of model parameters varied to find best fit
     void set_nfit (unsigned);
 
+    //! Get the number of abscissa / dimensions
+    unsigned get_ndim() const;
+    //! Set the number of abscissa / dimensions
+    void set_ndim (unsigned);
+
     //! Get the best fit value of the reduced chi squared = chisq/nfree
     double get_reduced_chisq () const;
+
+    //! Get the Akaike information criterion
+    double get_Akaike_information_criterion() const;
+
+    //! Get the Bayesian information criterion
+    double get_Bayesian_information_criterion() const;
+
+    //! Get the geometric information criterion
+    double get_geometric_information_criterion() const;
+
+    //! Get the stochastic information complexity
+    double get_stochastic_information_complexity() const;
 
     // Text interface to a PolnCalibratorExtension instance
     class Interface : public TextInterface::To<Transformation>
@@ -211,10 +246,16 @@ namespace Pulsar {
     std::vector< std::string > descriptions;
 
     std::vector<double> covariance;
-    double chisq;
-    unsigned nfree;
-    unsigned nfit;
-    bool valid;
+    double chisq = 0.0;
+    double log_det_curvature = 0.0;
+    double log_cond_curvature = 0.0;
+    unsigned nfree = 0;
+    unsigned nfit = 0;
+
+    /*! Currently (29 Dec 2024), ndim is not stored with the model results;
+        rather, it is derived from the ConfigurableProjection */
+    unsigned ndim = 0;
+    bool valid = false;
 
   };
 

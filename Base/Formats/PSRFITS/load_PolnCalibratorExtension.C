@@ -43,13 +43,13 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
   {
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
-	" no FEEDPAR HDU" << endl;
+              " no FEEDPAR HDU" << endl;
     return;
   }
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_PolnCalibratorExtension", 
-		     "fits_movnam_hdu FEEDPAR");
+                    "fits_movnam_hdu FEEDPAR");
 
   Reference::To<PolnCalibratorExtension> pce = new PolnCalibratorExtension;
 
@@ -72,7 +72,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
   {
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
-        " empty CAL_MTHD" << endl;
+              " empty CAL_MTHD" << endl;
     return;
   }
 
@@ -80,7 +80,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
 
   if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension Calibrator type=" 
-	 << pce->get_type()->get_name() << endl;
+        << pce->get_type()->get_name() << endl;
 
   // Get NCPAR 
   int ncpar = 0;
@@ -105,7 +105,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
     string key = stringprintf ("PAR_%04d", iparam);
     string empty = "";
     psrfits_read_key (fptr, key.c_str(), &(param_names[iparam]),
-		      empty, verbose == 3);
+                      empty, verbose == 3);
   }
 
   Pulsar::load (fptr, pce);
@@ -116,7 +116,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
   {
     if (verbose == 3)
       cerr << "FITSArchive::load_PolnCalibratorExtension FEEDPAR HDU"
-	   << " contains no data. PolnCalibratorExtension not loaded" << endl;
+          << " contains no data. PolnCalibratorExtension not loaded" << endl;
     return;
   }
 
@@ -146,19 +146,19 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
       bool valid = true;
       for (int j = 0; j < ncpar; j++)
       {
-	pce->get_transformation(ichan)->set_param_name (j, param_names[j]);
+        pce->get_transformation(ichan)->set_param_name (j, param_names[j]);
 
-	if (!true_math::finite(data[count]))
-	  valid = false;
-	else
+        if (!true_math::finite(data[count]))
+          valid = false;
+        else
         {
-	  pce->get_transformation(ichan)->set_param(j,data[count]);
-          DEBUG ("\t" << j << " " << data[count]);
+          pce->get_transformation(ichan)->set_param(j,data[count]);
+                DEBUG ("\t" << j << " " << data[count]);
         }
-	count++;
+        count++;
       }
       if (!valid)
-	pce->set_valid (ichan, false);
+        pce->set_valid (ichan, false);
     }
     else
       count += ncpar;
@@ -207,30 +207,30 @@ void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 
       for (int j = 0; j < ncpar; j++)
       {
-	float err = data[count];
+        float err = data[count];
 
-	if (!true_math::finite(err))
-	  valid = false;
-	else
-	  pce->get_transformation(ichan)->set_variance (j,err*err);
+        if (!true_math::finite(err))
+          valid = false;
+        else
+          pce->get_transformation(ichan)->set_variance (j,err*err);
 
-	if (err == 0)
-	  zeroes++;
+        if (err == 0)
+          zeroes++;
 
-	count++;	
+        count++;	
       }
 
       if (zeroes == ncpar)
       {
-	if (Pulsar::Archive::verbose > 1)
-	  cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
-	    " WARNING\n  ichan=" << ichan << " flagged invalid:"
-	    " zero error in all parameters" << endl;
-	valid = false;
+        if (Pulsar::Archive::verbose > 1)
+          cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
+            " WARNING\n  ichan=" << ichan << " flagged invalid:"
+            " zero error in all parameters" << endl;
+        valid = false;
       }
 
       if (!valid)
-	pce->set_valid (ichan, false);
+        pce->set_valid (ichan, false);
 
     }
     else
@@ -244,7 +244,7 @@ void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 //
 //
 void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		       int ncovar, vector<float>& data)
+                        int ncovar, vector<float>& data)
 {
   if (Pulsar::Archive::verbose > 2)
     cerr << "FITSArchive::load_PolnCalibratorExtension"
@@ -289,8 +289,7 @@ void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 //
 //
 //
-void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		  vector<float>& data)
+void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<float>& data)
 {
   unsigned nchan = pce->get_nchan();
   data.resize( nchan );
@@ -303,8 +302,7 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
   catch (Error& error)
   {
     if (Pulsar::Archive::verbose > 2)
-      cerr << "FITSArchive::load_PolnCalibratorExtension"
-	" no CHISQ/NFREE" << endl;
+      cerr << "FITSArchive::load_PolnCalibratorExtension no CHISQ/NFREE" << endl;
     pce->set_has_solver (false);
     return;
   }
@@ -317,9 +315,34 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
   catch (Error& error)
   {
     if (Pulsar::Archive::verbose > 2)
-      cerr << "FITSArchive::load_PolnCalibratorExtension"
-	" no NFIT" << endl;
+      cerr << "FITSArchive::load_PolnCalibratorExtension no NFIT" << endl;
     nfit.resize (0);
+  }
+
+  // WvS new on 24 Dec 2024 - needed to compute the SIC
+  vector<float> log_det_curvature ( nchan, 0.0 );
+  try
+  {
+    psrfits_read_col (fptr, "LN_DET_H", log_det_curvature);
+  }
+  catch (Error& error)
+  {
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "FITSArchive::load_PolnCalibratorExtension no LN_DET_H" << endl;
+    log_det_curvature.resize (0);
+  }
+
+  // WvS new on 29 Dec 2024
+  vector<float> log_cond_curvature ( nchan, 0.0 );
+  try
+  {
+    psrfits_read_col (fptr, "LN_COND", log_cond_curvature);
+  }
+  catch (Error& error)
+  {
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "FITSArchive::load_PolnCalibratorExtension no LN_COND" << endl;
+    log_cond_curvature.resize (0);
   }
 
   for (unsigned ichan = 0; ichan < nchan; ichan++)
@@ -333,6 +356,14 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
     // WvS new on 3 Jan 2022 - needed to compute the AIC
     if (nfit.size() == nchan)
       pce->get_transformation(ichan)->set_nfit( nfit[ichan] );
+
+    // WvS new on 24 Dec 2024 - needed to compute the SIC
+    if (log_det_curvature.size() == nchan)
+      pce->get_transformation(ichan)->set_log_det_curvature( log_det_curvature[ichan] );
+
+    // WvS new on 29 Dec 2024
+    if (log_cond_curvature.size() == nchan)
+      pce->get_transformation(ichan)->set_log_cond_curvature( log_cond_curvature[ichan] );
   }
 
   pce->set_has_solver (true);

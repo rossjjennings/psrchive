@@ -16,6 +16,8 @@
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
+#include "Pulsar/DispersionHistory.h"
 
 #include "Pulsar/ComponentModel.h"
 #include "Pulsar/SimplePolnProfile.h"
@@ -26,6 +28,7 @@
 #include "MEAL/ScalarParameter.h"
 
 #include "pairutil.h"
+#include "BoxMuller.h"
 
 #include <fstream>
 #include <iomanip>
@@ -55,17 +58,23 @@ protected:
   Reference::To<SimplePolnProfile> simulator;
 
   //! Faraday rotation measure
-  double rotation_measure;
+  double rotation_measure = 0;
+
+  //! Standard deviation of absolute rotation measure
+  double absolute_rotation_measure_rms = 0;
 
   //! Signal-to-noise ratio of integrated total
-  double signal_to_noise_ratio;
+  double signal_to_noise_ratio = 0;
 
   //! Number of Pulse Profiles to be output 
-  int profile_number;
+  int profile_number = 1;
 
   //! Simulate observation of the input data with a specified receiver
-  bool simulate_reception;
+  bool simulate_reception = false;
   
+  //! Overwrite input file
+  bool overwrite = false;
+
   //! Orientation and ellipticity of single receptor
   std::pair<double,double> receptor_angles;
 
@@ -96,12 +105,6 @@ psrsim::psrsim () :
   add( new Pulsar::StandardOptions );
 
   simulator = new SimplePolnProfile;
-  rotation_measure = 0;
-  signal_to_noise_ratio = 0;
-
-  profile_number = 1;
-
-  simulate_reception = false;
 }
 
 // defined in RotatingVectorModelOptions.C
@@ -117,13 +120,18 @@ void psrsim::add_options (CommandLine::Menu& menu)
   arg = menu.add (rotation_measure, 'r');
   arg->set_help ("rotation measure");
 
+  arg = menu.add (absolute_rotation_measure_rms, "rms_arm");
+  arg->set_help ("rms of random absolute rotation measure");
+
   menu.add ("\n" "Pulse shape and statistics:");
 
   MEAL::ScaledVonMises* svm = simulator->get_Intensity();
 
-  arg = menu.add (svm, &MEAL::ScaledVonMises::set_width,
-		  deg_to_rad, 'w', "degrees");
-  arg->set_help ("width of pulse in degrees");
+  arg = menu.add (svm, &MEAL::ScaledVonMises::set_width, deg_to_rad, 'w', "degrees");
+  arg->set_help ("width of pulse as a standard deviation in degrees");
+
+  arg = menu.add (svm, &MEAL::ScaledVonMises::set_fwhm, deg_to_rad, "fwhm", "degrees");
+  arg->set_help ("full width at half maximum of pulse in degrees");
 
   arg = menu.add (this, &psrsim::load_component_model, 'P', "paas.m");
   arg->set_help ("load component model as output by paas");
@@ -153,6 +161,9 @@ void psrsim::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (profile_number, 'N');
   arg->set_help ("number of pulse profiles to be simulated");
+
+  arg = menu.add (overwrite, 'O');
+  arg->set_help ("overwrite input data file");
 
   arg = menu.add (this, &psrsim::set_receptor_angles, 'R', "or:el");
   arg->set_help ("orientation and ellipticity of receptor 0 [deg]");
@@ -212,6 +223,8 @@ void psrsim::process (Pulsar::Archive* data)
     simulator->set_noise( sigma );
   }
 
+  BoxMuller gasdev;
+
   for (int i=0; i<profile_number; i++)
   {
     ostringstream value;
@@ -240,6 +253,17 @@ void psrsim::process (Pulsar::Archive* data)
         simulator->get_PolnProfile(profile.ptr());
         subint->set_weight(ichan, 1.0);
       }
+
+      if (absolute_rotation_measure_rms)
+      {
+        auto aux = subint->getadd<AuxColdPlasmaMeasures>();
+        double rm = absolute_rotation_measure_rms * gasdev();
+        aux->set_rotation_measure(rm);
+      }
+
+      auto history = subint->get<DispersionHistory>();
+      if (history)
+        delete history;
     }
 
     if (rotation_measure != 0.0)
@@ -247,15 +271,19 @@ void psrsim::process (Pulsar::Archive* data)
       // perform Faraday rotation
       FaradayRotation xform;
       xform.set_reference_frequency( data->get_centre_frequency() );
-      xform.set_measure( -rotation_measure );
+      xform.set_rotation_measure( -rotation_measure );
       xform.just_do_it( data );
     }
     
     data->set_faraday_corrected (false);
     data->set_rotation_measure (rotation_measure);
     data->set_dispersion_measure (0.0);
+    data->set_dedispersed (false);
     
-    data->unload (unload);
+    if (overwrite)
+      data->unload();
+    else
+      data->unload (unload);
     
   } // end of for loop to generate multiple files
   

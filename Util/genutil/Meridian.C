@@ -48,12 +48,23 @@ Matrix<3,3,double> Meridian::get_basis (const Vector<3,double>& from) const
   /*
     receptor basis in the frame of the observatory
 
-    start with dish pointing toward zenith,
-    x receptor toward North, y receptor toward East,
+    start with dish pointing toward zenith, and define a right-handed
+    coordinate system with 
 
-    positive rotations about East dip dish toward South, so rotate -x
-    positive rotations about North (prime) dip dish toward East, so rotate y
+    x-axis toward North, y-axis toward East, z-axis toward Earth
+
+    The Matrix returned by the rotation function defined in 
+    epsic/src/util/Matrix.h rotates a vector about an axis by an angle
+    as defined by the right-hand rule.  Therefore, to perform a basis
+    transformation, rotate by negative angle.
+
+    R1: rotate about East by x (tip basis to the North)
+    then
+    R2: rotate about North (prime) by -y (tip basis to the East)
   */
-  return transpose( rotation (Vector<3,double>::basis(1), -x) *
-		    rotation (Vector<3,double>::basis(0), y) );
+
+  Matrix<3,3,double> R1 = rotation (Vector<3,double>::basis(1), x);
+  Matrix<3,3,double> R2 = rotation (Vector<3,double>::basis(0), -y);
+
+  return R2 * R1;
 }

@@ -75,23 +75,10 @@ unsigned Pulsar::PeakConsecutive::get_consecutive () const
 }
 
 //! Set the BaselineEstimator used to find the off-pulse phase bins
-void Pulsar::PeakConsecutive::set_baseline_estimator (BaselineEstimator* b)
+void Pulsar::PeakConsecutive::set_baseline_estimator (ProfileWeightFunction* b)
 {
-  baseline_estimator = b;
+  HasBaselineEstimator::set_baseline_estimator(b);
   built = false;
-}
-
-//! Get the BaselineEstimator used to find the off-pulse phase bins
-const Pulsar::BaselineEstimator* 
-Pulsar::PeakConsecutive::get_baseline_estimator () const
-{
-  return baseline_estimator;
-}
-
-Pulsar::BaselineEstimator*
-Pulsar::PeakConsecutive::get_baseline_estimator ()
-{
-  return baseline_estimator;
 }
 
 //! Set the start and end bins of the search
@@ -194,13 +181,12 @@ void regions( unsigned ndat, const float* data,
 void Pulsar::PeakConsecutive::build ()
 {
   if (!profile)
-    throw Error (InvalidState, "Pulsar::PeakConsecutive::build",
-		 "Profile not set");
+    throw Error (InvalidState, "Pulsar::PeakConsecutive::build", "Profile not set");
 
   Reference::To<PhaseWeight> baseline;
 
-  if (baseline_estimator)
-    baseline = baseline_estimator->baseline (profile);
+  if (has_baseline_estimator())
+    baseline = get_baseline_estimator()->operate (profile);
   else
     baseline = profile->baseline();
 

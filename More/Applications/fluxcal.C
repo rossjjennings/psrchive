@@ -127,18 +127,8 @@ void configuration_report (Reference::To<Pulsar::StandardCandles>);
 // print all fluxes to cerr
 void print_fluxes (Reference::To<Pulsar::StandardCandles>, double freq);
 
-// compare two Database::Entry instances using Entry::less_than
-bool less_than (const Pulsar::Database::Entry* A, const Pulsar::Database::Entry* B)
+int main (int argc, char** argv) try
 {
-  if (A==NULL || B==NULL)
-    throw Error (InvalidParam, "less_than (Pulsar::Database::Entry*)",
-                 "null pointer passed as argument");
-
-  return A->less_than (B);
-}
-
-int main (int argc, char** argv) try {
-
   Pulsar::Option<bool> self_calibrate ("fluxcal::self_calibrate", false);
 
   bool offpulse_calibrator = false;
@@ -301,7 +291,7 @@ int main (int argc, char** argv) try {
       return -1;
     }
 
-    sort (entries.begin(), entries.end(), &less_than);
+    sort (entries.begin(), entries.end(), &Pulsar::less_than);
 
     // break them into sets
 

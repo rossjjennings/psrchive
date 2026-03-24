@@ -22,7 +22,7 @@ unsigned Pulsar::ConstantGainInfo::get_nchan () const
 }
 
 //! Return the name of the specified class
-std::string Pulsar::ConstantGainInfo::get_name (unsigned iclass) const
+std::string Pulsar::ConstantGainInfo::get_label (unsigned iclass) const
 {
   switch (iclass) {
   case 0:

@@ -1,0 +1,33 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -d splinter ) then
+
+  echo "Downloading YAML-CPP source code from github"
+
+  setenv YAML_CPP_GIT https://github.com/jbeder/yaml-cpp.git
+  git clone $YAML_CPP_GIT
+
+endif
+
+cd yaml-cpp
+git pull
+
+mkdir -p build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=@prefix@ -DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" ..
+
+make
+make install
+
+echo
+echo
+echo "YAML-CPP library installation completed"
+echo
+echo "To use the library, please re-run the PSRCHIVE configure script"
+echo
+

@@ -284,35 +284,35 @@ const Angle operator / (const Angle &a1, double d)
   return a;
 }
 
-int operator > (const Angle &a1, const Angle &a2)
+bool operator > (const Angle &a1, const Angle &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(0);
   else return (a1.getRadians()>a2.getRadians());
 }
 
-int operator >= (const Angle &a1, const Angle &a2)
+bool operator >= (const Angle &a1, const Angle &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(1);
   else return (a1.getRadians()>a2.getRadians());
 }
 
-int operator < (const Angle &a1, const Angle &a2)
+bool operator < (const Angle &a1, const Angle &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(0);
   else return (a1.getRadians()<a2.getRadians());
 }
 
-int operator <= (const Angle &a1, const Angle &a2)
+bool operator <= (const Angle &a1, const Angle &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(1);
   else return (a1.getRadians()<a2.getRadians());
 }
 
-int operator == (const Angle &a1, const Angle &a2)
+bool operator == (const Angle &a1, const Angle &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if ((fabs(a1.getRadians()-a2.getRadians())<precision_limit)) 
@@ -321,7 +321,7 @@ int operator == (const Angle &a1, const Angle &a2)
       return (0);  
 }
 
-int operator != (const Angle &a1, const Angle &a2)
+bool operator != (const Angle &a1, const Angle &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if ((fabs(a1.getRadians()-a2.getRadians())>precision_limit)) 
@@ -540,8 +540,7 @@ AnglePair operator* (const AnglePair & pair, const double mult)
   return AnglePair(pair.angle1*mult, pair.angle2*mult);
 }
 
-AnglePair &
-AnglePair::operator= (const AnglePair & a)
+AnglePair& AnglePair::operator= (const AnglePair & a)
 {
   angle1 = a.angle1;
   angle2 = a.angle2;
@@ -555,7 +554,7 @@ std::ostream& operator<< (std::ostream & os, const AnglePair & pair)
             << "," << pair.angle2 << ")";
 }
 
-int operator == (const AnglePair &a1, const AnglePair &a2)
+bool operator == (const AnglePair &a1, const AnglePair &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   double ra1, ra2, dec1, dec2;
@@ -567,7 +566,7 @@ int operator == (const AnglePair &a1, const AnglePair &a2)
       return (0);  
 }
 
-int operator != (const AnglePair &a1, const AnglePair &a2)
+bool operator != (const AnglePair &a1, const AnglePair &a2)
 {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   double ra1, ra2, dec1, dec2;

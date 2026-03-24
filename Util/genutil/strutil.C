@@ -26,7 +26,7 @@ string basename (const string& filename)
     return filename.substr (last+1);
 }
 
-string pathname (const string& filename)
+string dirname (const string& filename)
 {
   string::size_type last = filename.rfind ("/");
 

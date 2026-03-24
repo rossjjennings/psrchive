@@ -44,12 +44,14 @@ PhaseGradShift::~PhaseGradShift()
 //! Set the maximum number of harmonics to include in fit
 void PhaseGradShift::set_maximum_harmonic (unsigned max)
 {
+  HasMaxHarmonic::set_maximum_harmonic(max);
   stm->set_maximum_harmonic (max);
 }
 
 //! Allow software to choose the maximum harmonic
 void PhaseGradShift::set_choose_maximum_harmonic (bool flag)
 {
+  HasMaxHarmonic::set_choose_maximum_harmonic(flag);
   stm->set_choose_maximum_harmonic (flag);
 }
 

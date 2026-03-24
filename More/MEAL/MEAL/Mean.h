@@ -15,12 +15,13 @@
 
 namespace MEAL {
 
-  //! Used to accumulate a running mean of Complex2 model parameters
+  //! Pure virtual base class of objects that compute mean model parameters
   /*! This pure virtual template base class defines the interface by
     which mean Function parameters may be accumulated and used. */
 
   template<class T>
-  class Mean : public Reference::Able {
+  class Mean : public Reference::Able
+  {
 
   public:
 

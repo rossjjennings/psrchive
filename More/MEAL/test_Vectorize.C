@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+#include "MEAL/Complex2.h"
+
 #include "MEAL/Vectorize.h"
 #include "MEAL/Union.h"
 

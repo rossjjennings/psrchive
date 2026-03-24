@@ -1,4 +1,13 @@
 
+nodist_include_HEADERS = psrchive_version.h
+.PHONY: psrchive_version.h
+
+psrchive_version.h:
+	GIT_HASH=`cd $(top_srcdir); git describe --always --dirty --match 'NOT A TAG'`; echo "#define PSRCHIVE_COMMIT_HASH \"$$GIT_HASH\"" > psrchive_version.tmp
+	if diff -q psrchive_version.tmp psrchive_version.h >/dev/null 2>&1; then rm psrchive_version.tmp; else mv psrchive_version.tmp psrchive_version.h; fi
+
+CLEANFILES = psrchive_version.h
+
 aclocaldir = $(datadir)/aclocal
 
 dist_aclocal_DATA = \
@@ -10,7 +19,8 @@ dist_aclocal_DATA = \
 nodist_aclocal_DATA = Makefile.aclocal
 
 EXTRA_DIST = aclocal.sh
-CLEANFILES = Makefile.aclocal
+
+CLEANFILES += Makefile.aclocal
 
 #############################################################################
 #

@@ -1,44 +1,153 @@
 /***************************************************************************
  *
- *   Copyright (C) 2019 by Willem van Straten
+ *   Copyright (C) 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/VariableTransformation.h"
 
-using namespace Pulsar;
+#include "Pauli.h"
+#include "Error.h"
 
-//! Default constructor
+using namespace std;
+using namespace Calibration;
+
+// #define _DEBUG 1
+
+void VariableTransformation::init()
+{
+  add_model (&post_correction);
+  add_model (&chain);
+  add_model (&pre_correction);
+}
+
 VariableTransformation::VariableTransformation ()
 {
-  built = false;
+  init ();
 }
 
-//! Set the Archive for which a tranformation will be computed
-void VariableTransformation::set_archive (const Archive* _archive) 
+VariableTransformation::VariableTransformation (const VariableTransformation& s)
 {
-  if (archive && archive != _archive)
-    built = false;
- 
-  archive = _archive;
+  init ();
+  operator = (s);
 }
 
-//! Set the sub-integration for which a tranformation will be computed
-void VariableTransformation::set_subint (unsigned _subint)
-{ 
-  if (subint != _subint)
-    built = false;
+//! Assignment Operator
+const VariableTransformation& 
+VariableTransformation::operator = (const VariableTransformation& s)
+{
+  if (&s == this)
+    return *this;
+
+  // clone the model
+  if (s.model)
+    set_model (s.model->clone());
+
+  // clone any constraints
+  for (auto f: s.function)
+    set_constraint (f.first, f.second->clone());
+
+  return *this;
+}
+
+VariableTransformation::~VariableTransformation ()
+{
+#if _DEBUG
+  cerr << "VariableTransformation::dtor this=" << this << endl;
+#endif
+}
+
+VariableTransformation* VariableTransformation::clone () const
+{
+  return new VariableTransformation (*this);
+}
+
+void VariableTransformation::set_model (MEAL::Complex2* _model)
+{
+  model = _model;
+  chain.set_model (model);
+}
+
+MEAL::Complex2* VariableTransformation::get_model ()
+{
+  return model;
+}
+
+const MEAL::Complex2* VariableTransformation::get_model () const
+{
+  return model;
+}
+
+//! Set the multivariate function that constrains the specified parameter
+void VariableTransformation::set_constraint (unsigned index, MEAL::Nvariate<MEAL::Scalar>* func)
+{
+#if _DEBUG
+  cerr << "VariableTransformation::set_constrain this=" << this << " function=" << (void*) func;
+  if (function)
+    cerr << " " << func->get_name();
+  cerr << endl;
+#endif
   
-  subint = _subint;
+  function[index] = func;
+  chain.set_constraint (index, func);
 }
 
-//! Set the frequency channel for which a tranformation will be computed
-void VariableTransformation::set_chan (unsigned _chan)
+unsigned VariableTransformation::get_index (unsigned jconstraint)
 {
-  if (chan != _chan)
-    built = false;
+  auto it = function.begin();
+  unsigned j = 0;
+  while (j < jconstraint && it != function.end())
+  {
+    j++;
+    it++;
+  }
 
-  chan = _chan;
+  if (j != jconstraint)
+    throw Error (InvalidParam, "VariableTransformation::get_index",
+          "jconstraint=%u >= nconstraint=%u", jconstraint, function.size());
+
+  return it->first;
 }
 
+void VariableTransformation::set_argument (const Argument& argset)
+{
+  if ( argset.arguments.size() != function.size() )
+    throw Error (InvalidState, "VariableTransformation::set_argument",
+                 "number of parameter sets = %d does not equal number of functions = %d",
+                 argset.arguments.size(), function.size() );
+
+  for (auto arg : argset.arguments)
+  {
+    // arg.first is the parameter index
+    auto f = function.at( arg.first );
+
+    // arg.second is the vector of arguments for each abscissa
+    unsigned nargs = arg.second.size();
+
+    for (unsigned iarg=0; iarg < nargs; iarg++)
+      f->set_abscissa_value (iarg, arg.second[iarg]);
+  }
+
+  pre_correction.set_value (argset.pre_correction);
+  post_correction.set_value (argset.post_correction);
+}
+
+std::string Calibration::axis_value_to_string(const VariableTransformation::Argument& vtarg)
+{
+  string result;
+  string space;  // no space before the first arg
+
+  for (auto& arg: vtarg.arguments)
+  {
+    result += space + tostring(arg.first) + ":";
+    for (unsigned i=0; i < arg.second.size(); i++)
+    {
+      if (i > 0)
+        result += ",";
+      result += tostring(arg.second[i]);
+    }
+    space = " ";  // space before subsequent args
+  }
+  return result;
+}

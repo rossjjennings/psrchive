@@ -12,7 +12,7 @@
 
 //! Constructor
 Pulsar::SourceInfo::SourceInfo 
-(const std::vector<Calibration::SourceEstimate>& estimate)
+(const std::vector< Reference::To<Calibration::SourceEstimate> >& estimate)
   : source (estimate)
 {
   together = false;
@@ -54,7 +54,7 @@ unsigned Pulsar::SourceInfo::get_nclass () const
 }
 
 //! Return the name of the specified class
-std::string Pulsar::SourceInfo::get_name (unsigned iclass) const
+std::string Pulsar::SourceInfo::get_label (unsigned iclass) const
 {
   std::string label = "\\fiS'\\b\\d\\frk";
 
@@ -86,7 +86,7 @@ Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
   if (!source.size())
     return 0.0;
 
-  if (!source[ichan].valid || !source[ichan].source)
+  if (!source[ichan]->valid || !source[ichan]->source)
     return 0.0;
 
   unsigned index = 0;
@@ -96,5 +96,5 @@ Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
   else
     index = iclass;
 
-  return source[ichan].source->get_Estimate(index);
+  return source[ichan]->source->get_Estimate(index);
 }

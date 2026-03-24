@@ -29,8 +29,7 @@ void Calibration::FitGoodnessReport::report (ostream& os)
     for (unsigned idat=0; idat < ndat; idat++)
     {
       // get the specified CoherencyMeasurementSet
-      const Calibration::CoherencyMeasurementSet& data 
-	= model->get_data (idat);
+      const Calibration::CoherencyMeasurementSet& data = model->get_data (idat);
     
       // set the independent variables for this observation
       data.set_coordinates();
@@ -40,37 +39,37 @@ void Calibration::FitGoodnessReport::report (ostream& os)
     
       for (unsigned jstate=0; jstate<mstate; jstate++)
       {
-	if (data[jstate].get_input_index() != input)
-	  continue;
+        if (data[jstate].get_input_index() != input)
+          continue;
 
-	// set the independent variables for this measurement
-	data[jstate].set_coordinates();
+        // set the independent variables for this measurement
+        data[jstate].set_coordinates();
 
-	Stokes< Estimate<float> > datum = data[jstate].get_stokes();
-      
-	Stokes<double> ms = coherency( model->evaluate() );
+        Stokes< Estimate<float> > datum = data[jstate].get_stokes();
+            
+        Stokes<double> ms = coherency( model->evaluate() );
 
 #ifdef _DEBUG
-	if (input == 0)
-	  cerr << "model=" << ms << "\ndata=" << datum << endl;
+        if (input == 0)
+          cerr << "model=" << ms << "\ndata=" << datum << endl;
 #endif
 
-        // report above 10 sigma
-	double max_divergence = 100.0;
+              // report above 10 sigma
+        double max_divergence = 100.0;
 
-	for (unsigned ipol=0; ipol<4; ipol++)
-	{
-	  double diff = datum[ipol].get_value() - ms[ipol];
-	  double divergence = diff * diff / datum[ipol].get_variance();
+        for (unsigned ipol=0; ipol<4; ipol++)
+        {
+          double diff = datum[ipol].get_value() - ms[ipol];
+          double divergence = diff * diff / datum[ipol].get_variance();
 
-	  if (divergence > max_divergence)
-	    os << "divergence[" << ipol << "]=" << sqrt(divergence) << " "
-	       << data.get_identifier() << endl;
+          if (divergence > max_divergence)
+            os << "divergence[" << ipol << "]=" << sqrt(divergence) << " "
+              << data.get_identifier() << endl;
 
-	  chisq[ipol] += divergence;
-	}
+          chisq[ipol] += divergence;
+        }
 
-	count ++;
+        count ++;
 
       }
 

@@ -23,8 +23,9 @@ AC_DEFUN([SWIN_LIB_GIZA],
       with_giza_dir=
     fi
 
-    GIZA_CFLAGS="`pkg-config --cflags giza`"
-    GIZA_LIBS="`pkg-config --libs giza` -lcpgplot"
+    PKGS="$prefix/share/pkgconfig:$PKG_CONFIG_PATH"
+    GIZA_CFLAGS="`PKG_CONFIG_PATH=$PKGS pkg-config --cflags giza`"
+    GIZA_LIBS="`PKG_CONFIG_PATH=$PKGS pkg-config --libs giza` -lcpgplot"
 
     have_giza="not found"
 

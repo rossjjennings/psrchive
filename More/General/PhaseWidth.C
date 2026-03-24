@@ -11,13 +11,15 @@
 
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/Smooth.h"
+#include "debug.h"
 
 #include <math.h>
-
-#define _DEBUG 0
-#include <iostream>
-
 using namespace std;
+
+Pulsar::PhaseWidth::~PhaseWidth()
+{
+  DEBUG("Pulsar::PhaseWidth dtor this=" << this);
+}
 
 Pulsar::PhaseWidth::PhaseWidth ()
 {
@@ -96,9 +98,8 @@ double Pulsar::PhaseWidth::get_width_turns (const Profile* profile)
   {
     if ( fabs(level) < threshold_above_noise*stdev)
     {
-#if _DEBUG
-      cerr << "width: level=" << level << " less than " << threshold_above_noise << " sigma=" << stdev << " from baseline mean=" << baseline_mean << endl;
-#endif
+      DEBUG("width: level=" << level << " less than " << threshold_above_noise 
+            << " sigma=" << stdev << " from baseline mean=" << baseline_mean);
       return 0.0;
     }
 
@@ -116,10 +117,8 @@ double Pulsar::PhaseWidth::get_width_turns (const Profile* profile)
 
     double bin_dist = hi_edge - lo_edge;
 
-#if _DEBUG
-    cerr << "width: " << tries << " hi_edge=" << hi_edge << " lo_edge=" << lo_edge 
-         << " bin_dist=" << bin_dist << endl;
-#endif
+    DEBUG("width: " << tries << " hi_edge=" << hi_edge << " lo_edge=" << lo_edge 
+          << " bin_dist=" << bin_dist);
 
     if (bin_dist < 0)
       bin_dist += float(nbin);

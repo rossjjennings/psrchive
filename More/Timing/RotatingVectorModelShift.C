@@ -46,7 +46,7 @@ void RotatingVectorModelShift::preprocess (Archive* archive) try
 {
   FaradayRotation xform;
   xform.set_reference_wavelength( 0 );
-  xform.set_measure( archive->get_rotation_measure() );
+  xform.set_rotation_measure( archive->get_rotation_measure() );
   xform.execute( archive );
 
   archive->convert_state (Signal::Stokes);

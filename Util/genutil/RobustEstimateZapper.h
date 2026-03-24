@@ -15,6 +15,7 @@
 
 #include "TextInterface.h"
 #include "Estimate.h"
+#include "debug.h"
 
 #include <algorithm>
 
@@ -80,10 +81,7 @@ public:
   void excise (unsigned iparam, Container* container, Size size, Get get, Valid valid)
   {
     unsigned npt = (container->*size)();
-
-#if _DEBUG
-    std::cerr << "RobustEstimateZapper::excise iparam=" << iparam << " npt=" << npt << std::endl;
-#endif
+    DEBUG("RobustEstimateZapper::excise iparam=" << iparam << " npt=" << npt);
 
     std::vector<float> work (npt);
     unsigned iwork = 0;
@@ -95,17 +93,14 @@ public:
         continue;
 
       work[iwork] = get_value (val);
-
-#if _DEBUG
-      std::cout << iparam << " " << ipt << " " << work[iwork] << std::endl;
-#endif
-
       iwork ++;
     }
 
     // find the median value
     std::nth_element (work.begin(), work.begin()+iwork/2, work.begin()+iwork);
     float median = work[ iwork/2 ];
+
+    DEBUG("RobustEstimateZapper::excise work size=" << work.size() << " median=" << median);
 
     float madm = 1.0;
 
@@ -118,13 +113,13 @@ public:
       // find the median absolute deviation from the median 
       std::nth_element (work.begin(), work.begin()+iwork/2, work.begin()+iwork);
       madm = work[ iwork/2 ];
+
+      DEBUG("RobustEstimateZapper::excise scale by madm=" << madm);
     }
 
-#if _DEBUG
-    std::cerr << "RobustEstimateZapper::excise iwork=" << iwork 
-              << " iparam=" << iparam << " median=" << median
-              << " madm=" << madm << std::endl;
-#endif
+    DEBUG("RobustEstimateZapper::excise iwork=" << iwork 
+          << " iparam=" << iparam << " median=" << median
+          << " madm=" << madm);
 
     unsigned excised = 0;
 
@@ -141,10 +136,7 @@ public:
 
       if (threshold_max && test > max_extreme)
       {
-#if _DEBUG
-    std::cerr << "RobustEstimateZapper::excise zapping >max iparam=" << iparam
-              << " ipt=" << ipt << std::endl;
-#endif
+        DEBUG("RobustEstimateZapper::excise zapping >max iparam=" << iparam << " ipt=" << ipt);
 
         excised ++;
         (container->*valid)(ipt, false);
@@ -152,10 +144,7 @@ public:
 
       if (threshold_min && test < min_extreme)
       {
-#if _DEBUG
-    std::cerr << "RobustEstimateZapper::excise zapping <min iparam=" << iparam
-              << " ipt=" << ipt << std::endl;
-#endif
+        DEBUG("RobustEstimateZapper::excise zapping <min iparam=" << iparam << " ipt=" << ipt);
 
         excised ++;
         (container->*valid)(ipt, false);
@@ -163,10 +152,7 @@ public:
 
     }
 
-#if _DEBUG
-    std::cerr << "RobustEstimateZapper::excise excised=" << excised << std::endl;
-#endif
-
+    DEBUG("RobustEstimateZapper::excise excised=" << excised);
   }
 };
 

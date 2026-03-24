@@ -583,7 +583,7 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
       }
       plots.push_back( new_fplot );
     }
-    catch ( Error e )
+    catch ( Error& e )
     {
       cerr << "Unable to load archive " << filenames[i] << endl;
       cerr << "The following exception was encountered" << endl;
@@ -1199,7 +1199,7 @@ int PavApp::run( int argc, char *argv[] )
         plots[i].plots[p]->plot ( plots[i].archive );
       }
     }
-    catch( Error e )
+    catch( Error& e )
     {
       cerr << "Unable to plot " << plots[i].filename << endl;
       cerr << "The following exception was encountered" << endl;

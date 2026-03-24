@@ -37,53 +37,14 @@ void Pulsar::FITSArchive::load_DynamicResponse (fitsfile* fptr) try
 		     "fits_movnam_hdu DYN_RESP");
  
   Reference::To<DynamicResponse> response = new DynamicResponse;
-    
-  int nchan = 0;
-  psrfits_read_key (fptr, "NCHAN", &nchan, 0, verbose > 2);
 
-  if (!nchan)
-  {
-    if (verbose > 2)
-      cerr << "FITSArchive::load_DynamicResponse DYN_RESP HDU contains no data." << endl;
-    return;
-  }
-  
-  // Set nchan 
-  response->set_nchan( nchan ); 
-
-  int ntime = 0;
-  psrfits_read_key (fptr, "NTIME", &ntime, 0, verbose > 2);
-
-  if (!ntime)
-  {
-    if (verbose > 2)
-      cerr << "FITSArchive::load_DynamicResponse DYN_RESP HDU contains no data." << endl;
-    return;
-  }
-
-  response->set_ntime( ntime ); 
-
-  // Get npol from DYN_RESP 
-  int npol = 1;
-  psrfits_read_key (fptr, "NPOL", &npol, 1, verbose > 2);
-
-  if (!npol)
-  {
-    if (verbose > 2)
-      cerr << "FITSArchive::load_DynamicResponse DYN_RESP HDU contains no data" << endl;
-    return;
-  }
-
-  // Set npol 
-  response->set_npol( npol );
-
-  double minfreq = 0;
-  psrfits_read_key (fptr, "MINFREQ", &minfreq);
-  response->set_minimum_frequency (minfreq);
-  
-  double maxfreq = 0;
-  psrfits_read_key (fptr, "MAXFREQ", &maxfreq);
-  response->set_maximum_frequency (maxfreq);
+  psrfits_read_key (fptr, "NCHAN", response, &DynamicResponse::set_nchan);
+  psrfits_read_key (fptr, "NTIME", response, &DynamicResponse::set_ntime);
+  psrfits_read_key (fptr, "NPOL",  response, &DynamicResponse::set_npol);
+  psrfits_read_key (fptr, "CFREQ", response, &DynamicResponse::set_centre_frequency);
+  psrfits_read_key (fptr, "BW",    response, &DynamicResponse::set_bandwidth);
+  psrfits_read_key (fptr, "NPOS_FIR", response, &DynamicResponse::set_impulse_pos);
+  psrfits_read_key (fptr, "NNEG_FIR", response, &DynamicResponse::set_impulse_neg);
 
   double minepoch = 0;
   psrfits_read_key (fptr, "MINEPOCH", &minepoch);
@@ -115,5 +76,9 @@ void Pulsar::FITSArchive::load_DynamicResponse (fitsfile* fptr) try
 
 catch (Error& error)
 {
-  throw error += "FITSArchive::load_DynamicResponse";
+  if (verbose)
+    cerr << "FITSArchive::load_DynamicResponse ignoring exception" << endl;
+  if (verbose > 2)
+    cerr << error << endl;
 }
+

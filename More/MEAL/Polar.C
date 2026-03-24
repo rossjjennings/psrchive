@@ -92,6 +92,11 @@ MEAL::Polar::operator = (const Polar& polar)
   return *this;
 }
 
+MEAL::Polar* MEAL::Polar::clone () const
+{
+  return new Polar (*this);
+}
+
 //! Return the name of the class
 std::string MEAL::Polar::get_name () const
 {

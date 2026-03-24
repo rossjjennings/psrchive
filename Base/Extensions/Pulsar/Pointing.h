@@ -42,10 +42,10 @@ namespace Pulsar {
     TextInterface::Parser* get_interface();
     
     // Text interface to a Pointing instance
-    class Interface : public TextInterface::To<Pointing>
+    class Interface : public Integration::Extension::Interface<Pointing>
     {
       public:
-	  Interface( Pointing *s_instance = NULL );
+        Interface( Pointing *s_instance = NULL );
     };
 
     //! Addition operator
@@ -60,7 +60,6 @@ namespace Pulsar {
     //! Update information based on the provided Integration and Archive
     void update (const Integration* subint, const Archive *archive);
 
-
     //! Set the LST (in seconds) at subint centre
     void set_local_sidereal_time (double seconds);
     //! Get the LST (in seconds) at subint centre
@@ -70,6 +69,9 @@ namespace Pulsar {
     void set_right_ascension (const Angle&);
     //! Get the RA (J2000) at subint centre
     Angle get_right_ascension () const;
+
+    //! Get the hour angle
+    Angle get_hour_angle () const;
 
     //! Set the DEC (J2000) at subint centre
     void set_declination (const Angle&);
@@ -166,7 +168,6 @@ namespace Pulsar {
 
     std::string list_info () const;
     void edit_info (const std::string&);
-
 
     std::string get_short_name () const { return "point"; }
 

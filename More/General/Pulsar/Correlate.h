@@ -25,7 +25,12 @@ namespace Pulsar {
     /*! operand is a member of the Combination<Profile> base class*/
     void transform (Profile* argument) override;
 
-  protected:
+    //! Modify the behaviour of subsequent calls to transform method
+    /*! If true, call Profile::correlate_normalized to compute the power-normalized cross-correlation
+        If false, call Profile::correlate */
+    void set_normalize(bool flag) { normalize = flag; }
+
+    protected:
 
     //! By default, call Profile::correlate_normalized to compute the power-normalized cross-correlation
     bool normalize = true;

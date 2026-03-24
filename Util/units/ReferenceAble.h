@@ -70,10 +70,10 @@ namespace Reference {
   private:
 
     //! Pointer to the shared handle to this instance
-    mutable Handle* __reference_handle;
+    mutable Handle* __reference_handle = nullptr;
 
     //! Count of active references to this instance
-    mutable unsigned __reference_count;
+    mutable unsigned __reference_count = 0;
 
   };
 
@@ -96,10 +96,10 @@ namespace Reference {
     ~Handle();
 
     //! Pointer to Able instance
-    Able* pointer;
+    Able* pointer = nullptr;
 
     //! Count of all references to this handle
-    unsigned handle_count;
+    unsigned handle_count = 0;
 
     //! Thread-safe decrement and delete
     void decrement (bool active, bool auto_delete);

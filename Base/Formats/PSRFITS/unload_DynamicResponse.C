@@ -38,29 +38,31 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const DynamicResponse* respons
   if (ndat == 0)
   {
     if (verbose > 2)
-      cerr << "Pulsar::FITSArchive::unload DynamicResponse - no data" << endl;
+      cerr << "Pulsar::FITSArchive::unload DynamicResponse - no data - deleting DYN_RESP HDU" << endl;
+    delete_hdu (fptr, "DYN_RESP");
     return;
   }
 
   unsigned expected_ndat = nchan * ntime * npol;
 
   if (ndat != expected_ndat)
-    throw Error (InvalidState, "Pulsar::FITSArchive::unload DynamicResponse",
-                "invalid data dimensions: ndat=%u does not equal %u = nchan*ntime*npol=%u*%u*%u",
-                ndat, expected_ndat, nchan, ntime, npol);
+  {
+    if (verbose)
+      cerr << "Pulsar::FITSArchive::unload DynamicResponse invalid data dimensions"
+              " ndat=" << ndat << " != " << expected_ndat << 
+	      " (nchan=" << nchan << ",ntime=" << ntime << ",npol=" << npol << ")" << endl;
+    delete_hdu (fptr, "DYN_RESP");
+    return;
+  }
 
-  // Move and Clear existing rows in DYN_RESP 
   psrfits_move_hdu (fptr, "DYN_RESP");
-
-  psrfits_update_key (fptr, "NCHAN", response->get_nchan());
-  psrfits_update_key (fptr, "NTIME", response->get_ntime());
-  psrfits_update_key (fptr, "NPOL", response->get_npol());
-
-  double min_freq = response->get_minimum_frequency();
-  psrfits_update_key (fptr, "MINFREQ", min_freq);
-
-  double max_freq = response->get_maximum_frequency();
-  psrfits_update_key (fptr, "MAXFREQ", max_freq);
+  psrfits_update_key (fptr, "NCHAN",    nchan);
+  psrfits_update_key (fptr, "NTIME",    ntime);
+  psrfits_update_key (fptr, "NPOL",     npol);
+  psrfits_update_key (fptr, "CFREQ",    response->get_centre_frequency());
+  psrfits_update_key (fptr, "BW",       response->get_bandwidth());
+  psrfits_update_key (fptr, "NPOS_FIR", response->get_impulse_pos());
+  psrfits_update_key (fptr, "NNEG_FIR", response->get_impulse_neg());
 
   double min_epoch = response->get_minimum_epoch().in_days();
   psrfits_update_key (fptr, "MINEPOCH", min_epoch);

@@ -22,8 +22,10 @@ int main () try {
 
   return 0;
 
- }
- catch (Error& error) {
-   cerr << error << endl;
-   return -1;
- }
+}
+catch (Error& error)
+{
+  cerr << error << endl;
+  return -1;
+}
+

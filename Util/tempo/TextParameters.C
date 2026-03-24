@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,9 @@
 #include "Pulsar/TextParameters.h"
 #include "whitespace.h"
 #include "strutil.h"
+
+// #define _DEBUG 1
+#include "debug.h"
 
 using namespace std;
 
@@ -84,8 +87,9 @@ void Pulsar::TextParameters::parse_rows () const
 //! Retrieve a string from the text
 string Pulsar::TextParameters::get_value (const string& keyword) const
 {
-  const string whitespace = WHITESPACE;
+  DEBUG("TextParameters::get_value keyword=" << keyword);
 
+  const string whitespace = WHITESPACE;
   string empty;
 
   // find the start of the keyword
@@ -98,11 +102,20 @@ string Pulsar::TextParameters::get_value (const string& keyword) const
 
     // keyword not followed by whitespace
     if (end == string::npos)
+    {
+      DEBUG("TextParameters::get_value keyword not followed by whitespace");
       return empty;
+    }
+
+    if (start > 0)
+    {
+      DEBUG("TextParameters::get_value char before keyword=" << text[start-1]);
+    }
 
     // check that the keyword is preceded by whitespace
-    if (! (start == 0 || whitespace.find( text[start-1] )))
+    if (! (start == 0 || whitespace.find( text[start-1] ) != string::npos))
     {
+      DEBUG("TextParameters::get_value keyword not preceded by whitespace");
       start = end;
       continue;
     }
@@ -110,6 +123,8 @@ string Pulsar::TextParameters::get_value (const string& keyword) const
     // check that the keyword is followed by whitespace
     if (text.substr (start, end - start) != keyword)
     {
+      DEBUG("TextParameters::get_value substr=" << text.substr (start, end - start)
+            << " != keyword=" << keyword);
       start = end;
       continue;
     }
@@ -120,6 +135,7 @@ string Pulsar::TextParameters::get_value (const string& keyword) const
     // and the end of the value
     end = text.find_first_of (whitespace, start);
 
+    DEBUG("TextParameters::get_value value=" << text.substr (start, end - start));
     return text.substr (start, end-start);
   }
 

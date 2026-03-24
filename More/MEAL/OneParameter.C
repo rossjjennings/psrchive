@@ -12,6 +12,7 @@ using namespace std;
 MEAL::OneParameter::OneParameter (Function* context)
   : ParameterPolicy(context), fit(true)
 {
+  param = 0.0;
 }
 
 

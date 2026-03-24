@@ -28,6 +28,11 @@ void Calibration::SourceEstimate::create_source (ReceptionModel* equation)
 
   input_index = equation->get_num_input();
 
+  if (Pulsar::Calibrator::verbose > 2)
+    cerr << "Calibration::SourceEstimate::create_source"
+      " source=" << (void*) source <<
+      " input_index=" << input_index << endl;
+  
   equation->add_input( source );
 }
 

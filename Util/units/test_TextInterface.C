@@ -391,13 +391,11 @@ int main () try
 
   cerr << child_tui.get_value ("value") << endl;
 
-  try {
-    child_tui.get_value ("same");
-    cerr << "childTUI should have thrown an exception" << endl;
+  string error = child_tui.get_value ("same");
+  if (error != "-")
+  {
+    cerr << "childTUI should have returned '-'" << endl;
     return -1;
-  }
-  catch (Error& error) {
-    cerr << "childTUI successfully removed 'same' attribute" << endl;
   }
 
   cerr << "testing import of map interface" << endl;

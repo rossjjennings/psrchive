@@ -130,6 +130,7 @@ namespace Pulsar
     //! Get the measurement equation used to model the fit
     Calibration::ReceptionModel* get_equation ();
     const Calibration::ReceptionModel* get_equation () const;
+    void set_equation (Calibration::ReceptionModel*);
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
@@ -165,6 +166,9 @@ namespace Pulsar
 
     //! Get the statistical interface to the data
     Calibration::StandardSpectra* get_spectra ();
+
+    //! Get the total squared invariant used to normalize the Stokes parameters
+    Estimate<double> get_total_squared_invariant (const PolnProfile*);
 
   protected:
 
@@ -203,6 +207,9 @@ namespace Pulsar
     //! The phase gradient model for each observation added
     Reference::To< MEAL::PhaseGradients<MEAL::Complex2> > phases;
 
+    //! The index of each used harmonic in the measurement equation
+    std::vector<unsigned> input_index;
+    
     //! The phase axis
     MEAL::Axis<double> phase_axis;
 

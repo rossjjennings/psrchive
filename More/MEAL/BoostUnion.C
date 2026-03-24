@@ -44,7 +44,7 @@ void MEAL::BoostUnion::set_beta (Evaluable< double >* _beta)
 }
 
 //! Get the unit-vector along which the boost occurs
-Vector<3, double> MEAL::BoostUnion::get_axis () const
+Vector<3,double> MEAL::BoostUnion::get_axis () const
 {
   if (!axis)
     throw Error (InvalidState, "MEAL::BoostUnion::get_axis",

@@ -210,6 +210,9 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
   char* strval = new char [maxstrlen+1];
   unsigned icol=0;
 
+  std::string null = " ";
+  char* nullstr = const_cast<char*>( null.c_str() );
+
   for (icol=0; icol<ephind.size() && status==0; icol++) {
 
     int ieph = ephind[icol];
@@ -224,9 +227,8 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 
     case 0:  // string
       {
-	auto_ptr<char> nul ( strdup(" ") );
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       nul.get(), &strval, &anynul, &status);
+		       &nullstr, &strval, &anynul, &status);
 
         // strip off any leading spaces
         char* start = strtok (strval, " \t\n");
@@ -283,9 +285,8 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
       }
     case 2:  // h:m:s
       {
-	auto_ptr<char> nul ( strdup(" ") );
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       nul.get(), &strval, &anynul, &status);
+		       &nullstr, &strval, &anynul, &status);
 
         if (anynul)
           break;
@@ -308,9 +309,8 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
       }
     case 3:  // d:m:s
       {
-	auto_ptr<char> nul ( strdup(" ") );
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       nul.get(), &strval, &anynul, &status);
+		       &nullstr, &strval, &anynul, &status);
 
         if (anynul)
           break;

@@ -45,6 +45,7 @@ void usage ()
 #endif
     " -M metafile      Specify list of archive filenames in metafile \n"
     " -X               print the reduced chi squared of the difference \n"
+    " -W               print the weighted reduced chi squared of the difference \n"
     " -q               Quiet mode \n"
     " -v               Verbose mode \n"
     " -V               Very verbose mode \n"
@@ -59,6 +60,9 @@ static bool pscrunch = false;
 
 // print the reduced chi squared of the difference
 bool print_reduced_chisq = false;
+
+// weight the reduced chi squared by the inverse of the off-pulse variance
+bool weighted_reduced_chisq = false;
 
 void diff_two (const std::string& fileA, const std::string& fileB);
 
@@ -93,11 +97,15 @@ public:
 
 class TemplateDifference : public Difference
 {
+  Reference::To<const Archive> reference;
   Reference::To<const Integration> std_subint;
   vector<vector<double>> std_variance;
   vector<vector<double>> variance;
 
 public:
+
+  //! Set the template to which the data will be compared
+  void set_reference(const Archive* _template);
 
   //! Set the template to which the data will be compared
   void set_template(const Integration* _template);
@@ -131,8 +139,8 @@ int main (int argc, char** argv) try
   bool likelihood = false;
 
   char c;
-  while ((c = getopt(argc, argv, "c:dfhLM:pqs:tXvV")) != -1) 
-
+  while ((c = getopt(argc, argv, "c:dfhLM:pqs:tWXvV")) != -1)
+  {
     switch (c)
     {
     case 'c':
@@ -187,8 +195,13 @@ int main (int argc, char** argv) try
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       break;
-    } 
 
+    case 'W':
+      print_reduced_chisq = true;
+      weighted_reduced_chisq = true;
+      break;
+    }
+  }
 
   vector <string> filenames;
 
@@ -398,16 +411,15 @@ catch (Error& error)
 
 class NumericDifference : public Difference
 {
-  Reference::To<const Archive> difference;
+  Reference::To<const Archive> reference;
   double tolerance = pow(2.0,-16); // assume 16-bit archives
 
 public:
 
-  //! Set the difference between the data and another archive
-  void set_difference(const Archive* _diff) { difference = _diff; }
+  //! Set the reference data used to compute the difference
+  void set_reference(const Archive* _diff) { reference = _diff; }
 
   //! return the reduced chisq for the current isubint, ichan, and ipol
-  /*! Defined by children. */
   double chisq(const Profile*) override;
 };
 
@@ -444,6 +456,23 @@ void diff_two (const std::string& fileA, const std::string& fileB)
     return;
   }
 
+  if (print_reduced_chisq)
+  {
+    if (weighted_reduced_chisq)
+    {
+      TemplateDifference diff;
+      diff.set_reference(A);
+      cout << "Weighted reduced chisq: " << diff.reduced_chisq(B) << endl;
+    }
+    else
+    {
+      NumericDifference diff;
+      diff.set_reference(A);
+      cout << "Reduced chisq: " << diff.reduced_chisq(B) << endl;
+    }
+    return;
+  }
+
   if (verbose)
     cerr << "psrdiff: subtracting " << fileB << " from " << fileA << endl;
 
@@ -460,15 +489,6 @@ void diff_two (const std::string& fileA, const std::string& fileB)
 
         profileA->diff(profileB);
       }
-
-  if (print_reduced_chisq)
-  {
-    NumericDifference diff;
-    diff.set_difference(A);
-
-    cout << "Reduced chisq: " << diff.reduced_chisq(B) << endl;
-    return;
-  }
 
   std::string output_filename = "psrdiff.out";
   cerr << "psrdiff: unloading " << output_filename << endl;
@@ -518,6 +538,12 @@ void TemplateDifference::set_template(const Integration* _template)
   std_subint->baseline_stats (0, &std_variance);
 }
 
+//! Set the template to which the data will be compared
+void TemplateDifference::set_reference(const Archive* _template)
+{
+  reference = _template;
+}
+
 unsigned TemplateDifference::get_weight(unsigned ichan)
 {
   return std_subint->get_weight(ichan);
@@ -527,6 +553,11 @@ unsigned TemplateDifference::get_weight(unsigned ichan)
 void TemplateDifference::set_subint (const Integration* subint)
 {
   subint->baseline_stats (0, &variance);
+
+  if (reference)
+  {
+    set_template(reference->get_Integration(isubint));
+  }
 }
 
 //! return the reduced chisq for the current isubint, ichan, and ipol
@@ -551,13 +582,13 @@ double TemplateDifference::chisq(const Profile* profile)
 }
 
 //! return the reduced chisq for the current isubint, ichan, and ipol
-/*! Defined by children. */
 double NumericDifference::chisq(const Profile* profile)
 {
-  const float* diff = difference->get_Profile(isubint,ipol,ichan)->get_amps();
+  const float* diff = reference->get_Profile(isubint,ipol,ichan)->get_amps();
   const unsigned nbin = profile->get_nbin();
 
   double range = profile->max() - profile->min();
+  const float* amps = profile->get_amps();
 
   // cerr << "NumericDifference::chisq isubint=" << isubint << " ichan=" << ichan << " ipol=" << ipol << " range=" << range << endl;
 
@@ -570,7 +601,7 @@ double NumericDifference::chisq(const Profile* profile)
   double total_diff = 0;
   for (unsigned ibin = 0; ibin < nbin; ibin++)
   {
-    double val = diff[ibin];
+    double val = diff[ibin] - amps[ibin];
     total_diff += val * val;
   }
 

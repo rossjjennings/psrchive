@@ -66,12 +66,10 @@ namespace Pulsar {
     void get_range (float& min, float& max) const;
 
     //! Return array indeces that span the axis indeces
-    void get_indeces (unsigned n, unsigned& imin, unsigned& imax,
-		      bool cyclic = false) const;
+    void get_indeces (unsigned n, unsigned& imin, unsigned& imax, bool cyclic = false) const;
 
     //! Return axis indeces scaled according to zoom
-    void get_axis_indeces (unsigned n, float& imin, float& imax,
-                           bool cyclic = false) const;
+    void get_axis_indeces (unsigned n, float& imin, float& imax, bool cyclic = false) const;
 
     //! Return min and max scaled according to zoom
     void get_range_external (float& min, float& max) const;
@@ -126,13 +124,13 @@ namespace Pulsar {
     std::pair<float,float> world_external;
 
     std::pair<unsigned, unsigned> index_range;
-    unsigned num_indeces;
 
-    float buf_norm;
-    float minval;
-    float maxval;
-    bool minmaxvalset;
-    bool frozen;
+    unsigned num_indeces = 0;
+    float buf_norm = 0.0;
+    float minval = 0.0;
+    float maxval = 1.0;
+    bool minmaxvalset = false;
+    bool frozen = false;
   };
 
   

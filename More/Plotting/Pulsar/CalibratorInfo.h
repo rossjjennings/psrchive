@@ -51,6 +51,12 @@ namespace Pulsar {
     void set_calibrator_stokes_degree (bool x);
     bool get_calibrator_stokes_degree () const;
 
+    void set_correlation (int idx) { correlation = idx; }
+    int get_correlation () const { return correlation; }
+
+    void set_configurable_projection (bool x) { configurable_projection = x; }
+    bool get_configurable_projection () const { return configurable_projection; }
+
     void set_reduced_chisq (bool x) { reduced_chisq = x; }
     bool get_reduced_chisq () const { return reduced_chisq; }
 
@@ -74,33 +80,38 @@ namespace Pulsar {
     std::vector< Reference::To<CalibratorParameter> > parameter;
 
     //! spacing between plot panels
-    float between_panels;
+    /*! by default, reserve 5% of the viewport height for space between panels */
+    float between_panels = 0.05;
 
     //! panels to be plotted
     std::string panels;
 
     //! plot the calibrator Stokes parameters
-    bool calibrator_stokes;
+    bool calibrator_stokes = false;
 
     //! plot the calibrator Stokes parameters w/ degree of polarization
-    bool calibrator_stokes_degree;
-    
+    bool calibrator_stokes_degree = false;
+   
+    //! plot the configurable projection parameters
+    bool configurable_projection = false;
+ 
+    //! plot the cross-correlation between parameters
+    int correlation = -1;
+
     //! plot the goodness-of-fit statistic
-    bool reduced_chisq;
+    bool reduced_chisq = false;
 
     //! plot the intrinsic cross-polarization ratio
-    bool intrinsic_crosspol_ratio;
+    bool intrinsic_crosspol_ratio = false;
 
     //! plot constant gain flux calibrator information
-    bool constant_gain;
+    bool constant_gain = false;
 
     //! threshold used to detect outliers when creating SingleAxis calibrator
-    float outlier_threshold;
+    float outlier_threshold = 0.0;
 
     // Sub-integration from which to derive a solution
     Index subint;
-    
-
   };
 
 }

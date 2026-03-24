@@ -27,27 +27,26 @@ namespace Pulsar {
     SolverInfo (const PolnCalibrator* calibrator);
     
     //! Return the title
-    std::string get_title () const;
+    std::string get_title () const override;
 
     //! Return the number of frequency channels
-    unsigned get_nchan () const;
+    unsigned get_nchan () const override;
     
     //! Return the number of parameter classes
-    unsigned get_nclass () const;
+    unsigned get_nclass () const override;
     
     //! Return the name of the specified class
-    std::string get_name (unsigned iclass) const;
+    std::string get_label (unsigned iclass) const override;
 
     //! Return the number of parameters in the specified class
-    unsigned get_nparam (unsigned iclass) const;
+    unsigned get_nparam (unsigned iclass) const override;
     
     //! Return the estimate of the specified parameter
-    Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			       unsigned iparam) const;
+    Estimate<float> get_param (unsigned ichan, unsigned iclass, unsigned iparam) const override;
 
   protected:
 
-    //! The CalibratorStokes to be plotted
+    //! The PolnCalibrator with solver parameters to be plotted
     Reference::To<const PolnCalibrator> poln_calibrator;
 
   };

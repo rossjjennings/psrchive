@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.7             '   / Header version 
+HDRVER  = '6.9             '   / Header version
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -461,6 +461,10 @@ TTYPE#  = NFREE                / Number of degrees of freedom
 TFORM#  = J                    / NCHAN long (32-bit) integers
 TTYPE#  = NFIT                 / Number of model parameters varied in fit
 TFORM#  = J                    / NCHAN long (32-bit) integers
+TTYPE#  = LN_DET_H             / Logarithm of chi-squared Hessian determinant
+TFORM#  = E                    / NCHAN floats
+TTYPE#  = LN_COND              / Logarithm of chi-squared Hessian condition no.
+TFORM#  = E                    / NCHAN floats
 END
 #
 ###############################################################################
@@ -512,6 +516,39 @@ TTYPE#  = NFLAG_OUT            / Number of input data flagged after fit
 TFORM#  = 1J                   / Integer
 TTYPE#  = INTERTXT             / Text that describes interpolator
 TFORM#  = 4096A                / 4k of text per row
+END
+#
+###############################################################################
+#
+# Configurable Projection Parameters Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** configurable projection parameters *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    * / Number of fields per row
+#
+EXTNAME = CFGPROJ              / Name of this binary table extension
+NPARAM  =                    * / Number of parameters
+NCOVAR  =                    * / Number of parameter covariances
+NCHAN   =                    * / Number of frequency channels
+#
+TTYPE#  = DAT_WTS              / Weights for each channel
+TFORM#  = E                    / NCHAN floats
+TTYPE#  = DATA                 / Parameter values
+TDIM#   = (*,*)                / Dimensions (NPARAM,NCHAN)
+TFORM#  = E                    / NPARAM*NCHAN floats
+TTYPE#  = DATAERR              / Estimated parameter errors
+TDIM#   = (*,*)                / Dimensions (NPARAM,NCHAN)
+TFORM#  = E                    / NPARAM*NCHAN floats
+TTYPE#  = COVAR                / Formal covariances of coupling data
+TDIM#   = (*,*)                / Dimensions (NCOVAR,NCHAN)
+TFORM#  = E                    / NCOVAR*NCHAN floats
 END
 #
 ###############################################################################
@@ -592,8 +629,10 @@ EXTNAME = DYN_RESP             / name of this binary table extension
 NCHAN   =                    * / Number of frequency channels
 NTIME   =                    * / Number of time samples
 NPOL    =                    * / Number of polarisations
-MINFREQ =                    * / [MHz] Minimum frequency of response (D)
-MAXFREQ =                    * / [MHz] Maximum frequency of response (D)
+CFREQ =                      * / [MHz] Centre frequency of response (D)
+BW =                         * / [MHz] Bandwidth of response (D)
+NPOS_FIR =                   * / Number of FIR samples with positive delay
+NPOS_FIR =                   * / Number of FIR samples with negative delay
 MINEPOCH=                    * / [MJD] Minimum epoch of dynamic response (D)
 MAXEPOCH=                    * / [MJD] Maximum epoch of dynamic response (D)
 #

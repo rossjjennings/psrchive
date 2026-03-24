@@ -33,14 +33,13 @@ namespace Pulsar {
     unsigned get_nclass () const { return 2; }
     
     //! Return the name of the specified class
-    std::string get_name (unsigned iclass) const;
+    std::string get_label (unsigned iclass) const;
     
     //! Return the number of parameters in the specified class
     unsigned get_nparam (unsigned iclass) const;
     
     //! Return the estimate of the specified parameter
-    Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			       unsigned iparam) const;
+    Estimate<float> get_param (unsigned ichan, unsigned iclass, unsigned iparam) const;
     
   protected:
     

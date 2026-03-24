@@ -59,7 +59,8 @@ namespace Pulsar {
   class ManagedStrategies : public Profile::Strategies
   {
     Reference::To<Integration, false> container;
-    
+    bool to_clone = false;
+
   public:
 
     //! Construct with a pointer to the container
@@ -68,6 +69,9 @@ namespace Pulsar {
     //! Copy constructor
     ManagedStrategies (const ManagedStrategies&);
 
+    //! Copy constructor for later cloning
+    ManagedStrategies (const ManagedStrategies*);
+
     //! Destructor
     ~ManagedStrategies ();
 
@@ -75,19 +79,22 @@ namespace Pulsar {
     Integration* get_container();
     
     //! The implementation of the baseline finding algorithm
-    ProfileWeightFunction* baseline () const;
+    ProfileWeightFunction* baseline () const override;
 
     //! The implementation of the on-pulse finding algorithm
-    ProfileWeightFunction* onpulse () const;
+    ProfileWeightFunction* onpulse () const override;
 
     //! The implementation of the signal-to-noise ratio calculation
-    SNRatioEstimator* snratio () const;
+    SNRatioEstimator* snratio () const override;
 
     //! The implementation of the pulse width estimator
-    WidthEstimator* width () const;
+    WidthEstimator* width () const override;
 
     //! Clone
-    ManagedStrategies* clone () const;
+    ManagedStrategies* clone () const override;
+
+    //! Return true if the container strategy should be cloned
+    bool to_be_cloned () const { return to_clone; }
   };
 }
 

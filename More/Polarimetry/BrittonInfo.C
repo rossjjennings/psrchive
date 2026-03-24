@@ -15,17 +15,18 @@ Pulsar::BrittonInfo::BrittonInfo (const PolnCalibrator* calibrator) :
   BackendFeedInfo (calibrator)
 {
   degeneracy_isolated = false;
-  constant_orientation = true;
-  
+
+  for (unsigned iparam=0; iparam<nparam; iparam++)
+    available_data[iparam] = false;
+
   for (unsigned ichan=0; ichan < calibrator->get_nchan(); ichan++)
   {
     if (!calibrator->get_transformation_valid (ichan))
       continue;
-					     
+
     const MEAL::Complex2* xform = calibrator->get_transformation (ichan);
 
-    const Calibration::Britton2000* bri00
-      = dynamic_cast<const Calibration::Britton2000*> (xform);
+    auto* bri00 = dynamic_cast<const Calibration::Britton2000*> (xform);
     if (!bri00)
       throw Error (InvalidState, "Pulsar::BrittonInfo::get_param_feed"
 		   "xform is not of type Britton2000");
@@ -33,8 +34,8 @@ Pulsar::BrittonInfo::BrittonInfo (const PolnCalibrator* calibrator) :
     if (bri00->get_degeneracy_isolated())
       degeneracy_isolated = true;
 
-    if (!bri00->get_constant_orientation())
-      constant_orientation = false;
+    for (unsigned iparam=0; iparam<nparam; iparam++)
+      available_data[iparam] |= bri00->get_infit(iparam);
   }
 }
 
@@ -46,21 +47,61 @@ string Pulsar::BrittonInfo::get_title () const
   return "Parameterization: Britton (2000) Equation 19" + isolated;
 }
 
-//! Return the name of the specified class
-string Pulsar::BrittonInfo::get_name_feed (unsigned iclass) const
+void add_with_comma_if_needed (string& total, const string& txt)
 {
-  string orientation;
-  if (!constant_orientation)
-    orientation = ",\\gh";
-  
+  if (total != "")
+    total += ",";
+
+  total += txt;
+}
+
+string Pulsar::BrittonInfo::get_param_name_feed (unsigned iparam) const
+{
+  string subscript[2];
+  subscript[0] = "\\gh"; // theta
+  subscript[1] = "\\gx"; // chi
+
+  switch (iparam / 2)
+  {
+  case 0:
+    return "\\fi\\gd\\d" + subscript[iparam % 2]  + "\\u\\fr";  // delta_{theta,chi}
+  case 1:
+    return "\\fi\\gs\\d" + subscript[!(iparam % 2)] + "\\u\\fr";  // sigma_{chi,theta}
+  default:
+    return "";
+  }
+}
+
+string Pulsar::BrittonInfo::get_label_feed (unsigned iclass) const
+{
+  string differences;
+
+  // b_u(delta_theta) was measured
+  if (available_data[3])
+    add_with_comma_if_needed(differences, "\\gh");
+
+  // b_v(delta_chi) was measured
+  if (available_data[4])
+    add_with_comma_if_needed(differences, "\\gx");
+
+  string sums;
+
+  // r_u(sigma_chi) was measured
+  if (available_data[5])
+    add_with_comma_if_needed(sums, "\\gx");
+
+  // r_v(sigma_theta) was measured
+  if (available_data[6])
+    add_with_comma_if_needed(sums, "\\gh");
+
   switch (iclass)
   {
   case 0:
     // italic-font greek-delta subscript-theta,chi roman-font (degree symbol)
-    return "\\fi\\gd\\d\\gh,\\gx\\u\\fr (\\(2729))";
+    return "\\fi\\gd\\d" + differences + "\\u\\fr (\\(2729))";
   case 1:
     // italic-font greek-sigma subscript-chi,theta roman-font
-    return "\\fi\\gs\\d\\gx" + orientation + "\\u\\fr (\\(2729))";
+    return "\\fi\\gs\\d" + sums + "\\u\\fr (\\(2729))";
   default:
     return "";
   }
@@ -69,8 +110,7 @@ string Pulsar::BrittonInfo::get_name_feed (unsigned iclass) const
 
 //! Return the estimate of the specified parameter
 Estimate<float> 
-Pulsar::BrittonInfo::get_param_feed (unsigned ichan, unsigned iclass,
-				     unsigned iparam) const
+Pulsar::BrittonInfo::get_param_feed (unsigned ichan, unsigned iclass, unsigned iparam) const
 {
   if (iclass >= 2)
     return 0;

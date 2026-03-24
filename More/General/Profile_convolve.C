@@ -1,15 +1,17 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Aidan Hotan
+ *   Copyright (C) 2002 - 2025 by Aidan Hotan and Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Profile.h"
 #include "Error.h"
 #include "FTransform.h"
 
 #include <memory>
+
+using namespace std;
 
 void Pulsar::Profile::convolve (const Profile* profile)
 {
@@ -50,8 +52,10 @@ void Pulsar::Profile::convolve (const Profile* profile, int dir)
   const float* nptr = get_amps();
   const float* mptr = profile->get_amps();
 
-  for (unsigned ibin=0; ibin < nbin; ibin++) {
-    for (unsigned jbin=0; jbin < mbin; jbin++) {
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    for (unsigned jbin=0; jbin < mbin; jbin++)
+    {
       unsigned n_bin = (ibin+jbin)%nbin;
       unsigned m_bin = (mbin+dir*jbin)%mbin;
       temp[ibin] += nptr[n_bin] * mptr[m_bin];

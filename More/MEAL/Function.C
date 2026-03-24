@@ -147,5 +147,5 @@ void MEAL::Function::set_evaluation_changed (bool _changed)
 //! Return a text interface that can be used to access this instance
 TextInterface::Parser* MEAL::Function::get_interface ()
 {
-  return new Interface (this);
+  return new Interface<Function> (this);
 }

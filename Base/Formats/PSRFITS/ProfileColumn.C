@@ -362,8 +362,7 @@ void Pulsar::ProfileColumn::unload_floats (int row, const std::vector<const Prof
 }
 
 //! Unload the given vector of profiles
-void Pulsar::ProfileColumn::unload (int row, 
-				    const std::vector<const Profile*>& prof)
+void Pulsar::ProfileColumn::unload (int row, const std::vector<const Profile*>& prof)
 {
   if (!fptr)
     throw Error (InvalidState, "Pulsar::ProfileColumn::unload",
@@ -389,8 +388,8 @@ void Pulsar::ProfileColumn::unload (int row,
     bug report at https://sourceforge.net/p/psrchive/bugs/440 
   */
 
-  double the_min = 1-pow(2,15)+16;
-  double the_max = pow(2,15)-2-16;
+  const double the_min = 1-pow(2,15)+16;
+  const double the_max = pow(2,15)-2-16;
 
   // cerr << "int16_t min=" << the_min << " max=" << the_max << endl;
 
@@ -408,23 +407,20 @@ void Pulsar::ProfileColumn::unload (int row,
 
     offsets[iprof] = (min*the_max -max*the_min) / (the_max - the_min);
 
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
-	   << " offset=" << offsets[iprof] << endl;
+    DEBUG("Pulsar::ProfileColumn::unload iprof=" << iprof << " offset=" << offsets[iprof]);
       
     // Test for dynamic range
     if (fabs(min - max) > (100.0 * FLT_MIN))
+    {
       scales[iprof] = (max - min) / (the_max - the_min);
+    }
     else if (verbose)
     {
       scales[iprof] = 1.0;
-      cerr << "Pulsar::ProfileColumn::unload WARNING no range in profile"
-	   << endl;
+      cerr << "Pulsar::ProfileColumn::unload WARNING no range in profile iprof=" << iprof << endl;
     }
     
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof
-	   << " scale=" << scales[iprof] << endl;
+    DEBUG("Pulsar::ProfileColumn::unload iprof=" << iprof << " scale=" << scales[iprof]);
   }
 
   // offset and scale are one-dimensional arrays
@@ -458,16 +454,14 @@ void Pulsar::ProfileColumn::unload (int row,
         https://sourceforge.net/p/psrchive/bugs/440
       */
  
-      float fvalue = round( (amps[ibin]-offsets[iprof]) / scales[iprof]);
+      float fvalue = round((amps[ibin]-offsets[iprof]) / scales[iprof]);
       fvalue = std::max(fvalue, (float)INT16_MIN);
       fvalue = std::min(fvalue, (float)INT16_MAX);
       int16_t value = fvalue;
       compressed[iprof*nbin+ibin] = value;
     }
 
-    if (verbose)
-      cerr << "Pulsar::ProfileColumn::unload iprof=" << iprof << "written" 
-	   << endl;
+    DEBUG("Pulsar::ProfileColumn::unload iprof=" << iprof << " written");
   }
 
   // Write the data
@@ -477,8 +471,7 @@ void Pulsar::ProfileColumn::unload (int row,
 
   int status = 0;
   int offset = 1;
-  fits_write_col (fptr, TSHORT, data_colnum, row, offset, nvalue, 
-		  &(compressed[0]), &status);
+  fits_write_col (fptr, TSHORT, data_colnum, row, offset, nvalue, &(compressed[0]), &status);
 
   if (status != 0)
     throw FITSError (status, "Pulsar::ProfileColumn::unload",
@@ -497,12 +490,11 @@ void Pulsar::ProfileColumn::load (int row, const std::vector<Profile*>& prof)
   long width = 0;
   int status = 0;
   
-  fits_get_coltype (fptr, get_data_colnum(),
-		    &typecode, &repeat, &width, &status);  
+  fits_get_coltype (fptr, get_data_colnum(), &typecode, &repeat, &width, &status);
 
   if (status != 0)
     throw FITSError (status, "Pulsar::ProfileColumn::load", 
-		     "fits_get_coltype " + data_colname);
+                     "fits_get_coltype " + data_colname);
     
   if (typecode == TSHORT)
   {
@@ -517,8 +509,8 @@ void Pulsar::ProfileColumn::load (int row, const std::vector<Profile*>& prof)
     load_amps<float> (row, prof, false);
   }
   else
-    throw Error( InvalidState, "Pulsar::ProfileColumn::load",
-		 "unhandled DATA typecode=%s", fits_datatype_str(typecode) );
+    throw Error (InvalidState, "Pulsar::ProfileColumn::load",
+                 "unhandled DATA typecode=%s", fits_datatype_str(typecode));
 }
 
 
@@ -611,16 +603,16 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
   vector<T> temparray (nvalue);
 
   fits_read_col (fptr, FITS_traits<T>::datatype(),
-		 get_data_colnum(), row, counter, nvalue, 
-		 &null, &(temparray[0]), &initflag, &status);
+                 get_data_colnum(), row, counter, nvalue,
+                 &null, &(temparray[0]), &initflag, &status);
 
   if (status != 0)
-    throw FITSError( status, "ProfileColumn::load_amps",
-		     "Error reading subint data"
-		     " nprof=%u nchan=%u nbin=%u \n\t"
-		     "colnum=%d firstrow=%d firstelem=%d nelements=%d",
-		     nprof, nchan, nbin,
-		     data_colnum, row, counter, nvalue );
+    throw FITSError (status, "ProfileColumn::load_amps",
+                    "Error reading subint data"
+                    " nprof=%u nchan=%u nbin=%u \n\t"
+                    "colnum=%d firstrow=%d firstelem=%d nelements=%d",
+                    nprof, nchan, nbin,
+                    data_colnum, row, counter, nvalue );
   
   unsigned index = 0;
   for (unsigned iprof = 0; iprof < nprof; iprof++)
@@ -639,8 +631,8 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
 
         if (nprof_by_nchan)
         {
-	  scale = scales[iprof*nchan + ichan];
-	  offset = offsets[iprof*nchan + ichan];
+          scale = scales[iprof*nchan + ichan];
+          offset = offsets[iprof*nchan + ichan];
         }
 
 #ifdef _DEBUG
@@ -649,13 +641,13 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
 #endif
 
         if (scale == 0.0)
-	  scale = 1.0;
+          scale = 1.0;
 
         if ( !true_math::finite(scale) || !true_math::finite(offset) )
         {
-	  warning << "Pulsar::ProfileColumn::load_amps"
-	    " SCALE or OFFSET NaN in row=" << row << endl;
-	  scale = offset = 0.0;
+          warning << "Pulsar::ProfileColumn::load_amps"
+            " SCALE or OFFSET NaN in row=" << row << endl;
+          scale = offset = 0.0;
         }
       }
 
@@ -666,20 +658,18 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof, bool must_have_scloffs)
 
       for (unsigned ibin = 0; ibin < nbin; ibin++)
       {
-	amps[ibin] = temparray[index*nbin+ibin] * scale + offset;
-	if (!true_math::finite(amps[ibin]))
-	{
-	  nans ++;
-	  amps[ibin] = 0.0;
-	}
+        amps[ibin] = temparray[index*nbin+ibin] * scale + offset;
+        if (!true_math::finite(amps[ibin]))
+        {
+          nans ++;
+          amps[ibin] = 0.0;
+        }
       }
 
       index ++;
 
       if (nans)
-	warning << "Pulsar::ProfileColumn::load_amps"
-	  " data NaN in row=" << row << endl;
-
+        warning << "Pulsar::ProfileColumn::load_amps " << nans << " NaN in row=" << row << endl;
     }  
   }
 }

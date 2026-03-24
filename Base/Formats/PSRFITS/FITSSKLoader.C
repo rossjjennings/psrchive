@@ -45,7 +45,6 @@ void Pulsar::FITSArchive::SKLoader::load (SpectralKurtosis * sk)
     cerr << "FITSArchive::loadSpectralKurtosis entered" << endl;
 
   int status = 0;
-  int colnum = 0;
 
   // Move to the SPECKURT HDU
   fits_movnam_hdu (fptr, BINARY_TBL, "SPECKURT", 0, &status);
@@ -87,9 +86,11 @@ void Pulsar::FITSArchive::SKLoader::load (SpectralKurtosis * sk)
   if (dimension == 0)
   {
     if (verbose == 3)
+    {
       cerr << "FITSArchive::load_SpectralKurtosis SPECKURT HDU"
            << " contains no data. SpectralKurtosis not loaded" << endl;
-      return;
+    }
+    return;
   }
 
   vector<float> fil_sum (dimension);

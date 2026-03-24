@@ -43,11 +43,16 @@ Calibration::StandardPrepare::factory (std::string name)
 void Calibration::StandardPrepare::prepare (Pulsar::Archive* archive)
 {
   archive->convert_state (Signal::Stokes);
-  archive->remove_baseline ();
   archive->dedisperse ();
-  // to select phase ranges using pcm -p or pcm -b, it is necessary
-  // to plot data using psrplot -p S -j "FD,centre 0"
-  archive->centre (0.0);
+
+  /* The following line ensures that data are aligned using the phase predictor
+    (Not all instruments output data with phase 0 in bin 0.)
+
+    As a consequence, to select phase ranges using pcm -p or pcm -b, 
+    it is necessary to plot data using psrplot -p S -j "FD,centre 0"
+  */
+  if (align_phase)
+    archive->centre (0.0);
 }
 
 //! Set the number of input states to be chosen
@@ -92,8 +97,8 @@ void Calibration::StandardPrepare::choose (const Pulsar::Archive* input) try
 
       if (ranking > maximum && !chosen[ibin])
       {
-	maximum = ranking;
-	imax = ibin;
+        maximum = ranking;
+        imax = ibin;
       }
     }
 
@@ -184,9 +189,10 @@ double Calibration::MultipleRanking::get_rank (unsigned ibin)
   return rankings[current]->get_rank (ibin);
 }
 
-//! Called when a phase bin has been chosen
+//! Change the ranking policy when each phase bin is chosen
 void Calibration::MultipleRanking::set_chosen (unsigned ibin)
 {
+  // cycle through the ranking policies
   current ++;
   current %= rankings.size();
 

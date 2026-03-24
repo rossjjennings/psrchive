@@ -43,11 +43,14 @@ namespace MEAL {
     //! Get the concentration
     Estimate<double> get_concentration () const;
 
-    //! Set the width
+    //! Set the width as a standard deviation
     void set_width (double width);
 
-    //! Get the width
+    //! Get the width as a standard deviation
     double get_width () const;
+
+    //! Set the full width at half maximum (FWHM) in radians
+    void set_fwhm (double FWHM);
 
     //! Set the height
     void set_height (const Estimate<double> &height);

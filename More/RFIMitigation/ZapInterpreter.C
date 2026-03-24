@@ -13,6 +13,7 @@
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/ConfigurableProjectionExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 
 #include "Pulsar/ChannelZapMedian.h"
@@ -28,6 +29,8 @@
 #include "evaluate.h"
 #include "substitute.h"
 #include "Ranges.h"
+
+#include "debug.h"
 
 using namespace std;
 
@@ -305,8 +308,8 @@ string Pulsar::ZapInterpreter::cal (const string& args)
       Reference::To<PolnCalibratorExtension> ext;
       ext = get()->get<PolnCalibratorExtension>();
       if (ext)
-       for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
-        robust_estimate_zapper->excise (iparam, ext.get(), 
+        for (unsigned iparam=0; iparam < ext->get_nparam(); iparam++)
+          robust_estimate_zapper->excise (iparam, ext.get(), 
                                         &PolnCalibratorExtension::get_nchan,
                                         &PolnCalibratorExtension::get_Estimate,
                                         &PolnCalibratorExtension::set_weight);
@@ -314,8 +317,8 @@ string Pulsar::ZapInterpreter::cal (const string& args)
       Reference::To<CalibratorStokes> cs;
       cs = get()->get<CalibratorStokes>();
       if (cs)
-       for (unsigned iparam=0; iparam < cs->get_nparam(); iparam++)
-        robust_estimate_zapper->excise (iparam, cs.get(), 
+        for (unsigned iparam=0; iparam < cs->get_nparam(); iparam++)
+          robust_estimate_zapper->excise (iparam, cs.get(), 
                                         &CalibratorStokes::get_nchan,
                                         &CalibratorStokes::get_Estimate,
                                         &CalibratorStokes::set_valid);
@@ -323,11 +326,23 @@ string Pulsar::ZapInterpreter::cal (const string& args)
       Reference::To<FluxCalibratorExtension> fext;
       fext = get()->get<FluxCalibratorExtension>();
       if (fext)
-       for (unsigned iparam=0; iparam < fext->get_nparam(); iparam++)
-        robust_estimate_zapper->excise (iparam, fext.get(),
+        for (unsigned iparam=0; iparam < fext->get_nparam(); iparam++)
+          robust_estimate_zapper->excise (iparam, fext.get(),
                                         &FluxCalibratorExtension::get_nchan,
                                         &FluxCalibratorExtension::get_Estimate,
                                         &FluxCalibratorExtension::set_weight);
+
+      Reference::To<ConfigurableProjectionExtension> cp;
+      cp = get()->get<ConfigurableProjectionExtension>();
+      if (cp)
+      {
+        DEBUG("zap cal robust ConfigurableProjectionExtension nparam=" << cp->get_nparam());
+        for (unsigned iparam=0; iparam < cp->get_nparam(); iparam++)
+          robust_estimate_zapper->excise (iparam, cp.get(),
+                                        &ConfigurableProjectionExtension::get_nchan,
+                                        &ConfigurableProjectionExtension::get_Estimate,
+                                        &ConfigurableProjectionExtension::set_valid);
+      }
 
       if (!ext && !cs && !fext)
         return response (Fail, "archive contains no calibrator extensions");

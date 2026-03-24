@@ -27,8 +27,7 @@ Pulsar::PolnProfile* Pulsar::Integration::new_PolnProfile (unsigned ichan)
 			  get_Profile(2,ichan), get_Profile(3,ichan));
 }
 
-const Pulsar::PolnProfile*
-Pulsar::Integration::new_PolnProfile (unsigned ichan) const
+Pulsar::PolnProfile* Pulsar::Integration::new_PolnProfile (unsigned ichan) const
 {
   if (Profile::verbose)
     cerr << "Pulsar::Integration::new_PolnProfile" << endl;
@@ -37,9 +36,13 @@ Pulsar::Integration::new_PolnProfile (unsigned ichan) const
     throw Error (InvalidState, "Pulsar::Integration::new_PolnProfile",
 		 "incomplete polarization information");
 
-  return new PolnProfile (get_basis(), get_state(), 
+  auto result = new PolnProfile (get_basis(), get_state(), 
 			  get_Profile(0,ichan)->clone(),
 			  get_Profile(1,ichan)->clone(),
 			  get_Profile(2,ichan)->clone(),
 			  get_Profile(3,ichan)->clone());
+
+  if (Profile::verbose)
+    cerr << "Pulsar::Integration::new_PolnProfile result=" << result << endl;
+  return result;
 }

@@ -27,7 +27,7 @@ TotalCovariance* TotalCovariance::clone () const
 //! Add the uncertainty of another instance
 void TotalCovariance::add (const Uncertainty* other)
 {
-  const TotalCovariance* like = dynamic_cast<const TotalCovariance*> (other);
+  // const TotalCovariance* like = dynamic_cast<const TotalCovariance*> (other);
   cerr << "TotalCovariance::add not implemented" << endl;
 }
 

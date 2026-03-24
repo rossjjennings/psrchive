@@ -10,10 +10,10 @@
 #include "Pulsar/Profile.h"
 
 #include "RealTimer.h"
-#include "Pauli.h"
 #include "FTransform.h"
 
 // #define _DEBUG 1
+#include "debug.h"
 
 #include <memory>
 
@@ -73,16 +73,6 @@ void ScalarTemplateMatching::set_plan (FTransform::Plan* p)
   stats->set_plan (p);
 }
 
-void ScalarTemplateMatching::set_maximum_harmonic (unsigned max)
-{
-  maximum_harmonic = max;
-}
-
-void ScalarTemplateMatching::set_choose_maximum_harmonic (bool flag)
-{
-  choose_maximum_harmonic = flag;
-}
-
 //! Get the standard to which observations will be fit
 const Profile* ScalarTemplateMatching::get_standard () const
 {
@@ -101,6 +91,8 @@ void ScalarTemplateMatching::set_regions (const PhaseWeight& on, const PhaseWeig
 //! Set the standard to which observations will be fit
 void ScalarTemplateMatching::set_standard (const Profile* _standard)
 {
+  DEBUG("ScalarTemplateMatching::set_standard");
+
   if (!_standard)
   {
     data.resize(0);
@@ -120,19 +112,19 @@ void ScalarTemplateMatching::set_standard (const Profile* _standard)
   // number of complex phase bins in Fourier domain
   unsigned std_harmonic = _standard->get_nbin() / 2;
 
-  DEBUG("ScalarTemplateMatching::set_standard max harmonic");
-
-  if (choose_maximum_harmonic)
-  {
-    n_harmonic = stats->get_last_harmonic ();
-    if (verbose)
-      cerr << "ScalarTemplateMatching::set_standard chose " << n_harmonic << " harmonics" << endl;
-  }
-  else if (maximum_harmonic && maximum_harmonic < std_harmonic)
+  DEBUG("ScalarTemplateMatching::set_standard max harmonic choose=" << choose_maximum_harmonic << " max=" << maximum_harmonic);
+ 
+  if (maximum_harmonic && maximum_harmonic < std_harmonic)
   {
     n_harmonic = maximum_harmonic;
     if (verbose)
       cerr << "ScalarTemplateMatching::set_standard using " << maximum_harmonic << " out of " << std_harmonic << " harmonics" << endl;
+  }
+  else if (choose_maximum_harmonic)
+  {
+    n_harmonic = stats->get_last_harmonic ();
+    if (verbose)
+      cerr << "ScalarTemplateMatching::set_standard chose " << n_harmonic << " harmonics" << endl;
   }
   else
   {
@@ -141,7 +133,7 @@ void ScalarTemplateMatching::set_standard (const Profile* _standard)
       cerr << "ScalarTemplateMatching::set_standard using all " << std_harmonic << " harmonics" << endl;
   }
 
-  DEBUG("ScalarTemplateMatching::set_standard created");
+  DEBUG("ScalarTemplateMatching::set_standard n_harmonic=" << n_harmonic);
 }
 
 //! Fit the specified observation to the standard
@@ -183,6 +175,8 @@ catch (Error& error)
 
 void ScalarTemplateMatching::solve () try
 {
+  DEBUG("ScalarTemplateMatching::solve n_harmonic=" << n_harmonic);
+
   RealTimer clock;
 
   clock.start();

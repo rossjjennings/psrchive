@@ -522,13 +522,11 @@ void CommandParser::add_command (Method* command)
 CommandParser::Nested::Nested( CommandParser* _parser,
 			       const string& _command,
 			       const string& _help,
-			       char _shortcut )
+			       char _shortcut ) : parser(_parser)
 {
   command  = _command;
   help     = _help;
   shortcut = _shortcut;
-
-  parser   = _parser;
 
   parser->nested = command;
 }

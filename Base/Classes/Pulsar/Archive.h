@@ -495,6 +495,10 @@ namespace Pulsar
 
     //! Template method searches for an Extension of the specified type
     template<class ExtensionType>
+    bool has () const;
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
     const ExtensionType* get () const;
 
     //! Template method searches for an Extension of the specified type
@@ -525,6 +529,7 @@ namespace Pulsar
     static void agent_list ();
 
     //! Set the verbosity level (0 to 3)
+    /*! note that Archive::verbose is IntegrationManager::verbose */
     static void set_verbosity (unsigned level);
 
     //! Sanity checks such as verification and correction
@@ -598,6 +603,9 @@ namespace Pulsar
     //! Name of class to which data are converted if unload_file unimplemented
     static Option<std::string> unload_class;
 
+    //! Default policy for culling predictor coefficients when unloading
+    static Option<bool> unload_cull_predictor;
+
     //! Default policy for overwriting archive files
     static Option<bool> no_clobber;
 
@@ -640,20 +648,37 @@ namespace Pulsar
 
     //@}
 
+    //! Set the phase predictor attribute without any computation
+    /*! In Base/ it is not possible to call set_model(apply=false) because
+        Archive::set_model is defined in More/ */
+    void set_predictor (Predictor* model);
+
     //! The pulsar ephemeris, as used by TEMPO
     Reference::To<Parameters> ephemeris;
-
-    //! The pulsar phase model, as created using TEMPO
-    Reference::To<Predictor> model;
 
     //! Return the given Integration ready for use
     Integration* use_Integration (Integration*);
 
-    //! Initialize an Integration to reflect Archive attributes.
+    //! Initialize an Integration to reflect Archive attributes
+    /*! This should be performed after the integration is considered complete. */
     void init_Integration (Integration* subint, bool check_phase = false);
 
+    //! Initialize the dispersion correction history of the Integration
+    /*! bugs/509 
+      By default, the absolute dispersion correction history is not overwritten
+      if the Integration already has a DispersionHistory extension 
+    */
+    void init_DispersionHistory (Integration*, bool overwrite_absolute = false);
+
+    //! Initialize the Faraday rotation correction history of the Integration
+    /*! bugs/509 
+      By default, the absolute Faraday rotation correction history is not overwritten
+      if the Integration already has a BirefringenceHistory extension 
+    */
+    void init_BirefringenceHistory (Integration*, bool overwrite_absolute = false);
+
     //! Provide Integration::resize access to Archive-derived classes
-    void resize_Integration (Integration* integration);
+    void resize_Integration (Integration*);
 
     //! Apply the current model to the Integration
     void apply_model (Integration* subint, const Predictor* old = 0);
@@ -692,6 +717,15 @@ namespace Pulsar
     //! Strategies used by all Profile instances contained by this instance
     mutable Reference::To<StrategySet> strategy;
 
+    //! The pulsar phase model, as created using TEMPO
+    Reference::To<Predictor> model;
+
+    //! A pared down copy of the phase model, used when unloading
+    mutable Reference::To<Predictor> unload_model;
+
+    //! Create the pared down copy of the phase model
+    void create_unload_model() const;
+
     //! Store the name of the file from which the current instance was loaded
     /*! Although the logical name of the file may be changed with
       Archive::set_filename, the base class must keep track of the
@@ -707,9 +741,17 @@ namespace Pulsar
     //! Load a new instance of the specified integration from __load_filename
     Integration* load_Integration (unsigned isubint);
 
+    //! Update the AuxColdPlasma extension, as needed
+    /*! Assumes that dedisperse has been applied to all channels */
+    void update_absolute_dispersion();
+
+    //! Update the AuxColdPlasma extension, as needed
+    /*! Assumes that defaraday has been applied to all channels */
+    void update_absolute_rotation();
+    
     //! Set all values to null
     void init ();
-
+   
     //! Perform all known correction operations listed in Check::registry
     void correct ();
 

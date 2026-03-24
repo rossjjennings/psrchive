@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -17,10 +17,6 @@ namespace Pulsar {
 
   //! Communicates Britton (2000) parameters to plotting routines
   class BrittonInfo : public BackendFeedInfo {
-
-    //! When true, b_v and r_u are swapped in Equation 19
-    bool degeneracy_isolated;
-    bool constant_orientation;
     
   public:
 
@@ -30,12 +26,25 @@ namespace Pulsar {
     //! Return the title
     std::string get_title () const;
 
-    //! Return the name of the specified class
-    std::string get_name_feed (unsigned iclass) const;
-    
+    //! Return the PGPLOT-encoded label of the specified class
+    std::string get_label_feed (unsigned iclass) const override;
+
+    //! Return the PGPLOT-encoded name of the specified parameter
+    std::string get_param_name_feed (unsigned iparam) const override;
+
     //! Return the estimate of the specified parameter
-    Estimate<float> get_param_feed (unsigned ichan, unsigned iclass,
-				    unsigned iparam) const;
+    Estimate<float> get_param_feed (unsigned ichan, unsigned iclass, unsigned iparam) const override;
+
+    //! This model has 7 free parameters
+    static constexpr unsigned nparam = 7;
+
+  protected:
+
+    //! When true, b_v and r_u are swapped in Equation 19
+    bool degeneracy_isolated;
+
+    //! When true, there are data to plot for this parameter
+    bool available_data[nparam];
   };
 
 }

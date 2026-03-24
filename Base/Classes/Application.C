@@ -1,15 +1,20 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008-2010 by Willem van Straten
+ *   Copyright (C) 2008 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include<config.h>
+#endif
 
 #include "Pulsar/Application.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ProcHistory.h"
 
 #include "Pulsar/psrchive.h"
+#include "config/psrchive_version.h"
 
 #include "strutil.h"
 #include "dirutil.h"
@@ -37,7 +42,7 @@ Pulsar::Application::Application (const string& n, const string& d)
 //! Add options to the application
 void Pulsar::Application::add (Options* f)
 {
-  f->application = this;
+  f->application.set(this);
   options.push_back( f );
 }
 
@@ -94,7 +99,7 @@ void Pulsar::Application::parse (int argc, char** argv)
   if (has_manual) menu.set_help_footer
     ("\n" "See " PSRCHIVE_HTTP "/manuals/" + name + " for more details \n");
 
-  menu.set_version (version);
+  menu.set_version (PACKAGE_STRING " " PSRCHIVE_COMMIT_HASH);
 
   arg = menu.add (this, &Application::set_quiet, 'q');
   arg->set_help ("quiet mode");
@@ -134,10 +139,38 @@ void Pulsar::Application::parse (int argc, char** argv)
 
   if (!metafile.empty())
   {
+    std::vector<std::string> loaded;
+
     // stringfload appends to filenames (without first clearing the vector)
-    if (stringfload (&filenames, metafile) < 0)
+    if (stringfload (&loaded, metafile) < 0)
       throw Error (FailedSys, "Pulsar::Application::parse", 
                    "failed to load filnames from '" + metafile + "'\n");
+
+    std::string metapath = dirname(metafile);
+    if (metapath != ".")
+    {
+      // check if files need to have metapath prepended
+      unsigned ifile = 0;
+      while (ifile < loaded.size())
+      {
+        if (!file_exists(loaded[ifile].c_str()))
+        {
+          // check if it exists in metapath
+          std::string alt = metapath + "/" + loaded[ifile];
+          if (!file_exists(alt.c_str()))
+          {
+            cerr << "Pulsar::Application::parse '" << loaded[ifile] << "' not found and '" << alt << "' not found" << endl;
+            loaded.erase(loaded.begin() + ifile);
+            continue;
+          }
+
+          loaded[ifile] = alt;
+        }
+        ifile ++;
+      }
+    }
+
+    filenames.insert(filenames.end(), loaded.begin(), loaded.end());
   }
 
   string separator = " ";
@@ -219,9 +252,24 @@ void Pulsar::Application::finish (Archive* archive)
   }
 }
 
+void Pulsar::Application::verify_commit_hash()
+{
+  if (commit_hash.empty())
+    return;
+
+  if (commit_hash != PSRCHIVE_COMMIT_HASH)
+  {
+    throw Error (InvalidState, "Pulsar::Application::verify_commit_hash",
+                "commit hash compiled into application binary='" + commit_hash + "'"
+                " does not equal that compiled into library='" PSRCHIVE_COMMIT_HASH "'");
+  }
+}
+
 //! Execute the main loop
 int Pulsar::Application::main (int argc, char** argv) try
 {
+  verify_commit_hash();
+
   parse (argc, argv);
 
   for (unsigned i=0; i<options.size(); i++)

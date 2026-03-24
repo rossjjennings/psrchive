@@ -29,8 +29,7 @@ namespace Pulsar {
 
   public:
 
-    Expert (Integration* inst)
-    { instance = inst; }
+    Expert (Integration* inst) : instance(inst) { }
 
     //! Set the number of pulsar phase bins
     void set_nbin (unsigned numbins)
@@ -83,6 +82,16 @@ namespace Pulsar {
     void defaraday (unsigned ichan, unsigned kchan, double f0)
     { instance->defaraday (ichan, kchan, f0); }
 
+    //! Update the DispersionHistory extension, as needed
+    /*! Assumes that the dedisperse worker function has been applied to all channels */
+    void update_absolute_dispersion()
+    { instance->update_absolute_dispersion(); }
+
+    //! Update the BirefringenceHistory extension, as needed
+    /*! Assumes that the defaraday worker function has been applied to all channels */
+    void update_absolute_rotation()
+    { instance->update_absolute_rotation(); }
+    
     //! Swap the two specified Profiles
     void swap_profiles (unsigned ipol, unsigned ichan,
 			unsigned jpol, unsigned jchan)

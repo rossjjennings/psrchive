@@ -52,7 +52,7 @@ namespace Calibration {
     ~SingleAxis ();
 
     //! Clone operator
-    SingleAxis* clone () const;
+    SingleAxis* clone () const override;
 
     //! Set cyclical bounds on the differential phase
     void set_cyclic (bool flag = true);

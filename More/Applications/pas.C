@@ -664,7 +664,7 @@ void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive
 		   << rmax << " at bin lag " << fmax <<endl;
   if(verbose) cout << "Present cross correlation coeffecient: " 
 		   << pcoef <<endl;
-  strncmp(line, "", 100);
+  // strncmp(line, "", 100); warning: statement has no effect [-Wunused-value]
   sprintf(line, "Maximum cross correlation coeffecient = %f at bin lag %f   Present = %f", ppcoef, fmax, pcoef);
 }
 

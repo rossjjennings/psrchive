@@ -18,7 +18,7 @@ from spinifex import get_rm
 
 """Set the aux:rm in each sub-integration to the ionospheric RM estimated using spinifex."""
 
-def update_aux_rm(filenames, new_extension):
+def update_aux_rm(filenames, new_extension, itrf=None):
 
     times = []
 
@@ -26,7 +26,10 @@ def update_aux_rm(filenames, new_extension):
         print(f"loading information from {file=}")
         ar = psr.Archive.load(file)
         artimes = ar.get_mjds()
-        arloc = ar.get_ant_xyz()
+        if itrf is None:
+            arloc = ar.get_ant_xyz()
+        else:
+            arloc = itrf.split(',')
         arcoord = ar.get_coordinates()
 
         if not times:
@@ -45,10 +48,7 @@ def update_aux_rm(filenames, new_extension):
                       f"do not equal coordinates {coord.getHMSDMS()} in file={reference_file}")
                 exit()
 
-        if isinstance(artimes, list):
-            times.extend(artimes)
-        else:
-            times.append(artimes)
+        times.append(artimes)
 
     if telescope_location == 'undefined':
         print(f"telescope undefined - assuming Parkes")
@@ -60,13 +60,9 @@ def update_aux_rm(filenames, new_extension):
     ra=coord.ra().getRadians() * u.rad
     dec=coord.dec().getRadians() * u.rad
     source = SkyCoord(ra=ra, dec=dec)
-
+    times = np.concatenate(times)
     times = Time(np.array(times).flatten(), format='mjd')
-    iono_kwargs = {}
-    iono_kwargs['prefix'] = 'uqr'
-    iono_kwargs['server'] = 'chapman'
-
-    rm = get_rm.get_rm_from_skycoord(loc=loc, times=times, source=source, iono_kwargs=iono_kwargs)
+    rm = get_rm.get_rm_from_skycoord(loc=loc, times=times, source=source, server="chapman", prefix="uqr")
     # print to screen
     rotation_measures = rm.rm
     rm_times = rm.times
@@ -74,7 +70,7 @@ def update_aux_rm(filenames, new_extension):
     azimuths = rm.azimuth
     print("time      RM (rad/lambda^2)      azimuth (deg)      elevation (deg)")
     for myrm, tm, az, el in zip(rotation_measures, rm_times, azimuths, elevations):
-        print(f"{tm.isot} {myrm} {az:3.2f} {el:2.2f}")
+        print(f"{tm.isot} {myrm:2.4f} {az:3.2f} {el:2.2f}")
 
     idx = 0
 
@@ -103,7 +99,7 @@ def main() -> None:
     p.add_argument(
         "--itrf",
         type=str,
-        help="ITRF coordinates of observatory (not impelemented)",
+        help="ITRF coordinates of observatory (m) separated by ,",
     )
 
     p.add_argument(
@@ -114,7 +110,7 @@ def main() -> None:
     )
 
     args, files = p.parse_known_args()
-    update_aux_rm(files, args.ext)
+    update_aux_rm(files, args.ext, args.itrf)
 
 if __name__ == "__main__":
-  main()
+    main()

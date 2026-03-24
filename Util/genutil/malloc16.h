@@ -33,6 +33,7 @@ public:
   Array16 (size_t n) { ptr = (T*) malloc16 (sizeof(T) * n); }
   ~Array16 () { if (ptr) free16 (ptr); }
   operator T* () { return ptr; }
+  T* get() { return ptr; }
   bool operator ! () { return ptr == 0; }
 
 protected:

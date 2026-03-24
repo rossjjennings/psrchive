@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -37,6 +37,6 @@ void Pulsar::Archive::defaraday ()
     get_Integration(i)->defaraday ();
   
   set_faraday_corrected (true);
-  getadd<AuxColdPlasma>()->set_birefringence_corrected (true);
+  update_absolute_rotation();
 }
 

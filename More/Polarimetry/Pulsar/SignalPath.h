@@ -21,24 +21,35 @@
 #include "MEAL/ProductRule.h"
 #include "MEAL/ChainRule.h"
 #include "MEAL/Univariate.h"
+#include "MEAL/Variable.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Axis.h"
 #include "MEAL/Real4.h"
 
 namespace Calibration
 {
+  class VariableBackend;
+  class VariableBackendEstimate;
+  
   //! Manages multiple signal path transformations in a reception model
 
   /*! As in Table 1 of van Straten (2004), different types of
     observations are subjected to different polarimetric
-    transformations */
+    transformations.
 
-  class VariableBackendEstimate;
-  class VariableBackend;
-  class BackendEstimate;
-  
+    Each SignalPath instance manages the polarimetric tranformations
+    for observations of a single pulsar, its reference source
+    (e.g. noise diode), and a flux calibrator.
+
+    Multiple pulsars are managed by multiple SignalPaths that share a
+    reception model and a common set of polarimetric transformations.
+  */
+
   class SignalPath : public Reference::Able
   {
+    //! Name of this instance (useful when debugging)
+    std::string name;
+
   public:
 
     //! Verbosity flag
@@ -47,9 +58,16 @@ namespace Calibration
     //! Default constructor
     SignalPath (Pulsar::Calibrator::Type*);
 
-    //! Copy the state of another instance
-    void copy (SignalPath*);
+    //! Set the name of this instance
+    void set_name (const std::string& _name) { name = _name; }
 
+    //! Copy state of other instance
+    void copy (SignalPath* other);
+
+    //! Share reception model and common transformations of other instance
+    /*! Common transformations are experienced by all sources. */
+    void share (SignalPath* other);
+    
     //! Set the response transformation
     void set_response (MEAL::Complex2*);
 
@@ -211,6 +229,9 @@ namespace Calibration
     //! Activate time varations
     void engage_time_variations ();
 
+    //! Return true if time-variations are engaged
+    bool get_time_variations_engaged () const { return time_variations_engaged; }
+
     //! Set whether steps occur before or after cals
     void set_step_after_cal (bool flag = true);
 
@@ -221,7 +242,13 @@ namespace Calibration
     bool get_valid () const { return valid; }
     std::string get_invalid_reason () const { return invalid_reason; }
 
-    MEAL::Axis< Jones<double> >& get_projection () { return projection; }
+    void set_projection (MEAL::Variable<MEAL::Complex2>*);
+    MEAL::Variable<MEAL::Complex2>* get_projection ()
+    { return projection; }
+
+    void set_faraday_rotation (MEAL::Variable<MEAL::Complex2>*);
+    MEAL::Variable<MEAL::Complex2>* get_faraday_rotation ()
+    { return faraday_rotation; }
 
  protected:
 
@@ -237,12 +264,13 @@ namespace Calibration
     //! The algorithm used to solve the measurement equation
     Reference::To< Calibration::ReceptionModel::Solver > solver;
 
-    //! The instrumental response to be modelled
+    //! The common instrumental response to be modelled
     
     /*! All signal paths include this transformation, which is the
-      response to be modeled and output as a solution.  All other
-      transformations deal with variations as a function of time,
-      variations between signals of different types, etc. */
+      response to be modeled and output as a solution.  
+
+      Other transformations mostly deal with variations as a function
+      of time, variations between signals of different types, etc. */
     
     Reference::To< MEAL::Complex2 > response;
 
@@ -256,11 +284,10 @@ namespace Calibration
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > instrument;
 
     //! The transformation from the celestial sphere to the receptors
-    Reference::To<MEAL::Complex2> celestial;
+    Reference::To< MEAL::Variable<MEAL::Complex2> > projection;
 
-    //! The known transformations from the celestial sphere to the receptors
-    /*! The axis class is used to set this constant for each observation */
-    MEAL::Axis< Jones<double> > projection;
+    //! Ionospheric and interstellar Faraday rotation
+    Reference::To< MEAL::Variable<MEAL::Complex2> > faraday_rotation;
 
     //! ChainRule used to model response parameter variations
     Reference::To< MEAL::ChainRule<MEAL::Complex2> > response_chain;
@@ -273,8 +300,9 @@ namespace Calibration
     Calibration::ConvertMJD convert;
 
     //! The set of instrumental backend transformations for each epoch
-    /*! This is the new way to handle jumps in the instrumental response
-      that apply to both calibrator and pulsar observations. */
+    /*! The VariableBackendEstimate class handles jumps in the
+      instrumental response that apply to both calibrator and pulsar
+      observations. */
     std::vector< Reference::To< VariableBackendEstimate > > backends;
 
     //! Return a newly constructed and initialized backend
@@ -290,7 +318,11 @@ namespace Calibration
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
-    //! The Mueller transformation
+    //! The (optional) common instrumental impurity to be modelled
+    
+    /*! When used, all signal paths include this transformation, which
+      supplements the response to be modeled and output as a solution. */
+
     Reference::To< MEAL::Real4 > impurity;
 
     //! The instrumental response returned by get_transformation
@@ -329,6 +361,9 @@ namespace Calibration
     //! built flag
     bool built;
 
+    //! flag set when sharing model and common transformations
+    bool sharing;
+    
     //! build method
     void build ();
 

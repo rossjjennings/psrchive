@@ -30,6 +30,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "Maximum::get", "empty vector");
       return *std::max_element (data.begin(), data.end());
     }
     
@@ -70,6 +72,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "Range::get", "empty vector");
       // C++11
       auto ret = std::minmax_element (data.begin(), data.end());
       return *ret.second - *ret.first;
@@ -88,6 +92,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "Sum::get", "empty vector");
       return std::accumulate (data.begin(), data.end(), 0.0);
     }
     
@@ -105,6 +111,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "Mean::get", "empty vector");
       return std::accumulate (data.begin(), data.end(), 0.0) / data.size();
     }
     
@@ -124,6 +132,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& input)
     {
+      if (input.size() == 0)
+        throw Error (InvalidParam, "NMode::get", "empty vector");
       vector<double> data(input);
       std::sort(data.begin(),data.end());
 
@@ -251,6 +261,8 @@ namespace UnaryStatistics {
     
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "Median::get", "empty vector");
       return median (data);
     }
     
@@ -271,6 +283,9 @@ namespace UnaryStatistics {
 
     double get (const vector<double>& data)
     {
+      if (data.size() == 0)
+        throw Error (InvalidParam, "RobustMedian::get", "empty vector");
+
       vector<double> copy = data;
       unsigned i=0;
       while (i < copy.size())
@@ -306,7 +321,11 @@ public:
   }
 
   double get (const vector<double>& data)
-  { return madm (data); }
+  {
+    if (data.size() == 0)
+      throw Error (InvalidParam, "MedianAbsoluteDifference::get", "empty vector");
+    return madm (data);
+  }
 
   MedianAbsoluteDifference* clone () const 
   { return new MedianAbsoluteDifference(*this); }
@@ -329,7 +348,11 @@ public:
   }
 
   double get (const vector<double>& data)
-  { return iqr (data); }
+  { 
+    if (data.size() == 0)
+      throw Error (InvalidParam, "MedianAbsoluteDifference::get", "empty vector");
+    return iqr (data);
+  }
 
   InterQuartileRange* clone () const 
   { return new InterQuartileRange(*this); }

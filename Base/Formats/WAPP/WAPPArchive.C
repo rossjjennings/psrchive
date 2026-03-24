@@ -388,8 +388,7 @@ void Pulsar::WAPPArchive::load_polycos()
   }
 
   // Link into Archive
-  model = &hdr_polyco;
-  
+  set_predictor(&hdr_polyco);
 }
 
 Pulsar::Integration*

@@ -18,8 +18,9 @@ class LinearRegression
 {
 public:
 
-  //! If true, the weighted median difference between x and y is used instead of the weighted mean difference
-  bool robust_offset = false;
+  //! If non-zero, iteratively search for outliers using the inter-quartile range of the residuals
+  /*! Outliers are any points that lie beyond the median +/- threshold * IQR */
+  float iterative_outlier_threshold = 0.0;
 
   //! If true, the weighted mean of x is subracted from x, thereby reducing the covariance between scale and offset to zero
   bool subtract_weighted_mean_abscissa = false;
@@ -36,6 +37,12 @@ public:
   //! The weighted mean abscissa (x value)
   double weighted_mean_abscissa = 0.0;
 
+  //! The merit function (chi squared)
+  double chisq = 0.0;
+
+  //! The number of degrees of freedom
+  unsigned nfree = 0;
+  
   //! ordinary least squares with optional mask
   void ordinary_least_squares (const std::vector<double>& yval,
                                const std::vector<double>& xval,
@@ -56,6 +63,19 @@ public:
                                   const std::vector<double>& xval,
                                   const std::vector<double>& weight,
                                   const std::vector<double>& alpha);
+
+  /* the inner loop of generalized_least_squares, which may iteratively remove outliers */
+  void least_squares_worker (const std::vector<double>& yval,
+                             const std::vector<double>& xval,
+                             const std::vector<double>& weight,
+                             const std::vector<double>& alpha);
+
+  //! if iterative_outlier_threshold > 0, the input weights with outliers set to zero
+  std::vector<double> masked_weights;
+
+  protected:
+    //! Array of weighted residuals, filled in by least_squares_worker
+    std::vector<double> residual;
 };
 
 #endif

@@ -1,61 +1,34 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2022 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "MEAL/FunctionInterface.h"
 
-using namespace std;
-
-MEAL::Function::Interface::Interface( Function *c )
+MEAL::Parameter::Interface::Interface ( Parameter *s_instance )
 {
-  if (c)
-    set_instance (c);
+  std::string value_name = "Parameter value";
 
-  add( &Function::get_nparam, "nparam", "Number of parameters" );
-
+  if ( s_instance )
   {
-    VGenerator<string> generator;
-
-    add_value(generator( "name", string("Parameter name"),
-			  &Function::get_param_name,
-			  &Function::get_nparam ));
-
-    add_value(generator( "help", string("Parameter description"),
-			  &Function::get_param_description,
-			  &Function::get_nparam ));
+    set_instance( s_instance );
+    std::string help = s_instance->get_description();
+    if ( help != "" )
+      value_name = help;
   }
 
-  {
-    VGenerator<double> generator;
+  add( &Parameter::get_param,
+       &Parameter::set_param,
+       "val", value_name.c_str() );
 
-    add_value(generator( "val", string("Parameter value"),
-			  &Function::get_param,
-			  &Function::set_param,
-			  &Function::get_nparam ));
+  add( &Parameter::get_variance,
+       &Parameter::set_variance,
+       "var", "Parameter variance" );
 
-    add_value(generator( "var", string("Parameter variance"),
-			  &Function::get_variance,
-			  &Function::set_variance,
-			  &Function::get_nparam ));
-  }
-
-  {
-    VGenerator<bool> generator;
-
-    add_value(generator( "fit", string("Fit flag"),
-			  &Function::get_infit,
-			  &Function::set_infit,
-			  &Function::get_nparam ));
-  }
-
-#if 0
-  add( &Function::get_,
-       &Function::set_,
-       "", "" );
-#endif
-
+  add( &Parameter::get_infit,
+       &Parameter::set_infit,
+       "fit", "Fit flag" );
 }
 

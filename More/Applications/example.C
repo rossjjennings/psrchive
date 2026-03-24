@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 - 2014 by Willem van Straten
+ *   Copyright (C) <update>YEAR by AUTHOR</update>
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -15,7 +15,7 @@
 using namespace std;
 
 //
-//! An example of an application
+//! A PSRCHIVE application that <update>DOES THINGS</update>
 //
 class example : public Pulsar::Application
 {
@@ -25,18 +25,22 @@ public:
   example ();
 
   //! Process the given archive
-  void process (Pulsar::Archive*);
+  void process (Pulsar::Archive*) override;
 
 protected:
 
+  // <update> The following attributes are specific to this example
+
   //! Scale attribute used to rescale all of the data in the archive
-  double scale;
+  double scale = 1.0;
 
   //! Name used to reset the name of the source
   std::string name;
 
+  // </update>
+
   //! Add command line options
-  void add_options (CommandLine::Menu&);
+  void add_options (CommandLine::Menu&) override;
 };
 
 
@@ -64,9 +68,6 @@ example::example ()
 {
   add( new Pulsar::StandardOptions );
   add( new Pulsar::UnloadOptions );
-
-  // default value for scale
-  scale = 1.0;
 }
 
 
@@ -83,6 +84,8 @@ void example::add_options (CommandLine::Menu& menu)
   // add a blank line and a header to the output of -h
   menu.add ("\n" "General options:");
 
+  // <update> The following attributes are specific to this example
+
   // add an option that enables the user to set the scale with -s
   arg = menu.add (scale, 's', "scale");
   arg->set_help ("multiply all amplitudes by 'scale'");
@@ -90,10 +93,13 @@ void example::add_options (CommandLine::Menu& menu)
   // add an option that enables the user to set the source name with -name
   arg = menu.add (name, "name", "string");
   arg->set_help ("set the source name to 'string'");
+
+  // </update>
 }
 
 
 /*!
+  // <update> This method should be re-implemented
 
   Scale every profile and optionally set the source name
 
@@ -112,8 +118,8 @@ void example::process (Pulsar::Archive* archive)
     for (unsigned ipol=0; ipol < npol; ipol++)
       for (unsigned ichan=0; ichan < nchan; ichan++)
       {
-	Pulsar::Profile* profile = archive->get_Profile (isub, ipol, ichan);
-	profile->scale(scale);
+        Pulsar::Profile* profile = archive->get_Profile (isub, ipol, ichan);
+        profile->scale(scale);
       }
 }
 

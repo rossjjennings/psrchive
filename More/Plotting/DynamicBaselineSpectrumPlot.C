@@ -12,6 +12,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/Statistics.h"
 
 #include <iostream>
 using namespace std;
@@ -32,9 +33,6 @@ TextInterface::Parser* Pulsar::DynamicBaselineSpectrumPlot::get_interface ()
 {
   return new Interface (this);
 }
-
-// defined in More/General/standard_interface.C
-std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 // Calculate values to fill in to plot array
 void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data, 

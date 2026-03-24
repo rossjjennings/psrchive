@@ -149,7 +149,17 @@ namespace Pulsar
     Focus focus;
 
   };
+}
 
+class Mount;
+
+namespace Pulsar
+{
+  // return a new Mount object
+  Mount* mount_factory (Telescope::Mount mount);
+
+  // return true if the mount naturally tracks celestial coordinates
+  bool naturally_celestial (Telescope::Mount mount);
 }
 
 #endif

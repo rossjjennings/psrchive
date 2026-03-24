@@ -99,9 +99,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
       DEBUG ("FITSArchive::unload PolnCalibratorExtension ichan=" << ichan << " valid");
       for (int j = 0; j < ncpar; j++)
       {
-	data[count] = pce->get_transformation(ichan)->get_param(j);
+        data[count] = pce->get_transformation(ichan)->get_param(j);
         DEBUG ("\t" << j << " " << data[count]);
-	count++;
+        count++;
       }
     }
     else
@@ -231,14 +231,16 @@ void unload_covariances (fitsfile* fptr,
 }
 
 void unload_solver (fitsfile* fptr,
-		    const Pulsar::PolnCalibratorExtension* pce,
-		    vector<float>& chisq)
+                    const Pulsar::PolnCalibratorExtension* pce,
+                    vector<float>& chisq)
 {
   unsigned nchan = pce->get_nchan();
 
   chisq.resize( nchan );
   vector<unsigned> nfree( nchan, 0 );
   vector<unsigned> nfit( nchan, 0 );
+  vector<float> log_det_curvature( nchan, 0.0 );
+  vector<float> log_cond_curvature( nchan, 0.0 );
 
   for (unsigned i = 0; i < nchan; i++)
   {
@@ -247,12 +249,16 @@ void unload_solver (fitsfile* fptr,
       chisq[i] = pce->get_transformation(i)->get_chisq();
       nfree[i] = pce->get_transformation(i)->get_nfree();
       nfit[i]  = pce->get_transformation(i)->get_nfit();
-    }
+      log_det_curvature[i] = pce->get_transformation(i)->get_log_det_curvature();
+      log_cond_curvature[i] = pce->get_transformation(i)->get_log_cond_curvature();
+   }
     else
     {
       chisq[i] = 0.0;
       nfree[i] = 0;
       nfit[i]  = 0;
+      log_det_curvature[i]  = 0.0;
+      log_cond_curvature[i]  = 0.0;
     }
   }
 
@@ -261,6 +267,8 @@ void unload_solver (fitsfile* fptr,
   psrfits_write_col (fptr, "CHISQ", 1, chisq, no_dimensions);
   psrfits_write_col (fptr, "NFREE", 1, nfree, no_dimensions);
   psrfits_write_col (fptr, "NFIT",  1, nfit,  no_dimensions);
+  psrfits_write_col (fptr, "LN_DET_H", 1, log_det_curvature, no_dimensions);
+  psrfits_write_col (fptr, "LN_COND", 1, log_cond_curvature, no_dimensions);
 }
 
 void delete_solver (fitsfile* fptr)
@@ -268,4 +276,6 @@ void delete_solver (fitsfile* fptr)
   psrfits_delete_col (fptr, "CHISQ");
   psrfits_delete_col (fptr, "NFREE");
   psrfits_delete_col (fptr, "NFIT");
+  psrfits_delete_col (fptr, "LN_DET_H");
+  psrfits_delete_col (fptr, "LN_COND");
 }

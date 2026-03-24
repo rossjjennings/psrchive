@@ -47,8 +47,7 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
   vector<string> labels;
   separate (elabel, labels, "\n");
 
-  Reference::To<TextInterface::Parser> parser 
-    = standard_interface( const_cast<Archive*>(archive) );
+  Reference::To<TextInterface::Parser> parser = standard_interface( const_cast<Archive*>(archive) );
   parser->set_indentation ("");
 
   for (unsigned i=0; i < labels.size(); i++)

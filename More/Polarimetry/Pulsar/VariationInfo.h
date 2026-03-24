@@ -38,7 +38,7 @@ namespace Pulsar {
     unsigned get_nchan () const;
 
     //! Return the name of the specified class
-    std::string get_name (unsigned iclass) const;
+    std::string get_label (unsigned iclass) const;
     
     //! Return the Scalar variation function for the specified channel
     const MEAL::Scalar* get_Scalar (unsigned ichan) const;

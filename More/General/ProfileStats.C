@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005-2009 by Willem van Straten
+ *   Copyright (C) 2005-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,6 +14,9 @@
 #include "Pulsar/GaussianBaseline.h"
 #include "Pulsar/SNRatioEstimator.h"
 #include "Pulsar/PhaseWidth.h"
+
+// #define _DEBUG 1
+#include "debug.h"
 
 using namespace std;
 
@@ -37,9 +40,6 @@ Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
   on_est->set_baseline_estimator (off_est);
 
   width_estimator = new PhaseWidth;
-
-  built = false;
-  regions_set = false;
   set_profile (_profile);
 }
 
@@ -61,9 +61,6 @@ Pulsar::ProfileStats::ProfileStats (const ProfileStats& copy) : HasBaselineEstim
 
   if (copy.exclude_estimator)
     exclude_estimator = copy.exclude_estimator->clone();
-
-  built = false;
-  regions_set = false;
 }
 
 //! Destructor
@@ -119,7 +116,7 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
     cerr << "Pulsar::ProfileStats::set_profile this=" << this
          << " profile=" << _profile << " regions_set=" << regions_set << endl;
 
-  profile = _profile;
+  profile.set(_profile);
   built = false;
 }
 
@@ -134,7 +131,7 @@ void Pulsar::ProfileStats::select_profile (const Profile* set_profile) try
   regions_set = false;
 
   if (set_profile)
-    profile = set_profile;
+    profile.set(set_profile);
 
   build ();
 
@@ -154,24 +151,24 @@ void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
   if (!prof)
     return;
 
-  if (prof->get_nbin() != onpulse.get_nbin())
+  if (prof->get_nbin() != onpulse->get_nbin())
     throw Error (InvalidState, "Pulsar::ProfileStats::deselect_onpulse",
                  "profile nbin=%u != onpulse nbin=%u", 
-                 prof->get_nbin(), onpulse.get_nbin());
+                 prof->get_nbin(), onpulse->get_nbin());
 
   if (Profile::verbose)
     cerr << "Pulsar::ProfileStats::deselect_onpulse nbin=" << prof->get_nbin() << endl;
 
   for (unsigned i=0; i<prof->get_nbin(); i++)
     if (prof->get_amps()[i] < thresh)
-      onpulse[i] = 0;
+      onpulse->at(i) = 0;
 }
 
 //! The algorithm used to find the on-pulse phase bins
 void Pulsar::ProfileStats::set_onpulse_estimator (ProfileWeightFunction* est)
 {
   if (Profile::verbose)
-    cerr << "Pulsar::ProfileStats::set_onpulse_estimator this=" << this << " est=" << est << endl;
+    cerr << "Pulsar::ProfileStats::set_onpulse_estimator this=" << this << " est=" << (void*) est << endl;
 
   onpulse_estimator = est;
   built = false;
@@ -191,6 +188,20 @@ void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
     cerr << "Pulsar::ProfileStats::set_baseline_estimator this=" << this << " est=" << est << endl;
 
   HasBaselineEstimator::set_baseline_estimator (est);
+
+  HasBaselineEstimator* other = 0;
+  if (width_estimator)
+    other = dynamic_cast<HasBaselineEstimator*> (width_estimator.ptr());
+
+  if (other)
+    other->set_baseline_estimator (est);
+  
+  if (onpulse_estimator)
+    other = dynamic_cast<HasBaselineEstimator*> (onpulse_estimator.ptr());
+
+  if (other)
+    other->set_baseline_estimator (est);
+    
   built = false;
   regions_set = false;
 }
@@ -229,8 +240,8 @@ Pulsar::ProfileStats::get_snratio_estimator () const
 //! Set the on-pulse and baseline regions
 void Pulsar::ProfileStats::set_regions (const PhaseWeight& on, const PhaseWeight& off)
 {
-  onpulse = on;
-  baseline = off;
+  onpulse->copy(on);
+  baseline->copy(off);
 
   if (Profile::verbose)
     cerr << "Pulsar::ProfileStats::set_regions true" << endl;
@@ -242,8 +253,8 @@ void Pulsar::ProfileStats::set_regions (const PhaseWeight& on, const PhaseWeight
 //! Set the on-pulse and baseline regions
 void Pulsar::ProfileStats::get_regions (PhaseWeight& on, PhaseWeight& off) const
 {
-  on = onpulse;
-  off = baseline;
+  on.copy(onpulse);
+  off.copy(baseline);
 }
 
 //! Returns the total flux of the on-pulse phase bins
@@ -252,22 +263,20 @@ Pulsar::ProfileStats::get_total (bool subtract_baseline) const try
 {
   if (!built)
   {
-#if _DEBUG
-    cerr << "Pulsar::ProfileStats::get_total this=" << this
-        << " regions_set=" << regions_set << " calling build" << endl;
-#endif
+    DEBUG("Pulsar::ProfileStats::get_total this=" << this
+        << " regions_set=" << regions_set << " calling build");
     build ();
   }
 
   double offmean = 0.0;
   
   if (subtract_baseline)
-    offmean = baseline.get_mean().get_value();
+    offmean = baseline->get_mean().get_value();
 
-  double variance = baseline.get_variance().get_value ();
+  double variance = baseline->get_variance().get_value ();
 
-  double navg = onpulse.get_weight_sum();
-  double total = onpulse.get_weighted_sum();
+  double navg = onpulse->get_weight_sum();
+  double total = onpulse->get_weighted_sum();
 
 #if 0
   navg = profile->get_nbin();
@@ -290,14 +299,14 @@ unsigned Pulsar::ProfileStats::get_onpulse_nbin () const
 {
   if (!built)
     build ();
-  return (unsigned) onpulse.get_weight_sum();
+  return (unsigned) onpulse->get_weight_sum();
 }
 
 unsigned Pulsar::ProfileStats::get_baseline_nbin () const
 {
   if (!built)
     build ();
-  return (unsigned) baseline.get_weight_sum();
+  return (unsigned) baseline->get_weight_sum();
 }
 
 //! Return true if the specified phase bin is in the on pulse window
@@ -306,7 +315,7 @@ bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const try
   if (!built)
     build ();
 
-  return onpulse[ibin];
+  return onpulse->at(ibin);
 }
 catch (Error& error)
 {
@@ -317,7 +326,7 @@ void Pulsar::ProfileStats::set_onpulse (unsigned ibin, bool val) try
 {
   if (!built)
     build ();
-  onpulse[ibin] = val;
+  onpulse->at(ibin) = val;
 }
 catch (Error& error)
 {
@@ -329,41 +338,61 @@ bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const try
 {
   if (!built)
     build ();
-  return baseline[ibin];
+  return baseline->at(ibin);
 }
 catch (Error& error)
 {
   throw error += "Pulsar::ProfileStats::get_baseline (ibin)";
 }
 
-Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const try
+Estimate<double> Pulsar::ProfileStats::get_baseline_mean () const try
 {
-#if _DEBUG
-  cerr << "Pulsar::ProfileStats::get_baseline_variance profile=" << profile.get() 
-       << " built=" << built << " variance=" << baseline_variance << endl;
-#endif
+  DEBUG("Pulsar::ProfileStats::get_baseline_mean profile=" << profile.get() 
+       << " built=" << built << " mean=" << baseline_mean);
 
   if (!built)
   {
-#if _DEBUG
-    cerr << "Pulsar::ProfileStats::get_baseline_variance call build" << endl;
-#endif
+    DEBUG("Pulsar::ProfileStats::get_baseline_mean call build");
+
+    build ();
+  }
+
+  if (baseline_mean.get_value() == 0)
+  {
+    DEBUG("Pulsar::ProfileStats::get_baseline_mean get mean");
+
+    baseline_mean = baseline->get_mean();
+  }
+
+  DEBUG("Pulsar::ProfileStats::get_baseline_mean mean=" << baseline_mean);
+
+  return baseline_mean;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::ProfileStats::get_baseline_mean";
+}
+
+Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const try
+{
+  DEBUG("Pulsar::ProfileStats::get_baseline_variance profile=" << profile.get() 
+       << " built=" << built << " variance=" << baseline_variance);
+
+  if (!built)
+  {
+    DEBUG("Pulsar::ProfileStats::get_baseline_variance call build");
 
     build ();
   }
 
   if (baseline_variance.get_value() == 0)
   {
-#if _DEBUG
-    cerr << "Pulsar::ProfileStats::get_baseline_variance get variance" << endl;
-#endif
+    DEBUG("Pulsar::ProfileStats::get_baseline_variance get variance");
 
-    baseline_variance = baseline.get_variance();
+    baseline_variance = baseline->get_variance();
   }
 
-#if _DEBUG
-  cerr << "Pulsar::ProfileStats::get_baseline_variance variance=" << baseline_variance << endl;
-#endif
+  DEBUG("Pulsar::ProfileStats::get_baseline_variance variance=" << baseline_variance);
 
   return baseline_variance;
 }
@@ -377,8 +406,7 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse () try
 {
   if (!built)
     build ();
-
-  return &onpulse;
+  return onpulse;
 }
 catch (Error& error)
 {
@@ -390,7 +418,7 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline () try
 {
   if (!built)
     build ();
-  return &baseline;
+  return baseline;
 }
 catch (Error& error)
 {
@@ -402,7 +430,7 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
 {
   if (!built)
     build ();
-  return &all;
+  return all;
 }
 
 void Pulsar::ProfileStats::build () const try
@@ -410,12 +438,13 @@ void Pulsar::ProfileStats::build () const try
   // Profile::verbose = true;
 
   baseline_variance = 0.0;
+  baseline_mean = 0.0;
 
   if (!profile)
   {
     if (Profile::verbose)
       cerr << "Pulsar::ProfileStats::build this=" << this
-	   << " Profile not set" << endl;
+          << " Profile not set" << endl;
     return;
   }
 
@@ -423,11 +452,11 @@ void Pulsar::ProfileStats::build () const try
   {
     if (Profile::verbose)
       cerr << "Pulsar::ProfileStats::build this=" << this
-          << " regions set" << endl;
+           << " regions set" << endl;
 
-    onpulse.set_Profile (profile);
-    baseline.set_Profile (profile);
-    all.set_Profile (profile);
+    onpulse->set_Profile (profile);
+    baseline->set_Profile (profile);
+    all->set_Profile (profile);
 
     built = true;
     return;
@@ -438,57 +467,52 @@ void Pulsar::ProfileStats::build () const try
         << " computing on-pulse and baseline of profile=" << profile.get() 
         << endl;
 
-  all = PhaseWeight (profile.get());
+  all->resize(profile->get_nbin());
+  all->set_all(1.0);
 
   if (include_estimator)
   {
+    if (!include)
+      include = new PhaseWeight;
+      
     include_estimator->set_Profile (profile);
-    include_estimator->get_weight (&include);
-    onpulse_estimator->set_include (&include);
-    get_baseline_estimator()->set_include (&include);
+    include_estimator->get_weight (include);
+    onpulse_estimator->set_include (include);
+    get_baseline_estimator()->set_include (include);
 
-    all = include;
+    all->copy(include);
   }
 
   if (exclude_estimator)
   {
-    exclude_estimator->set_Profile (profile);
-    exclude_estimator->get_weight (&exclude);
-    onpulse_estimator->set_exclude (&exclude);
-    get_baseline_estimator()->set_exclude (&exclude);
+    if (!exclude)
+      exclude = new PhaseWeight;
 
-    PhaseWeight negation = exclude;
+    exclude_estimator->set_Profile (profile);
+    exclude_estimator->get_weight (exclude);
+    onpulse_estimator->set_exclude (exclude);
+    get_baseline_estimator()->set_exclude (exclude);
+
+    PhaseWeight negation(exclude);
     negation.negate();
-    all *= negation;
+    all->elementwise_product(negation);
   }
 
   onpulse_estimator->set_Profile (profile);
-  onpulse_estimator->get_weight (&onpulse);
+  onpulse_estimator->get_weight (onpulse);
 
   get_baseline_estimator()->set_Profile (profile);
-  get_baseline_estimator()->get_weight (&baseline);
+  get_baseline_estimator()->get_weight (baseline);
+
+  all->set_Profile (profile);
 
   built = true;
 
   if (Profile::verbose)
   {
     cerr << "Pulsar::ProfileStats::build nbin=" << profile->get_nbin()
-        << " on-pulse=" << onpulse.get_weight_sum()
-        << " baseline=" << baseline.get_weight_sum() << endl;
-
-#if _DEBUG
-    cerr << "onpulse ";
-    for (unsigned ibin=0; ibin<profile->get_nbin(); ibin++)
-      if (onpulse[ibin])
-        cerr << ibin << " ";
-    cerr << endl;
-
-    cerr << "baseline ";
-    for (unsigned ibin=0; ibin<profile->get_nbin(); ibin++)
-      if (baseline[ibin])
-        cerr << ibin << " ";
-    cerr << endl;
-#endif
+         << " on-pulse=" << onpulse->get_weight_sum()
+         << " baseline=" << baseline->get_weight_sum() << endl;
   }
 }
 catch (Error& error)
@@ -505,9 +529,7 @@ void Pulsar::ProfileStats::set_snr_estimator (const std::string& name)
 //! Get the signal-to-noise ratio
 double Pulsar::ProfileStats::get_snr () const
 {
-#if _DEBUG
-  cerr << "Pulsar::ProfileStats::get_snr profile=" << profile.get() << endl;
-#endif
+  DEBUG("Pulsar::ProfileStats::get_snr profile=" << profile.get());
 
   if (snratio_estimator)
     return snratio_estimator->get_snr ( profile );

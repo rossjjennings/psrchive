@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005-2009 by Willem van Straten
+ *   Copyright (C) 2005-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -61,7 +61,7 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
   }
 
   double dm = integration->get_effective_dispersion_measure();
-  bool must_dedisperse = dedisperse &&  dm != 0;
+  bool must_dedisperse = dedisperse && dm != 0;
 
   double rm = integration->get_effective_rotation_measure();
   bool must_defaraday = defaraday && subint_npol == 4 && rm != 0;
@@ -86,8 +86,8 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
     double reference_frequency = integration->weighted_frequency (start,stop);
 
     if (Integration::verbose)
-      cerr << "Pulsar::FrequencyIntegrate::transform ichan=" << ichan 
-	   << " freq=" << reference_frequency << endl;
+      cerr << "Pulsar::FrequencyIntegrate::transform ichan=" << ichan
+           << " freq=" << reference_frequency << endl;
 
     if (must_dedisperse)
       integration->expert()->dedisperse (start, stop, reference_frequency);
@@ -98,18 +98,18 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
     for (unsigned ipol=0; ipol < subint_npol; ipol++)
     {
       if (Integration::verbose)
-	cerr << "Pulsar::FrequencyIntegrate::transform ipol=" << ipol << endl;
+        cerr << "Pulsar::FrequencyIntegrate::transform ipol=" << ipol << endl;
 
       Profile* output = integration->get_Profile (ipol, ichan);
 
       for (unsigned jchan=start; jchan<stop; jchan++)
       {
-	Profile* input  = integration->get_Profile (ipol, jchan);
-	if (jchan==start)
-	  *(output) = *(input);
-	else
-	  output->average (input);
-      } 
+        Profile* input  = integration->get_Profile (ipol, jchan);
+        if (jchan==start)
+          *(output) = *(input);
+        else
+          output->average (input);
+      }
     }
 
     integration->set_centre_frequency (ichan, reference_frequency);
@@ -123,6 +123,12 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
     cerr << "Pulsar::FrequencyIntegrate::transform resize" << endl;
 
   integration->expert()->resize (0, output_nchan, 0);
+
+  if (must_dedisperse)
+    integration->expert()->update_absolute_dispersion ();
+
+  if (must_defaraday)
+    integration->expert()->update_absolute_rotation ();
 
   if (Integration::verbose) 
     cerr << "Pulsar::FrequencyIntegrate::transform finish" << endl;

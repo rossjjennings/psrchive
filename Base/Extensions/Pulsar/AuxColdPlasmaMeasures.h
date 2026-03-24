@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2010 by Willem van Straten
+ *   Copyright (C) 2010-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -15,7 +15,7 @@
 
 namespace Pulsar {
   
-  //! Stores parameters used to correct auxiliary dispersion and birefringence
+  //! Stores parameters used to correct variable dispersion and birefringence
   class AuxColdPlasmaMeasures : public Pulsar::Integration::Extension {
     
   public:
@@ -32,19 +32,22 @@ namespace Pulsar {
     //! Return an abbreviated name that can be typed relatively quickly
     std::string get_short_name () const { return "aux"; }
 
-    //! Set the auxiliary dispersion measure
+    //! Set the difference in dispersion measure
+    /*! The difference is with respect to Archive::get_dispersion_measure */
     void set_dispersion_measure (double measure);
-    //! Get the auxiliary dispersion measure
+    //! Get the difference dispersion measure
+    /*! The difference is with respect to Archive::get_dispersion_measure */
     double get_dispersion_measure () const;
 
-    //! Set the auxiliary rotation measure
+    //! Set the difference in rotation measure
+    /*! The difference is with respect to Archive::get_rotation_measure */
     void set_rotation_measure (double measure);
-    //! Get the auxiliary rotation measure
+    //! Get the difference in rotation measure
+    /*! The difference is with respect to Archive::get_rotation_measure */
     double get_rotation_measure () const;
 
     //! Text interface to a AuxColdPlasmaMeasures instance
-    class Interface :
-      public Integration::Extension::Interface<AuxColdPlasmaMeasures>
+    class Interface : public Integration::Extension::Interface<AuxColdPlasmaMeasures>
     {
     public:
       Interface (AuxColdPlasmaMeasures* = NULL);
@@ -52,11 +55,11 @@ namespace Pulsar {
 
   protected:
 
-    //! The auxiliary dispersion measure
-    double dispersion_measure;
-
-    //! The auxiliary rotation measure
-    double rotation_measure;
+    //! The difference in dispersion measure
+    double dispersion_measure = 0.0;
+    
+    //! The difference in rotation measure
+    double rotation_measure = 0.0;
   };
   
 

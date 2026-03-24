@@ -102,10 +102,10 @@ unsigned Pulsar::DoPCalibrator::Info::get_nclass () const
 }
 
 //! Return the name of the specified class
-string Pulsar::DoPCalibrator::Info::get_name (unsigned iclass) const
+string Pulsar::DoPCalibrator::Info::get_label (unsigned iclass) const
 {
   if (iclass < 3)
-    return SingleAxisCalibrator::Info::get_name (iclass);
+    return SingleAxisCalibrator::Info::get_label (iclass);
 
   return "dop fix";
 } 

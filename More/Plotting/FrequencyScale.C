@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -18,8 +18,7 @@ Pulsar::FrequencyScale::FrequencyScale ()
   reverse = false;
 }
 
-static void get_minmax_freq (const Pulsar::Archive* data, 
-    double& min, double& max)
+static void get_minmax_freq (const Pulsar::Archive* data, double& min, double& max)
 {
   double bw = data->get_bandwidth();
   if (data->get_nsubint())
@@ -54,12 +53,10 @@ void Pulsar::FrequencyScale::init (const Archive* data)
   if (reverse)
     set_world (std::pair<float,float>(max_freq, min_freq));
 
-  if (!get_minmaxset())
-    set_minmax (min_freq, max_freq);
+  set_minmax (min_freq, max_freq);
 }
 
-void Pulsar::FrequencyScale::get_indeces (const Archive* data, 
-					  unsigned& min, unsigned& max) const
+void Pulsar::FrequencyScale::get_indeces (const Archive* data, unsigned& min, unsigned& max) const
 {
   PlotScale::get_indeces (data->get_nchan(), min, max);
 }
@@ -69,8 +66,7 @@ std::string Pulsar::FrequencyScale::get_label () const
   return "Frequency (MHz)";
 }
 
-void Pulsar::FrequencyScale::get_ordinates (const Archive* data,
-					    std::vector<float>& x_axis) const
+void Pulsar::FrequencyScale::get_ordinates (const Archive* data, std::vector<float>& x_axis) const
 {
   x_axis.resize (data->get_nchan());
 

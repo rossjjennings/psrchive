@@ -78,7 +78,7 @@ namespace Pulsar {
     Reference::To<Processor> preprocessor;
 
     //! The constructor for the derived type of this instance
-    Constructor* constructor;
+    Reference::To<Constructor> constructor;
   };
 
   /*!  
@@ -86,7 +86,7 @@ namespace Pulsar {
     having to go through the entire inheritance hierarchy.
     PlotFactory installs the Constructor for the derived type.
   */
-  class Plot::Constructor
+  class Plot::Constructor : public Reference::Able
   {
   public:
 

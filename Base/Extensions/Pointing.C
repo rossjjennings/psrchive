@@ -11,48 +11,53 @@
 #include "Horizon.h"
 #include "strutil.h"
 
+// #define _DEBUG 1
+#include "debug.h"
+
 using namespace std;
 
 Pulsar::Pointing::Pointing () : Extension ("Pointing")
 {
 }
 
-Pulsar::Pointing::Pointing (const Pointing& other)
+Pulsar::Pointing::Pointing (const Pointing& that)
   : Extension ("Pointing")
 {
-  operator = (other);
+  operator = (that);
 }
 
 const Pulsar::Pointing&
-Pulsar::Pointing::operator= (const Pointing& pointing)
+Pulsar::Pointing::operator= (const Pointing& that)
 {
-  local_sidereal_time = pointing.local_sidereal_time;
-  right_ascension     = pointing.right_ascension;
-  declination         = pointing.declination;
-  galactic_longitude  = pointing.galactic_longitude;
-  galactic_latitude   = pointing.galactic_latitude;
-  feed_angle          = pointing.feed_angle;
-  position_angle      = pointing.position_angle;
-  parallactic_angle   = pointing.parallactic_angle;
-  telescope_azimuth   = pointing.telescope_azimuth;
-  telescope_zenith    = pointing.telescope_zenith;
+  local_sidereal_time = that.local_sidereal_time;
+  right_ascension     = that.right_ascension;
+  declination         = that.declination;
+  galactic_longitude  = that.galactic_longitude;
+  galactic_latitude   = that.galactic_latitude;
+  feed_angle          = that.feed_angle;
+  position_angle      = that.position_angle;
+  parallactic_angle   = that.parallactic_angle;
+  telescope_azimuth   = that.telescope_azimuth;
+  telescope_zenith    = that.telescope_zenith;
+
+  DEBUG("Pulsar::Pointing::operator= this.right_ascension=" << right_ascension << " that.right_ascension=" << that.right_ascension);
 
   return *this;
 }
 
 const Pulsar::Pointing&
-Pulsar::Pointing::operator += (const Pointing& pointing)
+Pulsar::Pointing::operator += (const Pointing& that)
 {
-  local_sidereal_time += pointing.local_sidereal_time;
-  right_ascension     += pointing.right_ascension;
-  declination         += pointing.declination;
-  galactic_longitude  += pointing.galactic_longitude;
-  galactic_latitude   += pointing.galactic_latitude;
-  feed_angle          += pointing.feed_angle;
-  position_angle      += pointing.position_angle;
-  parallactic_angle   += pointing.parallactic_angle;
-  telescope_azimuth   += pointing.telescope_azimuth;
-  telescope_zenith    += pointing.telescope_zenith;
+  local_sidereal_time += that.local_sidereal_time;
+  right_ascension     += that.right_ascension;
+  declination         += that.declination;
+  galactic_longitude  += that.galactic_longitude;
+  galactic_latitude   += that.galactic_latitude;
+  feed_angle          += that.feed_angle;
+  position_angle      += that.position_angle;
+  parallactic_angle   += that.parallactic_angle;
+  telescope_azimuth   += that.telescope_azimuth;
+  telescope_zenith    += that.telescope_zenith;
 
   return *this;
 }
@@ -61,17 +66,17 @@ Pulsar::Pointing::~Pointing ()
 {
 }
 
-
 static const double seconds_per_day = 24.0 * 60.0 * 60.0;
+static const double radians_per_second = 2.0 * M_PI / seconds_per_day;
 
 void Pulsar::Pointing::set_local_sidereal_time (double seconds)
 {
-  local_sidereal_time = Estimate<double> (seconds*M_PI/seconds_per_day, 1.0);
+  local_sidereal_time = Estimate<double> (seconds * radians_per_second, 1.0);
 }
 
 double Pulsar::Pointing::get_local_sidereal_time () const
 {
-  return local_sidereal_time.get_Estimate().val * seconds_per_day / M_PI;
+  return local_sidereal_time.get_Estimate().val / radians_per_second;
 }
 
 static void setmean (MeanRadian<double>& value, const Angle& angle)
@@ -94,7 +99,6 @@ Angle Pulsar::Pointing::get_right_ascension () const
   return getmean (right_ascension);
 }
 
-
 void Pulsar::Pointing::set_declination (const Angle& angle)
 {
   setmean (declination, angle);
@@ -105,6 +109,15 @@ Angle Pulsar::Pointing::get_declination () const
   return getmean (declination);
 }
 
+Angle Pulsar::Pointing::get_hour_angle () const
+{
+  double lst_rad = get_local_sidereal_time() * radians_per_second;
+  double ra_rad = get_right_ascension().getRadians();
+
+  if (Integration::verbose)
+    cerr << "Pulsar::Pointing::get_hour_angle lst=" << lst_rad << " R.A.=" << ra_rad << " (radians)" << endl;
+  return lst_rad - ra_rad;
+}
 
 void Pulsar::Pointing::set_galactic_longitude (const Angle& angle)
 {
@@ -190,6 +203,7 @@ void Pulsar::Pointing::update (const Integration* subint)
   if (!archive)
     throw Error (InvalidState, "Pulsar::Pointing::update",
 	         "Integration has no parent Archive");
+
   update(subint, archive);
 }
 
@@ -197,10 +211,8 @@ void Pulsar::Pointing::update (const Integration* subint)
 /*! Based on the epoch of the Integration, uses slalib to re-calculate
   the following Pointing attributes: local_sidereal_time, parallactic_angle, 
   telescope_azimuth, and telescope_zenith. */
-void Pulsar::Pointing::update (const Integration* subint, 
-    const Archive *archive)
+void Pulsar::Pointing::update (const Integration* subint, const Archive *archive)
 {
-
   const Telescope* telescope = archive->get<Telescope>();
 
   if (!telescope)
@@ -217,30 +229,69 @@ void Pulsar::Pointing::update (const Integration* subint,
       "  zen=" << get_telescope_zenith().getDegrees() << " deg\n"
       " para=" << get_parallactic_angle().getDegrees() << " deg\n"
       " posa=" << get_position_angle().getDegrees() << " deg\n"
-      "Pulsar::Pointing::update using:\n"
       " r.a.=" << get_right_ascension().getDegrees() << " deg\n"
       " dec.=" << get_declination().getDegrees() << " deg\n"
-      " pos.=" << coord << "\n"
       "Pulsar::Pointing::update parent:\n"
       " r.a.=" << archive->get_coordinates().ra().getDegrees() << " deg\n"
       " dec.=" << archive->get_coordinates().dec().getDegrees() << " deg"
 	 << endl;
 
+  if (coord.ra() == 0 && coord.dec() == 0)
+  {
+    coord = archive->get_coordinates();
+    if (Integration::verbose)
+      cerr << "Pulsar::Pointing::update using parent coordinates=" << coord << endl;
 
-  Horizon horizon;
+    set_right_ascension(coord.ra());
+    set_declination(coord.dec());
+  }
 
-  horizon.set_source_coordinates( coord );
-  horizon.set_observatory_latitude( telescope->get_latitude().getRadians() );
-  horizon.set_observatory_longitude( telescope->get_longitude().getRadians() );
-  horizon.set_epoch( subint->get_epoch() );
+  Mount* mount = mount_factory (telescope->get_mount());
+  if (!mount)
+  {
+    if (Integration::verbose)
+      cerr << "Pulsar::Pointing::update no Mount for Telescope - update aborted" << endl;
+    return;
+  }
 
-  double rad2sec = 3600.0*12.0/M_PI;
-  set_local_sidereal_time( horizon.get_local_sidereal_time()*rad2sec );
-  set_telescope_azimuth( horizon.get_azimuth() );
-  set_telescope_zenith( horizon.get_zenith() );
-  set_parallactic_angle( horizon.get_parallactic_angle() );
+  if (Integration::verbose)
+    cerr << "Pulsar::Pointing::update using observatory"
+            " latitude=" << telescope->get_latitude() <<
+            " longitude=" << telescope->get_longitude() << endl;
 
-  set_position_angle( get_feed_angle() + get_parallactic_angle() );
+  mount->set_source_coordinates( coord );
+  mount->set_observatory_latitude( telescope->get_latitude().getRadians() );
+  mount->set_observatory_longitude( telescope->get_longitude().getRadians() );
+  mount->set_epoch( subint->get_epoch() );
+
+  if (Integration::verbose)
+    cerr << "Pulsar::Pointing::update LST=" << mount->get_local_sidereal_time() << " rad" << endl;
+
+  local_sidereal_time = Estimate<double>( mount->get_local_sidereal_time(), 1.0 );
+
+  Directional* directional = dynamic_cast<Directional*> (mount);
+  if (!directional)
+  {
+    if (Integration::verbose)
+      cerr << "Pulsar::Pointing::update Mount for Telescope is not Directional - parallactic angle not updated" << endl;
+  }
+  else
+  {
+    set_parallactic_angle( directional->get_parallactic_angle() );
+    set_position_angle( get_feed_angle() + get_parallactic_angle() );
+  }
+
+  Horizon* horizon = dynamic_cast<Horizon*> (mount);
+  if (!horizon)
+  {
+    if (Integration::verbose)
+      cerr << "Pulsar::Pointing::update Mount for Telescope is not Horizon - az and zen not updated" << endl;
+  }
+  else
+  {
+    set_telescope_azimuth( horizon->get_azimuth() );
+    set_telescope_zenith( horizon->get_zenith() );
+  }
 
   if (Integration::verbose)
     cerr << "Pulsar::Pointing::update after:\n"  
@@ -265,7 +316,7 @@ void Pulsar::Pointing::integrate (const Integration* subint)
   }
 
   if (Integration::verbose)
-    cerr << "Pulsar::Pointing::integrate other Pointing" << endl;
+    cerr << "Pulsar::Pointing::integrate that Pointing" << endl;
 
   operator += (*useful);
 }

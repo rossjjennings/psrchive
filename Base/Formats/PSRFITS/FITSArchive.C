@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -30,6 +31,7 @@
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibrationInterpolatorExtension.h"
+#include "Pulsar/ConfigurableProjectionExtension.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/CoherentDedispersion.h"
 #include "Pulsar/SpectralKurtosis.h"
@@ -41,6 +43,7 @@
 #include "Pulsar/ThresholdMatch.h"
 
 #include "Pulsar/Predictor.h"
+#include "Pulsar/psrchive.h"
 
 #include "psrfitsio.h"
 #include "strutil.h"
@@ -49,11 +52,18 @@
 
 using namespace std;
 
-//! null constructor
-// //////////////////////////
-// //////////////////////////
+Pulsar::Option<bool> Pulsar::FITSArchive::search_mode_warning
+(
+ "PSRFITS::search_mode_warning", true,
 
+ "Print a warning when loading a SEARCH-mode PSRFITS file [boolean]",
 
+ "PSRCHIVE does not load SEARCH-mode time series data; however, it can \n"
+ "be used to query the metadada from a SEARCH-mode file.  By default, \n"
+ "a warning message is printed with a pointer to further information. "
+);
+
+//! Initialize attributes to default values
 void Pulsar::FITSArchive::init ()
 {
   psrfits_version = 0.0;
@@ -366,8 +376,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     search_mode = true;
     set_type ( Signal::Unknown );
-    if (verbose > 2)
-      cerr << "FITSArchive::load_header search mode file" << endl;
+    if (search_mode_warning)
+      warning << "FITSArchive::load_header WARNING data are not loaded from SEARCH-mode PSRFITS files.\n"
+	         "See " PSRCHIVE_HTTP "/manuals/psrfits for more information." << endl;
   }
   else
   {
@@ -740,7 +751,10 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   
   // Load the calibration interpolator
   load_CalibrationInterpolatorExtension (read_fptr);
-  
+
+  // Load the configurable projection
+  load_ConfigurableProjectionExtension (read_fptr);
+ 
   // Load the parameters from the SUBINT HDU
   load_FITSSUBHdrExtension( read_fptr );
 
@@ -756,7 +770,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   // Load the pulse phase predictor
   load_Predictor (read_fptr);
-  hdr_model = model;
+
+  if (has_model())
+    hdr_model = get_model();
 
   if (correct_P236_reference_epoch)
     P236_reference_epoch_correction ();
@@ -1007,7 +1023,7 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     if (ext)
     {
       if (verbose > 2)
-	cerr << "FITSArchive::unload WidebandCorrelator extension" << endl;
+        cerr << "FITSArchive::unload WidebandCorrelator extension" << endl;
       unload (fptr, ext);
     }
   }
@@ -1018,11 +1034,11 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     if (backend)
     {
       if (verbose > 2)
-	cerr << "FITSArchive::unload " << backend->get_extension_name()
-	     << " BACKEND=" << backend->get_name() 
-	     << " BE_DCC=" << backend->get_downconversion_corrected()
-	     << " BE_PHASE=" << backend->get_argument() 
-	     << " BE_DELAY=" << backend->get_delay() << endl;
+        cerr << "FITSArchive::unload " << backend->get_extension_name()
+            << " BACKEND=" << backend->get_name() 
+            << " BE_DCC=" << backend->get_downconversion_corrected()
+            << " BE_PHASE=" << backend->get_argument() 
+            << " BE_DELAY=" << backend->get_delay() << endl;
       
       psrfits_update_key (fptr, "BACKEND",  backend->get_name());
       
@@ -1115,7 +1131,6 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   // order that they appear in the psrheader.fits template
   //
   // /////////////////////////////////////////////////////////////////
-  
 
   // Unload some of the other HDU's
   
@@ -1130,6 +1145,8 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   unload <PolnCalibratorExtension> (fptr, "FEEDPAR");
 
   unload <CalibrationInterpolatorExtension> (fptr, "PCMINTER");
+
+  unload <ConfigurableProjectionExtension> (fptr, "CFGPROJ");
 
   unload <CrossCovarianceMatrix> (fptr, "COV_MAT");
 

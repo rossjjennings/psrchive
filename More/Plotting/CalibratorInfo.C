@@ -9,9 +9,11 @@
 
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorStokesInfo.h"
+#include "Pulsar/CorrelationInfo.h"
 #include "Pulsar/SolverInfo.h"
 #include "Pulsar/IXRInfo.h"
 #include "Pulsar/ConstantGainInfo.h"
+#include "Pulsar/ConfigurableProjectionInfo.h"
 
 #include "Pulsar/Archive.h"
 
@@ -22,22 +24,20 @@ using namespace std;
 
 Pulsar::CalibratorInfo::CalibratorInfo ()
 {
-  // reserve 5% of the viewport height for space between panels
-  between_panels = 0.05;
-
-  calibrator_stokes = false;
-  calibrator_stokes_degree = false;
-  reduced_chisq = false;
-  intrinsic_crosspol_ratio = false;
-  constant_gain = false;
-
-  outlier_threshold = 0.0;
   subint.set_integrate( true );
 }
 
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
 {
-  DEBUG("Pulsar::CalibratorInfo::prepare");
+  if (Plot::verbose)
+    cerr << "Pulsar::CalibratorInfo::prepare data=" << data << " prepared=" << prepared << endl;
+
+  if (data == prepared)
+  {
+    if (Plot::verbose)
+      cerr << "Pulsar::CalibratorInfo::prepare already prepared for this Archive" << endl;
+    return;
+  }
 
   Calibrator::Info* info = 0;
 
@@ -48,6 +48,9 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     stokes->set_degree (calibrator_stokes_degree);
     info = stokes;
   }
+
+  else if (correlation != -1)
+    info = new CorrelationInfo (correlation, new PolnCalibrator(data));
   
   else if (reduced_chisq)
     info = new SolverInfo (new PolnCalibrator(data));
@@ -58,8 +61,20 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
   else if (constant_gain)
     info = new ConstantGainInfo (new FluxCalibrator(data));
 
+  else if (configurable_projection)
+  {
+    auto ext = data->get<ConfigurableProjectionExtension>();
+    if (!ext)
+      throw Error (InvalidParam, "Pulsar::CalibratorInfo::prepare", 
+                   "archive has no ConfigurableProjectionExtension");
+
+    auto projection = new ConfigurableProjection (ext);
+    info = new ConfigurableProjection::Info (projection);
+  }
   else
+  {
     info = CalibratorParameter::get_Info (data, subint, outlier_threshold);
+  }
 
   get_frame()->get_label_above()->set_centre("$file\n"+info->get_title());
 
@@ -106,7 +121,8 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     plot->set_managed (true);
     plot->set_class (jclass);
 
-    DEBUG("Pulsar::CalibratorInfo::prepare call CalibratorParameter::prepare");
+    if (Plot::verbose)
+      cerr << "Pulsar::CalibratorInfo::prepare call CalibratorParameter::prepare plot=" << (void*)plot.get() << " info=" << info << endl;
 
     plot->prepare (info, data);
 
@@ -144,8 +160,14 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     }
   }
 
+  if (Plot::verbose)
+    cerr << "Pulsar::CalibratorInfo::prepare get_scale()->set_minmax" << endl;
   get_scale()->set_minmax (xmin, xmax);
 
+  if (Plot::verbose)
+    cerr << "Pulsar::CalibratorInfo::prepare done" << endl;
+
+  prepared = data;
 }
 
 void Pulsar::CalibratorInfo::set_calibrator_stokes_degree (bool x)
@@ -185,10 +207,18 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
        &CalibratorInfo::set_calibrator_stokes,
        "cal", "Plot the calibrator Stokes parameters" );
 
+  add( &CalibratorInfo::get_configurable_projection,
+       &CalibratorInfo::set_configurable_projection,
+       "proj", "Plot the configurable projection parameters" );
+
   add( &CalibratorInfo::get_calibrator_stokes_degree,
        &CalibratorInfo::set_calibrator_stokes_degree,
        "calp", "Plot calibrator Stokes parameters w/ degree of polarization" );
 
+  add( &CalibratorInfo::get_correlation,
+       &CalibratorInfo::set_correlation,
+       "corr", "Plot the correlations of the specified parameter index" );
+       
   add( &CalibratorInfo::get_reduced_chisq,
        &CalibratorInfo::set_reduced_chisq,
        "gof", "Plot the model goodness-of-fit" );

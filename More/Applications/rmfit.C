@@ -41,6 +41,7 @@ void usage ()
     "  -T sigma_L    Set the threshold used to select bins (default: " << selection_threshold << " sigma) \n"
     "  -P paas.m     Perform RM refinement for each profile component in model \n"
     "  -b [+/-][i-k] Include/exclude phase bins i through k (inclusive) \n"
+    "  -x ext        Set int:aux:rm and unload with new extension \n"
     "\n"
     "Quadratic fitting algorithm (Noutsos et al. 2008) options: \n"
     "\n"
@@ -167,13 +168,19 @@ void do_refine(Pulsar::Archive* data,
 
 Reference::To<Pulsar::Archive> get_data (string archive_filename);
 
-double do_maxmthd(double minrm,double maxrm,unsigned rmsteps, Pulsar::Archive* data);
+double do_maxmthd(double minrm,double maxrm,unsigned rmsteps, const Pulsar::Archive* data);
 
 // The polarization statistics estimator used by do_maxmthd
 Reference::To<Pulsar::PolnProfileStats> poln_stats;
 
 // prints various numbers out to file
 void rmresult (Pulsar::Archive* archive, const Estimate<double>& rm, unsigned used);
+
+// write out a new file with the aux:rm extension set in each sub-integration
+void unload_auxrm(Pulsar::Archive* data);
+
+// update the RM in either the header or the sub-integration aux:rm
+void update_rm(Archive* data, unsigned isubint, double new_rm);
 
 static bool display = false;
 
@@ -201,6 +208,10 @@ static bool squared = false;
 // do not tscrunch and compute RM for each sub-integration
 // setting the aux:rm with the result
 static bool set_auxrm = false;
+static std::string new_auxrm_ext;
+
+// search for maximum linear polarization as a function of trial RM
+static bool maxmthd = false;
 
 int main (int argc, char** argv)
 {
@@ -210,7 +221,6 @@ int main (int argc, char** argv)
   bool window = false;
 
   bool refine  = false;
-  bool maxmthd = false;
 
   minrm = -1000.0;
   maxrm = 1000.0;
@@ -260,7 +270,7 @@ int main (int argc, char** argv)
   // estimate an unique RM for each component in the model
   Reference::To<Pulsar::ComponentModel> component_model;
 
-  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Ll:m:M:p:P:rR:sS:T:tu:U:vVw:WxYz:";
+  const char* args = "a:A:b:B:c:C:DeF:hi:j:JK:Ll:m:M:p:P:rR:sS:T:tu:U:vVw:Wx:Yz:";
 
   int gotc = 0;
 
@@ -479,6 +489,7 @@ int main (int argc, char** argv)
 
     case 'x':
       set_auxrm = true;
+      new_auxrm_ext = optarg;
       break;
 
     case 'Y':
@@ -486,7 +497,7 @@ int main (int argc, char** argv)
       if (fin)
       {
         fin.close();
-        system("rm -f QUVflux.out");
+        unlink("QUVflux.out");
       }
       
       break;
@@ -612,9 +623,10 @@ int main (int argc, char** argv)
           data -> fscrunch(fscr);
       }
 
-      cerr << endl << endl
-          << "Number of frequency channels = " << data -> get_nchan() 
-          << endl << endl;
+      if (nfscr > 1)
+        cerr << endl << endl
+             << "Number of frequency channels = " << data -> get_nchan() 
+             << endl << endl;
 
       for(unsigned ibscr=0; ibscr<nbscr+1; ibscr++)
       {
@@ -646,19 +658,25 @@ int main (int argc, char** argv)
         {
           double best_rm = do_maxmthd (minrm, maxrm, rmsteps, data);
 
-          data->set_rotation_measure (best_rm);
+          if (verbose)
+            cerr << "rmfit: do_maxmthd best_rm=" << best_rm << endl;
 
-          if( verbose )
-            fprintf(stderr,"Completed do_maxmthd and got out best_rm=%f\n",
-              best_rm);
+          // do_maxmthd currently works on only the first sub-integration
+          unsigned isubint = 0;
+          update_rm(data, isubint, best_rm);
 
-          if( !refine )
+          if (!refine)
+          {
+            if (set_auxrm)
+            {
+              unload_auxrm (data);
+            }          
             continue;
+          }
         }
 
-        if( verbose )
-          fprintf(stderr,"Continuing with specialist methods\n");
-
+        if (verbose)
+          cerr << "rmfit: continuing with specialist methods" << endl;
 
         if (component_model)
         {
@@ -681,29 +699,13 @@ int main (int argc, char** argv)
 
           if (set_auxrm)
           {
-            std::string filename = data->get_filename();
-            filename += ".auxrmfit";
-
-            cerr << "rmfit: unloading " << filename << " with auxiliary RM set for each sub-integration" << endl;
-            data->unload(filename);
-
-            filename += ".psh";
-            cerr << "rmfit: unloading " << filename << " with psrsh commands that set auxiliary RM set for each sub-integration" << endl;
-            std::ofstream out (filename.c_str());
-            unsigned nsubint = data->get_nsubint();
-            for (unsigned isubint = 0; isubint < nsubint; isubint++)
-            {
-              Integration* subint = data->get_Integration(isubint);
-              auto aux = subint->get<AuxColdPlasmaMeasures>();
-              assert (aux != nullptr);
-              double auxRM = aux->get_rotation_measure();
-              out << "int[" << isubint << "]:aux:rm=" << auxRM << endl;
-            }
+            unload_auxrm (data);
           }
 
           continue;
         }
-        catch (Error& error) { 
+        catch (Error& error)
+        {
           cerr << "rmfit: Error during refine" << error << endl; 
           return -1;
         } 
@@ -776,15 +778,12 @@ int main (int argc, char** argv)
 
     fbscr_RMs_var /= float(fbscr_RMs.size()-1);
     fbscr_RMs_var = sqrt(fbscr_RMs_var);
-
-
-
   }
   catch (Error& error)
-    { 
-      cerr << error << endl;
-      continue;
-    }
+  {
+    cerr << error << endl;
+    continue;
+  }
 
   if (mtm_std)
     return 0;
@@ -869,6 +868,48 @@ int main (int argc, char** argv)
 
 // defined in width.C
 float width (const Pulsar::Profile* profile, float& error, float pc, float dc);
+
+void update_rm(Archive* data, unsigned isubint, double new_rm)
+{
+  if (set_auxrm)
+  {
+    Integration* subint = data->get_Integration(isubint);
+    auto aux = subint->getadd<AuxColdPlasmaMeasures>();
+
+    double dRM = new_rm - data->get_rotation_measure();
+    double auxRM = aux->get_rotation_measure();
+
+    aux->set_rotation_measure(auxRM + dRM);
+
+    cerr << "rmfit: set_auxrm header RM=" << data->get_rotation_measure() << " dRM=" << dRM << " int[" << isubint << "]:aux:rm=" << auxRM << " new aux:rm=" << auxRM+dRM << endl;
+  }
+  else
+  {
+    data->set_rotation_measure (new_rm);
+  }
+}
+
+void unload_auxrm(Archive* data)
+{           
+  std::string filename = replace_extension(data->get_filename(), new_auxrm_ext);
+  cerr << "rmfit: unloading " << filename << " with auxiliary RM set for each sub-integration" << endl;
+  data->unload(filename);
+
+  filename += ".psh";
+  cerr << "rmfit: unloading " << filename << " with psrsh commands that set auxiliary RM set for each sub-integration" << endl;
+  std::ofstream out (filename.c_str());
+  unsigned nsubint = data->get_nsubint();
+  for (unsigned isubint = 0; isubint < nsubint; isubint++)
+  {
+    Integration* subint = data->get_Integration(isubint);
+    auto aux = subint->get<AuxColdPlasmaMeasures>();
+    if (aux)
+    {
+      double auxRM = aux->get_rotation_measure();
+      out << "int[" << isubint << "]:aux:rm=" << auxRM << endl;
+    }
+  }
+}
 
 void rmresult (Pulsar::Archive* archive,
 	       const Estimate<double>& rm, unsigned used)
@@ -1102,18 +1143,28 @@ Reference::To<Pulsar::Archive> get_data(string filename)
   data -> convert_state(Signal::Stokes);
   data -> dedisperse();
 
-  if (!set_auxrm)
+  if (maxmthd)
+  {
     data -> tscrunch();
-
+    Integration* subint = data->get_Integration(0);
+    auto aux = subint->get<AuxColdPlasmaMeasures>();
+    if (aux)
+    {
+      double auxRM = aux->get_rotation_measure();
+      cerr << "rmfit: setting auxiliary RM=" << auxRM << " to zero" << endl;
+      aux->set_rotation_measure(0);
+    }
+  }
   data -> remove_baseline();
   return data;
 }
 
-double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive* data)
+double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, const Pulsar::Archive* original_data)
 {
   if (auto_maxmthd)
   {
     // compute the maximum (and minimum) measurable rotation measure ...
+    const Pulsar::Archive* data = original_data;
 
     // centre frequency in Hz
     double nu = data->get_centre_frequency () * 1e6;
@@ -1202,7 +1253,9 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive
 
   float rmstepsize = (maxrm-minrm)/float(rmsteps-1);
 
-  Reference::To<Pulsar::Archive> backup = data->clone();
+  // use the same off-pulse baseline phase bins for all trial RM values
+  Reference::To<Pulsar::Archive> total = original_data->total();
+  poln_stats->select_profile( total->get_Integration(0)->get_Profile(0,0) );
 
   double max_snr = 0.0;
   double max_L = 0.0;
@@ -1219,6 +1272,8 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive
       Wvs, 26 September 2007: Then again, perhaps round-off error
       can build up over many iterations.
     */
+
+    Reference::To<Archive> data = original_data->clone();
     
     data->set_rotation_measure( rm );
     data->defaraday ();
@@ -1249,8 +1304,6 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive
       profile->get_linear (&linear);
       max_snr = linear.snr();
     }
-    
-    data = backup->clone();
   }
   
   ofstream os ("rm_spectrum.txt");
@@ -1268,7 +1321,7 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive
 
     for( unsigned i=0; i<rms.size(); i++){
       if( fluxes[i]-err[i] < ymin )
-	ymin = fluxes[i]-err[i];
+        ymin = fluxes[i]-err[i];
       if( fluxes[i]+err[i] > ymax )
 	ymax = fluxes[i]+err[i];
     }
@@ -1298,7 +1351,6 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps, Pulsar::Archive
   }
 
 #endif
-
 
   unsigned index = max_element(fluxes.begin(), fluxes.end()) - fluxes.begin();
   assert (index < fluxes.size());
@@ -1562,27 +1614,12 @@ void do_refine (Pulsar::DeltaRM& delta_rm,
       cerr << "Getting old ... try mean of last two = " << new_RM << endl;
     }
 
-    if (set_auxrm)
-    {
-      unsigned isubint = delta_rm.get_subint();
-      Integration* subint = data->get_Integration(isubint);
-      auto aux = subint->getadd<AuxColdPlasmaMeasures>();
-
-      double dRM = new_RM - data->get_rotation_measure();
-      double auxRM = aux->get_rotation_measure();
-      aux->set_rotation_measure(auxRM + dRM);
-
-      cerr << "rmfit: set_auxrm header RM=" << data->get_rotation_measure() << " new RM=" << new_RM << " int[" << isubint << "]:aux:rm=" << auxRM << " new aux:rm=" << auxRM+dRM << endl;
-    }
-    else
-    {
-      data->set_rotation_measure (new_RM);
-    }
+    unsigned isubint = delta_rm.get_subint();
+    update_rm(data, isubint, new_RM);
   }
 
   cerr << "rmfit: converged in " << iterations << " iterations" << endl;
-  cerr << "       final rotation measure = " 
-       << delta_rm.get_rotation_measure() << endl;
+  cerr << "       final rotation measure = " << new_rm.get_value() << endl;
 
   if (log_results)
     rmresult (data, delta_rm.get_rotation_measure(), delta_rm.get_used_bins());

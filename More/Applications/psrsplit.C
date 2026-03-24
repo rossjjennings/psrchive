@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009-2011 by Willem van Straten, Stefan Oslowski
+ *   Copyright (C) 2009 - 2026 by Willem van Straten, Stefan Oslowski
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -91,6 +91,9 @@ void psrsplit::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (cal_extensions, "cal");
   arg->set_help ("split calibration-related extensions");
+
+  arg = menu.add (Pulsar::Profile::rotate_phase_enabled, "const_phase");
+  arg->set_help ("Leave profile amplitudes alone, but update metadata");
 }
 
 void psrsplit::setup ()
@@ -148,11 +151,6 @@ void psrsplit::process (Pulsar::Archive* archive)
   unsigned isub=0;
   unsigned ichan=0;
 
-  Pulsar::Dispersion correction;
-  bool was_dedispersed = archive->get_dedispersed () ;
-  if ( was_dedispersed && nchannel > 0 )
-    correction.revert (archive);
-
   while( isub < nsub )
   {
     cerr << "psrsplit: extracting";
@@ -201,10 +199,20 @@ B) after deleting these sub-integrations, the Archive tries to reload them
           sub_chan_archive->remove_chan (ichan, nchan - 1);
         if ( ichan - nchannel > 0 )
           sub_chan_archive->remove_chan (0, ichan - nchannel - 1 );
-        if ( was_dedispersed )
-          sub_chan_archive->dedisperse ();
         if (sub_chan_archive->has_model() && archive->get_type() == Signal::Pulsar)
-            sub_chan_archive->update_model ();
+          sub_chan_archive->update_model ();
+      }
+
+      if (sub_chan_archive->get_dedispersed())
+      {
+        // correct dispersive delays with respect to the new centre frequency
+        sub_chan_archive->dedisperse();
+      }
+
+      if (sub_chan_archive->get_faraday_corrected())
+      {
+        // correct Faraday rotation with respect to the new centre frequency
+        sub_chan_archive->defaraday();
       }
 
       string ext;
@@ -285,10 +293,9 @@ void psrsplit::split_cal_extensions (Pulsar::Archive* archive)
     cerr << "psrsplit: writing " << filename << endl;
 
     output->expert()->set_nchan (nchannel);
-
-    output->set_dedispersed (false);
     output->set_bandwidth (bw);
     output->set_centre_frequency (cf);
+    output->set_dedispersed (false);
 
     // overcome the historical vagaries of OBSFREQ and OBSBW
     FITSHdrExtension* hdr = output->get<FITSHdrExtension> ();

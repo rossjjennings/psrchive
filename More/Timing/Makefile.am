@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libTiming.la
 
 nobase_include_HEADERS = \
 	Pulsar/ArrivalTime.h \
+  Pulsar/HasMaxHarmonic.h \
 	Pulsar/MeanArrivalTime.h \
 	Pulsar/ShiftEstimator.h \
 	Pulsar/ProfileShiftEstimator.h \

@@ -48,7 +48,7 @@ namespace Calibration {
 		     const Stokes<double>& variance);
 
     //! Set the measured complex Stokes parameters and the variance function
-    void set_stokes (const Stokes< std::complex<double> >& stokes, const Uncertainty*);
+    void set_stokes (const Stokes< std::complex<double> >& stokes, Uncertainty*);
 
     //! Get the number of constraints provided by this measurement
     unsigned get_nconstraint () const;
@@ -68,8 +68,7 @@ namespace Calibration {
     //! Given a coherency matrix, return the weighted conjugate matrix
     Jones<double> get_weighted_conjugate (const Jones<double>& matrix) const;
 
-    void get_weighted_components (const Jones<double>&,
-				  std::vector<double>& components) const;
+    void get_weighted_components (const Jones<double>&, std::vector<double>& components) const;
 
     //! The uncertainty of the measurement
     const Uncertainty* get_uncertainty () const { return uncertainty; }
@@ -79,6 +78,10 @@ namespace Calibration {
 
     //! Apply the independent variables
     void set_coordinates () const;
+
+    //! Multiply the coherency matrix measurement by a scalar
+    /*! The variance is scaled by the square of the scalar. */
+    void scale (double);
 
   protected:
 
@@ -98,7 +101,7 @@ namespace Calibration {
     Stokes<double> variance;
 
     //! The uncertainty of the measurement
-    Reference::To<const Uncertainty> uncertainty;
+    Reference::To<Uncertainty> uncertainty;
 
   };
 
@@ -114,24 +117,18 @@ namespace Calibration {
     virtual void add (const Uncertainty*) = 0;
     
     //! Given a coherency matrix, return the weighted norm
-    virtual 
-    double
-    get_weighted_norm (const Jones<double>&) const = 0;
+    virtual double get_weighted_norm (const Jones<double>&) const = 0;
     
     //! Given a coherency matrix, return the weighted conjugate matrix
-    virtual 
-    Jones<double>
-    get_weighted_conjugate (const Jones<double>&) const = 0;
+    virtual Jones<double> get_weighted_conjugate (const Jones<double>&) const = 0;
 
-    virtual 
-    Stokes< std::complex<double> > 
-    get_weighted_components (const Jones<double>&) const = 0;
+    virtual Stokes<std::complex<double>> get_weighted_components (const Jones<double>&) const = 0;
 
     //! Return the variance of each Stokes parameter
-    virtual
-    Stokes< std::complex<double> >
-    get_variance () const = 0;
+    virtual Stokes<std::complex<double>> get_variance () const = 0;
 
+    //! Scale the uncertainty by the square of a scalar
+    virtual void scale (double) = 0;
   };
 }
 

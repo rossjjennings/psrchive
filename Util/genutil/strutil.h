@@ -29,13 +29,15 @@
 //! Return true if every character in string is printable
 bool printable (const std::string& s);
 
-// returns the filename without its path
+//! returns the filename without its path
 std::string basename (const std::string& filename);
-// returns the path preceding a filename
-std::string pathname (const std::string& filename);
-//! a simple command for replacing the extension on a filename
+
+//! returns the path preceding a filename
+std::string dirname (const std::string& filename);
+
+//! replace the extension on a filename
 std::string replace_extension (const std::string& filename, 
-			       const std::string& extension);
+			       const std::string& new_extension);
 
 //! a simple command for returning a user friendly time std::string
 std::string time_string (double seconds);

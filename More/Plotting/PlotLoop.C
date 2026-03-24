@@ -169,7 +169,7 @@ void Pulsar::PlotLoop::set_colour_index (Plot* plot, unsigned colour_index)
     return;
   }
 
-  TextInterface::Parser* parser = plot->get_interface ();
+  Reference::To<TextInterface::Parser> parser = plot->get_interface ();
   if (parser)
   {
     bool throw_exception = false;

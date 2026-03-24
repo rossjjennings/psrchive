@@ -4,7 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "MEAL/Polynomial.h"
+
+ #include "MEAL/Polynomial.h"
 
 #include "stringtok.h"
 #include "tostring.h"
@@ -63,6 +64,11 @@ void MEAL::Polynomial::resize (unsigned ncoef)
 string MEAL::Polynomial::get_name () const
 {
   return "Polynomial";
+}
+
+void MEAL::Polynomial::set_param_name (unsigned icoeff, const std::string& name)
+{
+  parameters.set_name (icoeff, name);
 }
 
 void MEAL::Polynomial::parse (const string& line)
@@ -143,4 +149,27 @@ void MEAL::Polynomial::calculate (double& result, std::vector<double>* grad)
     }
   }
 
+}
+
+#include "MEAL/FunctionInterface.h"
+
+class MEAL::Polynomial::Interface : public Function::Interface<MEAL::Polynomial>
+{
+  public:
+    //! Default constructor that takes an optional instance
+    Interface ( Polynomial* = 0 );
+};
+
+MEAL::Polynomial::Interface::Interface ( Polynomial* s_instance )
+: Function::Interface<MEAL::Polynomial> ( s_instance )
+{
+  add( &Polynomial::get_ncoef,
+       &Polynomial::set_ncoef,
+       "ncoef", "Number of coefficients" );
+}
+
+//! Return a text interface that can be used to access this instance
+TextInterface::Parser* MEAL::Polynomial::get_interface ()
+{
+  return new Interface (this);
 }

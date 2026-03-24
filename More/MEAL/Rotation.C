@@ -13,6 +13,11 @@ using namespace std;
 
 MEAL::Rotation::Rotation ()
 {
+  init();
+}
+
+void MEAL::Rotation::init()
+{
   Parameters* params = new Parameters (this, 3);
 
   for (unsigned i=0; i<3; i++)
@@ -22,18 +27,24 @@ MEAL::Rotation::Rotation ()
     string name = "r_" + index;
 
     if (very_verbose)
-      cerr << "MEAL::Rotation::Rotation name[" << i << "]=" << name << endl;
+      cerr << "MEAL::Rotation::init name[" << i << "]=" << name << endl;
 
     params->set_name (i, name);
 
     string description = "rotation axis_" + index + " times angle (radians)";
 
     if (very_verbose)
-      cerr << "MEAL::Rotation::Rotation description[" << i << "]=" 
+      cerr << "MEAL::Rotation::init description[" << i << "]=" 
            << description << endl;
 
     params->set_description (i, description);
   }
+}
+
+MEAL::Rotation::Rotation (const Vector<3,double>& axis, double angle)
+{
+  init();
+  set_axis_angle (axis,angle);
 }
 
 //! Return the name of the class
@@ -42,7 +53,7 @@ string MEAL::Rotation::get_name () const
   return "Rotation";
 }
 
-Vector<3, double> MEAL::Rotation::get_vector () const
+Vector<3,double> MEAL::Rotation::get_vector () const
 {
   Vector<3, double> vect;
   for (unsigned i=0; i<3; i++)
@@ -51,7 +62,7 @@ Vector<3, double> MEAL::Rotation::get_vector () const
 }
 
 //! Get the unit-vector along which the rotation occurs
-Vector<3, double> MEAL::Rotation::get_axis () const
+Vector<3,double> MEAL::Rotation::get_axis () const
 {
   Vector<3, double> vect = get_vector();
   double mod = sqrt (vect * vect);
@@ -59,6 +70,23 @@ Vector<3, double> MEAL::Rotation::get_axis () const
     vect /= mod;
 
   return vect;
+}
+
+//! Set the unit-vector along which the rotation occurs and the angle in radians
+void MEAL::Rotation::set_axis_angle (Vector<3,double> axis, double angle) 
+{
+  // ensure that axis is a unit vector
+  double mod = sqrt (axis * axis);
+  if (mod != 0.0)
+    axis /= mod;
+
+  set_vector (angle * axis);
+}
+
+void MEAL::Rotation::set_vector (const Vector<3,double>& vect)
+{
+  for (unsigned i=0; i<3; i++)
+    set_param(i, vect[i]);
 }
 
 double MEAL::Rotation::get_phi () const
@@ -115,12 +143,11 @@ void MEAL::Rotation::calculate (Jones<double>& result,
     
   }
   
-  if (verbose) {
+  if (verbose)
+  {
     cerr << "MEAL::Rotation::calculate gradient" << endl;
     for (unsigned i=0; i<3; i++)
       cerr << "   " << (*grad)[i] << endl;
   }
-
 }
-
 

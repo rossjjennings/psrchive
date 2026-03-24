@@ -39,7 +39,7 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
 }
 
 //! Return the name of the specified class
-std::string Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
+std::string Pulsar::CalibratorStokesInfo::get_label (unsigned iclass) const
 {
   // degree of polarization
   if (degree && iclass == 3)

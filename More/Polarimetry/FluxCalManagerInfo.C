@@ -72,7 +72,7 @@ unsigned Pulsar::FluxCalManagerInfo::get_nclass () const
 }
 
 //! Return the name of the specified class
-std::string Pulsar::FluxCalManagerInfo::get_name (unsigned iclass) const
+std::string Pulsar::FluxCalManagerInfo::get_label (unsigned iclass) const
 {
   string label = "\\fiS'\\b\\d\\fr";
 

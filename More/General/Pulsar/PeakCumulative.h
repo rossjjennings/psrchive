@@ -12,10 +12,9 @@
 #define __Pulsar_PeakCumulative_h
 
 #include "Pulsar/RiseFall.h"
+#include "Pulsar/HasBaselineEstimator.h"
 
 namespace Pulsar {
-
-  class BaselineEstimator;
 
   //! Find the edges of a pulse
   /*!
@@ -47,7 +46,8 @@ namespace Pulsar {
     
   */
 
-  class PeakCumulative : public RiseFall {
+  class PeakCumulative : public RiseFall, public HasBaselineEstimator
+  {
 
   public:
 
@@ -70,11 +70,7 @@ namespace Pulsar {
     bool get_choose () const;
 
     //! Set the BaselineEstimator used to find the off-pulse phase bins
-    void set_baseline_estimator (BaselineEstimator*);
-
-    //! Get the BaselineEstimator used to find the off-pulse phase bins
-    const BaselineEstimator* get_baseline_estimator () const;
-    BaselineEstimator* get_baseline_estimator ();
+    void set_baseline_estimator (ProfileWeightFunction*) override;
 
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);
@@ -114,10 +110,6 @@ namespace Pulsar {
     int bin_rise;
     int bin_fall;
     bool choose;
-
-    //! The BaselineEstimator used to find the off-pulse phase bins
-    Reference::To<BaselineEstimator> baseline_estimator;
-
   };
 
 }

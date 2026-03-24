@@ -1,21 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2011 by Willem van Straten
+ *   Copyright (C) 2003-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#if 1
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Interpreter.h"
-#else
-#include "Pulsar/Application.h"
-#include "Pulsar/StandardOptions.h"
-#include "Pulsar/UnloadOptions.h"
-#endif
 
 #include "Pulsar/CalibratorTypes.h"
-
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
 
@@ -34,6 +27,11 @@
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/ProjectionCorrection.h"
+
+#include "Pulsar/ConfigurableProjectionExtension.h"
+#include "Pulsar/ConfigurableProjection.h"
+#include "Pulsar/VariableTransformationFile.h"
+
 #include "Pulsar/ReflectStokes.h"
 #include "Pulsar/BackendFeed.h"
 #include "Pulsar/VariableBackend.h"
@@ -52,16 +50,23 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGghiIJ:j:K:k:lLM:m:Nn:O:op:PqQ:Rr:sSt:Tu:UvVwWxXyY:Z";
+const char* args = "A:aBbC:cDd:Ee:fFGghIiJ:j:K:k:LlM:m:Nn:O:oPp:Q:qRr:SsTt:Uu:VvWwXxY:yZ";
 
 void usage ()
 {
-  cout << "A program for calibrating Pulsar::Archives\n"
+  cout << "Calibrates polarization, based on the model described in van Straten (2025). \n"
+    "Where the instrumental response, M = Phi G D C P F (equation 43), \n"
+    "pac calibrates Phi G D C and P, where \n"
+    " Phi is the phase convention correction \n"
+    "   G is the complex receiver gain matrix \n"
+    "   D [optional] describes deviations from an ideal feed (enabled by -S) \n"
+    "   C is the nominal feed response \n"
+    "   P is the projection to the celestial sphere \n"
+    "\n"
     "Usage: pac [options] filenames\n"
     "  -q             Quiet mode\n"
     "  -v             Verbose mode\n"
     "  -V             Very verbose mode\n"
-    "  -i             Show revision information\n"
     "\n"
     "Database options: \n"
     "  -d database    Read calibration database summary \n"   
@@ -75,41 +80,44 @@ void usage ()
     "\n"
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
-    "  -Q filename    Use the Jones calibrator in filename \n"
-    "  -Y filename    Load projection transformations from file \n"
     "  -C model       Use the specified model of the calibrator solution \n"
-    "  -P             Calibrate polarisation only (not flux)\n"
-    "  -R             Calibrate the receiver (feed) only \n"
     "  -r filename    Use the specified receiver parameters file \n"
-    "  -S             Use the complete Reception model \n"
     "  -s             Use the Polar Model \n"
-    "  -I             Correct ionospheric Faraday rotation using IRI\n"
+    "  -I             Correct ionospheric Faraday rotation using IRI \n"
+    "  -i             Perform the inverse of calibration \n"
     "  -x             Derive calibrator Stokes parameters from fluxcal data\n"
     "  -y             Always trust the Pointing::feed_angle attribute \n"
-    "  -g             Fscrunch data to match number of channels of calibrator\n"
     "  -K sigma       Reject outliers when computing CAL levels \n"
+    "\n"
+    "Calibrator switches: \n"
+    "  -S             Enable calibration of D \n"
+    "  -N             Disable calibration of Phi (backend) \n"
+    "  -P             Disable absolute flux calibration \n"
+    "  -R             Disable calibration of G (applies only when -A is used) \n"
+    "  -X             Disable calibration of GD \n"
+    "  -U             Disable calibration of CP (frontend) \n"
+    "  -Q filename    Replace GD with the Jones matrices, J(t,f) in filename \n"
+    "  -Y filename    Replace P with the Jones matrices, J(t,f) in filename \n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
     "  -B             Fix the off-pulse baseline statistics \n"
     "  -D             Fix the reference degree of polarization \n"
     "\n"
     "Matching options: \n"
-    "  -m [b|a]       Use only calibrator before|after observation\n"
-    "  -T             Take closest time (no maximum interval)\n"
-    "  -c             Take closest sky coordinates (no maximum distance)\n"
-    "  -Z             Do not try to match instruments\n"
-    "  -F             Do not try to match frequencies\n"
-    "  -b             Do not try to match bandwidths\n"
-    "  -o             Allow opposite sidebands\n"
-    "  -a             Per-channel matching\n"
+    "  -m [b|a]       Use only calibrator before|after observation \n"
+    "  -T             Take closest time (no maximum interval) \n"
+    "  -c             Take closest sky coordinates (no maximum distance) \n"
+    "  -Z             Do not try to match instruments \n"
+    "  -F             Do not try to match frequencies \n"
+    "  -b             Do not try to match bandwidths \n"
+    "  -o             Allow opposite sidebands \n"
+    "  -a             Per-channel matching \n"
+    "  -g             Fscrunch data to match number of channels of calibrator \n"
     "  -L             Print verbose matching information \n"
     "\n"
-    "Expert options: \n"
-    "  -f             Override flux calibration flag\n"
+    "Experimental options: \n"
+    "  -f             Override flux calibration flag \n"
     "  -G             Normalize profile weights by absolute gain \n"
-    "  -N             Disable backend corrections \n"
-    "  -U             Disable frontend corrections (parallactic angle, etc)\n"
-    "  -X             Disable poln calibration \n"
     "\n"
     "Input/Output options: \n"
     "  -e ext         Extension added to output filenames (default .calib) \n"
@@ -119,12 +127,46 @@ void usage ()
     "  -n [q|u|v]     Flip the sign of Stokes Q, U, or V \n"
     "  -O path        Path to which output files are written \n"
     "\n"
-    "See " PSRCHIVE_HTTP "/manuals/pac for more details\n"
-       << endl;
+    "See " PSRCHIVE_HTTP "/manuals/pac for more details\n" << endl;
 }
 
 // cut down the calibrator solution to only the feed
 void keep_only_feed( Pulsar::PolnCalibrator* );
+
+// the database from which calibrators will be selected
+Reference::To<Database> dbase;
+
+// Combine pcal with fluxcal stokes into a new HybridCalibrator
+PolnCalibrator* get_hybrid_from_fluxcal (PolnCalibrator* pcal, const Archive* arch)
+{
+  ReferenceCalibrator* refcal = 0;
+  refcal = dynamic_cast<ReferenceCalibrator*> (pcal);
+  if (!refcal)
+    throw Error (InvalidState, "pcm",
+                 "PolnCalibrator is not a ReferenceCalibrator");
+
+  // Find appropriate fluxcal from DB
+  Reference::To<FluxCalibrator> flux_cal;
+  try
+  {
+    flux_cal = dbase->generateFluxCalibrator(arch);
+  }
+  catch (Error& error)
+  {
+    error << " -- closest match: \n\n"
+          << dbase->get_closest_match_report ();
+    throw error;
+  }
+
+  Reference::To<HybridCalibrator> hybrid_cal;
+  hybrid_cal = new HybridCalibrator;
+  hybrid_cal->set_reference_input( flux_cal->get_CalibratorStokes(),
+                                   flux_cal->get_filenames() );
+
+  hybrid_cal->set_reference_observation( refcal );
+
+  return hybrid_cal.release();
+}
 
 int main (int argc, char *argv[]) try
 {    
@@ -133,6 +175,8 @@ int main (int argc, char *argv[]) try
   bool do_polncal = true;
   bool do_backend = true;
   bool do_frontend = true;
+
+  bool do_calibration = true;
 
   bool use_fluxcal_stokes = false;
   bool fscrunch_data_to_cal = false;
@@ -217,13 +261,14 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'V':
-      verbose = true;
-      Archive::set_verbosity(3);
+      {
+        cerr << "pac: increasing verbosity" << endl;
+        verbose = true;
+        static unsigned verbosity = 2;
+        verbosity ++;
+        Archive::set_verbosity(verbosity);
+      }
       break;
-
-    case 'i':
-      cout << "$Id: pac.C,v 1.109 2011/02/17 07:43:53 straten Exp $" << endl;
-      return 0;
 
     case 'k':
       database_filename = optarg;
@@ -286,6 +331,16 @@ int main (int argc, char *argv[]) try
 
     case 'I':
       ionosphere = new IonosphereCalibrator;
+      break;
+
+    case 'i':
+      cerr << "pac: disabling calibration and inducing effects" << endl;
+      do_calibration = false;
+      do_fluxcal = false;
+      do_polncal = false;
+      do_backend = false;
+      do_frontend = false;
+      unload_ext = "sim";  // "simulated"
       break;
 
     case 'j':
@@ -500,9 +555,6 @@ int main (int argc, char *argv[]) try
   // the calibrator constructed from the specified archive
   Reference::To<PolnCalibrator> model_calibrator;
 
-  // the database from which calibrators will be selected
-  Reference::To<Database> dbase;
-
   if ( !model_file.empty() ) try
   {
     cerr << "pac: Loading calibrator from " << model_file << endl;
@@ -647,6 +699,18 @@ int main (int argc, char *argv[]) try
   if (feed)
     dbase -> set_feed (feed);
 
+  // If -Y is used to load "known projections" (e.g. as computed by dreamBeam)
+  Reference::To<ManualPolnCalibrator> known_projection;
+
+  // If the calibrator has a "configurable projection" it will incorporate the "known projections"
+  Reference::To<VariableTransformationFile> known_wrapper;
+
+  if ( ! projection_file.empty() )
+  {
+    cerr << "pac: Loading projection transformations from " << projection_file << endl;
+    known_projection = new ManualPolnCalibrator (projection_file);
+  }
+
   // Start calibrating archives
   
   Interpreter* preprocessor = standard_shell();
@@ -682,13 +746,15 @@ int main (int argc, char *argv[]) try
       cerr << "pac: Backend corrections disabled" << endl;
 
     bool successful_polncal = false;
+    bool calibrate_frontend = do_frontend;
+
+    Reference::To<ConfigurableProjection> projection;
 
     if (do_polncal && arch->get_poln_calibrated() )
     {
       cout << "pac: " << filenames[i] << " already poln calibrated" << endl;
       successful_polncal = true;
     }
-
     else if (do_polncal && !arch->get_poln_calibrated())
     {
       Reference::To<PolnCalibrator> pcal_engine;
@@ -710,8 +776,7 @@ int main (int argc, char *argv[]) try
       }
       catch (Error& error)
       {
-        error << " -- closest match: \n\n"
-              << dbase->get_closest_match_report ();
+        error << " -- closest match: \n\n" << dbase->get_closest_match_report ();
         throw error;
       }
 
@@ -720,35 +785,7 @@ int main (int argc, char *argv[]) try
         if (verbose)
           cout << "pac: Calculating fluxcal Stokes params" << endl;
 
-        ReferenceCalibrator* refcal = 0;
-        refcal = dynamic_cast<ReferenceCalibrator*> (pcal_engine.get());
-        if (!refcal)
-          throw Error (InvalidState, "pcm",
-                       "PolnCalibrator is not a ReferenceCalibrator");
-
-        // Find appropriate fluxcal from DB 
-        Reference::To<FluxCalibrator> flux_cal;
-        try
-        {
-          flux_cal = dbase->generateFluxCalibrator(arch);
-        }
-        catch (Error& error)
-        {
-          error << " -- closest match: \n\n"
-                << dbase->get_closest_match_report ();
-          throw error;
-        }
-
-        // Combine already-selected pcal_engine with fluxcal stokes
-        // into a new HybridCalibrator
-        Reference::To<HybridCalibrator> hybrid_cal;
-        hybrid_cal = new HybridCalibrator;
-        hybrid_cal->set_reference_input( flux_cal->get_CalibratorStokes(),
-                                         flux_cal->get_filenames() );
-
-        hybrid_cal->set_reference_observation( refcal );
-
-        pcal_engine = hybrid_cal;
+        pcal_engine = get_hybrid_from_fluxcal (pcal_engine, arch);
       }
       catch (Error& error)
       {
@@ -785,6 +822,26 @@ int main (int argc, char *argv[]) try
         }
       }
 
+      if (pcal_engine->has_Archive())
+      {
+        const Archive* calarch = pcal_engine->get_Archive ();
+        auto cpe = calarch->get<ConfigurableProjectionExtension>();
+        if (cpe)
+        {
+          cerr << "pac: using configurable projection (disabling frontend correction)" << endl;
+          projection = new ConfigurableProjection(cpe);
+
+          if (known_projection)
+          {
+            if (!known_wrapper)
+              known_wrapper = new VariableTransformationFile (known_projection);
+
+            projection->set_projection(known_wrapper);
+          }
+          calibrate_frontend = false;
+        }
+      }
+
       pcal_engine->set_backend_correction( do_backend );
       pcal_engine->calibrate (arch);
 
@@ -797,7 +854,7 @@ int main (int argc, char *argv[]) try
       cerr << "pac: Poln calibration disabled" << endl;
     }
 
-    if (do_frontend && (arch->get_npol() == 4))
+    if (calibrate_frontend && (arch->get_npol() == 4))
     {
       if (verbose)
         cerr << "pac: Correcting fronted, if necessary" << endl;
@@ -808,24 +865,45 @@ int main (int argc, char *argv[]) try
     else
       cerr << "pac: Frontend corrections disabled." << endl;
 
-    if ( ! projection_file.empty() )
+    bool do_special_projection = do_calibration && (projection || known_projection);
+
+    Receiver* receiver = arch->get<Receiver>();
+
+    if ( do_special_projection )
     {
-      cerr << "pac: Loading projection transformations from "
-	   << projection_file << endl;
-
-      Receiver* receiver = arch->get<Receiver>();
-
+      // correct the basis before applying the projection
       BasisCorrection basis_correction;
       if ( basis_correction.required (arch) )
       {
-	arch->transform( inv( basis_correction(arch) ) );
-	receiver->set_basis_corrected (true);
-      }
-      
-      Reference::To<ManualPolnCalibrator> calibrator;
-      calibrator = new ManualPolnCalibrator (projection_file);
-      calibrator->calibrate (arch);
+        cerr << "pac: Performing basis correction" << endl;
+        arch->transform( inv( basis_correction(arch) ) );
 
+        if (receiver)
+          receiver->set_basis_corrected (true);
+      }
+    }
+
+    if (projection)
+    {
+      cerr << "pac: Applying configurable projection transformation" << endl;
+
+      if (do_calibration)
+        projection->calibrate (arch);
+      else
+        projection->transform (arch);
+    }
+    else if (known_projection)
+    {
+      cerr << "pac: Applying known projection transformation" << endl;
+
+      if (do_calibration)
+        known_projection->calibrate (arch);
+      else
+        known_projection->transform (arch);
+    }
+
+    if (do_special_projection && receiver)
+    {
       receiver->set_projection_corrected (true);
     }
     

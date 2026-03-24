@@ -29,8 +29,7 @@ void Calibration::InputDataReport::report (ostream& os)
     for (unsigned jstate=0; jstate<mstate; jstate++)
     {
       Stokes< Estimate<float> > datum = data[jstate].get_stokes();
-      os << "\t" << "source=" << data[jstate].get_input_index()
-	 << " " << datum << endl;
+      os << "\t" << "source=" << data[jstate].get_input_index() << " " << datum << endl;
     }
   }
 }

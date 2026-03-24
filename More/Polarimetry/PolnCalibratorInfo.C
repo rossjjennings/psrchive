@@ -5,10 +5,11 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/PolnCalibratorInfo.h"
 #include "Pulsar/CalibratorTypes.h"
 
-#include "Pulsar/SingleAxisCalibrator.h"
-#include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/SingleAxisCalibratorInfo.h"
+#include "Pulsar/PolarCalibratorInfo.h"
 #include "Pulsar/InstrumentInfo.h"
 #include "Pulsar/BrittonInfo.h"
 
@@ -19,7 +20,7 @@ Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
 {
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::Info::create type="
-	 << calibrator->get_type()->get_name() << endl;
+         << calibrator->get_type()->get_name() << endl;
 
   if (calibrator->get_type()->is_a<CalibratorTypes::SingleAxis>())
     return new SingleAxisCalibrator::Info (calibrator);
@@ -83,7 +84,7 @@ string Pulsar::PolnCalibrator::Info::get_title () const
 }
 
 /*! The name of each parameter is unknown */
-string Pulsar::PolnCalibrator::Info::get_name (unsigned iclass) const
+string Pulsar::PolnCalibrator::Info::get_label (unsigned iclass) const
 {
   return "unknown";
 }
@@ -138,3 +139,9 @@ int Pulsar::PolnCalibrator::Info::get_graph_marker (unsigned iclass,
 
   return nice_markers[iparam];
 }
+
+Pulsar::Calibrator::Info* Pulsar::PolnCalibrator::get_Info () const
+{
+  return PolnCalibrator::Info::create (this);
+}
+

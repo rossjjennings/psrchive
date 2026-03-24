@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/usr/bin/bash
 
 echo "Running update ..."
 

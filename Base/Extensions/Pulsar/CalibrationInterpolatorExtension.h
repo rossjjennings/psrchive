@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2022 by Willem van Straten
+ *   Copyright (C) 2022-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -125,11 +125,10 @@ namespace Pulsar {
     public:
 
       //! Text interface to CalibrationInterpolatorExtension::Parameter
-      class Interface
-	: public TextInterface::To<Parameter>
+      class Interface : public TextInterface::To<Parameter>
       {
       public:
-	Interface (Parameter* = 0);
+        Interface (Parameter* = 0);
       };
 
       //! The type of model parameter
@@ -137,7 +136,8 @@ namespace Pulsar {
       {
         FrontendParameter = 1,
         CalibratorStokesParameter = 2,
-	FluxCalibratorParameter = 3
+        FluxCalibratorParameter = 3,
+        ConfigurableProjectionParameter = 4
       };
       
       Type code;
@@ -208,8 +208,7 @@ namespace Pulsar {
     std::vector< Reference::To<Parameter> > parameter;
   };
  
-  std::ostream& operator << (std::ostream& ostr,
-			     CalibrationInterpolatorExtension::Parameter::Type);
+  std::ostream& operator << (std::ostream& ostr, CalibrationInterpolatorExtension::Parameter::Type);
 
 }
 

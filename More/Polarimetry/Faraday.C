@@ -71,6 +71,10 @@ double Calibration::Faraday::get_reference_frequency () const
 //! Set the frequency in MHz
 void Calibration::Faraday::set_frequency (double MHz)
 {
+  if (MHz == 0.0)
+    throw Error (InvalidState, "Calibration::Faraday::set_frequency",
+                 "invalid frequency=%lf", MHz);
+
   set_wavelength( Pulsar::speed_of_light / (MHz * 1e6) );
 }
 
@@ -100,6 +104,10 @@ double Calibration::Faraday::get_reference_wavelength () const
 //! Set the wavelength in metres
 void Calibration::Faraday::set_wavelength (double metres)
 {
+  if (!true_math::finite(metres))
+    throw Error (InvalidState, "Calibration::Faraday::set_wavelength",
+                 "non-finite wavelength");
+
   if (wavelength == metres)
     return;
 
@@ -127,14 +135,18 @@ double Calibration::Faraday::get_rotation () const
   double lambda_0 = reference_wavelength;
   double lambda = wavelength;
 
+  double rot = rotation_measure * (lambda*lambda - lambda_0*lambda_0);
+
 #ifndef _DEBUG
-  if (verbose)
+  if (verbose || !true_math::finite(rot))
 #endif
     cerr << "Calibration::Faraday::get_rotation lambda_0=" 
 	 << reference_wavelength
 	 << " lambda=" << wavelength << " (metres)" << endl;
 
-  double rot = rotation_measure * (lambda*lambda - lambda_0*lambda_0);
+  if (!true_math::finite(rot))
+    throw Error (InvalidState, "Calibration::Faraday::get_rotation",
+                 "non-finite result");
 
 #ifndef _DEBUG
   if (verbose)

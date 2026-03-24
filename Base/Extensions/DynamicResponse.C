@@ -26,25 +26,6 @@ DynamicResponse::DynamicResponse (const DynamicResponse& ext)
   operator = (ext);
 }
 
-//! Assignment operator
-const DynamicResponse&
-DynamicResponse::operator= (const DynamicResponse& extension)
-{
-  nchan = extension.nchan;
-  npol = extension.npol;
-  ntime = extension.ntime;
-
-  minimum_epoch = extension.minimum_epoch;
-  maximum_epoch = extension.maximum_epoch;
-
-  minimum_frequency = extension.minimum_frequency;
-  maximum_frequency = extension.maximum_frequency;
-
-  response = extension.response;
-
-  return *this;
-}
-
 //! Destructor
 DynamicResponse::~DynamicResponse ()
 {

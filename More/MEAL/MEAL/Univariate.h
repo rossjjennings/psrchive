@@ -12,13 +12,15 @@
 #define __MEAL_Univariate_H
 
 #include "MEAL/UnivariatePolicy.h"
+#include "MEAL/Nvariate.h"
 #include "Reference.h"
 
 namespace MEAL {
 
   //! Abstract template base class of univariate Function implementations
   template<class T>
-  class Univariate : public T {
+  class Univariate : public Nvariate<T>
+  {
 
   public:
 
@@ -47,6 +49,22 @@ namespace MEAL {
     //! Evaluate the function
     typename T::Result compute (double x)
     { set_abscissa (x); return this->evaluate (); }
+
+    /** @name Nvariate Interface */
+    //@{
+
+    //! Get the number of abscissa (dimension) of the function
+    unsigned get_ndim () const { return 1; }
+
+    //! Set the abscissa value for the specified dimension
+    void set_abscissa_value (unsigned idim, double value)
+    { set_abscissa (value); }
+
+    //! Get the abscissa value for the specified dimension
+    double get_abscissa_value (unsigned idim) const
+    { return get_abscissa (); }
+
+    //@}
 
   protected:
 
@@ -85,10 +103,11 @@ namespace MEAL {
 template<class T>
 MEAL::Univariate<T>& MEAL::Univariate<T>::operator = (const Univariate& copy)
 { 
-  if (&copy != this) {
-    set_abscissa( copy.get_abscissa() ); 
-    T::operator=( copy );
-  }
+  if (&copy == this)
+    return *this;
+
+  set_abscissa( copy.get_abscissa() ); 
+  T::operator=( copy );
   return *this;
 }
 

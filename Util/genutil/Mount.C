@@ -1,18 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Mount.h"
 
-//#define _DEBUG
-
-#ifdef _DEBUG
-#include <iostream>
-using namespace std;
-#endif
+// #define _DEBUG 1
+#include "debug.h"
 
 static float unset = -333.0;
 
@@ -112,10 +108,7 @@ void Mount::build () const
   {
     double long_deg = longitude * 180/M_PI;
 
-#ifdef _DEBUG
-    cerr << "Mount::build epoch=" << epoch << endl
-	 << "Mount::build longitude=" << long_deg << " deg" << endl;
-#endif
+    DEBUG("Mount::build epoch=" << epoch << " longitude=" << long_deg << " deg");
 
     if (epoch != MJD::zero)
       // MJD::LST receives longitude in degrees and returns LST in hours
@@ -126,18 +119,12 @@ void Mount::build () const
   }
   else
   {
-#ifdef _DEBUG
-    cerr << "Mount::build hour_angle=" << hour_angle << endl;
-#endif
+    DEBUG("Mount::build hour_angle=" << hour_angle);
     lst = hour_angle + right_ascension;
   }
 
-#ifdef _DEBUG
-  cerr << "Mount::build LST=" << lst << " latitude=" << latitude
-       << endl
-       << "Mount::build RA=" << right_ascension << " Dec=" << declination
-       << endl;
-#endif
+  DEBUG("Mount::build LST=" << lst << " latitude=" << latitude);
+  DEBUG("Mount::build RA=" << right_ascension << " Dec=" << declination);
 
   /*
     start with basis at equator and

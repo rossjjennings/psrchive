@@ -81,7 +81,6 @@ namespace Pulsar {
     void set_Receiver (const Archive*);
     std::string get_receiver_basis_filename () const;
 
-
     // ///////////////////////////////////////////////////////////////////
     //
     // useful for unloading
@@ -237,53 +236,6 @@ namespace Pulsar {
 
   //! Create a new Calibrator::Type instance according to the transformation
   Calibrator::Type* new_CalibratorType( const MEAL::Complex2* xform ); 
-
-
-  class PolnCalibrator::Info : public Calibrator::Info
-  {
-
-  public:
-
-    //! Factory returns a suitable instance
-    static PolnCalibrator::Info* create (const PolnCalibrator* calibrator);
-    
-    //! Constructor
-    Info (const PolnCalibrator* calibrator);
-    
-    //! Return the title
-    std::string get_title () const;
-
-    //! Return the number of frequency channels
-    unsigned get_nchan () const;
-
-    //! Return the number of parameter classes
-    unsigned get_nclass () const;
-    
-    //! Return the name of the specified class
-    std::string get_name (unsigned iclass) const;
-    
-    //! Return the number of parameters in the specified class
-    unsigned get_nparam (unsigned iclass) const;
-    
-    //! Return the estimate of the specified parameter
-    Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			       unsigned iparam) const;
-    
-    //! Return the colour index
-    int get_colour_index (unsigned iclass, unsigned iparam) const;
-    
-    //! Return the graph marker
-    int get_graph_marker (unsigned iclass, unsigned iparam) const;
-    
-  protected:
-    
-    //! The PolnCalibrator to be plotted
-    Reference::To<const PolnCalibrator> calibrator;
-
-    //! The number of parameters in the PolnCalibrator transformation
-    unsigned nparam;
-    
-  };
 
 }
 

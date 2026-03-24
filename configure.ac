@@ -2,7 +2,10 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[2025-02-03],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2026-02-26],[psrchive-developers@lists.sourceforge.net])
+
+AUTOCONF_VERSION=m4_defn([AC_AUTOCONF_VERSION])
+AC_SUBST(AUTOCONF_VERSION)
 
 # Dependencies
 PKG_PROG_PKG_CONFIG
@@ -44,7 +47,7 @@ fi
 
 EPSIC_SOURCE='$(top_srcdir)/Util/epsic/src'
 EPSIC_BUILD='$(top_builddir)/Util/epsic/src'
-INCLUDE_CPPFLAGS='-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_BUILD) -I$(EPSIC_BUILD)/util'
+INCLUDE_CPPFLAGS='-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_SOURCE)/true_math -I$(EPSIC_BUILD) -I$(EPSIC_BUILD)/util'
 AC_SUBST(EPSIC_SOURCE)
 AC_SUBST(EPSIC_BUILD)
 AC_SUBST(INCLUDE_CPPFLAGS)
@@ -148,12 +151,14 @@ SWIN_LIB_MKL
 SWIN_LIB_IPP
 PSR_LIB_SPLINTER
 PSR_LIB_ARMADILLO
+PSR_LIB_YAMLCPP
 
 #
 # Set up for automatic package installation
 #
 SWIN_DOWNLOAD
 AC_CONFIG_FILES([packages/Makefile
+	packages/yaml-cpp.csh
 	packages/armadillo.csh
 	packages/splinter.csh
 	packages/cfitsio.csh

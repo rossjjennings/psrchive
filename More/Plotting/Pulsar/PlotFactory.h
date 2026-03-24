@@ -48,7 +48,7 @@ namespace Pulsar {
 
     class Agent;
     
-    std::vector<Agent*> agents;
+    std::vector<Reference::To<Agent>> agents;
 
   public:
 

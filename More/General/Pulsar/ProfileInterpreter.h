@@ -15,6 +15,7 @@
 
 namespace Pulsar {
 
+  class Correlate;
   class Smooth;
   class RemoveBaseline;
 
@@ -76,6 +77,8 @@ namespace Pulsar {
     std::string smooth (Smooth*, const std::string& args);
 
     Reference::To<RemoveBaseline> remove_baseline;
+
+    Reference::To<Correlate> correlator;
   };
 
 }

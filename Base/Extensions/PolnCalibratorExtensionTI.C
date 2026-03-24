@@ -53,18 +53,36 @@ Pulsar::PolnCalibratorExtension::Transformation::Interface::Interface ()
   }
 
    add( &Transformation::get_chisq,
-	&Transformation::set_chisq,
-	"chisq", "Chi squared" );
+        &Transformation::set_chisq,
+        "chisq", "Chi squared" );
 
    add( &Transformation::get_nfree,
-	&Transformation::set_nfree,
-	"nfree", "Number of degrees of freedom" );
+        &Transformation::set_nfree,
+        "nfree", "Number of degrees of freedom" );
 
    add( &Transformation::get_nfit,
-	&Transformation::set_nfit,
-	"nfit", "Number of model parameters varied" );
+        &Transformation::set_nfit,
+        "nfit", "Number of model parameters varied" );
 
    add( &Transformation::get_reduced_chisq,
         "gof", "Reduced chi squared" );
+
+   add( &Transformation::get_log_det_curvature,
+        "ln_det", "Logarithm of determinant of curvature" );
+
+   add( &Transformation::get_log_cond_curvature,
+        "ln_cond", "Logarithm of condition number of curvature" );
+
+   add( &Transformation::get_Akaike_information_criterion,
+        "AIC", "Akaike information criterion" );
+
+   add( &Transformation::get_Bayesian_information_criterion,
+        "BIC", "Bayesian information criterion" );
+
+   add( &Transformation::get_geometric_information_criterion,
+        "GIC", "Geometric information criterion" );
+
+   add( &Transformation::get_stochastic_information_complexity,
+        "SIC", "Stochastic information complexity" );
 }
 

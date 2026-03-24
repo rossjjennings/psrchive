@@ -66,33 +66,22 @@ namespace Pulsar {
     Signal::State get_state () const;
     void set_state (Signal::State);
 
-    //! Auxiliary inter-channel dispersion delay has been removed
-    bool get_auxiliary_dispersion_corrected () const;
-    void set_auxiliary_dispersion_corrected (bool);
-
-    //! Auxiliary inter-channel birefringence has been removed
-    bool get_auxiliary_birefringence_corrected () const;
-    void set_auxiliary_birefringence_corrected (bool);
-
     Profile::Strategies* get_strategy ();
     void set_strategy (Profile::Strategies*);
  
   protected:
 
-    double centre_frequency;
-    double bandwidth;
+    double centre_frequency = 0.0;
+    double bandwidth = 0.0;
 
-    double dispersion_measure;
-    bool dedispersed;
+    double dispersion_measure = 0.0;
+    bool dedispersed = false;
 
-    double rotation_measure;
-    bool faraday_corrected;
+    double rotation_measure = 0.0;
+    bool faraday_corrected = false;
 
     Signal::Basis basis;
     Signal::State state;
-
-    bool auxiliary_dispersion_corrected;
-    bool auxiliary_birefringence_corrected;
 
     std::string telescope;
     sky_coord coordinates;

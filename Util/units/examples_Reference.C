@@ -141,11 +141,32 @@ Counter* error_create ()
   return ref;
 }
 
-void test_set4()
+void test_set_fail()
 // unreleased object is deleted when reference to it goes out of scope
 {
   // results in a bus error or AddressSanitizer heap-use-after-free error
   Reference::To<Counter> ref = error_create();
+}
+
+class HasCounter
+{
+  public:
+    Counter counter;
+};
+
+void test_set4()
+// static member of class is not deleted when reference to it goes out of scope
+{
+  HasCounter* has_counter = new HasCounter;
+  assert( Counter::get_instance_count() == 1 );
+  {
+    Reference::To<Counter> ref = &(has_counter->counter);
+  }
+  assert( Counter::get_instance_count() == 1 );
+  assert( has_counter->counter.__is_on_heap() == false);
+
+  delete has_counter;
+  assert( Counter::get_instance_count() == 0 );
 }
 
 class Composite;
@@ -268,7 +289,8 @@ int main ()
   test_set1();
   test_set2();
   test_set3();
-  // test_set4(); // causes bus error
+  // test_set_fail(); // causes bus error
+  test_set4();
   test_set5();
   test_set6();
   test_set7();

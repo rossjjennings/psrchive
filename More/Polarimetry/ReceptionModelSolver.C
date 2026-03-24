@@ -95,59 +95,134 @@ void Calibration::ReceptionModel::Solver::check_constraints () try
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::check_constraints" << endl;
 
-  assert( path_observed.size() == equation->get_num_transformation() );
-
-  // check that all paths with unknown parameters have a CoherencyMeasurement
-  for (unsigned ipath=0; ipath < equation->get_num_transformation(); ipath++)
-  {
-    bool need_path = false;
-
-    equation->set_transformation_index (ipath);
-    const MEAL::Function* path = equation->get_transformation ();
-      
-    for (unsigned iparam=0; iparam < path->get_nparam(); iparam++)
-      if( path->get_infit(iparam) )
-	      need_path = true;
-      
-    if (need_path && !path_observed[ipath])
-      throw Error (InvalidRange,
-		   "Calibration::ReceptionModel::Solver::check_constraints",
-		   "input path %u with free parameter(s) not observed", ipath);
-  }
-
-  assert( state_observed.size() == equation->get_num_input() );
-
-  for (unsigned isource=0; isource < equation->get_num_input(); isource++)
-  {
-    bool need_source = false;
-
-    equation->set_input_index (isource);
-    const MEAL::Function* state = equation->get_input ();
-      
-    for (unsigned iparam=0; iparam < state->get_nparam(); iparam++)
-      if( state->get_infit(iparam) )
-	      need_source = true;
-      
-    if (need_source && !state_observed[isource])
-      throw Error (InvalidRange, "Calibration::ReceptionModel::Solver::check_constraints",
-		   "input source %u with free parameter(s) not observed", isource);
-  }
+  check_transformations ();
+  check_inputs ();
 }
 catch (Error& error)
 {
   throw error += "Calibration::ReceptionModel::Solver::check_constraints";
 }
 
+void Calibration::ReceptionModel::Solver::check_transformations ()
+{
+  assert( path_observed.size() == equation->get_num_transformation() );
+
+  // check that all paths with unknown parameters have a CoherencyMeasurement
+  unsigned ipath=0;
+  while (ipath < equation->get_num_transformation())
+  {
+    bool need_path = false;
+
+    equation->set_transformation_index (ipath);
+    const MEAL::Function* path = equation->get_transformation ();
+
+    string names;
+    
+    for (unsigned iparam=0; iparam < path->get_nparam(); iparam++)
+      if( path->get_infit(iparam) )
+      {
+        need_path = true;
+        if (!names.empty())
+          names += " ";
+        names += path->get_param_name(iparam);
+      }
+    
+    if (need_path && !path_observed[ipath])
+    {
+      if (verbose)
+        cerr << "Calibration::ReceptionModel::Solver::check_transformations WARNING:"
+	  	   " removing signal path with unconstrained free parameters (" << names << ")" << endl;
+
+      erase_transformation(ipath);
+    }
+    else
+    {
+      ipath ++;
+    }
+  }
+
+  assert( path_observed.size() == equation->get_num_transformation() );
+
+  if (equation->get_num_transformation() == 0)
+    throw Error (InvalidState, "Calibration::ReceptionModel::Solver::check_transformations", "no signal paths");
+}
+
+void Calibration::ReceptionModel::Solver::erase_transformation (unsigned index)
+{
+  assert (index < path_observed.size());
+
+  equation->erase_transformation(index);
+  path_observed.erase(path_observed.begin() + index);
+}
+
+void Calibration::ReceptionModel::Solver::check_inputs ()
+{
+  assert( state_observed.size() == equation->get_num_input() );
+
+  unsigned isource=0;
+  while (isource < equation->get_num_input())
+  {
+    bool need_source = false;
+
+    equation->set_input_index (isource);
+    const MEAL::Function* state = equation->get_input ();
+
+    string names;
+    
+    for (unsigned iparam=0; iparam < state->get_nparam(); iparam++)
+      if( state->get_infit(iparam) )
+      {
+        need_source = true;
+        if (!names.empty())
+          names += " ";
+        names += state->get_param_name(iparam);
+      }
+
+    if (need_source && !state_observed[isource])
+    {
+      if (verbose)
+        cerr << "Calibration::ReceptionModel::Solver::check_inputs WARNING:"
+                " removing source with unconstrained free parameters (" << names << ")" << endl;
+
+      erase_input(isource);
+    }
+    else
+    {
+      isource++;
+    }
+  }
+
+  assert( state_observed.size() == equation->get_num_input() );
+
+  if (equation->get_num_input() == 0)
+    throw Error (InvalidState, "Calibration::ReceptionModel::Solver::check_inputs", "no sources");
+}
+
+
+void Calibration::ReceptionModel::Solver::erase_input (unsigned index)
+{
+  assert (index < state_observed.size());
+
+  equation->erase_input(index);
+  state_observed.erase(state_observed.begin() + index);
+}
+
 /*! Uses the Levenberg-Marquardt algorithm of non-linear least-squares
     minimization in order to find the best fit to the observations. */
 void Calibration::ReceptionModel::Solver::solve () try
 {
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::Solver::solve this=" << this << endl;
+
+  count_infit ();
+  count_constraint ();
+
+  check_constraints ();
+
   count_infit ();
   count_constraint ();
 
   nfree = ndat_constraint - nparam_infit;
-
-  check_constraints ();
 
   singular = false;
   solved = false;
@@ -190,9 +265,9 @@ void Calibration::ReceptionModel::Solver::check_solution ()
 
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::check_solution " 
-	 << iterations << " iterations. chi_sq=" 
-	 << best_chisq << "/(" << ndat_constraint << "-" << nparam_infit
-	 << "=" << nfree << ")=" << reduced_chisq << endl;
+        << iterations << " iterations. chi_sq=" 
+        << best_chisq << "/(" << ndat_constraint << "-" << nparam_infit
+        << "=" << nfree << ")=" << reduced_chisq << endl;
 }
 
 void Calibration::ReceptionModel::Solver::set_variances ()
@@ -268,5 +343,6 @@ void Calibration::ReceptionModel::Solver::add_acceptance_condition
 
 void Calibration::ReceptionModel::Solver::set_equation (ReceptionModel* m)
 {
-  equation = m;
+  equation.set(m);
 }
+

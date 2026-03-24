@@ -42,17 +42,24 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 
     try {
         std::string newcode = Tempo2::observatory (a->get_telescope())->get_name();
-        if (newcode.compare("JB_42ft")==0){
+        if (newcode.compare("JB_42ft")==0)
+	{
             Telescopes::Jodrell(t);
             t->set_name("JB_42ft");
             oldcode=0;
         }
-        if (newcode.compare("JB_MKII")==0){
+        if (newcode.compare("JB_MKII")==0)
+	{
             Telescopes::Jodrell(t);
             t->set_name("JB_MKII");
             oldcode=0;
         }
-
+        if (newcode.compare("NUPPI")==0)
+	{
+            Telescopes::Nancay(t);
+            t->set_name("Nancay");
+            oldcode=0;
+        }
         if (oldcode != 0)
         {
           DEBUG("Telescopes::set_telescope_info Tempo2::observatory->get_code");
@@ -167,9 +174,11 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
             break;
 
         default: 
-            // Unknown code, throw error after calling Telecope::set_coordinates
-            emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
-            warn << emsg << std::endl;
+            // Unknown code, throw error after calling Telescope::set_coordinates
+            emsg = "Unrecognized telescope code '" + a->get_telescope() + "'";
+
+            warn << "Pulsar::Telescopes::set_telescope_info"
+		    " unrecognized telescope code '" << a->get_telescope() << "'" << std::endl;
             break;
     }
 

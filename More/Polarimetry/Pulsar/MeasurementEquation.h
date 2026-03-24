@@ -78,6 +78,9 @@ namespace Calibration {
     //! Set the transformation index, \f$ i \f$
     void set_transformation_index (unsigned index);
 
+    //! Remove the specified transformation from the model
+    virtual void erase_transformation (unsigned index);
+
   protected:
 
     //! Returns \f$ \rho^\prime \f$ and its gradient

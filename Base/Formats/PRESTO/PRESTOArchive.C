@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PRESTOArchive.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
@@ -365,13 +366,13 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
 
   // Read polyco file if it hasn't been read already
   if (!has_model() && !polyco_load_failed) try {
-    model = new polyco(string(filename) + ".polycos");
+    set_predictor(new polyco(string(filename) + ".polycos"));
   }
   catch (Error &e) {
     cerr << "PRESTOArchive::load_Integration WARNING:  Polyco load failed. " 
       << "These results will NOT be accurate for timing!"  << e << endl;
     polyco_load_failed = true;
-    model = NULL;
+    set_predictor(nullptr);
   }
 
   // Subint epoch needs to correspond to bin 0 of the folded profile.
@@ -397,8 +398,8 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   double midfreq = 0.0;
   if (has_model())
   {                    // Correct to zero phase point
-    midphase = model->phase(epoch) - model->phase(epoch0); 
-    midfreq = model->frequency(epoch);
+    midphase = get_model()->phase(epoch) - get_model()->phase(epoch0); 
+    midfreq = get_model()->frequency(epoch);
     epoch -= midphase.fracturns() / midfreq;
   }
   integration->set_epoch(epoch);

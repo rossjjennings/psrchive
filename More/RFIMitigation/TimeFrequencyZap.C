@@ -13,6 +13,7 @@
 
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/Statistics.h"
 
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
@@ -104,9 +105,6 @@ Pulsar::TimeFrequencyZap::Interface::Interface (TimeFrequencyZap* instance)
        &TimeFrequencyZap::set_aux_filename,
        "aname", "Name of file to which auxiliary data are printed" );
 }
-
-// defined in More/General/standard_interface.C
-std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::TimeFrequencyZap::TimeFrequencyZap ()
 {

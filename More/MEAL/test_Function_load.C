@@ -15,6 +15,8 @@ int main (int argc, char** argv) try
   if (argc < 2)
   {
     cerr << "test_Function_load: please provide name of file to load" << endl;
+
+    MEAL::Function::factory ("help");
     return -1;
   }
 

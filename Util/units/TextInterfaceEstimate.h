@@ -59,7 +59,6 @@ namespace TextInterface
     std::string get_value (const V* ptr) const;
 
     //! Set the value of the attribute
-    //! Set the value of the attribute
     void set_value (V*, const std::string&)
       { throw Error (InvalidState, "VectorOfEstimate::set_value",
                      prefix + " cannot be set"); }

@@ -67,9 +67,9 @@ namespace Pulsar {
 
       bool equals (const Row& that)
       { return
-	  keyword == that.keyword &&
-	  value == that.value &&
-	  flag == that.flag;
+          keyword == that.keyword &&
+          value == that.value &&
+          flag == that.flag;
       }
     };
 

@@ -33,7 +33,8 @@ namespace TextInterface
     //! Set the instance
     virtual void set_instance (C* c) 
     {
-      instance = c; 
+      instance.set(c);
+
       for (unsigned i=0; i<values.size(); i++)
         setup (values[i]);
     }
@@ -48,7 +49,7 @@ namespace TextInterface
 #endif
       const Attribute<C>* attribute = dynamic_cast<const Attribute<C>*>(value);
       if (attribute) 
-        attribute->instance = instance.ptr();
+        attribute->instance = instance;
 #if _DEBUG
       else
         std::cerr << "TextInterface::To<C>::setup " << value->get_name() <<

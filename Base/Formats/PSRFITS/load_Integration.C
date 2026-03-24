@@ -52,7 +52,6 @@ try {
 		 "SEARCH mode data -- no Integrations to load");
 
   Reference::To<Pulsar::Integration> integ = new_Integration();
-  init_Integration (integ);
 
   int row = isubint + 1;
   

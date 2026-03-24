@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <vector>
+#include "Error.h"
 
 //! worker function for variance, skewness, kurtosis, etc.
 void central_moments (std::vector<double> data, std::vector<double>& mu);
@@ -31,6 +32,9 @@ void power_spectral_density (const std::vector<double>& data, std::vector<float>
 template<typename T>
 T median (std::vector<T> data)
 {
+  if (data.size() == 0)
+    throw Error (InvalidParam, "median (statutil.h)", "input data size = 0");
+
   unsigned mid = data.size() / 2;
   std::nth_element( data.begin(), data.begin()+mid, data.end() );
   return data[mid];
@@ -39,6 +43,9 @@ T median (std::vector<T> data)
 template<typename T>
 T mean (const std::vector<T>& data)
 {
+  if (data.size() == 0)
+    throw Error (InvalidParam, "mean (statutil.h)", "input data size = 0");
+
   T sum (0.0);
   for (auto element: data)
     sum += element;
@@ -48,6 +55,9 @@ T mean (const std::vector<T>& data)
 template<typename T>
 void Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3)
 {
+  if (data.size() == 0)
+    throw Error (InvalidParam, "Q1_Q2_Q3 (statutil.h)", "input data size = 0");
+
   std::sort( data.begin(), data.end() );
   unsigned ndat = data.size();
   Q1 = data[ndat / 4];
@@ -58,6 +68,9 @@ void Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3)
 template<typename T>
 void filtered_Q1_Q2_Q3 (std::vector<T> data, T& Q1, T& Q2, T& Q3, T value)
 {
+  if (data.size() == 0)
+    throw Error (InvalidParam, "filtered_Q1_Q2_Q3 (statutil.h)", "input data size = 0");
+  
   std::remove( data.begin(), data.end(), value );
   std::sort( data.begin(), data.end() );
   unsigned ndat = data.size();

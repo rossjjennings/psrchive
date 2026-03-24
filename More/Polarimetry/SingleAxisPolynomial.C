@@ -99,18 +99,17 @@ void Calibration::SingleAxisPolynomial::set_argument (unsigned dimension,
   \param max_result the maximum value produced by the polynomials
   \param max_abscissa the maximum absolute value of the abscissa
 */
-void Calibration::SingleAxisPolynomial::random (double max_result,
-						double max_abscissa)
+void Calibration::SingleAxisPolynomial::random (double max_result, double max_abscissa)
 {
-  for (unsigned ipoly=0; ipoly<npoly; ipoly++)  {
-
+  for (unsigned ipoly=0; ipoly<npoly; ipoly++)
+  {
     unsigned ncoef = polynomial[ipoly]->get_nparam();
 
     // initialize a random Polynomial
     float max_coef = max_result / double (ncoef);
 
-    for (unsigned icoef=1; icoef<ncoef; icoef++) {
-
+    for (unsigned icoef=1; icoef<ncoef; icoef++)
+    {
       max_coef /= max_abscissa;
 
       float coef = 0.0;
@@ -119,12 +118,10 @@ void Calibration::SingleAxisPolynomial::random (double max_result,
       polynomial[ipoly]->set_param (icoef, coef);
       
       if (verbose)
-	cerr << "Calibration::SingleAxisPolynomial::random"
-	  " polynomial[" << ipoly << "][" << icoef << "]=" 
-	     << polynomial[ipoly]->get_param (icoef) << endl;
-
+        cerr << "Calibration::SingleAxisPolynomial::random"
+          " polynomial[" << ipoly << "][" << icoef << "]=" 
+            << polynomial[ipoly]->get_param (icoef) << endl;
     }
-
   }
 }
 

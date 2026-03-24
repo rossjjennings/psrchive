@@ -32,6 +32,9 @@ namespace Pulsar {
 
   public:
 
+    //! Destructor
+    ~WidthEstimator();
+
     //! Return the width of the pulse profile in turns
     virtual Phase::Value get_width (const Profile* profile);
 

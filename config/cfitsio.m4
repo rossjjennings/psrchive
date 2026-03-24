@@ -9,8 +9,9 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
 
   AC_MSG_CHECKING([for cfitsio installation])
 
-  CFITSIO_CFLAGS="`pkg-config --cflags cfitsio`"
-  CFITSIO_LIBS="`pkg-config --libs cfitsio`"
+  PKGS="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
+  CFITSIO_CFLAGS="`PKG_CONFIG_PATH=$PKGS pkg-config --cflags cfitsio`"
+  CFITSIO_LIBS="`PKG_CONFIG_PATH=$PKGS pkg-config --libs cfitsio`"
 
   have_cfitsio="not found"
 

@@ -59,7 +59,7 @@ namespace Reference {
     HeapTracked& operator = (const HeapTracked&) { return *this; }
 
     //! Destructor
-    virtual ~HeapTracked () { }
+    virtual ~HeapTracked ();
 
     //! Records the addresses of new instances allocated on the heap
     static void* operator new (size_t size, void* ptr = 0);
@@ -79,12 +79,16 @@ namespace Reference {
   private:
 
     friend class Able;
+    friend class Bin;
 
     //! State of this instance
     mutable char __heap_state;
 
     //! Called by Able destructor
     void __set_deleted ();
+
+    //! Worker function used by __is_on_heap
+    bool __found_on_heap () const;
 
   };
 

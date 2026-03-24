@@ -150,39 +150,33 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   if (verbose > 2) cerr << "Pulsar::Archive::update_model epoch=" << time 
 			 << " clear=" << clear_model << endl;
 
-  if (model && !clear_model) try {
-
+  if (model && !clear_model) try
+  {
     model->phase (time);
 
     if (verbose > 2)
-      cerr << "Pulsar::Archive::update_model current model spans epoch"
-	   << endl;
+      cerr << "Pulsar::Archive::update_model current model spans epoch" << endl;
 
     return;
-
   }
-  catch (Error& error) {
-
+  catch (Error& error)
+  {
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model current model doesn't span epoch"
-	"\n\t" << error.get_message() << endl;
-
+              "\n\t" << error.get_message() << endl;
   }
 
   if (!ephemeris)
-    throw Error (InvalidState, "Pulsar::Archive::update_model",
-		 "no Pulsar::Parameters available");
+    throw Error (InvalidState, "Pulsar::Archive::update_model", "no Pulsar::Parameters available");
 
   if (verbose > 2)
-    cerr << "Pulsar::Archive::update_model Predictor::policy=" 
-	 << Predictor::get_policy() << endl;
+    cerr << "Pulsar::Archive::update_model Predictor::policy=" << Predictor::get_policy() << endl;
 
   Reference::To<Generator> generator;
   if (model && Pulsar::Predictor::get_policy() == Pulsar::Predictor::Input)
   {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::update_model get matching generator "
-              "from current predictor" << endl;
+      cerr << "Pulsar::Archive::update_model get matching generator from current predictor" << endl;
     generator = model->generator();
   }
   else if (Pulsar::Predictor::get_policy() == Pulsar::Predictor::Default)
@@ -194,30 +188,33 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   else
   {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::update_model produce generator"
-	" that matches parameters" << endl;
+      cerr << "Pulsar::Archive::update_model produce generator that matches parameters" << endl;
     generator = Generator::factory (ephemeris);
   }
 
   generator->set_parameters (ephemeris);
 
-  double frequency = get_centre_frequency ();
-  double bandwidth = get_bandwidth ();
+  double freq = get_centre_frequency ();
+  double bw = get_bandwidth ();
 
-  generator->set_frequency_span( frequency - 0.5 * bandwidth,
-				 frequency + 0.5 * bandwidth );
-
+  generator->set_frequency_span( freq - 0.5 * bw, freq + 0.5 * bw );
   generator->set_time_span( time, time );
-
   generator->set_site( get_telescope() );
 
   Reference::To<Predictor> predictor = generator->generate();
 
   if (clear_model || !model)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::update_model replace model" << endl;
     model = predictor;
+  }
   else
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::update_model insert model" << endl;
     model->insert (predictor);
-
+  }
 }
 
 

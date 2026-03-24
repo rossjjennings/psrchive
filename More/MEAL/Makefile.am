@@ -63,6 +63,8 @@ nobase_include_HEADERS = \
         MEAL/NormalizeStokes.h \
         MEAL/NotCached.h \
 	MEAL/Null.h \
+	MEAL/Nvariate.h \
+	MEAL/NvariateScalarFactory.h \
         MEAL/OneParameter.h \
 	MEAL/OrthogonalModes.h \
 	MEAL/OrthoRVM.h \
@@ -75,6 +77,7 @@ nobase_include_HEADERS = \
         MEAL/PhysicalCoherency.h \
         MEAL/Polar.h \
         MEAL/Polynomial.h \
+	MEAL/Polynomial2D.h \
         MEAL/PositionAngles.h \
         MEAL/PowerLaw.h \
 	MEAL/ProductRule.h \
@@ -129,6 +132,7 @@ nobase_include_HEADERS = \
         MEAL/Univariate.h \
         MEAL/UnivariatePolicy.h \
 	MEAL/Value.h \
+	MEAL/Variable.h \
 	MEAL/Vectorize.h \
         MEAL/VectorRule.h \
         MEAL/VelocityModel.h \
@@ -180,6 +184,7 @@ libMEAL_la_SOURCES = \
 	MultivariatePolicy.C \
         NormalizeStokes.C \
 	Null.C \
+	NvariateScalarFactory.C \
         OneParameter.C \
 	OrthogonalModes.C \
 	OrthoRVM.C \
@@ -189,6 +194,7 @@ libMEAL_la_SOURCES = \
         PhysicalCoherency.C \
         Polar.C \
         Polynomial.C \
+	Polynomial2D.C \
         PositionAngles.C \
         PowerLaw.C \
         Projection.C \
@@ -242,10 +248,10 @@ TESTS = \
 	test_Invariant test_CyclicParameter test_Univariate		 \
 	test_StokesError test_StokesCovariance test_Vectorize		 \
 	test_UnitTangent test_ComplexCorrelation	 \
-	test_Spinor test_CrossCoherency test_JonesMueller test_bessi0 \
-        test_lm_covar
+	test_Spinor test_CrossCoherency test_JonesMueller test_bessi0    \
+	test_GaussJordan test_lm_covar
 
-check_PROGRAMS = $(TESTS) test_Function_load 
+check_PROGRAMS = $(TESTS) test_Function_load test_NvariateScalarFactory
 
 test_copy_SOURCES		= test_copy.C
 test_Axis_SOURCES		= test_Axis.C
@@ -269,6 +275,8 @@ test_ComplexCorrelation_SOURCES = test_ComplexCorrelation.C
 test_Spinor_SOURCES		= test_Spinor.C
 test_CrossCoherency_SOURCES	= test_CrossCoherency.C
 test_JonesMueller_SOURCES	= test_JonesMueller.C
+test_NvariateScalarFactory_SOURCES = test_NvariateScalarFactory.C
+test_GaussJordan_SOURCES	= test_GaussJordan.C
 test_lm_covar_SOURCES           = test_lm_covar.C
 
 ##############################################################################
@@ -294,7 +302,7 @@ doc: MEAL.pdf
 #
 
 LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/epsic/src/util/libutil.la
+	$(top_builddir)/Util/epsic/src/libepsic.la
 
 include $(top_srcdir)/config/Makefile.include
 

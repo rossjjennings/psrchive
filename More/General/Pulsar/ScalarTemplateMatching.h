@@ -12,6 +12,7 @@
 #define __Pulsar_ScalarTemplateMatching_h
 
 #include "Pulsar/PhaseWeight.h"
+#include "Pulsar/HasMaxHarmonic.h"
 #include "FTransformAgent.h"
 #include "toa.h"
 
@@ -36,7 +37,7 @@ namespace Pulsar
       and it was becoming a nuisance to maintain, extend or optimize it;
       therefore, this class was wrapped around it to manage complexity. */
 
-  class ScalarTemplateMatching : public Reference::Able
+  class ScalarTemplateMatching : public Reference::Able, public HasMaxHarmonic
   {
     //! Disable copy constructor
     ScalarTemplateMatching (const ScalarTemplateMatching& fit);
@@ -85,18 +86,6 @@ namespace Pulsar
     //! Get the scale factor between the standard and the observation
     Estimate<double> get_scale () const;
 
-    //! Set the maximum number of harmonics to include in fit
-    void set_maximum_harmonic (unsigned max);
-
-    //! Get the maximum number of harmonics to include in fit
-    unsigned get_maximum_harmonic () const { return maximum_harmonic; }
-
-    //! Set the maximum number of harmonics to include in fit
-    void set_choose_maximum_harmonic (bool flag);
-
-    //! Get the maximum number of harmonics to include in fit
-    bool get_choose_maximum_harmonic () const { return choose_maximum_harmonic; }
-
     //! Get the number of harmonics to be included in fit
     unsigned get_nharmonic () const { return n_harmonic; }
 
@@ -117,14 +106,8 @@ namespace Pulsar
     //! Used to compute the variance of the off-pulse harmonics
     Reference::To<FluctuationSpectrumStats> stats;
 
-    //! The maximum number of harmonics to include in the fit
-    unsigned maximum_harmonic;
-
-    //! Set true when set_standard should choose the maximum harmonic
-    bool choose_maximum_harmonic;
-
     //! The number of harmonics in the fit
-    unsigned n_harmonic;
+    unsigned n_harmonic = 0;
 
     //! Compute the reduced chisq (using the expected variance of the residual profile)
     /*! When set to false, incorrectly assume that the reduced chisq is equal to unity. */

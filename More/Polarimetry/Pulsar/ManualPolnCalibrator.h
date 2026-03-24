@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2013 by Gregory Desvignes
+ *   Copyright (C) 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,143 +9,107 @@
 #define __CalibrationManualPolnCalibrator_H
 
 #include "Pulsar/PolnCalibrator.h"
-#include "Jones.h"
 
-namespace Pulsar {
-
-  //class ReferenceCalibrator;
-  //class CalibratorStokes;
-
-  //! Phenomenological description of the instrument
-  /*! 
-     */
-  class ManualPolnCalibrator : public PolnCalibrator {
-
+namespace Pulsar
+{
+  //! Manages a table of Jones matrix elements as a function of time and frequency
+  class ManualPolnCalibrator : public PolnCalibrator
+  {
   public:
 
-    //! Default Constructor
-    ManualPolnCalibrator (const std::string ascii_model_filename);
+    //! Default Constructor loads content from specified file name
+    ManualPolnCalibrator (const std::string& filename);
 
-    //! Copy Constructor
-    ManualPolnCalibrator (const ManualPolnCalibrator& s);
+    //! Loads content from specified file name
+    virtual void load (const std::string& filename);
 
-    //! Assignment Operator
-    //const ManualPolnCalibrator& operator = (const ManualPolnCalibrator& s);
-
-    //! Clone operator
-    //ManualPolnCalibrator* clone () const;
-
-    //! Destructor
-    ~ManualPolnCalibrator ();
-
-    virtual void load (const std::string& ascii_model_filename);
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // useful for calibrating
-    //
-    // ///////////////////////////////////////////////////////////////////
-
-    //! Set the number of frequency channels in the response array
-    virtual void set_response_nsub (unsigned nsub);
-
-    //! Get the number of frequency channels in the response array
-    virtual unsigned get_response_nsub () const;
-
-    //! Return the system response for the specified channel
-    //virtual Jones<float> get_response (unsigned ichan) const;
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Model implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
-    //! Return the name of the class
-    //std::string get_name () const;
-    
-    //! Calibrate the polarization of the given archive
+    //! Calibrate the polarization of the given observation
     void calibrate (Archive* archive);
 
-    class Entry {
+    //! Subject an observation to the transformation (inverse of calibration)
+    void transform (Archive*);
 
+    //! The response at a single radio frequency
+    class Response
+    {
     public:
 
-      //! Null constructor
-      Entry () { init(); }
+      //! load from string and return the epoch
+      /*! The elements of the Jones matrix are parsed in the following order:
+          Re[j_{00}], Im[j_{00}], Re[j_{01}], Im[j_{01}], Re[j_{10}], Im[j_{10}], Re[j_{11}], Im[j_{11}]
+      */
+      MJD load (const std::string& str);
 
-      //! Construct from an ASCII string
-      explicit Entry (std::string& str) { load(str); }
-    
-      //! Destructor
-      ~Entry();
+      //! Set the reference frequency
+      void set_frequency (double f) { frequency = f; }
 
-      //! load from ascii string
-      void load (const std::string& str);
+      //! Get the reference frequency
+      double get_frequency () const { return frequency; }
 
-      //! return true if the criteria matches
-      bool matches (const std::string& name) const;
+      //! Set the Jones matrix
+      void set_response (const Jones<float>& J) { response = J; }
 
-      double ref_frequency; 
+      //! Get the Jones matrix
+      const Jones<float>& get_response () const { return response; }
 
-      MJD ref_epoch; 
-
-      void set_response (const Jones<float> response_h) {entry_response = response_h;}
-
-      Jones<float> get_response () {return entry_response;}
-
-    private:
-    
     protected:
  
-      //! Clean slate
-      void init ();
+      //! The reference frequency
+      double frequency = 0.0; 
 
-    private:
-      
-      //double ref_frequency; 
-
-      //!
-      //MJD ref_epoch; 
-
-      Jones<float> entry_response;
+      //! The response funtion
+      Jones<float> response;
     };
 
-    //void set_response (const Jones<float> response_h) {response = response_h;}
+    //! The frequency response for a given epoch
+    class FrequencyResponse
+    {
+    public:
 
-    //Jones<float> get_response () {return response;}
-    
-    //! Returns the best match, given the source name and centre frequency
-    std::vector<Entry> match (const MJD& epoch) const;
-    const Entry& match (const MJD& epoch, double MHz) const;
+      //! Set the reference epoch
+      void set_epoch (const MJD& mjd) { epoch = mjd; }
 
-    //! Returns a given entry
-    Entry get_entry (const unsigned idx) const { return entries[idx]; }
+      //! Get the reference eopch
+      MJD get_epoch () const { return epoch; }
 
+      //! Return the best-matching Response object, given the frequency in MHz
+      const Response& match (double freq_MHz) const;
+
+      //! Add a new Response object
+      void add (const Response& single) { response.push_back(single); }
+
+    protected:
+
+      //! The reference epoch
+      MJD epoch;
+
+      //! The frequency response
+      std::vector<Response> response;
+    };
+
+    //! Add a new Response at the given epoch
+    void add (const MJD& epoch, const Response&);
+
+    //! Return the best-matching frequency response, given the epoch
+    const FrequencyResponse& match (const MJD& epoch) const;
+
+    //! Return the Jones matrix for the given the epoch and frequency in MHz
+    const Jones<float>& get_response (const MJD& epoch, double MHz) const;
 
   protected:
 
-    //! 
-    std::vector<std::vector<Jones<float> > > response;
+    //! The frequency response as a function of epoch
+    std::vector<FrequencyResponse> response;
 
-    //! vector of entries in the database
-    std::vector<Entry> entries;
+    //! Index of the current frequency response
+    unsigned current_response = 0;
 
-    std::vector<Entry> matches_epoch (const MJD& epoch) const;
-
-  private:
-    
     //! Name of the file from which the entries were loaded
     std::string ascii_model_filename;
 
-    //! Initialize function used by constructors
-    //void init ();
-
-
-
+    //! Performs the work for calibrate and transform
+    void transform_work (Archive* arch, const std::string& name, bool invert);
   };
-
 }
 
 #endif
-

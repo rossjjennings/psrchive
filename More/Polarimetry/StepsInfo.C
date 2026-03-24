@@ -95,14 +95,14 @@ unsigned Pulsar::StepsInfo::get_nclass () const
 }
     
 //! Return the name of the specified class
-string Pulsar::StepsInfo::get_name (unsigned iclass) const
+string Pulsar::StepsInfo::get_label (unsigned iclass) const
 {
   if (iclass == 0)
-    return VariationInfo::get_name (iclass) + "(mean)";
+    return VariationInfo::get_label (iclass) + "(mean)";
 
   iclass --;
 
-  return VariationInfo::get_name (iclass) 
+  return VariationInfo::get_label (iclass) 
     + "(" + tostring( steps[iclass], 4 )+ ")";
 }
 

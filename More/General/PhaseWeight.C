@@ -68,47 +68,60 @@ Pulsar::PhaseWeight::~PhaseWeight ()
 }
 
 const Pulsar::PhaseWeight& 
-Pulsar::PhaseWeight::operator = (const PhaseWeight& pm)
+Pulsar::PhaseWeight::operator = (const PhaseWeight& that)
 {
-  weight = pm.weight;
-  reference_frequency = pm.reference_frequency;
-
-  if (pm.profile)
-    set_Profile (pm.profile);
-
+  if (this != &that)
+    copy(that);
   return *this;
+}
+
+void Pulsar::PhaseWeight::copy (const PhaseWeight& that)
+{
+  weight = that.weight;
+  reference_frequency = that.reference_frequency;
+
+  if (that.profile)
+    set_Profile (that.profile);
 }
 
 const Pulsar::PhaseWeight& 
 Pulsar::PhaseWeight::operator += (const PhaseWeight& pm)
 {
+  elementwise_sum(pm);
+  return *this;
+}
+
+void Pulsar::PhaseWeight::elementwise_sum (const PhaseWeight& pm)
+{
   if (weight.size() != pm.weight.size())
-    throw Error (InvalidState, "Pulsar::PhaseWeight::operator +=",
-		 "weight size=%d != other weight size=%d",
-		 weight.size(), pm.weight.size());
+    throw Error (InvalidState, "Pulsar::PhaseWeight::elementwise_sum",
+                "weight size=%d != other weight size=%d",
+                weight.size(), pm.weight.size());
 
   for (unsigned ipt=0; ipt<weight.size(); ipt++)
     weight[ipt] += pm.weight[ipt];
 
   built = false;
-  return *this;
 }
 
 const Pulsar::PhaseWeight& 
 Pulsar::PhaseWeight::operator *= (const PhaseWeight& pm)
 {
-  if (weight.size() != pm.weight.size())
-    throw Error (InvalidState, "Pulsar::PhaseWeight::operator *=",
-		 "weight size=%d != other weight size=%d",
-		 weight.size(), pm.weight.size());
+  elementwise_product(pm);
+  return *this;
+}
 
-  // cerr << "Pulsar::PhaseWeight::operator *=" << endl;
+void Pulsar::PhaseWeight::elementwise_product (const PhaseWeight& pm)
+{
+  if (weight.size() != pm.weight.size())
+    throw Error (InvalidState, "Pulsar::PhaseWeight::elementwise_product",
+                "weight size=%d != other weight size=%d",
+                weight.size(), pm.weight.size());
 
   for (unsigned ipt=0; ipt<weight.size(); ipt++)
     weight[ipt] *= pm.weight[ipt];
 
   built = false;
-  return *this;
 }
 
 void Pulsar::PhaseWeight::set_all (float value)
@@ -306,7 +319,7 @@ void Pulsar::PhaseWeight::set_Profile (const Profile* _profile) const
   cerr << "Pulsar::PhaseWeight::set_Profile this=" << this << " profile=" << _profile << endl;
 #endif
 
-  profile = _profile;
+  profile.set(_profile);
   built = false;
   median_computed = false;
   median_diff_computed = false;

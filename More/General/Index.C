@@ -128,7 +128,7 @@ Pulsar::get_Integration (const Archive* archive, Index subint)
     if (subint.get_integrate() && archive->get_nsubint() > 1)
     {
       if (Profile::verbose)
-	cerr << "Pulsar::get_Integration chan=I tscrunch" << endl;
+        cerr << "Pulsar::get_Integration chan=I tscrunch" << endl;
 
       Reference::To<Archive> archive_clone = archive->clone();
       archive_clone->tscrunch();
@@ -136,7 +136,7 @@ Pulsar::get_Integration (const Archive* archive, Index subint)
       Reference::To<Integration> integration;
       integration = archive_clone->get_Integration(0);
 
-      // adopt original parent (for extension information, etc.
+      // adopt original parent (for extension information, etc.)
       integration->adopt (archive);
 
       // delete clone so that it does not delete released integration
@@ -185,8 +185,8 @@ Pulsar::get_Stokes (const Integration* data, Index chan)
 
   try
   {
-    if (Profile::verbose) cerr << "Pulsar::get_Stokes "
-      "(" << chan << ")" << endl;
+    if (Profile::verbose) 
+      cerr << "Pulsar::get_Stokes (" << chan << ")" << endl;
 
     Reference::To<const Integration> integration = data;
     Reference::To<Integration> integration_clone;
@@ -198,24 +198,12 @@ Pulsar::get_Stokes (const Integration* data, Index chan)
       integration = integration_clone;
     }
 
-    Reference::To<const PolnProfile> profile;
-    profile = integration->new_PolnProfile(chan.get_value());
-
-    Reference::To<PolnProfile> profile_clone;
-    if (integration_clone)
-      profile_clone = integration_clone->new_PolnProfile(chan.get_value());
-
+    Reference::To<PolnProfile> profile = integration->new_PolnProfile(chan.get_value());
     if (profile->get_state() != Signal::Stokes)
     {
-      if (!profile_clone)
-	profile_clone = profile->clone();
-      profile_clone->convert_state(Signal::Stokes);
-      profile = profile_clone;
+      profile->convert_state(Signal::Stokes);
     }
-    
-    // ensure profile_clone doesn't destroy profile as it goes out of scope
-    profile_clone = 0;
-    
+
     return profile.release();
 
   }

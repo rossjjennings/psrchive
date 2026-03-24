@@ -82,13 +82,7 @@ namespace MEAL
   public:
     static unsigned verbose;
     
-    LevenbergMarquardt ()
-    { 
-      lamda_increase_factor = 10.0;
-      lamda_decrease_factor = 0.1;
-      singular_threshold = 1e-8;
-      restore_policy = NULL;
-    }
+    LevenbergMarquardt () = default;
 
     //! returns initial chi-squared
     /*!
@@ -98,33 +92,42 @@ namespace MEAL
     */
     template <class At, class Et, class Mt>
     float init (const std::vector< At >& x,
-		const std::vector< Et >& y,
-		Mt& model);
+                const std::vector< Et >& y,
+                Mt& model);
     
     //! returns next chi-squared (better or worse)
     template <class At, class Et, class Mt>
     float iter (const std::vector< At >& x,
-		const std::vector< Et >& y,
-		Mt& model);
+                const std::vector< Et >& y,
+                Mt& model);
 
-    //! returns the best-fit answers
+    //! returns covariance and curvatuere matrix of the current fit
     template <class Mt>
     void result (Mt& model,
-		 std::vector<std::vector<double> >& covariance = null_arg,
-		 std::vector<std::vector<double> >& curvature = null_arg);
+                 std::vector<std::vector<double> >& covariance = null_arg,
+                 std::vector<std::vector<double> >& curvature = null_arg);
+
+    //! return the logarithm of the determinant of the curvature matrix
+    double get_log_det_curvature() const { return log_det_alpha; }
+
+    //! return the number of parameters varied in the fit
+    unsigned get_nparam_infit() const { return nparam_infit; }
 
     //! lamda determines the dominance of the steepest descent method
-    float lamda;
+    float lamda = 1.0;
 
-    float lamda_increase_factor;
-    float lamda_decrease_factor;
+    float lamda_increase_factor = 10.0;
+    float lamda_decrease_factor = 0.1;
 
     //! Singular Matrix threshold
     /*! Passed to MEAL::GaussJordan, this attribute is used to
       decide when the curvature matrix is close to singular. */
-    float singular_threshold;
+    float singular_threshold = 1e-8;
 
-    RestorePolicy* restore_policy;
+    //! print a report on the orthogonality of the curvature matrix on each iteration
+    bool verify_orthogonality = false;
+
+    RestorePolicy* restore_policy = nullptr;
 
   protected:
 
@@ -134,8 +137,8 @@ namespace MEAL
     //! returns chi-squared and calculates the Hessian matrix and gradient
     template <class At, class Et, class Mt>
     float calculate_chisq (const std::vector< At >& x,
-			   const std::vector< Et >& y,
-			   Mt& model);
+                          const std::vector< Et >& y,
+                          Mt& model);
 
   private:
 
@@ -147,23 +150,30 @@ namespace MEAL
 
     //! curvature matrix
     std::vector<std::vector<double> > alpha;
+    double log_det_alpha = 0.0;
 
     //! next change to model
     std::vector<std::vector<double> > delta;
 
+    //! names of model parameters
+    std::vector<std::string> names;
+    std::vector<const char*> name_ptrs;
+
     //! chi-squared of best fit
-    float best_chisq;                     
+    float best_chisq = 0;
 
     //! curvature matrix (one half of Hessian matrix) of best fit
     std::vector<std::vector<double> > best_alpha;
     //! gradient of chi-squared of best fit
     std::vector<double> best_beta;
 
+    //! number of parameters varied on the fit
+    unsigned nparam_infit = 0;
+
     //! The parameters of the current model
     std::vector<double> backup;
 
     static std::vector<std::vector<double> > null_arg;
-
   };
 
   template<class At>
@@ -344,6 +354,9 @@ float MEAL::LevenbergMarquardt<Grad>::init
   beta.resize   (model.get_nparam());
   delta.resize  (model.get_nparam());
   backup.resize (model.get_nparam());
+  names.resize  (model.get_nparam());
+  name_ptrs.resize (model.get_nparam());
+
   for (unsigned j=0; j<model.get_nparam(); j++)
   {
     alpha[j].resize (model.get_nparam());
@@ -351,8 +364,7 @@ float MEAL::LevenbergMarquardt<Grad>::init
   }
 
   if (verbose > 2)
-    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init calculate chisq"
-              << std::endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init calculate chisq" << std::endl;
 
   best_chisq = calculate_chisq (x, y, model);
   best_alpha = alpha;
@@ -360,8 +372,7 @@ float MEAL::LevenbergMarquardt<Grad>::init
   lamda = 0.001;
 
   if (verbose > 0)
-    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init chisq=" 
-	 << best_chisq << std::endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init chisq=" << best_chisq << std::endl;
 
   return best_chisq;
 }
@@ -407,11 +418,11 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha, const T
 
   for (unsigned irow=0; irow<nfree; irow++)
   {
+    double norm = 0.0;
     for (unsigned jcol=0; jcol<nfree; jcol++) 
-    {
-      row_mod[irow] += alpha[irow][jcol] * alpha[irow][jcol];
-    }
-    row_mod[irow] = sqrt(row_mod[irow]);
+      norm += alpha[irow][jcol] * alpha[irow][jcol];
+
+    row_mod[irow] = sqrt(norm);
 
     if (row_mod[irow] == 0)
       std::cerr << irow << "=" << names[irow] << " gradient = 0" << std::endl;
@@ -530,6 +541,9 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 
       alpha[iinfit][iinfit] *= (1.0 + lamda);
       delta[iinfit][0]=best_beta[ifit];
+      names[iinfit] = model.get_param_name(ifit);
+      name_ptrs[iinfit] = names[iinfit].c_str();
+
       iinfit ++;
     }
     else if (verbose > 0)
@@ -539,16 +553,21 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
   if (iinfit == 0)
     throw Error (InvalidState, "MEAL::LevenbergMarquardt<Grad>::solve_delta", "no parameters in fit");
 
+  nparam_infit = iinfit;
+
   if (verbose > 2)
     std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta for " << iinfit << " parameters" << std::endl;
 
   //! curvature matrix
   std::vector<std::vector<double> > temp_copy (alpha);
 
+  if (verify_orthogonality)
+    verify_orthogonal (temp_copy, model);
+
   try
   {
     // invert Equation 15.5.14
-    MEAL::GaussJordan (alpha, delta, iinfit, singular_threshold);
+    log_det_alpha = MEAL::GaussJordan (alpha, delta, iinfit, singular_threshold, &name_ptrs);
   }
   catch (Error& error)
   {
@@ -668,6 +687,7 @@ float MEAL::LevenbergMarquardt<Grad>::iter
 
    \retval covar the covariance matrix
    \retval curve the curvature matrix
+   \return determinant of the curvature matrix
 */
 template <class Grad>
 template <class Mt>
@@ -715,7 +735,7 @@ void MEAL::LevenbergMarquardt<Grad>::result
       }
       iindim ++;
     }
-  }  
+  }
 }
 
 // /////////////////////////////////////////////////////////////////////////
@@ -790,6 +810,7 @@ float MEAL::lmcoff (
 		    std::vector<std::vector<double> >& alpha,
 		    std::vector<double>& beta
 		    )
+try
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
     std::cerr << "MEAL::lmcoff data=" << data << std::endl;
@@ -810,6 +831,12 @@ float MEAL::lmcoff (
 
   return result;
 }
+catch (Error& error)
+{
+  error << "\n\t" "data=" << data << " model=" << model.evaluate ();
+  throw error += "MEAL::lmcoff";
+}
+
 
 template <class Mt, class Yt, class Wt, class Grad>
 float MEAL::lmcoff1 (
@@ -822,6 +849,7 @@ float MEAL::lmcoff1 (
 		     std::vector<std::vector<double> >& alpha,
 		     std::vector<double>& beta
 		     )
+try
 {
   //! The traits of the gradient element
   ElementTraits<Grad> traits;
@@ -835,8 +863,13 @@ float MEAL::lmcoff1 (
   {
     if (model.get_infit(ifit))
     {
+      double term = traits.to_real (w_delta_y * gradient[ifit]);
+      if (!true_math::finite(term))
+        throw Error (InvalidState, "MEAL::lmcoff1"
+                     "non-finite contribution to beta");
+
       // Equation 15.5.6 (with 15.5.8)
-      beta[ifit] += traits.to_real (w_delta_y * gradient[ifit]);
+      beta[ifit] += term;
 
       if (LevenbergMarquardt<Grad>::verbose > 2)
         std::cerr << "MEAL::lmcoff1 compute weighted conjugate of gradient"
@@ -850,8 +883,14 @@ float MEAL::lmcoff1 (
       // Equation 15.5.11 of NR
       for (unsigned jfit=0; jfit <= ifit; jfit++)
       {
-      	if (model.get_infit(jfit))
-          alpha[ifit][jfit] += traits.to_real (w_gradient * gradient[jfit]);
+        if (model.get_infit(jfit))
+        {
+          double term = traits.to_real (w_gradient * gradient[jfit]);
+          if (!true_math::finite(term))
+            throw Error (InvalidState, "MEAL::lmcoff1", "non-finite contribution to alpha");
+
+          alpha[ifit][jfit] += term;
+        }
       }
     }
   }
@@ -859,12 +898,15 @@ float MEAL::lmcoff1 (
   // Equation 15.5.5
   float chisq = weight.get_weighted_norm (delta_y);
 
-  if (LevenbergMarquardt<Grad>::verbose > 1)
+  if (LevenbergMarquardt<Grad>::verbose > 1 || !true_math::finite(chisq))
     std::cerr << "MEAL::lmcoff1 chisq=" << chisq << std::endl;
 
   return chisq;
 }
-
-
+catch (Error& error)
+{
+  error << "\n\t" "delta_y=" << delta_y;
+  throw error += "MEAL::lmcoff1";
+}
 
 #endif

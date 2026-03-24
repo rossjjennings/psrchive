@@ -23,8 +23,9 @@ AC_DEFUN([PSR_LIB_ARMADILLO],
       with_armadillo_dir=
     fi
 
-    ARMADILLO_CFLAGS="`pkg-config --cflags armadillo`"
-    ARMADILLO_LIBS="`pkg-config --libs armadillo`"
+    PKGS="$prefix/lib64/pkgconfig:$PKG_CONFIG_PATH"
+    ARMADILLO_CFLAGS="`PKG_CONFIG_PATH=$PKGS pkg-config --cflags armadillo`"
+    ARMADILLO_LIBS="`PKG_CONFIG_PATH=$PKGS pkg-config --libs armadillo`"
 
     have_armadillo="not found"
 

@@ -71,6 +71,9 @@ namespace Calibration {
     //! Get the channel index
     unsigned get_ichan () const { return ichan; }
 
+    //! Get a string that describes the coordinate values
+    std::string get_coordinates_string () const;
+
   protected:
 
     //! Index of the transformation through which the measurements are made

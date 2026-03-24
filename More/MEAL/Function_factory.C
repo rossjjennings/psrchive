@@ -5,55 +5,46 @@
  *
  ***************************************************************************/
 
-#include "MEAL/Agent.h"
 #include "MEAL/Function.h"
 
-using namespace MEAL;
-
 #include "MEAL/Polynomial.h"
-static Registry::List<Agent>::Enter< Advocate<Polynomial> >
-polynomial;
-
 #include "MEAL/Gaussian.h"
-static Registry::List<Agent>::Enter< Advocate<Gaussian> >
-gaussian;
-
 #include "MEAL/SumRule.h"
-static Registry::List<Agent>::Enter< Advocate< SumRule<Scalar> > >
-scalar_sum;
 
 #include "MEAL/Rotation1.h"
-static Registry::List<Agent>::Unary< Advocate<Rotation1>, Vector<3,double> >
-rotation1( Vector<3,double>::basis(0) );
-
 #include "MEAL/Boost1.h"
-static Registry::List<Agent>::Unary< Advocate<Boost1>, Vector<3,double> >
-boost1( Vector<3,double>::basis(0) );
-
 #include "MEAL/Depolarizer.h"
-static Registry::List<Agent>::Enter< Advocate<Depolarizer> >
-depolarizer;
 
+#include "TextInterfaceParser.h"
+#include "interface_factory.h"
+
+#include <assert.h>
+
+using namespace MEAL;
 using namespace std;
+
+static std::vector< MEAL::Function* >* instances = NULL;
+
+static void instances_build ()
+{
+  instances = new std::vector< MEAL::Function* >;
+  instances->push_back( new MEAL::Polynomial );
+  instances->push_back( new MEAL::Gaussian );
+  instances->push_back( new MEAL::SumRule<Scalar> );
+
+  instances->push_back( new MEAL::Rotation1( Vector<3,double>::basis(0) ) );
+  instances->push_back( new MEAL::Boost1( Vector<3,double>::basis(0) ) );
+  instances->push_back( new MEAL::Depolarizer );
+}
 
 //! Construct a new model instance from a string
 MEAL::Function* MEAL::Function::factory (const std::string& text)
 {
-  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+  if (instances == NULL)
+    instances_build ();
 
-  for (unsigned agent=0; agent<registry.size(); agent++)
-  {
-    if (registry[agent]->get_name () == text)
-    {
-      if (verbose)
-        cerr << "MEAL::Function::factory using " 
-	     << registry[agent]->get_name() << endl;
+  assert (instances != NULL);
 
-      return registry[agent]->new_Function(); 
-    }
-  }
-
-  throw Error (InvalidParam, "MEAL::Function::factory",
-	       "no match for '%s' in %d agents", text.c_str(),
-	       registry.size());
+  return TextInterface::factory<MEAL::Function> (*instances, text);
 }
+

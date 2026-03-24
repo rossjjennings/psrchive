@@ -11,8 +11,13 @@
 #ifndef __MEAL_Complex2_H
 #define __MEAL_Complex2_H
 
-#include "MEAL/Complex.h"
+/*
+ * It is necessary to include Jones.h first in order to define true_math::finite(Jones)
+ * before the Evaluable::evaluate method is encountered
+ */
+
 #include "Jones.h"
+#include "MEAL/Complex.h"
 
 template<typename T>
 struct EstimateTraits< Jones<T> >

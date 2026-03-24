@@ -36,7 +36,7 @@ unsigned Pulsar::IXRInfo::get_nclass () const
 }
 
 //! Return the name of the specified class
-std::string Pulsar::IXRInfo::get_name (unsigned iclass) const
+std::string Pulsar::IXRInfo::get_label (unsigned iclass) const
 {
   return "IXR (dB)";
 }

@@ -103,14 +103,14 @@ namespace Pulsar {
     void add (const Pulsar::Archive* archive);
 
     //! Return a pointer to a new PolnCalibrator for the given archive
-    PolnCalibrator* generatePolnCalibrator (Archive*,
+    PolnCalibrator* generatePolnCalibrator (const Archive*,
 					    const Calibrator::Type* m);
  
     //! Return a pointer to a new FluxCalibrator for the given archive
-    FluxCalibrator* generateFluxCalibrator (Archive*, bool allow_raw=false);
+    FluxCalibrator* generateFluxCalibrator (const Archive*, bool allow_raw=false);
     
     //! Return a pointer to a new HybridCalibrator
-    HybridCalibrator* generateHybridCalibrator (ReferenceCalibrator*,Archive*);
+    HybridCalibrator* generateHybridCalibrator (ReferenceCalibrator*, const Archive*);
 
     //! Set the feed transformation to be incorporated into PolnCalibrator
     void set_feed (MEAL::Complex2* xform) { feed = xform; }
@@ -365,7 +365,7 @@ namespace Pulsar {
     Cache<FluxCalibrator> lastFluxCal;
  
     //! Return a pointer to a new FluxCalibrator for the given archive
-    FluxCalibrator* rawFluxCalibrator (Archive* a);
+    FluxCalibrator* rawFluxCalibrator (const Archive* a);
 
     //! If set, this model of the feed is incorporated into all solutions
     Reference::To<MEAL::Complex2> feed;
@@ -377,6 +377,9 @@ namespace Pulsar {
   std::ostream& operator << (std::ostream& os, Database::Sequence);
     
   std::istream& operator >> (std::istream& is, Database::Sequence&);
+
+  bool less_than (const Pulsar::Database::Entry* A, 
+		  const Pulsar::Database::Entry* B);
 }
 
 #endif

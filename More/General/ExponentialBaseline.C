@@ -37,11 +37,10 @@ void Pulsar::ExponentialBaseline::set_threshold (float sigma)
   if (Profile::verbose)
 #endif
     cerr << "Pulsar::ExponentialBaseline::set_threshold sigma=" << sigma
-	 << " correction=" << moment_correction << endl;
+         << " correction=" << moment_correction << endl;
 }
 
-void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight* weight, 
-					      float& lower, float& upper)
+void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight* weight, float& lower, float& upper)
 {
   weight->set_Profile (profile);
 
@@ -55,7 +54,6 @@ void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight* weight,
 
   if (!get_initial_bounds())
     upper *= moment_correction;
-
 }
 
 class Pulsar::ExponentialBaseline::Interface 
@@ -68,8 +66,8 @@ public:
       set_instance (instance);
 
     add( &IterativeBaseline::get_threshold,
-	 &IterativeBaseline::set_threshold,
-	 "threshold", "cutoff threshold used to avoid outliers" );
+         &IterativeBaseline::set_threshold,
+         "threshold", "cutoff threshold used to avoid outliers" );
   }
 
   std::string get_interface_name () const { return "exponential"; }

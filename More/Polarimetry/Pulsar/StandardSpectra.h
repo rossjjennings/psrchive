@@ -42,7 +42,7 @@ namespace Calibration {
     //! Return the index of the last harmonic
     unsigned get_last_harmonic () const;
 
-    //! Normalize estimates by the average determinant
+    //! Normalize estimates by the average squared_invariant
     void set_normalize (bool);
 
     //! Get the Stokes parameters of the specified phase bin
@@ -51,12 +51,15 @@ namespace Calibration {
     //! Get the statistical interface to the data
     Pulsar::PolnSpectrumStats* get_stats ();
 
+    //! Get the total squared invariant used to normalize the Stokes parameters
+    Estimate<double> get_total_squared_invariant() { return total_squared_invariant; }
+    
  protected:
 
     Reference::To< Pulsar::PolnSpectrumStats > stats;
     Reference::To< MEAL::NormalizeStokes > normalize;
 
-    Estimate<double> total_determinant;
+    Estimate<double> total_squared_invariant;
     unsigned last_harmonic;
 
   };

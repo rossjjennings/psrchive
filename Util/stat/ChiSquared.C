@@ -9,6 +9,7 @@
 #include "LinearRegression.h"
 
 #include "statutil.h"
+#include "true_math.h"
 
 #include <algorithm>
 #include <numeric>

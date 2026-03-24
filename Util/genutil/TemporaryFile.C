@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,6 +10,8 @@
 #endif
 
 #include "TemporaryFile.h"
+#include "dirutil.h"
+#include "strutil.h"
 #include "Error.h"
 
 #include <signal.h>
@@ -99,29 +101,23 @@ void TemporaryFile::signal_handler (int sig)
 }
 
 //! Construct with regular expression
-TemporaryFile::TemporaryFile (const string& basename)
+TemporaryFile::TemporaryFile (const string& desired_filename)
 {
-  // open the temporary file
-  filename = basename + ".XXXXXXXX";
+  filename = desired_filename;
 
+  static const char* tmpdir = getenv("PSRCHIVE_TMPDIR");
+  if (tmpdir)
+  {
+    filename = string(tmpdir) + "/" + basename(filename);
+  }
+
+  filename += ".XXXXXXXX";
+
+  // open the temporary file
   fd = mkstemp (const_cast<char*> (filename.c_str()));
   if (fd < 0)
     throw Error (FailedSys, "TemporaryFile",
                  "mkstemp(" + filename + ")");
-
-#if 0
-  // close and re-open just in case mkstemp returns a file descriptor that
-  // is incapable of going past 2GB in size
-
-  if (::close (fd) < 0)
-    throw Error (FailedSys, "TemporaryFile",
-                 "close (%d)", fd);
-
-  fd = ::open (filename.c_str(), O_RDWR);
-  if (fd < 0)
-    throw Error (FailedSys, "TemporaryFile",
-                 "open (" + filename + ")");
-#endif
 
   unlinked = false;
 

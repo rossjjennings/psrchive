@@ -41,8 +41,7 @@ void Pulsar::RemoveBaseline::Total::transform (Archive* archive)
     operate (archive->get_Integration(isub), baseline);
 }
 
-void Pulsar::RemoveBaseline::Total::operate (Integration* integration,
-					     const PhaseWeight* baseline)
+void Pulsar::RemoveBaseline::Total::operate (Integration* integration, const PhaseWeight* baseline)
 {
   DisperseWeight shift (integration);
   shift.set_weight (baseline);
@@ -69,7 +68,7 @@ void Pulsar::RemoveBaseline::Total::operate (Integration* integration,
     for (unsigned ipol=0; ipol<npol; ipol++)
     {
       if (Profile::verbose)
-	cerr << "Pulsar::RemoveBaseline::Total::operate ipol=" << ipol << endl;
+        cerr << "Pulsar::RemoveBaseline::Total::operate ipol=" << ipol << endl;
 
       Profile* profile = integration->get_Profile(ipol,ichan);
 

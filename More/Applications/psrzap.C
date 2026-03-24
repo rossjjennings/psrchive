@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) try
 {
   /* Process any args */
   int opt=0;
-  int verb=0;
+  int verbose=0;
 
   string expression;
   bool resume_psrsh = false;
@@ -240,8 +240,8 @@ int main(int argc, char *argv[]) try
     switch (opt)
     {
       case 'v':
-        verb++;
-        Archive::set_verbosity(verb);
+        verbose++;
+        Archive::set_verbosity(verbose);
         break;
         
       case 'e':
@@ -249,8 +249,8 @@ int main(int argc, char *argv[]) try
         break;
 
       case 'E':
-	expression = optarg;
-	break;
+        expression = optarg;
+        break;
 
       case 'r':
         resume_psrsh = true;
@@ -270,7 +270,8 @@ int main(int argc, char *argv[]) try
     }
   }
 
-  if (optind==argc) {
+  if (optind==argc)
+  {
     usage();
     cerr << PROG ": No filename given" << endl;
     exit(-1);
@@ -278,7 +279,15 @@ int main(int argc, char *argv[]) try
 
   /* Load file */
   string filename = argv[optind];
+
+  if (verbose)
+    cerr << "psrzap: loading '" << filename << "'" << endl;
+
   Reference::To<Archive> orig_arch = Archive::load(filename);
+
+  if (verbose)
+    cerr << "psrzap: dedisperse and remove basline from clone" << endl;
+
   Reference::To<Archive> arch = orig_arch->clone();
   arch->dedisperse();
   arch->remove_baseline();
@@ -294,6 +303,9 @@ int main(int argc, char *argv[]) try
 
   if (reconstruct_psrsh)
   {
+    if (verbose)
+      cerr << "psrzap: reconstruct from '" << psrsh_filename << "'" << endl;
+    
     FILE *file = fopen (psrsh_filename.c_str(), "w");
     fprintf (file, "%s\n", psrsh_header.c_str());
 
@@ -356,6 +368,9 @@ int main(int argc, char *argv[]) try
   }
   else if (resume_psrsh)
   {
+    if (verbose)
+      cerr << "psrzap: resume from '" << psrsh_filename << "'" << endl;
+
     Reference::To<Pulsar::Interpreter> interpreter = standard_shell ();
 
     interpreter->set( arch );
@@ -365,22 +380,18 @@ int main(int argc, char *argv[]) try
 
   // Create profile plots
   Reference::To<Archive> tot_arch=NULL,pf_arch=NULL,pt_arch=NULL;
-  ProfilePlot *totplot=NULL;
-  PhaseVsFrequency *pfplot=NULL;
-  PhaseVsTime *ptplot=NULL;
-  int totplot_id;
 
-  totplot = new ProfilePlot;
-  pfplot = new PhaseVsFrequency;
-  ptplot= new PhaseVsTime;
+  Reference::To<ProfilePlot> totplot = new ProfilePlot;
+  Reference::To<PhaseVsFrequency> pfplot = new PhaseVsFrequency;
+  Reference::To<PhaseVsTime> ptplot= new PhaseVsTime;
 
   // Create window and subdivide
-  totplot_id = cpgopen("/xs");
+  int totplot_id = cpgopen("/xs");
   cpgpap(0.0,1.5);
   cpgsubp(1,3);
 
   // Create Dynamic Spectrum Plot
-  DynamicBaselineSpectrumPlot *dsplot = new DynamicBaselineSpectrumPlot;
+  Reference::To<DynamicBaselineSpectrumPlot> dsplot = new DynamicBaselineSpectrumPlot;
   if (!expression.empty())
     dsplot->configure("exp="+expression);
   else
@@ -422,27 +433,27 @@ int main(int argc, char *argv[]) try
       cpgpage();
       dsplot->plot(arch);
       if (resum) {
-	// Total
-	tot_arch = arch->total();
+        // Total
+        tot_arch = arch->total();
         cpgslct(totplot_id);
-	cpgpanl(1,1);
+        cpgpanl(1,1);
         cpgeras();
         totplot->plot(tot_arch);
 
-	// pulse vs frequency
-	pf_arch = arch->clone();
-	pf_arch->pscrunch();
-	pt_arch = pf_arch->clone();
-	pf_arch->tscrunch();
-	//	pf_arch->remove_baseline();
-	cpgpanl(1,2);
+        // pulse vs frequency
+        pf_arch = arch->clone();
+        pf_arch->pscrunch();
+        pt_arch = pf_arch->clone();
+        pf_arch->tscrunch();
+        //	pf_arch->remove_baseline();
+        cpgpanl(1,2);
         cpgeras();
         pfplot->plot(pf_arch);
 
-	// pulse vs time
-	pt_arch->fscrunch();
-	//	pt_arch->remove_baseline();
-	cpgpanl(1,3);
+        // pulse vs time
+        pt_arch->fscrunch();
+        //	pt_arch->remove_baseline();
+        cpgpanl(1,3);
         cpgeras();
         ptplot->plot(pt_arch);
 
@@ -454,16 +465,17 @@ int main(int argc, char *argv[]) try
     }
 
     // Mark zapped profiles
-    for (unsigned i=izap; i<zap_list.size(); i++) {
+    for (unsigned i=izap; i<zap_list.size(); i++)
+    {
       float df=zap_list[i].freq0-zap_list[i].freq1;
       float dt=zap_list[i].sub0-zap_list[i].sub1;
 
       cpgsfs(2);
       cpgsci(2);
       if (fabs(df)<0.001 && fabs(dt)<0.001)
-	cpgpt1(zap_list[i].sub0+0.5,zap_list[i].freq0,2);
+        cpgpt1(zap_list[i].sub0+0.5,zap_list[i].freq0,2);
       else
-	cpgrect(zap_list[i].sub0+0.5,zap_list[i].sub1+0.5,zap_list[i].freq0,zap_list[i].freq1);
+        cpgrect(zap_list[i].sub0+0.5,zap_list[i].sub1+0.5,zap_list[i].freq0,zap_list[i].freq1);
       cpgsci(1);
     }
 
@@ -512,10 +524,10 @@ int main(int argc, char *argv[]) try
           if (x0>x1) { tmp=x0; x0=x1; x1=tmp; }
           sprintf(conf,"srange=(%d,%d)",(int)x0,(int)ceil(x1));
           dsplot->configure(string(conf));
-	  t0=sub2time(pt_arch,(int) x0);
-	  t1=sub2time(pt_arch,(int) ceil(x1));
-	  sprintf(conf,"y:win=(%.3f,%.3f)",t0,t1);
-	  ptplot->configure(string(conf));
+          t0=sub2time(pt_arch,(int) x0);
+          t1=sub2time(pt_arch,(int) ceil(x1));
+          sprintf(conf,"y:win=(%.3f,%.3f)",t0,t1);
+          ptplot->configure(string(conf));
         }
         redraw = true;
         click = 0;
@@ -699,9 +711,9 @@ int main(int argc, char *argv[]) try
           int chan1 = freq2chan(arch, zap_list[i].freq1);
           if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
           if (chan0==chan1) 
-	    printf(" -z %d", chan0);
+            printf(" -z %d", chan0);
           else 
-	    printf(" -Z \"%d %d\"", chan0, chan1);
+            printf(" -Z \"%d %d\"", chan0, chan1);
         } else if (zap_list[i].type == time_cursor) {
           if (zap_list[i].sub0==zap_list[i].sub1) 
             printf(" -w %d", zap_list[i].sub0);
@@ -714,22 +726,22 @@ int main(int argc, char *argv[]) try
       /* Small ranges */
       for (unsigned i=0; i<zap_list.size(); i++) {
         if (zap_list[i].type == both_cursor) {
-	  printf("paz -m -I");
-	  int chan0 = freq2chan(arch, zap_list[i].freq0);
+          printf("paz -m -I");
+          int chan0 = freq2chan(arch, zap_list[i].freq0);
           int chan1 = freq2chan(arch, zap_list[i].freq1);
           if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
           if (chan0==chan1)
             printf(" -z %d", chan0);
           else
             printf(" -Z \"%d %d\"", chan0, chan1);
-	  if (zap_list[i].sub0==zap_list[i].sub1)
+          if (zap_list[i].sub0==zap_list[i].sub1)
             printf(" -w %d", zap_list[i].sub0);
           else
             printf(" -W \"%d %d\"", zap_list[i].sub0, zap_list[i].sub1);
-	  cstr=new char [output_filename.size()+1];
-	  strcpy(cstr,output_filename.c_str());
-	  printf(" %s\n", (char *) cstr);
-	}
+          cstr=new char [output_filename.size()+1];
+          strcpy(cstr,output_filename.c_str());
+          printf(" %s\n", (char *) cstr);
+        }
       }
     }
 
@@ -737,27 +749,27 @@ int main(int argc, char *argv[]) try
     if (ch==CMD_BASELINE) {
       // Set baselining strategy
       if (remove_baseline) {
-	fprintf(stderr, "Unsetting remove_baseline_strategy.\n");
-	Pulsar::Archive::remove_baseline_strategy.set (new Pulsar::RemoveBaseline::Total, &Pulsar::RemoveBaseline::Total::transform);
-	remove_baseline=false;
-	arch=orig_arch->clone();
-	arch->dedisperse();
-	arch->remove_baseline();
-	for (unsigned i=0; i<zap_list.size(); i++) {
-	  zap = zap_list[i];
-	  apply_zap_range(arch, &zap);
-	}
+        fprintf(stderr, "Unsetting remove_baseline_strategy.\n");
+        Pulsar::Archive::remove_baseline_strategy.set (new Pulsar::RemoveBaseline::Total, &Pulsar::RemoveBaseline::Total::transform);
+        remove_baseline=false;
+        arch=orig_arch->clone();
+        arch->dedisperse();
+        arch->remove_baseline();
+        for (unsigned i=0; i<zap_list.size(); i++) {
+          zap = zap_list[i];
+          apply_zap_range(arch, &zap);
+        }
       } else {
-	fprintf(stderr, "Set remove_baseline_strategy.\n");
-	Pulsar::Archive::remove_baseline_strategy.set (new Pulsar::RemoveVariableBaseline, &Pulsar::RemoveVariableBaseline::transform);
-	remove_baseline=true;
-	arch=orig_arch->clone();
-	arch->dedisperse();
-	arch->remove_baseline();
-	for (unsigned i=0; i<zap_list.size(); i++) {
-	  zap = zap_list[i];
-	  apply_zap_range(arch, &zap);
-	}
+        fprintf(stderr, "Set remove_baseline_strategy.\n");
+        Pulsar::Archive::remove_baseline_strategy.set (new Pulsar::RemoveVariableBaseline, &Pulsar::RemoveVariableBaseline::transform);
+        remove_baseline=true;
+        arch=orig_arch->clone();
+        arch->dedisperse();
+        arch->remove_baseline();
+        for (unsigned i=0; i<zap_list.size(); i++) {
+          zap = zap_list[i];
+          apply_zap_range(arch, &zap);
+        }
       }
       redraw=true;
       resum=true;
@@ -784,9 +796,9 @@ int main(int argc, char *argv[]) try
           int chan1 = freq2chan(arch, zap_list[i].freq1);
           if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
           if (chan0==chan1) 
-	    fprintf(file,"zap chan %d\n",chan0);
+            fprintf(file,"zap chan %d\n",chan0);
           else 
-	    fprintf(file,"zap chan %d-%d\n", chan0, chan1);
+            fprintf(file,"zap chan %d-%d\n", chan0, chan1);
         }
         else if (zap_list[i].type == time_cursor)
         {
@@ -800,23 +812,23 @@ int main(int argc, char *argv[]) try
       // Subint/channel intersections
       for (unsigned i=0; i<zap_list.size(); i++) {
         if (zap_list[i].type == both_cursor) {
-	  int chan0 = freq2chan(arch, zap_list[i].freq0);
+          int chan0 = freq2chan(arch, zap_list[i].freq0);
           int chan1 = freq2chan(arch, zap_list[i].freq1);
-	  int sub0 = zap_list[i].sub0;
-	  int sub1 = zap_list[i].sub1;
+          int sub0 = zap_list[i].sub0;
+          int sub1 = zap_list[i].sub1;
           if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
           if (chan0==chan1 && sub0==sub1) {
             fprintf(file,"zap such %d,%d\n",sub0,chan0);
-	  } else {
-	    fprintf(file,"zap such");
-	    for (int sub=sub0;sub<=sub1;sub++) {
-	      for (int chan=chan0;chan<=chan1;chan++) {
-		fprintf(file," %d,%d",sub,chan);
-	      }
-	    }
-	    fprintf(file,"\n");
-	  }
-	}
+          } else {
+            fprintf(file,"zap such");
+            for (int sub=sub0;sub<=sub1;sub++) {
+              for (int chan=chan0;chan<=chan1;chan++) {
+                fprintf(file," %d,%d",sub,chan);
+              }
+            }
+            fprintf(file,"\n");
+          }
+        }
       }
       fclose(file);
       printf("PSRSH script written\n");

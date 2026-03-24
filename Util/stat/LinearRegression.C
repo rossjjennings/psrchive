@@ -27,35 +27,85 @@ void LinearRegression::ordinary_least_squares
 )
 {
   unsigned ndat = yval.size();
-  vector<double> wt (ndat, 1.0);
+  vector<double> weight (ndat, 1.0);
   vector<double> alpha (ndat, 1.0);
 
   if (mask)
   {
     for (unsigned idat=0; idat < ndat; idat++)
       if (! (*mask)[idat])
-        wt[idat] = 0.0;
+        weight[idat] = 0.0;
   }
 
-  generalized_least_squares (yval, xval, wt, alpha);
+  generalized_least_squares (yval, xval, weight, alpha);
 }
 
 void LinearRegression::weighted_least_squares 
 (
   const vector<double>& yval,
   const vector<double>& xval,
-  const vector<double>& wt
+  const vector<double>& weight
 )
 {
   vector<double> alpha (yval.size(), 1.0);
-  generalized_least_squares (yval, xval, wt, alpha);
+  generalized_least_squares (yval, xval, weight, alpha);
 }
- 
+
 void LinearRegression::generalized_least_squares 
 (
   const vector<double>& yval,
   const vector<double>& xval,
-  const vector<double>& wt,
+  const vector<double>& weight,
+  const vector<double>& alpha
+)
+{
+  bool done = false;
+
+  masked_weights = weight;
+
+  while (!done)
+  {
+    least_squares_worker(yval, xval, masked_weights, alpha);
+
+    done = true;
+
+    if (iterative_outlier_threshold > 0.0)
+    {
+      double Q1=0, Q2=0, Q3=0;
+      Q1_Q2_Q3 (residual, Q1, Q2, Q3);
+
+      double IQR = Q3-Q1;
+      double diff_min = Q1 - iterative_outlier_threshold * IQR;
+      double diff_max = Q3 + iterative_outlier_threshold * IQR;
+      
+      // cerr << "diff_min=" << diff_min << " diff_max=" << diff_max << endl;
+
+      unsigned idiff = 0;
+      unsigned ndim = yval.size ();
+
+      for (unsigned idim=0; idim<ndim; idim++)
+      {
+        if (masked_weights[idim] == 0)
+          continue;
+    
+        double diff = residual[idim];
+        if (diff > diff_max || diff < diff_min)
+        {
+          masked_weights[idim] = 0;
+          done = false;
+        }
+
+        idiff ++;
+      }
+    }
+  }
+}
+
+void LinearRegression::least_squares_worker
+(
+  const vector<double>& yval,
+  const vector<double>& xval,
+  const vector<double>& weight,
   const vector<double>& alpha
 )
 {
@@ -76,11 +126,11 @@ void LinearRegression::generalized_least_squares
     double orig_alpha_2 = 0.0;
     for (unsigned idim=0; idim < ndim; idim++)
     {
-      if (wt[idim] == 0)
+      if (weight[idim] == 0)
         continue;
 
-      orig_alpha_x += alpha[idim] * xval[idim] * wt[idim];
-      orig_alpha_2 += alpha[idim] * alpha[idim] * wt[idim];
+      orig_alpha_x += alpha[idim] * xval[idim] * weight[idim];
+      orig_alpha_2 += alpha[idim] * alpha[idim] * weight[idim];
     }
  
     x_offset = orig_alpha_x / orig_alpha_2;
@@ -89,17 +139,17 @@ void LinearRegression::generalized_least_squares
 
   for (unsigned idim=0; idim < ndim; idim++)
   {
-    if (wt[idim] == 0)
+    if (weight[idim] == 0)
       continue;
 
     double xdatum = xval[idim] - x_offset;
 
     count ++;
-    x_y += yval[idim] * xdatum * wt[idim];
-    x_2 += xdatum * xdatum * wt[idim];
-    alpha_x += alpha[idim] * xdatum * wt[idim];
-    alpha_y += alpha[idim] * yval[idim] * wt[idim];
-    alpha_2 += alpha[idim] * alpha[idim] * wt[idim];
+    x_y += yval[idim] * xdatum * weight[idim];
+    x_2 += xdatum * xdatum * weight[idim];
+    alpha_x += alpha[idim] * xdatum * weight[idim];
+    alpha_y += alpha[idim] * yval[idim] * weight[idim];
+    alpha_2 += alpha[idim] * alpha[idim] * weight[idim];
   }
  
   double bar_x = alpha_x / alpha_2;
@@ -122,37 +172,49 @@ void LinearRegression::generalized_least_squares
     for (unsigned idim=0; idim < ndim; idim++)
       out << idim << " " << yval[idim] << " " << xval[idim] << endl;
 
-    throw Error (InvalidState, "linear_fit_work", "non-finite scale=%lf count=%u alpha_2=%lf", scale.val, count, alpha_2);
+    throw Error (InvalidState, "LinearRegression::generalized_least_squares", 
+                 "non-finite scale=%lf count=%u alpha_2=%lf", scale.val, count, alpha_2);
   }
 
   if ( ! true_math::finite(scale.var) )
-    throw Error (InvalidState, "linear_fit_work", "non-finite scale var=%lf", scale.var);
+    throw Error (InvalidState, "LinearRegression::generalized_least_squares",
+		 "non-finite scale var=%lf", scale.var);
 
-  if (robust_offset)
+  if ( ! true_math::finite(offset.val) )
+    throw Error (InvalidState, "LinearRegression::generalized_least_squares",
+                 "non-finite offset=%lf", offset.val);
+
+  if ( ! true_math::finite(offset.var) )
+    throw Error (InvalidState, "LinearRegression::generalized_least_squares",
+                 "non-finite offset var=%lf", offset.var);
+
+  nfree = 0;
+  chisq = 0.0;
+
+  if (iterative_outlier_threshold > 0)
+    residual.resize(count);
+
+  for (unsigned idim=0; idim<ndim; idim++)
   {
-    vector<double> diff (count);
-    unsigned idiff = 0;
-  
-    for (unsigned idim=0; idim<ndim; idim++)
-    {
-      if (wt[idim] == 0)
-        continue;
+    if (weight[idim] == 0)
+      continue;
     
-      double xdatum = xval[idim] - x_offset;
+    double xdatum = xval[idim] - x_offset;
 
-      diff[idiff] = yval[idim]*wt[idim] - scale.val * xdatum*wt[idim];
-      idiff ++;
-    }
-  
-    assert (idiff == count);  
-    offset.val = median (diff);
+    double diff = yval[idim] - scale.val*xdatum - offset.val*alpha[idim];
+    chisq += diff * diff * weight[idim];
+
+    if (iterative_outlier_threshold > 0)
+      residual[nfree] = diff * sqrt(weight[idim]);
+
+    nfree ++;
   }
+
+  assert (nfree == count);
 
   if ( ! true_math::finite(offset.val) )
     throw Error (InvalidState, "linear_fit_work", "non-finite offset=%lf", offset.val);
 
   if ( ! true_math::finite(offset.var) )
     throw Error (InvalidState, "linear_fit_work", "non-finite offset var=%lf", offset.var);
-
-  // cerr << "scale=" << scale << " offset=" << offset << endl;
 }

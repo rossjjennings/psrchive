@@ -101,7 +101,7 @@ try
   if (verbose)
 #endif
     cerr << "Pulsar::CalibratorPlotter::plot nchan=" << nchan 
-	 << " nplot=" << nplot << " cfreq=" << cfreq << " bw=" << bw << endl;
+         << " nplot=" << nplot << " cfreq=" << cfreq << " bw=" << bw << endl;
 
   float xmin, xmax, ymin, ymax;
   cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
@@ -153,7 +153,7 @@ try
   {
 #ifdef _DEBUG
     cerr << "Pulsar::CalibratorPlotter::plot " 
-	 << iplot << "/" << info->get_nclass() << endl;
+         << iplot << "/" << info->get_nclass() << endl;
 #endif
 
     if (ipanel % npanel == 0)
@@ -162,9 +162,9 @@ try
 
       if (ipanel)
       {
-	if (print_titles)
-	  plot_labels (info);
-	cpgpage ();
+        if (print_titles)
+          plot_labels (info);
+        cpgpage ();
       }
 
       ybottom = ymin;
@@ -172,7 +172,7 @@ try
       unsigned to_plot = info->get_nclass() - iplot;
 
       if (to_plot < npanel)
-	ybottom += 0.5 * (ybetween + yheight) * float(npanel - to_plot);
+        ybottom += 0.5 * (ybetween + yheight) * float(npanel - to_plot);
     }
     else
       xaxis = "bcst";
@@ -185,7 +185,7 @@ try
     if (verbose)
 #endif
       cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-	   << " nparam=" << nparam << endl;
+           << " nparam=" << nparam << endl;
 
     unsigned iparam = 0;
 
@@ -194,11 +194,11 @@ try
 #ifndef _DEBUG
       if (verbose)
 #endif
-	cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-	     << " iparam=" << iparam << endl;
+        cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+             << " iparam=" << iparam << endl;
 
       for (unsigned ichan=0; ichan<nchan; ichan++)
-	data[ichan] = info->get_param (ichan, iplot, iparam);
+        data[ichan] = info->get_param (ichan, iplot, iparam);
 
 
       plotter.add_plot (data);
@@ -208,7 +208,7 @@ try
     if (verbose)
 #endif
       cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-	   << " plots initialized" << endl;
+           << " plots initialized" << endl;
 
     cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
@@ -217,9 +217,9 @@ try
     for (iparam=0; iparam<nparam; iparam++)
     {
       if (use_colour)
-	cpgsci ( info->get_colour_index(iplot, iparam) );
+        cpgsci ( info->get_colour_index(iplot, iparam) );
       else
-	plotter.set_graph_marker ( info->get_graph_marker(iplot, iparam) );
+        plotter.set_graph_marker ( info->get_graph_marker(iplot, iparam) );
 
       plotted += plotter.plot (iparam);
     }
@@ -229,8 +229,8 @@ try
 #ifndef _DEBUG
       if (verbose)
 #endif
-	cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-	     << " plot axis" << endl;
+        cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+            << " plot axis" << endl;
 
       cpgsci (1);
 
@@ -241,13 +241,13 @@ try
       cpgbox(xaxis.c_str(),0,0,"bcvnst",0,2);
 
 #ifdef _DEBUG
-      cerr << "cpgmtxt (" << info->get_name(iplot) << ")" << endl;
+      cerr << "cpgmtxt (" << info->get_label(iplot) << ")" << endl;
 #endif
 
-      cpgmtxt("L",3.5,.5,.5, info->get_name(iplot).c_str());
+      cpgmtxt("L",3.5,.5,.5, info->get_label(iplot).c_str());
       
       if (ipanel % npanel == 0)
-	cpgmtxt("B",3.0,.5,.5, "Frequency (MHz)");
+        cpgmtxt("B",3.0,.5,.5, "Frequency (MHz)");
 
       ipanel ++;
       ybottom += ybetween + yheight;
@@ -255,7 +255,7 @@ try
 
 #ifdef _DEBUG
     cerr << "Pulsar::Calibrator::plot end " << iplot << "/" 
-	 << info->get_nclass() << endl;
+         << info->get_nclass() << endl;
 #endif
   }
 

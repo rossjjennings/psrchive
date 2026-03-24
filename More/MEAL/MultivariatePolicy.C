@@ -80,8 +80,8 @@ class BindDimension : public Reference::Able
   unsigned idim;
 
   public:
-    BindDimension (unsigned _idim, MEAL::MultivariatePolicy* policy)
-    { idim = _idim;  context = policy; }
+    BindDimension (unsigned _idim, MEAL::MultivariatePolicy* policy) : context(policy)
+    { idim = _idim; }
 
     void set_abscissa (double val) { context->set_abscissa (idim, val); }
 };

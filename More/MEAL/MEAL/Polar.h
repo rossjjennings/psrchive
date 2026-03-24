@@ -42,6 +42,9 @@ namespace MEAL {
     //! Destructor
     ~Polar ();
 
+    //! Clone operator
+    Polar* clone () const override;
+
     //! Get the instrumental gain, \f$ G \f$, in calibrator voltage units
     Estimate<double> get_gain () const;
 

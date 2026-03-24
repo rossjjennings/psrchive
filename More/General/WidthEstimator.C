@@ -10,9 +10,13 @@
 #include "interface_factory.h"
 
 #include "Pulsar/PhaseWidth.h"
-// #include "Pulsar/MTMWidth.h"
 
 using namespace std;
+
+Pulsar::WidthEstimator::~WidthEstimator()
+{
+  // cerr << "Pulsar::WidthEstimator dtor this=" << this << endl;
+}
 
 Phase::Value Pulsar::WidthEstimator::get_width (const Profile* profile)
 {

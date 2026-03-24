@@ -11,8 +11,9 @@
 #ifndef __MEAL_JonesCloude_H
 #define __MEAL_JonesCloude_H
 
-#include "MEAL/Complex4.h"
 #include "MEAL/Complex2.h"
+#include "MEAL/Complex4.h"
+
 #include "MEAL/Convert.h"
 
 namespace MEAL {

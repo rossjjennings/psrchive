@@ -50,8 +50,20 @@ namespace Calibration {
     //! Get the specified CoherencyMeasurementSet
     const CoherencyMeasurementSet& get_data (unsigned idata) const;
 
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // Remove data from the model
+    //
+    // ///////////////////////////////////////////////////////////////////
+
     //! Delete all data
     void delete_data ();
+
+    //! Remove the specified input from the model and update all measurements
+    void erase_input (unsigned index) override;
+
+    //! Remove the specified transformation from the model and update all measurements
+    void erase_transformation (unsigned index) override;
 
     // ///////////////////////////////////////////////////////////////////
     //

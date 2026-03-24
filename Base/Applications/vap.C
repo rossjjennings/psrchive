@@ -2106,16 +2106,20 @@ void ExtractPolyco( string filename )
   if( !archive )
     return;
 
-  if( !full_paths )
-    cout << basename(filename);
-  else
-    cout << filename;
+  if (!hide_headers)
+  {
+    if( !full_paths )
+      cout << basename(filename);
+    else
+      cout << filename;
 
-  cout << " has polyco:" << endl << endl;
+    cout << " has polyco:" << endl << endl;
+  }
 
   archive->get_model()->unload( stdout );
 
-  cout << endl;
+  if (!hide_headers)
+    cout << endl;
 }
 
 
@@ -2132,7 +2136,7 @@ void ExtractEphemeris( string filename )
   if( !archive )
     return;
 
-  if( !archive->has_ephemeris() )
+  if( !archive->has_ephemeris() && !hide_headers )
     cout << "vap: " << filename << " has no ephemeris" << endl;
   else
     archive->get_ephemeris()->unload( stdout );

@@ -48,7 +48,7 @@ string TextInterface::Parser::process (const string& command)
   string::size_type set = command.find('=');
 
   // if no equals sign is present, assume that command is get key
-  if (set == string::npos)
+  if (set == string::npos) try
   {
     string name = command;
     string value = get_name_value (name);
@@ -58,6 +58,11 @@ string TextInterface::Parser::process (const string& command)
       prefix = name + "=";
 
     return indentation + prefix + value;
+  }
+  catch (Error& error)
+  {
+    DEBUG("TextInterface::Parser::process exception code=" << error.get_code())
+    return "-";
   }
 
   // string before the equals sign
@@ -247,10 +252,7 @@ string TextInterface::Parser::get_name_value (string& name) const try
 }
 catch (Error& error)
 {
-  if (error.get_code() == InvalidPointer)
-    return "-";
-  else
-    throw error;
+  return "-";
 }
 
 //! Set the value of the value

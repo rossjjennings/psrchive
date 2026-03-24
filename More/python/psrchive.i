@@ -5,7 +5,11 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include "numpy/noprefix.h"
+#include "numpy/arrayobject.h"
+
+#ifndef PSRCHIVE_PyArray_DATA
+  #define PSRCHIVE_PyArray_DATA(a) PyArray_DATA(a)
+#endif
 
 #include "Reference.h"
 #include "Pulsar/IntegrationManager.h"
@@ -166,7 +170,7 @@ void pointer_tracker_remove(Reference::Able *ptr)
 %ignore Pulsar::FrontendCorrection::get_transformation(unsigned);
 %ignore Pulsar::FrontendCorrection::get_basis();
 %ignore Pulsar::FrontendCorrection::get_projection(unsigned);
-%ignore Pulsar::FaradayRotation::get_identity();
+%ignore Pulsar::FaradayRotation::get_identity() const;
 
 // Also does not use the assignment operator
 %ignore Pulsar::Archive::operator=(const Archive&);
@@ -435,7 +439,7 @@ Pulsar::Archive* Archive_load (const std::string& name)
         n = self->get_nbin();
         ptr = self->get_amps();
         arr = (PyArrayObject *) \
-              PyArray_SimpleNewFromData(1, &n, PyArray_FLOAT, (char *)ptr);
+              PyArray_SimpleNewFromData(1, &n, NPY_FLOAT, (char *)ptr);
         if (arr == NULL) return NULL;
         PyArray_INCREF(arr);
         return (PyObject *)arr;
@@ -448,8 +452,8 @@ Pulsar::Archive* Archive_load (const std::string& name)
         float *ptr = self->get_amps();
         float weight = self->get_weight();
         
-        PyArrayObject *arr = (PyArrayObject *)PyArray_SimpleNew(1, &ndims, PyArray_FLOAT);
-        float* data = reinterpret_cast<float*>(arr->data);
+        PyArrayObject *arr = (PyArrayObject *)PyArray_SimpleNew(1, &ndims, NPY_FLOAT);
+        float* data = reinterpret_cast<float*>(PSRCHIVE_PyArray_DATA(arr));
         for (int ii = 0 ; ii < ndims; ii++)
             data[ii] = ptr[ii] * weight;
         return (PyObject *)arr;
@@ -467,10 +471,10 @@ Pulsar::Archive* Archive_load (const std::string& name)
         ndims[0] = self->get_npol();
         ndims[1] = self->get_nchan();
         ndims[2] = self->get_nbin();
-        arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, PyArray_FLOAT);
+        arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, NPY_FLOAT);
         for (int jj = 0 ; jj < ndims[0] ; jj++)
             for (int kk = 0 ; kk < ndims[1] ; kk++)
-                memcpy(arr->data + sizeof(float) * 
+                memcpy((char*)PSRCHIVE_PyArray_DATA(arr) + sizeof(float) * 
                         (ndims[2] * (kk + ndims[1] * jj)), 
                         self->get_Profile(jj, kk)->get_amps(),
                         ndims[2]*sizeof(float));
@@ -567,12 +571,12 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
         // Pack values into new numpy arrays
         PyArrayObject *npy_mean, *npy_var;
-        npy_mean = (PyArrayObject *)PyArray_SimpleNew(2, size, PyArray_DOUBLE);
-        npy_var  = (PyArrayObject *)PyArray_SimpleNew(2, size, PyArray_DOUBLE);
+        npy_mean = (PyArrayObject *)PyArray_SimpleNew(2, size, NPY_DOUBLE);
+        npy_var  = (PyArrayObject *)PyArray_SimpleNew(2, size, NPY_DOUBLE);
         for (int ii=0; ii<size[0]; ii++) 
             for (int jj=0; jj<size[1]; jj++) {
-                ((double *)npy_mean->data)[ii*size[1]+jj] = mean[ii][jj].get_value();
-                ((double *)npy_var->data)[ii*size[1]+jj] = var[ii][jj];
+                ((double *)PSRCHIVE_PyArray_DATA(npy_mean))[ii*size[1]+jj] = mean[ii][jj].get_value();
+                ((double *)PSRCHIVE_PyArray_DATA(npy_var))[ii*size[1]+jj] = var[ii][jj];
             }
 
         // Pack arrays into tuple for output
@@ -594,21 +598,21 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
         // Create, fill numpy arrays
         PyArrayObject *hi_arr, *lo_arr, *sig_hi_arr, *sig_lo_arr;
-        hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
-        lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+        hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+        lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
         sig_hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims,
-            PyArray_DOUBLE);
+            NPY_DOUBLE);
         sig_lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims,
-            PyArray_DOUBLE);
+            NPY_DOUBLE);
         for (int ii=0; ii<dims[0]; ii++) {
             for (int jj=0; jj<dims[1]; jj++) {
-                ((double *)hi_arr->data)[ii*dims[1]+jj] =
+                ((double *)PSRCHIVE_PyArray_DATA(hi_arr))[ii*dims[1]+jj] =
                     hi[ii][jj].get_value();
-                ((double *)lo_arr->data)[ii*dims[1]+jj] =
+                ((double *)PSRCHIVE_PyArray_DATA(lo_arr))[ii*dims[1]+jj] =
                     lo[ii][jj].get_value();
-                ((double *)sig_hi_arr->data)[ii*dims[1]+jj] =
+                ((double *)PSRCHIVE_PyArray_DATA(sig_hi_arr))[ii*dims[1]+jj] =
                     sqrt(hi[ii][jj].get_variance());
-                ((double *)sig_lo_arr->data)[ii*dims[1]+jj] =
+                ((double *)PSRCHIVE_PyArray_DATA(sig_lo_arr))[ii*dims[1]+jj] =
                     sqrt(lo[ii][jj].get_variance());
             }
         }
@@ -629,9 +633,9 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         PyArrayObject *arr;
         npy_intp ndim[1];
         ndim[0] = self->get_nchan();
-        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, NPY_DOUBLE);
         for (ii = 0; ii < ndim[0]; ii++) {
-            ((double *)arr->data)[ii] = self->get_Profile(0, ii)->get_centre_frequency();
+            ((double *)PSRCHIVE_PyArray_DATA(arr))[ii] = self->get_Profile(0, ii)->get_centre_frequency();
         }
         return (PyObject *)arr;
     }
@@ -766,9 +770,9 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         npy_intp ndim[1];
 
         ndim[0] = self->get_nchan();
-        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, NPY_DOUBLE);
         for (ii = 0; ii < ndim[0]; ii++) {
-            ((double *)arr->data)[ii] = self->get_Profile(0, 0, ii)->get_centre_frequency();
+            ((double *)PSRCHIVE_PyArray_DATA(arr))[ii] = self->get_Profile(0, 0, ii)->get_centre_frequency();
         }
         return (PyObject *)arr;
     }
@@ -782,10 +786,10 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
         ndims[0] = self->get_nsubint();
         ndims[1] = self->get_nchan();
-        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, PyArray_DOUBLE);
+        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, NPY_DOUBLE);
         for (ii = 0; ii < ndims[0]; ii++) {
             for (jj = 0; jj < ndims[1]; jj++) {
-                ((double *)arr->data)[ii*ndims[1]+jj] = \
+                ((double *)PSRCHIVE_PyArray_DATA(arr))[ii*ndims[1]+jj] = \
                     self->get_Profile(ii, 0, jj)->get_centre_frequency();
             }
         }
@@ -800,9 +804,9 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         npy_intp ndim[1];
 
         ndim[0] = self->get_nsubint();
-        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, PyArray_DOUBLE);
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, ndim, NPY_DOUBLE);
         for (ii = 0; ii < ndim[0]; ii++) {
-            ((double *)arr->data)[ii] = self->get_Integration(ii)->get_epoch().in_days();
+            ((double *)PSRCHIVE_PyArray_DATA(arr))[ii] = self->get_Integration(ii)->get_epoch().in_days();
         }
         return (PyObject *)arr;
     }
@@ -818,11 +822,11 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         ndims[1] = self->get_npol();
         ndims[2] = self->get_nchan();
         ndims[3] = self->get_nbin();
-        arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, PyArray_FLOAT);
+        arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, NPY_FLOAT);
         for (ii = 0 ; ii < ndims[0] ; ii++)
             for (jj = 0 ; jj < ndims[1] ; jj++)
                 for (kk = 0 ; kk < ndims[2] ; kk++)
-                    memcpy(arr->data + sizeof(float) * 
+                    memcpy((char*)PSRCHIVE_PyArray_DATA(arr) + sizeof(float) * 
                            (ndims[3] * (kk + ndims[2] * (jj + ndims[1] * ii))), 
                            self->get_Profile(ii, jj, kk)->get_amps(),
                            ndims[3]*sizeof(float));
@@ -839,8 +843,8 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         ndims[2] = self->get_nchan();
         ndims[3] = self->get_nbin();
 
-        PyArrayObject* arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, PyArray_FLOAT);
-        float* base = reinterpret_cast<float*>(arr->data);
+        PyArrayObject* arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, NPY_FLOAT);
+        float* base = reinterpret_cast<float*>(PSRCHIVE_PyArray_DATA(arr));
 
         for (int ii = 0 ; ii < ndims[0] ; ii++)
         {
@@ -870,10 +874,10 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
         ndims[0] = self->get_nsubint();
         ndims[1] = self->get_nchan();
-        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, PyArray_FLOAT);
+        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, NPY_FLOAT);
         for (ii = 0 ; ii < ndims[0] ; ii++)
             for (jj = 0 ; jj < ndims[1] ; jj++)
-                ((float *)arr->data)[ii*ndims[1]+jj] = \
+                ((float *)PSRCHIVE_PyArray_DATA(arr))[ii*ndims[1]+jj] = \
                     self->get_Integration(ii)->get_weight(jj);
         return (PyObject *)arr;
     }
@@ -891,7 +895,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         ndims[0] = self->get_nsubint();
         ndims[1] = self->get_npol();
         ndims[2] = self->get_nchan();
-        arr = (PyArrayObject *)PyArray_SimpleNew(3, ndims, PyArray_FLOAT);
+        arr = (PyArrayObject *)PyArray_SimpleNew(3, ndims, NPY_FLOAT);
         for (ii = 0 ; ii < ndims[0] ; ii++)
             for (jj = 0 ; jj < ndims[1] ; jj++)
                 for (kk = 0 ; kk < ndims[2] ; kk++)
@@ -900,7 +904,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
                     stat->set_pol(jj);
                     stat->set_chan(kk);
               
-                    ((float *)arr->data)[ii*ndims[1]*ndims[2]+jj*ndims[2]+kk] = \
+                    ((float *)PSRCHIVE_PyArray_DATA(arr))[ii*ndims[1]*ndims[2]+jj*ndims[2]+kk] = \
                         stat->get();
                 }
         return (PyObject *)arr;
@@ -992,9 +996,9 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         npy_intp size[1];
         size[0] = toas.size();
 
-        arr = (PyArrayObject *)PyArray_SimpleNew(1, size, PyArray_DOUBLE);
+        arr = (PyArrayObject *)PyArray_SimpleNew(1, size, NPY_DOUBLE);
         for (int i=0; i<toas.size(); i++) {
-            ((double*)arr->data)[i] = toas[i].get_phase_shift();
+            ((double*)PSRCHIVE_PyArray_DATA(arr))[i] = toas[i].get_phase_shift();
         }
         return (PyObject*) arr;
     }
@@ -1006,13 +1010,13 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
     //! Set the reference wavelength in metres
     void set_reference_wavelength (double metres)
     {
-        self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::set_reference_wavelength(metres);
+        self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::BirefringenceHistory>::set_reference_wavelength(metres);
     }
 
     //! Get the reference wavelength
     double get_reference_wavelength () const
     {
-        return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::DeFaraday>::get_reference_wavelength();
+        return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::BirefringenceHistory>::get_reference_wavelength();
     }
 }
 

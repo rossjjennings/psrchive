@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2012 by Willem van Straten
+ *   Copyright (C) 2003-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -37,6 +37,8 @@
 
 #include "Pauli.h"
 
+#include "debug.h"
+
 #include <algorithm>
 #include <assert.h>
 
@@ -44,8 +46,6 @@ using namespace std;
 using Pulsar::ReceptionCalibrator;
 using Calibration::FluxCalManager;
 
-/*! The Archive passed to this constructor will be used to supply the first
-  guess for each pulse phase bin used to constrain the fit. */
 ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
 {
   type = _type;
@@ -67,8 +67,6 @@ ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
   physical_coherency = false;
 
   output_report = false;
-  
-  unique = 0;
 
   nthread = 1;
 }
@@ -87,13 +85,17 @@ void ReceptionCalibrator::set_standard_data (const Archive* data)
   Reference::To<PolnProfile> p = clone->get_Integration(0)->new_PolnProfile(0);
 
   standard_data = new Calibration::StandardData;
-
-  if (verbose)
-    cerr << "Pulsar::ReceptionCalibrator::set_standard_data"
-      " normalize_by_invariant=" << normalize_by_invariant << endl;
-
   standard_data->set_normalize (normalize_by_invariant);
   standard_data->select_profile( p );
+
+  if (verbose)
+  {
+    ProfileStats* stats = standard_data->get_poln_stats()->get_stats();
+
+    cerr << "Pulsar::ReceptionCalibrator::set_standard_data standard_data=" << standard_data.ptr()
+         << " stats=" << stats << endl
+         << "Pulsar::ReceptionCalibrator::set_standard_data normalize_by_invariant=" << normalize_by_invariant << endl;
+  }
 
   ensure_consistent_onpulse ();
 }
@@ -105,26 +107,57 @@ void ReceptionCalibrator::ensure_consistent_onpulse ()
 
   ProfileStats* stats = standard_data->get_poln_stats()->get_stats();
 
+  if (verbose)
+  {
+    cerr << "Pulsar::ReceptionCalibrator::ensure_consistent_onpulse standard_data=" << standard_data.ptr()
+         << " stats=" << stats << endl
+         << "Pulsar::ReceptionCalibrator::ensure_consistent_onpulse phase bins=";
+  }
+
   for (unsigned istate=0; istate < phase_bins.size(); istate++)
+  {
+    if (verbose)
+    {
+      if (istate > 0)
+        cerr << ",";
+      cerr << phase_bins[istate];
+    }
     stats->set_onpulse (phase_bins[istate], true);
+  }
+
+  if (verbose)
+    cerr << endl;
 }
 
 const Pulsar::PhaseWeight* ReceptionCalibrator::get_baseline () const
 {
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::get_baseline standard_data=" << standard_data.ptr()
+         << " stats=" << standard_data->get_poln_stats()->get_stats() << endl;
   return standard_data->get_poln_stats()->get_stats()->get_baseline();
 }
 
 //! Get the on-pulse mask
 const Pulsar::PhaseWeight* ReceptionCalibrator::get_onpulse () const
 {
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::get_onpulse standard_data=" << standard_data.ptr()
+         << " stats=" << standard_data->get_poln_stats()->get_stats() << endl;
   return standard_data->get_poln_stats()->get_stats()->get_onpulse();
 }
 
 void ReceptionCalibrator::set_normalize_by_invariant (bool set)
 {
   normalize_by_invariant = set;
-  if (standard_data)
-    standard_data->set_normalize (normalize_by_invariant);
+
+  if (!standard_data)
+    return;
+
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::set_normalize_by_invariant standard_data=" << standard_data.ptr()
+         << " stats=" << standard_data->get_poln_stats()->get_stats() << endl;
+         
+  standard_data->set_normalize (normalize_by_invariant);
 }
 
 /*!
@@ -170,7 +203,11 @@ void ReceptionCalibrator::initial_observation (const Archive* data)
   set_calibrator( data->clone() );
 
   if (!standard_data)
+  {
+    if (verbose)
+      cerr << "Pulsar::ReceptionCalibrator::initial_observation create new standard_data" << endl;
     set_standard_data (data);
+  }
 
   Signal::Basis basis = get_calibrator()->get_basis ();
 
@@ -196,16 +233,17 @@ void ReceptionCalibrator::initial_observation (const Archive* data)
   {
     has_pulsar = true;
     load_calibrators ();
+    load_previous();
   }
 
-  assert( pulsar.size() == phase_bins.size() );
+  assert( pulsar_estimate.size() == phase_bins.size() );
 
   cerr << "ReceptionCalibrator::initial_observation"
     " initialize pulsar source estimates" << endl;
 
   // initialize any previously added states
-  for (unsigned istate=0; istate<pulsar.size(); istate++)
-    init_estimates ( pulsar[istate], phase_bins[istate] );
+  for (unsigned istate=0; istate<pulsar_estimate.size(); istate++)
+    init_estimates ( pulsar_estimate[istate], phase_bins[istate] );
 
   add_epoch( data->start_time () );
 }
@@ -264,112 +302,126 @@ void ReceptionCalibrator::submit_calibrator_data ()
 
 
 //! Add the specified pulse phase bin to the set of state constraints
-void ReceptionCalibrator::add_state (unsigned phase_bin)
+void ReceptionCalibrator::add_state (int phase_bin)
 {
-  check_ready ("Pulsar::ReceptionCalibrator::add_state", false);
-
   if (verbose > 2)
-    cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" 
-	 << phase_bin << endl;
+    cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << phase_bin << endl;
 
   for (unsigned istate=0; istate<phase_bins.size(); istate++)
+  {
     if (phase_bins[istate] == phase_bin)
     {
-      cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << phase_bin
-	   << " already in use" << endl;
+      cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << phase_bin << " already in use" << endl;
       return;
     }
+  }
 
   phase_bins.push_back (phase_bin);
 
-  pulsar.resize( pulsar.size() + 1 );
+  pulsar_estimate.resize( pulsar_estimate.size() + 1 );
 
   if (has_calibrator())
-    init_estimates( pulsar.back(), phase_bin );
+    init_estimates( pulsar_estimate.back(), phase_bin );
 }
 
 
 //! Get the number of pulsar phase bin input polarization states
 unsigned ReceptionCalibrator::get_nstate_pulsar () const
 {
-  return pulsar.size();
-}
-
-//! Add the specified pulsar observation to the set of constraints
-void ReceptionCalibrator::add_calibrator (const Archive* data)
-{
-  if (data->get_type() == Signal::Calibrator)
-    set_previous (data);
-  else
-    SystemCalibrator::add_calibrator (data);
+  return pulsar_estimate.size();
 }
 
 bool equal_pi (const Angle& a, const Angle& b, float tolerance = 0.01);
 
-
-void ReceptionCalibrator::set_previous (const Archive* data)
+bool ReceptionCalibrator::match (const Archive* data, bool throw_exception)
 {
-  const PolnCalibratorExtension* ext = data->get<PolnCalibratorExtension>();
-  if (ext->get_type() == get_type())
-  {
-    cerr << "Pulsar::ReceptionCalibrator::set_previous solution of same type" << endl;
-    previous = new PolnCalibrator (data);
-    previous_cal = data->get<CalibratorStokes>();
-  }
-}
-
-
-//! Add the specified pulsar observation to the set of constraints
-void Pulsar::ReceptionCalibrator::match (const Archive* data)
-{
-  check_ready ("Pulsar::ReceptionCalibrator::match", false);
-
   if (verbose > 1)
-    cerr << "ReceptionCalibrator::match" << endl;
+    cerr << "ReceptionCalibrator::match name=" << get_name() << " data.source=" << data->get_source() << endl;
   
-  if (!has_calibrator())
-    initial_observation (data);
+  if (get_name() != data->get_source())
+  {
+    if (verbose > 1)
+      cerr << "ReceptionCalibrator::match return false" << endl;
+    return false;
+  }
 
-  SystemCalibrator::match (data);
+  if (!has_calibrator())
+  {
+    if (verbose)
+    cerr << "ReceptionCalibrator::match initial observation for data.source=" << data->get_source() << endl;
+
+    initial_observation (data);
+  }
+
+  return SystemCalibrator::match (data, throw_exception);
 }
 
+double ReceptionCalibrator::get_invariant (Integration* subint, unsigned ichan)
+{
+  if (!standard_data)
+    throw Error (InvalidState, "ReceptionCalibrator::get_invariant", "standard_data not set");
+
+  standard_data->set_profile( subint->new_PolnProfile (ichan) );
+  Estimate<double> total_squared_invariant = standard_data->get_total_squared_invariant();
+  return sqrt(total_squared_invariant.get_value());
+}
 
 void ReceptionCalibrator::add_pulsar
 ( Calibration::CoherencyMeasurementSet& measurements,
   const Integration* integration, unsigned ichan )
 {
+  DEBUG("Pulsar::ReceptionCalibrator::add_pulsar standard_data=" << standard_data.ptr()
+        << " stats=" << standard_data->get_poln_stats()->get_stats());
+         
   standard_data->set_profile( integration->new_PolnProfile (ichan) );
 
-  for (unsigned istate=0; istate < pulsar.size(); istate++)
+  if (report_total_invariant && normalize_by_invariant)
   {
-    if (ichan >= pulsar[istate].size())
-      throw Error (InvalidParam, "ReceptionCalibrator::add_pulsar",
-                  "ichan=%u >= pulsar[%u].size=%u", ichan, istate, pulsar[istate].size());
+    Estimate<double> invint = standard_data->get_total_squared_invariant();
+    invint_out << integration->get_epoch().printdays(10) << " " << ichan << " " << sqrt(invint.get_value()) << endl;
+    if (!invint_out)
+    {
+      cerr << "ReceptionCalibrator::add_pulsar FAILED to write total invariant for ichan=" << ichan << endl;
+    }
+  }
 
-    add_data (measurements, pulsar[istate][ichan], integration->get_epoch(), ichan);
+  for (unsigned istate=0; istate < pulsar_estimate.size(); istate++)
+  {
+    if (ichan >= pulsar_estimate[istate].size())
+      throw Error (InvalidParam, "ReceptionCalibrator::add_pulsar",
+                  "ichan=%u >= pulsar[%u].size=%u", ichan, istate, pulsar_estimate[istate].size());
+
+    add_data (measurements, pulsar_estimate[istate][ichan], integration->get_epoch(), ichan);
   }
 }
 
 
 void ReceptionCalibrator::add_data
 ( vector<Calibration::CoherencyMeasurement>& bins,
-  Calibration::SourceEstimate& estimate,
+  Calibration::SourceEstimate* estimate,
   const MJD& epoch,
   unsigned ichan )
 {
   get_data_call ++;
 
-  unsigned ibin = estimate.phase_bin;
+  int ibin = estimate->phase_bin;
 
-  try {
+  DEBUG("Pulsar::ReceptionCalibrator::add_data standard_data=" << standard_data.ptr()
+        << " stats=" << standard_data->get_poln_stats()->get_stats());
 
-    Stokes< Estimate<double> > stokes = standard_data->get_stokes( ibin );
+  try
+  {
+    Stokes< Estimate<double> > stokes;
+    
+    if (ibin == Calibration::SourceEstimate::baseline_mean)
+      stokes = standard_data->get_baseline();
+    else
+      stokes = standard_data->get_stokes( ibin );
 
-    // NOTE: the measured states are not corrected
-    Calibration::CoherencyMeasurement state (estimate.input_index);
+    // NOTE: the measured states are not corrected / calibrated
+    Calibration::CoherencyMeasurement state (estimate->input_index);
     state.set_stokes( stokes );
     bins.push_back ( state );
-
   }
   catch (Error& error)
   {
@@ -381,13 +433,12 @@ void ReceptionCalibrator::add_data
   }
 }
 
-Calibration::SourceEstimate& ReceptionCalibrator::get_estimate (unsigned index,
-								unsigned ichan)
+Calibration::SourceEstimate* ReceptionCalibrator::get_estimate (unsigned index, unsigned ichan)
 {
-  for (unsigned istate=0; istate < pulsar.size(); istate++)
+  for (unsigned istate=0; istate < pulsar_estimate.size(); istate++)
   {
-    Calibration::SourceEstimate& estimate = pulsar.at(istate).at(ichan);
-    if (estimate.input_index == index)
+    Calibration::SourceEstimate* estimate = pulsar_estimate.at(istate).at(ichan);
+    if (estimate->input_index == index)
       return estimate;
   }
 
@@ -398,7 +449,7 @@ Calibration::SourceEstimate& ReceptionCalibrator::get_estimate (unsigned index,
 void ReceptionCalibrator::integrate_pulsar_data
 (const Calibration::CoherencyMeasurementSet& data)
 {
-  unsigned mchan = data.get_ichan();
+  unsigned ichan = data.get_ichan();
   MJD epoch = data.get_epoch();
 
   data.set_coordinates();
@@ -406,46 +457,51 @@ void ReceptionCalibrator::integrate_pulsar_data
   for (unsigned i=0; i < data.size(); i++)
   {
     unsigned index = data[i].get_input_index();
-    Calibration::SourceEstimate& estimate = get_estimate (index, mchan);
+    Calibration::SourceEstimate* estimate = get_estimate (index, ichan);
 
-    integrate_pulsar_data (data[i], estimate, epoch, mchan);
+    integrate_pulsar_data (data[i], estimate, epoch, ichan);
   }
 }
 
 void ReceptionCalibrator::integrate_pulsar_data
 (const Calibration::CoherencyMeasurement& data,
- Calibration::SourceEstimate& estimate,
+ Calibration::SourceEstimate* estimate,
  const MJD& epoch,
- unsigned mchan) try
+ unsigned ichan) try
 {
-  estimate.add_data_attempts ++;
+  estimate->add_data_attempts ++;
+
+  if (Profile::verbose)
+    cerr << "ReceptionCalibrator::integrate_pulsar_data chan=" << ichan
+         << " calling Calibration::CoherencyMeasurement::set_coordinates" << endl;
 
   data.set_coordinates();
+
+  auto transformation = get_transformation (epoch, Signal::Pulsar, ichan);
 
   /* Correct the stokes parameters using the current best estimate of
      the instrument and the parallactic angle rotation before adding
      them to best estimate of the input state */
-    
-  unsigned path = model[mchan]->get_psr_path_index(epoch);
 
-  model[mchan]->get_equation()->set_transformation_index (path);
+  Jones< Estimate<double> > xform = transformation->evaluate();
 
-  Jones< Estimate<double> > correct;
-  correct = inv( model[mchan]->get_pulsar_transformation(epoch)->evaluate() );
+  if (Profile::verbose)
+    cerr << "ReceptionCalibrator::integrate_pulsar_data chan=" << ichan << " xform=" << xform << endl;
 
+  auto correct = inv(xform);
   Stokes< Estimate<double> > stokes = data.get_stokes();
   stokes = transform( stokes, correct );
     
-  estimate.estimate.integrate( stokes );
+  estimate->estimate.integrate( stokes );
 }
 catch (Error& error)
 {
-  unsigned ibin = estimate.phase_bin;
+  unsigned ibin = estimate->phase_bin;
 
   // if (verbose > 1)
-  cerr << "Pulsar::ReceptionCalibrator::add_data mchan=" << mchan 
+  cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
        << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
-  estimate.add_data_failures ++;  
+  estimate->add_data_failures ++;  
 }
 
 void ReceptionCalibrator::prepare_calibrator_estimate (Signal::Source source)
@@ -515,42 +571,44 @@ void ReceptionCalibrator::setup_calibrators ()
   then it should be fixed to a specified value
 */
 
-void set_fixed_QUV ( Calibration::SourceEstimate& cal, double value )
+void set_fixed_QUV ( Calibration::SourceEstimate* cal, double value )
 {
   for (unsigned ipol=1; ipol < 4; ipol++)
-    if (!cal.source->get_infit (ipol))
-      cal.source->set_Estimate (ipol, 0.0);
+    if (!cal->source->get_infit (ipol))
+      cal->source->set_Estimate (ipol, value);
 }
 
-void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate& est)
+void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate* est)
 {
   Signal::Basis basis = get_calibrator()->get_basis ();
 
   for (unsigned istokes=0; istokes<4; istokes++)
-    est.source->set_infit (istokes, false);
+    est->source->set_infit (istokes, false);
 
   // calibrator flux is unity by definition
-  est.source->set_Estimate (0, 1.0);
+  est->source->set_Estimate (0, 1.0);
     
   if (basis == Signal::Linear)
   {
     // degree of polarization (Stokes U) may vary
-    est.source->set_infit (2, true);
+    est->source->set_infit (2, true);
     
     if (measure_cal_Q)
-      est.source->set_infit (1, true);
+      est->source->set_infit (1, true);
   }
   else
   {
     // degree of polarization (Stokes Q) may vary
-    est.source->set_infit (1, true);
+    est->source->set_infit (1, true);
   }
   
-  if (measure_cal_V && (equal_ellipticities || has_fluxcal()))
+  bool cal_V_may_vary = equal_ellipticities || !degenerate_V_boost || has_fluxcal();
+
+  if (measure_cal_V && cal_V_may_vary)
   {
     if (verbose)
       cerr << "Stokes V of the calibrator may vary" << endl;
-    est.source->set_infit (3, true);
+    est->source->set_infit (3, true);
   }
 
   set_fixed_QUV (est, 0.0);
@@ -652,35 +710,12 @@ void ReceptionCalibrator::integrate_calibrator_solution
     SystemCalibrator::integrate_calibrator_solution (data);
 }
 
-
-//! Add the ReferenceCalibrator observation to the set of constraints
-void 
-ReceptionCalibrator::add_calibrator (const ReferenceCalibrator* p) try 
-{
-  check_ready ("Pulsar::ReceptionCalibrator::add_calibrator");
-
-  SystemCalibrator::add_calibrator (p);
-}
-catch (Error& error)
-{
-  throw error += "Pulsar::ReceptionCalibrator::add_calibrator";
-}
-
-void ReceptionCalibrator::solve ()
-{
-  if (!get_prepared())
-    check_ready ("Pulsar::ReceptionCalibrator::solve");
-
-  initialize ();
-  SystemCalibrator::solve ();
-}
-
 void ReceptionCalibrator::export_prepare () const
 {
-  const_cast<ReceptionCalibrator*>(this)->initialize();
+  const_cast<ReceptionCalibrator*>(this)->solve_prepare();
 }
 
-void ReceptionCalibrator::initialize ()
+void ReceptionCalibrator::solve_prepare () try
 {
   bool set_equal_ellipticities = equal_ellipticities;
   bool fit_gain = true;
@@ -688,18 +723,18 @@ void ReceptionCalibrator::initialize ()
   if (calibrator_estimate.size() == 0)
   {
     cerr <<
-      "Pulsar::ReceptionCalibrator::initialize WARNING: \n\t"
+      "Pulsar::ReceptionCalibrator::solve_prepare WARNING: \n\t"
       "Without a ReferenceCalibrator observation, there remains \n\t";
     if (degenerate_V_boost)
-    {
       cerr << "a degeneracy along the Stokes V axis and \n\t";
+    cerr << "an unconstrained scalar gain.  Therefore, \n\t";
+
+    if (degenerate_V_boost) 
+    {
+      cerr << "the boost along the Stokes V axis and \n\t";
       set_equal_ellipticities = true;
     }
-    cerr << "an unconstrained scalar gain.  Therefore, \n\t";
-    if (degenerate_V_boost) 
-      cerr << "the boost along the Stokes V axis and \n\t";
     cerr << "the absolute gain will be fixed." << endl;
-
     fit_gain = false;
   }
 
@@ -730,13 +765,20 @@ void ReceptionCalibrator::initialize ()
     cerr << "Pulsar::ReceptionCalibrator::initialize using previous solution" << endl;
     for (unsigned ichan=0; ichan<model.size(); ichan++)
     {
-      Stokes< Estimate<double> > calS = previous_cal->get_stokes (ichan);
-      calibrator_estimate[ichan].source-> set_stokes( calS );
+      Stokes<Estimate<double>> calS = previous_cal->get_stokes (ichan);
+      calibrator_estimate[ichan]->source->set_stokes( calS );
     }
   }
  
   SystemCalibrator::solve_prepare ();
 
+  for (unsigned ichan=0; ichan < model.size(); ichan++)
+    if (output_report && model[ichan]->get_valid())
+    {
+      string name = "fit_goodness_" + tostring(ichan) + ".txt";
+      model[ichan]->get_equation()->add_postfit_report( new Calibration::FitGoodnessReport (name) );
+    }
+    
   for (unsigned ichan=0; ichan<fluxcal.size(); ichan++) try
   {
     if (fluxcal[ichan])
@@ -747,13 +789,14 @@ void ReceptionCalibrator::initialize ()
     model[ichan]->set_valid (false, "Flux calibrator estimate update failed");
   }
 
-  for (unsigned istate=0; istate<pulsar.size(); istate++)
+  for (unsigned istate=0; istate<pulsar_estimate.size(); istate++)
   {
     if (report_input_failed)
-      SystemCalibrator::print_input_failed (pulsar[istate]);
+      SystemCalibrator::print_input_failed (pulsar_estimate[istate]);
 
-    for (unsigned ichan=0; ichan<pulsar[istate].size(); ichan++)
-      pulsar[istate][ichan].update ();
+    for (unsigned ichan=0; ichan<pulsar_estimate[istate].size(); ichan++)
+      if (pulsar_estimate[istate][ichan]) 
+        pulsar_estimate[istate][ichan]->update ();
   }
 
   if (report_input_failed)
@@ -765,21 +808,18 @@ void ReceptionCalibrator::initialize ()
   */
 
   setup_calibrators ();
+
+  /*
+    Any configuration set on the command line take precedence
+  */
+  for (unsigned ichan=0; ichan<model.size(); ichan++)
+  {
+    configure (model[ichan]->get_equation());
+  }
 }
-
-void ReceptionCalibrator::check_ready (const char* method, bool unc)
+catch (Error& error)
 {
-  if (get_solved())
-    throw Error (InvalidState, method,
-		 "Model has been solved. Cannot add data.");
-
-  if (get_prepared())
-    throw Error (InvalidState, method,
-		 "Model has been initialized. Cannot add data.");
-
-  if (unc && !has_calibrator())
-    throw Error (InvalidState, method,
-		 "Initial observation required.");
+  throw error += "ReceptionCalibrator::solve_prepare";
 }
 
 /*! Mask invalid SourceEstimate states */
@@ -795,26 +835,21 @@ void ReceptionCalibrator::valid_mask
     model[ichan]->set_valid( model[ichan]->get_valid() && src[ichan].valid );
 }
 
-
-void ReceptionCalibrator::solve_prepare ()
-{
-  SystemCalibrator::solve_prepare ();
-
-  for (unsigned ichan=0; ichan < model.size(); ichan++)
-    if (output_report && model[ichan]->get_valid())
-    {
-      string name = "fit_goodness_" + tostring(ichan) + ".txt";
-      model[ichan]->get_equation()->add_postfit_report( new Calibration::FitGoodnessReport (name) );
-    }
-}
-
 Pulsar::Calibrator::Info* 
 ReceptionCalibrator::new_info_pulsar (unsigned istate) const
 {
-  SourceInfo* info = new SourceInfo( pulsar[istate] );
+  SourceInfo* info = new SourceInfo( pulsar_estimate[istate] );
 
-  info->set_title( "Stokes Parameters of Phase Bin " 
-		   + tostring(pulsar[istate][0].phase_bin) );
+  for (unsigned i=0; i < pulsar_estimate[istate].size(); i++)
+    if (pulsar_estimate[istate][i])
+    {
+      int bin = pulsar_estimate[istate][i]->phase_bin;
+      if (bin == Calibration::SourceEstimate::baseline_mean)
+        info->set_title( "Stokes Parameters of the Baseline Mean" );
+      else
+        info->set_title( "Stokes Parameters of Phase Bin " + tostring(bin) );
+      break;
+    }
 
   return info;
 }

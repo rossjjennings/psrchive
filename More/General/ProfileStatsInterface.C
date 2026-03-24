@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008-2024 by Willem van Straten
+ *   Copyright (C) 2008 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,7 +8,7 @@
 #include "Pulsar/ProfileStatsInterface.h"
 #include "Pulsar/PhaseWeightInterface.h"
 #include "Pulsar/ProfileWeightFunction.h"
-#include "Pulsar/IntegrationTI.h"
+#include "Pulsar/IntegrationInterface.h"
 
 #include <iostream>
 using namespace std;

@@ -133,7 +133,17 @@ Profile::Strategies* Profile::get_strategy() const
     if (managed)
     {
       DEBUG("Profile::get_strategy this=" << this << " managed");
-      strategy = managed->get_container()->get_strategy();
+
+      /* a temporary pointer is used to avoid assigning the smart pointer twice,
+        which can lead to auto-deletion if no other smart pointer has incremented
+        the reference count of this instance */
+      auto tmp = managed->get_container()->get_strategy();
+
+      /* decouple this cloned Profile from the its composite Integration */
+      if (managed->to_be_cloned())
+        tmp = tmp->clone();
+
+      strategy = tmp;
     }
   }
   return strategy;

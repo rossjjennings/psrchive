@@ -38,46 +38,46 @@ class MJD {
 
   static int verbose;
 
-  // null constructor
+  //! null constructor
   MJD () { days=0;secs=0;fracsec=0.0; };
 
-  // construct from standard C types
+  //! construct from standard C types
   MJD (double dd);                        // mjd given as day
   MJD (int intday, double fracday);       // mjd given with separate fracday
   MJD (double dd, double ss, double fs);  // mjd with seconds and fracsec
   MJD (int dd, int ss, double fs);        // again
 
-  // construct from a C string of the form "50312.4569"
+  //! construct from a C string of the form "50312.4569"
   MJD (const char* mjdstring);
 
-  // some standard C time formats
+  //! some standard C time formats
   MJD (time_t time);                // returned by time()
   MJD (const struct tm& greg);      // returned by gmtime()
   MJD (const struct timeval& tp);   // returned by gettimeofday()
 
-  // simple little struct invented in S2 days
+  //! simple little struct invented in S2 days
   MJD (const utc_t& utc);
 
-  // construct from a C++ string
+  //! construct from a C++ string
   MJD (const std::string& mjd);
 
-  // parses a string of the form 51298.45034 ish
+  //! construct from a string of the form 51298.45034 ish
   int Construct (const char* mjdstr);
 
-  // constructs an MJD from the unix time_t
+  //! construct from the unix time_t
   int Construct (time_t time);
 
-  // constructs an MJD from the unix struct tm
+  //! construct from the unix struct tm
   int Construct (const struct tm& greg);
 
-  // another UNIX time standard
+  //! construct from another UNIX time standard
   int Construct (const struct timeval& tp);
 
-  // constructs an MJD from the home-grown utc_t
+  //! constructs from the home-grown utc_t
   int Construct (const utc_t& utc);
 
-  // constructs from a BAT (binary atomic time), ie MJD in microseconds
-  // stored in two 32 bit unsigned integers --- as returned by the AT clock
+  //! construct from a BAT (binary atomic time), ie MJD in microseconds
+  /*! @param bat time stored in two 32 bit unsigned integers, as returned by the AT clock */
   int Construct (uint64_t bat);
 
   double in_seconds() const;
@@ -113,7 +113,7 @@ class MJD {
   friend int operator == (const MJD &, const MJD &);
   friend int operator != (const MJD &, const MJD &);
 
-  // function to return plotable value to xyplot template class
+  //! return plotable value to xyplot template class
   float plotval() const { return float (in_days()); };
   
   // These bits are useful for tempo
@@ -122,10 +122,11 @@ class MJD {
   int    get_secs() const {return(secs);};
   double get_fracsec() const {return(fracsec);};
 
-  // return LST in hours (longitude given in degrees East of Greenwich)
+  //! return Local Sidereal Time in hours
+  /*! @param (longitude given in degrees East of Greenwich) */
   double LST (double longitude) const;
 
-  // return Greenwich Mean Sidereal Time
+  //! return Greenwich Mean Sidereal Time in radians
   double GMST () const;
   
   std::string printdays (unsigned precision) const;
@@ -138,8 +139,8 @@ class MJD {
   std::string printfs()     const;
   std::string strtempo() const; 
 
-  // returns a string formatted by strftime
-  // e.g. format = "%Y-%m-%d %H:%M:%S"
+  //! return a string formatted by strftime
+  /*! @param format as used by strftime; e.g. "%Y-%m-%d %H:%M:%S" */
   char* datestr (char* dstr, int len, const char* format) const;
 
   //! Convenient interface to datestr, with optional fractional seconds
@@ -147,14 +148,6 @@ class MJD {
 
   //! Parse MJD from the given datestr using strptime and the specified format
   void from_datestr (const std::string& datestr, const std::string& format = "%Y-%m-%d-%H:%M:%S");
-
-#ifdef HAVE_MPI
-  friend int mpiPack_size (const MJD&, MPI_Comm comm, int* size);
-  friend int mpiPack   (const MJD&, void* outbuf, int outcount, 
-			int* position, MPI_Comm comm);
-  friend int mpiUnpack (void* inbuf, int insize, int* position, 
-			MJD*, MPI_Comm comm);
-#endif
 
  protected:
   friend bool equal (const MJD &m1, const MJD &m2);

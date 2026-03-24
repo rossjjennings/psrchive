@@ -12,7 +12,7 @@ bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
 	drifting_subpulses dynamic_spectra psr4th psrtxt2 reslice \
-	smint psr4th2txt pcmrm pcmdiff pcmerr diffdelay
+	smint psr4th2txt pcmrm pcmdiff pcmerr diffdelay pcmtxt psrdnu
 
 pam_SOURCES = pam.C
 
@@ -24,10 +24,9 @@ paz_SOURCES = paz.C zap_periodic_spikes.C
 calavg_SOURCES = calavg.C
 
 pcmavg_SOURCES = pcmavg.C
-
 pcmrm_SOURCES = pcmrm.C
-
 pcmerr_SOURCES = pcmerr.C
+pcmtxt_SOURCES = pcmtxt.C
 
 diffdelay_SOURCES = diffdelay.C
 
@@ -87,6 +86,8 @@ psr4th2txt_SOURCES = psr4th2txt.C
 psrtxt2_SOURCES = psrtxt2.C
 
 reslice_SOURCES = reslice.C
+
+psrdnu_SOURCES = psrdnu.C
 
 smint_SOURCES = smint.C
 smint_LDADD = @SPLINTER_LIBS@ $(LDPLOT)
@@ -207,13 +208,12 @@ print_Predictor_SOURCES = print_Predictor.C
 #
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
-	$(top_builddir)/Base/libpsrbase.la \
-        $(top_builddir)/Util/libpsrutil.la \
-	$(top_builddir)/Util/epsic/src/util/libutil.la
+    $(top_builddir)/Base/libpsrbase.la \
+    $(top_builddir)/Util/libpsrutil.la \
+    $(top_builddir)/Util/epsic/src/libepsic.la
 
 include $(top_srcdir)/config/Makefile.include
 
 AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ \
-	       @PSRXML_CFLAGS@ @CULA_CFLAGS@ @HEALPIX_CFLAGS@ \
-	       @ARMADILLO_CFLAGS@
+	@PSRXML_CFLAGS@ @CULA_CFLAGS@ @HEALPIX_CFLAGS@ @ARMADILLO_CFLAGS@
 

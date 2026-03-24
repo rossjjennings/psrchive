@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,7 +14,7 @@
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Pulsar.h"
 #include "Pulsar/DigitiserCounts.h"
-
+#include "Pulsar/AuxColdPlasma.h"
 #include "ModifyRestore.h"
 #include "Error.h"
 
@@ -76,6 +76,9 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 
   DigitiserCounts *digitiserCounts = archive->get<DigitiserCounts>();
 
+  bool any_absolute_dm_corrected = false;
+  bool any_absolute_rm_corrected = false;
+  
   for (unsigned isub=0; isub < output_nsub; isub++)
   {
     range_policy->get_range (isub, start, stop);
@@ -244,6 +247,9 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     //
     // //////////////////////////////////////////////////////////////////////
     
+    bool absolute_dm_corrected = false;
+    bool absolute_rm_corrected = false;
+
     for (unsigned ichan=0; ichan < archive_nchan; ichan++)
     {
       if (Archive::verbose > 2) 
@@ -261,11 +267,19 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       {
         Integration* subint = archive->get_Integration (iadd);
 
-        double dm = subint->get_effective_dispersion_measure();
-        if (dm != 0)
+        double dm = subint->get_absolute_dispersion_measure();
+        if (dm != 0.0)
+          absolute_dm_corrected = true;
+        dm += subint->get_relative_dispersion_measure();
+
+        if (dm != 0.0)
           subint->expert()->dedisperse (ichan, ichan+1, reference_frequency);
 
-        double rm = subint->get_effective_rotation_measure();
+        double rm = subint->get_absolute_rotation_measure();
+        if (rm != 0.0)
+          absolute_rm_corrected = true;
+        rm += subint->get_relative_rotation_measure();
+
         if (archive_npol == 4 && rm != 0)
           subint->expert()->defaraday (ichan, ichan+1, reference_frequency);
 
@@ -326,12 +340,33 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       ext->update (result);
     }
 
+    if (absolute_dm_corrected)
+    {
+      any_absolute_dm_corrected = true;
+      result->expert()->update_absolute_dispersion ();
+    }
+
+    if (absolute_rm_corrected)
+    {
+      any_absolute_rm_corrected = true;
+      result->expert()->update_absolute_rotation ();
+    }
+
   } // for each integrated result
 
   if (digitiserCounts != NULL)
     digitiserCounts->subints.resize(output_nsub);
 
   archive->resize (output_nsub);
+
+  if (any_absolute_dm_corrected || any_absolute_rm_corrected)
+  {
+    auto aux = archive->getadd<AuxColdPlasma>();
+    if (any_absolute_dm_corrected)
+      aux->set_dispersion_corrected(true);
+    if (any_absolute_rm_corrected)
+      aux->set_birefringence_corrected(true);
+  }
 }
 catch (Error& err)
 {

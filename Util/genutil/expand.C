@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ string expand (const string& filename)
   if (filename[1] == '/')
     return home + filename.substr(1);
 
-  string system_home = pathname (home);
+  string system_home = dirname (home);
   return system_home + filename.substr(1);
 }
+

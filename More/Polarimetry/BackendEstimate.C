@@ -66,7 +66,7 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
   }
 
   throw Error (InvalidParam, "BackendEstimate::set_response",
-	       "unrecognized xform=" + xform->get_name());
+	             "unrecognized xform=" + xform->get_name());
 }
 
 void Calibration::BackendEstimate::integrate (const MEAL::Complex2* xform)

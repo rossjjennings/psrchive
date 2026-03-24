@@ -4,8 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/FITSHdrExtension.h"
+
 #include "FITSError.h"
 
 using namespace std;
@@ -24,16 +27,16 @@ Angle angle_units (fitsfile* fptr, int colnum, double angle, const char* name)
 
   Angle retval;
 
-  if (status == 0 && string(value) == "deg") {
+  if (status == 0 && string(value) == "deg")
+  {
     if (name)
-      cerr << "Pulsar::FITSArchive::load_Pointing " << name << " in degrees"
-	   << endl;
+      cerr << "Pulsar::FITSArchive::load_Pointing " << name << " = " << angle << " degrees" << endl;
     retval.setDegrees (angle);
   }
-  else {
+  else
+  {
     if (name)
-      cerr << "Pulsar::FITSArchive::load_Pointing " << name << " in turns"
-	   << endl;
+      cerr << "Pulsar::FITSArchive::load_Pointing " << name << " = " << angle << " turns" << endl;
     retval.setTurns (angle);  
   }
 
@@ -81,20 +84,21 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_get_colnum (fptr, CASEINSEN, "RA_SUB", &colnum, &status);
   
   double double_angle = 0.0;
-  Angle angle;
 
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &double_angle, &initflag, &status);
   
-  if (status != 0) {
+  if (status != 0)
+  {
     if (verbose > 2)
       cerr << "FITSArchive::load_Pointing WARNING no RA_SUB" << endl;
     double_angle = 0;
     status = 0;
   }
 
-  double RA_angle = double_angle;
-  int RA_colnum = colnum;
+  Angle RA_angle = angle_units (fptr, colnum, double_angle,
+                                (verbose > 2) ? "RA_SUB" : 0);
+  RA_angle.setWrapPoint (2*M_PI);
 
   initflag = 0;
   colnum = 0;
@@ -106,15 +110,38 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &double_angle, &initflag, &status);
   
-  if (status != 0) {
+  if (status != 0)
+  {
     if (verbose > 2)
       cerr << "FITSArchive::load_Pointing WARNING no DEC_SUB" << endl;
     double_angle = 0;
     status = 0;
   }
   
-  double DEC_angle = double_angle;
-  int DEC_colnum = colnum;
+  Angle DEC_angle = angle_units (fptr, colnum, double_angle,
+                                (verbose > 2) ? "DEC_SUB" : 0);
+
+  FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
+  if (hdr_ext && hdr_ext->trk_mode == "TRACK")
+  {
+    sky_coord coord = get_coordinates ();
+
+    if (RA_angle != coord.ra())
+    {
+      warning << "FITSArchive::load_Pointing correcting RA_SUB currently=" << RA_angle.getHMS()
+	      << " expected=" << coord.ra().getHMS() << endl;
+      RA_angle = coord.ra();
+    }
+    if (DEC_angle != coord.dec())
+    {
+      warning << "FITSArchive::load_Pointing correcting DEC_SUB currently=" << DEC_angle.getDMS()
+	      << " expected=" << coord.dec().getDMS() << endl;
+      DEC_angle = coord.dec();
+    }
+  }
+
+  ext->set_right_ascension(RA_angle);
+  ext->set_declination(DEC_angle);
 
   initflag = 0;
   colnum = 0;
@@ -132,7 +159,8 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
     double_angle = 0;
     status = 0;
   }
-  
+
+  Angle angle;
   angle.setDegrees (double_angle);
   ext->set_galactic_longitude (angle);
 
@@ -257,7 +285,8 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0) {
+  if (status != 0)
+  {
     if (verbose > 2)
       cerr << "FITSArchive::load_Pointing WARNING no TEL_ZEN" << endl;
     float_angle = 0;
@@ -266,12 +295,6 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
 
   angle.setDegrees (float_angle);
   ext->set_telescope_zenith (angle);
-
-  ext->set_right_ascension( angle_units (fptr, RA_colnum, RA_angle,
-					 (verbose > 2) ? "RA_SUB" : 0) );
-
-  ext->set_declination( angle_units (fptr, DEC_colnum, DEC_angle,
-				     (verbose > 2) ? "DEC_SUB" : 0) );
 
   unsigned ninfo = extra_pointing_columns.size();
 

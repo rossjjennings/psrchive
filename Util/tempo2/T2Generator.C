@@ -72,7 +72,7 @@ Tempo2::Generator::Generator (const Pulsar::Parameters* parameters)
   ntimecoeff = 12;
   nfreqcoeff = 2;
 
-  // one hour
+  // by default, each polynomial spans one hour
   segment_length = 1.0/24.0;
 
   if (parameters)
@@ -91,6 +91,9 @@ Tempo2::Generator::~Generator ()
 //! Set the parameters used to generate the predictor
 void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p) try
 {
+  if (Predictor::verbose)
+    cerr << "Tempo2::Generator::set_parameters ptr=" << p << endl;
+
   parameters = p;
 
   // lookup optional parameters for Tempo2 generators
@@ -102,21 +105,66 @@ void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p) try
   if (!pulsar.length())
     pulsar = parameters->get_value("PSRB");
 
-  string param = lookup.get_param ("ntcoef", pulsar);
-  unsigned ntcoef = atoi (param.c_str());
-  if (param.compare("*") != 0 && ntcoef > 0 && ntcoef < 32)
-    set_time_ncoeff (ntcoef);
+  string param = parameters->get_value("ntcoef");
+  if (!param.length())
+    param = lookup.get_param ("ntcoef", pulsar);
 
-  param = lookup.get_param ("nfcoef", pulsar);
-  unsigned nfcoef = atoi (param.c_str());
-  if (param.compare("*") != 0 && nfcoef > 0 && nfcoef < 32)
-    set_frequency_ncoeff (nfcoef);
+  if (param != "*")
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::set_parameters ntcoef=" << param << endl;
 
-  // catalog stores this in seconds, convert to days
-  param = lookup.get_param ("predlen", pulsar);
-  double predlen = atof (param.c_str()) / 86400;
-  if (param.compare("*") != 0 && predlen > 0 && predlen < 1)
-    set_segment_length (predlen);
+    unsigned ntcoef = atoi (param.c_str());
+    if (ntcoef > 0 && ntcoef < 32)
+    {
+      set_time_ncoeff (ntcoef);
+    }
+    else if (Predictor::verbose)
+    {
+      cerr << "Tempo2::Generator::set_parameters invalid ntcoef ignored" << endl;
+    }
+  }
+
+  param = parameters->get_value("nfcoef");
+  if (!param.length())
+    param = lookup.get_param ("nfcoef", pulsar);
+
+  if (param != "*")
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::set_parameters nfcoef=" << param << endl;
+
+    unsigned nfcoef = atoi (param.c_str());
+    if (nfcoef > 0 && nfcoef < 32)
+    {
+      set_frequency_ncoeff (nfcoef);
+    }
+    else if (Predictor::verbose)
+    {
+      cerr << "Tempo2::Generator::set_parameters invalid nfcoef ignored" << endl;
+    }
+  }
+
+  param = parameters->get_value("predlen");
+  if (!param.length())
+    param = lookup.get_param ("predlen", pulsar);
+
+  if (param != "*")
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::set_parameters predlen=" << param << endl;
+
+    // catalog stores this in seconds, convert to days
+    double predlen = atof (param.c_str()) / 86400;
+    if (predlen > 0 && predlen < 1)
+    {
+      set_segment_length (predlen);
+    }
+    else if (Predictor::verbose)
+    {
+      cerr << "Tempo2::Generator::set_parameters invalid predlen ignored" << endl;
+    }
+  }
 }
 catch (Error& error)
 {

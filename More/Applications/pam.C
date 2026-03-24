@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Aidan Hotan
+ *   Copyright (C) 2003-2025 by Aidan Hotan and Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,6 +10,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Parameters.h"
+#include "Pulsar/ParametersDM.h"
 #include "Pulsar/Config.h"
 
 // Extensions this program understands
@@ -97,23 +98,6 @@ string GetArchiveTypes( void )
 
   return agents_string;
 }
-
-//! Returns the difference between the start of observation and TEPOCH
-double get_delta_time(Pulsar::Archive* archive,
-        const MJD tepoch);
-
-//! Populate the dms vector with the input DM[1-9] values
-void get_dms(vector<double>& dms, const Pulsar::Archive* archive);
-
-//! Returns the input value of 'DMEPOCH' (if it exists), otherwise, 'PEPOCH'
-MJD get_tepoch(const Pulsar::Archive* archive);
-
-//! Returns the input value of 'DM'
-double get_dm(const Pulsar::Archive* archive);
-
-//! Uses the input DM and DM[1-9] values to calculate the new DM
-double calculate_new_dm(vector<double>& dms, const double dm,
-        const double delta_time);
 
 //! Calculates new DM from ephemeris and sets it in the given Archive
 void update_dm(Pulsar::Archive* archive);
@@ -971,6 +955,26 @@ int main (int argc, char *argv[]) try {
 	correction.revert (arch);
       }
 
+      if (newrm) {
+        arch->set_rotation_measure (rm);
+        if (verbose)
+          cout << arch->get_filename() << " RM set to " << rm << endl;
+      }
+
+      if (defaraday) {
+        arch->defaraday();
+        if (verbose)
+          cout << arch->get_filename() << " defaradayed" <<endl;
+      }
+
+      if (aux_rm)
+      {
+        if (verbose)
+          cout << "pam: correct auxiliary Faraday rotation; iono RM="
+              << aux_rm << endl;
+        correct_auxiliary_rm (arch, aux_rm);
+      }
+
       if (stokesify) {
 	if (arch->get_npol() != 4)
 	  throw Error(InvalidState, "Convert to Stokes",
@@ -1073,25 +1077,6 @@ int main (int argc, char *argv[]) try {
 	  cout << arch->get_filename() << " invinted" << endl;
       }
 
-      if (newrm) {
-	arch->set_rotation_measure (rm);
-	if (verbose)
-	  cout << arch->get_filename() << " RM set to " << rm << endl;
-      }
-
-      if (defaraday) {
-	arch->defaraday();
-	if (verbose)
-	  cout << arch->get_filename() << " defaradayed" <<endl;
-      }
-
-      if (aux_rm)
-      {
-	if (verbose)
-	  cout << "pam: correct auxiliary Faraday rotation; iono RM="
-	       << aux_rm << endl;
-	correct_auxiliary_rm (arch, aux_rm);
-      }
 
       if (fscr) {
 	if (new_nchn > 0) {
@@ -1264,79 +1249,11 @@ void smear (Pulsar::Profile* profile, float duty_cycle)
   profile->fft_convolve( hat_profile(profile->get_nbin(), duty_cycle) );
 }
 
-double get_delta_time(Pulsar::Archive* archive, const MJD tepoch)
-{
-  const MJD start = archive->start_time();
-
-  return (start - tepoch).in_days() / 365.25; // convert from days to years
-}
-
-MJD get_tepoch(const Pulsar::Archive* archive)
-{
-  string str = archive->get_ephemeris()->get_value("DMEPOCH");
-  if (!str.empty()) {
-    return MJD(fromstring<double>(str));
-  }
-
-  str = archive->get_ephemeris()->get_value("PEPOCH");
-  if (!str.empty()) {
-    return MJD(fromstring<double>(str));
-  }
-
-  throw Error(InvalidState, "pam - get_tepoch",
-      "cannot find DMEPOCH or PEPOCH in new ephermeris");
-}
-
-double get_dm(const Pulsar::Archive* archive)
-{
-  string str = archive->get_ephemeris()->get_value("DM");
-
-  if (!str.empty()) {
-    return fromstring<double>(str);
-  } else {
-    throw Error(InvalidState, "pam - get_dm",
-        "cannot find DM value in new ephermeris");
-  }
-}
-
-void get_dms(vector<double>& dms, const Pulsar::Archive* archive)
-{
-  vector<string> dm_keywords;
-  get_dm_keywords(dm_keywords);
-
-  for (unsigned i = 0; i < dm_keywords.size(); ++i) {
-    string str = archive->get_ephemeris()->get_value(dm_keywords[i]);
-
-    if (!str.empty()) {
-      dms.push_back(fromstring<double>(str));
-    }
-  }
-}
-
-double calculate_new_dm(vector<double>& dms, const double dm, const double delta_time)
-{
-    double new_dm = dm;
-    unsigned power = 1;
-
-    for (unsigned i = 0; i < dms.size(); ++i) {
-        new_dm += dms[i] * pow(delta_time, power);
-        ++power;
-    }
-
-    return new_dm;
-}
-
 void update_dm(Pulsar::Archive* archive)
 {
-  const MJD tepoch = get_tepoch(archive);
-  const double delta_time = get_delta_time(archive, tepoch);
-  const double dm = get_dm(archive);
-
-  vector<double> dms;
-  get_dms(dms, archive);
-
-  const double new_dm = calculate_new_dm(dms, dm, delta_time);
-
+  Pulsar::ParametersDM params_dm;
+  params_dm.set_parameters(archive->get_ephemeris());
+  double new_dm = params_dm.get_dm(archive->start_time());
   archive->set_dispersion_measure(new_dm);
 }
 

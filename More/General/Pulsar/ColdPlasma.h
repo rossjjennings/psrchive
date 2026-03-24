@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,8 +12,8 @@
 #define __Pulsar_ColdPlasma_h
 
 #include "Pulsar/Transformation.h"
-#include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Physical.h"
 
@@ -34,43 +34,43 @@ namespace Pulsar {
     properly, through use of a History class (an Integration::Extension).
 
   */
-  template<class Corrector, class History>
+  template<class Calculator, class History>
   class ColdPlasma : public Transformation<Integration> {
 
   public:
 
     /*! For dispersion, Type = double; for Faraday rotation, Type = Jones<double> */
-    typedef typename Corrector::Return Type;
+    typedef typename Calculator::Return Type;
 
     //! Default constructor
     ColdPlasma () { name = "ColdPlasma"; }
 
     //! Return the measure to be corrected with respect to centre frequency
     /*! As returned by psredit -c dm or rm */
-    virtual double get_correction_measure (const Integration*) = 0;
+    virtual double get_relative_measure (const Integration*) const = 0;
 
-    //! Return the measure to be corrected with respect to infinite frequency
-    /*! If psredit -c aux:dmc is 0, return int:aux:dm; otherwise, return 0 */
-    virtual double get_absolute_measure (const Integration*) = 0;
-
-    //! Return true if the data have been corrected
+    //! Return true if the relative measure has been corrected with respect to centre frequency
     /*! As returned by psredit -c dmc or rmc */
-    virtual bool get_corrected (const Integration*) = 0;
+    virtual bool get_relative_corrected (const Integration*) const = 0;
+    
+    //! Return the measure to be corrected with respect to infinite frequency
+    /*! As returned by psredit -c int:aux:dm or int:aux:rm */
+    virtual double get_absolute_measure (const Integration*) const = 0;
 
-    //! Derived classes must return the effective measure to be corrected
-    /*! Return absolution measure plus, if not corrected, the correction measure */
-    virtual double get_effective_measure (const Integration*) = 0;
+    //! Return true if the relative measure has been corrected with respect to centre frequency
+    /*! As returned by psredit -c aux:dmc or aux:rmc */
+    virtual bool get_absolute_corrected (const Integration*) const = 0;
 
     //! Derived classes must define the identity
     /*! For dispersion, returns 0; for Faraday rotation, returns the identity matrix */
-    virtual Type get_identity () = 0;
+    virtual Type get_identity () const = 0;
 
     //! Derived classes must define the operator
     /*! For dispersion, this performs scalar addition; for Faraday rotation, matrix multiplication */
-    virtual void combine (Type& result, const Type& add) = 0;
+    virtual void combine (Type& result, const Type& add) const = 0;
 
     //! Derived classes must define how to apply the correction
-    virtual void apply (Integration*, unsigned channel) = 0;
+    virtual void apply (Integration*, unsigned channel, Type to_be_corrected) = 0;
 
     //! Execute the correction for an entire Archive
     virtual void execute (Archive*);
@@ -89,7 +89,7 @@ namespace Pulsar {
     void setup (const Integration*);
 
     //! update internal variables before execution
-    /*! \post backup_measure = get_measure; get_measure -= corrected_measure; and delta is initialized */
+    /*! \post measure -= corrected_measure; and delta is initialized */
     virtual void update (const Integration*);
 
     //! Calls setup then update
@@ -98,22 +98,24 @@ namespace Pulsar {
 
     //! Set the frequency for which the correction will be computed
     virtual void set_Profile (const Profile* data)
-    { corrector.set_frequency( data->get_centre_frequency () ); }
+    { set_frequency( data->get_centre_frequency () ); }
 
     //! Set the frequency for which the correction will be computed
     virtual void set_frequency (double frequency)
-    { corrector.set_frequency(frequency); }
+    { relative.set_frequency(frequency); absolute.set_frequency(frequency); }
 
     //! Execute the correction for the current get_reference_frequency and get_measure
-    /* \post All data will be corrected to the reference frequency */
+    /* \post All data will be corrected to the reference frequency 
+    
+      Calls update and range, then updates the history. */
     void execute1 (Integration*);
 
-    //! Undo the correction
-    /* \post All data will be uncorrected to the reference frequency */
-    void revert1 (Integration*);
+    //! Undo the relative correction
+    /* \post All corrections with respect to the reference frequency will be inverted */
+    void revert_relative (Integration*);
 
     //! Correct the selected range according to effective_measure
-    void correct (Integration*, unsigned ichan, unsigned jchan, double freq);
+    void correct (Integration*, unsigned start_chan, unsigned end_chan, double freq);
 
     //! Correct the second argument as the first argument was corrected
     void match (const Integration* reference, Integration* to_be_corrected);
@@ -128,17 +130,10 @@ namespace Pulsar {
     //! Get the reference frequency in MHz
     double get_reference_frequency () const;
 
-    //! Set the correction measure
-    void set_measure (double measure);
-    //! Get the correction measure
-    double get_measure () const;
-
-    //! Set the correction to infinite frequency
-    /*! Due to either absolute measure or a change in reference wavelength */
+    //! Set the correction due to a change in reference wavelength
     void set_delta (const Type& d) { delta = d; }
 
-    //! Get the correction to infinite frequency
-    /*! Due to either absolute measure or a change in reference wavelength */
+    //! Get the correction due to a change in reference wavelength
     Type get_delta () const { return delta; }
 
   protected:
@@ -146,10 +141,19 @@ namespace Pulsar {
     friend class Integration;
 
     //! Execute the correction on the selected range
-    void range (Integration*, unsigned ichan, unsigned jchan);
+    void range (Integration*, unsigned start_chan, unsigned end_chan);
 
-    //! The dielectric effect corrector
-    Corrector corrector;
+    //! Computes the effect to be corrected with respect to reference frequency
+    Calculator relative;
+
+    //! update the relative transformation based on past correction
+    virtual void update_relative (const Integration*);
+
+    //! Computes the effect to be corrected with respect to infinite frequency
+    Calculator absolute;
+
+    //! update the absolute transformation based on past correction
+    virtual void update_absolute (const Integration*);
 
     //! The correction due to a change in reference wavelength
     Type delta;
@@ -159,23 +163,18 @@ namespace Pulsar {
 
     //! The name of the correction measure
     std::string val;
-
-  private:
-    double backup_measure = 0.0;
   };
-
 }
-
 
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::setup (const Integration* data)
 {
   set_reference_frequency( data->get_centre_frequency() );
-  set_measure( get_correction_measure(data) );
+  relative.set_measure( get_relative_measure(data) );
 
   if (Integration::verbose)
     std::cerr << "Pulsar::" + name + "::setup lambda=" 
-	      << get_reference_wavelength() << " measure=" << get_measure()
+	      << get_reference_wavelength() << " measure=" << relative.get_measure()
 	      << std::endl;
 }
  
@@ -193,6 +192,8 @@ catch (Error& error)
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::execute (Archive* arch)
 {
+  if (Archive::verbose > 2)
+    std::cerr << "Pulsar::" + name + "::execute (Archive*)" << std::endl;
   for (unsigned i=0; i<arch->get_nsubint(); i++)
     execute1( arch->get_Integration(i) );
 }
@@ -201,7 +202,7 @@ template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::revert (Archive* arch)
 {
   for (unsigned i=0; i<arch->get_nsubint(); i++)
-    revert1( arch->get_Integration(i) );
+    revert_relative( arch->get_Integration(i) );
 }
 
 template<class C, class H>
@@ -216,101 +217,111 @@ void Pulsar::ColdPlasma<C,H>::just_do_it (Archive* arch)
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::set_reference_frequency (double MHz)
 {
-  corrector.set_reference_frequency (MHz);
+  relative.set_reference_frequency (MHz);
 }
 
 template<class C, class H>
 double Pulsar::ColdPlasma<C,H>::get_reference_frequency () const
 {
-  return corrector.get_reference_frequency ();
+  return relative.get_reference_frequency ();
 }
 
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::set_reference_wavelength (double metres)
 {
-  corrector.set_reference_wavelength (metres);
+  relative.set_reference_wavelength (metres);
 }
 
 template<class C, class H>
 double Pulsar::ColdPlasma<C,H>::get_reference_wavelength () const
 {
-  return corrector.get_reference_wavelength ();
+  return relative.get_reference_wavelength ();
 }
 
-template<class C, class H>
-void Pulsar::ColdPlasma<C,H>::set_measure (double measure)
-{
-  corrector.set_measure (measure);
-}
-
-template<class C, class H>
-double Pulsar::ColdPlasma<C,H>::get_measure () const
-{
-  return corrector.get_measure ();
-}
-
-template<class Corrector, class History>
-void Pulsar::ColdPlasma<Corrector,History>::update (const Integration* data)
+template<class Calculator, class History>
+void Pulsar::ColdPlasma<Calculator,History>::update (const Integration* data)
 try
 {
-  backup_measure = get_measure();
-
-  double effective_measure = backup_measure;
-
-  if (Integration::verbose)
-    std::cerr << "Pulsar::" + name + "::update"
-                 " backup measure=" << backup_measure << std::endl;
-
-  delta = get_identity();
-
-  double absolute_measure = get_absolute_measure (data);
-  if (absolute_measure)
-  {
-    if (Integration::verbose)
-      std::cerr << "Pulsar::" + name + "::update absolute"
-	" measure=" << absolute_measure << std::endl;
-
-    // the following corrects centre frequency to infinite frequency
-    Corrector absolute;
-    absolute.set_measure( absolute_measure );
-    absolute.set_reference_wavelength( 0 );
-    absolute.set_frequency( data->get_centre_frequency() );
-    combine (delta, absolute.evaluate());
-
-    // the following corrects channel frequency to centre frequency
-    effective_measure += absolute_measure;
-  }
-
-  const History* corrected = 0;
-
-  if ( get_corrected(data) )
-    corrected = data->template get<History>();
-
-  if (corrected)
-  {
-    double corrected_measure = corrected->get_measure();
-    double lambda = corrected->get_reference_wavelength();
-
-    if (Integration::verbose)
-      std::cerr << "Pulsar::" + name + "::update corrected"
-                  " measure=" << corrected_measure << " lambda=" << lambda << std::endl;
-
-    // calculate the correction due to the new centre frequency, if any
-    corrector.set_wavelength( lambda );
-    combine (delta, corrector.evaluate());
-
-    effective_measure -= corrected_measure;
-  }
-
-  if (Integration::verbose)
-    std::cerr << "Pulsar::" + name + "::update effective_measure=" << effective_measure << std::endl;
-
-  // set the effective correction measure
-  set_measure( effective_measure );
+  update_relative(data);
+  update_absolute(data);
 }
 catch (Error& error)
 {
   throw error += "Pulsar::"+name+"::update";
+}
+
+template<class Calculator, class History>
+void Pulsar::ColdPlasma<Calculator,History>::update_relative (const Integration* data) try
+{
+  double relative_measure = get_relative_measure (data);
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::" + name + "::update_relative measure=" << relative_measure << std::endl;
+
+  relative.set_measure(relative_measure);
+
+  delta = get_identity();
+
+  if (get_relative_corrected(data))
+  {
+    double corrected_measure = relative_measure;
+
+    auto history = data->template get<History>();
+    if (history && history->get_relative()->get_corrected())
+    {
+      corrected_measure = history->get_relative()->get_measure();
+      double lambda = history->get_relative()->get_reference_wavelength();
+
+      if (Integration::verbose)
+        std::cerr << "Pulsar::" + name + "::update_relative corrected"
+                    " measure=" << corrected_measure << " lambda=" << lambda << std::endl;
+
+      // calculate the correction due to the new centre frequency, if any
+      relative.set_wavelength( lambda );
+      delta = relative.evaluate();
+    }
+
+    // remaining correction is due to change in corrected measure, if any
+    relative.set_measure(relative_measure - corrected_measure);
+  }
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::"+name+"::update_relative";
+}
+
+template<class Calculator, class History>
+void Pulsar::ColdPlasma<Calculator,History>::update_absolute (const Integration* data) try
+{
+  double absolute_measure = get_absolute_measure (data);
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::" + name + "::update_absolute measure=" << absolute_measure << std::endl;
+
+  absolute.set_measure(absolute_measure);
+  absolute.set_reference_wavelength(0.0);
+
+  if (get_absolute_corrected(data))
+  {
+    double corrected_measure = absolute_measure;
+
+    auto history = data->template get<History>();
+    if (history && history->get_absolute()->get_corrected())
+    {
+      corrected_measure = history->get_absolute()->get_measure();
+    }
+
+    if (Integration::verbose)
+      std::cerr << "Pulsar::" + name + "::update_absolute corrected"
+                  " measure=" << corrected_measure << std::endl;
+
+    // remaining correction is due to change in corrected measure, if any
+    absolute.set_measure(absolute_measure - corrected_measure);
+  }
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::"+name+"::update_absolute";
 }
 
 template<class C, class History>
@@ -320,19 +331,25 @@ void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
 
   if (Integration::verbose)
     std::cerr << "Pulsar::"+name+"::execute1"
-      " effective "+val+"=" << get_measure() <<
+      " relative "+val+"=" << relative.get_measure() <<
       " reference wavelength=" << get_reference_wavelength() << std::endl;
 
   range (data, 0, data->get_nchan());
 
-  // restore the original correction measure
-  set_measure( backup_measure );
+  double relative_measure = get_relative_measure (data);
+  History* history = data->template getadd<History>();
+  history->get_relative()->set_corrected( true );
+  history->get_relative()->set_measure( relative_measure );
+  history->get_relative()->set_reference_wavelength( get_reference_wavelength() );
 
-  History* corrected = new History;
-  corrected->set_measure( backup_measure );
-  corrected->set_reference_wavelength( get_reference_wavelength() );
-  data->add_extension( corrected );
-
+  double absolute_measure = get_absolute_measure (data);
+  if (absolute_measure)
+  {
+    History* history = data->template getadd<History>();
+    history->get_absolute()->set_corrected( true );
+    history->get_absolute()->set_measure( absolute_measure );
+    history->get_absolute()->set_reference_wavelength( 0.0 );
+  }
 }
 catch (Error& error)
 {
@@ -340,47 +357,49 @@ catch (Error& error)
 }
 
 template<class C, class History>
-void Pulsar::ColdPlasma<C,History>::revert1 (Integration* data) try
+void Pulsar::ColdPlasma<C,History>::revert_relative (Integration* data) try
 {
-  if ( !get_corrected(data) )
+  auto history = data->template get<History>();
+  if (!history)
+    throw Error (InvalidState, "Pulsar::" + name + "::revert_relative", "no correction history");
+
+  if (!history->get_relative()->get_corrected())
+  {
+    if (Integration::verbose)
+      std::cerr << "Pulsar::" + name + "::revert_relative not corrected" << std::endl;
     return;
+  }
 
-  History* corrected = data->template get<History>();
- 
-  if (!corrected)
-    throw Error (InvalidState, "Pulsar::" + name + "::revert1",
-		 "no correction history");
-
-  set_measure( -corrected->get_measure() );
-  set_reference_wavelength( corrected->get_reference_wavelength() );
+  relative.set_measure( -history->get_relative()->get_measure() );
+  set_reference_wavelength( history->get_relative()->get_reference_wavelength() );
   set_delta( get_identity() );
 
   if (Integration::verbose)
-    std::cerr << "Pulsar::"+name+"::revert1"
-      " effective "+val+"=" << get_measure() <<
+    std::cerr << "Pulsar::"+name+"::revert_relative"
+      " relative "+val+"=" << relative.get_measure() <<
       " reference wavelength=" << get_reference_wavelength() << std::endl;
 
   range (data, 0, data->get_nchan());
 
   // this should remove the history
-  delete corrected;
+  delete history;
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::"+name+"::revert1";
+  throw error += "Pulsar::"+name+"::revert_relative";
 }
 
 //! Correct the second argument as the first argument was corrected
 template<class C, class History>
 void Pulsar::ColdPlasma<C,History>::match (const Integration* reference, Integration* to_correct)
 {
-  const History* corrected = reference->template get<History>();
-  if (!corrected)
+  const History* history = reference->template get<History>();
+  if (!history)
     throw Error (InvalidState, "Pulsar::" + name + "::match",
 		 "reference has no correction history");
 
-  set_measure( corrected->get_measure() );
-  set_reference_wavelength( corrected->get_reference_wavelength() );
+  relative.set_measure( history->get_relative()->get_measure() );
+  set_reference_wavelength( history->get_relative()->get_reference_wavelength() );
  
   execute1( to_correct );
 }
@@ -388,8 +407,8 @@ void Pulsar::ColdPlasma<C,History>::match (const Integration* reference, Integra
 /*! This worker method performs the correction on a specified range
     of frequency channels
 
-    \param ichan the first channel to be corrected
-    \param kchan one more than the last channel to be corrected
+    \param start_chan the first channel to be corrected
+    \param end_chan one more than the last channel to be corrected
 
     \pre the measure and reference_wavelength attributes will
     have been set prior to calling this method
@@ -397,45 +416,61 @@ void Pulsar::ColdPlasma<C,History>::match (const Integration* reference, Integra
     \pre the delta attribute will have been properly set or reset
 */
 template<class C, class H>
-void Pulsar::ColdPlasma<C,H>::range (Integration* data, unsigned ichan, unsigned kchan) try
+void Pulsar::ColdPlasma<C,H>::range (Integration* data, unsigned start_chan, unsigned end_chan) try
 {
-
   if (Integration::verbose)
-    std::cerr << "Pulsar::"+name+"::range "+val+"=" << get_measure()
+    std::cerr << "Pulsar::"+name+"::range "+val
+        << " relative=" << relative.get_measure()
+        << " absolute=" << absolute.get_measure()
         << " lambda_0=" << get_reference_wavelength() << " m" 
         << " delta=" << delta << std::endl;
 
-  if (get_measure() == 0 && delta == get_identity())
-    return;
-
-  if (ichan >= data->get_nchan())
-    throw Error (InvalidRange, "Pulsar::"+name+"::range",
-                 "start chan=%d >= nchan=%d", ichan, data->get_nchan());
-
-  if (kchan > data->get_nchan())
-    throw Error (InvalidRange, "Pulsar::"+name+"::range",
-                 "end chan=%d > nchan=%d", kchan, data->get_nchan());
-
-  for (unsigned jchan=ichan; jchan < kchan; jchan++)
+  if (relative.get_measure() == 0 && absolute.get_measure() == 0 && delta == get_identity())
   {
-    corrector.set_frequency( data->get_centre_frequency (jchan) );
-    apply (data, jchan);
+    if (Integration::verbose)
+      std::cerr << "Pulsar::"+name+"::range nothing to correct" << std::endl;
+    return;
   }
 
+  if (start_chan >= data->get_nchan())
+    throw Error (InvalidRange, "Pulsar::"+name+"::range",
+                 "start chan=%d >= nchan=%d", start_chan, data->get_nchan());
+
+  if (end_chan > data->get_nchan())
+    throw Error (InvalidRange, "Pulsar::"+name+"::range",
+                 "end chan=%d > nchan=%d", end_chan, data->get_nchan());
+
+  for (unsigned ichan=start_chan; ichan < end_chan; ichan++)
+  {
+    set_frequency( data->get_centre_frequency (ichan) );
+
+    Type result = delta;
+    combine(result, relative.evaluate());
+    combine(result, absolute.evaluate());
+
+    if (Profile::verbose)
+      std::cerr << "Pulsar::"+name+"::range ichan=" << ichan
+                << "\n\t relative=" << relative.evaluate()
+                << "\n\t absolute=" << absolute.evaluate() << std::endl;
+
+    apply (data, ichan, result);
+  }
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::"+name+"::range";
 }
 
 
-/*! 
-   \param ichan the first channel to be corrected
-   \param kchan one greater than the last channel to be corrected
+/*! Calls setup, update, and range, but does not modify history
+
+   \param start_chan the first channel to be corrected
+   \param end_chan one greater than the last channel to be corrected
    \param reference_frequency the reference frequency
 */
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::correct (Integration* subint,
-				       unsigned ichan, unsigned kchan, 
+				       unsigned start_chan, unsigned end_chan, 
 				       double reference_frequency) 
 try
 {
@@ -446,9 +481,10 @@ try
   if (Integration::verbose)
     std::cerr << "Pulsar::" + name + "::correct"
                  " reference freq=" << reference_frequency << 
-                 " effective measure=" << get_measure() << std::endl;
+                 " relative measure=" << relative.get_measure() <<
+                 " absolute measure=" << absolute.get_measure() << std::endl;
 
-  range (subint, ichan, kchan);
+  range (subint, start_chan, end_chan);
 }
 catch (Error& error)
 {

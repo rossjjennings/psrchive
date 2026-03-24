@@ -82,7 +82,7 @@ void MEAL::CyclicParameter::set_period (double P)
 //! Set the matching azimuth and behave like an elevation
 void MEAL::CyclicParameter::set_azimuth (CyclicParameter* az)
 {
-  azimuth = az;
+  azimuth.set(az);
   check (get_param());
 }
 

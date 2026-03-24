@@ -9,6 +9,11 @@
 #include "MEAL/CongruenceTransformation.h"
 #include "MEAL/MuellerTransformation.h"
 
+// #define _DEBUG
+#include "debug.h"
+
+#include <cassert>
+
 using namespace std;
 
 Calibration::MeasurementEquation::MeasurementEquation () 
@@ -52,11 +57,13 @@ unsigned Calibration::MeasurementEquation::get_input_index () const
 
 void Calibration::MeasurementEquation::set_input_index (unsigned index)
 {
+  DEBUG ("Calibration::MeasurementEquation::set_input_index index=" << index);
   inputs.set_index( index );
 }
 
 void Calibration::MeasurementEquation::erase_input (unsigned index)
 {
+  assert(index < inputs.size());
   inputs.erase( index );
 }
 
@@ -127,18 +134,24 @@ unsigned Calibration::MeasurementEquation::get_transformation_index () const
 void
 Calibration::MeasurementEquation::set_transformation_index (unsigned index)
 {
+  DEBUG ("Calibration::MeasurementEquation::set_xform_index index=" << index);
   xforms.set_index( index );
+}
+
+void Calibration::MeasurementEquation::erase_transformation (unsigned index)
+{
+  assert(index < xforms.size());
+  xforms.erase( index );
 }
 
 //! Returns \f$ \rho^\prime_j \f$ and its gradient
 void 
-Calibration::MeasurementEquation::calculate (Jones<double>& result,
-					     std::vector<Jones<double> >* grad)
+Calibration::MeasurementEquation::calculate (Jones<double>& result, std::vector<Jones<double>>* grad)
 try {
   if (verbose)
     cerr << "Calibration::MeasurementEquation::calculate nparam="
-	 << get_nparam() << " policy=" << parameter_policy.ptr()
-	 << " composite=" << &composite << endl;
+        << get_nparam() << " policy=" << parameter_policy.ptr()
+        << " composite=" << &composite << endl;
 
   xforms.get_current()->set_input( inputs.get_projection() );
 

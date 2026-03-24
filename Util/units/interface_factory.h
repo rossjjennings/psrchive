@@ -12,6 +12,7 @@
 #define __interface_factory_h
 
 #include "separate.h"
+#include "stringtok.h"
 
 // #define _DEBUG 1
 #include "debug.h"

@@ -120,7 +120,6 @@ void Pulsar::PolnProfile::sum (const PolnProfile* that)
     this->profile[ipol]->sum( that->profile[ipol] );
 }
 
-
 //
 //
 //
@@ -129,9 +128,6 @@ void Pulsar::PolnProfile::diff (const PolnProfile* that)
   for (unsigned ipol=0; ipol < 4; ipol++)
     this->profile[ipol]->diff( that->profile[ipol] );
 }
-
-
-
 
 //
 //
@@ -541,7 +537,6 @@ void Pulsar::PolnProfile::sum_difference (Profile* sum, Profile* difference)
   }
 }
 
-
 /*!
   Currently, this method should be used only to correct Stokes parameters
   that have been formed assuming linearly polarized receptors when in
@@ -563,7 +558,6 @@ void Pulsar::PolnProfile::convert_basis (Signal::Basis to)
     basis = to;
   }
 }
-				      
 
 /*! 
   Forms the Stokes polarimetric invariant interval,
@@ -593,7 +587,7 @@ void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
   Reference::To<Pulsar::PhaseWeight> use_baseline = get_baseline ();
 
   /*
-    remove the bias due to noise from the invariant profile
+    subtract the bias due to noise
   */
   use_baseline->set_Profile( invint );
   invint->offset( -use_baseline->get_mean().get_value() );
@@ -887,8 +881,7 @@ Pulsar::PolnProfile::get_linear_variance (std::pair<double,double>& var) const
   return 0.5 * (var.first + var.second);
 }
 
-void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
-				      float threshold) const
+void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L, float threshold) const
 {
   Profile linear;
   get_linear (&linear);
@@ -927,8 +920,7 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
 }
 
 //! Returns a vector of position angle estimates as a function of pulse phase
-void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
-					   float threshold) const
+void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang, float threshold) const
 {
   vector< complex< Estimate<double> > > linear;
   get_linear (linear, threshold);

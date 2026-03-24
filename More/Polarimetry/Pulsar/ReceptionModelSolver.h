@@ -67,7 +67,21 @@ namespace Calibration
     //! Count the total number of constraints (one-dimensional data)
     void count_constraint ();
 
+    //! verify that all free parameters have constraining data
     void check_constraints ();
+
+    //! verify that all transformations with free parameters have constraining data
+    void check_transformations ();
+
+    //! remove the transformation from the model and adjust all measurements accordingly
+    void erase_transformation (unsigned index);
+
+    //! verify that all inputs with free parameters have constraining data
+    void check_inputs ();
+
+    //! remove the input from the model and adjust all measurements accordingly
+    void erase_input (unsigned index);
+
     void set_variances ();
     void check_solution ();
 

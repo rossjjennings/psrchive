@@ -38,6 +38,9 @@ namespace Pulsar {
     //! Default constructor
     PhaseWidth ();
     
+    //! Destructor
+    ~PhaseWidth ();
+    
     //! Return the width of the pulse profile in turns
     double get_width_turns (const Profile* profile);
 

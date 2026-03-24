@@ -57,7 +57,7 @@ namespace Pulsar {
     std::vector< Reference::To<Options> > options;
 
     //! Add command line options
-    virtual void add_options (CommandLine::Menu&) = 0;
+    virtual void add_options (CommandLine::Menu&) { }
 
     //! Parse the command line options
     virtual void parse (int argc, char** argv);
@@ -141,6 +141,17 @@ namespace Pulsar {
 
     // sort filenames returned by dirglob
     bool sort_filenames;
+
+    // set the commit hash compiled into application
+    void set_commit_hash (const std::string& hash) { commit_hash = hash; }
+
+    private:
+
+    // commit hash compiled into application
+    std::string commit_hash;
+
+    // verify that commit hash compiled into application equals that compiled into library
+    void verify_commit_hash ();
   };
 
   //! Describes application command line options.

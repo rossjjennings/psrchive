@@ -117,8 +117,8 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   struct timer* header = const_cast<struct timer*> (&hdr);
 
-  if (model)
-    header->nbytespoly = nbytes<Predictor> (model);
+  if (has_model())
+    header->nbytespoly = nbytes<Predictor> (get_model());
   else
     header->nbytespoly = 0;
 
@@ -167,13 +167,14 @@ void Pulsar::TimerArchive::set_be_data_size ()
 
 void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
 {
-  if (model && hdr.nbytespoly > 0) {
+  if (has_model() && hdr.nbytespoly > 0)
+  {
     if (verbose == 3)
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytespoly << " bytes in predictor" << endl;
 
     long before = ftell(fptr);
-    model->unload (fptr);
+    get_model()->unload (fptr);
     long after = ftell(fptr);
 
     if (after - before != hdr.nbytespoly)

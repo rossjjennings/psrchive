@@ -30,10 +30,12 @@ namespace Calibration
   void copy (T* to, const F* from)
   {
     if (to->get_nparam() != from->get_nparam())
-      throw Error (InvalidParam, "copy<To,From>",
-      "to nparam=%d != from nparam=%d",
-      to->get_nparam(), from->get_nparam());
-
+    {
+      throw Error (InvalidParam, "Calibration::copy<To,From>",
+                  "to nparam=%d != from nparam=%d",
+                  to->get_nparam(), from->get_nparam());
+    }
+  
     for (unsigned i=0; i<to->get_nparam(); i++)
       to->set_Estimate(i, from->get_Estimate(i));
 

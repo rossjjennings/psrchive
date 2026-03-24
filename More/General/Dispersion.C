@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2010 by Willem van Straten
+ *   Copyright (C) 2006-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,8 +9,8 @@
 
 #include "Pulsar/Dispersion.h"
 
+#include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/AuxColdPlasmaMeasures.h"
@@ -39,21 +39,17 @@ Pulsar::Dispersion::Dispersion ()
   delta = get_identity ();
 }
 
-double Pulsar::Dispersion::get_correction_measure (const Integration* data)
+double Pulsar::Dispersion::get_relative_measure (const Integration* data) const
 {
   if (Archive::verbose > 2)
-    cerr << "Pulsar::Dispersion::get_correction_measure DM="
+    cerr << "Pulsar::Dispersion::get_relative_measure DM="
          << data->get_dispersion_measure () << endl;
 
   return data->get_dispersion_measure ();
 }
 
-//! Return the auxiliary dispersion measure (0 if corrected)
-double Pulsar::Dispersion::get_absolute_measure (const Integration* data)
+double Pulsar::Dispersion::get_absolute_measure (const Integration* data) const
 {
-  if (data->get_auxiliary_dispersion_corrected ())
-    return 0;
-
   const AuxColdPlasmaMeasures* aux = data->get<AuxColdPlasmaMeasures> ();
   if (!aux)
     return 0;
@@ -61,41 +57,41 @@ double Pulsar::Dispersion::get_absolute_measure (const Integration* data)
   return aux->get_dispersion_measure ();
 }
 
-double Pulsar::Dispersion::get_effective_measure (const Integration* data)
+bool Pulsar::Dispersion::get_relative_corrected (const Integration* data) const
 {
   if (Archive::verbose > 2)
-    cerr << "Pulsar::Dispersion::get_effective_measure DM="
-         << data->get_effective_dispersion_measure () << endl;
-
-  return data->get_effective_dispersion_measure ();
-}
-
-bool Pulsar::Dispersion::get_corrected (const Integration* data)
-{
-  if (Archive::verbose > 2)
-    cerr << "Pulsar::Dispersion::get_corrected dedispersed=" 
+    cerr << "Pulsar::Dispersion::get_relative_corrected dedispersed=" 
 	       << data->get_dedispersed() << endl;
 
   return data->get_dedispersed();
 }
 
+bool Pulsar::Dispersion::get_absolute_corrected (const Integration* data) const
+{
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Dispersion::get_relative_corrected dedispersed=" 
+	       << data->get_absolute_dispersion_corrected() << endl;
+
+  return data->get_absolute_dispersion_corrected ();
+}
+
 //! Execute the correction for an entire Pulsar::Archive
 void Pulsar::Dispersion::execute (Archive* arch)
 {
-  ColdPlasma<DispersionDelay,Dedisperse>::execute (arch);
+  ColdPlasma<DispersionDelay,DispersionHistory>::execute (arch);
   arch->set_dispersion_measure( get_dispersion_measure() );
   arch->set_dedispersed( true );
-  arch->get<AuxColdPlasma>()->set_dispersion_corrected( true );
+  arch->expert()->update_absolute_dispersion();
 }
 
 //! Undo the correction for an entire Pulsar::Archive
 void Pulsar::Dispersion::revert (Archive* arch)
 {
-  ColdPlasma<DispersionDelay,Dedisperse>::revert (arch);
+  ColdPlasma<DispersionDelay,DispersionHistory>::revert (arch);
   arch->set_dedispersed( false );
 }
 
-void Pulsar::Dispersion::apply (Integration* data, unsigned ichan) try
+void Pulsar::Dispersion::apply (Integration* data, unsigned ichan, double delay) try
 {
   folding_period = data->get_folding_period();
   if (barycentric_correction)
@@ -105,19 +101,24 @@ void Pulsar::Dispersion::apply (Integration* data, unsigned ichan) try
 
     if (Archive::verbose > 2)
       cerr << "Pulsar::Dispersion::apply barycentric Doppler correction=1+" << earth_doppler - 1.0 << endl;
+
+    delay /= earth_doppler;
   }
 
+  double shift = delay / folding_period;
+
   for (unsigned ipol=0; ipol < data->get_npol(); ipol++)
-    data->get_Profile(ipol,ichan) -> rotate_phase( get_shift() );
+    data->get_Profile(ipol,ichan) -> rotate_phase( shift );
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Dispersion::apply";
 }
 
 //! Set attributes in preparation for execute
 void Pulsar::Dispersion::update (const Integration* data)
 {
-  ColdPlasma<DispersionDelay,Dedisperse>::update (data);
+  ColdPlasma<DispersionDelay,DispersionHistory>::update (data);
   folding_period = data->get_folding_period ();
 
   if (Integration::verbose)
@@ -138,7 +139,7 @@ double Pulsar::Dispersion::get_delay () const
 {
   // corrector is of type DispersionDelay
   // it is a member of the ColdPlasma template base class
-  double delay = delta + corrector.evaluate();
+  double delay = delta + relative.evaluate();
   return delay / earth_doppler;
 }
 

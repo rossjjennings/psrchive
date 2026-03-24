@@ -11,8 +11,8 @@
 #ifndef __Pulsar_SimPolnTiming_h
 #define __Pulsar_SimPolnTiming_h
 
-#include "Pulsar/SyntheticPolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
+#include "Pulsar/SyntheticPolnProfile.h"
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/Gaussian.h"
 

@@ -129,7 +129,6 @@ void Pulsar::EPNArchive::set_source (const string& source)
 }
 
 
-
 /*! From line 3 of the header:
 
   c     rah         - I2     - Hours of right ascension (J2000)

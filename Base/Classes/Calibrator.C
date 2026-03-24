@@ -130,6 +130,11 @@ const Pulsar::Archive* Pulsar::Calibrator::get_Archive () const
   return calibrator; 
 }
 
+bool Pulsar::Calibrator::has_Archive () const
+{
+  return calibrator;
+}
+
 MJD Pulsar::Calibrator::get_epoch () const
 {
   if (extension)

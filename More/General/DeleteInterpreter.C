@@ -66,7 +66,7 @@ Pulsar::DeleteInterpreter::DeleteInterpreter ()
 
   add_command
     ( &DeleteInterpreter::cal,
-      "cal", "delete specified channels from CalibratorExtenstion",
+      "cal", "delete specified channels from calibrator extension",
       index_help("cal") );
 
   add_command

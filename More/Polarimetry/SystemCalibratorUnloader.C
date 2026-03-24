@@ -36,8 +36,7 @@ void Pulsar::SystemCalibrator::Unloader::set_extension (const string& ext)
   extension = ext;
 }
 
-void Pulsar::SystemCalibrator::Unloader::set_filename (const Archive* archive,
-						       unsigned subint)
+void Pulsar::SystemCalibrator::Unloader::set_filename (const Archive* archive, unsigned subint)
 {
   string new_ext = stringprintf ("%04u.tmp", subint);
 
@@ -50,8 +49,7 @@ void Pulsar::SystemCalibrator::Unloader::set_filename (const Archive* archive,
 void Pulsar::SystemCalibrator::Unloader::unload (SystemCalibrator* model)
 {
   if (filename.empty())
-    throw Error (InvalidState, "Pulsar::SystemCalibrator::Unloader::unload",
-		 "filename not set");
+    throw Error (InvalidState, "Pulsar::SystemCalibrator::Unloader::unload", "filename not set");
 
   Reference::To<Archive> solution = model->new_solution (archive_class);
 

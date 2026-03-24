@@ -15,6 +15,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include <iostream>
 using namespace std;
@@ -148,9 +149,16 @@ void Pulsar::DeltaRM::refine ()
 
   rotation_measure = delta_RM + data->get_rotation_measure();
   
+  Estimate<double> report_RM = rotation_measure;
+  auto aux = clone->get<AuxColdPlasmaMeasures>();
+  if (aux)
+  {
+    report_RM += aux->get_rotation_measure();
+  }
+
   cerr << "delta PA = <PA_1 - PA_0> = " << 180.0/M_PI * delta_PA << " deg.\n"
        << "delta RM = " << delta_RM << endl
-       << "final RM = " << rotation_measure << endl;
+       << "final RM = " << report_RM << endl;
 
   used_bins = delta_pa.get_used_bins();
 }

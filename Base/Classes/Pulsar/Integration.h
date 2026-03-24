@@ -213,7 +213,7 @@ namespace Pulsar {
     virtual double get_folding_period() const = 0;
     //! Set the folding or topocentric pulsar period (in seconds)
     /*  The topocentric folding period of the pulsar should be equal
-	to that at the epoch defined by get_epoch. */
+        to that at the epoch defined by get_epoch. */
     virtual void set_folding_period (double seconds) = 0;
 
     //! Get the fraction of the pulse period recorded (in turns)
@@ -270,18 +270,31 @@ namespace Pulsar {
     //! Get the polarimetric state of the profiles
     Signal::State get_state () const;
 
-    //! Auxiliary inter-channel dispersion delay has been removed
-    bool get_auxiliary_dispersion_corrected () const;
+    //! Absolute inter-channel dispersive delay has been removed
+    bool get_absolute_dispersion_corrected () const;
 
-    //! Auxiliary inter-channel birefringence has been removed
-    bool get_auxiliary_birefringence_corrected () const;
+    //! Absolute inter-channel birefringence has been removed
+    bool get_absolute_rotation_corrected () const;
 
     //! Get the effective dispersion measure that remains to be corrected
+    /*! Returns the sum of get_relative_dispersion_measure and get_absolute_dispersion_measure. */
     double get_effective_dispersion_measure () const;
 
     //! Get the effective rotation measure that remains to be corrected
+    /*! Returns the sum of get_relative_rotation_measure and get_absolute_rotation_measure. */
     double get_effective_rotation_measure () const;
 
+    //! Get the relative dispersion measure that remains to be corrected
+    double get_relative_dispersion_measure () const;
+
+    //! Get the relative rotation measure that remains to be corrected
+    double get_relative_rotation_measure () const;    
+
+    //! Get the absolute dispersion measure that remains to be corrected
+    double get_absolute_dispersion_measure () const;
+
+    //! Get the absolute rotation measure that remains to be corrected
+    double get_absolute_rotation_measure () const;        
     //@}
 
 
@@ -303,18 +316,18 @@ namespace Pulsar {
     //! Returns a const pointer to the Profile given by the specified indeces
     const Profile* get_Profile (unsigned ipol, unsigned ichan) const;
 
-    //! Returns a pointer to a new PolnProfile instance
+    //! Returns a pointer to a new PolnProfile containing references to Profiles
     PolnProfile* new_PolnProfile (unsigned ichan);
 
-    //! Returns a const pointer to a new PolnProfile instance
-    const PolnProfile* new_PolnProfile (unsigned ichan) const;
+    //! Returns a pointer to a new PolnProfile containing clones of Profiles
+    PolnProfile* new_PolnProfile (unsigned ichan) const;
 
     //! Return the Stokes 4-vector for the frequency channel and phase bin
     Stokes<float> get_Stokes (unsigned ichan, unsigned ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
     void get_Stokes (std::vector< Stokes<float> >& S, unsigned iother,
-		     Signal::Dimension abscissa = Signal::Phase ) const;
+                     Signal::Dimension abscissa = Signal::Phase ) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -439,8 +452,7 @@ namespace Pulsar {
     virtual void copy (const Integration* subint, bool management = true);
 
     //! Swap the two specified profiles
-    void swap_profiles (unsigned ipol, unsigned ichan,
-			unsigned jpol, unsigned jchan);
+    void swap_profiles (unsigned ipol, unsigned ichan, unsigned jpol, unsigned jchan);
 
     //! Rotate each profile by time (in seconds); updates the epoch attribute
     void rotate (double time);
@@ -508,6 +520,14 @@ namespace Pulsar {
     void defaraday (unsigned ichan, unsigned kchan,
                     double reference_frequency);
 
+    //! Update the DispersionHistory extension, as needed
+    /*! Assumes that the dedisperse worker function has been applied to all channels */
+    void update_absolute_dispersion();
+
+    //! Update the BirefringenceHistory extension, as needed
+    /*! Assumes that the defaraday worker function has been applied to all channels */
+    void update_absolute_rotation();
+
     //! Converts between coherency products and Stokes parameters
     void poln_convert (Signal::State out_state);
 
@@ -518,33 +538,20 @@ namespace Pulsar {
     void update_nbin ();
   };
 
-  template<typename UnaryProfileMethod, typename Argument>
+  template<typename Argument>
   void foreach (Integration* integration,
-		UnaryProfileMethod method, const Argument& arg)
+                void (Profile::*method) (Argument), Argument arg)
   {
     const unsigned npol = integration->get_npol();
     const unsigned nchan = integration->get_nchan();
 
     for (unsigned ipol=0; ipol<npol; ipol++)
       for (unsigned ichan=0; ichan<nchan; ichan++)
-	(integration->get_Profile(ipol, ichan)->*(method)) (arg);
+        (integration->get_Profile(ipol, ichan)->*(method)) (arg);
   }
 
-  template<typename BinaryProfileMethod>
   void foreach (Integration* integration, const Integration* operand,
-                BinaryProfileMethod method)
-  {
-    const unsigned npol = integration->get_npol();
-    const unsigned nchan = integration->get_nchan();
-
-    for (unsigned ipol=0; ipol<npol; ipol++)
-      for (unsigned ichan=0; ichan<nchan; ichan++)
-      {
-	Profile* into = integration->get_Profile(ipol, ichan);
-	const Profile* from = operand->get_Profile(ipol, ichan);
-        (into->*(method)) (from);
-      }
-  }
+                void (Pulsar::Profile::*method) (const Pulsar::Profile*));
 }
 
 #endif

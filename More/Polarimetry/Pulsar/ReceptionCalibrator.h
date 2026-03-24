@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 - 2012 by Willem van Straten
+ *   Copyright (C) 2003 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -85,7 +85,7 @@ namespace Pulsar
     ReflectStokes reflections;
 
     //! Add the specified pulse phase bin to the set of state constraints
-    void add_state (unsigned pulse_phase_bin);
+    void add_state (int pulse_phase_bin);
     
     //! Get the number of pulsar phase bin input polarization states
     unsigned get_nstate_pulsar () const;
@@ -101,12 +101,6 @@ namespace Pulsar
 
     //! Get the on-pulse mask
     const PhaseWeight* get_onpulse () const;
-
-    //! Add the calibrator observation to the set of constraints
-    void add_calibrator (const Archive* data);
-    
-    //! Add the ReferenceCalibrator observation to the set of constraints
-    void add_calibrator (const ReferenceCalibrator* polncal);
     
     //! Return true if any flux calibrator observations are available
     bool has_fluxcal () const;
@@ -114,31 +108,24 @@ namespace Pulsar
     //! Return the flux calibration manager for the specified frequency channel
     const Calibration::FluxCalManager* get_fluxcal (unsigned ichan) const;
 
-    //! Set the first guess to a previous solution
-    void set_previous (const Archive* data);
-
     //! Normalize each Stokes vector by the mean on-pulse invariant 
     void set_normalize_by_invariant (bool set = true);
 
-    //! Solve equation for each frequency
-    void solve ();
-    
+    //! Return the invariant for the specified integration and frequency channel
+    double get_invariant (Integration* subint, unsigned ichan) override;
+
   protected:
     
     //! Standard data interface
     Reference::To<Calibration::StandardData> standard_data;
 
-    //! The unique transformation for each observation
-    MEAL::VectorRule<MEAL::Complex2>* unique;
-
-    //! The unique transformation "axis"
-    MEAL::Axis< unsigned > unique_axis;
-
     std::vector< Reference::To<Calibration::FluxCalManager> > fluxcal;
 
+    typedef Reference::To<Calibration::SourceEstimate> SourceEstimate;
+
     //! Uncalibrated estimate of pulsar polarization as a function of phase
-    std::vector< std::vector<Calibration::SourceEstimate> > pulsar;
-    std::vector< unsigned > phase_bins;
+    std::vector< std::vector< SourceEstimate > > pulsar_estimate;
+    std::vector< int > phase_bins;
 
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
@@ -152,14 +139,8 @@ namespace Pulsar
     //! The number of channels that may be simultaneously solved
     unsigned nthread;
 
-    //! Set the initial guesses and update the reference epoch
-    void initialize ();
-
     //! Initialize the SignalPath of the specified channel
     void init_model (unsigned ichan);
-
-    //! Check that the model is ready to receive additional constraints
-    void check_ready (const char* method, bool init = true);
 
     //! Initialization performed using the first observation added
     void initial_observation (const Archive* data);
@@ -173,7 +154,7 @@ namespace Pulsar
       \param ichan the frequency channel
     */
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
-		   Calibration::SourceEstimate& estimate,
+		   Calibration::SourceEstimate* estimate,
 		   const MJD& epoch, unsigned ichan);
 
     //! Prepare the calibrator estimate
@@ -191,21 +172,21 @@ namespace Pulsar
     void submit_calibrator_data ();
 
     //! Ensure that the pulsar observation can be added to the data set
-    void match (const Archive*);
+    bool match (const Archive*, bool throw_exception = true);
 
     void add_pulsar (Calibration::CoherencyMeasurementSet&,
 		     const Integration*, unsigned ichan);
 
-    Calibration::SourceEstimate& get_estimate (unsigned index,
-					       unsigned ichan);
+    Calibration::SourceEstimate* get_estimate (unsigned index, unsigned ichan);
 
     void integrate_pulsar_data (const Calibration::CoherencyMeasurementSet&);
 
     void integrate_pulsar_data (const Calibration::CoherencyMeasurement&,
-				Calibration::SourceEstimate&,
+				Calibration::SourceEstimate*,
 				const MJD& epoch, unsigned ichan);
       
     //! Prepare the measurement equations for fitting
+    /*! Set the initial guesses and update the reference epoch */
     void solve_prepare ();
 
     //! Prepare to export the solution
@@ -213,7 +194,7 @@ namespace Pulsar
 
     //! Set fit flags and initial values of the calibrator Stokes parameters
     void setup_calibrators ();
-    void setup_poln_calibrator (Calibration::SourceEstimate&);
+    void setup_poln_calibrator (Calibration::SourceEstimate*);
     void setup_flux_calibrator (Calibration::FluxCalManager*);
 
     //! Ensure that selected phase bins are represented in on-pulse mask

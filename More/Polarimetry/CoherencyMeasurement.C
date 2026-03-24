@@ -44,7 +44,16 @@ void CoherencyMeasurement::set_stokes
 {
   Stokes<double> val;
 
-  for (unsigned ipol=0; ipol<4; ipol++) {
+  for (unsigned ipol=0; ipol<4; ipol++)
+  {
+    if (!true_math::finite(stokes[ipol].val))
+      throw Error (InvalidState, "CoherencyMeasurement::set_stokes",
+                   "non-finite stokes[%d].val=", stokes[ipol].val);
+
+    if (!true_math::finite(stokes[ipol].var))
+      throw Error (InvalidState, "CoherencyMeasurement::set_stokes",
+                   "non-finite stokes[%d].var=", stokes[ipol].var);
+
     val[ipol] = stokes[ipol].val;
     variance[ipol] = stokes[ipol].var;
   }
@@ -108,7 +117,7 @@ void CoherencyMeasurement::set_stokes
 
 //! Set the measured complex Stokes parameters and the variance functions
 void CoherencyMeasurement::set_stokes
-(const Stokes< complex<double> >& stokes, const Uncertainty* var)
+(const Stokes< complex<double> >& stokes, Uncertainty* var)
 {
   uncertainty = var;
 
@@ -150,6 +159,7 @@ Jones<double> CoherencyMeasurement::get_weighted_conjugate
 }
 catch (Error& error)
 {
+  error << "\n\t" "matrix=" << matrix;
   throw error += "CoherencyMeasurement::get_weighted_conjugate";
 }
 
@@ -196,3 +206,9 @@ void CoherencyMeasurement::set_coordinates () const
     coordinates[ic]->apply();
 }
 
+void CoherencyMeasurement::scale (double x)
+{
+  rho *= x;
+  variance *= x*x;
+  uncertainty->scale(x);
+}

@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2000 by Willem van Straten
+ *   Copyright (C) 2000-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifndef __DIRUTILS_H
 #define __DIRUTILS_H
 
@@ -13,7 +14,7 @@
 #include <string>
 
 // in dirwith.C
-const std::string dirwith (double size, const std::vector<std::string>& disks,
+std::string dirwith (double size, const std::vector<std::string>& disks,
 			   const std::string& path=std::string(),
 			   double usage_limit = 0.0,
 			   double leave_free = 0.0);
@@ -49,7 +50,7 @@ void dirglobtree (std::vector<std::string>* filenames,
 void dirglobtree (std::vector<std::string>* filenames, 
 		  const std::string& root, const std::string& pattern);
 
-// expands ~
+//! expands any tilde ~ at the start of the filename
 std::string expand (const std::string& filename);
 
 extern "C" {

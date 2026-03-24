@@ -11,8 +11,8 @@
 #ifndef __MEAL_JonesMueller_H
 #define __MEAL_JonesMueller_H
 
-#include "MEAL/Real4.h"
 #include "MEAL/Complex2.h"
+#include "MEAL/Real4.h"
 #include "MEAL/Convert.h"
 
 namespace MEAL {

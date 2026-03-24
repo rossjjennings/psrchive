@@ -35,33 +35,10 @@ namespace Pulsar {
     ~SingleAxisCalibrator ();
 
     //! Communicates SingleAxisCalibrator parameters
-    class Info : public PolnCalibrator::Info {
-
-    public:
-
-      //! Constructor
-      Info (const PolnCalibrator* calibrator);
-      
-      //! Return the title
-      std::string get_title () const;
-
-      //! Return the number of parameter classes
-      unsigned get_nclass () const;
-
-      //! Return the name of the specified class
-      std::string get_name (unsigned iclass) const;
-      
-      //! Return the number of parameters in the specified class
-      unsigned get_nparam (unsigned iclass) const;
-
-      Estimate<float> get_param (unsigned ichan, 
-				 unsigned iclass,
-				 unsigned iparam) const;
-
-    };
+    class Info;
 
     //! Return the SingleAxisCalibrator information
-    Info* get_Info () const;
+    Calibrator::Info* get_Info () const;
 
   protected:
 

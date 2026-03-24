@@ -11,7 +11,7 @@
 //! Default constructor
 MEAL::Projection::Projection (Function* _model, Composite* _meta)
 {
-  model = _model;
+  model.set(_model);
 
   if (_model && _meta)
     _meta->map (this);
@@ -57,7 +57,7 @@ void MEAL::Projection::set_Function (Function* _model)
   if (model.ptr() == _model)
     return;
 
-  model = _model;
+  model.set(_model);
 
   imap.resize (0);
   meta = 0;

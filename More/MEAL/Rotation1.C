@@ -16,6 +16,7 @@ void MEAL::Rotation1::init ()
 {
   OneParameter* param = new OneParameter (this);
   param->set_name ("rotation");
+  param->set_description ("Rotation angle (rad)");
 }
 
 MEAL::Rotation1::Rotation1 (const Vector<3,double>& _axis) 

@@ -21,16 +21,26 @@ unsigned Pulsar::BackendFeedInfo::get_nclass () const
   // two extra classes: ellipticities and orientations, or sums and differences
   return SingleAxisCalibrator::Info::get_nclass() + 2;
 }
-    
+
+std::string Pulsar::BackendFeedInfo::get_param_name (unsigned iparam) const
+{
+  if (iparam < SingleAxisCalibrator::Info::get_nparam())
+    return SingleAxisCalibrator::Info::get_param_name(iparam);
+
+  iparam -= SingleAxisCalibrator::Info::get_nparam();
+
+  return get_param_name_feed (iparam);
+}
+
 //! Return the name of the specified class
-string Pulsar::BackendFeedInfo::get_name (unsigned iclass) const
+string Pulsar::BackendFeedInfo::get_label (unsigned iclass) const
 {
   if (iclass < SingleAxisCalibrator::Info::get_nclass())
-    return SingleAxisCalibrator::Info::get_name(iclass);
+    return SingleAxisCalibrator::Info::get_label(iclass);
   
   iclass -= SingleAxisCalibrator::Info::get_nclass();
 
-  return get_name_feed (iclass);
+  return get_label_feed (iclass);
 }
 
 //! Return the number of parameters in the specified class
@@ -49,8 +59,7 @@ unsigned Pulsar::BackendFeedInfo::get_nparam (unsigned iclass) const
 
 //! Return the estimate of the specified parameter
 Estimate<float> 
-Pulsar::BackendFeedInfo::get_param (unsigned ichan, unsigned iclass,
-				   unsigned iparam) const
+Pulsar::BackendFeedInfo::get_param (unsigned ichan, unsigned iclass, unsigned iparam) const
 {
   if( ! calibrator->get_transformation_valid (ichan) )
     return 0;
@@ -64,8 +73,7 @@ Pulsar::BackendFeedInfo::get_param (unsigned ichan, unsigned iclass,
 }
 
 //! Return the colour index
-int Pulsar::BackendFeedInfo::get_colour_index (unsigned iclass,
-					      unsigned iparam) const
+int Pulsar::BackendFeedInfo::get_colour_index (unsigned iclass, unsigned iparam) const
 {
   if (iparam == 0)
     return 1;

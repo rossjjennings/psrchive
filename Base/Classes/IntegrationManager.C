@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/IntegrationManagerExpert.h"
 #include "Pulsar/Integration.h"
@@ -11,7 +12,7 @@
 
 using namespace std;
 
-unsigned Pulsar::IntegrationManager::verbose = 1;
+unsigned Pulsar::IntegrationManager::verbose = 0;
 
 Pulsar::IntegrationManager::IntegrationManager () 
 { 

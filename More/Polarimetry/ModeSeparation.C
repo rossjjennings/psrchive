@@ -371,13 +371,13 @@ void Pulsar::ModeSeparation::solve ()
     if (convergence_chisq)
     {
       if (debug)
-	cerr << "chisq=" << chisq << " convergence="
-	     << convergence_chisq << endl;
+        cerr << "chisq=" << chisq << " convergence="
+            << convergence_chisq << endl;
 
       if (chisq < convergence_chisq)
-	break;
+        break;
       else
-	continue;
+        continue;
     }
 
     float delta_chisq = chisq - best_chisq;

@@ -33,11 +33,11 @@ void Pulsar::FITSArchive::refmjd_rounding_correction()
 {
 
   // Skip non-Pulsar files
-  if (!model || get_type() != Signal::Pulsar)
+  if (!has_model() || get_type() != Signal::Pulsar)
     return;
 
   // Skip if not tempo1 polycos
-  const polyco* polys = dynamic_cast<const polyco*>(model.get());
+  auto polys = dynamic_cast<const polyco*>(get_model());
   if (!polys)
     return;
 

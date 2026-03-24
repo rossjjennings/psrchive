@@ -57,8 +57,8 @@ namespace Pulsar
     public:
       CALIBRATOR_TYPE(SingleAxis)
       {
-	set_identity("single");
-	add_alias("SingleAxis");
+        set_identity("single");
+        add_alias("SingleAxis");
       }
 
       unsigned get_nparam () const { return 3; }
@@ -70,10 +70,10 @@ namespace Pulsar
     public:
       CALIBRATOR_TYPE(van02_EqA1)
       {
-	set_identity("van02eA1");
-	add_alias("Polar");
+        set_identity("van02eA1");
+        add_alias("Polar");
       }
-      unsigned get_nparam () const { return 6; }
+      unsigned get_nparam () const { return 7; }
     };
     
     //! Full 7 degrees of freedom parameterization of Jones matrix
@@ -88,7 +88,7 @@ namespace Pulsar
       unsigned get_nparam () const { return 7; }
     };
 
-class ManualPoln : public Poln
+    class ManualPoln : public Poln
     {
     public:
       CALIBRATOR_TYPE_INIT(ManualPoln,"manualpoln");
@@ -111,8 +111,8 @@ class ManualPoln : public Poln
     public:
       CALIBRATOR_TYPE(van09_Eq)
       {
-	set_identity ("van09");
-	add_alias ("Hamaker");
+        set_identity ("van09");
+        add_alias ("Hamaker");
       }
       bool is_a (const Type* that) const { return Type::is_a (that); }
     };

@@ -25,7 +25,7 @@ void
 Calibration::StandardSpectra::select_profile (const Pulsar::PolnProfile* pp)
 {
   stats->select_profile (pp);
-  total_determinant = stats->get_total_determinant ();
+  total_squared_invariant = stats->get_total_squared_invariant ();
 }
 
 //! Set the profile from which estimates will be derived
@@ -39,7 +39,7 @@ Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p) try
        << stats->get_real()->get_stats()->get_onpulse_nbin() << endl;
 #endif
 
-  total_determinant = stats->get_total_determinant ();
+  total_squared_invariant = stats->get_total_squared_invariant ();
 }
 catch (Error& error)
 {
@@ -61,7 +61,6 @@ const Pulsar::PolnProfile* Calibration::StandardSpectra::get_fourier () const
   return stats->get_fourier ();
 }
 
-//! Normalize estimates by the average determinant
 void Calibration::StandardSpectra::set_normalize (bool norm)
 {
   if (norm)
@@ -85,8 +84,8 @@ Calibration::StandardSpectra::get_stokes (unsigned ibin)
 
   if (normalize)
   {
-    normalize->normalize (re, total_determinant);
-    normalize->normalize (im, total_determinant);
+    normalize->normalize (re, total_squared_invariant);
+    normalize->normalize (im, total_squared_invariant);
 
     unsigned nbin = stats->get_real()->get_stats()->get_onpulse_nbin();
 

@@ -32,6 +32,7 @@ namespace Pulsar
   class FluxCalibratorExtension;
   class CalibratorStokes;
   class CalibrationInterpolatorExtension;
+  class ConfigurableProjectionExtension;
   class DigitiserCounts;
   class FITSSUBHdrExtension;
   class ProfileColumn;
@@ -59,6 +60,9 @@ namespace Pulsar
   class FITSArchive : public BasicArchive {
 
   public:
+
+    //! Print a warning when loading a SEARCH-mode PSRFITS files
+    static Option<bool> search_mode_warning;
 
     //! Default constructor
     FITSArchive ();
@@ -138,7 +142,10 @@ namespace Pulsar
 
     //! Unload CalibrationInterpolatorExtension to the PCMINTER HDU
     static void unload (fitsfile*, const CalibrationInterpolatorExtension*);
-    
+   
+    //! Unload ConfigurableProjectionExtension to the CFGPROJ HDU
+    static void unload (fitsfile*, const ConfigurableProjectionExtension*);
+ 
     //! Unload FITSSUBHdrExtension
     static void unload (fitsfile*, const FITSSUBHdrExtension*);
     
@@ -235,8 +242,7 @@ namespace Pulsar
     double predicted_phase;
 
     //! The polyco parsed from the PSRFITS file
-    Reference::To<Predictor> hdr_model;
-    
+    Reference::To<const Predictor> hdr_model;
 
     // //////////////////////////////////////////////////////////////////////
 
@@ -265,6 +271,7 @@ namespace Pulsar
     void load_FluxCalibratorExtension (fitsfile*);
     void load_CalibratorStokes (fitsfile*);
     void load_CalibrationInterpolatorExtension (fitsfile*);
+    void load_ConfigurableProjectionExtension (fitsfile*);
     void load_Receiver (fitsfile*);
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
@@ -287,6 +294,8 @@ namespace Pulsar
 
     void interpret_scale ( );
     void interpret_pol_type ( );
+
+    static Signal::State get_state_from_pol_type (const std::string& pol_type);
 
     //! Delete the HDU with the specified name
     static void delete_hdu (fitsfile*, const char* hdu_name);

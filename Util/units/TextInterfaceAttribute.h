@@ -25,8 +25,7 @@ namespace TextInterface
   public:
 
     //! Default constructor
-    Attribute ()
-      { instance = 0; }
+    Attribute () { }
 
     //! Get the value of the attribute
     std::string get_value () const

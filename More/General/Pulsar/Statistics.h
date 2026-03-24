@@ -40,7 +40,7 @@ namespace Pulsar {
     StrategySet* get_strategy () const;
 
     //! Get the phase of the pulse peak
-    Phase::Value get_peak () const;
+    ::Phase::Value get_peak () const;
  
     //! Get the effective duty cycle
     double get_effective_duty_cycle () const;
@@ -101,7 +101,7 @@ namespace Pulsar {
     mutable std::vector< Reference::To<Plugin> > plugins;
 
     //! Set the period attribute of the Phase::Value/Range/Ranges argument
-    void set_period (Phase::HasUnit&) const;
+    void set_period (::Phase::HasUnit&) const;
 
   };
 

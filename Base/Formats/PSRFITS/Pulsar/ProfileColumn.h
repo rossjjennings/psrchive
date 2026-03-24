@@ -64,9 +64,6 @@ namespace Pulsar {
 
     //! Resize the columns for floating point output
     void resize_floats ();
-
-    //! Get the number of rows required to unload data (after resize)
-    unsigned get_nrow () const { return nrow; }
     
     //! Insert the columns and resize
     void create (unsigned start_column);
@@ -80,22 +77,23 @@ namespace Pulsar {
     //! Load the given vector of profiles
     void load (int row, const std::vector<Profile*>&);
 
-    bool verbose;
+    bool verbose = false;
 
   protected:
 
-    fitsfile* fptr;
+    fitsfile* fptr = nullptr;
 
     std::string data_colname;
     std::string offset_colname;
     std::string scale_colname;
 
-    int data_colnum;
-    int offset_colnum;
-    int scale_colnum;
+    int data_colnum = -1;
+    int offset_colnum = -1;
+    int scale_colnum = -1;
 
-    unsigned nbin, nchan, nprof;
-    unsigned nrow;
+    unsigned nbin = 0;
+    unsigned nchan = 0;
+    unsigned nprof = 0;
     
     //! reset the column indeces
     void reset ();

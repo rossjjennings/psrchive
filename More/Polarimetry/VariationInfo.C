@@ -53,7 +53,7 @@ unsigned Pulsar::VariationInfo::get_nchan () const
 
  
 //! Return the name of the specified class
-string Pulsar::VariationInfo::get_name (unsigned iclass) const
+string Pulsar::VariationInfo::get_label (unsigned iclass) const
 {
   switch (which)
   {

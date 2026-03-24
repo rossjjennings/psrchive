@@ -13,6 +13,8 @@
 
 #include "MEAL/Function.h"
 #include "MEAL/EvaluationPolicy.h"
+
+#include "complex_math.h"
 #include "Estimate.h"
 
 //! Works for most scalar types
@@ -64,7 +66,11 @@ namespace MEAL {
     //! Return the Jones matrix and its gradient
     T evaluate (std::vector<T>* grad=0) const
     { 
-      return evaluation_policy->evaluate (grad);
+      T result = evaluation_policy->evaluate (grad);
+      if (!true_math::finite(result))
+        throw Error (InvalidState, "MEAL::Evaluable::evaluate for " + this->get_name(),
+                     "non-finite result");
+      return result;
     }
 
     //! Return the Jones Estimate matrix

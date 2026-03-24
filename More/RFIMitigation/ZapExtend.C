@@ -9,6 +9,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Statistics.h"
 
 #include <stdio.h>
 
@@ -37,9 +38,6 @@ Pulsar::ZapExtend::Interface::Interface (ZapExtend* instance)
        &ZapExtend::set_report,
        "report", "Print one-line report to stdout" );
 }
-
-// defined in More/General/standard_interface.C
-std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::ZapExtend::ZapExtend ()
 {

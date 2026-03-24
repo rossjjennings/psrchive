@@ -24,7 +24,7 @@ public:
   public:
     interface (container* instance) {
       if (instance)
-	set_instance( instance );
+        set_instance( instance );
       add (&container::get_ndat, "ndat", "number of data elements");
     }
 
@@ -45,18 +45,22 @@ int main () try {
   TextIndex index ("dat=3-");
   index.set_container( test.get_interface() );
 
-  if (index.size() != 3) {
+  if (index.size() != 3)
+  {
     cerr << "test_TextIndex error: size=" << index.size() << endl;
     return -1;
   }
 
   for (unsigned i=0; i<index.size(); i++)
-    if (index.get_index(i) != "dat=" + tostring(i+3)) {
+  {
+    if (index.get_index(i) != "dat=" + tostring(i+3))
+    {
       cerr << "test_TextIndex error: index[" << i << "]=" 
            << index.get_index(i) << endl;
       return -1;
     }
-
+  }
+  
   cerr << "test_TextIndex SUCCESS!" << endl;
   return 0;
 }

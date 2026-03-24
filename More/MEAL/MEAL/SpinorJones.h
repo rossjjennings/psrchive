@@ -11,6 +11,12 @@
 #ifndef __MEAL_SpinorJones_H
 #define __MEAL_SpinorJones_H
 
+/*
+ * It is necessary to include complex_math.h first in order to define true_math::finite(complex)
+ * before the Evaluable::evaluate method is encountered.
+ */
+
+#include "complex_math.h"
 #include "MEAL/Complex2.h"
 #include "MEAL/Spinor.h"
 #include "MEAL/Composite.h"

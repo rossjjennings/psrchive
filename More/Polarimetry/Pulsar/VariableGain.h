@@ -11,9 +11,9 @@
 #ifndef __CalibrationVariableGain_H
 #define __CalibrationVariableGain_H
 
+#include "MEAL/Complex2.h"
 #include "MEAL/Gain.h"
 #include "MEAL/ChainRule.h"
-#include "MEAL/Complex2.h"
 #include "MEAL/ScalarParameter.h"
 
 #include "Estimate.h"

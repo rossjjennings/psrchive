@@ -87,23 +87,25 @@ void MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
 }
 
 void MEAL::NormalizeStokes::normalize (Stokes< Estimate<double> >& stokes,
-				       Estimate<double> total_determinant)
+                                       const Estimate<double>& total_squared_invariant)
 {
-  Estimate<double> invint = ::invariant (stokes);
+  Estimate<double> invint_squared = ::invariant (stokes);
 
 #ifdef _DEBUG
-  cerr << "MEAL::NormalizeStokes::normalize invint=" << invint
-       << "tot_det=" << total_determinant << endl;
+  cerr << "MEAL::NormalizeStokes::normalize invint=" << invint_squared
+       << "tot_inv_squared=" << total_squared_invariant << endl;
 #endif
 
-  // subtract the determinant of the input from the total
-  total_determinant.val -= invint.val;
-  total_determinant.var -= invint.var;
+  Estimate<double> remainder = total_squared_invariant;
+
+  // subtract the square of the invariant of the input from the total invariant squared
+  remainder.val -= invint_squared.val;
+  remainder.var -= invint_squared.var;
 
 #ifdef _DEBUG
-  cerr << "MEAL::NormalizeStokes::normalize remaining tot_det=" << total_determinant << endl;
+  cerr << "MEAL::NormalizeStokes::normalize remaining tot_inv_squared=" << remainder << endl;
 #endif
 
-  set_other (total_determinant);
+  set_other (remainder);
   normalize (stokes);
 }

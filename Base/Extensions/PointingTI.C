@@ -19,6 +19,9 @@ Pointing::Interface::Interface ( Pointing *s_instance )
        &Pointing::set_local_sidereal_time,
        "lst", "Local sidereal time (seconds)" );
 
+  add( &Pointing::get_hour_angle,
+       "ha", "Hour angle (deg)" );
+
   add( &Pointing::get_galactic_longitude,
        &Pointing::set_galactic_longitude,
        "gb", "Galactic longitude (deg)" );

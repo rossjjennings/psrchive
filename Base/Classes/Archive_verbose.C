@@ -18,6 +18,9 @@
 
 void Pulsar::Archive::set_verbosity (unsigned level)
 {
+  if (level)
+    std::cerr << "Pulsar::Archive::set_verbosity level=" << level << std::endl;
+
   Calibrator::verbose = level;
 
   // level 4
@@ -33,5 +36,6 @@ void Pulsar::Archive::set_verbosity (unsigned level)
   Integration::verbose = (level >= 2);
 
   // all levels
+  // note that Archive::verbose is IntegrationManager::verbose
   Archive::verbose = level;
 }

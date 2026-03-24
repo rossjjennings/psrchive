@@ -33,12 +33,25 @@ VariableBackend::VariableBackend (const VariableBackend& s)
   operator = (s);
 }
 
-//! Equality Operator
-const VariableBackend& 
+//! Assignment Operator
+const VariableBackend&
 VariableBackend::operator = (const VariableBackend& s)
 {
-  if (&s != this)
-    *backend = *(s.backend);
+  if (&s == this)
+    return *this;
+
+  backend = s.backend->clone();
+  set_model( backend );
+
+  if (s.gain_variation)
+    gain_variation = s.gain_variation->clone();
+
+  if (s.diff_gain_variation)
+    diff_gain_variation = s.diff_gain_variation->clone();
+
+  if (s.diff_phase_variation)
+    diff_phase_variation = s.diff_phase_variation->clone();
+
   return *this;
 }
 

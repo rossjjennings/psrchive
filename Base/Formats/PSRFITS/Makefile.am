@@ -21,8 +21,8 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_DigitiserStatistics.C load_DigitiserStatistics.C \
 	unload_DigitiserCounts.C load_DigitiserCounts.C \
 	unload_CalibratorExtension.C load_CalibratorExtension.C \
-	unload_CalibrationInterpolatorExtension.C \
-	load_CalibrationInterpolatorExtension.C \
+	unload_CalibrationInterpolatorExtension.C load_CalibrationInterpolatorExtension.C \
+	unload_ConfigurableProjectionExtension.C load_ConfigurableProjectionExtension.C \
 	unload_PolnCalibratorExtension.C load_PolnCalibratorExtension.C \
 	unload_FluxCalibratorExtension.C load_FluxCalibratorExtension.C \
 	unload_FITSSUBHdrExtension.C load_FITSSUBHdrExtension.C \
@@ -64,5 +64,5 @@ include $(top_srcdir)/config/Makefile.include
 AM_CPPFLAGS += @CFITSIO_CFLAGS@ @TEMPO2_CFLAGS@
 
 LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la \
-	$(top_builddir)/Util/epsic/src/util/libutil.la @CFITSIO_LIBS@
+	$(top_builddir)/Util/epsic/src/libepsic.la @CFITSIO_LIBS@
 

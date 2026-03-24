@@ -266,8 +266,8 @@ catch (Error& error)
 
 void Pulsar::Statistics::add_plugin (Plugin* plugin)
 {
-  plugin->parent = this;
   plugins.push_back(plugin);
+  plugin->parent.set(this);
 
   // Calling HasArchive::set_Archive makes HasArchive::is_current return false
   if (archive)

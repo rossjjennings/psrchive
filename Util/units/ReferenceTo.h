@@ -1,21 +1,23 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 - 2023 by Willem van Straten
+ *   Copyright (C) 2004 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 // psrchive/Util/units/ReferenceTo.h
 
-#ifndef __ReferenceTo_h
-#define __ReferenceTo_h
+#ifndef __psrchive_util_units_ReferenceTo_h
+#define __psrchive_util_units_ReferenceTo_h
 
 // #define _DEBUG 1
+//
 #include "debug.h"
 #include "ReferenceAble.h"
 #include "Error.h"
 
+#include <type_traits>
 #include <typeinfo>
 #include <string>
 
@@ -25,15 +27,9 @@ namespace Reference {
   template<class Type, bool active = true> class To {
 
   public:
-
-    //! Returns true if reference is null
-    bool operator ! () const;
-    
-    //! Returns true if reference is other than null
-    operator bool () const;
     
     //! Default constructor
-    To (Type* ptr = 0);
+    constexpr To () = default;
     
     //! Copy constructor
     To (const To&);
@@ -44,7 +40,10 @@ namespace Reference {
     //! Assignment operator
     To& operator = (const To&);
 
-    //! Assignment operator
+    //! Construct from pointer
+    To (Type* ptr);
+
+    //! Assign from pointer
     To& operator = (Type *);
     
     //! Object dereferencing operator
@@ -53,8 +52,54 @@ namespace Reference {
     //! Member dereferencing operator
     Type* operator -> () const { return get(); }
     
+    //! Comparison operator
+    bool operator == (const Type* ptr) const;
+
+    //! Comparison operator
+    bool operator != (const Type* ptr) const;
+
+    //! Comparison operator 
+    /*! 
+     * This overloaded operator is 
+     *  - prioritized over ‘operator==(Type*, Type*)’ <built-in> 
+     *  - enabled only if Type is not const (e.g. Reference::To<const T>)
+     */ 
+    template <typename U = Type>
+    typename std::enable_if<!std::is_const<U>::value, bool>::type
+    operator == (U* ptr) const { return is_equal_to(ptr); }
+
+    //! Comparison operator
+    /*!
+     * This overloaded operator is
+     *  - prioritized over ‘operator!=(Type*, Type*)’ <built-in>
+     *  - enabled only if Type is not const (e.g. Reference::To<const T>)
+     */
+    template <typename U = Type>
+    typename std::enable_if<!std::is_const<U>::value, bool>::type
+    operator != (U* ptr) const { return !is_equal_to(ptr); }
+
+    //! Comparison operator
+    /*! This version is prioritized over ‘operator!=(Type*, Type*)’ <built-in> */
+    bool operator == (std::nullptr_t) const;
+
+    //! Comparison operator
+    /*! This version is prioritized over ‘operator!=(Type*, Type*)’ <built-in> */
+    bool operator != (std::nullptr_t) const;
+
+    //! Worker method for all six comparison operator overloads
+    bool is_equal_to (const Type* ptr) const;
+
     //! Cast to Type* operator
     operator Type* () const { return get(); }
+
+    //! Returns true if reference is null
+    bool operator ! () const;
+    
+    //! Returns true if reference is other than null
+    operator bool () const;
+
+    //! Set the pointer
+    void set (Type*);
 
     //! Return the pointer
     Type* get () const;
@@ -80,9 +125,46 @@ namespace Reference {
     void unhook (bool auto_delete = true);
 
     //! The handle to the object
-    Able::Handle* the_handle;
+    Able::Handle* the_handle = nullptr;
 
   };
+}
+
+template<class Type, bool active>
+bool Reference::To<Type,active>::operator == (const Type* ptr) const
+{
+  DEBUG("Reference::To<"+name()+">::operator == const Type*");
+  return is_equal_to(ptr);
+}
+
+template<class Type, bool active>
+bool Reference::To<Type,active>::operator != (const Type* ptr) const
+{
+  DEBUG("Reference::To<"+name()+">::operator != const Type*");
+  return !is_equal_to(ptr);
+}
+
+template<class Type, bool active>
+bool Reference::To<Type,active>::operator == (std::nullptr_t ptr) const
+{
+  DEBUG("Reference::To<"+name()+">::operator == std::nullptr_t");
+  return is_equal_to(ptr);
+}
+
+template<class Type, bool active>
+bool Reference::To<Type,active>::operator != (std::nullptr_t ptr) const
+{
+  DEBUG("Reference::To<"+name()+">::operator != std::nullptr_t");
+  return !is_equal_to(ptr);
+}
+
+template<class Type, bool active>
+bool Reference::To<Type,active>::is_equal_to (const Type* ptr) const
+{
+  if (!ptr)
+    return !the_handle || the_handle->pointer == nullptr;
+  else
+    return the_handle && the_handle->pointer == ptr;
 }
 
 template<class Type, bool active>
@@ -191,15 +273,21 @@ Reference::To<Type,active>&
 Reference::To<Type,active>::operator = (Type* ref_pointer)
 {
   DEBUG("Reference::To<"+name()+">::operator = (Type*=" << (void*)ref_pointer <<")");
+  set (ref_pointer);
+  return *this;
+}
+
+// operator = assignment operator
+template<class Type, bool active>
+void Reference::To<Type,active>::set (Type* ref_pointer)
+{
+  DEBUG("Reference::To<"+name()+">::set (Type*=" << (void*)ref_pointer <<")");
 
   if (the_handle && the_handle->pointer == ref_pointer)
-    return *this;
+    return;
 
   unhook ();
-
   hook (ref_pointer);
-
-  return *this;
 }
 
 template<class Type, bool active>
@@ -268,6 +356,12 @@ bool operator == (const Reference::To<Type1,active1>& ref1,
 {
   DEBUG("operator == (Reference::To<Type>&, Reference::To<Type2>&)");
 
+  if (!ref1)
+    return !ref2;
+
+  if (!ref2)
+    return false;
+
   return ref1.ptr() == ref2.ptr();
 }
 
@@ -278,6 +372,12 @@ bool operator != (const Reference::To<Type1,active1>& ref1,
 {
   DEBUG("operator != (Reference::To<Type>&, Reference::To<Type2>&)");
 
+  if (!ref1)
+    return ref2;
+
+  if (!ref2)
+    return true;
+
   return ref1.ptr() != ref2.ptr();
 }
 
@@ -287,8 +387,7 @@ template<class Type, bool active, class Type2>
 bool operator == (const Reference::To<Type,active>& ref, const Type2* instance)
 {
   DEBUG("operator == (Reference::To<Type>&, Type*)");
-
-  return ref.ptr() == instance;
+  return ref.is_equal_to(instance);
 }
 
 //! return true if Reference::To refers to instance
@@ -296,8 +395,7 @@ template<class Type, bool active, class Type2>
 bool operator == (const Type2* instance, const Reference::To<Type,active>& ref)
 {
   DEBUG("operator == (T2*, Reference::To<T1>&)");
-
-  return ref.ptr() == instance;
+  return ref.is_equal_to(instance);
 }
 
 template<typename C, typename P, bool A>
@@ -312,5 +410,5 @@ P* const_kast (Reference::To<const P,A>& p)
   return const_cast<P*> (p.ptr());
 }
 
-#endif // #ifndef __ReferenceTo_h
+#endif // #ifndef __psrchive_util_units_ReferenceTo_h
 

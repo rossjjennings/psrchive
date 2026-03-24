@@ -87,8 +87,8 @@ done
 	# libraries which must be linked in when embedding
 	#
 	AC_MSG_CHECKING(python extra libraries)
-	PYTHON_EXTRA_LIBS=`$PYTHON -c "import distutils.sysconfig; \
-                conf = distutils.sysconfig.get_config_var; \
+	PYTHON_EXTRA_LIBS=`$PYTHON -c "import sysconfig; \
+                conf = sysconfig.get_config_var; \
                 print(conf('LOCALMODLIBS')+' '+conf('LIBS'))"`
 	AC_MSG_RESULT([$PYTHON_EXTRA_LIBS])
         AC_SUBST(PYTHON_EXTRA_LIBS)

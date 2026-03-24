@@ -18,6 +18,9 @@
 #include "Pulsar/Statistics.h"
 #include "Pulsar/Backend.h"
 
+#include "Pulsar/ArchiveTemplates.h"
+#include "Pulsar/Subtract.h"
+
 #include "Pulsar/Flux.h"
 #include "Pulsar/StandardFlux.h"
 
@@ -343,8 +346,11 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub, std::vector<Tempo::toa>& toas
         Integration* rsubint = residual->get_Integration (isub);
         rsubint->expert()->rotate_phase( shift.get_value() );
 
+        Reference::To<Subtract> subtract = new Subtract;
+        subtract->set_linear_fit(true);
+
         const Integration* std = standard->get_Integration (0);
-        foreach (rsubint, std, &Profile::diff);
+        Pulsar::foreach (rsubint, std, subtract.get());
       }
     }
     catch (Error& error)
@@ -364,7 +370,6 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub, std::vector<Tempo::toa>& toas
     get_subband_toas(subint,toas);
   }
 }
-
 
 void Pulsar::ArrivalTime::setup (const Integration* subint, unsigned ichan)
 {

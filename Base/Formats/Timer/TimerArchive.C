@@ -632,13 +632,17 @@ void Pulsar::TimerArchive::correct () try
   hdr.ndump_sub_int = 1;
 
   // correct the polyco parameters
-  polyco* t1model = dynamic_cast<polyco*> (model.ptr());
-  if (t1model) {
-    hdr.nspan = (int) t1model->get_nspan();
-    hdr.ncoeff = t1model->get_ncoeff();
+  if (has_model())
+  {
+    auto t1model = dynamic_cast<const polyco*>(get_model());
+    if (t1model)
+    {
+      hdr.nspan = (int) t1model->get_nspan();
+      hdr.ncoeff = t1model->get_ncoeff();
+    }
+    else
+      hdr.nspan = hdr.ncoeff = 0;
   }
-  else
-    hdr.nspan = hdr.ncoeff = 0;
 
   /* General info */
   char hostname[50];

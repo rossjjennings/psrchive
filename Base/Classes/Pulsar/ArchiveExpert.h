@@ -31,8 +31,7 @@ namespace Pulsar {
 
   public:
 
-    Expert (Archive* inst) : IntegrationManager::Expert (inst)
-    { instance = inst; }
+    Expert (Archive* inst) : IntegrationManager::Expert (inst), instance(inst) { }
 
     //! Set the number of pulsar phase bins
     void set_nbin (unsigned numbins)
@@ -85,6 +84,16 @@ namespace Pulsar {
     //! Get agent list
     static void get_agent_list( std::vector< std::pair< std::string,std::string > > &details )
     { return Archive::Agent::get_list( details ); }
+
+    //! Update the AuxColdPlasma extension, as needed
+    /*! Assumes that the dedisperse worker function has been applied to all channels */
+    void update_absolute_dispersion()
+    { instance->update_absolute_dispersion(); }
+
+    //! Update the AuxColdPlasma extension, as needed
+    /*! Assumes that the defaraday worker function has been applied to all channels */
+    void update_absolute_rotation()
+    { instance->update_absolute_rotation(); }
 
   private:
 

@@ -52,6 +52,7 @@ include_HEADERS = \
 	TextInterfaceParser.h \
 	TextInterfaceProxy.h \
 	TextInterfaceTo.h \
+	TextInterfaceTransform.h \
 	TextInterfaceValue.h \
 	TextLoop.h \
 	tostring.h \

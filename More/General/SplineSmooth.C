@@ -13,7 +13,10 @@
 #include <data_table.h>
 #include <bspline.h>
 #include <bspline_builders.h>
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 using namespace SPLINTER;
 using namespace Pulsar;
@@ -31,20 +34,40 @@ SplineSmooth::SplineSmooth ()
   handle = 0;
 }
 
+// copied from https://stackoverflow.com/questions/499636/how-to-create-a-stdofstream-to-a-temp-file
+
+std::string open_temp(std::string path, std::ofstream& f)
+{
+  path += "/XXXXXX";
+  std::vector<char> dst_path(path.begin(), path.end());
+  dst_path.push_back('\0');
+
+  int fd = mkstemp(&dst_path[0]);
+  if (fd != -1)
+  {
+    path.assign(dst_path.begin(), dst_path.end() - 1);
+    f.open(path.c_str(), std::ios_base::trunc | std::ios_base::out);
+    ::close(fd);
+  }
+  return path;
+}
+
 SplineSmooth::SplineSmooth (const std::string& json)
 {
-  char* fname = tempnam (NULL, NULL);
+  string fname;
   {
-    ofstream os (fname);
+    ofstream os;
+    fname = open_temp("/tmp", os);
+    if (!os)
+      throw Error (FailedSys, "SplineSmooth ctor", "could not open a temporary file");
+
     os << json;
     if (!os)
-      throw Error (FailedSys, "SplineSmooth ctor",
-                   "error after writing string");
+      throw Error (FailedSys, "SplineSmooth ctor", "error after writing string");
   }
 
   load (fname);
-  remove (fname);
-  free (fname);
+  remove (fname.c_str());
 }
 
 SplineSmooth::~SplineSmooth ()

@@ -49,7 +49,7 @@ void load_dig_stats_rows( fitsfile *fptr, DigitiserStatistics *ext )
       ext->rows[r].atten.resize( ndigr );
       psrfits_read_col( fptr, "ATTEN", ext->rows[r].atten, r+1 );
     }
-    catch( Error e )
+    catch( Error& e )
     {
       if( Archive::verbose > 1 )
         cerr << "load_dig_stats_rows: Failed to read in ATTEN values, filling with zeroes" << endl;

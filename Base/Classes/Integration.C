@@ -10,11 +10,13 @@
 #include "Pulsar/IntegrationExtension.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationMeta.h"
-#include "Pulsar/IntegrationTI.h"
+#include "Pulsar/IntegrationInterface.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/AuxColdPlasma.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
+#include "Pulsar/DispersionHistory.h"
+#include "Pulsar/BirefringenceHistory.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -93,12 +95,12 @@ void Pulsar::Integration::add_extension (Extension* ext)
 
   if (index < extension.size())  {
     if (verbose)
-      cerr << "Pulsar::Integration::add_extension replacing" << endl;
+      cerr << "Pulsar::Integration::add_extension replacing " << ext->get_extension_name() << endl;
     extension[index] = ext;
   }
   else {
     if (verbose)
-      cerr << "Pulsar::Integration::add_extension appending" << endl;
+      cerr << "Pulsar::Integration::add_extension appending " << ext->get_extension_name() << endl;
     extension.push_back(ext);
   }
 }
@@ -126,8 +128,14 @@ void Pulsar::Integration::edit_extensions (const std::string& name)
   string ext = name.substr(1);
 
   if (name[0] == '+')
-    add_extension( Integration::Extension::factory(ext) );
-  
+  {
+    if (verbose)
+      cerr << "Pulsar::Integration::edit_extensions name=" << name << endl;
+
+    Reference::To<Integration::Extension> new_ext = Integration::Extension::factory(ext);
+    new_ext->update(this);
+    add_extension(new_ext);
+  }
   else if (name[0] == '-')
   {
     unsigned next = get_nextension();
@@ -284,7 +292,7 @@ void Pulsar::Integration::adopt (const Archive* archive)
     cerr << "Pulsar::Integration::adopt new parent" << endl;
 
   orphaned = 0;
-  parent = archive;
+  parent.set(archive);
 }
 
 void Pulsar::Integration::range_check (unsigned ipol, unsigned ichan) const
@@ -365,6 +373,12 @@ double Pulsar::Integration::get_centre_frequency (unsigned ichan) const
   if (ichan>=get_nchan() || get_npol() < 1)
     return 0;
 
+  if (profiles.size() == 0)
+    return 0;
+
+  if (profiles[0].size() <= ichan)
+    return 0;
+ 
   return profiles[0][ichan]->get_centre_frequency();
 }
 
@@ -501,91 +515,128 @@ catch (Error& error) {
 }
 
 
-double Pulsar::Integration::get_effective_dispersion_measure () const try
+double Pulsar::Integration::get_effective_dispersion_measure () const
 {
-  double dm = 0;
+  return get_relative_dispersion_measure() + get_absolute_dispersion_measure();
+}
 
-  if (! get_dedispersed())
-    dm += get_dispersion_measure ();
+double Pulsar::Integration::get_relative_dispersion_measure () const
+{
+  if (get_dedispersed())
+    return 0.0;
 
-  if (! get_auxiliary_dispersion_corrected())
+  return get_dispersion_measure ();
+}
+
+double Pulsar::Integration::get_absolute_dispersion_measure () const try
+{
+  if (get_absolute_dispersion_corrected())
   {
     if (verbose)
-      cerr << "Integration::get_effective_dispersion_measure"
-              " aux dm not corrected" << endl;
-
-    const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
-    if (aux)
-    {
-      if (verbose)
-        cerr << "Integration::get_effective_dispersion_measure"
-                " aux dm = " << aux->get_dispersion_measure() << endl;
-
-      dm += aux->get_dispersion_measure();
-    }
+      cerr << "Integration::get_absolute_dispersion_measure aux:dm corrected - returning zero" << endl;
+    return 0.0;
   }
 
-  return dm;
+
+  const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
+  if (!aux)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_dispersion_measure no aux:dm - returning zero" << endl;
+    return 0.0;
+  }
+
+  if (verbose)
+    cerr << "Integration::get_absolute_dispersion_measure aux:dm=" << aux->get_dispersion_measure() << endl;
+
+  return aux->get_dispersion_measure();
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Integration::get_effective_dispersion_measure";
+  throw error += "Pulsar::Integration::get_absolute_dispersion_measure";
 }
 
 //! Auxiliary inter-channel dispersion delay has been removed
-bool Pulsar::Integration::get_auxiliary_dispersion_corrected () const
-try
+bool Pulsar::Integration::get_absolute_dispersion_corrected () const try
 {
-  if (orphaned)
-    return orphaned->get_auxiliary_dispersion_corrected ();
-
-  const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
-  if (aux)
-    return aux->get_dispersion_corrected();
-
-  return false;
-}
-catch (Error& error)
-{
-  throw error += "Pulsar::Integration::get_auxiliary_dispersion_corrected ";
-}
-
-double Pulsar::Integration::get_effective_rotation_measure () const try
-{
-  double rm = 0;
-
-  if (! get_faraday_corrected())
-    rm += get_rotation_measure ();
-
-  if (! get_auxiliary_birefringence_corrected())
-  {    
-    const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
-    if (aux)
-      rm += aux->get_rotation_measure();
+  auto history = get<DispersionHistory>();
+  if (!history)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_dispersion_corrected no DispersionHistory history - returning false" << endl;
+    return false;
   }
-  return rm;
+
+  bool val = history->get_absolute()->get_corrected();
+  if (verbose)
+    cerr << "Integration::get_absolute_dispersion_corrected val=" << val << endl;
+
+  return val;
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Integration::get_effective_rotation_measure";
+  throw error += "Pulsar::Integration::get_absolute_dispersion_corrected ";
+}
+
+double Pulsar::Integration::get_effective_rotation_measure () const
+{
+  return get_relative_rotation_measure() + get_absolute_rotation_measure();
+}
+
+double Pulsar::Integration::get_relative_rotation_measure () const
+{
+  if (get_faraday_corrected())
+    return 0.0;
+  return get_rotation_measure ();
+}
+
+double Pulsar::Integration::get_absolute_rotation_measure () const try
+{
+  if (get_absolute_rotation_corrected())
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_measure aux:rm corrected - returning zero" << endl;
+    return 0.0;
+  }
+
+  const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
+  if (!aux)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_measure no aux:rm - returning zero" << endl;
+    return 0.0;
+  }
+
+  if (verbose)
+    cerr << "Integration::get_absolute_rotation_measure aux:rm=" << aux->get_rotation_measure() << endl;
+
+  return aux->get_rotation_measure();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Integration::get_absolute_rotation_measure";
 }
 
 //! Auxiliary inter-channel birefringence has been removed
-bool Pulsar::Integration::get_auxiliary_birefringence_corrected () const
-try
+bool Pulsar::Integration::get_absolute_rotation_corrected () const try
 {
-  if (orphaned)
-    return orphaned->get_auxiliary_birefringence_corrected ();
+  auto history = get<BirefringenceHistory>();
+  if (!history)
+  {
+    if (verbose)
+      cerr << "Integration::get_absolute_rotation_corrected no BirefringenceHistory history - returning false" << endl;
+    return false;
+  }
 
-  const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
-  if (aux)
-    return aux->get_birefringence_corrected();
+  bool val = history->get_absolute()->get_corrected();
+  if (verbose)
+    cerr << "Integration::get_absolute_rotation_corrected val=" << val << endl;
 
-  return false;
+  return val;
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::Integration::get_auxiliary_birefringence_corrected ";
+  throw error += "Pulsar::Integration::get_absolute_rotation_corrected ";
 }
 
 //! Get the feed configuration of the receiver
@@ -716,3 +767,19 @@ void Pulsar::Integration::uniform_weight (float new_weight)
   foreach (this, &Profile::set_weight, new_weight);
 }
 
+void Pulsar::foreach (Integration* integration, const Integration* operand,
+              void (Profile::*method) (const Profile*))
+{
+  const unsigned npol = integration->get_npol();
+  const unsigned nchan = integration->get_nchan();
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      Profile* into = integration->get_Profile(ipol, ichan);
+      const Profile* from = operand->get_Profile(ipol, ichan);
+      (into->*(method)) (from);
+    }
+  }
+}

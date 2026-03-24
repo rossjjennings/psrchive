@@ -91,6 +91,15 @@ namespace Pulsar
     return get_ext<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
   }
 
+  /*! e.g. 
+    const Archive* archive;
+    const MyExtension* ext = archive->get<MyExtension>(); */
+  template<class T>
+  bool Archive::has () const
+  {
+    return get_ext<const T> (this, "Pulsar::Archive::has<Ext>", false) != nullptr;
+  }
+
   /*! If the specified extension type T does not exist, an atempt is made to
       add it using add_extension.  If this fails, NULL is returned. */
   template<class T>

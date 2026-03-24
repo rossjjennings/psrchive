@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ColdPlasmaHistory.h"
 #include "Physical.h"
 
@@ -11,64 +12,52 @@
 Pulsar::ColdPlasmaHistory::ColdPlasmaHistory (const char* name)
   : Extension (name)
 {
-  measure = 0.0;
-  reference_wavelength = 0.0;
+  relative.set_reference(ColdPlasmaMeasure::Relative);
+  absolute.set_reference(ColdPlasmaMeasure::Absolute);
 }
 
 //! Copy constructor
-Pulsar::ColdPlasmaHistory::ColdPlasmaHistory (const ColdPlasmaHistory& cph)
-  : Extension ("ColdPlasmaHistory")
+Pulsar::ColdPlasmaHistory::ColdPlasmaHistory (const ColdPlasmaHistory& that)
+  : Extension (that)
 {
-  operator=(cph);
+  relative = that.relative;
+  absolute = that.absolute;
 }
 
-//! Operator =
-const Pulsar::ColdPlasmaHistory&
-Pulsar::ColdPlasmaHistory::operator= (const ColdPlasmaHistory& cph)
+void Pulsar::ColdPlasmaHistory::set_measurement (ColdPlasmaMeasure::Measurement measurement)
 {
-  measure = cph.measure;
-  reference_wavelength = cph.reference_wavelength;
-
-  return *this;
+  relative.set_measurement (measurement);
+  absolute.set_measurement (measurement);
 }
 
-//! Destructor
-Pulsar::ColdPlasmaHistory::~ColdPlasmaHistory ()
-{
-}
-
-//! Set the rotation measure
-void Pulsar::ColdPlasmaHistory::set_measure (double m)
-{
-  measure = m;
-}
-
-//! Get the rotation measure
-double Pulsar::ColdPlasmaHistory::get_measure () const
-{
-  return measure;
-}
-
-//! Set the reference wavelength in metres
-void Pulsar::ColdPlasmaHistory::set_reference_wavelength (double metres)
-{
-  reference_wavelength = metres;
-}
-
-//! Get the reference wavelength
-double Pulsar::ColdPlasmaHistory::get_reference_wavelength () const
-{
-  return reference_wavelength;
-}
-
-//! Set the reference frequency in MHz
-void Pulsar::ColdPlasmaHistory::set_reference_frequency (double MHz)
+void Pulsar::ColdPlasmaMeasure::set_reference_frequency (double MHz)
 {
   reference_wavelength = speed_of_light / (MHz * 1e6);
 }
 
-//! Get the reference frequency in MHz
-double Pulsar::ColdPlasmaHistory::get_reference_frequency () const
+double Pulsar::ColdPlasmaMeasure::get_reference_frequency () const
 {
   return 1e-6 * speed_of_light / reference_wavelength;
+}
+
+void Pulsar::ColdPlasmaMeasure::set_corrected (bool flag)
+{
+  if (Integration::verbose)
+  {
+    std::string ref = "Unknown";
+    if (reference == Relative)
+      ref = "Relative";
+    else if (reference == Absolute)
+      ref = "Absolute";
+
+    std::string meas = "Unknown";
+    if (measurement == DispersionMeasure)
+      meas = "DM";
+    else if (measurement == RotationMeasure)
+      meas = "RM";
+
+    std::cerr << "Pulsar::ColdPlasmaMeasure::set_corrected " << ref << " " << meas << " to " << flag << std::endl; 
+  }
+
+  corrected = flag;
 }

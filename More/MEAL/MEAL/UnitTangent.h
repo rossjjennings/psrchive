@@ -12,8 +12,8 @@
 #ifndef __MEAL_UnitTangent_H
 #define __MEAL_UnitTangent_H
 
-#include "MEAL/Evaluable.h"
 #include "Vector.h"
+#include "MEAL/Evaluable.h"
 
 namespace MEAL {
 

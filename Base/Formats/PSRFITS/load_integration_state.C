@@ -129,16 +129,14 @@ void Pulsar::FITSArchive::interpret_scale ()
     if (!hist)
     {
       if (verbose > 1)
-	cerr << "FITSArchive::interpret_scale assuming undefined SCALE=FluxDen"
-	     << endl;
+        cerr << "FITSArchive::interpret_scale assuming undefined SCALE=FluxDen" << endl;
       set_scale( Signal::FluxDensity );
       return;
     }
 
     state_scale = hist->get_last().scale;
     if (verbose > 2)
-      cerr << "FITSArchive::interpret_scale using HISTORY SCALE=" 
-	   << state_scale << endl;
+      cerr << "FITSArchive::interpret_scale using HISTORY SCALE=" << state_scale << endl;
   }
   else if (verbose > 2)
     cerr << "FITSArchive::interpret_scale SCALE=" << state_scale << endl;
@@ -153,8 +151,73 @@ void Pulsar::FITSArchive::interpret_scale ()
     set_scale( Signal::Jansky );
 
   else if (verbose > 1)
-    cerr << "FITSArchive::interpret_scale WARNING unrecognized SCALE='"
-	 << state_scale << "'" << endl;
+    cerr << "FITSArchive::interpret_scale WARNING unrecognized SCALE='" << state_scale << "'" << endl;
+}
+
+Signal::State Pulsar::FITSArchive::get_state_from_pol_type (const string& pol_type)
+{
+  if ( pol_type == "XXYY" || pol_type == "LLRR" || pol_type == "AABB" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::PPQQ" << endl;
+    return Signal::PPQQ;
+  }
+
+  else if ( pol_type == "STOKE" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::Stokes" << endl;
+    return Signal::Stokes;
+  }
+
+  else if ( pol_type == "PSTOKES" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::PseudoStokes" << endl;
+    return Signal::PseudoStokes;
+  }
+
+  else if ( pol_type == "XXYYCRCI" || pol_type == "LLRRCRCI" || pol_type == "AABBCRCI" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::Coherence" << endl;
+    return Signal::Coherence;
+  }
+
+  else if ( pol_type == "INTEN" || pol_type == "AA+BB" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::Intensity" << endl;
+    return Signal::Intensity;
+  }
+
+  else if ( pol_type == "INVAR" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::Invariant" << endl;
+    return Signal::Invariant;
+  }
+  
+  else if ( pol_type == "XRXIYRYI" || pol_type == "LRLIRRRI" || pol_type == "ARAIBRBI" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::Analytic" << endl;
+    return Signal::Analytic;
+  }
+
+  else if ( pol_type == "XY" || pol_type == "LR" || pol_type == "AB" )
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type Signal::Nyquist" << endl;
+    return Signal::Nyquist;
+  }
+
+  else
+  {
+    if (verbose > 1)
+      cerr << "FITSArchive::interpret_pol_type WARNING unknown POL_TYPE='" << pol_type << "'" << endl;
+    return Signal::Other;
+  }
 }
 
 void Pulsar::FITSArchive::interpret_pol_type ()
@@ -167,103 +230,31 @@ void Pulsar::FITSArchive::interpret_pol_type ()
     if (!hist)
     {
       if (verbose > 1)
-	cerr << "FITSArchive::interpret_pol_type undefined POL_TYPE" << endl;
+        cerr << "FITSArchive::interpret_pol_type undefined POL_TYPE (no history)" << endl;
       pol_type_undefined = true;
     }
     else
     {
       state_pol_type = hist->get_last().pol_type;
       if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type using HISTORY POL_TYPE=" 
-	     << state_pol_type << endl;
+        cerr << "FITSArchive::interpret_pol_type using HISTORY POL_TYPE=" << state_pol_type << endl;
     }
   }
-  else if (verbose > 2)
-    cerr << "FITSArchive::interpret_pol_type POL_TYPE=" << state_pol_type
-	 << endl;
-
-  if (!pol_type_undefined)
+  else
   {
-    if( state_pol_type == "XXYY" || 
-	state_pol_type == "LLRR" ||
-	state_pol_type == "AABB" )
-    {
-      set_state ( Signal::PPQQ );
-      if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type Signal::PPQQ" << endl;
-    }
-
-    else if( state_pol_type == "STOKE" )
-    {
-      set_state ( Signal::Stokes );
-      if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type Signal::Stokes" << endl;
-    }
-
-    else if( state_pol_type == "PSTOKES" )
-    {
-      set_state ( Signal::PseudoStokes );
-      if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type Signal::PseudoStokes" << endl;
-    }
-
-    else if( state_pol_type == "XXYYCRCI" ||
-	     state_pol_type == "LLRRCRCI" ||
-	     state_pol_type == "AABBCRCI" )
-    {
-      set_state ( Signal::Coherence );
-      if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type Signal::Coherence" << endl;
-    }
-
-    else if( state_pol_type == "INTEN" ||
-	     state_pol_type == "AA+BB" )
-    {
-      set_state ( Signal::Intensity );
-      if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type Signal::Intensity" << endl;
-    }
-
-    else if( state_pol_type == "INVAR" )
-    {
-      set_state ( Signal::Invariant );
-      if (verbose > 2)
-	cerr << "FITSArchive::interpret_pol_type Signal::Invariant" << endl;
-    }
-    
-    else if( state_pol_type == "XRXIYRYI" ||
-             state_pol_type == "LRLIRRRI" ||
-             state_pol_type == "ARAIBRBI" )
-    {
-      set_state ( Signal::Analytic );
-      if (verbose > 2)
-        cerr << "FITSArchive::interpret_pol_type Signal::Analytic" << endl;
-    }
-
-    else if( state_pol_type == "XY" ||
-             state_pol_type == "LR" ||
-             state_pol_type == "AB" )
-    {
-      set_state ( Signal::Nyquist );
-      if (verbose > 2)
-        cerr << "FITSArchive::interpret_pol_type Signal::Nyquist" << endl;
-    }
-
+    if (verbose > 2)
+      cerr << "FITSArchive::interpret_pol_type POL_TYPE=" << state_pol_type << endl;
+    auto state = get_state_from_pol_type( state_pol_type );
+    if (state != Signal::Other)
+      set_state( state );
     else
-    {
-      if (verbose > 1)
-	cerr << "FITSArchive::interpret_pol_type WARNING unknown POL_TYPE='"
-	     << state_pol_type << "'" << endl;
       pol_type_undefined = true;
-    }
   }
-
 
   if (pol_type_undefined)
   {
     if (verbose > 1)
-      cerr << "FITSArchive::interpret_pol_type WARNING"
-	" guessing state from NPOL=" << get_npol() << endl;
+      cerr << "FITSArchive::interpret_pol_type WARNING guessing state from NPOL=" << get_npol() << endl;
 
     if (npol == 4)
       set_state ( Signal::Stokes );
@@ -273,7 +264,7 @@ void Pulsar::FITSArchive::interpret_pol_type ()
       set_state ( Signal::Intensity );
     else
       throw Error (InvalidState, "Pulsar::FITSArchive::interpret_pol_type",
-		   "Bad archive, no POL_TYPE and npol=%d", npol);
+                  "cannot determine state; no POL_TYPE and npol=%d", npol);
   }
 }
 

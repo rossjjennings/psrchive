@@ -51,12 +51,20 @@ size_t Reference::HeapTracked::get_heap_queue_size ()
 
 bool Reference::verbose = false;
 
+Reference::HeapTracked::~HeapTracked()
+{
+  if (__found_on_heap())
+  {
+    DEBUG("Reference::HeapTracked dtor this=" << this
+          << " found on heap (size=" << get_heap_queue_size() << ")");
+  }
+}        
+
 void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 {
   if (ptr)
   {
     DEBUG("Reference::HeapTracked::operator placement new size=" << size << " ptr=" << ptr);
-
     return ptr;
   }
 
@@ -64,8 +72,7 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 
   ptr = ::operator new (size);
 
-  DEBUG("Reference::HeapTracked::operator new size=" << size 
-       << " ptr=" << ptr);
+  DEBUG("Reference::HeapTracked::operator new size=" << size << " ptr=" << ptr);
 
   heap_addresses().push_back (ptr);
 
@@ -77,14 +84,12 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 void Reference::HeapTracked::operator delete (void* location, void* ptr)
 {
   DEBUG("Reference::HeapTracked::operator placement delete void*=" << location);
-
   ::operator delete (location, ptr);
 }
 
 void Reference::HeapTracked::operator delete (void* location)
 {
   DEBUG("Reference::HeapTracked::operator delete void*=" << location);
-
   ::operator delete (location);
 }
 
@@ -99,46 +104,43 @@ bool Reference::HeapTracked::__is_on_heap () const
 
   if (__heap_state)
   {
-    DEBUG("Reference::HeapTracked::__is_on_heap __heap_state="
-         << (int)__heap_state);
-
+    DEBUG("Reference::HeapTracked::is_on_heap heap_state=" << (int)__heap_state);
     return __heap_state == is_on_heap;
-  }
-
-  DEBUG("Reference::HeapTracked::is_on_heap this=" << this);
-
-  const void* raw_address = dynamic_cast<const void*>(this);
-
-  DEBUG("Reference::HeapTracked::is_on_heap void*=" << raw_address);
-
-  if (raw_address == NULL)
-    throw Error (InvalidPointer, "Reference::HeapTracked::is_on_heap",
-		 "failed dynamic_cast<const void*>(%p)", this);
-  
-  vector<const void*>::iterator it;
-
-  LOCK_HEAP
-
-  it = std::find( heap_addresses().begin(), heap_addresses().end(), raw_address );
-
-  if ( it != heap_addresses().end() )
-  {
-    heap_addresses().erase (it);
-    __heap_state = is_on_heap;
-
-    DEBUG("Reference::HeapTracked::is_on_heap true heap_state=" << (int)__heap_state);
-
-    UNLOCK_HEAP
-
-    return true;
   }
 
   __heap_state = 0x04;
 
-  DEBUG("Reference::HeapTracked::is_on_heap false heap_state=" << (int)__heap_state);
+  if (__found_on_heap())
+  {
+    __heap_state = is_on_heap;
+  }
+
+  return __heap_state == is_on_heap;
+}
+
+bool Reference::HeapTracked::__found_on_heap () const
+{
+  DEBUG("Reference::HeapTracked::is_on_heap this=" << this);
+  const void* raw_address = dynamic_cast<const void*>(this);
+  DEBUG("Reference::HeapTracked::is_on_heap void*=" << raw_address);
+
+  if (raw_address == NULL)
+    throw Error (InvalidPointer, "Reference::HeapTracked::is_on_heap",
+                 "failed dynamic_cast<const void*>(%p)", this);
+
+  bool found = false;
+
+  LOCK_HEAP
+
+  auto it = std::find( heap_addresses().begin(), heap_addresses().end(), raw_address );
+  if ( it != heap_addresses().end() )
+  {
+    heap_addresses().erase (it);
+    found = true;
+  }
 
   UNLOCK_HEAP
 
-  return false;
+  DEBUG("Reference::HeapTracked::found_on_heap result=" << found);
+  return found;
 }
-

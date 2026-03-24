@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2001 by Willem van Straten
+ *   Copyright (C) 2001 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -13,59 +13,45 @@
 
 #include "Traits.h"
 #include "Error.h"
-#include "FTransform.h"
 
 #include <vector>
+#include <iostream>
 
 namespace fft {
 
+  //! Use zero-padded Fourier transform to interpolate between samples
+  void interpolate (std::complex<float>* dest, unsigned n_dest, const std::complex<float>* src, unsigned n_src);
+
+  //! Use zero-padded Fourier transform to interpolate between samples of multi-dimensional structure
   template <class T>
-  void interpolate (std::vector<T>& out, const std::vector<T>& in) {
-    
+  void interpolate (std::vector<T>& out, const std::vector<T>& in, bool verbose = false)
+  {
     if (in.size() >= out.size())
       throw Error (InvalidParam, "fft::interpolate",
 		   "in.size=%d >= out.size=%d.  just scrunch",
 		   in.size() >= out.size());
     
-    std::vector< std::complex<float> > dom1 (out.size());
+    std::vector< std::complex<float> > dom1 (in.size());
     std::vector< std::complex<float> > dom2 (out.size());
-    
+
     DatumTraits<T> datum_traits;
 
     unsigned ndim = datum_traits.ndim();
-    
-    unsigned ipt;
+    if (verbose)
+      std::cerr << "fft::interpolate ndim=" << ndim << " in.size=" << in.size() << " out.size=" << out.size() << std::endl;
+
+    unsigned ipt = 0;
 
     // for each dimension of the type T, perform an interpolation
-    for (unsigned idim=0; idim<ndim; idim++) {
-
+    for (unsigned idim=0; idim<ndim; idim++)
+    {
       for (ipt=0; ipt < in.size(); ipt++)
-	dom1[ipt] = datum_traits.element (in[ipt], idim);
+	      dom1[ipt] = datum_traits.element (in[ipt], idim);
 
-      FTransform::fcc1d (in.size(), (float*)&(dom2[0]), (float*)&(dom1[0]));
-
-      // shift the negative frequencies
-      unsigned npt2 = in.size()/2;
-      for (ipt=0; ipt<npt2; ipt++)
-	dom2[out.size()-1-ipt] = dom2[in.size()-1-ipt];
-      
-      // zero pad the rest
-      unsigned end = out.size() - npt2;
-      for (ipt=npt2; ipt<end; ipt++)
-	dom2[ipt] = 0;
-
-      FTransform::bcc1d (out.size(), (float*)&(dom1[0]), (float*)&(dom2[0]));
-
-      float scalefac = 1.0;
-
-      if (FTransform::get_norm() == FTransform::unnormalized)
-        scalefac = 1.0 / float(in.size());
-      else
-        scalefac = float(out.size()) / float(in.size());
+      interpolate (dom2.data(), dom2.size(), dom1.data(), dom1.size());
 
       for (ipt=0; ipt < out.size(); ipt++)
-	datum_traits.element (out[ipt], idim) = 
-	  datum_traits.element_traits.from_complex (dom1[ipt]*scalefac);
+	      datum_traits.element (out[ipt], idim) = datum_traits.element_traits.from_complex (dom2[ipt]);
 
     } // end for each dimension
 

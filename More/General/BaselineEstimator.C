@@ -59,9 +59,9 @@ Pulsar::BaselineEstimator::operate (const Profile* profile)
     {
       if ( (*weight)[ibin] )
       {
-	float diff = fabs( amps[ibin] - median );
-	if ( diff > median_cut * median_diff )
-	  (*weight)[ibin] = 0;
+        float diff = fabs( amps[ibin] - median );
+        if ( diff > median_cut * median_diff )
+          (*weight)[ibin] = 0;
       }
     }
   }

@@ -34,7 +34,6 @@ namespace Calibration
     bool has_index () const { return index >= 0; }
     void set_index (unsigned _index) { index = _index; }
     unsigned get_index () const { return index; }
-
   };
   
   //! Manages a variable backend and its best estimate

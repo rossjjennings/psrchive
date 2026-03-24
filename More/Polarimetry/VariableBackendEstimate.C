@@ -43,18 +43,11 @@ void disable_gain (VariableBackend* variable_backend)
 void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
 {
   VariableBackend* vb = MEAL::extract<VariableBackend>( xform );
-  if (!vb)
-    throw Error (InvalidParam, "VariableBackendEstimate::set_response",
-		 "xform=" + xform->get_name() +
-		 " does not contain a VariableBackend");
-
   variable_backend = vb;
 
-#if _DEBUG
-  cerr << "VariableBackendEstimate::set_response this=" << this <<
-    " xform=" << (void*) xform << " " << xform->get_name() <<
-    " variable_backend=" << (void*) variable_backend << endl;
-#endif
+  DEBUG("VariableBackendEstimate::set_response this=" << this <<
+        " xform=" << (void*) xform << " " << xform->get_name() <<
+        " variable_backend=" << (void*) vb);
 
   psr_response->clear();
   psr_response->add_model (xform);
@@ -76,8 +69,14 @@ void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
   {
     if (cal_gain)
       cal_gain->set_gain_variation (gain_variation);
-    else
+    else if (variable_backend)
       variable_backend->set_gain_variation (gain_variation);
+  }
+
+  if (!variable_backend)
+  {
+    BackendEstimate::set_response (xform);
+    return;
   }
 
   if (diff_gain_variation)
@@ -86,10 +85,8 @@ void VariableBackendEstimate::set_response (MEAL::Complex2* xform)
   if (diff_phase_variation)
     variable_backend->set_diff_phase_variation (diff_phase_variation);
 
-#if _DEBUG
-  cerr << "VariableBackendEstimate::set_response this=" << this
-       << " backend=" << vb->get_backend() << endl;
-#endif
+  DEBUG("VariableBackendEstimate::set_response this=" << this
+       << " backend=" << vb->get_backend());
     
   BackendEstimate::set_response (vb->get_backend());
 }
@@ -107,12 +104,13 @@ void VariableBackendEstimate::add_model (MEAL::Complex2* xform)
 
 void VariableBackendEstimate::update ()
 {
-#if _DEBUG
-  cerr << "VariableBackendEstimate::update this=" << this << endl;
-#endif
+  DEBUG("VariableBackendEstimate::update this=" << this);
   
   BackendEstimate::update ();
   
+  if (!variable_backend)
+    return;
+
   SingleAxis* single = variable_backend->get_backend ();
   
   if (gain_variation)
@@ -135,11 +133,9 @@ void VariableBackendEstimate::update (MEAL::Scalar* function, double value)
 {
   MEAL::Polynomial* polynomial = dynamic_cast<MEAL::Polynomial*>( function );
 
-#if _DEBUG
-  cerr << "VariableBackendEstimate::update function=" << function
+  DEBUG("VariableBackendEstimate::update function=" << function
        << " poly=" << polynomial
-       << " value=" << value << endl;
-#endif
+       << " value=" << value);
   
   if (polynomial)
     polynomial->set_param( 0, value );
@@ -148,15 +144,13 @@ void VariableBackendEstimate::update (MEAL::Scalar* function, double value)
 void
 VariableBackendEstimate::set_gain_variation (Univariate<Scalar>* function)
 {
-#if _DEBUG
-  cerr << "VariableBackendEstimate::set_gain_variation this=" << this <<
-    " variable_backend=" << (void*) variable_backend <<
-    " function=" << (void*) function << " " << function->get_name() << endl;
-#endif
+  DEBUG("VariableBackendEstimate::set_gain_variation this=" << this <<
+    " variable_backend=" << (void*) variable_backend.ptr() <<
+    " function=" << (void*) function << " " << function->get_name());
   
   if (cal_gain)
     cal_gain->set_gain_variation( function );
-  else
+  else if (variable_backend)
     variable_backend->set_gain_variation( function );
 
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
@@ -166,13 +160,12 @@ VariableBackendEstimate::set_gain_variation (Univariate<Scalar>* function)
 void
 VariableBackendEstimate::set_diff_gain_variation (Univariate<Scalar>* function)
 {
-#if _DEBUG
-  cerr << "VariableBackendEstimate::set_diff_gain_variation this=" << this <<
+  DEBUG("VariableBackendEstimate::set_diff_gain_variation this=" << this <<
     " variable_backend=" << (void*) variable_backend <<
-    " function=" << (void*) function << " " << function->get_name() << endl;
-#endif
+    " function=" << (void*) function << " " << function->get_name());
   
-  variable_backend -> set_diff_gain_variation( function );
+  if (variable_backend)
+    variable_backend -> set_diff_gain_variation( function );
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   diff_gain_variation = function;
 }
@@ -180,13 +173,12 @@ VariableBackendEstimate::set_diff_gain_variation (Univariate<Scalar>* function)
 void
 VariableBackendEstimate::set_diff_phase_variation (Univariate<Scalar>* function)
 {
-#if _DEBUG
-  cerr << "VariableBackendEstimate::set_diff_phase_variation this=" << this <<
+  DEBUG("VariableBackendEstimate::set_diff_phase_variation this=" << this <<
     " variable_backend=" << (void*) variable_backend <<
-    " function=" << (void*) function << " " << function->get_name() << endl;
-#endif
+    " function=" << (void*) function << " " << function->get_name());
   
-  variable_backend -> set_diff_phase_variation( function );
+  if (variable_backend)
+    variable_backend -> set_diff_phase_variation( function );
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   diff_phase_variation = function;
 }
@@ -195,10 +187,8 @@ void VariableBackendEstimate::update_reference_epoch ()
 {
   MJD mid = (min_time + max_time) / 2.0;
 
-#if _DEBUG
-  cerr << "VariableBackendEstimate::update_reference_epoch"
-    " min=" << min_time << " max=" << max_time << " mid=" << mid << endl;
-#endif
+  DEBUG("VariableBackendEstimate::update_reference_epoch"
+    " min=" << min_time << " max=" << max_time << " mid=" << mid);
   
   convert.set_reference_epoch( mid );
 }
@@ -242,8 +232,11 @@ void VariableBackendEstimate::set_psr_constant_gain (bool flag)
       cal_response->add_model (cal_gain);
     }
     
-    cal_gain->set_gain ( variable_backend->get_gain() );
-    disable_gain (variable_backend);
+    if (variable_backend)
+    {
+      cal_gain->set_gain ( variable_backend->get_gain() );
+      disable_gain (variable_backend);
+    }
 
     if (gain_variation)
       cal_gain->set_gain_variation (gain_variation);
@@ -252,12 +245,13 @@ void VariableBackendEstimate::set_psr_constant_gain (bool flag)
   {
     if (cal_gain)
     {
-      variable_backend->set_gain ( cal_gain->get_gain() );
+      if (variable_backend)
+        variable_backend->set_gain ( cal_gain->get_gain() );
       cal_response->remove_model (cal_gain);
       cal_gain = 0;
     }
     
-    if (gain_variation)
+    if (gain_variation && variable_backend)
       variable_backend->set_gain_variation (gain_variation);
   }
 }
@@ -268,7 +262,7 @@ void VariableBackendEstimate::set_cal_backend_only (bool flag)
   if (cal_gain)
     cal_response->add_model (cal_gain);
 
-  if (flag)
+  if (flag && variable_backend)
     cal_response->add_model (variable_backend);
   else
     cal_response->add_model (psr_response);
@@ -279,48 +273,42 @@ void VariableBackendEstimate::set_cal_backend_only (bool flag)
 void VariableBackendEstimate::engage_time_variations () try
 {
 #ifdef _DEBUG
-  cerr << "before engage nparam = " << variable_backend->get_nparam() << endl;
+  if (variable_backend)
+    cerr << "before engage nparam = " << variable_backend->get_nparam();
 #endif
 
   if (gain_variation) 
   {
-#ifdef _DEBUG
-    cerr << "engage constant_pulsar_gain=" << bool(cal_gain) << endl;
-#endif
+    DEBUG("engage constant_pulsar_gain=" << bool(cal_gain));
 
     if (!cal_gain)
       cal_gain->set_gain_variation( gain_variation );
-    else
+    else if (variable_backend)
       variable_backend->set_gain_variation( gain_variation );
   }
 
+  if (!variable_backend)
+    return;
+
   if (cal_gain)
   {
-#ifdef _DEBUG
-    cerr << "engage fix variable_backend gain = 1" << endl;
-#endif
+    DEBUG("engage fix variable_backend gain = 1");
     disable_gain (variable_backend);
   }
 
   if (diff_gain_variation)
   {
-#ifdef _DEBUG
-    cerr << "engage diff_gain" << endl;
-#endif
+    DEBUG("engage diff_gain");
     variable_backend->set_diff_gain_variation( diff_gain_variation );
   }
 
   if (diff_phase_variation)
   {
-#ifdef _DEBUG
-    cerr << "engage diff_phase" << endl;
-#endif
+    DEBUG("engage diff_phase");
     variable_backend->set_diff_phase_variation( diff_phase_variation );
   }
 
-#ifdef _DEBUG
-  cerr << "after engage nparam = " << variable_backend->get_nparam() << endl;
-#endif
+  DEBUG("after engage nparam = " << variable_backend->get_nparam());
 }
 catch (Error& error)
 {
@@ -330,53 +318,47 @@ catch (Error& error)
 void VariableBackendEstimate::disengage_time_variations () try
 {
 #ifdef _DEBUG
-  cerr << "before disengage nparam=" << variable_backend->get_nparam() << endl;
+  if (variable_backend)
+    cerr << "before disengage nparam=" << variable_backend->get_nparam();
 #endif
 
   if (gain_variation)
   {
-#ifdef _DEBUG
-    cerr << "disengage gain" << endl;
-#endif
+    DEBUG("disengage gain");
 
     if (cal_gain)
     {
       cal_gain->set_gain_variation (0);
       cal_gain->set_gain( gain_variation->estimate() );
     }
-    else
+    else if (variable_backend)
     {
       variable_backend->set_gain_variation (0);
       variable_backend->set_gain( gain_variation->estimate() );
     }
   }
 
+  if (!variable_backend)
+    return;
+
   if (cal_gain)
     variable_backend->set_gain( cal_gain->get_gain() );
 
   if (diff_gain_variation)
   {
-#ifdef _DEBUG
-    cerr << "disengage diff_gain value="
-	 << diff_gain_variation->estimate() << endl;
-#endif
+    DEBUG("disengage diff_gain value=" << diff_gain_variation->estimate());
     variable_backend->set_diff_gain_variation (0);
     variable_backend->set_diff_gain( diff_gain_variation->estimate() );
   }
 
   if (diff_phase_variation)
   {
-#ifdef _DEBUG
-    cerr << "disengage diff_phase value="
-	 << diff_phase_variation->estimate() << endl;
-#endif
+    DEBUG("disengage diff_phase value=" << diff_phase_variation->estimate());
     variable_backend->set_diff_phase_variation (0);
     variable_backend->set_diff_phase( diff_phase_variation->estimate() );
   }
 
-#ifdef _DEBUG
-  cerr << "after disengage nparam = " << variable_backend->get_nparam() << endl;
-#endif
+  DEBUG("after disengage nparam = " << variable_backend->get_nparam());
 
 }
 catch (Error& error)
@@ -384,9 +366,14 @@ catch (Error& error)
   throw error += "VariableBackendEstimate::disengage_time_variations";
 }
 
-void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap,
-						MEAL::Complex2* composite) try
+void VariableBackendEstimate::unmap_variations (vector<unsigned>& imap, MEAL::Complex2* composite) try
 {
+  if (!variable_backend)
+  {
+    DEBUG("VariableBackendEstimate::unmap_variations no variable backend");
+    return;
+  }
+
   MEAL::get_imap( composite, get_backend(), backend_imap );
       
   if (gain_variation)
@@ -419,9 +406,14 @@ catch (Error& error)
 }
 
 
-void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap,
-						  vector< vector<double> >& C)
+void VariableBackendEstimate::compute_covariance (vector<unsigned>& imap, vector<vector<double>>& C)
 {
+  if (!variable_backend)
+  {
+    DEBUG("VariableBackendEstimate::compute_covariance no variable backend");
+    return;
+  }
+
   SingleAxis* backend = get_backend();
 
   if (!backend)

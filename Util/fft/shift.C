@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 1999 by mbritton Matthew Britton
+ *   Copyright (C) 1999 by Matthew Britton
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,7 +12,9 @@
 
 using namespace std;
 
-/* Uses the Fourier shift theorem to shift an array */
+/*! Uses the Fourier shift theorem to cyclically shift an array of real-valued data
+    @param shift the number of array indeces by which to shift, may be fractional
+ */
 void FTransform::shift (unsigned npts, float* arr, double shift)
 {
   Array16<float> cmplx_arr (2*npts);
@@ -26,7 +28,7 @@ void FTransform::shift (unsigned npts, float* arr, double shift)
     cmplx_arr[2*i+1] = 0;
   }
 
-  FTransform::fcc1d(npts, &(fft_cmplx_arr[0]), &(cmplx_arr[0]));
+  FTransform::fcc1d(npts, fft_cmplx_arr, cmplx_arr);
 
   for (unsigned i=1; i<npts/2; ++i)
   {
@@ -40,7 +42,7 @@ void FTransform::shift (unsigned npts, float* arr, double shift)
     fft_cmplx_arr[2*npts-2*i+1] = -fft_cmplx_arr[2*i+1];
   }
 
-  FTransform::bcc1d(npts, &(cmplx_arr[0]), &(fft_cmplx_arr[0]));
+  FTransform::bcc1d(npts, cmplx_arr, fft_cmplx_arr);
 
   float norm = 1.0;
   if (FTransform::get_norm() == FTransform::unnormalized)
@@ -48,5 +50,4 @@ void FTransform::shift (unsigned npts, float* arr, double shift)
 
   for (unsigned i=0; i<npts; ++i)
     arr[i] = cmplx_arr[2*i]*norm;
-
 }

@@ -25,10 +25,10 @@ Pulsar::PolnSpectrumStats::get_stokes (unsigned ibin) const
   return result;
 }
 
-//! Returns the total determinant of the on-pulse phase bins
-Estimate<double> Pulsar::PolnSpectrumStats::get_total_determinant () const
+//! Returns the total squared invariant of the on-pulse phase bins
+Estimate<double> Pulsar::PolnSpectrumStats::get_total_squared_invariant() const
 {
-  return real->get_total_determinant() + imag->get_total_determinant();
+  return real->get_total_squared_invariant() + imag->get_total_squared_invariant();
 }
 
 //! Returns the variance of the baseline for the specified polarization

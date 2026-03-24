@@ -86,7 +86,7 @@ private:
         Reference::To<PC> sp = dynamic_cast<PC*>( (*pit).get() );
         if( sp )
         {
-	  try { sp->configure( cmd ); } catch( Error e ) {}
+	  try { sp->configure( cmd ); } catch( Error& e ) {}
         }
       }
     }

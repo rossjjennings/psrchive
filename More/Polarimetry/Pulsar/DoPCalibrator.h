@@ -11,7 +11,7 @@
 #ifndef __Pulsar_DoPCalibrator_H
 #define __Pulsar_DoPCalibrator_H
 
-#include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/SingleAxisCalibratorInfo.h"
 
 namespace Pulsar {
 
@@ -53,7 +53,7 @@ namespace Pulsar {
       unsigned get_nclass () const;
 
       //! Return the name of the specified class
-      std::string get_name (unsigned iclass) const;
+      std::string get_label (unsigned iclass) const;
       
       //! Return the number of parameters in the specified class
       unsigned get_nparam (unsigned iclass) const;

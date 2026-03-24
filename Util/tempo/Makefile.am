@@ -3,7 +3,8 @@ noinst_LTLIBRARIES = libtempo.la
 
 nobase_include_HEADERS = Pulsar/Predictor.h Pulsar/Parameters.h \
 	Pulsar/Generator.h Pulsar/Site.h Pulsar/TextParameters.h \
-	Pulsar/ParametersLookup.h Pulsar/FixedFrequencyPredictor.h
+	Pulsar/ParametersLookup.h Pulsar/FixedFrequencyPredictor.h \
+  Pulsar/ParametersDM.h
 
 include_HEADERS = psrephem.h ephio_func.h psrephem_orbital.h \
 	polyco.h Phase.h residual.h resio.h tempo++.h Predict.h \
@@ -18,7 +19,8 @@ libtempo_la_SOURCES = keys.dat ephio_c.c ephio.f \
 	tempo++.C Predict.C inverse_phase.C \
 	Observatory.C obsys.C itoa.C tempo_impl.h \
 	Parameters.C TextParameters.C ParametersLookup.C \
-	Predictor.C FixedFrequencyPredictor.C
+	Predictor.C FixedFrequencyPredictor.C \
+  ParametersDM.C
 
 nodist_libtempo_la_SOURCES = ephio_def.c
 
@@ -33,7 +35,7 @@ aopx_SOURCES = aopx.C
 check_PROGRAMS = test_ephio test_polyco_io test_Phase \
 	test_get_configuration test_psrephem test_obsys $(TESTS)
 
-TESTS = test_polyco_io test_psrephem test_TextParameters
+TESTS = test_polyco_io test_psrephem test_TextParameters test_ParametersDM
 
 test_polyco_io_SOURCES		= test_polyco_io.C test.polyco
 test_Phase_SOURCES		= test_Phase.C
@@ -41,6 +43,7 @@ test_get_configuration_SOURCES	= test_get_configuration.C
 test_psrephem_SOURCES		= test_psrephem.C test.psrephem
 test_obsys_SOURCES		= test_obsys.C
 test_TextParameters_SOURCES	= test_TextParameters.C
+test_ParametersDM_SOURCES = test_ParametersDM.C
 
 # ######################################################################
 #
@@ -71,7 +74,7 @@ LDADD = libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la \
-	$(top_builddir)/Util/epsic/src/util/libutil.la @FLIBS@
+	$(top_builddir)/Util/epsic/src/libepsic.la @FLIBS@
 
 include $(top_srcdir)/config/Makefile.include
 

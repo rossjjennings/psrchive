@@ -22,7 +22,7 @@ unsigned Pulsar::FluxCalibrator::Info::get_nchan () const
 }
 
 //! Return the name of the specified class
-std::string Pulsar::FluxCalibrator::Info::get_name (unsigned iclass) const
+std::string Pulsar::FluxCalibrator::Info::get_label (unsigned iclass) const
 {
   switch (iclass) {
   case 0:

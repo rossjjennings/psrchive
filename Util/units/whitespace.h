@@ -12,7 +12,7 @@
 #define __UTILS_UNITS_whitespace_H
 
 /*
-    \f form fee
+    \f form feed
     \n new line
     \r carriage return
     \t horizontal tab

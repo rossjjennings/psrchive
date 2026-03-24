@@ -11,6 +11,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/CrossCovarianceMatrix.h"
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/Statistics.h"
 
 #include "pairutil.h"
 #include "Matrix.h"
@@ -21,9 +22,6 @@
 #include <assert.h>
 
 using namespace std;
-
-// defined in More/General/standard_interface.C
-std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::StokesCrossCovariancePlot::StokesCrossCovariancePlot ()
 {

@@ -183,7 +183,7 @@ double Pulsar::StandardCandles::Entry::get_flux_mJy (double MHz)
 
     */
 
-    if (MHz < 300 | MHz > 50e3)
+    if (MHz < 300 || MHz > 50e3)
       warning << "Pulsar::StandardCandles::Entry::get_flux_mJy\n"
 	"\tfrequency=" << MHz << " MHz outside of range of validity" << endl;
 

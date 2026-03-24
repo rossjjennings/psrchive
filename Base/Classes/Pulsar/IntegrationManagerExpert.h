@@ -32,8 +32,7 @@ namespace Pulsar {
 
   public:
 
-    Expert (IntegrationManager* inst)
-    { instance = inst; }
+    Expert (IntegrationManager* inst) : instance (inst) { }
 
     //! Append new_Integration copies of Integration objects to instance
     void append (const IntegrationManager* more_subints)

@@ -18,8 +18,8 @@ RobustEstimateZapper::RobustEstimateZapper ()
      on the order of magnitude difference from the median */
   scale = false;
 
-  // allow error bars up to 10x greater than the median error bar
-  threshold_max = 1.0;
+  // allow error bars up to 3x greater than the median error bar
+  threshold_max = log10 (3.0);
 
   // smaller error bars are ok
   threshold_min = 0.0;

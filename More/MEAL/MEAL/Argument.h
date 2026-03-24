@@ -43,6 +43,8 @@ namespace MEAL {
       //! Apply the value of this Argument
       virtual void apply () const = 0;
       
+      //! Return a string representation of the value, if posssible
+      virtual std::string get_string () const = 0;
     };
 
   };

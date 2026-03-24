@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -25,6 +25,16 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
 
   // ensure that books are kept
   init_Integration (subint, true);
+
+  /*
+    bugs/509 - part 2
+    When an Integration is first loaded, its ColdPlasmaHistory objects should always be initialized.
+    (The init_Integration method initializes them onlyt if they do not already exist.)
+   */
+
+  bool overwrite_absolute = true;
+  init_DispersionHistory (subint, overwrite_absolute);
+  init_BirefringenceHistory (subint, overwrite_absolute);
 
   return subint.release();
 }

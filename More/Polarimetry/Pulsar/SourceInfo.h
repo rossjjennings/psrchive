@@ -23,7 +23,7 @@ namespace Pulsar {
   public:
 
     //! Constructor
-    SourceInfo (const std::vector<Calibration::SourceEstimate>& source);
+    SourceInfo (const std::vector< Reference::To<Calibration::SourceEstimate> >& );
     
     //! Return the title
     std::string get_title () const;
@@ -35,7 +35,7 @@ namespace Pulsar {
     unsigned get_nclass () const;
     
     //! Return the name of the specified class
-    std::string get_name (unsigned iclass) const;
+    std::string get_label (unsigned iclass) const;
 
     //! Return the number of parameters in the specified class
     unsigned get_nparam (unsigned iclass) const;
@@ -56,7 +56,7 @@ namespace Pulsar {
   protected:
     
     //! The SourceEstimate to be plotted
-    const std::vector<Calibration::SourceEstimate>& source;
+    const std::vector< Reference::To<Calibration::SourceEstimate> >& source;
 
     //! Plot all Stokes parameters in one panel
     bool together;

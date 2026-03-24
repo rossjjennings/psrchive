@@ -487,7 +487,7 @@ void psrmodel::process (Pulsar::Archive* data)
   // correct PA to infinite frequency
   FaradayRotation xform;
   xform.set_reference_wavelength( 0 );
-  xform.set_measure( data->get_rotation_measure() );
+  xform.set_rotation_measure( data->get_rotation_measure() );
   xform.execute( data );
 
   data->tscrunch();

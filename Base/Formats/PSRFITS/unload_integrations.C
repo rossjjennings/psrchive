@@ -114,7 +114,11 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   naux_profile = 0;
   aux_nsample = 0;
   
-  const MoreProfiles* more = get_Profile(0,0,0)->get<MoreProfiles>();
+  const MoreProfiles* more = nullptr;
+  
+  if (!search_mode)
+    more = get_Profile(0,0,0)->get<MoreProfiles>();
+
   if (more)
   {
     naux_profile = more->get_size ();
@@ -173,17 +177,20 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
                      "error resizing DAT_WTS");
 
   if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
-         << nchan << endl;
+    cerr << "FITSArchive::unload_integrations DAT_WTS resized to " << nchan << endl;
+
+  if (search_mode)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::unload_integrations search_mode - stopping" << endl;
+    return;
+  }
 
   setup_dat (ffptr, unload_dat_io);
   unload_dat_io->resize ();
-
-  unsigned nrow = unload_dat_io->get_nrow();
   
   if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations dat_io=" << unload_dat_io.ptr()
-         << endl;
+    cerr << "FITSArchive::unload_integrations dat_io=" << unload_dat_io.ptr() << endl;
 
   if (more)
   {

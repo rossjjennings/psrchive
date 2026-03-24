@@ -114,7 +114,6 @@ void DirectoryLock::clean ()
   system (clean_command.c_str());
 }
 
-
 void DirectoryLock::open_lockfile ()
 {
   string filename = get_lockfile();
@@ -128,7 +127,7 @@ void DirectoryLock::open_lockfile ()
 		 "failed open(%s)", fname);
 }
 
-  //! Constructor locks the target working directory and changes to it
+//! Constructor locks the target working directory and changes to it
 DirectoryLock::Push::Push (DirectoryLock& _lock)
   : lock(_lock)
 {
@@ -137,12 +136,12 @@ DirectoryLock::Push::Push (DirectoryLock& _lock)
   char cwd[MAXPATHLEN];
 
   if (getcwd (cwd, MAXPATHLEN) == NULL)
-    throw Error (FailedSys, "DirectoryPush ctor", "failed getcwd");
+    throw Error (FailedSys, "DirectoryLock::Push ctor", "failed getcwd");
 
   current = cwd;
 
   if (chdir (lock.get_directory().c_str()) != 0)
-    throw Error (FailedSys, "DirectoryPush ctor",
+    throw Error (FailedSys, "DirectoryLock::Push ctor",
 		 "failed chdir(" + lock.get_directory() + ")");
 }
 
@@ -152,6 +151,5 @@ DirectoryLock::Push::~Push ()
   lock.unlock();
 
   if (chdir (current.c_str()) != 0)
-    throw Error (FailedSys, "DirectoryPush ctor",
-		 "failed chdir(" + current + ")");
+    cerr << "DirectoryLock::Push dtor failed chdir(" + current + ")" << endl;
 }

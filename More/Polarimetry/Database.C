@@ -503,6 +503,17 @@ bool Database::Entry::less_than (const Entry* that) const
   return this->get_effective_time() < that->get_effective_time();
 }
 
+// compare two Database::Entry instances using Entry::less_than
+bool Pulsar::less_than (const Pulsar::Database::Entry* A, 
+			const Pulsar::Database::Entry* B)
+{
+  if (A==NULL || B==NULL)
+    throw Error (InvalidParam, "Pulsar::less_than (Database::Entry* A,B)",
+                 "null pointer passed as argument");
+
+  return A->less_than (B);
+}
+
 ostream& Pulsar::operator << (ostream& os, Database::Sequence sequence)
 {
   switch (sequence) {
@@ -1337,7 +1348,7 @@ void match_channels (Pulsar::Archive* calarch, const Pulsar::Archive* arch)
   flux calibration of the original pulsar observation.
 */      
 Pulsar::FluxCalibrator* 
-Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
+Database::generateFluxCalibrator (const Archive* arch, bool allow_raw) try {
 
   const Entry* match = best_match (criteria(arch, new CalibratorTypes::Flux));
 
@@ -1376,7 +1387,7 @@ catch (Error& error)
 }
 
 Pulsar::FluxCalibrator* 
-Database::rawFluxCalibrator (Pulsar::Archive* arch)
+Database::rawFluxCalibrator (const Pulsar::Archive* arch)
 {
   vector<const Entry*> oncals;
   all_matching (criteria (arch, Signal::FluxCalOn), oncals);
@@ -1419,7 +1430,7 @@ Database::rawFluxCalibrator (Pulsar::Archive* arch)
   observation. */
 
 Pulsar::PolnCalibrator* 
-Database::generatePolnCalibrator (Archive* arch,
+Database::generatePolnCalibrator (const Archive* arch,
 				  const Calibrator::Type* type)
 {
   if (!arch)
@@ -1555,7 +1566,7 @@ Database::generatePolnCalibrator (Archive* arch,
 
 Pulsar::HybridCalibrator* 
 Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
-					    Archive* arch)
+					    const Archive* arch)
 {
   if (!arch) throw Error (InvalidParam,
 			  "Database::generateHybridCalibrator",

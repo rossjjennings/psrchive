@@ -15,6 +15,8 @@
 
 #include <math.h>
 
+// #define _DEBUG 1
+
 using namespace std;
 
 static Pulsar::BaselineEstimator* default_initial_baseline ()

@@ -94,7 +94,7 @@ namespace MEAL {
     virtual void copy (const Function* model);
 
     //! Textual interface to Function attributes
-    class Interface;
+    template<class T> class Interface;
 
     //! Return a text interface that can be used to access this instance
     virtual TextInterface::Parser* get_interface ();
@@ -182,6 +182,10 @@ namespace MEAL {
 
     //! Provide access to the parameter_policy attribute
     const ParameterPolicy* get_parameter_policy () const
+    { return parameter_policy; }
+
+    //! Provide access to the parameter_policy attribute
+    ParameterPolicy* get_parameter_policy ()
     { return parameter_policy; }
 
     //! Some wrappers may not have a parameter policy

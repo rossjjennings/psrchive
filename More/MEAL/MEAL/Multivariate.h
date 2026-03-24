@@ -12,6 +12,7 @@
 #define __MEAL_Multivariate_H
 
 #include "MEAL/MultivariatePolicy.h"
+#include "MEAL/Nvariate.h"
 #include "Reference.h"
 
 namespace MEAL {
@@ -19,7 +20,7 @@ namespace MEAL {
   //! Abstract template base class of multivariate Function implementations
   /*! All abscissae are of type double */
   template<class T>
-  class Multivariate : public T 
+  class Multivariate : public Nvariate<T>
   {
     unsigned ndim;
 
@@ -40,13 +41,21 @@ namespace MEAL {
     Multivariate<T>* clone () const
     { throw Error (InvalidState, "Multivariate<T>::clone", "not implemented"); }
 
+    /** @name Nvariate Interface */
+    //@{
+
+    //! Get the number of abscissa (dimension) of the function
+    unsigned get_ndim () const { return ndim; }
+
     //! Set the abscissa value for the specified dimension
-    virtual void set_abscissa (unsigned idim, double value)
+    void set_abscissa_value (unsigned idim, double value)
     { multivariate_policy->set_abscissa (idim, value); }
 
     //! Get the abscissa value for the specified dimension
-    double get_abscissa (unsigned idim) const
+    double get_abscissa_value (unsigned idim) const
     { return multivariate_policy->get_abscissa (idim); }
+
+    //@}
 
   protected:
 
@@ -86,10 +95,10 @@ template<class T>
 MEAL::Multivariate<T>& MEAL::Multivariate<T>::operator = (const Multivariate& copy)
 { 
   if (&copy == this)
-    return this;
+    return *this;
 
   for (unsigned idim=0; idim < ndim; idim++)
-    set_abscissa( idim, copy.get_abscissa(idim) );
+    set_abscissa_value( idim, copy.get_abscissa_value(idim) );
 
   T::operator=( copy );
 

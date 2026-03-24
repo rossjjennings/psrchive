@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,7 +11,7 @@ using namespace std;
 using namespace Pulsar;
 
 template<typename T>
-void run (TextParameters& test, const std::string& key, T expected)
+void compare (TextParameters& test, const std::string& key, T expected)
 {
   T value = test.get<T> (key);
 
@@ -35,14 +35,27 @@ int main (int argc, char** argv) try
   TextParameters test;
   test.set_text( text );
 
-  run<double> (test, "DM", 5.67);
-  run<float> (test, "DM", 5.67);
+  compare<double> (test, "DM", 5.67);
+  compare<float> (test, "DM", 5.67);
 
-  run<double> (test, "F0", 134.0);
-  run<float> (test, "F0", 134.0);
+  compare<double> (test, "F0", 134.0);
+  compare<float> (test, "F0", 134.0);
 
-  run<double> (test, "F1", -1.728314e-15);
-  run<float> (test, "F1", -1.728314e-15);
+  compare<double> (test, "F1", -1.728314e-15);
+  compare<float> (test, "F1", -1.728314e-15);
+
+  // bugs/506 ensure that DIST_DM1 is not misinterpreted as DM1
+  text += "DIST_DM1 0.5 \n";
+  test.set_text( text );
+
+  try
+  {
+    compare<double> (test, "DM1", 0.0);
+  }
+  catch(const Error& error)
+  {
+    cerr << "test_TextParameters: caught expected exception '" << error.get_message() << "'" << endl;
+  }
 
   cerr << "test_TextParameters: all tests passed" << endl;
 

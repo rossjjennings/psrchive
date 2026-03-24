@@ -23,6 +23,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/ConfigurableProjectionExtension.h"
 
 #include "Pulsar/CalibrationInterpolatorExtension.h"
 #include "Pulsar/CalibratorTypes.h"
@@ -78,6 +79,8 @@ protected:
 
   Reference::To< CalibrationInterpolatorExtension > result;
   
+  float log_err_madm_threshold = 0.0;
+
   bool convert_epochs;
   bool use_native_scale;
 
@@ -169,6 +172,9 @@ protected:
   // CalibratorStokes [ipol] to be smoothed
   vector<set> cal_stokes_data;
 
+  // ConfigurableProjectionExtension [iparam] to be smoothed
+  vector<set> proj_data;
+
   // FluxCalibratorExtension [iparam] to be smoothed
   vector<set> fcal_data;
 
@@ -194,7 +200,7 @@ protected:
   // add parameters, from istart to iend inclusive, only if they have been measured
   template<class Container>
   void add_if_has_data (vector<set>& data, Container* ext,
-                        unsigned istart, unsigned iend);
+                        unsigned istart = 0, unsigned iend = 0);
 
   template<typename Container>
   void set_reference (Pulsar::Archive* archive, Container* ext);
@@ -422,6 +428,9 @@ void smint::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (plot_device, 'D', "dev");
   arg->set_help ("print all plots to a single device");
+
+  arg = menu.add (log_err_madm_threshold, "lem", "double");
+  arg->set_help ("excise outliers with log(error) > median + lem * MADM");
 #endif
 
 }
@@ -472,6 +481,21 @@ void smint::add_if_has_data (vector<set>& data, Container* ext,
                              unsigned istart, unsigned iend)
 {
   const unsigned nchan = ext->get_nchan();
+
+  if (istart >= ext->get_nparam())
+    throw Error (InvalidParam, "smint::add_if_has_data",
+                 "start index " + tostring(istart) + " >= nparam=" + tostring(ext->get_nparam()) );
+
+  if (iend >= ext->get_nparam())
+    throw Error (InvalidParam, "smint::add_if_has_data",
+                 "end index " + tostring(iend) + " >= nparam=" + tostring(ext->get_nparam()) );
+
+  if (iend < istart)
+    throw Error (InvalidParam, "smint::add_if_has_data",
+                 "end index " + tostring(iend) + " < start index " + tostring(istart) );
+
+  if (iend == 0)
+    iend = ext->get_nparam() - 1;
 
   for (unsigned iparam=istart; iparam <= iend; iparam++)
   {
@@ -596,9 +620,9 @@ void smint::process (Pulsar::Archive* archive)
     {
       
       /*
-	smooth either S_cal or scale for each of the receptor parameters 
+        smooth either S_cal or scale for each of the receptor parameters 
 
-	See FluxCalibratorExtension::get_Estimate index calculations.
+        See FluxCalibratorExtension::get_Estimate index calculations.
       */
 
       unsigned nreceptor = fext->get_nreceptor ();
@@ -608,8 +632,8 @@ void smint::process (Pulsar::Archive* archive)
       
       if (use_native_scale && fext->has_scale())
       {
-	cerr << "smint: fluxcal native scale" << endl;
-	istart += nreceptor;
+        cerr << "smint: fluxcal native scale" << endl;
+        istart += nreceptor;
       }
 
       unsigned iend = istart + nreceptor - 1;
@@ -634,10 +658,7 @@ void smint::process (Pulsar::Archive* archive)
   {
     if (pcal_data.size() == 0)
     {
-      /* smooth only receptor parameters 3, 4, 5, 6
-         and ignore the backend (gain and phase) */
-
-      add_if_has_data (pcal_data, ext, 3, 6);
+      add_if_has_data (pcal_data, ext);
       set_reference (archive, ext);
     }
     else
@@ -660,6 +681,19 @@ void smint::process (Pulsar::Archive* archive)
       }
     
       load_data (cal_stokes_data, cal.get(), epoch);
+    }
+
+    Reference::To< ConfigurableProjectionExtension > proj;
+    proj = archive->get<ConfigurableProjectionExtension>();
+    if (proj)
+    {
+      cerr << "smint: calibrator includes ConfigurableProjectionExtension" << endl;
+      if (proj_data.size() == 0)
+      {
+        add_if_has_data (proj_data, proj.get());
+      }
+    
+      load_data (proj_data, proj.get(), epoch);
     }
   }
 
@@ -787,7 +821,7 @@ void smint::fit (set& dataset)
     {
       SmoothingSpline spline;
       if (minimize_tmse)
-	spline.set_msre (1.0);
+	      spline.set_msre (1.0);
 
       spline.fit (table[irow].freq, table[irow].data);
       nfree[irow] = spline.get_fit_effective_nfree ();
@@ -804,21 +838,21 @@ void smint::fit (set& dataset)
     {
       if (use_smoothing_spline())
       {
-	cerr << "smint::fit 1-D pspline to "
-	     << table[irow].freq.size() << " points" << endl;
+        cerr << "smint::fit 1-D pspline to "
+            << table[irow].freq.size() << " points" << endl;
 
         data_filename = dataset.table[irow].filename;
 
-	fit_pspline (dataset.table[irow].spline1d,
-		     table[irow].freq, table[irow].data);
+        fit_pspline (dataset.table[irow].spline1d,
+              table[irow].freq, table[irow].data);
       }
       else
       {
-	fit_polynomial (table[irow].freq, table[irow].data);
+        fit_polynomial (table[irow].freq, table[irow].data);
       }
       
       if (row_by_row)
-	unload_row (dataset, irow);
+        unload_row (dataset, irow);
     }
 
 #if HAVE_PGPLOT
@@ -1046,6 +1080,12 @@ void smint::finalize ()
     unload (filename, cal_stokes_data[i].table);
   }
 
+  for (unsigned i=0; i < proj_data.size(); i++)
+  {
+    string filename = "proj_data_" + tostring(proj_data[i].index) + ".txt";
+    unload (filename, proj_data[i].table);
+  }
+
   for (unsigned i=0; i < fcal_data.size(); i++)
   {
     string filename = "fcal_data_" + tostring(fcal_data[i].index) + ".txt";
@@ -1092,6 +1132,25 @@ void smint::finalize ()
       plot_filename = "cal_stokes_fit_" + idx + ".eps/cps";
 
     fit (cal_stokes_data[i]);
+  }
+
+  model_code = CalibrationInterpolatorExtension::Parameter::ConfigurableProjectionParameter;
+
+  for (unsigned i=0; i < proj_data.size(); i++)
+  {
+    model_index = proj_data[i].index;
+    
+    cerr << "smint: fitting PolnCalibrator "
+            "iparam=" << model_index << endl;
+
+    string idx = tostring(model_index);
+
+    spline_filename = "proj_spline_" + idx;
+
+    if (plot_device == "")
+      plot_filename = "proj_fit_" + idx + ".eps/cps";
+
+    fit (proj_data[i]);
   }
 
   model_code = CalibrationInterpolatorExtension::Parameter::FluxCalibratorParameter;
@@ -1141,11 +1200,6 @@ void smint::finalize ()
                      filename + " does not have PolnCalibratorExtension");
 
       ext->set_has_covariance (false);
-
-      zero (ext, 0);
-      zero (ext, 1);
-      zero (ext, 2);
-      
       unload (ext, pcal_data, ifile);
     }
 
@@ -1158,6 +1212,18 @@ void smint::finalize ()
                      filename + " does not have CalibratorStokes");
 
       unload (ext, cal_stokes_data, ifile);
+    }
+
+    if (proj_data.size())
+    {
+      ConfigurableProjectionExtension* ext;
+      ext = archive->get<ConfigurableProjectionExtension>();
+      if (!ext)
+        throw Error (InvalidState, "smint", 
+                     filename + " does not have ConfigurableProjectionExtension");
+
+      ext->set_has_covariance (false);
+      unload (ext, proj_data, ifile);
     }
 
     if (fcal_data.size())
@@ -1687,6 +1753,9 @@ void smint::plot_data (const vector< double >& data_x,
   //
 
   EstimatePlotter plot;
+  plot.set_log_err_madm_threshold (log_err_madm_threshold);
+  plot.set_minimum_error (0.0);
+
   plot.add_plot (data_x, data_y);
 
   cpgsch (1.5);

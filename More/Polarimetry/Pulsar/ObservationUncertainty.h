@@ -46,11 +46,13 @@ namespace Calibration {
     virtual Jones<double> get_weighted_conjugate (const Jones<double>&) const;
 
     //! Given a coherency matrix, return the weighted Stokes parameters
-    Stokes< std::complex<double> >
-    get_weighted_components (const Jones<double>&) const;
+    Stokes<std::complex<double>> get_weighted_components (const Jones<double>&) const;
 
     //! Return the variance of each Stokes parameter
     Stokes< std::complex<double> > get_variance () const;
+
+    //! Scale the variance by the square of a scalar
+    void scale (double);
 
   protected:
 

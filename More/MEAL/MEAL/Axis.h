@@ -22,6 +22,9 @@ namespace MEAL {
   /*! This template class implements the Argument/Value interface by
     enabling methods to be connected and called by Value instances. */
 
+  template<typename T>
+  std::string axis_value_to_string(const T& axis_value) { return tostring(axis_value); }
+
   template<class Type> 
   class Axis : public Argument {
 
@@ -55,11 +58,15 @@ namespace MEAL {
       // ///////////////////////////////////////////////////////////////////
       
       //! Apply the value 
-      void apply () const 
+      void apply () const override
       { 
-	if (verbose) std::cerr << "MEAL::Axis<Type>::Value::apply value="
-			       << value << std::endl;
-	axis->set_value (value);
+        axis->set_value (value);
+      }
+
+      //! Return a string representation of the value, if posssible
+      std::string get_string () const override
+      {
+        return axis_value_to_string(value);
       }
 
     protected:

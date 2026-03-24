@@ -11,6 +11,7 @@
 #ifndef __Calibration_MeanJones_H
 #define __Calibration_MeanJones_H
 
+#include "complex_math.h"
 #include "MEAL/JonesCloude.h"
 
 namespace Calibration {

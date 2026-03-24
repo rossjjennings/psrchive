@@ -41,6 +41,9 @@ namespace MEAL {
     //! Optimization: set input already mapped into containing composite
     virtual void set_input (Project<T>& _input) { input = _input; }
 
+    //! Get the transformation
+    virtual Function* get_transformation () { return 0; }
+
   protected:
 
     //! The input, \f$ \rho \f$

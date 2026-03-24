@@ -8,45 +8,39 @@
 #include "Pulsar/HasBaselineEstimator.h"
 #include "Pulsar/ProfileWeightFunction.h"
 #include "Pulsar/GaussianBaseline.h"
-
+#include "debug.h"
 using namespace std;
 
 //! Default constructor
 Pulsar::HasBaselineEstimator::HasBaselineEstimator ()
 {
   baseline_estimator = new GaussianBaseline;
-  other = 0;
 }
 
 Pulsar::HasBaselineEstimator::HasBaselineEstimator (const HasBaselineEstimator& copy)
 {
   if (copy.baseline_estimator)
     baseline_estimator = copy.baseline_estimator->clone();
-  other = 0;
 }
 
-//! Destructor
 Pulsar::HasBaselineEstimator::~HasBaselineEstimator()
 {
+  DEBUG("Pulsar::HasBaselineEstimator dtor this=" << this << " other=" << other);
 }
 
 void Pulsar::HasBaselineEstimator::set_baseline_estimator (ProfileWeightFunction* est)
 {
-#if _DEBUG
-    cerr << "Pulsar::HasBaselineEstimator::set_baseline_estimator this=" << this
-	 << " est=" << est << endl;
-#endif
-
+  DEBUG("Pulsar::HasBaselineEstimator::set_baseline_estimator this=" << this << " est=" << est);
   baseline_estimator = est;
-  other = 0;
 }
 
 Pulsar::ProfileWeightFunction*
 Pulsar::HasBaselineEstimator::get_baseline_estimator () const
 {
-  if (other)
-    return other->baseline_estimator;
-
   return baseline_estimator;
 }
 
+bool Pulsar::HasBaselineEstimator::has_baseline_estimator () const
+{
+  return baseline_estimator;
+}

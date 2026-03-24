@@ -29,7 +29,7 @@ void Calibration::SingleAxis::init ()
   gain->set_param_description ("scalar gain");
   add_model (gain);
 
-  boost = new MEAL::Boost1    (Vector<3, double>::basis(0));
+  boost = new MEAL::Boost1 (Vector<3, double>::basis(0));
   boost->set_param_name ("gamma");
   boost->set_param_description ("differential gain (hyperbolic radians)");
   add_model (boost);

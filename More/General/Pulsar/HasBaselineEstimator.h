@@ -38,9 +38,9 @@ namespace Pulsar
     //! Get the algorithm used to find the off-pulse phase bins
     ProfileWeightFunction* get_baseline_estimator () const;
 
-    //! Share the baseline estimator of other
-    void share (HasBaselineEstimator* other);
-
+    //! Return true if baseline estimator is set
+    bool has_baseline_estimator () const;
+    
     template<typename Child>
     static void import (typename Child::Interface*);
 
@@ -48,9 +48,6 @@ namespace Pulsar
 
     //! The algorithm used to find the off-pulse phase bins
     Reference::To<ProfileWeightFunction> baseline_estimator;
-
-    //! Share from another object that has a baseline estimator
-    HasBaselineEstimator* other;
   };
 
   template<typename Child>

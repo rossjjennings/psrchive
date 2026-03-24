@@ -40,7 +40,7 @@ void Pulsar::SystemCalibratorPlotter::plot_cal_constraints (unsigned chan)
 		 "Pulsar::SystemCalibratorPlotter::plot_cal_constraints",
 		 "no calibrator data");
 
-  plot_constraints (chan, calibrator->calibrator_estimate[0].input_index);
+  plot_constraints (chan, calibrator->calibrator_estimate[0]->input_index);
 }
 
 void Pulsar::SystemCalibratorPlotter::plot_psr_constraints (unsigned chan,

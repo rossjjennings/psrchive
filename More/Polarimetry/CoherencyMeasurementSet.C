@@ -20,8 +20,7 @@ CoherencyMeasurementSet::~CoherencyMeasurementSet ()
 }
 
 //! Set the transformation through which the measurements are made
-void 
-CoherencyMeasurementSet::set_transformation_index (unsigned index)
+void CoherencyMeasurementSet::set_transformation_index (unsigned index)
 {
   transformation_index = index;
 }
@@ -42,5 +41,20 @@ void CoherencyMeasurementSet::set_coordinates () const
 {
   for (unsigned ic=0; ic<coordinates.size(); ic++)
     coordinates[ic]->apply();
+}
+
+std::string CoherencyMeasurementSet::get_coordinates_string () const
+{
+  string result;
+  
+  for (unsigned ic=0; ic<coordinates.size(); ic++)
+  {
+    if (ic > 0)
+      result += " ";
+
+    result += coordinates[ic]->get_string();
+  }
+
+  return result;
 }
 

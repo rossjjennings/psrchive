@@ -11,9 +11,9 @@
 #ifndef __SingleAxisPolynomial_H
 #define __SingleAxisPolynomial_H
 
-#include "MEAL/ChainRule.h"
 #include "MEAL/Complex2.h"
 #include "MEAL/Polynomial.h"
+#include "MEAL/ChainRule.h"
 
 namespace Calibration {
 

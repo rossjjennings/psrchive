@@ -68,7 +68,7 @@ namespace Pulsar {
       plot->set_subint (isubint);
       plot->set_chan (ichan);
       if (data)
-	plot->prepare (data);
+        plot->prepare (data);
     }
 
   };

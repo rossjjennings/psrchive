@@ -12,11 +12,9 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ArchiveStatistic.h"
+#include "Pulsar/Statistics.h"
 
 using namespace std;
-
-// defined in More/General/standard_interface.C
-std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 Pulsar::SpectrumPlot::SpectrumPlot ()
   : ibin (0, true) // sum over all phase bins by default

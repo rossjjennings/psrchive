@@ -75,8 +75,7 @@ void Pulsar::PolnStatistics::setup_stats () try
   cerr << "Pulsar::PolnStatistics::setup_stats this=" << this << endl;
 #endif
 
-  profile = Pulsar::get_Stokes (get_Integration(), parent->get_chan());
-
+  profile.set(Pulsar::get_Stokes (get_Integration(), parent->get_chan()));
   PhaseWeight* baseline = parent->get_stats()->get_baseline();
 
   Reference::To<PolnProfile> p = profile->clone();
@@ -86,7 +85,7 @@ void Pulsar::PolnStatistics::setup_stats () try
     baseline->set_Profile(s);
     s->offset( -baseline->get_mean().get_value() );
   }
-  profile = p.release();
+  profile.set(p.release());
 
   stats->select_profile( profile );
 

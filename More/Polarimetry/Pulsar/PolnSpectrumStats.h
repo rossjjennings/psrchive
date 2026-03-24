@@ -25,8 +25,8 @@ namespace Pulsar {
     //! Get the Stokes parameters for the specified harmonic
     Stokes< std::complex< Estimate<double> > > get_stokes (unsigned) const;
 
-    //! Returns the total determinant of the on-pulse phase bins
-    Estimate<double> get_total_determinant () const;
+    //! Returns the total squared invariant of the on-pulse phase bins
+    Estimate<double> get_total_squared_invariant () const;
 
     //! Returns the variance of the baseline for the specified polarization
     std::complex< Estimate<double> > get_baseline_variance (unsigned) const;

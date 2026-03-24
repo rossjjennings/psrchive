@@ -26,8 +26,17 @@ namespace Calibration
   {
   public:
 
+    //! Undefined phase bin
+    constexpr static int undefined = -1;
+
+    //! Off-pulse baseline mean
+    constexpr static int baseline_mean = -2;
+
+    //! Reference source
+    constexpr static int reference_source = -3;
+
     //! Construct with the specified bin from Archive
-    SourceEstimate (int ibin = -1);
+    SourceEstimate (int ibin = undefined);
 
     //! Create the source and add it to the measurement equation
     virtual void create_source (ReceptionModel* equation);

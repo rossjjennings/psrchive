@@ -57,7 +57,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
   unsigned nchan = get_nchan();
 
   if (Calibrator::verbose > 2)
-    cerr << "Pulsar::PolnCalibratorExtension nchan=" << nchan << endl;
+    cerr << "Pulsar::PolnCalibratorExtension nchan=" << nchan << " nparam=" << get_nparam() << endl;
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
@@ -97,6 +97,8 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
       get_transformation(ichan)->set_chisq( solver->get_chisq() );
       get_transformation(ichan)->set_nfree( solver->get_nfree() );
       get_transformation(ichan)->set_nfit( solver->get_nparam_infit() );
+      get_transformation(ichan)->set_log_det_curvature( solver->get_log_det_curvature() );
+      get_transformation(ichan)->set_log_cond_curvature( solver->get_log_cond_curvature() );
     }
   }
 }
@@ -115,7 +117,7 @@ try
 
   MEAL::Complex2* xform = new_transformation( ext->get_type() );
 
-  if (Pulsar::Calibrator::verbose)
+  if (Pulsar::Calibrator::verbose > 3)
     cerr << "Calibration::new_transformation name=" << xform->get_name() << endl;
 
   const Pulsar::PolnCalibratorExtension::Transformation* info;

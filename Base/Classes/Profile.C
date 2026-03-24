@@ -125,7 +125,7 @@ Pulsar::Profile* Pulsar::Profile::clone () const
 {
   DEBUG("Profile::clone this=" << this);
 
-  Profile* retval = new Profile (*this);
+  Profile* retval = new Profile (this);
   if (!retval)
     throw Error (BadAllocation, "Pulsar::Profile::clone");
   return retval;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2009 by Willem van Straten
+ *   Copyright (C) 2004 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -13,6 +13,8 @@
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Check.h"
 #include "Pulsar/Profile.h"
+
+#include "config/psrchive_version.h"
 
 #include "dirutil.h"
 #include "strutil.h"
@@ -74,10 +76,12 @@ psredit::psredit ()
   Pulsar::Archive::set_verbosity (0);
 
   // disable sanity checks that try to load Integration data
-  Pulsar::Archive::Check::disable ("Dedispersed");
-  Pulsar::Archive::Check::disable ("DeFaradayed");
+  Pulsar::Archive::Check::disable ("DispersionCheck");
+  Pulsar::Archive::Check::disable ("BirefringenceCheck");
 
   add( new Pulsar::UnloadOptions );
+
+  set_commit_hash(PSRCHIVE_COMMIT_HASH);
 }
 
 void psredit::add_options (CommandLine::Menu& menu)

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,6 +12,7 @@
 #define __psrfitsio_h
 
 #include "FITSError.h"
+#include "ReferenceTo.h"
 #include "fitsutil.h"
 
 #include <fitsio.h>
@@ -102,8 +103,7 @@ void* FITS_void_ptr (const std::string&);
 
 //! Calls fits_update_key; throws a FITSError exception if status != 0
 template<typename T>
-void psrfits_update_key (fitsfile* fptr, const char* name, T data,
-			 const char* comment = 0)
+void psrfits_update_key (fitsfile* fptr, const char* name, T data, const char* comment = 0)
 {
   // status
   int status = 0;
@@ -142,8 +142,7 @@ void psrfits_read_key (fitsfile* fptr,
 
 //! Worker function does not handle status
 template<typename T>
-void psrfits_read_key_work (fitsfile* fptr, const char* name, T* data, 
-			    int* status)
+void psrfits_read_key_work (fitsfile* fptr, const char* name, T* data, int* status)
 {
   // no comment
   char* comment = 0;
@@ -168,10 +167,33 @@ void psrfits_read_key (fitsfile* fptr, const char* name, T* data)
     throw FITSError (status, "psrfits_read_key", name);
 }
 
+//! Calls fits_read_key; throws a FITSError exception if status != 0
+/*! @param instance is a pointer to an object of type Class
+    @param set pointer to method of Class that sets attribute of type T
+  */
+template<typename Class, typename T>
+void psrfits_read_key (fitsfile* fptr, const char* name, Class* instance, void(Class::*set)(T))
+{
+  T val;
+  psrfits_read_key (fptr, name, &val);
+  (instance->*set)(val);
+}
+
+//! Calls fits_read_key; throws a FITSError exception if status != 0
+/*! @param instance is a smart pointer to an object of type Class
+    @param set pointer to method of Class that sets attribute of type T
+  */
+template<typename Class, typename T>
+void psrfits_read_key (fitsfile* fptr, const char* name, Reference::To<Class>& instance, void(Class::*set)(T))
+{
+  T val;
+  psrfits_read_key (fptr, name, &val);
+  (instance->*set)(val);
+}
+
 //! Calls fits_read_key; sets data to default if status != 0
 template<typename T>
-void psrfits_read_key (fitsfile* fptr, const char* name, T* data,
-		       T dfault, bool verbose = false)
+void psrfits_read_key (fitsfile* fptr, const char* name, T* data, T dfault, bool verbose = false)
 {
   // status
   int status = 0;

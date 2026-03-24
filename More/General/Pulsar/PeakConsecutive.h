@@ -12,6 +12,7 @@
 #define __Pulsar_PeakConsecutive_h
 
 #include "Pulsar/RiseFall.h"
+#include "Pulsar/HasBaselineEstimator.h"
 
 namespace Pulsar {
 
@@ -23,7 +24,8 @@ namespace Pulsar {
     for a while.    
   */
 
-  class PeakConsecutive : public RiseFall {
+  class PeakConsecutive : public RiseFall, public HasBaselineEstimator
+  {
 
   public:
 
@@ -46,11 +48,7 @@ namespace Pulsar {
     unsigned get_consecutive () const;
 
     //! Set the BaselineEstimator used to find the off-pulse phase bins
-    void set_baseline_estimator (BaselineEstimator*);
-
-    //! Get the BaselineEstimator used to find the off-pulse phase bins
-    const BaselineEstimator* get_baseline_estimator () const;
-    BaselineEstimator* get_baseline_estimator ();
+    void set_baseline_estimator (ProfileWeightFunction*) override;
 
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);
@@ -101,10 +99,6 @@ namespace Pulsar {
 
     std::vector<unsigned> on_transitions;
     std::vector<unsigned> off_transitions;
-
-    //! The BaselineEstimator used to find the off-pulse phase bins
-    Reference::To<BaselineEstimator> baseline_estimator;
-
   };
 
 }

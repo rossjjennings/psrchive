@@ -11,7 +11,6 @@
 Pulsar::AuxColdPlasmaMeasures::AuxColdPlasmaMeasures ()
   : Extension ("AuxColdPlasmaMeausures")
 {
-  dispersion_measure = rotation_measure = 0.0;
 }
 
 Pulsar::AuxColdPlasmaMeasures* Pulsar::AuxColdPlasmaMeasures::clone () const

@@ -11,6 +11,8 @@
 #ifndef __Pulsar_ModeSeparation_H
 #define __Pulsar_ModeSeparation_H
 
+#include "Jones.h"
+
 #include "MEAL/Real4.h"
 #include "MEAL/CrossCoherency.h"
 #include "MEAL/ComplexCorrelation.h"

@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/CongruenceTransformation.h"
 #include "MEAL/ProjectGradient.h"
 
@@ -75,6 +76,36 @@ MEAL::CongruenceTransformation::calculate (Jones<double>& result,
 
   // compute input and partial derivatives with respect to input parameters
   Jones<double> input_jones = input->evaluate (input_grad_ptr);
+
+  if (!true_math::finite (xform_jones))
+  {
+#if _DEBUG
+    cerr << "MEAL::CongruenceTransformation::calculate non-finite transformation" << endl;
+    string state;
+    transformation->print(state);
+    cerr << state;
+#endif
+
+    Error error (InvalidState, "MEAL::CongruenceTransformation::calculate",
+                 "non-finite transformation=");
+    error << xform_jones;
+    throw error;
+  }
+
+  if (!true_math::finite (input_jones))
+  {
+#if _DEBUG
+    cerr << "MEAL::CongruenceTransformation::calculate non-finite input" << endl;
+    string state;
+    input->print(state);
+    cerr << state;
+#endif
+
+    Error error (InvalidState, "MEAL::CongruenceTransformation::calculate",
+                 "non-finite input=");
+    error << input_jones;
+    throw error;
+  }
 
   // set the result
   result = xform_jones * input_jones * xform_herm;

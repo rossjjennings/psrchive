@@ -101,10 +101,10 @@ const double Pulsar::DynamicSpectrum::get_freq(unsigned ichan, unsigned isub)
 void Pulsar::DynamicSpectrum::compute() 
 {
   // Check that all necessary stuff is set
-  if (arch==NULL)
+  if (!arch)
     throw Error(InvalidState, "DynamicSpectrum::compute", 
         "compute() called without input Archive set.");
-  if (flux==NULL)
+  if (!flux)
     throw Error(InvalidState, "DynamicSpectrum::compute", 
         "compute() called without flux method set.");
   if (nchan==0 || nsub==0 || ds_data==NULL || ds_data_err==NULL)
@@ -112,9 +112,9 @@ void Pulsar::DynamicSpectrum::compute()
         "Inconsistent internal state.");
 
   // Loop over subints, chans, compute flux
-  for (int isub=0; isub<nsub; isub++) {
+  for (unsigned isub=0; isub<nsub; isub++) {
     Reference::To<const Integration> i = arch->get_Integration(isub);
-    for (int ichan=0; ichan<nchan; ichan++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
       Reference::To<const Profile> p = i->get_Profile(0,ichan);
       Estimate<double> e(0.0,0.0);
       if (p->get_weight()!=0.0) e = flux->get_flux(p);
@@ -154,8 +154,8 @@ void Pulsar::DynamicSpectrum::unload(const std::string& filename,
 
   fprintf(fout, "# Data columns:\n");
   fprintf(fout, "# isub ichan time(min) freq(MHz) flux flux_err\n");
-  for (int isub=0; isub<nsub; isub++) {
-    for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned isub=0; isub<nsub; isub++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
       fprintf(fout, "%4d %4d %10.4f %12.6f %+.6e %+.6e\n", isub, ichan,
           get_rel_epoch(isub).in_minutes(),
           get_freq(ichan),

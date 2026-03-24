@@ -38,11 +38,20 @@ namespace MEAL {
     //! Default constructor
     Rotation ();
 
+    //! Construct with rotation axis and angle in radians
+    Rotation (const Vector<3,double>& axis, double angle);
+
+    //! Set the rotation axis and angle in radians
+    void set_axis_angle (Vector<3,double> axis, double angle);
+
     //! Get the unit-vector along which the rotation occurs
     Vector<3, double> get_axis () const;
 
     //! Get the rotation angle, phi
     double get_phi () const;
+
+    //! Set the three free parameters as a vector
+    void set_vector (const Vector<3,double>&);
 
     //! Get the three free parameters as a vector
     Vector<3, double> get_vector () const;
@@ -61,6 +70,7 @@ namespace MEAL {
     //! Calculate the Jones matrix and its gradient
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);
 
+    void init();
   };
 
 }

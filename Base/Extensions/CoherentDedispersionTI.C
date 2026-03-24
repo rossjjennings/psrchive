@@ -30,7 +30,7 @@ CoherentDedispersion::Interface::Interface( CoherentDedispersion *s_instance )
        "nchan", "Number of input frequency channels" );
 
 #if 0
-  import( "int", IntegrationTI(),
+  import( "int", IntegrationInterface(),
           (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
           &Archive::get_nsubint );
 #endif

@@ -45,18 +45,30 @@ namespace Pulsar {
     
     //! Assignment operator
     const PhaseWeight& operator = (const PhaseWeight& weight);
+    void copy (const PhaseWeight& weight);
+    void copy (const PhaseWeight* weight) { copy(*weight); }
 
-    //! Forms the sum of this and weight
+    //! Forms the element-wise sum of this and weight
     const PhaseWeight& operator += (const PhaseWeight& weight);
+    void elementwise_sum (const PhaseWeight& weight);
+    void elementwise_sume (const PhaseWeight* weight) { elementwise_sum(*weight); }
 
-    //! Forms the product of this and weight
+    //! Forms the element-wise product of this and weight
     const PhaseWeight& operator *= (const PhaseWeight& weight);
+    void elementwise_product (const PhaseWeight& weight);
+    void elementwise_product (const PhaseWeight* weight) { elementwise_product(*weight); }
 
     //! Array operator
     float& operator [] (unsigned i) { built = false; return weight[i]; }
 
     //! Array operator
     const float& operator [] (unsigned i) const { return weight[i]; }
+
+    //! Array operator
+    float& at (unsigned i) { built = false; return weight[i]; }
+
+    //! Array operator
+    const float& at (unsigned i) const { return weight[i]; }
 
     //! Resize the weights array
     void resize (unsigned nbin) { weight.resize(nbin); }

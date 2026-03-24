@@ -29,9 +29,9 @@ namespace MEAL {
     //! Default constructor
     ForwardResult (T* context, T* function) 
       : CalculatePolicy<T> (context),
-	forward_changed (context)
+	forward_changed (context),
+	evaluator (function)
     {
-      evaluator = function;
       forward_changed.manage (function);
     }
 

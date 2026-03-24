@@ -11,7 +11,7 @@
 
 using namespace std;
 
-// #define _DEBUG 1
+#define _DEBUG 1
 #include "Reference.h"
 #include "debug.h"
 
@@ -108,11 +108,19 @@ int runtest ()
 
   cerr << "\ntest - Reference::To<parent> = &parent" << endl;
 
-  Reference::To<parent> parent_ref = &parent_instance;
+  Reference::To<parent> parent_ref;
+  
+  assert(parent_ref == nullptr);
+  assert(!parent_ref);
+
+  parent_ref = &parent_instance;
   if ( parent_ref->getval() != parent_instance.getval() ) {
     cerr << "ERROR: Parent method through Reference::To<>" << endl;
     return -1;
   }
+
+  assert(parent_ref != nullptr);
+  assert(parent_ref);
 
   const parent const_parent_instance(987);
   
