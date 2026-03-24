@@ -19,3 +19,6 @@ GENERATE_TAGFILE       =
 # Disable custom HTML header/footer (not generating HTML)
 HTML_HEADER            =
 HTML_FOOTER            =
+
+# epsic source files contain ISO-8859-1 characters (± signs)
+INPUT_ENCODING         = ISO-8859-1

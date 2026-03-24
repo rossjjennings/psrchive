@@ -19,3 +19,12 @@ GENERATE_TAGFILE       =
 # Disable custom HTML header/footer (not generating HTML)
 HTML_HEADER            =
 HTML_FOOTER            =
+
+# Hide file-level documentation (classes/namespaces only)
+SHOW_FILES             = NO
+
+# Hide undocumented members to reduce noise
+HIDE_UNDOC_MEMBERS     = YES
+
+# Exclude undocumented format-specific structs
+EXCLUDE_SYMBOLS        = WAPP_HEADER* wapp_*
