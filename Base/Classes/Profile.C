@@ -93,6 +93,7 @@ Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
 
 //! copy constructor
 Pulsar::Profile::Profile (const Profile& profile)
+  : ProfileAmps()
 {
   if (verbose)
     cerr << "Pulsar::Profile ctor this=" << this << " instances=" << instance_count << endl;

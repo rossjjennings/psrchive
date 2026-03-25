@@ -190,7 +190,10 @@ int Legacy::psrephem::unload (const std::string& filename) const
     if (parmStatus[ieph] && parmTypes[ieph] == EPH_TYPE_STRING)
     {
       assert (value_str[ieph].length() < EPH_STR_LEN -1);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
       strncpy (ephemstr[ieph], value_str[ieph].c_str(), EPH_STR_LEN);
+#pragma GCC diagnostic pop
       assert (ephemstr[ieph][EPH_STR_LEN-1] == '\0');
     }
     else
@@ -736,7 +739,10 @@ int Legacy::psrephem::unload (string* outstr) const
     if (parmTypes[ieph] == EPH_TYPE_STRING)
     {
       assert (value_str[ieph].length() < EPH_STR_LEN - 1);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
       strncpy (ephstr, value_str[ieph].c_str(), EPH_STR_LEN);
+#pragma GCC diagnostic pop
       assert (ephstr[EPH_STR_LEN-1] == '\0');
     }
     else

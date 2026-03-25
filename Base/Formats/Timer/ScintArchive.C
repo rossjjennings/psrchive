@@ -32,6 +32,7 @@ Pulsar::ScintArchive::ScintArchive ()
 //
 //
 Pulsar::ScintArchive::ScintArchive (const ScintArchive& archive)
+  : TimerArchive()
 {
   if (verbose == 3)
     cerr << "ScintArchive copy construct" << endl;

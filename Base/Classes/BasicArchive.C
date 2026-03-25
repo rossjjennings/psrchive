@@ -53,6 +53,7 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
 }
 
 Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy)
+  : Archive()
 {
   if (verbose == 3)
     cerr << "Pulsar::BasicArchive:: copy ctor this=" << this << endl;

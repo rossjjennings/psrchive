@@ -30,6 +30,7 @@ ScalarTemplateMatching::ScalarTemplateMatching ()
 
 //! Copy constructor
 ScalarTemplateMatching::ScalarTemplateMatching (const ScalarTemplateMatching& fit)
+  : Reference::Able()
 {
   init ();
   operator = (fit);

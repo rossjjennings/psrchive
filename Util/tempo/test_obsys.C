@@ -29,10 +29,12 @@ int main () try
   if (wsrt == srt)
   {
     cerr << "error: wsrt and srt refer to the same object" << endl;
-    cerr << " wsrt->name=" << wsrt->get_name() 
+    cerr << " wsrt->name=" << wsrt->get_name()
          << " srt->name=" << srt->get_name() << endl;
     return -1;
   }
+
+  cout << "gbt name=" << gbt->get_name() << " code=" << gbt->get_code() << endl;
 
   const Tempo::Observatory* obs = Tempo::observatory ("pks");
 

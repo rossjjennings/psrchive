@@ -19,10 +19,10 @@ AC_DEFUN([SWIN_TEST_CXXF77],
   AC_LANG_PUSH(C++)
 
   # This breaks g++ version 4.1.1 combined with g77 version 3.4.6
-  AC_TRY_LINK([#include <string>
-               #include <iostream>],
-              [try { std::cerr << std::endl; } catch (std::string) {}],
-              can_cxxf77=yes, can_cxxf77=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <string>
+               #include <iostream>]],
+              [[try { std::cerr << std::endl; } catch (std::string) {}]])],
+              [can_cxxf77=yes], [can_cxxf77=no])
 
   AC_LANG_POP(C++)
 

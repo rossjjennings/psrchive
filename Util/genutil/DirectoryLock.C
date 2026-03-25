@@ -111,7 +111,10 @@ void DirectoryLock::clean ()
     throw Error (InvalidState, "DirectoryLock::clean", "not locked");
 
   string clean_command = "rm -f " + get_directory() + "/*";
-  system (clean_command.c_str());
+  int ret = system (clean_command.c_str());
+  if (ret != 0)
+    throw Error (FailedSys, "DirectoryLock::clean",
+                 "system (%s) failed", clean_command.c_str());
 }
 
 void DirectoryLock::open_lockfile ()

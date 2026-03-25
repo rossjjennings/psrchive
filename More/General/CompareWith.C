@@ -229,7 +229,7 @@ void CompareWith::get_residual (vector<double>& amps, const vector<double>& mamp
 {
   chi.set_outlier_threshold (0.0);
 
-  double chisq = chi.get (amps, mamps);
+  [[maybe_unused]] double chisq = chi.get (amps, mamps);
 
   DEBUG("CompareWith::get_residual chisq=" << chisq);
 

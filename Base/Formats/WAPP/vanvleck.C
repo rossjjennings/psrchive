@@ -38,9 +38,8 @@ void vanvleck9lev(float *rho,int npts)
   static double coef5rg2p2[4] = { 5.284269565, 6.571535249, -2.897741312, 0.443156543};
   static double coef5rother[4] = {-1.475903733, 1.158114934, -0.311659264, 0.028185170};
 
-  double acoef[5],dtmp,zl,ro;
+  double acoef[5],dtmp,zl;
   int i;
-  ro = *rho;
   zl = (*rho)*16;
 /*  for(i=0; i<npts; i++) 
     *(rho+i) *= *(rho+i)/ro; */

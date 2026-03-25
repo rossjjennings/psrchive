@@ -41,6 +41,9 @@ class MJD {
   //! null constructor
   MJD () { days=0;secs=0;fracsec=0.0; };
 
+  //! copy constructor
+  MJD (const MJD&) = default;
+
   //! construct from standard C types
   MJD (double dd);                        // mjd given as day
   MJD (int intday, double fracday);       // mjd given with separate fracday

@@ -51,7 +51,7 @@ int main ()
 
   double_test = 4.5;
 
-  cerr << "test=" << double_test << endl;
+  cerr << "test=" << double_test << " original=" << copy << endl;
 
   Pulsar::Config::Interface* interface = Pulsar::Config::get_interface();
 

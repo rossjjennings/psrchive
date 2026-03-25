@@ -5,15 +5,15 @@ AC_DEFUN([SWIN_PACKAGE_OPTIONS],
   AC_PROVIDE([SWIN_PACKAGE_OPTIONS])
 
   AC_ARG_WITH([[$1]-dir],
-              AC_HELP_STRING([--with-[$1]-dir=DIR],
+              AS_HELP_STRING([--with-[$1]-dir=DIR],
                              [[$1] is in DIR]))
 
   AC_ARG_WITH([[$1]-include-dir],
-              AC_HELP_STRING([--with-[$1]-include-dir=DIR],
+              AS_HELP_STRING([--with-[$1]-include-dir=DIR],
                              [[$1] header files are in DIR]))
 
   AC_ARG_WITH([[$1]-lib-dir],
-              AC_HELP_STRING([--with-[$1]-lib-dir=DIR],
+              AS_HELP_STRING([--with-[$1]-lib-dir=DIR],
                              [[$1] library is in DIR]))
 
   if test x"$with_[$1]_dir" = x"no" ||
@@ -63,7 +63,7 @@ AC_DEFUN([SWIN_PACKAGE_LIB_OPTIONS],
   AC_PROVIDE([SWIN_PACKAGE_LIB_OPTIONS])
 
   AC_ARG_WITH([[$1]-dir],
-              AC_HELP_STRING([--with-[$1]-dir=DIR],
+              AS_HELP_STRING([--with-[$1]-dir=DIR],
                              [[$1] is in DIR]))
 
   if test x"$with_[$1]_dir" = x"no"; then
@@ -121,7 +121,7 @@ AC_DEFUN([SWIN_PACKAGE_TRY_COMPILE],
   [swin_cv_[$1]_include_dir=""
   for cf_dir in $cf_include_path_list; do
     CPPFLAGS="-I$cf_dir $ac_save_CPPFLAGS"
-    AC_TRY_COMPILE([$2], [$3], have_[$1]=yes, have_[$1]=no)
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[$2]], [[$3]])], [have_[$1]=yes], [have_[$1]=no])
     if test $have_[$1] = yes; then
       swin_cv_[$1]_include_dir="$cf_dir"
       break
@@ -170,7 +170,7 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
 
   for cf_dir in $cf_lib_path_list; do
     LIBS="-L$cf_dir [$4] $ac_save_LIBS"
-    AC_TRY_LINK([$2], [$3], have_[$1]=yes, have_[$1]=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[$2]], [[$3]])], [have_[$1]=yes], [have_[$1]=no])
     if test $have_[$1] = yes; then
       if test x"$cf_dir" = x.; then
         [$1]_LIBS="[$4]"

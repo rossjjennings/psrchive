@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[2026-02-26],[https://gitlab.com/pulsar-astronomy/psrchive/-/issues])
+AC_PREREQ(2.69)
+AC_INIT([PSRCHIVE],[2026-02-26],[psrchive-developers@lists.sourceforge.net])
 
 AUTOCONF_VERSION=m4_defn([AC_AUTOCONF_VERSION])
 AC_SUBST(AUTOCONF_VERSION)
@@ -61,7 +61,7 @@ if test "x$prefix" = xNONE; then
 fi
 
 PSRCHIVE_INSTALL=$prefix
-PSRCHIVE_HTTP="https://gitlab.com/pulsar-astronomy/psrchive"
+PSRCHIVE_HTTP="http://psrchive.sourceforge.net"
 
 AC_SUBST(PSRCHIVE_INSTALL)
 AC_SUBST(PSRCHIVE_HTTP)
@@ -123,7 +123,7 @@ SWIN_TEST_LIMITS
 # Set up to use any packages already installed in the target directory
 #
 AC_ARG_ENABLE([existing],
-              AC_HELP_STRING([--disable-existing],
+              AS_HELP_STRING([--disable-existing],
               ["Don't look for dependencies in existing installation"]))
 
 if test -d $PSRCHIVE_INSTALL -a x"$enable_existing" != x"no"; then
@@ -181,7 +181,7 @@ if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   AC_MSG_ERROR([No suitable FFT library was found.
 
-  Please see https://gitlab.com/pulsar-astronomy/psrchive/-/blob/master/packages/
+  Please see http://psrchive.sourceforge.net/third/fftw
 
   or simply run the following commands to install FFTW automatically
 
@@ -221,7 +221,7 @@ AC_SUBST(enable_shared)
 # but not if --disable-python is also used.
 #
 AC_ARG_ENABLE([python],
-              AC_HELP_STRING([--disable-python],
+              AS_HELP_STRING([--disable-python],
               [Don't build python extensions]))
 if test x"$enable_shared" == xyes -a x"$enable_python" != xno; then
   AM_PATH_PYTHON(,, [:])
@@ -262,7 +262,7 @@ install_sh="CPPROG='cp -p' ${install_sh}"
 #
 # For developers: provide the ability to compile a lean version of the code
 #
-AC_ARG_WITH([lean], AC_HELP_STRING([--enable-lean],
+AC_ARG_WITH([lean], AS_HELP_STRING([--enable-lean],
 				   [compile a lean version of the library]))
 
 AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])

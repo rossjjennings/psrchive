@@ -5,7 +5,7 @@ AC_DEFUN([PSR_LIB_YAMLCPP],
   AC_PROVIDE([PSR_LIB_YAMLCPP])
 
   AC_ARG_WITH([yamlcpp-dir],
-              AC_HELP_STRING([--with-yamlcpp-dir=DIR],
+              AS_HELP_STRING([--with-yamlcpp-dir=DIR],
                              [yaml-cpp is installed in DIR]))
 
   YAMLCPP_CFLAGS=""
@@ -37,9 +37,9 @@ AC_DEFUN([PSR_LIB_YAMLCPP],
 
     AC_LANG_PUSH(C++)
 
-    AC_TRY_LINK([#include <yaml-cpp/yaml.h>], 
-                [YAML::Node primes = YAML::Load("");],
-                have_yamlcpp=yes, have_yamlcpp=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <yaml-cpp/yaml.h>]],
+                   [[YAML::Node primes = YAML::Load("");]])],
+                   [have_yamlcpp=yes], [have_yamlcpp=no])
 
     AC_LANG_POP(C++)
 

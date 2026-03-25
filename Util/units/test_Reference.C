@@ -499,7 +499,7 @@ class Component : public Reference::Able
   public:
     Component (Container* parent) { DEBUG("Component ctor this=" << this << " new Policy"); policy = new Policy(parent); }
     virtual Component* clone () const { DEBUG("Component::clone this=" << this); return new Component(*this); }
-    Component (const Component& that) { DEBUG("Component copy ctor this=" << this << " clone Policy"); policy = that.policy->clone(); }
+    Component (const Component& that) : Reference::Able() { DEBUG("Component copy ctor this=" << this << " clone Policy"); policy = that.policy->clone(); }
     void copy (const Component* that) { DEBUG("Component::copy this=" << this << " clone Policy"); policy = that->policy->clone(); }
 };
 

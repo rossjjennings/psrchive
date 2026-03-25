@@ -40,6 +40,7 @@ Pulsar::ASCIIArchive::ASCIIArchive (const Archive& arch)
 }
 
 Pulsar::ASCIIArchive::ASCIIArchive (const ASCIIArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::ASCIIArchive construct copy ASCIIArchive" << endl;

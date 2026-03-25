@@ -60,6 +60,7 @@ Pulsar::ASPArchive::ASPArchive (const Archive& arch)
 }
 
 Pulsar::ASPArchive::ASPArchive (const ASPArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::ASPArchive construct copy ASPArchive" << endl;

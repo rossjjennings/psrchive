@@ -50,7 +50,6 @@ void Pulsar::foreach (Integration* subint, const Integration* operand,
   // allow one-to-many combinations
   unsigned subint_nchan = subint->get_nchan();
   unsigned operand_nchan = operand->get_nchan();
-  unsigned max_nchan = std::max(subint_nchan, operand_nchan);
 
   for (unsigned ipol = 0; ipol < subint->get_npol(); ipol++)
   {

@@ -12,24 +12,24 @@ class VectorMatrix : public Matrix<T>
 private:
 	std::vector<std::vector<T> > _matrix;
 
-	void setMatrix(const std::vector<std::vector<T> > *matrix); 
+	void setMatrix(const std::vector<std::vector<T> > *matrix);
 
 public:
-	
+
 	VectorMatrix(std::vector<std::vector<T> > matrix);
-	VectorMatrix(int nRows = 0, int nCols = 0);
+	VectorMatrix(size_t nRows = 0, size_t nCols = 0);
 	~VectorMatrix();
 
 
-	void resize( int nRow,  int nCol);
+	void resize( size_t nRow,  size_t nCol);
 	T getElement(int i, int j) const;
 	void setElement( int i,  int j, T value);
 	void invert();
 
 	std::vector<std::vector<T> > getMatrix();
-	int getSize() const; 
+	size_t getSize() const;
 	std::vector<std::vector<T> > getMatrix() const;
-	
+
 	void setZero();
 
 	Matrix<T>* operator*(const Matrix<T>* RHS);
@@ -48,14 +48,14 @@ VectorMatrix<T>::VectorMatrix(std::vector<std::vector<T> > matrix) : Matrix<T>()
 
 
 template<typename T>
-VectorMatrix<T>::VectorMatrix(int nRows, int nCols) : Matrix<T>()
+VectorMatrix<T>::VectorMatrix(size_t nRows, size_t nCols) : Matrix<T>()
 {
-	for(int i = 0; i < nRows; i++)
-	{	
+	for(size_t i = 0; i < nRows; i++)
+	{
 		std::vector<T> temp;
 		_matrix.push_back(temp);
 
-		for(int j = 0; j < nCols; j++)
+		for(size_t j = 0; j < nCols; j++)
 		{
 			_matrix[i].push_back(0);
 		}
@@ -70,19 +70,19 @@ VectorMatrix<T>::~VectorMatrix()
 
 
 template<typename T>
-void VectorMatrix<T>::resize(int nRow, int nCol)
+void VectorMatrix<T>::resize(size_t nRow, size_t nCol)
 {
 	//Determine if it needs to get smaller or bigger
-	bool bigger = false;;
-	
+	bool bigger = false;
+
 	//tests to see if rows need to get bigger
-	if(nRow > _matrix.size() ) 
+	if(nRow > _matrix.size() )
 	{
 		bigger = true;
 	}
 
 	//tests to see if cols need to get bigger
-	for(int i = 0; i < _matrix.size(); i++)
+	for(size_t i = 0; i < _matrix.size(); i++)
 	{
 		if(_matrix[i].size() < nCol)
 		{
@@ -98,7 +98,7 @@ void VectorMatrix<T>::resize(int nRow, int nCol)
 		//cout << "Bigger" << endl;
 
 		//Add extra cols to existing rows if needed
-		for(int i = 0; i < _matrix.size(); i++)
+		for(size_t i = 0; i < _matrix.size(); i++)
 		{
 			if(_matrix[i].size() < nCol)
 			{
@@ -110,10 +110,10 @@ void VectorMatrix<T>::resize(int nRow, int nCol)
 		//Add extra rows if needed
 		if(nRow > _matrix.size())
 		{
-			int amount = nRow - _matrix.size();
-			for(int i = 0; i < amount; i++)
+			size_t amount = nRow - _matrix.size();
+			for(size_t i = 0; i < amount; i++)
 			{
-				int currentNum = 0;
+				size_t currentNum = 0;
 				std::vector<T> vec;
 
 				//Pad the new row with 0's
@@ -142,11 +142,11 @@ void VectorMatrix<T>::resize(int nRow, int nCol)
 		}
 
 		//delete unwanted column elements in the remaining rows
-		for(int i = 0; i < _matrix.size(); i++)
+		for(size_t i = 0; i < _matrix.size(); i++)
 		{
 			if(_matrix[i].size() > nCol)
 			{
-				colStart = _matrix[i].begin() + nCol; 
+				colStart = _matrix[i].begin() + nCol;
 				_matrix[i].erase(colStart, _matrix[i].end() );
 			}
 		}
@@ -157,7 +157,7 @@ void VectorMatrix<T>::resize(int nRow, int nCol)
 template<typename T>
 void VectorMatrix<T>::invert()
 {
-        std::vector<std::vector<T> > dummy;	
+        std::vector<std::vector<T> > dummy;
 	MEAL::GaussJordan(_matrix, dummy);
 }
 
@@ -197,9 +197,9 @@ void VectorMatrix<T>::setMatrix(const std::vector<std::vector<T> >* matrix)
 template<typename T>
 void VectorMatrix<T>::setZero()
 {
-		for(int i = 0; i < _matrix.size(); i++)
+		for(size_t i = 0; i < _matrix.size(); i++)
 		{
-			for(int j = 0; j < _matrix.size(); j++)
+			for(size_t j = 0; j < _matrix.size(); j++)
 			{
 				_matrix[i][j] = 0;
 			}
@@ -207,9 +207,9 @@ void VectorMatrix<T>::setZero()
 }
 
 template<typename T>
-int VectorMatrix<T>::getSize() const
+size_t VectorMatrix<T>::getSize() const
 {
-	return _matrix.size();	
+	return _matrix.size();
 }
 
 
@@ -223,13 +223,13 @@ Matrix<T>* VectorMatrix<T>::operator*(const Matrix<T>* RHS)
 	result->resize(_matrix.size(), _matrix.size()); //Resize the matrix
 
 	//For each row
-	for(int row = 0; row < _matrix.size(); row++)
+	for(size_t row = 0; row < _matrix.size(); row++)
 	{
 		//for each element in that row
-		for(int element = 0; element < _matrix[row].size(); element++)
+		for(size_t element = 0; element < _matrix[row].size(); element++)
 		{
 			//calculate the value for the current element
-			for(int i = 0; i < _matrix.size(); i++)
+			for(size_t i = 0; i < _matrix.size(); i++)
 			{
 				result->setElement(row, element, (result->getElement(row, element) ) + _matrix[row][i] * RHS->getElement(i,element));
 			}
@@ -242,7 +242,7 @@ Matrix<T>* VectorMatrix<T>::operator*(const Matrix<T>* RHS)
 
 
 template<typename T>
-Matrix<T>* VectorMatrix<T>::operator+(const Matrix<T>* RHS) 
+Matrix<T>* VectorMatrix<T>::operator+(const Matrix<T>* RHS)
 {
 	if(_matrix.size() != RHS->getSize() || _matrix.size() != RHS->getSize())
 		return NULL;
@@ -251,10 +251,10 @@ Matrix<T>* VectorMatrix<T>::operator+(const Matrix<T>* RHS)
 	result->resize(_matrix.size(), _matrix.size()); //Resize the result matrix
 
 		//For each row
-	for(int row = 0; row < _matrix.size(); row++)
+	for(size_t row = 0; row < _matrix.size(); row++)
 	{
 		//for each element in that row
-		for(int element = 0; element < _matrix[row].size(); element++)
+		for(size_t element = 0; element < _matrix[row].size(); element++)
 		{
 			result->setElement(row, element, _matrix[row][element] + RHS->getElement(row, element) );
 		}
@@ -265,7 +265,7 @@ Matrix<T>* VectorMatrix<T>::operator+(const Matrix<T>* RHS)
 
 
 template<typename T>
-Matrix<T>* VectorMatrix<T>::operator-(const Matrix<T>* RHS) 
+Matrix<T>* VectorMatrix<T>::operator-(const Matrix<T>* RHS)
 {
 	if(_matrix.size() != RHS->getSize() || _matrix.size() != RHS->getSize())
 		return NULL;
@@ -274,10 +274,10 @@ Matrix<T>* VectorMatrix<T>::operator-(const Matrix<T>* RHS)
 	result->resize(_matrix.size(), _matrix.size()); //Resize the result matrix
 
 		//For each row
-	for(int row = 0; row < _matrix.size(); row++)
+	for(size_t row = 0; row < _matrix.size(); row++)
 	{
 		//for each element in that row
-		for(int element = 0; element < _matrix[row].size(); element++)
+		for(size_t element = 0; element < _matrix[row].size(); element++)
 		{
 			result->setElement(row, element, _matrix[row][element] - RHS->getElement(row, element) );
 		}
@@ -293,9 +293,9 @@ void VectorMatrix<T>::operator=(const VectorMatrix<T>* RHS)
 	if(_matrix.size() != RHS->getSize())
 		this->resize(RHS->getSize(), RHS->getSize() );
 
-	for(int i = 0; i < _matrix.size(); i++)
+	for(size_t i = 0; i < _matrix.size(); i++)
 	{
-		for(int j = 0; j < _matrix.size(); j++)
+		for(size_t j = 0; j < _matrix.size(); j++)
 		{
 			setElement(i, j, RHS->getElement(i, j) );
 		}

@@ -32,43 +32,43 @@ void array_changeEndian (int count, void *p, int element_size);
 
 #define MACHINE_LITTLE_ENDIAN 0
 
-#define toBigEndian(p,s)
-#define toLittleEndian(p,s)	changeEndian(p,s)
-#define fromBigEndian(p,s)		
-#define fromLittleEndian(p,s)	changeEndian(p,s)
+#define toBigEndian(p,s)           ((void)0)
+#define toLittleEndian(p,s)        changeEndian(p,s)
+#define fromBigEndian(p,s)         ((void)0)
+#define fromLittleEndian(p,s)      changeEndian(p,s)
 
 /* short forms that save typing */
-#define ToBigEndian(p)
-#define ToLittleEndian(p)       changeEndian (&(p), sizeof(p))
-#define FromBigEndian(p)
-#define FromLittleEndian(p)     changeEndian (&(p), sizeof(p))
+#define ToBigEndian(p)             ((void)0)
+#define ToLittleEndian(p)          changeEndian (&(p), sizeof(p))
+#define FromBigEndian(p)           ((void)0)
+#define FromLittleEndian(p)        changeEndian (&(p), sizeof(p))
 
 /* short forms that work on arrays */
-#define N_ToBigEndian(N,p) 
-#define N_ToLittleEndian(N,p)   array_changeEndian (N, p, sizeof(*p))
-#define N_FromBigEndian(N,p) 
-#define N_FromLittleEndian(N,p) array_changeEndian (N, p, sizeof(*p))
+#define N_ToBigEndian(N,p)         ((void)0)
+#define N_ToLittleEndian(N,p)      array_changeEndian (N, p, sizeof(*p))
+#define N_FromBigEndian(N,p)       ((void)0)
+#define N_FromLittleEndian(N,p)    array_changeEndian (N, p, sizeof(*p))
 
 #else
 
 #define MACHINE_LITTLE_ENDIAN 1
 
-#define toBigEndian(p,s) 	changeEndian(p,s)
-#define toLittleEndian(p,s)
-#define fromBigEndian(p,s)	changeEndian(p,s)
-#define fromLittleEndian(p,s)
+#define toBigEndian(p,s)           changeEndian(p,s)
+#define toLittleEndian(p,s)        ((void)0)
+#define fromBigEndian(p,s)         changeEndian(p,s)
+#define fromLittleEndian(p,s)      ((void)0)
 
 /* short forms that save typing */
-#define ToBigEndian(p)          changeEndian (&(p), sizeof(p))
-#define ToLittleEndian(p)
-#define FromBigEndian(p)        changeEndian (&(p), sizeof(p))
-#define FromLittleEndian(p)   
+#define ToBigEndian(p)             changeEndian (&(p), sizeof(p))
+#define ToLittleEndian(p)          ((void)0)
+#define FromBigEndian(p)           changeEndian (&(p), sizeof(p))
+#define FromLittleEndian(p)        ((void)0)
 
 /* short forms that work on arrays */
-#define N_ToBigEndian(N,p)      array_changeEndian (N, p, sizeof(*(p)))
-#define N_ToLittleEndian(N,p)
-#define N_FromBigEndian(N,p)    array_changeEndian (N, p, sizeof(*(p)))
-#define N_FromLittleEndian(N,p)
+#define N_ToBigEndian(N,p)         array_changeEndian (N, p, sizeof(*(p)))
+#define N_ToLittleEndian(N,p)      ((void)0)
+#define N_FromBigEndian(N,p)       array_changeEndian (N, p, sizeof(*(p)))
+#define N_FromLittleEndian(N,p)    ((void)0)
 
 #endif
 

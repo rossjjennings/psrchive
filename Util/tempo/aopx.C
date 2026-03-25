@@ -271,10 +271,6 @@ int main (int argc, char ** argv) try
       double st = atan2(sin_st, cos_st);
 
 
-      double sin_ph = sin(2.0 * omega_earth * time);
-      double cos_ph = cos(2.0 * omega_earth * time);
-      double ph = atan2(cos_ph, sin_ph);
-      ph = atan2(sin_ph, cos_ph);
 
       t_aopx.push_back (aopx_val);
       times.push_back (st);

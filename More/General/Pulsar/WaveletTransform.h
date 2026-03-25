@@ -75,13 +75,13 @@ namespace Pulsar {
       enum State { Wavelet, Time, Empty };
 
       //! Get decimation setting
-      const bool get_decimate() const { return decimate; }
+      bool get_decimate() const { return decimate; }
 
       //! Get current state
       State get_state() { return state; }
 
       //! Get wavelet data
-      double get_data(int level, int k);
+      double get_data(int level, unsigned k);
 
       //! Get data element
       double get_data(int n);
@@ -93,16 +93,16 @@ namespace Pulsar {
       const double* get_data() const;
 
       //! Get number of pts currently in use
-      const int get_npts() const { return npts; };
+      unsigned get_npts() const { return npts; };
 
       //! Get log2 of number of pts currently in use
-      const int get_log2_npts() const { return log2_npts; };
+      unsigned get_log2_npts() const { return log2_npts; };
 
       //! Get total number of wavelet coeffs computed
-      const int get_ncoeff() const { return decimate ? npts : log2_npts*npts; }
+      unsigned get_ncoeff() const { return decimate ? npts : (unsigned)log2_npts*npts; }
 
       //! Get number of coeffs at a given level
-      const int get_ncoeff(int level) const;
+      unsigned get_ncoeff(int level) const;
 
     protected:
 
@@ -119,10 +119,10 @@ namespace Pulsar {
       gsl_wavelet *wave;
 
       //! Number of points
-      int npts;
+      unsigned npts;
 
       //! Log2 of npts
-      int log2_npts;
+      unsigned log2_npts;
 
       //! Data storage
       double *data;

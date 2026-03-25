@@ -53,6 +53,7 @@ Pulsar::UVMArchive::UVMArchive (const Archive& arch)
 }
 
 Pulsar::UVMArchive::UVMArchive (const UVMArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::UVMArchive construct copy UVMArchive" << endl;
@@ -227,10 +228,10 @@ void Pulsar::UVMArchive::load_header (const char* filename)
       {
         unsigned data_ibin = 0;
         unsigned amps_ibin = 0;
-        for (int iwin=0; iwin < header->nwins; iwin++)
+        for (unsigned iwin=0; iwin < (unsigned)header->nwins; iwin++)
           if (include_offpulse_region || windows[iwin] != 'N')
           {
-            for (unsigned ibin = 0; ibin < header->nwbins[iwin]; ibin++)
+            for (unsigned ibin = 0; ibin < (unsigned)header->nwbins[iwin]; ibin++)
             {
               amps[amps_ibin] = (data.data[ipol][data_ibin] + offset) * scale;
               data_ibin ++;

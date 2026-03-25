@@ -138,7 +138,7 @@ AC_DEFUN([AC_LIB_WAD],
 [
         AC_REQUIRE([AC_PYTHON_DEVEL])
         AC_ARG_ENABLE(wad,
-        AC_HELP_STRING([--enable-wad], [enable wad module]),
+        AS_HELP_STRING([--enable-wad], [enable wad module]),
         [
                 case "${enableval}" in
                         no)     ;;

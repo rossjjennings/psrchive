@@ -42,7 +42,7 @@ void Pulsar::SmoothSinc::transform (Profile* profile)
 
   FTransform::bcc1d(nbin, (float*)&(c_input[0]), (float*)&(c_spectrum[0]));
 
-  for (int ibin = 0; ibin<nbin ; ibin ++)
+  for (unsigned ibin = 0; ibin<nbin ; ibin ++)
     amps[ibin] = c_input[ibin].real() / nbin;
 
 }

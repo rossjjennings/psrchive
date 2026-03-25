@@ -5,7 +5,7 @@ AC_DEFUN([SWIN_LIB_GIZA],
   AC_PROVIDE([SWIN_LIB_GIZA])
 
   AC_ARG_WITH([giza-dir],
-              AC_HELP_STRING([--with-giza-dir=DIR],
+              AS_HELP_STRING([--with-giza-dir=DIR],
                              [giza is installed in DIR]))
 
   GIZA_CFLAGS=""
@@ -35,8 +35,8 @@ AC_DEFUN([SWIN_LIB_GIZA],
     CPPFLAGS="$GIZA_CFLAGS $CPPFLAGS"
     LIBS="$GIZA_LIBS $LIBS"
 
-    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
-                have_giza=yes, have_giza=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cpgplot.h>]], [[cpgopen(""); cpgend();]])],
+                   [have_giza=yes], [have_giza=no])
 
     if test "$have_giza" != "yes"; then
       GIZA_CFLAGS=""

@@ -460,7 +460,7 @@ int psrephem::P_ddot (double& p_ddot, double& p_ddot_err) const
   return 0;
 }
 
-int psrephem::characteristic_age (double& age, double age_err)
+int psrephem::characteristic_age (double& age, double& age_err)
 {
   double p_dot, p_dot_err;
   if (P_dot (p_dot, p_dot_err) < 0)

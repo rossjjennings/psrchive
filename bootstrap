@@ -15,7 +15,7 @@ else
 
   echo
   echo "An error occured while running the GNU autotools."
-  echo "Please see https://gitlab.com/pulsar-astronomy/psrchive/-/blob/master/packages/"
+  echo "Please see http://psrchive.sourceforge.net/third/autotools"
   echo
   exit -1
 

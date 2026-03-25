@@ -27,33 +27,33 @@ void miniChangeEndian  (struct mini * m);
 
 #if MACHINE_LITTLE_ENDIAN
 #define timer_toBigEndian(p)       timerChangeEndian(p)
-#define timer_toLittleEndian(p)
+#define timer_toLittleEndian(p)    ((void)0)
 #define timer_fromBigEndian(p)     timerChangeEndian(p)
-#define timer_fromLittleEndian(p)
+#define timer_fromLittleEndian(p)  ((void)0)
 
 #define mini_toBigEndian(p)        miniChangeEndian(p)
-#define mini_toLittleEndian(p)
+#define mini_toLittleEndian(p)     ((void)0)
 #define mini_fromBigEndian(p)      miniChangeEndian(p)
-#define mini_fromLittleEndian(p)
+#define mini_fromLittleEndian(p)   ((void)0)
 
 #define band_toBigEndian(p)        bandChangeEndian(p)
-#define band_toLittleEndian(p)
+#define band_toLittleEndian(p)     ((void)0)
 #define band_fromBigEndian(p)      bandChangeEndian(p)
-#define band_fromLittleEndian(p)
+#define band_fromLittleEndian(p)   ((void)0)
 #else
-#define timer_toBigEndian(p)
+#define timer_toBigEndian(p)       ((void)0)
 #define timer_toLittleEndian(p)    timerChangeEndian(p)
-#define timer_fromBigEndian(p)
+#define timer_fromBigEndian(p)     ((void)0)
 #define timer_fromLittleEndian(p)  timerChangeEndian(p)
 
-#define mini_toBigEndian(p)
+#define mini_toBigEndian(p)        ((void)0)
 #define mini_toLittleEndian(p)     miniChangeEndian(p)
-#define mini_fromBigEndian(p)
+#define mini_fromBigEndian(p)      ((void)0)
 #define mini_fromLittleEndian(p)   miniChangeEndian(p)
 
-#define band_toBigEndian(p)
+#define band_toBigEndian(p)        ((void)0)
 #define band_toLittleEndian(p)     bandChangeEndian(p)
-#define band_fromBigEndian(p)
+#define band_fromBigEndian(p)      ((void)0)
 #define band_fromLittleEndian(p)   bandChangeEndian(p)
 #endif
 

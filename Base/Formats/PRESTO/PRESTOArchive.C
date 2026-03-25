@@ -49,6 +49,7 @@ Pulsar::PRESTOArchive::PRESTOArchive (const Archive& arch)
 }
 
 Pulsar::PRESTOArchive::PRESTOArchive (const PRESTOArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::PRESTOArchive construct copy PRESTOArchive" << endl;
@@ -426,7 +427,7 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   //
   // Also calculate a correction for the 'integer time sample
   // dedispersion' error.
-  int chan_per_subband = pfd.numchan/pfd.nsub;
+  unsigned chan_per_subband = pfd.numchan/pfd.nsub;
   double f0 = pfd.lofreq - 0.5*pfd.chan_wid 
     + 0.5*(double)chan_per_subband*pfd.chan_wid;
   if (is_spigot()!=0) 

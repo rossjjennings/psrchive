@@ -32,7 +32,7 @@ void usage()
 int main (int argc, char ** argv)
 {
   Tempo::toa::Format format = Tempo::toa::Unspecified;
-  bool verbose = false;
+  [[maybe_unused]] bool verbose = false;
   int gotc = 0;
 
   while ((gotc = getopt(argc, argv, "hvf:")) != -1) {

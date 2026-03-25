@@ -24,10 +24,10 @@ sky_coord::sky_coord (const std::string& astr) : AnglePair(astr)
   init ();
 }
 
-sky_coord::sky_coord (const sky_coord & co) 
-{ 
+sky_coord::sky_coord (const sky_coord & co) : AnglePair()
+{
   init ();
-  *this = co; 
+  *this = co;
 }
 
 // as long as sky_coord is empty, why not simply accept AnglePair?

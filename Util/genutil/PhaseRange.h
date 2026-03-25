@@ -94,6 +94,9 @@ namespace Phase
     Range as (Unit) const;
   };
 
+  std::ostream& operator<< (std::ostream&, const Range&);
+  std::istream& operator>> (std::istream&, Range&);
+
   //! A set of ranges of values with a common Phase::Unit
   class Ranges : public HasUnit, public ::Ranges
   {
@@ -106,6 +109,9 @@ namespace Phase
 
     Ranges as (Unit) const;
   };
+
+  std::ostream& operator<< (std::ostream&, const Ranges&);
+  std::istream& operator>> (std::istream&, Ranges&);
 
   //! Policy for converting any object with a Phase::Unit to a string
   template<class Type>

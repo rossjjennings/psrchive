@@ -19,9 +19,6 @@ int main (int argc, char** argv)
   
   Reference::To<Pulsar::Archive> archive1;
   Reference::To<Pulsar::Archive> archive2;
-  Reference::To<Pulsar::Archive> diff_Archive;  
-  
-  
   string filename1;
   string filename2;
  
@@ -50,15 +47,9 @@ int main (int argc, char** argv)
   Pulsar::Profile *profile1;
   Pulsar::Profile *profile2;
   
-  float max_val1=0;
-  float max_val2=0; 
-
-  float * amps1 = NULL;
-  float * amps2 = NULL;
-
   archive1->remove_baseline();
 
-  for (int nchan = 0; nchan < archive2->get_nchan(); nchan++) {
+  for (unsigned nchan = 0; nchan < archive2->get_nchan(); nchan++) {
       
       profile1 = archive1->get_Profile(0,0,nchan);
       profile2 = archive2->get_Profile(0,0,nchan);
