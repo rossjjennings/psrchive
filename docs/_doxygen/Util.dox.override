@@ -19,3 +19,10 @@ GENERATE_TAGFILE       =
 # Disable custom HTML header/footer (not generating HTML)
 HTML_HEADER            =
 HTML_FOOTER            =
+
+# Util includes epsic which has ISO-8859-1 source files (± signs)
+INPUT_ENCODING         = ISO-8859-1
+
+# Hide file-level documentation and undocumented members
+SHOW_FILES             = NO
+HIDE_UNDOC_MEMBERS     = YES
