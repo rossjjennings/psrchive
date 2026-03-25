@@ -135,13 +135,13 @@ void Pulsar::BasicArchive::set_nbin (unsigned numbins)
   nbin = numbins;
 }
 
-//! Get the name of the telescope
+//! Get the name of the telescope
 std::string Pulsar::BasicArchive::get_telescope () const
 {
   return telescope;
 }
 
-//! Set the name of the telescope
+//! Set the name of the telescope
 void Pulsar::BasicArchive::set_telescope (const std::string& tel)
 {
   telescope = tel;
