@@ -125,10 +125,10 @@ namespace Pulsar {
 
 }
 
-// standard interface constructor defined in More/General/standard_interface.C
+// standard interface constructor defined in More/Resources/standard_interface.C
 TextInterface::Parser* standard_interface (Pulsar::Archive*);
 
-// also defined in More/General/standard_interface.C
+// also defined in More/Resources/standard_interface.C
 std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 #endif

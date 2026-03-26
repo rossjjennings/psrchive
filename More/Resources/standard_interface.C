@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008-2009 by Willem van Straten
+ *   Copyright (C) 2008-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -68,10 +68,22 @@ std::string process (TextInterface::Parser* interface, const std::string& text)
 try
 {
   if ( text.find('$') == std::string::npos && text.find('`') == std::string::npos)
-    return interface->process ( text );
+  {
+    std::string processed = interface->process ( text );
+    if (processed != "-")
+    {
+      return processed;
+    }
+    else
+    {
+      return text;
+    }
+  }
   else
+  {
     return interface->get_indentation() + 
       execute( evaluate( substitute( text, interface ) ) );
+  }
 }
 catch (Error& error)
 {
