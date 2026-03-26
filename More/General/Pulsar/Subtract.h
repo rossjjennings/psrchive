@@ -20,16 +20,20 @@ namespace Pulsar {
   class Subtract : public Combination<Profile>
   {
 
-    //! subtract the best linear fit of the second profile from the first
-    bool subtract_linear_fit = false;
-
   public:
 
     void transform (Profile*);
 
-    //! Set whether to subtract the best linear fit of the second profile from the first
-    void set_linear_fit (bool fit) { subtract_linear_fit = fit; }
+    //! The type of fit performed when subtracting the second profile from the first
+    typedef enum { None, LeftToRight, RightToLeft } FitType;
 
+    //! Set whether to subtract the best linear fit of the second profile from the first
+    void set_fit (FitType f) { fit = f; }
+
+  protected:
+
+    //! Type of fit performed before subtracting the second profile from the first
+    FitType fit = None;
   }; 
 
 }

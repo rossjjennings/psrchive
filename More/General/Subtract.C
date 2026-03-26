@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007 - 2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -13,7 +13,7 @@ using namespace std;
 
 void Pulsar::Subtract::transform (Profile* profile)
 {
-  if (!subtract_linear_fit)
+  if (fit == None)
   {
     profile->diff( get_operand() );
     return;
@@ -22,13 +22,23 @@ void Pulsar::Subtract::transform (Profile* profile)
   //! Used to compute the residual
   BinaryStatistics::ChiSquared chi;
 
-  vector<double> amps;
-  profile->get_amps(amps);
-  vector<double> operand_amps;
-  get_operand()->get_amps(operand_amps);
+  vector<double> left_amps;
+  vector<double> right_amps;
+
+  profile->get_amps(left_amps);
+  get_operand()->get_amps(right_amps);
 
   chi.set_outlier_threshold (0.0);
-  double chisq = chi.get (amps, operand_amps);
+  double chisq = 0.0;
+
+  if (fit == LeftToRight)
+  {
+    chisq = chi.get (right_amps, left_amps);
+  }
+  else if (fit == RightToLeft)
+  {
+    chisq = chi.get (left_amps, right_amps);
+  }
 
   if (Profile::verbose)
     cerr << "Subtract::transform chi-squared = " << chisq << endl;
@@ -36,4 +46,7 @@ void Pulsar::Subtract::transform (Profile* profile)
   vector<double> residual = chi.get_residual();
 
   profile->set_amps(residual);
+
+  if (fit == LeftToRight)
+    profile->scale(-1.0);
 }

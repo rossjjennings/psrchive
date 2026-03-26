@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2021 - 2024 by Willem van Straten
+ *   Copyright (C) 2021 - 2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -17,9 +17,9 @@ namespace BinaryStatistics
 {
   class ChiSquared : public BinaryStatistic
   {
-    bool robust_linear_fit;
-    double outlier_threshold;
-    double max_zap_fraction;
+    bool robust_linear_fit = true;
+    double outlier_threshold = 3.0;
+    double max_zap_fraction = 0.5;
 
     std::vector<double> residual;
     
@@ -31,10 +31,11 @@ namespace BinaryStatistics
     //! Set the threshold used to detect outliers during robust linear fit
     void set_outlier_threshold (double threshold) { outlier_threshold = threshold; }
     
-    //! Return the chi-squared difference between 
-    double get (const std::vector<double>&, const std::vector<double>&);
+    //! Return the chi-squared difference between A and B
+    /*! If robust_linear_fit is true, then B is scaled and offset to minimize the chi-squared difference. */
+    double get (const std::vector<double>& A, const std::vector<double>& B);
 
-    //! Return the residual
+    //! Return the residual = A - scale*B - offset, where scale and offset are determined by the robust linear fit
     const std::vector<double>& get_residual () const { return residual; }
     
     ChiSquared* clone () const { return new ChiSquared; }

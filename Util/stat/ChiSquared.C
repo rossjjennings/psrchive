@@ -27,9 +27,6 @@ static double sqr (double x) { return x*x; }
 ChiSquared::ChiSquared ()
 : BinaryStatistic ("chi", "variance of difference")
 {
-  robust_linear_fit = true;
-  max_zap_fraction = 0.5;
-  outlier_threshold = 3.0;
 }
 
 double ChiSquared::get (const vector<double>& dat1, const vector<double>& dat2) try

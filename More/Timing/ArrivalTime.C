@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 - 2024 by Willem van Straten
+ *   Copyright (C) 2009 - 2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -347,7 +347,7 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub, std::vector<Tempo::toa>& toas
         rsubint->expert()->rotate_phase( shift.get_value() );
 
         Reference::To<Subtract> subtract = new Subtract;
-        subtract->set_linear_fit(true);
+        subtract->set_fit(Subtract::LeftToRight);
 
         const Integration* std = standard->get_Integration (0);
         Pulsar::foreach (rsubint, std, subtract.get());
