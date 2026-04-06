@@ -85,8 +85,6 @@ bool by_integration_length (const source& a, const source& b)
 
 pair<double,Mount*> best_slew (Mount* mount, const sky_coord& coord)
 {
-  Horizon* horizon = dynamic_cast<Horizon*> (mount);
-  // cerr << "best_slew: mount azimuth = " << horizon->get_azimuth() << endl;
 
   vector< pair<double,Mount*> > slew_times;
   slew_times = mount->slew_times (coord);
@@ -144,7 +142,7 @@ int main (int argc, char* argv[])
   Angle latitude;
   Angle longitude;
 
-  // Parkes Observatory: 32.9983°S, 148.2636°E
+  // Parkes Observatory: 32.9983Â°S, 148.2636Â°E
   latitude.setDegrees( -32.9983 );
   longitude.setDegrees( 148.2636 );
 

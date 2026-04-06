@@ -68,6 +68,7 @@ Pulsar::WAPPArchive::WAPPArchive (const Archive& arch)
 }
 
 Pulsar::WAPPArchive::WAPPArchive (const WAPPArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::WAPPArchive construct copy WAPPArchive" << endl;

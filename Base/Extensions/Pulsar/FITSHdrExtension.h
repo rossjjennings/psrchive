@@ -28,6 +28,9 @@ namespace Pulsar
     //! Copy constructor
     FITSHdrExtension (const FITSHdrExtension& extension);
 
+    //! Copy assignment operator
+    FITSHdrExtension& operator= (const FITSHdrExtension&) = default;
+
     //! Clone method
     FITSHdrExtension* clone () const { return new FITSHdrExtension( *this ); }
 

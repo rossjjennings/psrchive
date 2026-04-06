@@ -83,6 +83,7 @@ Pulsar::TimerIntegration::TimerIntegration ()
 
 //! Copy constructor
 Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint)
+  : Integration()
 {
   if (verbose)
     cerr << "TimerIntegration copy ctor this=" << this << " that=" << &t_subint << endl;

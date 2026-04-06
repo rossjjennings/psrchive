@@ -64,7 +64,7 @@ void Pulsar::AdaptiveSmooth::transform(Profile *p)
 
   // Apply filter to profile
   unsigned ih;
-  const int nh = p->get_nbin()/2 + 1;
+  const unsigned nh = p->get_nbin()/2 + 1;
   complex<float> *cprof = (complex<float> *)fprof;
   for (ih=0; (ih<nh) && (ih<filter.size()); ih++) 
     cprof[ih] *= filter[ih];
@@ -80,10 +80,10 @@ void Pulsar::AdaptiveSmooth::transform(Profile *p)
   delete [] fprof;
 }
 
-void Pulsar::AdaptiveSmooth::compute(const float *fprof, int nbin)
+void Pulsar::AdaptiveSmooth::compute(const float *fprof, unsigned nbin)
 {
   // Number of harmonics (including DC)
-  const int nh = nbin/2 + 1;
+  const unsigned nh = nbin/2 + 1;
 
   // Reset existing filter
   filter.resize(nh);
@@ -99,7 +99,7 @@ void Pulsar::AdaptiveSmooth::compute(const float *fprof, int nbin)
   // Estimate noise level
   double sigma2=0.0;
   int count=0;
-  for (unsigned i=(1.0 - noise_band)*nh; i<nh; i++) {
+  for (unsigned i=(unsigned)((1.0 - noise_band)*nh); i<nh; i++) {
     sigma2 += pspec[i];
     count++;
   }
@@ -124,7 +124,7 @@ void Pulsar::AdaptiveSmooth::compute(const float *fprof, int nbin)
 }
 
 void Pulsar::AdaptiveSmooth::compute_wiener(const float *pspec,
-    double sigma2, int nh) {
+    double sigma2, unsigned nh) {
   // Basic Wiener filter (ie, see NR sec 13.3), with a 2-sigma
   // cutoff to remove noisy points.
   filter[0] = 1.0;
@@ -135,15 +135,15 @@ void Pulsar::AdaptiveSmooth::compute_wiener(const float *pspec,
 }
 
 void Pulsar::AdaptiveSmooth::compute_sinc_mse(const float *pspec,
-    double sigma2, int nh) 
+    double sigma2, unsigned nh)
 {
   // Just brute-force this minimization:
   // Criterion is minimum expected MS diff between real and noisy signal,
-  // same as in Wiener filter.  But here our denoising filter is 
+  // same as in Wiener filter.  But here our denoising filter is
   // constrained to be a "brick wall" (sinc in time domain). We ignore
   // DC in making this.
   double mse, mse_min=0.0;
-  int ih_min=0;
+  unsigned ih_min=0;
 
   // Get total signal power
   double ptot=0.0;
@@ -174,15 +174,15 @@ void Pulsar::AdaptiveSmooth::compute_sinc_mse(const float *pspec,
 }
 
 void Pulsar::AdaptiveSmooth::compute_lpf(const float *pspec,
-    double sigma2, int nh, float (*filter_func)(float,float))
+    double sigma2, unsigned nh, float (*filter_func)(float,float))
 {
   // Same minimization as above, but uses a generic filter
-  // shape that takes a freq and cutoff freq as 
+  // shape that takes a freq and cutoff freq as
   // arguments.
   double mse, mse_min=0.0;
-  int ih_min=0;
+  unsigned ih_min=0;
 
-  for (unsigned ih=1; ih<nh*(1.0-noise_band); ih++) {
+  for (unsigned ih=1; ih<(unsigned)(nh*(1.0-noise_band)); ih++) {
 
     // Compute MSE using ih as cutoff freq.
     mse=0.0;
@@ -217,24 +217,24 @@ static float von_mises_filter(float freq, float freq_cutoff) {
   return top.val/bot.val;
 }
 
-void Pulsar::AdaptiveSmooth::compute_vonmises_lpf(const float *pspec, 
-    double sigma2, int nh) {
+void Pulsar::AdaptiveSmooth::compute_vonmises_lpf(const float *pspec,
+    double sigma2, unsigned nh) {
   compute_lpf(pspec, sigma2, nh, von_mises_filter);
 }
 
 void Pulsar::AdaptiveSmooth::compute_sinc_ic(const float *pspec,
-    double sigma2, int nh) {
+    double sigma2, unsigned nh) {
 
-  // Compute optimal number of harmonics using various 
+  // Compute optimal number of harmonics using various
   // information criteria.  These seem to be a little
   // more conservative than the pure MSE criterion above.
 
   double rss=0.0;
-  for (int i=1; i<nh; i++) { rss += pspec[i]; }
+  for (unsigned i=1; i<nh; i++) { rss += pspec[i]; }
 
-  double ic, ic_min;
-  double ih_min;
-  for (int i=1; i<nh; i++) {
+  double ic, ic_min = 0;
+  unsigned ih_min = 0;
+  for (unsigned i=1; i<nh; i++) {
     rss -= pspec[i];
     double n = (double)(nh-1-i);
     double k = (double)i;

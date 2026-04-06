@@ -1,11 +1,10 @@
 
-TESTS = psrchive_config
-
-bin_PROGRAMS = psrchive_info 
+bin_PROGRAMS = psrchive_info
 
 psrchive_info_SOURCES   = psrchive_info.C
 
 if !MAKE_LEAN
+TESTS = psrchive_config
 bin_PROGRAMS += psrchive_config
 psrchive_config_SOURCES = psrchive_config.C Config_ensure_linkage.C
 endif
@@ -27,7 +26,8 @@ dist_aclocal_DATA = psrchive.m4
 htmldir = $(datadir)/html
 dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 
-# Install the pkg-config file; the directory is set using PKG_INSTALLDIR in configure.ac.
+# Install the pkg-config file
+pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = psrchive.pc
 
 #############################################################################

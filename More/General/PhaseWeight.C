@@ -52,6 +52,7 @@ Pulsar::PhaseWeight::PhaseWeight (unsigned nbin, float set_all)
 }
 
 Pulsar::PhaseWeight::PhaseWeight (const PhaseWeight& pm)
+  : Reference::Able()
 {
   init ();
   operator = (pm);

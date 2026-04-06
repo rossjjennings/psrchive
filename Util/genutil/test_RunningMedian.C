@@ -142,6 +142,6 @@ void benchmark (int argc, char** argv)
 
   double new_method = timer.get_elapsed();
 
-  cerr << "RunningMedian benchmark runtime old/new=" << old_method/new_method 
-       << endl;
+  cerr << "RunningMedian benchmark runtime old/new=" << old_method/new_method
+       << " median=" << median << endl;
 }

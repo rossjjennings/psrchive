@@ -21,9 +21,9 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
   CPPFLAGS="$CFITSIO_CFLAGS $CPPFLAGS"
   LIBS="$CFITSIO_LIBS $LIBS"
 
-  AC_TRY_LINK([#include <fitsio.h>], 
-              [fits_movnam_hdu(0,0,0,0,0);],
-              have_cfitsio=yes, have_cfitsio=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <fitsio.h>]],
+                 [[fits_movnam_hdu(0,0,0,0,0);]])],
+                 [have_cfitsio=yes], [have_cfitsio=no])
 
   if test "$have_cfitsio" != "yes"; then
     CFITSIO_CFLAGS=""

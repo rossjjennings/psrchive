@@ -14,7 +14,7 @@ int main () {
   char* ptr2 = 0;
 
   ptr2 = (char*) &(hdr.power_normalization);
-  fprintf (stderr, "baseband_header.power_normalization = %d\n", ptr2-ptr1);
+  fprintf (stderr, "baseband_header.power_normalization = %td\n", ptr2-ptr1);
 
 #if 0
 

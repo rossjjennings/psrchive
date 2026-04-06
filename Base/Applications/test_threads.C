@@ -48,7 +48,6 @@ public:
 int main (int argc, char **argv) try
 {
   bool verbose = false;
-  bool quiet = false;
   unsigned nthread = 1;
 
   int gotc = 0;
@@ -75,7 +74,6 @@ int main (int argc, char **argv) try
 
     case 'q':
       Pulsar::Archive::set_verbosity (0);
-      quiet = true;
       break;
 
     }

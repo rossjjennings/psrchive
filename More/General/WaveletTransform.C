@@ -57,8 +57,8 @@ void Pulsar::WaveletTransform::free_mem() {
   if (wave!=NULL) gsl_wavelet_free(wave);
 }
 
-static int log2i(int n) {
-  int rv=0;
+static unsigned log2i(unsigned n) {
+  unsigned rv=0;
   while ((n>>rv)>1) { rv++; }
   return(rv);
 }
@@ -66,12 +66,11 @@ static int log2i(int n) {
 void Pulsar::WaveletTransform::init_mem() {
 
   // Check that n is valid
-  unsigned tmp, tmp_log;
-  tmp_log = log2i(npts);
-  tmp = 1 << tmp_log;
-  if (npts != tmp) 
+  unsigned tmp_log = log2i(npts);
+  unsigned tmp = 1 << tmp_log;
+  if (npts != tmp)
     throw Error (InvalidParam, "Pulsar::WaveletTransform::init_mem",
-        "npts=%d is not a power of two", npts);
+        "npts=%u is not a power of two", npts);
   log2_npts = tmp_log;
   
   if (decimate) {
@@ -133,7 +132,7 @@ void Pulsar::WaveletTransform::transform(unsigned n, const float *in) {
     for (unsigned i=0; i<npts; i++) tmp[i] = in[i] - mean;
 
     int rv = dwt_undec_transform(tmp, data, npts, wave);
-    if (rv!=log2_npts)
+    if (rv!=(int)log2_npts)
       throw Error (FailedCall, "Pulsar::WaveletTransform::transform",
           "dwt_undec_transform failed (rv=%d)", rv);
 
@@ -178,7 +177,7 @@ void Pulsar::WaveletTransform::invert() {
     double *tmp = new double[npts];
 
     int rv = dwt_undec_inverse(data, tmp, npts, wave);
-    if (rv!=log2_npts)
+    if (rv!=(int)log2_npts)
       throw Error (FailedCall, "Pulsar::WaveletTransform::invert",
           "dwt_undec_inverse failed (rv=%d)", rv);
 
@@ -193,7 +192,7 @@ void Pulsar::WaveletTransform::invert() {
   state = Time;
 }
 
-const int Pulsar::WaveletTransform::get_ncoeff(int level) const {
+unsigned Pulsar::WaveletTransform::get_ncoeff(int level) const {
   if (level==-1) return 1;
   if (decimate)
     return 1<<level;
@@ -201,7 +200,7 @@ const int Pulsar::WaveletTransform::get_ncoeff(int level) const {
     return npts;
 }
 
-double Pulsar::WaveletTransform::get_data(int level, int k) {
+double Pulsar::WaveletTransform::get_data(int level, unsigned k) {
 
   if (data==NULL) 
     throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
@@ -211,13 +210,13 @@ double Pulsar::WaveletTransform::get_data(int level, int k) {
     throw Error (InvalidState, "Pulsar:WaveletTransform::get_data",
         "data is not in Wavelet state");
 
-  if ((level<-1) || (level>=log2_npts))
+  if ((level<-1) || (level>=(int)log2_npts))
    throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
       "level %d out of range (log2_npts=%d)", level, log2_npts); 
 
-  if ((k<0) || (k>=get_ncoeff(level)))
+  if (k>=get_ncoeff(level))
     throw Error (InvalidRange, "Pulsar::WaveletTransform::get_data",
-      "index %d out of range (level=%d, log2_npts=%d, npts=%d, decimate=%s)", 
+      "index %d out of range (level=%d, log2_npts=%d, npts=%u, decimate=%s)",
       k, level, log2_npts, npts, decimate?"true":"false");
 
   if (decimate) { 
@@ -231,7 +230,7 @@ double Pulsar::WaveletTransform::get_data(int level, int k) {
 
     if (level==-1) return mean;
 
-    int idx = ((log2_npts - level) - 1)*npts + k;
+    unsigned idx = (unsigned)((log2_npts - level) - 1)*npts + k;
     return data[idx];
 
   }
@@ -242,10 +241,10 @@ double Pulsar::WaveletTransform::get_data(int n) {
   if (data==NULL) 
     throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
         "data array not allocated");
-  unsigned max_n = decimate ? npts : log2_npts*npts;
-  if ((n<0) || (n>=max_n)) 
+  unsigned max_n = decimate ? npts : (unsigned)log2_npts*npts;
+  if ((n<0) || ((unsigned)n>=max_n))
     throw Error (InvalidRange, "Pulsar:WaveletTransform::get_data",
-        "index %d out of range (max_n=%d)", n, max_n);
+        "index %d out of range (max_n=%u)", n, max_n);
   return data[n];
 }
 

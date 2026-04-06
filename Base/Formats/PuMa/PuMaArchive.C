@@ -46,6 +46,7 @@ Pulsar::PuMaArchive::PuMaArchive (const Archive& arch)
 }
 
 Pulsar::PuMaArchive::PuMaArchive (const PuMaArchive& arch)
+  : Archive()
 {
   if (verbose == 3)
     cerr << "PuMaArchive construct copy PuMaArchive" << endl;

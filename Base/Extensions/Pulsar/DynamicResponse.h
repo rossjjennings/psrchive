@@ -30,6 +30,9 @@ namespace Pulsar {
     //! Copy constructor
     DynamicResponse (const DynamicResponse& extension);
 
+    //! Copy assignment operator
+    DynamicResponse& operator= (const DynamicResponse&) = default;
+
     //!Destructor
     ~DynamicResponse ();
 

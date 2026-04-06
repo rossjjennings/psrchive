@@ -73,7 +73,7 @@ void check_length (const char* str, const char* name)
 {
   if (strlen(str) >= FLEN_CARD)
     throw Error (InvalidState, "check_length",
-		 "%s length=%d >= FLEN_CARD=%d\n\n%s",
+		 "%s length=%zu >= FLEN_CARD=%d\n\n%s",
 		 name, strlen(str), FLEN_CARD, str);
 }
 

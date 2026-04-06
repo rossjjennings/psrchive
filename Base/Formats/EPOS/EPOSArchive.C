@@ -50,6 +50,7 @@ Pulsar::EPOSArchive::EPOSArchive (const Archive& arch)
 }
 
 Pulsar::EPOSArchive::EPOSArchive (const EPOSArchive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::EPOSArchive construct copy EPOSArchive" << endl;

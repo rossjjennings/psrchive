@@ -90,7 +90,7 @@ string Pulsar::Generator::Interpreter::empty ()
 Configuration::Parameter<Pulsar::Generator*>&
 Pulsar::Generator::Interpreter::get_option ()
 {
-  Generator* generator = get_default_generator().get_value();
+  [[maybe_unused]] Generator* generator = get_default_generator().get_value();
 
   DEBUG("Pulsar::Generator::Interpreter::get_option generator=" << generator);
   return get_default_generator();

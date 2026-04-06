@@ -17,6 +17,7 @@ void Pulsar::BasicIntegration::init ()
 }
 
 Pulsar::BasicIntegration::BasicIntegration (const BasicIntegration& subint)
+  : Integration()
 {
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::BasicIntegration copy ctor" << endl;

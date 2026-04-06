@@ -448,7 +448,7 @@ void Pulsar::ProfileShiftFit::error_numerical()
 
   //cerr << "nb=" << nbins_ccf << " w->size=" << w->size << " w->limit=" << w->limit << endl;
 
-  double top=0.0, bot=0.0, etop, ebot;
+  double top=0.0, bot=0.0;
 
   // Integrate PDF
   gsl_function F;

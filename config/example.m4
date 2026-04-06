@@ -3,7 +3,7 @@ AC_DEFUN([SWIN_LIB_PKG],
   AC_PROVIDE([SWIN_LIB_PKG])
 
   AC_ARG_WITH([pkg-dir],
-              AC_HELP_STRING([--with-pkg-dir=DIR],
+              AS_HELP_STRING([--with-pkg-dir=DIR],
                              [pkg is in DIR]))
 
   if test x"$with_pkg_dir" = x"no"; then
@@ -35,8 +35,8 @@ AC_DEFUN([SWIN_LIB_PKG],
     ac_save_LIBS="$LIBS"
     LIBS="$ac_save_LIBS $PKG_LIBS"
     CFLAGS="$ac_save_CFLAGS $PKG_CFLAGS"
-    AC_TRY_LINK([#include <pkg.h>],[pkginit(); pkgclose();],
-                have_pkg=yes, have_pkg=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pkg.h>]], [[pkginit(); pkgclose();]])],
+                   [have_pkg=yes], [have_pkg=no])
 
     AC_MSG_RESULT($have_pkg)
 

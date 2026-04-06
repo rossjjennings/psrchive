@@ -5,7 +5,7 @@ AC_DEFUN([ATNF_DISABLE_OPTIMIZE],
 	AC_PROVIDE([ANTF_DISABLE_OPTIMIZE])
 
 	AC_ARG_ENABLE([optimize],
-		AC_HELP_STRING([--disable-optimize],
+		AS_HELP_STRING([--disable-optimize],
 			[disable optimization] ),
 			[optimize=yes])
 

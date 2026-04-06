@@ -23,6 +23,7 @@ class sky_coord  : public AnglePair
 
    sky_coord (const std::string& astr);
    sky_coord (const sky_coord & co);
+   sky_coord& operator= (const sky_coord&) = default;
 
    sky_coord (const AnglePair & co);
 

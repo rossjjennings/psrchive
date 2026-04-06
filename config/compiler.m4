@@ -5,7 +5,7 @@ AC_DEFUN([SWIN_COMPILER],
   AC_PROVIDE([SWIN_COMPILER])
 
   AC_ARG_WITH([compiler],
-              AC_HELP_STRING([--with-compiler=PKG],
+              AS_HELP_STRING([--with-compiler=PKG],
                              [PKG=intel,portland,gnu,gcc-4]))
 
   # "yes" is not a specification

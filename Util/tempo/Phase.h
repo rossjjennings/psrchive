@@ -35,11 +35,14 @@ namespace Pulsar
    Phase (double turns=0);
 
    Phase (int64_t tns, double ftns);
-   
+
+   //! Copy constructor
+   Phase (const Phase&) = default;
+
    const Phase& operator= (const Phase&);
-   
-   friend Phase operator + (const Phase&, double); 
-   friend Phase operator - (const Phase&, double); 
+
+   friend Phase operator + (const Phase&, double);
+   friend Phase operator - (const Phase&, double);
    friend Phase operator + (const Phase&, const Phase&);
    friend Phase operator - (const Phase&, const Phase&);
    friend Phase operator - (const Phase&);
@@ -78,7 +81,13 @@ namespace Pulsar
    
  };
  
- inline std::ostream& operator<< (std::ostream& ostr, const Phase& sz) 
+ Phase operator + (const Phase&, double);
+ Phase operator - (const Phase&, double);
+ Phase operator + (const Phase&, const Phase&);
+ Phase operator - (const Phase&, const Phase&);
+ Phase operator - (const Phase&);
+
+ inline std::ostream& operator<< (std::ostream& ostr, const Phase& sz)
  { return ostr << sz.strprint(8); }
 
 }

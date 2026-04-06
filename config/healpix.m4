@@ -41,10 +41,10 @@ AC_DEFUN([SWIN_LIB_HEALPIX],
   LIBS="$ac_save_LIBS $HEALPIX_LIBS"
   CXXFLAGS="$ac_save_CXXFLAGS $HEALPIX_CFLAGS"
 
-  AC_TRY_LINK([#include "healpix_base.h"
-               #include "healpix_map.h"],
-              [Healpix_Map<double> map = Healpix_Map<double>(); map.SetNside(128, RING); ],
-              have_healpix=yes, have_healpix=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "healpix_base.h"
+               #include "healpix_map.h"]],
+              [[Healpix_Map<double> map = Healpix_Map<double>(); map.SetNside(128, RING); ]])],
+              [have_healpix=yes], [have_healpix=no])
 
   AC_MSG_RESULT($have_healpix)
 

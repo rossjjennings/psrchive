@@ -46,6 +46,7 @@ Pulsar::BasebandArchive::BasebandArchive ()
 //
 //
 Pulsar::BasebandArchive::BasebandArchive (const BasebandArchive& archive)
+  : TimerArchive()
 {
   if (verbose == 3)
     cerr << "BasebandArchive copy construct" << endl;

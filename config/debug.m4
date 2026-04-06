@@ -25,7 +25,7 @@ AC_DEFUN([SWIN_DEBUG],
   AC_PROVIDE([SWIN_DEBUG])
 
   AC_ARG_ENABLE([debug],
-                AC_HELP_STRING([--enable-debug],
+                AS_HELP_STRING([--enable-debug],
                                [Enable debugging information]),
                 [swin_debug=yes])
 
@@ -44,13 +44,13 @@ AC_DEFUN([SWIN_DEBUG],
     echo 's/-g$//g' >> .ac_strip_g
 
     if test x"$swin_cxxflags_set" != xyes; then
-      CXXFLAGS="`echo $CXXFLAGS | sed -f .ac_strip_g` -Wall"
+      CXXFLAGS="`echo $CXXFLAGS | sed -f .ac_strip_g` -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual"
     else
       AC_MSG_NOTICE([   CXXFLAGS set by user.])
     fi
 
     if test x"$swin_cflags_set" != xyes; then
-      CFLAGS="`echo $CFLAGS | sed -f .ac_strip_g` -Wall"
+      CFLAGS="`echo $CFLAGS | sed -f .ac_strip_g` -Wall -Wextra -Wno-unused-parameter"
     else
       AC_MSG_NOTICE([   CFLAGS set by user.])
     fi
@@ -65,6 +65,16 @@ AC_DEFUN([SWIN_DEBUG],
 
   else
     AC_MSG_WARN([Debugging information not disabled.  Binaries may be large.])
+  fi
+
+  AC_ARG_ENABLE([werror],
+                AS_HELP_STRING([--enable-werror],
+                               [Treat compiler warnings as errors]),
+                [swin_werror=yes])
+
+  if test x"$swin_werror" = xyes; then
+    CXXFLAGS="$CXXFLAGS -Werror"
+    CFLAGS="$CFLAGS -Werror"
   fi
 
 ])

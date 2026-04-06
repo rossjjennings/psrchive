@@ -46,6 +46,7 @@ Pulsar::pdv_KtZ_Archive::pdv_KtZ_Archive (const Archive& arch)
 }
 
 Pulsar::pdv_KtZ_Archive::pdv_KtZ_Archive (const pdv_KtZ_Archive& arch)
+  : BasicArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::pdv_KtZ_Archive construct copy pdv_KtZ_Archive" << endl;

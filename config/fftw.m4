@@ -5,7 +5,7 @@ AC_DEFUN([SWIN_LIB_FFTW],
   AC_PROVIDE([SWIN_LIB_FFTW])
 
   AC_ARG_WITH([fftw3f-dir],
-              AC_HELP_STRING([--with-fftw3f-dir=DIR],
+              AS_HELP_STRING([--with-fftw3f-dir=DIR],
                              [fftw3f is installed in DIR]))
 
   FFTW_CFLAGS=""
@@ -35,9 +35,9 @@ AC_DEFUN([SWIN_LIB_FFTW],
     CPPFLAGS="$FFTW_CFLAGS $CPPFLAGS"
     LIBS="$FFTW_LIBS $LIBS"
 
-    AC_TRY_LINK([#include <fftw3.h>], 
-                [fftwf_plan_dft_1d(0,0,0,FFTW_FORWARD,FFTW_ESTIMATE);],
-                have_fftw3=yes, have_fftw3=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <fftw3.h>]],
+                   [[fftwf_plan_dft_1d(0,0,0,FFTW_FORWARD,FFTW_ESTIMATE);]])],
+                   [have_fftw3=yes], [have_fftw3=no])
 
     if test "$have_fftw3" != "yes"; then
       FFTW_CFLAGS=""

@@ -5,7 +5,7 @@ AC_DEFUN([PSR_LIB_ARMADILLO],
   AC_PROVIDE([PSR_LIB_ARMADILLO])
 
   AC_ARG_WITH([armadillo-dir],
-              AC_HELP_STRING([--with-armadillo-dir=DIR],
+              AS_HELP_STRING([--with-armadillo-dir=DIR],
                              [armadillo is installed in DIR]))
 
   ARMADILLO_CFLAGS=""
@@ -37,9 +37,9 @@ AC_DEFUN([PSR_LIB_ARMADILLO],
 
     AC_LANG_PUSH(C++)
 
-    AC_TRY_LINK([#include <armadillo>], 
-                [arma::gmm_diag model;],
-                have_armadillo=yes, have_armadillo=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <armadillo>]],
+                   [[arma::gmm_diag model;]])],
+                   [have_armadillo=yes], [have_armadillo=no])
 
     AC_LANG_POP(C++)
 

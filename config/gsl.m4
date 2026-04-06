@@ -37,8 +37,8 @@ AC_DEFUN([SWIN_LIB_GSL],
   LIBS="$ac_save_LIBS $GSL_LIBS"
   CFLAGS="$ac_save_CFLAGS $GSL_CFLAGS"
 
-  AC_TRY_LINK([#include <gsl/gsl_blas.h>],[gsl_blas_dgemm(0,0,0,0,0,0,0);],
-              have_gsl=yes, have_gsl=no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gsl/gsl_blas.h>]], [[gsl_blas_dgemm(0,0,0,0,0,0,0);]])],
+                 [have_gsl=yes], [have_gsl=no])
 
   AC_MSG_RESULT($have_gsl)
 

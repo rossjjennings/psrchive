@@ -45,6 +45,7 @@ Pulsar::EPNArchive::EPNArchive (const Archive& arch)
 }
 
 Pulsar::EPNArchive::EPNArchive (const EPNArchive& arch)
+  : Archive()
 {
   if (verbose == 3)
     cerr << "EPNArchive construct copy EPNArchive" << endl;
@@ -125,7 +126,8 @@ string Pulsar::EPNArchive::get_source () const
 
 void Pulsar::EPNArchive::set_source (const string& source)
 {
-  strncpy (line2.jname, source.c_str(), 12);
+  strncpy (line2.jname, source.c_str(), 12 - 1);
+  line2.jname[12 - 1] = '\0';
 }
 
 

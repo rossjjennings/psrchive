@@ -33,7 +33,7 @@ void usage()
 int main (int argc, char ** argv)
 {
   bool binary = false;
-  bool verbose = false;
+  [[maybe_unused]] bool verbose = false;
   int gotc = 0;
 
   MJD mjd;

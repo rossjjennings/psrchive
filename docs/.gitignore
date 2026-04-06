@@ -1,0 +1,4 @@
+_build/
+_doxygen/*/
+_doxygen/*.out
+_doxygen/*.err

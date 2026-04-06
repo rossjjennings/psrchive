@@ -87,12 +87,12 @@ const double *Pulsar::DynamicSpectrum::get_ds_err()
   return (const double *)ds_data_err;
 }
 
-const MJD Pulsar::DynamicSpectrum::get_rel_epoch(unsigned isub) 
+MJD Pulsar::DynamicSpectrum::get_rel_epoch(unsigned isub)
 {
   return arch->get_Integration(isub)->get_epoch() - arch->start_time();
 }
 
-const double Pulsar::DynamicSpectrum::get_freq(unsigned ichan, unsigned isub)
+double Pulsar::DynamicSpectrum::get_freq(unsigned ichan, unsigned isub)
 {
   return arch->get_Integration(isub)->get_centre_frequency(ichan);
 }

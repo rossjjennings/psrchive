@@ -5,7 +5,7 @@ AC_DEFUN([SWIN_LIB_CULA],
   AC_MSG_CHECKING([for CULA installation])
 
   AC_ARG_WITH([cula-dir],
-              AC_HELP_STRING([--with-cula-dir=DIR],
+              AS_HELP_STRING([--with-cula-dir=DIR],
                              [CULA is in DIR]))
 
   if test x"$with_cula_dir" = x"no"; then
@@ -43,15 +43,15 @@ AC_DEFUN([SWIN_LIB_CULA],
     CXXFLAGS="$ac_save_CXXFLAGS $CULA_CFLAGS"
 
 
-    AC_TRY_LINK([#include <cula.hpp>],[culaGetCudaMinimumVersion();],
-                have_cula=yes, have_cula=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cula.hpp>]], [[culaGetCudaMinimumVersion();]])],
+                   [have_cula=yes], [have_cula=no])
     # if 64 bit version failed, try 32 bits
     if test x"$have_cula" = xno; then
       CULA_LIBS="-L$CULA_ROOT/lib"
       CULA_LIBS="$CULA_LIBS -lcula_core -lcula_lapack -lcublas -lcudart"
       LIBS="$ac_save_LIBS $CULA_LIBS"
-      AC_TRY_LINK([#include <cula.hpp>],[culaGetCudaMinimumVersion();],
-		      have_cula=yes, have_cula=no)
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cula.hpp>]], [[culaGetCudaMinimumVersion();]])],
+                     [have_cula=yes], [have_cula=no])
     fi
 
     AC_MSG_RESULT($have_cula)
