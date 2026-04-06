@@ -1,6 +1,6 @@
-#!/bin/csh -fe
+#!/bin/bash -f
 
-if ( "$1" == "-h" || "$1" == "--help" ) then
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
   echo
   echo "developer: updates Git administration files with developer name"
   echo
@@ -11,15 +11,20 @@ if ( "$1" == "-h" || "$1" == "--help" ) then
   echo "  USER is a sourceforge user name"
   echo
   exit
-endif
+fi
 
-set root = "git.code.sf.net/p/psrchive/code"
-
-if ( "$1" == "" ) then
+if [ "$1" == "" ]; then
   echo "Git repository access changed to anonymous"
-  git config remote.origin.url git://$root
+  git config remote.origin.url https://gitlab.com/pulsar-astronomy/psrchive.git
 else
-  echo "Git repository developer name changed to $1"
-  git config remote.origin.url ssh://$1@$root
-endif
+  echo "Git repository access changed to developer"
+  git config remote.origin.url git@gitlab.com:pulsar-astronomy/psrchive.git
+
+  remote_sf="ssh://$1@git.code.sf.net/p/psrchive/code"
+  test_sf=$(git remote get-url sf)
+  if [[ "$test_sf" != "$remote_sf" ]]; then
+    echo "Adding sourceforge as a remote for user $1"
+    git remote add sf $remote_sf
+  fi
+fi
 
