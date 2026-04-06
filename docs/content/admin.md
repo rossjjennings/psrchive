@@ -1,7 +1,5 @@
 # PSRCHIVE Administration Guide
 
-## PSRCHIVE Administration Guide
-
 ### Table of Contents
 
 * [Preparing a Distribution](admin/prepare.md)* [Releasing a Distribution](admin/release.md)* [Updating web pages](admin/web.md)

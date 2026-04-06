@@ -1,6 +1,4 @@
-# PSRCHIVE: Third Party Software
-
-## Third Party Software
+# Third Party Software
 
 New users should note that if you are installing PSRCHIVE at a
 facility that already has the required third party packages, then you can skip this section.

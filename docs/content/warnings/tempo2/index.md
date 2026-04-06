@@ -1,6 +1,4 @@
-# PSRCHIVE: tempo2 warnings
-
-## TEMPO2 Warnings
+# TEMPO2 Warnings
 
 PSRCHIVE can make use of tempo2 to generate and
 use Chebyshev polynomials that predict apparent topocentric pulse

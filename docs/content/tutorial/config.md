@@ -21,7 +21,7 @@ ways to add the new option:
 
 ---
 
-### Direct Use
+# Direct Use
 
 To serve as an example, consider adding a new configuration option to
 set the default value of `threshold`, a floating point

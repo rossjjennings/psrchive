@@ -1,7 +1,5 @@
 # PSRCHIVE: common problems
 
-## PSRCHIVE: common problems
-
 The PSRCHIVE code makes use of a number of
 third-party packages. The `configure` script will do its best
 to detect the location of these packages and configure the software to

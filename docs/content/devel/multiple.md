@@ -1,6 +1,4 @@
-# PSRCHIVE: multiple build
-
-## PSRCHIVE: Building for multiple architectures/compilers
+# PSRCHIVE: Building for multiple architectures/compilers
 
 When compiling the PSRCHIVE source code, the
 location of the **build** directory is arbitrary. That is, your

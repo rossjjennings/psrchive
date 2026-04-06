@@ -1,6 +1,4 @@
-# PSRCHIVE Pronunciation
-
-## PSRCHIVE Pronunciation Guide
+# PSRCHIVE Pronunciation Guide
 
  pē ĕs är’ kīv 
 

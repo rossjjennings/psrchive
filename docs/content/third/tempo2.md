@@ -1,6 +1,4 @@
-# PSRCHIVE: TEMPO2 Instructions
-
-## TEMPO2 Pulsar Timing Package
+# TEMPO2 Pulsar Timing Package
 
 PSRCHIVE can make use of the TEMPO2 Pulsar Timing
 Package to model pulse phase.

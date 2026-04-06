@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrplot layout
-
-## PSRCHIVE documentation: **psrplot** layout
+# psrplot** layout
 
 The layout of any
 **psrplot** plot may be customized, including

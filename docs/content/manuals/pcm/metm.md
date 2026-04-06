@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pcm
-
-## PSRCHIVE user documentation: `pcm`
+# pcm
 
 **Important Note:** The following instructions contain a few
 intentional mistakes; the intent behind these is to demonstrate a

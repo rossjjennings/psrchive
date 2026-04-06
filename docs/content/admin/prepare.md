@@ -1,7 +1,5 @@
 # PSRCHIVE Administration Guide
 
-## PSRCHIVE Administration Guide
-
 ### Preparing a Release
 
 When ready to distribute the next release of

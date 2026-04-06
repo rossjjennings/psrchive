@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pav
-
-## PSRCHIVE user documentation: `pav`
+# pav
 
 ### 1.0 Purpose
 

@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrsh
-
-## PSRCHIVE user documentation: `psrsh` examples
+# psrsh` examples
 
 #### Shell script
 

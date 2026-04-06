@@ -1,7 +1,5 @@
 # PSRCHIVE User's Guide
 
-## PSRCHIVE User's Guide
-
 ### Introduction
 
 This is a draft user's manual for the PSRCHIVE

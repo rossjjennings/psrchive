@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrplot customization
-
-## PSRCHIVE documentation: **psrplot** customization
+# psrplot** customization
 
 **psrplot** can be customized using any combination of
 

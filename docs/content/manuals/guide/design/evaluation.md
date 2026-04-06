@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design
-
-## User's Guide: Evaluation of Mathematical Expressions
+# User's Guide: Evaluation of Mathematical Expressions
 
 Both [psrstat](../../psrstat.md) and
 [psrplot](../../psrstat.md) make use of the same

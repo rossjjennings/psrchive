@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrchive_config
-
-## PSRCHIVE documentation: **psrchive\_config**
+# psrchive\_config
 
 ### 1.0 Purpose
 

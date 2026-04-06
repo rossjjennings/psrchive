@@ -1,7 +1,5 @@
 # PSRCHIVE Python Interface
 
-## PSRCHIVE Python Interface
-
 ### Introduction
 
 This is a draft user's manual for the PSRCHIVE

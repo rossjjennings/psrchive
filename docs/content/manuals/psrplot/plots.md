@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrplot plots
-
-## PSRCHIVE documentation: **psrplot** available plots
+# psrplot** available plots
 
 ```
 psrplot -p flux

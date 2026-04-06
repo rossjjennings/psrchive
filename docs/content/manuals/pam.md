@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pam
-
-## PSRCHIVE user documentation: `pam`
+# pam
 
 ### 1.0 Purpose
 

@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pas
-
-## PSRCHIVE user documentation: `pas`
+# pas
 
 ### 1.0 Purpose
 

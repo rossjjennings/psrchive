@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pcm
-
-## PSRCHIVE user documentation: `pcm`
+# pcm
 
 ### Measurement Equation Modeling Example
 

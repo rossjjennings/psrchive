@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pazi
-
-## PSRCHIVE user documentation: `pazi`
+# pazi
 
 ### 1.0 Purpose
 

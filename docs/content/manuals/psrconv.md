@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrconv
-
-## PSRCHIVE user documentation: `psrconv`
+# psrconv
 
 ### 1.0 Purpose
 

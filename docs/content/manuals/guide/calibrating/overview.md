@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Overview of Calibration
-
-## PSRCHIVE User's Guide: Overview of Calibration
+# PSRCHIVE User's Guide: Overview of Calibration
 
 The progam [pac](../../pac.md) calibrates pulsar data using
 available combinations of:

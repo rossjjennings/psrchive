@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pcm
-
-## PSRCHIVE user documentation: `pcm`
+# pcm
 
 ### 1.0 Purpose
 

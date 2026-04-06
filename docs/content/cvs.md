@@ -1,6 +1,4 @@
-# PSRCHIVE: CVS Access
-
-## CVS Access Instructions
+# CVS Access Instructions
 
 ### Anonymous CVS Access
 

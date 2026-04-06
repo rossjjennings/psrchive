@@ -1,7 +1,5 @@
 # PSRCHIVE: switching to SourceForge
 
-## PSRCHIVE: switching to SourceForge
-
 ### Introduction
 
 This web-page is intended to help those with Swinburne CVS access to

@@ -1,6 +1,4 @@
-# psrplot: plot draw view pulsar data
-
-## PSRCHIVE documentation: **psrplot**
+# psrplot
 
 ### 1.0 Purpose
 

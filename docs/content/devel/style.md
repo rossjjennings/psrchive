@@ -1,6 +1,4 @@
-# PSRCHIVE Style Guide
-
-## Style Guide
+# Style Guide
 
 The following guidelines are common to most software development projects:
 

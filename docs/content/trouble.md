@@ -1,6 +1,4 @@
-# PSRCHIVE
-
-## The PSRCHIVE Trouble Shooting
+# The PSRCHIVE Trouble Shooting
 
 ### General Debugging Tips
 

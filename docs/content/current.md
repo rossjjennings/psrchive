@@ -1,6 +1,4 @@
-# PSRCHIVE: Git Access
-
-## Git Instructions
+# Git Instructions
 
 ### Anonymous Git Access
 

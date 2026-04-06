@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: fluxcal
-
-## PSRCHIVE user documentation: `fluxcal`
+# fluxcal
 
 ### 1.0 Purpose
 

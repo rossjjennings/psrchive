@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrpol
-
-## PSRCHIVE user documentation: `psrpol`
+# psrpol
 
 ### 1.0 Purpose
 

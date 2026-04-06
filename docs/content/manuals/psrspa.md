@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrspa
-
-## PSRCHIVE user documentation: `psrspa`
+# psrspa
 
 ### 1.0 Purpose
 

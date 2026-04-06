@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design
-
-## User's Guide: Weighted Means
+# User's Guide: Weighted Means
 
 When supported by the underlying file format,
 PSRCHIVE maintains and can assign a weight

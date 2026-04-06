@@ -1,6 +1,4 @@
-# PSRCHIVE
-
-## The PSRCHIVE Project
+# The PSRCHIVE Project
 
 PSRCHIVE is an Open Source C++ development
 library for the analysis of pulsar astronomical data. It implements

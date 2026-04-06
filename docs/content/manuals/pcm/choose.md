@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pcm
-
-## PSRCHIVE user documentation: `pcm`
+# pcm
 
 ### Optimal selection of pulse phase bins for MEM
 

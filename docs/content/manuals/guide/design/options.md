@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design
-
-## User's Guide: Standard Command Line Options
+# User's Guide: Standard Command Line Options
 
 For the sake of consistency, a number of PSRCHIVE programs employ a standard set of command
 line options, including

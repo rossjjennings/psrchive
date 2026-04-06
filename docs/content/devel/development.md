@@ -1,7 +1,5 @@
 # PSRCHIVE developer's guide
 
-## PSRCHIVE developer's guide
-
 ### Introduction
 
 The PSRCHIVE software makes use of the GNU

@@ -1,6 +1,4 @@
-# PSRCHIVE: Using Git
-
-## Git: Quick Guide (for Developers)
+# Git: Quick Guide (for Developers)
 
 Clone the PSRCHIVE Git repo using your sf.net username and password.
 

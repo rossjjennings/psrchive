@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pac
-
-## PSRCHIVE user documentation: `pac`
+# pac
 
 ### 1.0 Purpose
 

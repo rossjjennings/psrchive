@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrstat
-
-## PSRCHIVE user documentation: **psrstat**
+# psrstat
 
 ### Selecting, configuring, executing, and querying algorithms
 

@@ -1,6 +1,4 @@
-# PSRCHIVE: GNU Autotools Instructions
-
-## GNU Autotools: autoconf, automake, libtool
+# GNU Autotools: autoconf, automake, libtool
 
 To compile the PSRCHIVE source code
 from the CVS repository, you will need the GNU Build System

@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: rmfit
-
-## PSRCHIVE user documentation: `rmfit`
+# rmfit
 
 ### 1.0 Purpose
 

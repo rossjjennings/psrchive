@@ -1,6 +1,4 @@
-# PSRCHIVE: installation directory
-
-## Installation Directory
+# Installation Directory
 
 The installation directory is the directory to which all build
 products (header files, libraries, executables, and runtime data) will

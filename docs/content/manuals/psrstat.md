@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrstat
-
-## PSRCHIVE user documentation: **psrstat**
+# psrstat
 
 ### 1.0 Purpose
 

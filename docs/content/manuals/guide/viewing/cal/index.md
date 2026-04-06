@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : viewing calibrator data
-
-## User's Guide: Viewing Calibrator Data
+# User's Guide: Viewing Calibrator Data
 
 Assuming that the folded CAL observation is saved in the file,
 CAL.ar, both the data and the calibrator solution that

@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: vap
-
-## PSRCHIVE user documentation: `vap`
+# vap
 
 ### 1.0 Purpose
 

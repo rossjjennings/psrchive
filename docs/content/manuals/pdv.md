@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pdv
-
-## PSRCHIVE user documentation: `pdv`
+# pdv
 
 ### 1.0 Purpose
 

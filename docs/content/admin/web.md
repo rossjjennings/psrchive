@@ -1,7 +1,5 @@
 # PSRCHIVE Administration Guide
 
-## PSRCHIVE Administration Guide
-
 ### Updating web pages
 
 Check out the web/  module; e.g. from the top-level directory

@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrplot labels
-
-## PSRCHIVE documentation: **psrplot** labels
+# psrplot** labels
 
 The labels on
 **psrplot** plots may be set using

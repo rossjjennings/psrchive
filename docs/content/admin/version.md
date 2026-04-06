@@ -1,7 +1,5 @@
 # PSRCHIVE Administration Guide
 
-## PSRCHIVE Administration Guide
-
 ### Version Control
 
 To use the current stable version of the PSRCHIVE

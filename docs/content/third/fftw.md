@@ -1,6 +1,4 @@
-# PSRCHIVE: FFTW Instructions
-
-## FFTW: Fastest Fourier Transform in the West
+# FFTW: Fastest Fourier Transform in the West
 
 PSRCHIVE requires a single-precision version of
 the FFTW library to perform the Fast Fourier Transform. FFTW is freely

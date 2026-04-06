@@ -1,7 +1,5 @@
 # PSRCHIVE Developer Guide
 
-## PSRCHIVE Developer Guide
-
 ### Table of Contents
 
 * Quick Start

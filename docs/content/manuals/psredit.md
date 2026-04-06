@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psredit
-
-## PSRCHIVE user documentation: **psredit**
+# psredit
 
 ### 1.0 Purpose
 

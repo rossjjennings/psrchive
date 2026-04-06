@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design
-
-## User's Guide: Cold Plasma Effects
+# User's Guide: Cold Plasma Effects
 
 When supported by the underlying file format,
 PSRCHIVE maintains and can differentiate

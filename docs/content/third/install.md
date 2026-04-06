@@ -1,6 +1,4 @@
-# PSRCHIVE: Automatic Package Installation
-
-## Automatic Package Installation
+# Automatic Package Installation
 
 PSRCHIVE includes a number of scripts that
 may be used to automatically install its dependencies. These scripts

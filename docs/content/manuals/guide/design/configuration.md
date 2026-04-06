@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design
-
-## User's Guide: Configuration
+# User's Guide: Configuration
 
 There may be more than one way to compute a certain value or perform a
 certain operation. For example, there are a number of baseline

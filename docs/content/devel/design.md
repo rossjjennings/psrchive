@@ -1,7 +1,5 @@
 # PSRCHIVE Design Philosophy
 
-## PSRCHIVE Design Philosophy
-
 Modularity and extensibility are desireable software design features;
 but what does this mean, on a *practical* level, when
 developing PSRCHIVE? The following handy rules

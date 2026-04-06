@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Trouble Shooting
-
-## PSRCHIVE User's Guide: Increasing Verbosity
+# PSRCHIVE User's Guide: Increasing Verbosity
 
 By default, the error messages produced by PSRCHIVE
 programs are quite terse. For example,

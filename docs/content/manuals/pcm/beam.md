@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pcm
-
-## PSRCHIVE user documentation: `pcm`
+# pcm
 
 ### Modeling variations of instrumental response across the beam
 

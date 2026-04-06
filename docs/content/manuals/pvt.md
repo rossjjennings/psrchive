@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pvt
-
-## PSRCHIVE user documentation: `pvt`
+# pvt
 
 ### 1.0 Purpose
 

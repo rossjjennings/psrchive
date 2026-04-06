@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: spa
-
-## PSRCHIVE user documentation: `spa`
+# spa
 
 ### 1.0 Purpose
 

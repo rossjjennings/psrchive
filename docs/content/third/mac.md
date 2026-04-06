@@ -1,6 +1,4 @@
-# PSRCHIVE: Instructions for Mac users
-
-## Mac OS X Users
+# Mac OS X Users
 
 PSRCHIVE compiles on Mac OS X using Apple's
 Xcode Command Line Tools and a compatible version of gfortran.

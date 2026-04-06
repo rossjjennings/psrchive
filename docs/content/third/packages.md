@@ -1,6 +1,4 @@
-# PSRCHIVE: Package Detection
-
-## Package Detection
+# Package Detection
 
 PSRCHIVE can be directed where to find third-party
 software packages using one or more of the following environment variables:

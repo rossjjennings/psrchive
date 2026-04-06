@@ -33,7 +33,7 @@ usefulness of this feature will be demonstrated later.
 
 ---
 
-### Adding Attributes
+# Adding Attributes
 
 To add an interface to an attribute of a class, there must be separate
 methods that get and (optionally) set the value of this attribute.

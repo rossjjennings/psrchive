@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Polarimetric Calibration
-
-## User's Guide: Polarimetric Calibration
+# User's Guide: Polarimetric Calibration
 
 Before starting, please read [Section 1.1:
 Supported Models](../../pac.html#models) of the `pac` manual.

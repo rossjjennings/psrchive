@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: paz
-
-## PSRCHIVE user documentation: `paz`
+# paz
 
 ### 1.0 Purpose
 

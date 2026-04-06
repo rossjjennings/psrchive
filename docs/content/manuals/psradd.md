@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psradd
-
-## PSRCHIVE user documentation: `psradd`
+# psradd
 
 ### 1.0 Purpose
 

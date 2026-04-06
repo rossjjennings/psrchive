@@ -1,6 +1,4 @@
-# PSRCHIVE Website Credits
-
-## Website Credits
+# Website Credits
 
 The PSRCHIVE website is hosted by
  [SourceForge](http://sourceforge.net).

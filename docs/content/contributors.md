@@ -1,7 +1,5 @@
 # PSRCHIVE Contributors
 
-## PSRCHIVE Contributors
-
 PSRCHIVE development is managed by Willem van
 Straten, with valuable contributions by Paul Demorest, Aidan Hotan,
 Jonathan Khoo, and David Smith. The library is a generalized and

@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design
-
-## User's Guide: Core Applications
+# User's Guide: Core Applications
 
 The core applications provide access to the vast majority of PSRCHIVE functionality commonly used for inspection,
 visualization, and reduction of pulsar data. Core applications make

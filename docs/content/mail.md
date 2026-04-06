@@ -1,6 +1,4 @@
-# PSRCHIVE News
-
-## PSRCHIVE Users Mailing List
+# PSRCHIVE Users Mailing List
 
 To receive occasional emails regarding available updates, significant
 bug fixes, and new features in the PSRCHIVE software,

@@ -1,7 +1,5 @@
 # PSRCHIVE Administration Guide
 
-## PSRCHIVE Administration Guide
-
 ### Releasing a Distribution
 
 Upload the distribution file to the SourceForge File Release System (FRS)

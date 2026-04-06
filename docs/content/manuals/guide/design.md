@@ -1,6 +1,4 @@
-# PSRCHIVE User's Guide : Design Features
-
-## User's Guide: Design Features
+# User's Guide: Design Features
 
 - [Core Applications](design/core.md) :
   A tightly knit core of applications provide access to most functionality.

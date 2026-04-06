@@ -1,7 +1,5 @@
 # PSRCHIVE Tutorial
 
-## PSRCHIVE Tutorial
-
 This tutorial provides an introduction to the use and development
 of the PSRCHIVE library.
 

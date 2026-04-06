@@ -1,7 +1,5 @@
 # PSRCHIVE Administration Guide
 
-## PSRCHIVE Administration Guide
-
 ### System Installation
 
 At sites where some level of stability is important, it is useful to

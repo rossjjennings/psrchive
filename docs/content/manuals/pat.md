@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: pat
-
-## PSRCHIVE user documentation: `pat`
+# pat
 
 ### 1.0 Purpose
 

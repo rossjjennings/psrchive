@@ -1,6 +1,4 @@
-# PSRCHIVE: PGPLOT Instructions
-
-## PGPLOT Graphics Subroutine Library
+# PGPLOT Graphics Subroutine Library
 
 PSRCHIVE uses the PGPLOT Graphics Subroutine
 Library to produce publication quality plots in a variety of styles.

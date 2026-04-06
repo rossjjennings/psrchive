@@ -1,6 +1,4 @@
-# PSRCHIVE documentation: psrplot pen attributes
-
-## PSRCHIVE documentation: **psrplot** pen attributes
+# psrplot** pen attributes
 
 The attributes of the pen used to draw
 **psrplot** plots may be set, including

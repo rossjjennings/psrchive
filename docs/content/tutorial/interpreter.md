@@ -23,7 +23,7 @@ the new command:
 
 ---
 
-### In More Detail ...
+# In More Detail ...
 
 To serve as an example, consider adding a new command named
 `cal`, which performs polarimetric calibration. The new
