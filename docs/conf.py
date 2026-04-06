@@ -7,6 +7,13 @@ author = "Willem van Straten"
 extensions = [
     "breathe",
     "myst_parser",
+    "sphinx_click",
+    "sphinx_copybutton",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
 ]
 
 # -- Breathe (Doxygen XML) configuration ------------------------------------
@@ -35,3 +42,14 @@ source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
+
+myst_enable_extensions = [
+    "attrs_inline",
+    "colon_fence",
+    "amsmath",
+    "dollarmath",
+]
+
+# -- Copy button configuration -----------------------------------------------
+
+copybutton_prompt_text = "$ "
