@@ -54,7 +54,6 @@ experiments.
    :maxdepth: 2
    :caption: Developer Guide
 
-   content/devel
    content/devel/development
    content/devel/install
    content/devel/design

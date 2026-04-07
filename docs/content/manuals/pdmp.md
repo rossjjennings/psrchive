@@ -1,4 +1,4 @@
-# PSRCHIVE user documentation: **pdmp**
+# pdmp
 
 ## 1.0 Purpose
 

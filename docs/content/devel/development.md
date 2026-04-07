@@ -1,4 +1,4 @@
-# PSRCHIVE developer's guide
+# Developer's Guide
 
 ### Introduction
 
