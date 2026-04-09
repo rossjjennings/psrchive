@@ -8,11 +8,10 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH =~ /^adacs\//
 
 stages:
-  - sync
   - build
   - test
   - analysis
@@ -20,34 +19,6 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GITLAB_CI_TAG: k8srunner-psi-low
-
-# Sync all SourceForge branches into GitLab (one-way, fast-forward only).
-# Runs only on scheduled pipelines.
-sync-sourceforge:
-  stage: sync
-  image: alpine:latest
-  tags:
-    - $GITLAB_CI_TAG
-  variables:
-    GIT_STRATEGY: none
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-  script:
-    - apk add --no-cache git
-    - git clone
-        "https://oauth2:${GITLAB_PUSH_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git" repo
-    - cd repo
-    - git remote add sourceforge https://git.code.sf.net/p/psrchive/code
-    - git fetch sourceforge
-    - |
-      for ref in $(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/sourceforge/); do
-        [ "$ref" = "HEAD" ] && continue
-        if git push origin "refs/remotes/sourceforge/${ref}:refs/heads/${ref}" 2>&1; then
-          echo "Synced branch: $ref"
-        else
-          echo "Skipped branch (diverged or protected): $ref"
-        fi
-      done
 
 # Use Ubuntu 22.04 LTS as base image
 image: ubuntu:22.04
