@@ -122,14 +122,12 @@ void difference_plot(Reference::To<Plot> plot,
         Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
         vector<Tempo::toa>& toas, const unsigned subint, const unsigned chan);
 
-void template_plot(Reference::To<Plot> plot, Reference::To<Archive> arch);
-
 void profile_plot(Reference::To<Plot> plot,
         Reference::To<Archive> profile_archive,
         Reference::To<Profile> profile_to_copy, Reference::To<Archive> archive,
-        const double freq);
+        const double freq, bool std = false);
 
-void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
+void diff_profiles(Pulsar::Archive* diff, Pulsar::Profile* std,
     Pulsar::Profile* profile);
 
 string get_xrange(const double min, const double max);
@@ -924,60 +922,65 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
   // Split the plot window into 3 horizontal plots.
   cpgsubp(1, 3);
 
-  Profile stdcopy = stdarch->get_Profile(0,0,0) ;
-  float* amps = stdcopy.get_amps();
-  float mean=0;
-  for (unsigned ibin = 0 ; ibin < stdcopy.get_nbin(); ibin++)
-  {
-	  mean+=amps[ibin];
-  }
-  mean /= (float)stdcopy.get_nbin();
-
-  if (!cal_delay_file and fabs(mean) > 1e-3)
+  if (!cal_delay_file)
     stdarch->remove_baseline();
 
   const unsigned nbin  = arch->get_nbin();
   const unsigned nsub  = arch->get_nsubint();
   const unsigned nchan = arch->get_nchan();
-  if (nbin > stdcopy.get_nbin())
+  if (nbin > stdarch->get_nbin())
   {
-    if (nbin % stdcopy.get_nbin())
+    if (nbin % stdarch->get_nbin())
       throw Error (InvalidState, "pat", "profile nbin=%d standard nbin=%d",
-                   nbin, stdcopy.get_nbin());
+                   nbin, stdarch->get_nbin());
 
-    unsigned nscrunch = nbin / stdcopy.get_nbin();
+    unsigned nscrunch = nbin / stdarch->get_nbin();
     arch->bscrunch (nscrunch);
   }
 
-  if (nbin < stdcopy.get_nbin())
+  if (nbin < stdarch->get_nbin())
   {
-    if (stdcopy.get_nbin() % nbin)
+    if (stdarch->get_nbin() % nbin)
       throw Error (InvalidState, "pat", "profile nbin=%d standard nbin=%d",
-                   nbin, stdcopy.get_nbin());
+                   nbin, stdarch->get_nbin());
 
-    unsigned nscrunch = stdcopy.get_nbin() / nbin;
-    stdcopy.bscrunch (nscrunch);
+    unsigned nscrunch = stdarch->get_nbin() / nbin;
+    stdarch->bscrunch (nscrunch);
   }
+
+  cpgpage();
+
+  auto std_subint = stdarch->get_Integration(0);
 
   for (unsigned isub = 0; isub < nsub; ++isub)
   {
+    auto arch_subint = arch->get_Integration(isub);
+
     for (unsigned ichan = 0; ichan < nchan; ++ichan)
     {
-      // Each profile gets its own page.
-      cpgpage();
+      unsigned std_ichan = 0;
+      if (ichan < stdarch->get_nchan())
+        std_ichan = ichan;
+
+      if (std_subint->get_weight(std_ichan) == 0)
+        continue;
+      if (arch_subint->get_weight(ichan) == 0)
+        continue;
+
+      Profile* stdprofile = stdarch->get_Profile(0,0,std_ichan) ;
 
       Pulsar::Profile* profile = arch->get_Profile(isub, 0, ichan);
       if (cal_delay_file) {
         scaleProfile(profile);
       }
 
-      diff_profiles(profile_diff, stdarch, profile);
+      diff_profiles(profile_diff, stdprofile, profile);
       difference_plot(plotter, arch, profile_diff, toas, isub, ichan);
-      template_plot(plotter, stdarch);
 
       const double centre_frequency =
         truncateDecimals(profile->get_centre_frequency(), 3);
 
+      profile_plot(plotter, profile_archive, stdprofile, stdarch, centre_frequency, true);
       profile_plot(plotter, profile_archive, profile, arch, centre_frequency);
 
       if (output_profile_residuals)
@@ -1166,23 +1169,23 @@ void prepare_difference_archive(Reference::To<Archive> diff,
 #if HAVE_PGPLOT
 void difference_plot(Reference::To<Plot> plot,
         Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
-        vector<Tempo::toa>& toas, const unsigned subint, const unsigned chan)
+        vector<Tempo::toa>& toas, const unsigned isubint, const unsigned ichan)
 {
-  Reference::To<Profile> profile = arch->get_Profile(subint, 0, chan);
+  Reference::To<Profile> profile = arch->get_Profile(isubint, 0, ichan);
   prepare_difference_archive(diff_arch, arch, profile);
 
-  const unsigned i = subint * arch->get_nchan() + chan;
+  const unsigned itoa = isubint * arch->get_nchan() + ichan;
   const double snr = diff_arch->get_Profile(0,0,0)->snr();
 
   char phaseShift[50];
   char phaseError[50];
-  sprintf(phaseShift, "%.4f", toas[i].get_phase_shift());
-  sprintf(phaseError, "%.4g", toas[i].get_error());
+  sprintf(phaseShift, "%.4f", toas[itoa].get_phase_shift());
+  sprintf(phaseError, "%.4g", toas[itoa].get_error());
 
   // set the heading to read:
   // filename, subint, channel, snr, phase shift, phase error
   plot->configure("above:c=File: " + arch->get_filename() +
-          "\nSubint: " + tostring(subint) + " Chan: " + tostring(chan) +
+          "\nSubint: " + tostring(isubint) + " Chan: " + tostring(ichan) +
           " S/N: " + tostring(snr) + " Phase Shift: " + phaseShift +
           " Phase Error: " + phaseError);
 
@@ -1196,37 +1199,34 @@ void difference_plot(Reference::To<Plot> plot,
  * @brief set up and plot the standard template
  */
 
-void template_plot(Reference::To<Plot> plot, Reference::To<Archive> arch)
-{
-  plot->configure("above:c=Template: " + arch->get_filename());
-  plot->plot(arch);
-  cpgpage();
-}
-
 void profile_plot(Reference::To<Plot> plot,
         Reference::To<Archive> profile_archive,
         Reference::To<Profile> profile_to_copy, Reference::To<Archive> archive,
-        const double freq)
+        const double freq, bool std)
 {
   *(profile_archive->get_Profile(0,0,0)) = *profile_to_copy;
 
   profile_archive->set_source(archive->get_source());
   profile_archive->set_centre_frequency(freq);
 
-  plot->configure("above:c=Profile");
+  if (std)
+    plot->configure("above:c=Template");
+  else
+    plot->configure("above:c=Profile");
+
   plot->plot(profile_archive);
+  cpgpage();
 }
 
 /**
- * @brief calculate the difference between profile and stdarch
+ * @brief calculate the difference between profile and std
  *        and store it as diff
  */
 
-void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
+void diff_profiles(Pulsar::Archive* diff, Pulsar::Profile* std,
     Pulsar::Profile* profile)
 {
-  Reference::To<Pulsar::Profile> s = stdarch->get_Profile(0, 0, 0);
-  float *s_amps = s->get_amps();
+  float *s_amps = std->get_amps();
   float *p_amps = profile->get_amps();
 
   const float nbin = profile->get_nbin();
@@ -1236,15 +1236,15 @@ void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
     scale += s_amps[i] * p_amps[i];
   }
 
-  scale = (profile->get_nbin()* scale - profile->sum() * s->sum()) /
-	  (profile->get_nbin()* s->sumsq() - s->sum() * s->sum());
+  scale = (profile->get_nbin()* scale - profile->sum() * std->sum()) /
+	  (profile->get_nbin()* std->sumsq() - std->sum() * std->sum());
 
   const double offset = 
-    (scale * s->sum() - profile->sum()) / profile->get_nbin();
+    (scale * std->sum() - profile->sum()) / profile->get_nbin();
 
   Reference::To<Pulsar::Profile> diff_prof =  diff->get_Profile(0, 0, 0);
    
-  *diff_prof = *s;
+  *diff_prof = *std;
   
   diff_prof->offset(-offset);
   diff_prof->scale(scale);
@@ -1254,42 +1254,6 @@ void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
   //    profile - template
   diff_prof->scale(-1);
 }
-
-/**
- * @brief calculate the difference between profile and template
- *        and store it as 'diff'
- */
-
-/*void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
-    Pulsar::Profile* profile)
-{
-  float *s_amps = stdarch->get_Profile(0,0,0)->get_amps();
-  float *p_amps = profile->get_amps();
-  double scale = 0.0;
-
-  for (unsigned i = 0; i < profile->get_nbin(); ++i) {
-    scale += s_amps[i] * p_amps[i];
-  }
-
-  const double template_sum   = stdarch->get_Profile(0,0,0)->sum();
-  const double template_sumsq = stdarch->get_Profile(0,0,0)->sumsq();
-
-  scale = (profile->get_nbin()* scale - profile->sum() * template_sum) /
-	  (profile->get_nbin()* template_sumsq - template_sum * template_sum);
-
-  const double offset =
-    (scale * template_sum - profile->sum()) / profile->get_nbin();
-
-  // A copy of the template.
-  Reference::To<Pulsar::Profile> copy = stdarch->get_Profile(0,0,0)->clone();
-
-  // template -> offset, scale and then diff
-
-  Reference::To<Pulsar::Profile> diff_prof = profile->clone();
-  diff_prof->offset(-offset);
-  diff_prof->scale(scale);
-  diff_prof->diff(copy);
-}*/
 
 void scaleProfile(Reference::To<Profile> profile)
 {
