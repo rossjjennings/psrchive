@@ -70,24 +70,46 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub, std::vector<Tempo:
   engine->add_pulsar (observation, isub);
   engine->wait ();
 
-  const Integration* integration = observation->get_Integration (isub);
-  unsigned nchan = integration->get_nchan();
+  bool multichannel_standard = standard && (standard->get_nchan() > 1);
+  const Integration* std_int = standard->get_Integration (0);
+
+  const Integration* obs_int = observation->get_Integration (isub);
+  unsigned nchan = obs_int->get_nchan();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
+    unsigned std_ichan = 0;
+    if (multichannel_standard)
+      std_ichan = ichan;
+
+    if (std_int->get_weight(std_ichan) == 0)
+    {
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan
+             << " standard has zero weight" << endl;
+      continue;
+    }
+
+    if (obs_int->get_weight(ichan) == 0)
+    {
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan
+             << " observation has zero weight" << endl;
+      continue;
+    }
+
     if (!engine->get_transformation_valid(ichan))
     {
       if (Archive::verbose > 2)
-        cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan 
+        cerr << "Pulsar::MatrixTemplateMatching::get_toas invalid ichan=" << ichan
              << " " << engine->get_transformation_invalid_reason(ichan) << endl;
       continue;
     }
 
     const PolnProfileFit* mtm = engine->get_mtm(ichan);
-    
-    Estimate<double> shift = mtm -> get_phase();
+    Estimate<double> shift = mtm->get_phase();
 
-    Tempo::toa TOA = get_toa (shift, integration, ichan);
+    Tempo::toa TOA = get_toa (shift, obs_int, ichan);
     TOA.set_reduced_chisq( mtm->get_reduced_chisq () );
 
     toas.push_back( TOA );
@@ -101,8 +123,7 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub, std::vector<Tempo:
       rprof->transform( inv(xform) );
       rprof->rotate_phase( shift.get_value() );
 
-      const Integration* std = standard->get_Integration (0);
-      Reference::To<const PolnProfile> stdprof = std->new_PolnProfile (ichan);
+      Reference::To<const PolnProfile> stdprof = std_int->new_PolnProfile (std_ichan);
       rprof->diff (stdprof);
     }
   }
