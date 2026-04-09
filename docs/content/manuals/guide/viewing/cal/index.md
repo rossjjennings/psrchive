@@ -13,7 +13,7 @@ sub-integrations
 psrplot -pD -jFTp CAL.ar
 ```
 
-![](manuals/guide/viewing/cal/totalI.png)
+![](totalI.png)
 The solid green line should be centred on the mean of the on-pulse and
 the solid red line should be centred on the mean of the off-pulse.
 The dashed lines are spaced one standard deviation on either side of
@@ -27,7 +27,7 @@ Plot the on-pulse Stokes parameters as a function of frequency channel
 pacv -n csu CAL.ar
 ```
 
-![](manuals/guide/viewing/cal/uncal.png)
+![](uncal.png)
 
 ---
 
@@ -38,7 +38,7 @@ as a function of frequency channel
 pacv CAL.ar
 ```
 
-![](manuals/guide/viewing/cal/solution.png)
+![](solution.png)
 This last image indicates that channel 0 (the data are lower sideband)
 yields an anomalous solution. It can be removed from the plot with
 the `-c` command line option; e.g.
@@ -47,7 +47,7 @@ the `-c` command line option; e.g.
 pacv -c 0 CAL.ar
 ```
 
-![](manuals/guide/viewing/cal/solution_zapped.png)
+![](solution_zapped.png)
 
 ---
 
@@ -58,7 +58,7 @@ channel, after application of calibrator to itself.
 pacv -n csc -c 0 CAL.ar
 ```
 
-![](manuals/guide/viewing/cal/cal.png)
+![](cal.png)
 The white data points represent Stokes I (total intensity); the
 gain scale has been calibrated such that the CAL has a total flux of unity.
 The red data points represent Stokes Q; differential gain and phase
