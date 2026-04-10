@@ -1,7 +1,7 @@
 # Configuration file for the Sphinx documentation builder.
 
 project = "PSRCHIVE"
-copyright = "2004-2026, Willem van Straten et al."
+copyright = "2006-2026, Willem van Straten"
 author = "Willem van Straten"
 
 extensions = [

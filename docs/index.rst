@@ -11,7 +11,8 @@ experiments.
    :maxdepth: 2
    :caption: User Guide
 
-   installation
+   content/download
+   content/installation
    quickstart
    architecture
    content/manuals
@@ -64,10 +65,8 @@ experiments.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation & Dependencies
+   :caption: Dependencies
 
-   content/download
-   content/installation
    content/third
    content/trouble
 
