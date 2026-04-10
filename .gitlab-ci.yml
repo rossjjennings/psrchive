@@ -3,18 +3,23 @@
 # Two CI modes (mutually exclusive):
 #   1. Shared-runner CI: ubuntu:22.04 on gitlab.com (when ENABLE_SKA_CI is unset)
 #   2. SKA infrastructure CI: tagged runners (when ENABLE_SKA_CI is "true")
+#
+# Both modes run the same jobs. When one set runs, the other is skipped.
+# All `needs` entries use `optional: true` so skipped jobs don't break
+# the pipeline DAG validation.
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH =~ /^adacs\//
+    - if: $CI_COMMIT_TAG
 
 stages:
   - build
   - test
   - analysis
+  - release
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -46,8 +51,6 @@ image: ubuntu:22.04
   rules:
     - if: $ENABLE_SKA_CI == "true"
       when: never
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
     - when: on_success
 
 build:
@@ -68,7 +71,8 @@ test:
   stage: test
   extends: .shared_rules
   needs:
-    - build
+    - job: build
+      optional: true
   before_script:
     - *install_dependencies
   script:
@@ -120,7 +124,8 @@ clang-tidy:
   stage: analysis
   extends: .shared_rules
   needs:
-    - build
+    - job: build
+      optional: true
   before_script:
     - *install_dependencies
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
@@ -142,8 +147,6 @@ clang-tidy:
 .ska_rules:
   rules:
     - if: $ENABLE_SKA_CI != "true"
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
     - when: on_success
 
@@ -171,7 +174,8 @@ test-ska:
   tags:
     - $GITLAB_CI_TAG
   needs:
-    - build-ska
+    - job: build-ska
+      optional: true
   before_script:
     - *install_dependencies
   script:
@@ -201,13 +205,12 @@ python-bindings-ska:
     - export PYTHONPATH=$(find /tmp/psrchive -name psrchive.py -printf '%h\n' | head -1)
     - python3 -c "import psrchive; print('Python bindings OK')"
 
-# Static analysis (informational, does not block pipeline)
-cppcheck:
+cppcheck-ska:
   stage: analysis
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - when: on_success
+  extends: .ska_rules
+  image: ubuntu:22.04
+  tags:
+    - $GITLAB_CI_TAG
   before_script:
     - apt-get update -qq
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cppcheck
@@ -226,14 +229,15 @@ cppcheck:
       - cppcheck-report.xml
     expire_in: 1 week
 
-clang-tidy:
+clang-tidy-ska:
   stage: analysis
+  extends: .ska_rules
+  image: ubuntu:22.04
+  tags:
+    - $GITLAB_CI_TAG
   needs:
-    - build
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - when: on_success
+    - job: build-ska
+      optional: true
   before_script:
     - *install_dependencies
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
@@ -247,3 +251,54 @@ clang-tidy:
     paths:
       - clang-tidy-report.txt
     expire_in: 1 week
+
+# ============================================================
+# Release (triggered by date-format tags: YYYY-MM-DD)
+# ============================================================
+
+.release_rules:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d{4}-\d{2}-\d{2}$/
+    - when: never
+
+distcheck:
+  stage: release
+  extends: .release_rules
+  needs:
+    - job: test
+      optional: true
+    - job: test-ska
+      optional: true
+  before_script:
+    - *install_dependencies
+  script:
+    - ./bootstrap
+    - ./configure --enable-lean
+    - make distcheck
+
+release:
+  stage: release
+  extends: .release_rules
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: distcheck
+      optional: true
+  before_script:
+    - *install_dependencies
+  script:
+    - ./bootstrap
+    - ./configure --enable-lean
+    - make dist
+    - ls *.tar.gz
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Release $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "Source tarball"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/raw/psrchive-${CI_COMMIT_TAG}.tar.gz"
+  artifacts:
+    paths:
+      - "*.tar.gz"
+    expire_in: 1 year
