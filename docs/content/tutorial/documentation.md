@@ -1,4 +1,4 @@
-# PSRCHIVE: Composing Documentation
+# documentation
 
 **Composing Documentation**
 The PSRCHIVE online documentation uses Apache

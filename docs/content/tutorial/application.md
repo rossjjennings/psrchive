@@ -1,4 +1,4 @@
-# PSRCHIVE: Writing an Application
+# application
 
 **Writing an Application**
 One of the main hurdles when writing a new application is setting up
@@ -40,7 +40,11 @@ This simple class defines only the `process` method for
 operating on a single `Pulsar::Archive` instance. The
 `Pulsar::Application` class does the rest, including
 
-* parsing command line options* presenting help information* parsing archive filenames* looping over all archives* performing any preprocessing
+* parsing command line options
+* presenting help information
+* parsing archive filenames
+* looping over all archives
+* performing any preprocessing
 
 The following command line options are implemented by default:
 
@@ -105,7 +109,7 @@ command line options:
 
 ---
 
-Step 3: **add command line options** 
+Step 3: **add command line options**
 
 ```
 void example::add_options (CommandLine::Menu& menu)

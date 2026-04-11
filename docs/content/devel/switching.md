@@ -26,8 +26,9 @@ $CVSHOME and $LOGIN\_ARCH enviroment variables.
 It is strongly recommended that you:
 
 1. Check out the new PSRCHIVE software into your
-   $CVSHOME directory; and- Set the $CONFIG\_SITE environment variable to ensure that
-     PSRCHIVE is installed in $CVSHOME.
+   $CVSHOME directory; and
+2. Set the $CONFIG\_SITE environment variable to ensure that
+   PSRCHIVE is installed in $CVSHOME.
 
 In short, type
 

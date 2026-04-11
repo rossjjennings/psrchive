@@ -10,24 +10,27 @@ the degeneracy under commutation described in Appendix B of
    the following four assumptions can be made.
    * 1.A) The noise diode has zero circular polarization; this
      assumption is selected by specifying the `-v` command line
-     option.* 1.B) While pointing at a standard candle, the baseline flux
-       density has zero circular polarization; this assumption is the
-       default if the calibrator database that is provided
-       to `pcm` contains FluxCal-On observations.* 1.C) Given a set of flux calibration observations, some made
-         while pointing at a standard candle (FluxCal-On) and some made while
-         pointing at "nearby blank sky" (FluxCal-Off), the difference in the
-         off-pulse baseline flux density (FluxCal-On baseline minus
-         FluxCal-Off baseline) is a reasonable approximation to the flux
-         density of the standard candle and is assumed to have zero circular
-         polarization; this assumption is selected by specifying
-         the `-Y` command line option.* 1.D) The mixing between Stokes I and V is zero; that is, the
-           receptors have equal ellipticities. This assumption is selected by
-           specifying the `-k` command line option.
-
-   - ASSUMPTION 2: To constrain the mixing between Stokes Q and U
-     (rotation about line of sight), one of the following three assumptions
-     can be made.
-     * 2.A) the orientation offset of the first receptor is zero; or* 2.B) the orientation offset of the noide diode is zero.
+     option.
+   * 1.B) While pointing at a standard candle, the baseline flux
+     density has zero circular polarization; this assumption is the
+     default if the calibrator database that is provided
+     to `pcm` contains FluxCal-On observations.
+   * 1.C) Given a set of flux calibration observations, some made
+     while pointing at a standard candle (FluxCal-On) and some made while
+     pointing at "nearby blank sky" (FluxCal-Off), the difference in the
+     off-pulse baseline flux density (FluxCal-On baseline minus
+     FluxCal-Off baseline) is a reasonable approximation to the flux
+     density of the standard candle and is assumed to have zero circular
+     polarization; this assumption is selected by specifying
+     the `-Y` command line option.
+   * 1.D) The mixing between Stokes I and V is zero; that is, the
+     receptors have equal ellipticities. This assumption is selected by
+     specifying the `-k` command line option.
+2. ASSUMPTION 2: To constrain the mixing between Stokes Q and U
+   (rotation about line of sight), one of the following three assumptions
+   can be made.
+   * 2.A) the orientation offset of the first receptor is zero; or
+   * 2.B) the orientation offset of the noide diode is zero.
 
 Assumption 1.A is made by default if no
 `Signal::FluxCalOn` observations

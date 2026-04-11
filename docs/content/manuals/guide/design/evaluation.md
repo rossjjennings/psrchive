@@ -47,7 +47,12 @@ evaluateExpression](http://www.parsifalsoft.com/examples/evalexpression/index.md
 A number of functions that operate on arrays of values are also
 available, including
 
-* min - minimum value* max - maximum value* med - median value* avg - mean value* rms - standard deviation* sum - sum of all values
+* min - minimum value
+* max - maximum value
+* med - median value
+* avg - mean value
+* rms - standard deviation
+* sum - sum of all values
 
 The function name is specified before the opening brace bracket, and
 the vector expression is included inside the braces. For example, to

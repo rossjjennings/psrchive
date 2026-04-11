@@ -1,6 +1,6 @@
 # PSRCHIVE Software Support
 
-[### Ask a Question!](qa)
+### [Ask a Question!](qa)
 
 ### Bug Reports
 

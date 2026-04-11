@@ -1,4 +1,4 @@
-# PSRCHIVE: Adding to the Interpreter
+# interpreter
 
 **Adding to the Interpreter**
 A number of PSRCHIVE programs, most notably
@@ -14,12 +14,9 @@ the name of an existing command. There are four steps required to add
 the new command:
 
 1. inherit the nested sub-class `Pulsar::Interpreter::Extension`;
-
-   - declare and implement the method that will process the command;
-
-     - add the command in the constructor of the new class; and
-
-       - import the new class
+2. declare and implement the method that will process the command;
+3. add the command in the constructor of the new class; and
+4. import the new class
 
 ---
 
@@ -78,10 +75,14 @@ as follows:
 
 * `&CalInterpreter::cal` - the pointer to the method
   of the `CalInterpreter` class to be called when
-  the command is entered by the user* `'c'` - the shortcut key for this command* `"cal"` - the full command name* `"calibrate the currently loaded archive"` - a
-        short help string, seen when the user enters `help` in
-        psrsh.* *the rest* - a detailed help string, seen when the user
-          enters the `help cal` command in psrsh.
+  the command is entered by the user
+* `'c'` - the shortcut key for this command
+* `"cal"` - the full command name
+* `"calibrate the currently loaded archive"` - a
+  short help string, seen when the user enters `help` in
+  psrsh.
+* *the rest* - a detailed help string, seen when the user
+  enters the `help cal` command in psrsh.
 
 ---
 

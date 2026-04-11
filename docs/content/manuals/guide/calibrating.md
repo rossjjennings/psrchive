@@ -8,12 +8,10 @@ is discussed in more detail in the following sections.
 
 1. [Overview](calibrating/overview.md):
    Overview of Calibration.
+2. [Polarization](calibrating/polarization.md):
+   Produce calibrated Stokes parameters.
+3. [Flux](calibrating/flux.md):
+   Measure the flux of the source in Janskys.
 
-   - [Polarization](calibrating/polarization.md):
-     Produce calibrated Stokes parameters.
-
-     - [Flux](calibrating/flux.md):
-       Measure the flux of the source in Janskys.
-
-       Copyright © 2006-2019 Willem van Straten
-       Licensed under the Academic Free License version 2.1
+   Copyright © 2006-2019 Willem van Straten
+   Licensed under the Academic Free License version 2.1

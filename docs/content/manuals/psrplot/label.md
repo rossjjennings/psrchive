@@ -3,14 +3,23 @@
 The labels on
 **psrplot** plots may be set using
 
-* [label names](label.shtml.html#name),* [multiple lines](label.shtml.html#multiple),* [variable subsitution](label.shtml.html#variable).
+* [label names](label.shtml.html#name),
+* [multiple lines](label.shtml.html#multiple),
+* [variable subsitution](label.shtml.html#variable).
 
 ### Label names
 
 There are a total of eight label positions on each panel of a
 **psrplot** plot:
 
-* `x:lab` - label on x-axis* `y:lab` - label on y-axis* `above:l` - label above top of viewport (left)* `above:c` - label above top of viewport (centre)* `above:r` - label above top of viewport (right)* `below:l` - label below top of viewport (left)* `below:c` - label below top of viewport (centre)* `below:r` - label below top of viewport (right)
+* `x:lab` - label on x-axis
+* `y:lab` - label on y-axis
+* `above:l` - label above top of viewport (left)
+* `above:c` - label above top of viewport (centre)
+* `above:r` - label above top of viewport (right)
+* `below:l` - label below top of viewport (left)
+* `below:c` - label below top of viewport (centre)
+* `below:r` - label below top of viewport (right)
 
 ![](label.png)
 

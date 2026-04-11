@@ -28,39 +28,36 @@ using a number of different models of the instrumental response:
    perfectly orthogonally polarized, and the reference source is
    100% linearly polarized and illuminates both receptors equally
    and in phase.
-
-   - `Polar` - Introduced in
-     van Straten (2002 ApJ: 568, 436), this model is not necessarily
-     any more valid than the `SingleAxis` model. It can be
-     used to estimate the self-adjoint (or boost) component as well as
-     2 out of the 3 degrees of freedom of the unitary (or rotation)
-     component of the instrumental transformation. This model is
-     based on the assumptions that the off-pulse emission (system plus
-     sky) is completely unpolarized, and that the receptors have equal
-     and opposite ellipticities.
-
-     - `SingleAxis+Flux` - This model combines
-       observations of the reference source made near both the pulsar
-       and a standard candle (flux calibrator) to eliminate the
-       assumption that the reference source illuminates both receptors
-       equally. It is therefore better than `SingleAxis`
-       alone.
-
-       - `Reception` - Introduced in
-         Ord et al. (2004 MNRAS: 352, 804), this model combines the
-         results of two separate models to form the most accurate estimate
-         of the instrumental response. First, either a
-         `Britton` or `Hamaker` model, as produced
-         by [`pcm`](pcm.md), is used to
-         completely represent the system response at a fiducial epoch.
-         Second, a `SingleAxis` model is used to correct for
-         any variations in differential gain or phase since the reference
-         epoch. In addition to any assumptions made to overcome the
-         [measurement equation
-         modeling degeneracy](pcm/degeneracy.md), this model is based on the assumption
-         that the receptor orientations and ellipticities, as well as the
-         polarization of the reference source, do not vary significantly
-         with time.
+2. `Polar` - Introduced in
+   van Straten (2002 ApJ: 568, 436), this model is not necessarily
+   any more valid than the `SingleAxis` model. It can be
+   used to estimate the self-adjoint (or boost) component as well as
+   2 out of the 3 degrees of freedom of the unitary (or rotation)
+   component of the instrumental transformation. This model is
+   based on the assumptions that the off-pulse emission (system plus
+   sky) is completely unpolarized, and that the receptors have equal
+   and opposite ellipticities.
+3. `SingleAxis+Flux` - This model combines
+   observations of the reference source made near both the pulsar
+   and a standard candle (flux calibrator) to eliminate the
+   assumption that the reference source illuminates both receptors
+   equally. It is therefore better than `SingleAxis`
+   alone.
+4. `Reception` - Introduced in
+   Ord et al. (2004 MNRAS: 352, 804), this model combines the
+   results of two separate models to form the most accurate estimate
+   of the instrumental response. First, either a
+   `Britton` or `Hamaker` model, as produced
+   by [`pcm`](pcm.md), is used to
+   completely represent the system response at a fiducial epoch.
+   Second, a `SingleAxis` model is used to correct for
+   any variations in differential gain or phase since the reference
+   epoch. In addition to any assumptions made to overcome the
+   [measurement equation
+   modeling degeneracy](pcm/degeneracy.md), this model is based on the assumption
+   that the receptor orientations and ellipticities, as well as the
+   polarization of the reference source, do not vary significantly
+   with time.
 
 Ultimately, the model selected by the user will depend upon the
 perceived validity of the model assumptions and the availability of
@@ -162,14 +159,17 @@ following criteria.
 
 1. A calibrator is considered to match a pulsar observation if both
    were observed using the same receiver, instrument, centre frequency, and
-   bandwidth.- In addition to criterion 1, a flux calibrator is used only if
-     it was made within one month before or after the pulsar observation.- In addition to criterion 1, a polarimetric reference calibrator
-       observation matches only if it was made within 2 hours of the pulsar
-       observation, and only if the telescope was pointing within 5 degrees
-       of the pulsar.- When using the `Reception` model, any
-         `Britton` or `Hamaker` solution that satisfies
-         criterion 1 will be used (ie. no maximum time constraint); a match for
-         the `SingleAxis` component is found using criterion 3.
+   bandwidth.
+2. In addition to criterion 1, a flux calibrator is used only if
+   it was made within one month before or after the pulsar observation.
+3. In addition to criterion 1, a polarimetric reference calibrator
+   observation matches only if it was made within 2 hours of the pulsar
+   observation, and only if the telescope was pointing within 5 degrees
+   of the pulsar.
+4. When using the `Reception` model, any
+   `Britton` or `Hamaker` solution that satisfies
+   criterion 1 will be used (ie. no maximum time constraint); a match for
+   the `SingleAxis` component is found using criterion 3.
 
 Any of the above matching criteria can be disabled using the following
 command line options:
@@ -243,9 +243,10 @@ To use the `Reception` model, it will be necessary to run
 ### 5.0 Known bugs and features that require implementation
 
 * The program does not ensure that output filenames do not equal input
-  filenames.* This documentation does not describe the corrections that are
-    applied to the pulsar archive based upon the known receiver
-    configuration.
+  filenames.
+* This documentation does not describe the corrections that are
+  applied to the pulsar archive based upon the known receiver
+  configuration.
 
 ---
 
@@ -294,11 +295,12 @@ A, is most often used. Two sets of observations should be made:
 1. **FluxCalOn** - While the antenna is directed at the standard
    candle, observe the reference source as described above.
    For this observation, `psredit -c type filename`
-   should return `FluxCal-On`.- **FluxCalOff** - While the antenna is pointing at least a full
-     beam width away from the standard candle, observe the reference
-     source again.
-     For this observation, `psredit -c type
-     filename` should return `FluxCal-Off`.
+   should return `FluxCal-On`.
+2. **FluxCalOff** - While the antenna is pointing at least a full
+   beam width away from the standard candle, observe the reference
+   source again.
+   For this observation, `psredit -c type
+   filename` should return `FluxCal-Off`.
 
 At Parkes, `FluxCal-Off` observations are typically made by
 pointing both north and south of Hydra A.

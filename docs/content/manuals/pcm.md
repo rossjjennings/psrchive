@@ -11,7 +11,9 @@ There are two different modes of operation:
 **Measurement Equation Modeling (MEM)**, described in
 van Straten (2004), uses **uncalibrated** observations of
 
-* a single pulsar at multiple parallactic angles,* an amplitude modulated reference source (linear noise diode), and* [optionally] an unpolarized flux calibrator, such as Hydra A.
+* a single pulsar at multiple parallactic angles,
+* an amplitude modulated reference source (linear noise diode), and
+* [optionally] an unpolarized flux calibrator, such as Hydra A.
 
 Please read this imporant note about assumptions made to overcome
 [measurement equation modeling degeneracy](pcm/degeneracy.md).
@@ -20,8 +22,10 @@ Please read this imporant note about assumptions made to overcome
 van Straten (2013), uses
 
 * a single well-calibrated observation of a pulsar with high
-  signal-to-noise ratio (the template, or standard),* one or more uncalibrated observations of the same pulsar, and* [optionally] an amplitude-modulated reference source
-      (e.g. a noise diode coupled to the receptors).
+  signal-to-noise ratio (the template, or standard),
+* one or more uncalibrated observations of the same pulsar, and
+* [optionally] an amplitude-modulated reference source
+  (e.g. a noise diode coupled to the receptors).
 
 It is also possible simultaneously model multiple pulsars
 in order to map the two-dimensional response of the instrument.
@@ -38,14 +42,16 @@ Pulsar::Archive files containing:
 * full polarization observations of a single pulsar over a wide
   range in parallactic angles
   (`Pulsar::Archive::get_type` must
-  return `Signal::Pulsar`).* one or more observations of the "linear" noise diode (CAL) made
-    while pointing at or near the pulsar
-    (`Pulsar::Archive::get_type` must
-    return `Signal::PolnCal`).* [optionally] one or more observations of the CAL made while
-      pointing at a strong flux calibrator with negligibly small degree of
-      circular polarization, such as Hydra A
-      (`Pulsar::Archive::get_type` must return
-      `Signal::FluxCalOn`).
+  return `Signal::Pulsar`).
+* one or more observations of the "linear" noise diode (CAL) made
+  while pointing at or near the pulsar
+  (`Pulsar::Archive::get_type` must
+  return `Signal::PolnCal`).
+* [optionally] one or more observations of the CAL made while
+  pointing at a strong flux calibrator with negligibly small degree of
+  circular polarization, such as Hydra A
+  (`Pulsar::Archive::get_type` must return
+  `Signal::FluxCalOn`).
 
 All observations must have the same observing parameters, such as
 centre frequency and bandwidth, as defined by the
@@ -60,8 +66,9 @@ gathering all of the required data:
      $MYCALS/database.txt.
 * Create a preliminary total integrated calibrated profile:
   1. Perform preliminary calibration using
-     `pac -d $MYCALS/database.txt psr*.ar`* Combine the calibrated output archives using
-       `psradd -T -o calib.TT psr*.calib`
+     `pac -d $MYCALS/database.txt psr*.ar`
+  2. Combine the calibrated output archives using
+     `psradd -T -o calib.TT psr*.calib`
 
 This last step produces a total integrated profile from which to
 choose the best pulse phase bins to be used as model constraints. It
@@ -97,13 +104,15 @@ In MEM mode, `pcm` does the following (not necessarily in this order):
   `Polar`, depending upon the chosen parameterization,
   `Britton` or `Hamaker`). The weighted mean of
   these solutions is used as the first guess of the instrumental
-  response.* Loads the pulsar archive and prunes the Stokes parameters from
-    the specified set of pulse phase bins. These are corrected using the
-    best guess of the instrumental response, deparallactified, and added
-    to a weighted mean that is used as the first guess of the Stokes
-    parameters.* Loads all `FluxCalOn` flux calibrator files and uses
-      the off-pulse Stokes parameters to constrain the mixing of Stokes I
-      and V. This breaks the degeneracy described in van Straten (2004).
+  response.
+* Loads the pulsar archive and prunes the Stokes parameters from
+  the specified set of pulse phase bins. These are corrected using the
+  best guess of the instrumental response, deparallactified, and added
+  to a weighted mean that is used as the first guess of the Stokes
+  parameters.
+* Loads all `FluxCalOn` flux calibrator files and uses
+  the off-pulse Stokes parameters to constrain the mixing of Stokes I
+  and V. This breaks the degeneracy described in van Straten (2004).
 
 [An example of MEM usage.](pcm/mem.md)
 
@@ -131,21 +140,27 @@ where *name* is any one of:
 
 * `prefit`  for each frequency channel, print the initial
   state of the model that is to be fit to the data, including fit flags
-  and initial guesses for each parameter* `report`  print a report of the reduced chisq for each
-    Stokes parameter of each pulse phase bin in pcm\_report\_\*.txt.
-    Please see [fit report](pcm/report.md) for more details.* `data` 
-      for each pulsar and each frequency channel, print the input data
-      (Stokes parameters and errors) and the model evaluated for each datum.
-      Please see [data and model](pcm/data.md) for more details.* `guess`  plot the initial guess of the instrumental
-        response in guess\_response.ps, the calibrator Stokes
-        parameters in guess\_cal.ps, and the pulsar Stokes parameters
-        in guess\_psr.ps.* `residual`  plot the residual between each measurement
-          and the model in channel\_\*.ps.* `total`  plot the total integrated
-            pulse profile in uncalibrated.ps  (before) and
-            calibrated.ps  (after).* `result`  plot the best fit result of the instrumental
-              response in result\_response.ps, the calibrator Stokes
-              parameters in result\_cal.ps, and the pulsar Stokes parameters
-              in result\_psr.ps.
+  and initial guesses for each parameter
+* `report`  print a report of the reduced chisq for each
+  Stokes parameter of each pulse phase bin in pcm\_report\_\*.txt.
+  Please see [fit report](pcm/report.md) for more details.
+* `data` 
+  for each pulsar and each frequency channel, print the input data
+  (Stokes parameters and errors) and the model evaluated for each datum.
+  Please see [data and model](pcm/data.md) for more details.
+* `guess`  plot the initial guess of the instrumental
+  response in guess\_response.ps, the calibrator Stokes
+  parameters in guess\_cal.ps, and the pulsar Stokes parameters
+  in guess\_psr.ps.
+* `residual`  plot the residual between each measurement
+  and the model in channel\_\*.ps.
+* `total`  plot the total integrated
+  pulse profile in uncalibrated.ps  (before) and
+  calibrated.ps  (after).
+* `result`  plot the best fit result of the instrumental
+  response in result\_response.ps, the calibrator Stokes
+  parameters in result\_cal.ps, and the pulsar Stokes parameters
+  in result\_psr.ps.
 
 #### 2.4 Modeling time variations
 
@@ -166,14 +181,15 @@ When -s is used, the pulsar is put through a signal path with
 constant gain set to unity, and the free gain parameter is applied
 only to the calibrator signal path.
 
-**Instrumental variations** 
+**Instrumental variations**
 
 **pcm** can model the observations with an instrumental
 backend that varies over time. Each of the absolute gain,
 differential gain, or differential phase may be independently
 represented as either
 
-* a polynomial of arbitrary order; or* a series of step functions (jumps).
+* a polynomial of arbitrary order; or
+* a series of step functions (jumps).
 
 For the series of steps, the epoch of each step is defined by the
 first sub-integration of each CAL file encountered. This models the
@@ -188,7 +204,10 @@ the next LEVCAL.
 
 Where PAR is a single-character code:
 
-* g = absolute gain* b = differential gain* r = differential phase* a = all of the above
+* g = absolute gain
+* b = differential gain
+* r = differential phase
+* a = all of the above
 
 For example, to model all three parameters as a third order
 polynomial, use -o a:3; to model absolute and differential gain

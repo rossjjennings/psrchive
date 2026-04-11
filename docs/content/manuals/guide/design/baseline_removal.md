@@ -13,13 +13,16 @@ are described under [Configurable Algorithms and Options](../../psrstat/algorith
 Assuming that the recorded dispersion measure accurately describes the relationship between pulse phase and radio frequency
 and that the phase model accurately predicts pulse phase in every sub-integration, this strategy includes the following steps
 
-1. compute the total intensity integrated over all polarizations, frequency channels, and sub-integrations;- compute the common baseline mask; i.e. identify the phase bins to be included in the baseline using the current off-pulse estimation algorithm; and- for each polarization, frequency channel, and sub-integration, use the common baseline mask to compute and subtract the mean of the off-pulse phase bins
+1. compute the total intensity integrated over all polarizations, frequency channels, and sub-integrations;
+2. compute the common baseline mask; i.e. identify the phase bins to be included in the baseline using the current off-pulse estimation algorithm; and
+3. for each polarization, frequency channel, and sub-integration, use the common baseline mask to compute and subtract the mean of the off-pulse phase bins
 
 ### `RemoveBaseline::Each`
 
 This strategy includes the following steps
 
-1. for each frequency channel and sub-integration, compute a unique baseline mask;- for each polarization, use the unique baseline mask to compute and subtract the mean of the off-pulse phase bins
+1. for each frequency channel and sub-integration, compute a unique baseline mask;
+2. for each polarization, use the unique baseline mask to compute and subtract the mean of the off-pulse phase bins
 
 Copyright © 2006-2019 Willem van Straten
 Licensed under the Academic Free License version 2.1

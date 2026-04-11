@@ -25,11 +25,12 @@ following:
 1. `FluxCalOn` - An observation of the
    reference source made while the antenna is directed at a standard
    candle. (`Pulsar::Archive::get_type` must
-   return `Signal::FluxCalOn`).- `FluxCalOff` - An observation of the reference
-     source made while the antenna is pointing at least a full beam
-     width away from the standard candle.
-     (`Pulsar::Archive::get_type` must return
-     `Signal::FluxCalOff`).
+   return `Signal::FluxCalOn`).
+2. `FluxCalOff` - An observation of the reference
+   source made while the antenna is pointing at least a full beam
+   width away from the standard candle.
+   (`Pulsar::Archive::get_type` must return
+   `Signal::FluxCalOff`).
 
 The observations in each set must have the same observing parameters,
 such as centre frequency and bandwidth, as determined by the
@@ -43,7 +44,12 @@ information is parsed from a text file (by default,
 $prefix/share/fluxcal.cfg) which includes a row
 for each flux calibrator. The columns in this file are:
 
-1. source name- right ascension- declination- reference frequency (MHz)- reference flux density (Jy)- spectral index
+1. source name
+2. right ascension
+3. declination
+4. reference frequency (MHz)
+5. reference flux density (Jy)
+6. spectral index
 
 Following each row, any number of aliases for the source name may be
 specified using the aka keyword. An example
@@ -78,15 +84,16 @@ There are two modes of operation, as determined by the input method:
    `fluxcal` sorts the files by name and, as they are
    loaded, breaks the list up into sets. In order for the solutions
    to be used, the calibrator database text file must later be
-   regenerated using [`pac`](manuals/fluxcal/pac.md).- With Database: In this mode of operation, a calibrator database
-     text file, as produced by [`pac`](manuals/fluxcal/pac.md),
-     is provided using the -d filename command
-     line option; `fluxcal` sorts the observations by
-     the MJD of each database entry and, as they are loaded, breaks
-     the list up into sets. For each new flux calibration solution
-     successfully written to disk, `fluxcal` will add a
-     new entry to the database. The updated database text file will
-     be written at the end of operation.
+   regenerated using [`pac`](manuals/fluxcal/pac.md).
+2. With Database: In this mode of operation, a calibrator database
+   text file, as produced by [`pac`](manuals/fluxcal/pac.md),
+   is provided using the -d filename command
+   line option; `fluxcal` sorts the observations by
+   the MJD of each database entry and, as they are loaded, breaks
+   the list up into sets. For each new flux calibration solution
+   successfully written to disk, `fluxcal` will add a
+   new entry to the database. The updated database text file will
+   be written at the end of operation.
 
 A flux calibrator set is defined by the time elapsed between the end
 of the last observation in the set and the start of the first

@@ -29,10 +29,12 @@ psrplot -p plot [-c options] [-j jobs] [-l loop] filenames
 where:
 
 * `options` are plotting options (such as the label on
-  the x-axis);* `jobs` are preprocessing operations to be
-    performed on the data before plotting (such as integration in
-    frequency); and* `loop` is an index over which to loop (such as plotting
-      for each sub-integration).
+  the x-axis);
+* `jobs` are preprocessing operations to be
+  performed on the data before plotting (such as integration in
+  frequency); and
+* `loop` is an index over which to loop (such as plotting
+  for each sub-integration).
 
 Please see the [psrsh](psrsh.html#jobs)
 documentation for more about `jobs`.
@@ -67,11 +69,23 @@ in sequence, one after the other.
 
 Please follow the links for more detailed information on each topic:
 
-* [Available plots](psrplot/plots.md)* [Plot customization](psrplot/customization.md)
-    + [Command line arguments](psrplot/customization.shtml.html#command_line)+ [Style files](psrplot/customization.shtml.html#style_file)+ [Option sets](psrplot/customization.shtml.html#option_sets)* [Plot labels](psrplot/label.md)
-      + [Label names](psrplot/label.shtml.html#name)+ [Multiple lines](psrplot/label.shtml.html#multiple)+ [Variable substitution](psrplot/label.shtml.html#variable)* [Viewport layout](psrplot/viewport.md)
-        + [Position and size](psrplot/viewport.shtml.html#position)+ [Overlaying multiple plots](psrplot/viewport.shtml.html#overlay)+ [Multiple plot style files](psrplot/viewport.shtml.html#style)* [Pen attributes](psrplot/pen.md)
-          + [Character font and height](psrplot/pen.shtml.html#font)+ [Line width and style](psrplot/pen.shtml.html#line)* [Looping over data dimensions](psrplot/loop.md)
+* [Available plots](psrplot/plots.md)
+* [Plot customization](psrplot/customization.md)
+  + [Command line arguments](psrplot/customization.shtml.html#command_line)
+  + [Style files](psrplot/customization.shtml.html#style_file)
+  + [Option sets](psrplot/customization.shtml.html#option_sets)
+* [Plot labels](psrplot/label.md)
+  + [Label names](psrplot/label.shtml.html#name)
+  + [Multiple lines](psrplot/label.shtml.html#multiple)
+  + [Variable substitution](psrplot/label.shtml.html#variable)
+* [Viewport layout](psrplot/viewport.md)
+  + [Position and size](psrplot/viewport.shtml.html#position)
+  + [Overlaying multiple plots](psrplot/viewport.shtml.html#overlay)
+  + [Multiple plot style files](psrplot/viewport.shtml.html#style)
+* [Pen attributes](psrplot/pen.md)
+  + [Character font and height](psrplot/pen.shtml.html#font)
+  + [Line width and style](psrplot/pen.shtml.html#line)
+* [Looping over data dimensions](psrplot/loop.md)
 
 ### 3.0 Algorithms
 

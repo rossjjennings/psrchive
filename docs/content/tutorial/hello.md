@@ -1,4 +1,4 @@
-# PSRCHIVE Simple example
+# hello
 
 **Hello, pulsar!**
 In the tradition of computing language tutorials, the following

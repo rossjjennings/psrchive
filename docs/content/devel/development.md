@@ -1,4 +1,4 @@
-# Developer's Guide
+# PSRCHIVE developer's guide
 
 ### Introduction
 
@@ -80,8 +80,9 @@ In addition to the standard make targets, the following targets have
 been defined in the **main** directories:
 
 * libs compile and install only the library defined in the
-  **main** directory* include install only the header files defined in the
-    **main** directory
+  **main** directory
+* include install only the header files defined in the
+  **main** directory
 
 For instructions on how to compile the rest of the Swinburne software
 repository, please refer to the

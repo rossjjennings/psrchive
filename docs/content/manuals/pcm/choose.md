@@ -11,7 +11,10 @@ with the highest total intensity and the highest polarized flux.
 To specify a selection strategy, use `-B name`,
 where name selects the value to be maximized:
 
-* `int` - total intensity* `pol` - polarized flux* `inv` - invariant interval* `orth` - orthogonality
+* `int` - total intensity
+* `pol` - polarized flux
+* `inv` - invariant interval
+* `orth` - orthogonality
 
 Orthogonality is maximized by choosing the phase bin with
 maximum polarized flux, then each subsequent phase bin that maximizes

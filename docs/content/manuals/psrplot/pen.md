@@ -3,22 +3,21 @@
 The attributes of the pen used to draw
 **psrplot** plots may be set, including
 
-* [character font and height](pen.shtml.html#font), and* [line width and style](pen.shtml.html#line).
+* [character font and height](pen.shtml.html#font), and
+* [line width and style](pen.shtml.html#line).
 
 ### Character font and height
 
 The character font and height may be set via the `cf` and
 `ch` attributes. The default value for each of these is 1 (one).
-The character font may be set to any integer supported by the
-[PGSCF](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSCF) subroutine. The character height may be set to any
+The character font may be set to any integer supported by the[PGSCF](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSCF) subroutine. The character height may be set to any
 floating point value, as described in the
 [PGSCH](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSCH) documentation.
 ### Line width and style
 
 The line width may be set via the `lw` attribute.
 The default value is 1 (one), and the line width may be set to any integer
-up to 201, as described in the
-[PGSLW](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSLW) documentation.
+up to 201, as described in the[PGSLW](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSLW) documentation.
 
 Certain plots have other attributes, such as the line style and colour.
 For example, the "stokes" plot has colour index `ci` and

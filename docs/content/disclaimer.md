@@ -1,4 +1,4 @@
-# PSRCHIVE Disclaimer
+# disclaimer
 
 **PSRCHIVE Disclaimer**
 

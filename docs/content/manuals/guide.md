@@ -11,15 +11,11 @@ Suggestions and contributions are welcome!
 
 1. [Design Features](guide/design.md):
    description of overall design and unique features
+2. Installation: installation requirements and instructions
+3. [Viewing Data](guide/viewing.md): querying and editing metadata and making plots
+4. [Calibrating Data](guide/calibrating.md): polarimetric calibration
+5. [Trouble Shooting](../trouble.md):
+   steps that can help to debug a problem
 
-   - Installation: installation requirements and instructions
-
-     - [Viewing Data](guide/viewing.md): querying and editing metadata and making plots
-
-       - [Calibrating Data](guide/calibrating.md): polarimetric calibration
-
-         - [Trouble Shooting](../trouble.md):
-           steps that can help to debug a problem
-
-           Copyright © 2006-2019 Willem van Straten
-           Licensed under the Academic Free License version 2.1
+   Copyright © 2006-2019 Willem van Straten
+   Licensed under the Academic Free License version 2.1

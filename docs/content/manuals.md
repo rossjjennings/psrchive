@@ -18,22 +18,27 @@ A step-by-step [User's Guide](manuals/guide.md) is also under development.
 | *Text-based interfaces* | |
 | [vap](manuals/vap.md) | output tables of parameters and derived values |
 | [pdv](manuals/pdv.md) | view some basic data as text |
-| *Graphical interfaces* | || [pav](manuals/pav.md) | produce a wider variety of plots |
+| *Graphical interfaces* | |
+| [pav](manuals/pav.md) | produce a wider variety of plots |
 | psrgui | interactive plot interface |
 | [pazi](manuals/pazi.md) | interactive plotter and zapper |
-| *General data processing* | || [pam](manuals/pam.md) | command line general purpose data reduction |
+| *General data processing* | |
+| [pam](manuals/pam.md) | command line general purpose data reduction |
 | [psrconv](manuals/psrconv.md) | convert from one file format to another |
 | psrwt | assign weights to Archive data in various ways |
-| *Polarimetry and Calibration* | || [pac](manuals/pac.md) | polarimetric calibration and database creation |
+| *Polarimetry and Calibration* | |
+| [pac](manuals/pac.md) | polarimetric calibration and database creation |
 | [pcm](manuals/pcm.md) | determine the receiver cross coupling |
 | [fluxcal](manuals/fluxcal.md) | generate flux calibrators |
 | pacv | plot calibrator data |
 | [rmfit](manuals/rmfit.md) | estimate the Faraday rotation measure |
 | [psrpol](manuals/psrpol.md) | Measure phase-resolved spherical histograms of the polarization vector |
-| *Pulsar Timing* | || [pas](manuals/pas.md) | generate template profiles (standards) |
+| *Pulsar Timing* | |
+| [pas](manuals/pas.md) | generate template profiles (standards) |
 | [pat](manuals/pat.md) | produce time of arrival estimates |
 | [rhythm](http://astronomy.swin.edu.au/pulsar/software/manuals/rhythm) | graphical user interface to TEMPO |
-| *Miscellaneous* | || [psrchive\_config](manuals/config.md) | configuration file management |
+| *Miscellaneous* | |
+| [psrchive\_config](manuals/config.md) | configuration file management |
 | [paz](manuals/paz.md) | RFI mitigation |
 | [spa](manuals/spa.md) | statistical analysis of single pulse data |
 | [psrspa](manuals/psrspa.md) | Reimplementation of spa with added functionality |

@@ -1,4 +1,4 @@
-# PSRCHIVE: Adding a Configuration Option
+# config
 
 **Adding a Configuration Option**
 A number of PSRCHIVE classes have default
@@ -14,10 +14,8 @@ cannot be equal to the name of an existing option. There are three
 ways to add the new option:
 
 1. direct use of the `Pulsar::Config<>` template
-
-   - indirect use of the `Pulsar::Config<>` template via a pointer
-
-     - indirect use of the `Pulsar::Config<>` template via a `CommandParser`.
+2. indirect use of the `Pulsar::Config<>` template via a pointer
+3. indirect use of the `Pulsar::Config<>` template via a `CommandParser`.
 
 ---
 

@@ -1,11 +1,13 @@
-# PSRCHIVE: Writing a File Format Plugin
+# plugin
 
 **Writing a File Format Plugin**
 To add a new file format to the list supported by the PSRCHIVE library, it is necessary to write a new
 class that inherits the `Pulsar::Archive` base class. This
 class must implement at least:
 
-* constructors, destructors, and methods for copying and cloning;* methods for file loading and unloading; and* an advocate class
+* constructors, destructors, and methods for copying and cloning;
+* methods for file loading and unloading; and
+* an advocate class
 
 ---
 
@@ -57,8 +59,10 @@ The **advocate** for your new class tells the PSRCHIVE library when your plugin 
 load a file. There are three rules for defining the advocate class:
 
 1. the declaration of the class must be nested inside the definition of
-   your plugin class,- the class must be named `Agent`, and- the class must inherit the `Pulsar::Archive::Advocate`
-       template base class.
+   your plugin class,
+2. the class must be named `Agent`, and
+3. the class must inherit the `Pulsar::Archive::Advocate`
+   template base class.
 
 For example, suppose that your plugin class is named
 `MyArchive`; the code that defines the advocate class would

@@ -6,7 +6,9 @@ developing PSRCHIVE? The following handy rules
 of thumb can help when making design decisions:
 
 1. [Avoid adding methods](design.shtml.html#methods) to the container classes
-   (Archive, Integration, Profile)- [Implement algorithms as classes- [Use extensions](design.shtml.html#extensions) to customize functionality](design.shtml.html#classes)
+   (Archive, Integration, Profile)
+2. [Implement algorithms as classes](design.shtml.html#classes)
+3. [Use extensions](design.shtml.html#extensions) to customize functionality
 
 ---
 

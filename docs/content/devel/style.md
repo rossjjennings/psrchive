@@ -2,7 +2,9 @@
 
 The following guidelines are common to most software development projects:
 
-* use design patterns,* always protect attributes,* avoid multiple inheritance
+* use design patterns,
+* always protect attributes,
+* avoid multiple inheritance
 
 ---
 
@@ -31,30 +33,32 @@ component of data abstraction is design flexibility:
   correct to infinite frequency, it became better to store the
   reference as a wavelength. The change to the internal storage of
   the attribute required no changes to any code that used the
-  `get|set_reference_frequency` methods.* any additional error checking and/or other behaviours may be
-    implemented in set and/or get methods; for example, a base class
-    may ensure that preprocessing steps are performed on input data by
-    making the input data attribute private and implementing these steps
-    in the set input data method;* set and get methods enable *lazy evaluation*; e.g.
+  `get|set_reference_frequency` methods.
+* any additional error checking and/or other behaviours may be
+  implemented in set and/or get methods; for example, a base class
+  may ensure that preprocessing steps are performed on input data by
+  making the input data attribute private and implementing these steps
+  in the set input data method;
+* set and get methods enable *lazy evaluation*; e.g.
 
-      ```
-        //  the result attribute is cached internally and recomputed only when necessary 
+  ```
+    //  the result attribute is cached internally and recomputed only when necessary 
 
-        void MyClass::set_attribute (double new_value)
-        {
-          if (current_value == new_value)
-            return;
-          needs_computation = true;
-          current_value = new_value;
-        }
+    void MyClass::set_attribute (double new_value)
+    {
+      if (current_value == new_value)
+        return;
+      needs_computation = true;
+      current_value = new_value;
+    }
 
-        double MyClass::get_result () const
-        {
-          if (needs_computation)
-            compute_result ();
-          return result;
-        }
-      ```
+    double MyClass::get_result () const
+    {
+      if (needs_computation)
+        compute_result ();
+      return result;
+    }
+  ```
 
 ---
 

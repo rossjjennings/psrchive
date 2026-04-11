@@ -14,9 +14,11 @@ a number of different algorithms for RM estimation.
 `rmfit` implements the following three methods of RM estimation
 
 1. Brute force search for peak linear polarization as a
-   function of trial RM.- Iterative differential position angle refinement using two
-     halves of the total bandwidth- Using the quadratic fitting algorithm presented by
-       [Noutsos et al. (2008)](http://adsabs.harvard.edu/abs/2008MNRAS.386.1881N)
+   function of trial RM.
+2. Iterative differential position angle refinement using two
+   halves of the total bandwidth
+3. Using the quadratic fitting algorithm presented by
+   [Noutsos et al. (2008)](http://adsabs.harvard.edu/abs/2008MNRAS.386.1881N)
 
 #### 2.1 Brute Force Search
 
@@ -29,8 +31,10 @@ chooses the minimum and maximum RM and the RM step size as follows:
   `RM_max=0.5/(lambda*lambda)*nu/dnu`, where
   `lambda` is the wavelength in metres, `nu` is
   the centre frequency in Hz, and `dnu` is the channel bandwidth
-  in Hz.* `RM_min=-RM_max`* The step size is `RM_max/nchan`, where `nchan`
-      is the number of frequency channels in the data.
+  in Hz.
+* `RM_min=-RM_max`
+* The step size is `RM_max/nchan`, where `nchan`
+  is the number of frequency channels in the data.
 
 It is also possible to set minimum and maximum RM and the number of
 steps as in the following

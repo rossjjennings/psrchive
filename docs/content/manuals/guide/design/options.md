@@ -3,7 +3,9 @@
 For the sake of consistency, a number of PSRCHIVE programs employ a standard set of command
 line options, including
 
-* [Standard preamble](options.shtml.html#preamble),* [Standard preprocessing](options.shtml.html#preprocessing)* [Standard output](options.shtml.html#output).
+* [Standard preamble](options.shtml.html#preamble),
+* [Standard preprocessing](options.shtml.html#preprocessing)
+* [Standard output](options.shtml.html#output).
 
 ### Standard preamble
 
@@ -14,11 +16,9 @@ line options, including
   -v             verbose mode
   -V             very verbose mode
   -M metafile    metafile contains list of archive filenames
-```
+```### Standard preprocessing
 
-### Standard preprocessing
-
-Some programs make use of the [psrsh](../../psrsh.md)
+Some programs make use of the[psrsh](../../psrsh.md)
 command language interpreter to preprocess data. The relevant
 command line options are
 

@@ -14,9 +14,11 @@ dependencies, the Python interface requires a small number of additional
 external programs or libraries. The minimum requirements are:
 
 * [Python](http://www.python.org/), version 2.x or 3.x,
-  including the development headers ("python-dev" or similar package).* [SWIG](http://www.swig.org/), any version, is needed to generate the
-    Python/C++ interface code.* [NumPy](http://numpy.scipy.org/), version 1.x, the Python library
-      for handling N-dimensional data arrays. The PSRCHIVE Python bindings are incompatible with NumPy 2.x.
+  including the development headers ("python-dev" or similar package).
+* [SWIG](http://www.swig.org/), any version, is needed to generate the
+  Python/C++ interface code.
+* [NumPy](http://numpy.scipy.org/), version 1.x, the Python library
+  for handling N-dimensional data arrays. The PSRCHIVE Python bindings are incompatible with NumPy 2.x.
 
 These are available in all standard Linux distributions, and should
 typically be installed by your operating system's package manager.
@@ -24,10 +26,12 @@ typically be installed by your operating system's package manager.
 Not strictly required, but very useful are:
 
 * [SciPy](http://www.scipy.org/), a large set of very
-  useful routines for scientific computing in Python.* [matplotlib](http://matplotlib.sourceforge.net/) is
-    a widely used Python plotting library.* [IPython](http://ipython.org/) enhances the standard
-      Python interpreter for interactive use (e.g., tab completion, help
-      screens, etc).
+  useful routines for scientific computing in Python.
+* [matplotlib](http://matplotlib.sourceforge.net/) is
+  a widely used Python plotting library.
+* [IPython](http://ipython.org/) enhances the standard
+  Python interpreter for interactive use (e.g., tab completion, help
+  screens, etc).
 
 ### Installation
 
@@ -242,7 +246,8 @@ This results in the following plot:
 
 ### More Examples
 
-* Example 1 (TBD)* Example 2 (TBD)
+* Example 1 (TBD)
+* Example 2 (TBD)
 
 Copyright © 2006-2019 Paul Demorest
 Licensed under the Academic Free License version 2.1

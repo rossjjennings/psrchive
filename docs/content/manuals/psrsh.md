@@ -26,8 +26,7 @@ available by typing
 psrsh> help command
 ```
 
-To exit the shell, type `quit`.
-#### 2.2 Shell script
+To exit the shell, type `quit`.#### 2.2 Shell script
 
 To execute a sequence of commands on one or more archives without
 any interaction, run
@@ -55,12 +54,12 @@ script archive1 [archive2 ...]
 
 By default, unless the script contains a call to the `unload` 
 method, the results of the script will not be written to disk.
-However, if any of the [standard output
+However, if any of the[standard output
 options](guide/design/options.shtml.html#output) are used, then `psrsh`  will unload the results
 as specified. This allows scripts to behave like most other PSRCHIVE programs.
 #### 2.3 Job preprocessor
 
-Some PSRCHIVE programs (e.g. [psrplot](psrplot.md) and [psradd](psradd.md)) use the `psrsh`
+Some PSRCHIVE programs (e.g.[psrplot](psrplot.md) and [psradd](psradd.md)) use the `psrsh`
 interpreter to perform preprocessing on input archives. These
 programs generally accept preprocessing commands, or *jobs*,
 using the `-j` and `-J` command-line options. The
@@ -88,6 +87,7 @@ much like the assert function in C and can evaluate a wide variety of
 expressions.
 
 For a complete list of supported commands, type `psrsh -H`.
+
 #### 2.4 Shortcut Keys
 
 Certain commands can be entered using a single character shortcut key,
@@ -100,8 +100,7 @@ bins to 128, and rotate by one quarter turn of phase before plotting:
 psrplot -j 'FTB 128,r .25' etc.
 ```
 
-Shortcut keys are shown in square brackets when you run `psrsh -H`.
-#### 2.5 Archive Stack
+Shortcut keys are shown in square brackets when you run `psrsh -H`.#### 2.5 Archive Stack
 
 The `psrsh` interpreter supports storage of multiple archives
 on a stack, enabling backup of data before an operation is performed
@@ -110,30 +109,33 @@ filename` it automatically replaces the top of the stack.
 The `push` and `pop` commands work as follows:
 
 * `push`  
-  push a copy of the current archive on top of the stack.* `pop`  
-    pop the archive currently on top of the stack. If not named (see next
-    section) the archive will be deleted.
-
-#### 2.5 Archive Names
+  push a copy of the current archive on top of the stack.
+* `pop`  
+  pop the archive currently on top of the stack. If not named (see next
+  section) the archive will be deleted.#### 2.5 Archive Names
 
 It is also possible to assign a name to each archive both on and off
 the stack, using the following commands:
 
 * `set name`  
   assign a name to the current top of the stack. If the archive is
-  removed from the stack, it will not be deleted.* `get name`  
-    replace the current top of the stack with the named archive.* `remove name`  
-      delete the named archive
+  removed from the stack, it will not be deleted.
+* `get name`  
+  replace the current top of the stack with the named archive.
+* `remove name`  
+  delete the named archive
 
 Some commands also accept names as an optional argument:
 
 * `load name filename`  
   loads the specified file and assigns it a name.
-  The archive does not replace the top of the stack.* `unload name filename`  
-    unloads the named archive with the specified filename.* `push name`  
-      push the named archive onto the top of the stack
-      (differs from `get name`, which replaces
-      the top of the stack).
+  The archive does not replace the top of the stack.
+* `unload name filename`  
+  unloads the named archive with the specified filename.
+* `push name`  
+  push the named archive onto the top of the stack
+  (differs from `get name`, which replaces
+  the top of the stack).
 
 Some commands require a name as an argument, such as:
 
@@ -151,7 +153,9 @@ previously possible.
 
 ### 4.0 Testing and examples
 
-* [Interactive shell](psrsh/examples/shell.md)* [Executable script](psrsh/examples/script.md)* [Polarimetric calibration](psrsh/examples/calibration.md)
+* [Interactive shell](psrsh/examples/shell.md)
+* [Executable script](psrsh/examples/script.md)
+* [Polarimetric calibration](psrsh/examples/calibration.md)
 
 ### 5.0 Known bugs and features that require implementation
 

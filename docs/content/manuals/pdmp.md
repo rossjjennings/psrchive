@@ -75,15 +75,16 @@ Once the search is complete, it will display four plots along with a number of
 values, including the original pulsar parameter values for:
 
 * (Barycentric and Topocentric) period
-* Dispersion measure* Barycentric MJD
-  * Bandwidth
-  * Centre frequency
-  * Number of sub-integrations
-  * Number of phase bins
-  * Number of frequency channels
-  * Time span per phase bin
-  * Time span per sub integration
-  * Total observation time
+* Dispersion measure
+* Barycentric MJD
+* Bandwidth
+* Centre frequency
+* Number of sub-integrations
+* Number of phase bins
+* Number of frequency channels
+* Time span per phase bin
+* Time span per sub integration
+* Total observation time
 
 The period and dispersion measure search parameters displayed on output include:
 

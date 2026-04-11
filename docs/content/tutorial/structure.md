@@ -1,9 +1,11 @@
-# PSRCHIVE: Structure of an Archive
+# structure
 
 **Structure of an Archive**
 The `Pulsar::Archive` class is a data container that holds
 
-* an array of integrations,* common header parameters, and* any additional extensions.
+* an array of integrations,
+* common header parameters, and
+* any additional extensions.
 
 ---
 

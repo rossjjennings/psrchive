@@ -10,7 +10,10 @@ can be installed using [fink](http://www.finkproject.org) or
 The various dependencies can be installed as follows:
 
 * Install X11 and Xcode Tools:
-  1. insert Mac OS X Install Disk 1* click Finder (blue happy face)* search for "X11User.pkg" and install it* search for "XcodeTools.mpkg" and install it
+  1. insert Mac OS X Install Disk 1
+  2. click Finder (blue happy face)
+  3. search for "X11User.pkg" and install it
+  4. search for "XcodeTools.mpkg" and install it
 * **Mac OS X 10.5 (Leopard) and higher**:
   Install [the latest release of X11.pkg from XQuartz](http://xquartz.macosforge.org).
 * Install the appropriate version of gfortran. Links to

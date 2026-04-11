@@ -9,7 +9,8 @@ is called *auxiliary*; however, the auxiliary dispersion measures and
 rotation measures can also be used to represent changes in
 interstellar DM / RM.
 
-* Interstellar cold plasma effects are corrected with respect to the centre frequency stored in the archive header.* Auxiliary cold plasma effects are corrected with respect to infinite frequency.
+* Interstellar cold plasma effects are corrected with respect to the centre frequency stored in the archive header.
+* Auxiliary cold plasma effects are corrected with respect to infinite frequency.
 
 ### Interstellar DM and RM parameters
 
@@ -18,10 +19,13 @@ and their related correction flags are stored in the primary header of a file
 and can be queried and set using `psredit`:
 
 * `rmc` [boolean] Interstellar Faraday rotation has
-  been corrected; applies to all sub-integrations* `dmc` [boolean] Interstellar dispersion has
-    been corrected; applies to all sub-integrations* `rm` [double-precision floating-point value]
-      The interstellar Faraday rotation measure; applies to all sub-integrations* `dm` [double-precision floating-point value]
-        The interstellar dispersion measure; applies to all sub-integrations
+  been corrected; applies to all sub-integrations
+* `dmc` [boolean] Interstellar dispersion has
+  been corrected; applies to all sub-integrations
+* `rm` [double-precision floating-point value]
+  The interstellar Faraday rotation measure; applies to all sub-integrations
+* `dm` [double-precision floating-point value]
+  The interstellar dispersion measure; applies to all sub-integrations
 
 ### Auxiliary DM and RM parameters
 
@@ -30,14 +34,19 @@ auxiliary dispersion and birefringence and can be queried and set
 using `psredit`:
 
 * `aux:rmc` [boolean] auxiliary Faraday rotation has
-  been corrected; applies to all sub-integrations* `aux:rm_model` [string] describes the model used to
-    predict auxiliary rotation measure* `aux:dmc` [boolean] auxiliary dispersion has
-      been corrected; applies to all sub-integrations* `aux:dm_model` [string] describes the model used to
-        predict auxiliary dispersion measure* `int:aux:rm` [double-precision floating-point value]
-          for each sub-integration, the auxiliary rotation measure predicted
-          by the model for the corresponding epoch* `int:aux:dm` [double-precision floating-point value]
-            for each sub-integration, the auxiliary dispersion measure predicted
-            by the model for the corresponding epoch
+  been corrected; applies to all sub-integrations
+* `aux:rm_model` [string] describes the model used to
+  predict auxiliary rotation measure
+* `aux:dmc` [boolean] auxiliary dispersion has
+  been corrected; applies to all sub-integrations
+* `aux:dm_model` [string] describes the model used to
+  predict auxiliary dispersion measure
+* `int:aux:rm` [double-precision floating-point value]
+  for each sub-integration, the auxiliary rotation measure predicted
+  by the model for the corresponding epoch
+* `int:aux:dm` [double-precision floating-point value]
+  for each sub-integration, the auxiliary dispersion measure predicted
+  by the model for the corresponding epoch
 
 #### Example Usage: Edit auxiliary RM using a `psrsh`script
 
@@ -94,17 +103,19 @@ int[1]:aux:rm=3.4
 1. If `rmc`/`dmc` is false (0), then the interstellar RM/DM that
    applies to all sub-integrations is corrected with reference to the weighted centre-frequency
    of the resulting frequency channel (fscrunch) or sub-integration (tscrunch). The `rmc`/`dmc`
-   flags are not changed and remain false (0).- If `aux:rmc`/`aux:dmc` is false (0), then
-     the auxiliary RM/DM of each sub-integration is corrected with respect to infinite frequency
-     and the `aux:rmc`/`aux:dmc` flags are set to true (1).
+   flags are not changed and remain false (0).
+2. If `aux:rmc`/`aux:dmc` is false (0), then
+   the auxiliary RM/DM of each sub-integration is corrected with respect to infinite frequency
+   and the `aux:rmc`/`aux:dmc` flags are set to true (1).
 
 #### When defaraday/dedisperse is performed:
 
 1. If `rmc`/`dmc` is false (0), then the interstellar RM/DM that
    applies to all sub-integrations is corrected with reference to the centre frequency stored
-   in the archive. The `rmc`/`dmc` are set to true (1).- If `aux:rmc`/`aux:dmc` is false (0), then
-     the auxiliary RM/DM of each sub-integration is corrected with respect to infinite frequency
-     and the `aux:rmc`/`aux:dmc` flags are set to true (1).
+   in the archive. The `rmc`/`dmc` are set to true (1).
+2. If `aux:rmc`/`aux:dmc` is false (0), then
+   the auxiliary RM/DM of each sub-integration is corrected with respect to infinite frequency
+   and the `aux:rmc`/`aux:dmc` flags are set to true (1).
 
 For further information about weighted centre frequencies, the
 meanings of the `rmc` and `dmc` flags, and the

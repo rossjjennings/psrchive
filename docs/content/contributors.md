@@ -11,7 +11,9 @@ University of Technology.
 A lot of motivation, ideas, maintenance, documentation,
 and software has been contributed by the following people:
 
-Matthew Bailes Matthew Britton Paul Demorest Russell Edwards Bi Qing For Johan Hamaker Jin Lin Han George Hobbs Frederick Jenet Simon Johnston Jonathan Khoo Haydon Knight Duncan Lorimer Richard Manchester Steve Ord Scott Ransom John Reynolds David Smith Ben Stappers Albert Teoh Na Wang Joel Weisberg Craig West | |
+|  |  |
+| --- | --- |
+| Matthew Bailes Matthew Britton Paul Demorest Russell Edwards Bi Qing For Johan Hamaker Jin Lin Han George Hobbs Frederick Jenet Simon Johnston Jonathan Khoo Haydon Knight | Duncan Lorimer Richard Manchester Steve Ord Scott Ransom John Reynolds David Smith Ben Stappers Albert Teoh Na Wang Joel Weisberg Craig West |
 
 Special thanks to Duncan Lorimer for the EPN I/O routines; to Paul
 Demorest for ASP, BPP, Presto, and WAPP I/O routines; to Paul and

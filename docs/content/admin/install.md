@@ -35,15 +35,11 @@ where *VER* is the SourceForge Release Name (version number).
 The `psrchive_install` script will
 
 1. download psrchive-VER.tar.gz from the nearest SourceForge mirror;
-
-   - unpack and run `configure`, `make`, `make check`, and `make install`;
-
-     - install a read-only copy of the software in $PSRCHIVE\_SYSTEM/$VER;
-
-       - update the stable symbolic link to point to the new installation; and
-
-         - if the PSRCHIVE\_SYSGRP environment variable is set, then
-           the group ownership of the newly installed files will be set to it.
+2. unpack and run `configure`, `make`, `make check`, and `make install`;
+3. install a read-only copy of the software in $PSRCHIVE\_SYSTEM/$VER;
+4. update the stable symbolic link to point to the new installation; and
+5. if the PSRCHIVE\_SYSGRP environment variable is set, then
+   the group ownership of the newly installed files will be set to it.
 
 The `psrchive_install` script uses `curl` to download
 the tarball. If this step fails, you may have to set the http\_proxy

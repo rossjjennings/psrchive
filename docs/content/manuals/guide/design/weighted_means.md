@@ -41,14 +41,16 @@ The following conventions apply:
    position angles (phases) relative to the centre frequencies of the
    individual frequency channels, as returned by
    Profile::get\_centre\_frequency, and Archive::get\_faraday\_corrected
-   (Archive::get\_dedispersed) will return false.- After calling defaraday (dedisperse), all profiles will have
-     position angles (phases) relative to the centre frequency of the whole
-     band, as returned by Archive::get\_centre\_frequency, and
-     Archive::get\_faraday\_corrected (Archive::get\_dedispersed) will return
-     true.- The states of the two attributes, Archive::get\_faraday\_corrected
-       and Archive::get\_dedispersed, are completely independent; for example,
-       an archive may be dedispersed and still have Faraday rotated
-       (i.e. uncorrected) position angles.
+   (Archive::get\_dedispersed) will return false.
+2. After calling defaraday (dedisperse), all profiles will have
+   position angles (phases) relative to the centre frequency of the whole
+   band, as returned by Archive::get\_centre\_frequency, and
+   Archive::get\_faraday\_corrected (Archive::get\_dedispersed) will return
+   true.
+3. The states of the two attributes, Archive::get\_faraday\_corrected
+   and Archive::get\_dedispersed, are completely independent; for example,
+   an archive may be dedispersed and still have Faraday rotated
+   (i.e. uncorrected) position angles.
 
 These conventions hold at all times; in particular, they are true both
 before and after calling Archive::fscrunch and/or Archive::tscrunch.
@@ -59,12 +61,15 @@ Expressed in terms of the attribute names used by
 * If dmc is false, then the phase of the profile in the
   ith sub-integration and the
   jth channel is associated with the radio
-  frequency given by int[i]:freq[j].* If dmc is true, then the phase of every profile is
-    associated with the radio frequency given by freq.* If rmc is false, then the position angle of the profile
-      in the ith sub-integration and the
-      jth channel is associated with the radio
-      frequency given by int[i]:freq[j].* If rmc is true, then the position angle of every profile is
-        associated with the radio frequency given by freq.
+  frequency given by int[i]:freq[j].
+* If dmc is true, then the phase of every profile is
+  associated with the radio frequency given by freq.
+* If rmc is false, then the position angle of the profile
+  in the ith sub-integration and the
+  jth channel is associated with the radio
+  frequency given by int[i]:freq[j].
+* If rmc is true, then the position angle of every profile is
+  associated with the radio frequency given by freq.
 
 Functionally, when integrating in time or frequency, if
 Archive::get\_faraday\_corrected (Archive::get\_dedispersed) returns

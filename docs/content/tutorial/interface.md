@@ -1,4 +1,4 @@
-# PSRCHIVE: Building a text interface
+# interface
 
 **Building a text interface**
 Sometimes it is useful to enable the configuration of a class
@@ -86,15 +86,14 @@ attribute. Two important things to note:
   ```
     T get_attribute () const;
   ```
+* Methods that set the value of an attribute return no value, are
+  not `const`, and accept a single argument
+  either by value or by `const` reference, ie.
 
-  * Methods that set the value of an attribute return no value, are
-    not `const`, and accept a single argument
-    either by value or by `const` reference, ie.
-
-    ```
-      void set_attribute (T);          // by value
-      void set_attribute (const T&);   // by const reference
-    ```
+  ```
+    void set_attribute (T);          // by value
+    void set_attribute (const T&);   // by const reference
+  ```
 
 ---
 
@@ -138,7 +137,10 @@ constructor of the new class interface using the
 `TextInterface::To<MyClass>::import` method. It is
 currently possible to import the text interface of:
 
-* a [parent](interface.shtml.html#parent),* a [member](interface.shtml.html#member),* the elements of a [vector](interface.shtml.html#vector), or* the data in a [map](interface.shtml.html#map).
+* a [parent](interface.shtml.html#parent),
+* a [member](interface.shtml.html#member),
+* the elements of a [vector](interface.shtml.html#vector), or
+* the data in a [map](interface.shtml.html#map).
 
 **Inheriting the Parent interface**
 
@@ -312,7 +314,7 @@ imported as in the following example:
 ```
 MapTI::MapTI (Map* instance)
 {
-  import ( "y", Key(), DataTI(), ⤅::get_data );
+  import ( "y", Key(), DataTI(), &Map::get_data );
 
   if (instance)
     set_instance (instance);

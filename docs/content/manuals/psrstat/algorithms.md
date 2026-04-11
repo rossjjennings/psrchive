@@ -45,12 +45,15 @@ the following psrstat command line does the following:
 
 1. sets the signal-to-noise ratio estimator to the
    `modular` algorithm, which allows both on- and off-pulse
-   identification algorithms to be set;- sets the on-pulse estimator to the `minimum` algorithm,
-     which searches for the minimum in a boxcar smoothed version of the
-     profile;- configures the on-pulse estimator to search for the maximum
-       instead of the minimum (this algorithm is more typically used to
-       identify the off-pulse baseline); and- sets the duty cycle of the smoothing function used by the
-         on-pulse estimator to 5%.
+   identification algorithms to be set;
+2. sets the on-pulse estimator to the `minimum` algorithm,
+   which searches for the minimum in a boxcar smoothed version of the
+   profile;
+3. configures the on-pulse estimator to search for the maximum
+   instead of the minimum (this algorithm is more typically used to
+   identify the off-pulse baseline); and
+4. sets the duty cycle of the smoothing function used by the
+   on-pulse estimator to 5%.
 
 After configuring the signal-to-noise ratio
 estimator, `psrstat` then queries the signal-to-noise ratio

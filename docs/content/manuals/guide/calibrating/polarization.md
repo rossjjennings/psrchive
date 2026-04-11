@@ -19,7 +19,8 @@ look as expected by
 The data files used in the above and following examples
 are available here:
 
-* [CAL.ar](manuals/guide/calibrating/CAL.ar)* [PSR.ar](manuals/guide/calibrating/PSR.ar)
+* [CAL.ar](manuals/guide/calibrating/CAL.ar)
+* [PSR.ar](manuals/guide/calibrating/PSR.ar)
 
 ### Step Two: clean data and prepare a calibrator database
 

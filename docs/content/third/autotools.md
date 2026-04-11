@@ -36,7 +36,10 @@ you may want to edit it to use a GNU mirror. If you don't have
 `curl` installed on your system, you could also simply click
 the following links:
 
-* [m4-1.4.6.tar.gz](http://ftp.gnu.org/gnu/m4/m4-1.4.6.tar.gz)* [autoconf-2.60.tar.gz](http://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz)* [automake-1.9.6.tar.gz](http://ftp.gnu.org/gnu/automake/automake-1.9.6.tar.gz)* [libtool-1.5.8.tar.gz](http://ftp.gnu.org/gnu/libtool/libtool-1.5.8.tar.gz)
+* [m4-1.4.6.tar.gz](http://ftp.gnu.org/gnu/m4/m4-1.4.6.tar.gz)
+* [autoconf-2.60.tar.gz](http://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz)
+* [automake-1.9.6.tar.gz](http://ftp.gnu.org/gnu/automake/automake-1.9.6.tar.gz)
+* [libtool-1.5.8.tar.gz](http://ftp.gnu.org/gnu/libtool/libtool-1.5.8.tar.gz)
 
 #### Install
 

@@ -182,7 +182,9 @@ larger reduced chi squared near the leading edge of the passband
 (which corresponds to the lowest values of ichan shown above). On a
 1.2 GHz Pentium III, the solution takes approximately:
 
-* less than a minute with one pulse phase bin* about an hour with 16 pulse phase bins* about 19 hours with 64 pulse phase bins
+* less than a minute with one pulse phase bin
+* about an hour with 16 pulse phase bins
+* about 19 hours with 64 pulse phase bins
 
 - When all of the frequency channels have been fitted,
   `pcm` will output the solution in the FEEDPAR HDU of a

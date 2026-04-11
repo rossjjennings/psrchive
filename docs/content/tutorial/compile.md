@@ -1,4 +1,4 @@
-# PSRCHIVE: How to compile
+# compile
 
 **How to compile**
 To compile the code from the [previous example](hello.md),

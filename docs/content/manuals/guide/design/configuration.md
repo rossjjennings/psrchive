@@ -15,7 +15,9 @@ Strategy design. In PSRCHIVE, this pattern is
 most often implemented using the `Functor` template class,
 which allows the strategy to be implemented using a pointer to a
 
-* function;* functor instance; or* instance of a class and a pointer to a member function
+* function;
+* functor instance; or
+* instance of a class and a pointer to a member function
 
 ### Common Configuration Cravings
 

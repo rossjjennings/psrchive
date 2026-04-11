@@ -8,7 +8,10 @@ preprocess the data. Typical features of the core applications
 include
 
 * [Standard Command Line Options](options.md)
-  + [Standard Preamble](options.shtml.html#preamble)+ [Standard Preprocessing](options.shtml.html#preprocessing)+ [Standard Output](options.shtml.html#output)* [Evaluation of Mathematical Expressions](evaluation.md)
+  + [Standard Preamble](options.shtml.html#preamble)
+  + [Standard Preprocessing](options.shtml.html#preprocessing)
+  + [Standard Output](options.shtml.html#output)
+* [Evaluation of Mathematical Expressions](evaluation.md)
 
-    Copyright © 2006-2019 Willem van Straten
-    Licensed under the Academic Free License version 2.1
+  Copyright © 2006-2019 Willem van Straten
+  Licensed under the Academic Free License version 2.1
