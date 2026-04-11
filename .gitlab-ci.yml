@@ -256,18 +256,25 @@ clang-tidy-ska:
 # Release (triggered by date-format tags: YYYY-MM-DD)
 # ============================================================
 
-.release_rules:
+.release_shared_rules:
   rules:
+    - if: $ENABLE_SKA_CI == "true"
+      when: never
     - if: $CI_COMMIT_TAG =~ /^\d{4}-\d{2}-\d{2}$/
     - when: never
 
-distcheck:
+.release_ska_rules:
+  rules:
+    - if: $ENABLE_SKA_CI != "true"
+      when: never
+    - if: $CI_COMMIT_TAG =~ /^\d{4}-\d{2}-\d{2}$/
+    - when: never
+
+release-distcheck:
   stage: release
-  extends: .release_rules
+  extends: .release_shared_rules
   needs:
     - job: test
-      optional: true
-    - job: test-ska
       optional: true
   before_script:
     - *install_dependencies
@@ -278,10 +285,55 @@ distcheck:
 
 release:
   stage: release
-  extends: .release_rules
+  extends: .release_shared_rules
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: distcheck
+    - job: release-distcheck
+      optional: true
+  before_script:
+    - *install_dependencies
+  script:
+    - ./bootstrap
+    - ./configure --enable-lean
+    - make dist
+    - ls *.tar.gz
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Release $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "Source tarball"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/raw/psrchive-${CI_COMMIT_TAG}.tar.gz"
+  artifacts:
+    paths:
+      - "*.tar.gz"
+    expire_in: 1 year
+
+release-distcheck-ska:
+  stage: release
+  extends: .release_ska_rules
+  image: ubuntu:22.04
+  tags:
+    - $GITLAB_CI_TAG
+  needs:
+    - job: test-ska
+      optional: true
+  before_script:
+    - *install_dependencies
+  script:
+    - ./bootstrap
+    - ./configure --enable-lean
+    - make distcheck
+
+release-ska:
+  stage: release
+  extends: .release_ska_rules
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  tags:
+    - $GITLAB_CI_TAG
+  needs:
+    - job: release-distcheck-ska
       optional: true
   before_script:
     - *install_dependencies
