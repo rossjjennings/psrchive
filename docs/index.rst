@@ -72,6 +72,12 @@ experiments.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Troubleshooting (Q&A)
+
+   content/qa/index
+
+.. toctree::
+   :maxdepth: 2
    :caption: API Reference
 
    api/index
