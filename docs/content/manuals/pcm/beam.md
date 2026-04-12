@@ -61,6 +61,3 @@ Both polynomials have four coefficients (polynomial order = 3; i.e. cubic) in th
 three coefficients (order = 2; i.e. quadratic) in the declination dimension. They are configured to disable
 fitting the constant term (the zeroth coefficient) to avoid covariance/degeneracy with the differential gain and phase
 of the bore-sight differential gain and phase.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

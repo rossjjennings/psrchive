@@ -68,6 +68,3 @@ then the flags added in order to link against the Fortran
 libraries will mess up `g++` during the linking stage.
 Please ensure that `g77` and `g++` have the same
 version number.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

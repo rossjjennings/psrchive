@@ -19,6 +19,3 @@ script must be run again. For example,
 # set the PSRCAT_FILE environment variable
 ./configure
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -20,6 +20,3 @@
 * [Tutorial](tutorial.md)
 * [C++ Library Reference Manual](classes/psrchive.md)
 * [Administration Guide](admin.md)
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

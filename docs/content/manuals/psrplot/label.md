@@ -44,6 +44,3 @@ psrplot -p stokes -c below:l="PSR J0437-4715\nStokes parameters" 0437n.FF
 Plot labels may also include variable names and mathematical
 expressions that are interpreted before plotting using the syntax
 described [here](../guide/design/evaluation.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

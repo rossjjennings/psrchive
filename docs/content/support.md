@@ -19,6 +19,3 @@ If you have written or may some day write code or documentation that
 you would like to contribute to the project, simply obtain a
 SourceForge account and send your user name to
 [psrchive-developers@lists.sourceforge.net](mailto:psrchive-developers@lists.sourceforge.net)
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

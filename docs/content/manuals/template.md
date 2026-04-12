@@ -63,6 +63,3 @@ expect to get back.
 ### 5.0 Known bugs and features that require implementation
 
 * This is a list of known bugs.
-
-Copyright © 2020 Some Astronomer
-Licensed under the Academic Free License version 2.1

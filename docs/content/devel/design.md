@@ -118,6 +118,3 @@ different behaviours into a class. Without this design technique, it
 would be necessary to either duplicate the code or multiply inherit
 from different base classes that provide the different pieces of
 functionality.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

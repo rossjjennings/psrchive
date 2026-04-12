@@ -107,6 +107,3 @@ other developers to access, push it into the central Git repo.
 ```
 $ git push origin master
 ```
-
-Copyright © 2006-2019 Jonathan Khoo
-Licensed under the Academic Free License version 2.1

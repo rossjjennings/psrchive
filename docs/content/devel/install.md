@@ -92,6 +92,3 @@ make install prefix=desired_install_path
 
 Note, however, that if you use this option, you will have to set the
 PSRCHIVE environment variable to *desired\_install\_path*.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1**

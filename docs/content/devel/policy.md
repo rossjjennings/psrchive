@@ -15,6 +15,3 @@ PSRCHIVE team believes that:
   in the development process.
 
 Having said all that, please bear in mind our [disclaimer](../disclaimer.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

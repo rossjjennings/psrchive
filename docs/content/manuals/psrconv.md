@@ -42,6 +42,3 @@ extension associated with the destination filename is used automatically.
 ### 5.0 Known bugs and features that require implementation
 
 * The user should be able to specify a new file extension.
-
-Copyright © 2006-2019 Aidan Hotan
-Licensed under the Academic Free License version 2.1

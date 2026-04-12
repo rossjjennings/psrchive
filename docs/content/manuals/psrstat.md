@@ -59,6 +59,3 @@ described [here](psrstat/algorithms.md).
 ### 5.0 Known bugs and features that require implementation
 
 * None at this time.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

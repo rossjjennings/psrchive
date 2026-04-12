@@ -24,6 +24,3 @@ Please see our growing list of [contributors](contributors.md).
 As information resulting from fundamental research,
 PSRCHIVE is not subject to United States of America
 Export Administration Regulations. See §734.3(b)(3)(ii) and §734.8.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

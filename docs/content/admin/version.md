@@ -39,6 +39,3 @@ psrchive_version 6.1
 
 After setting the system version, the PATH environment
 variable will be set accordingly.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

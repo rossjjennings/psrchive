@@ -108,6 +108,3 @@ Note that
   apply to all plots
 * key=value commands encountered after a plot is created
   apply only to the last created plot.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

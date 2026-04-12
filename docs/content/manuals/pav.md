@@ -90,6 +90,3 @@ manipulating colour schemes, depending on the type of plot.
 ### 5.0 Known bugs and features that require implementation
 
 * None at this time.
-
-Copyright © 2006 Aidan Hotan
-Licensed under the Academic Free License version 2.1

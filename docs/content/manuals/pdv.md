@@ -103,6 +103,3 @@ To display the subint parameters from each subint, showing the tsubint and offs\
 ### 4.0 Known bugs and features that require implementation
 
 * None at this time.
-
-Copyright © 2007 David smith
-Licensed under the Academic Free License version 2.1

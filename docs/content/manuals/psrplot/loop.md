@@ -18,6 +18,3 @@ will plot the pulse profile from polarizations 2 and 3 for each of the
 frequency channels from 11 to 15 (inclusive) and from 63 to the last
 channel. The index specified first will be the most rapidly changing
 from plot to plot.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

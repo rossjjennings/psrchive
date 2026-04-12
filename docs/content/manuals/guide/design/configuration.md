@@ -22,6 +22,3 @@ which allows the strategy to be implemented using a pointer to a
 ### Common Configuration Cravings
 
 * [Always use tempo2 predictors instead of tempo polycos](manuals/guide/design/configuration/predictor.md)
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -19,6 +19,3 @@ If you are a developer and wish to integrate your program with the
 PSRCHIVE distribution, please follow the
 instructions at [Making
 Additions](../devel/development.shtml.html#additions).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

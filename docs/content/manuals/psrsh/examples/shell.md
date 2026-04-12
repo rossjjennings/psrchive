@@ -14,6 +14,3 @@ ok
 psrsh> unload ext=newext
 ok
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

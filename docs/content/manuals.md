@@ -44,6 +44,3 @@ A step-by-step [User's Guide](manuals/guide.md) is also under development.
 | [psrspa](manuals/psrspa.md) | Reimplementation of spa with added functionality |
 | [pvt](manuals/pvt.md) | analysis of pulse variability |
 | [pdmp](manuals/pdmp.md) | find optimal period and dispersion measure |
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -39,6 +39,3 @@ updated ephemeris can be installed with
 ```
 pam -E updated.eph -e new filename.ar
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

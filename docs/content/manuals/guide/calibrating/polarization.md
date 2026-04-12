@@ -74,6 +74,3 @@ can be plotted with
 ```
 psrplot -pS -jF PSR.calibP
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

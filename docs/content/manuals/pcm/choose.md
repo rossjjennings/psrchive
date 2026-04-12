@@ -31,6 +31,3 @@ pcm -c choose.ar -B inv,orth [...]
 
 When more than one value is specified, each strategy will be used in
 turn for each phase bin selected.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -85,6 +85,3 @@ Or, add it to an existing environment:
 conda activate my_env
 conda install psrchive
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

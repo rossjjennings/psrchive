@@ -94,6 +94,3 @@ is specified (with the -A option), the PGS method is used.
 ### 5.0 Known bugs and features that require implementation
 
 * None at this time.
-
-Copyright © 2006 Aidan Hotan
-Licensed under the Academic Free License version 2.1

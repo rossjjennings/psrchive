@@ -47,6 +47,3 @@ Examples of resulting histograms can be seen in Fig. 13 and 14 of
 ### 5.0 Known bugs and features that require implementation
 
 * Limitation of number of phase bins: the output file can contain at most 999 maps (pixels)
-
-Copyright © 2014 Stefan Oslowski
-Licensed under the Academic Free License version 2.1

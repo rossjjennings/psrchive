@@ -248,6 +248,3 @@ This results in the following plot:
 
 * Example 1 (TBD)
 * Example 2 (TBD)
-
-Copyright © 2006-2019 Paul Demorest
-Licensed under the Academic Free License version 2.1

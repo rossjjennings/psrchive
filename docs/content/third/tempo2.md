@@ -29,6 +29,3 @@ directory (where the `configure`  script was run) simply type
 ```
 packages/tempo2.csh
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

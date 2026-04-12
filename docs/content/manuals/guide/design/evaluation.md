@@ -87,6 +87,3 @@ psrstat -c 'Fractional BW: {fabs($bw)/$freq}%2' [...]
 ```
 
 would print a string like "Fractional BW: 0.048" for each file.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

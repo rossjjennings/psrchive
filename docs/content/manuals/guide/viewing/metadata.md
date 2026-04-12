@@ -39,6 +39,3 @@ And to print only the coordinates:
 psredit -c coord=08:35:20.6115-45:10:34.875 -m pulse_473145330.rf.it
 pulse_473145330.rf.it coord=08:35:20.612-45:10:34.88
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

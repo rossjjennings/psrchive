@@ -38,6 +38,3 @@ Only the profile amplitudes will be allocated using the alternative
 memory manager and paged in and out of the custom swap space. All
 other data and metadata will be allocated in the normal way and paged
 using kernel swap space as necessary.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

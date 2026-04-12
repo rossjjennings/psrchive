@@ -32,6 +32,3 @@ Feature Requests Trackers as follows:
 * Change the filter to "Group: release <yyyy-mm-dd>" then click "Filter" then "Permalink" and cut-and-paste the URL into the release notes.
 
 Finally, [update the web pages](web.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

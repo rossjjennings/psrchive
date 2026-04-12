@@ -122,6 +122,3 @@ desired class, as demonstrated in the following example:
 
 Note that a `Pulsar::Archive` can store only one
 instance of a given extension class.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

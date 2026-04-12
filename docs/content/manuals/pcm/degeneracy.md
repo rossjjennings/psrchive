@@ -62,6 +62,3 @@ regardless of the above assumptions; that is, except when Assumption
 1.C is adopted, there is no change in the goodness of fit.
 Assumption 1.C is different because new data (`Signal::FluxCalOff`
 observations) are included as constraints.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

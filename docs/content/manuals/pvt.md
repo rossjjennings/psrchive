@@ -82,6 +82,3 @@ desired output.
 ### 5.0 Known bugs and features that require implementation
 
 * Nothing specific, just lots of polishing.
-
-Copyright © 2006-2019 Aidan Hotan
-Licensed under the Academic Free License version 2.1

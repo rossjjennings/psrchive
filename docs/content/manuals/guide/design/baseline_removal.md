@@ -23,6 +23,3 @@ This strategy includes the following steps
 
 1. for each frequency channel and sub-integration, compute a unique baseline mask;
 2. for each polarization, use the unique baseline mask to compute and subtract the mean of the off-pulse phase bins
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -35,6 +35,3 @@ psrplot -p Scyl -c flux:ci=161,flux:ls=124 0437n.FF
 ```
 
 ![](cils.png)
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

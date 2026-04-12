@@ -122,6 +122,3 @@ psrplot -pY -jDp 20cmadd.Ft
 ### 5.0 Known bugs and features that require implementation
 
 * None at this time.
-
-Copyright © 2022 Willem van Straten
-Licensed under the Academic Free License version 2.1

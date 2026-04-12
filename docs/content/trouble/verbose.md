@@ -44,6 +44,3 @@ psredit -c name -V pulse_473145330.rf.it >& psredit_bug.log
 The log file can then be attached to the [Bug
 Report](../support.md) (below the **Detailed Description**, at the **Upload
 and Attach a File** prompt).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

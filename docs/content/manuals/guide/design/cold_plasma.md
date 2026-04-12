@@ -121,6 +121,3 @@ For further information about weighted centre frequencies, the
 meanings of the `rmc` and `dmc` flags, and the
 behaviour of PSRCHIVE when integrating in time
 and frequency, please read [Weighted Means](weighted_means.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

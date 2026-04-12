@@ -195,6 +195,3 @@ paste frequencies.txt radians.txt > plot.txt
 ```
 
 which can be plotted with gnuplot, where you can also fit a wavelength squared functional form to the curve to estimate the RM.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

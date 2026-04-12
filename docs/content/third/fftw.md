@@ -32,6 +32,3 @@ with the `--prefix` option; e.g.
 ```
 ./configure --enable-float --prefix=$PSRHOME/packages/$LOGIN_ARCH
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

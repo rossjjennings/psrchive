@@ -15,6 +15,3 @@ Tutorial chapters:
 8. [Adding to the Interpreter](tutorial/interpreter.md)
 9. [Composing Documentation](tutorial/documentation.md)
 10. [Building on Multiple Architectures](devel/multiple.md)
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

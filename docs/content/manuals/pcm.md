@@ -250,6 +250,3 @@ algorithm described in van Straten, W. 2013,
 ### 5.0 Known bugs and features that require implementation
 
 * Currently, `pcm` can handle data from only one pulsar.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

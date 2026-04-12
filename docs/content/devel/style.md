@@ -68,6 +68,3 @@ Multiple inheritance should be used judiciously;
 an excellent alternative is the Policy or
 [Strategy](http://en.wikipedia.org/wiki/Strategy_pattern)
 behavioural design pattern.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

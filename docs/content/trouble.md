@@ -15,6 +15,3 @@
 * [TEMPO2 warnings](warnings/tempo2/index.md)
 * [no polynomials loaded](trouble/nopolynomials/index.md)
 * [CFITSIO memory violation bug](trouble/ffmvec/index.md)
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

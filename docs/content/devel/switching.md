@@ -108,6 +108,3 @@ After merging any modifications, you may need to rebuild PSRCHIVE.
 Just run `make`.
 
 If you have any difficulties with compiling, please contact Willem.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

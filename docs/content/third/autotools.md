@@ -51,6 +51,3 @@ using the [make script](autotools/make.csh).
 If the PSRHOME environment variable is defined, the make
 script will install the GNU autotools in
 $PSRHOME/packages/$LOGIN\_ARCH.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -112,6 +112,3 @@ than 100. That is, the maximum RM will be set to 6 times the DM
 2000`), and never less than 100.
 
 ### 5.0 Known bugs and features that require implementation
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

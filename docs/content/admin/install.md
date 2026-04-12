@@ -44,6 +44,3 @@ The `psrchive_install` script will
 The `psrchive_install` script uses `curl` to download
 the tarball. If this step fails, you may have to set the http\_proxy
 environment variable.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

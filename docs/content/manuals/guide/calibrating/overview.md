@@ -31,6 +31,3 @@ stored in pcm.fits to calibrate the pulsar data. It is not
 necessary to use pcm **to calibrate** data (unless time variations
 produce a better fit to the data, and the data to be calibrated are
 those used as input to pcm, as mentioned above).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -147,6 +147,3 @@ In the interactive shell mode of [psrsh](../manuals/psrsh.md), the
 standardized text, based on the status code, to the beginning of the
 message printed to the terminal. In the script command processing
 mode, a `Fail` status will cause the script to abort.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

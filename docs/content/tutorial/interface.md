@@ -343,6 +343,3 @@ y[yellow]:code
 
 If the name given to a map has zero length, then the square brackets
 may be omitted.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

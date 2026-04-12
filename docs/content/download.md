@@ -25,6 +25,3 @@ be a relatively recent tarball [here](https://sourceforge.net/projects/psrchive/
 
 **conda:** Binary PSRCHIVE packages for the [conda](https://docs.conda.io/en/latest/) package management system are
 available via [conda-forge](https://conda-forge.org/).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -40,6 +40,3 @@ standard output command line options:
   -e ext         write files with a new extension
   -O path        write files to a new directory
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

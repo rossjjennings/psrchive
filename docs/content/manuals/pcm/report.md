@@ -60,6 +60,3 @@ divergence[2]=10.5858 s080921_182451.zrft 0
 2 14 1.33686 3.89276 10.2331 9.69206
 [...]
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

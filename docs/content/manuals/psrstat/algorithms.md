@@ -149,6 +149,3 @@ int main (int argc, char** argv)
 
 The above code can be compiled and executed as described at
 [How to compile](../../tutorial/compile.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

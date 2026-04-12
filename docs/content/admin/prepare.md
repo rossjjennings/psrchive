@@ -40,6 +40,3 @@ make dist
 The `make dist` step will create the distribution file,
 psrchive-2025-08-21.tar.gz.
 [Release the distribution](release.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

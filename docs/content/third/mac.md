@@ -38,6 +38,3 @@ The various dependencies can be installed as follows:
   g77  to gfortran .
   For detailed help, please follow these
   [PGPLOT installation instructions](pgplot.md).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

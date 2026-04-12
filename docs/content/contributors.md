@@ -20,6 +20,3 @@ Demorest for ASP, BPP, Presto, and WAPP I/O routines; to Paul and
 Scott Ransom for contribution to the design of PSRFITS version 3; and
 to Matthew Britton for numerous important contributions to the timer
 archive software.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

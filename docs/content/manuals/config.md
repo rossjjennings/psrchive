@@ -98,6 +98,3 @@ they will always be incorported into the output of
 **psrchive\_config**. This makes it impossible to print an
 unmodified default template configuration file without first moving
 the old configuration files out of the way.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

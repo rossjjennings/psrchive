@@ -9,6 +9,3 @@ please subscribe to the
 
 For more frequent updates (ideas, plans, bug fixes, etc.) follow
 [PSRCHIVE on Twitter](http://twitter.com/psrchive).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

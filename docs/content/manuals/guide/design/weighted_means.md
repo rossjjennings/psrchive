@@ -79,6 +79,3 @@ channel/sub-integration before the profiles are added together. If
 Archive::get\_faraday\_corrected (Archive::get\_dedispersed) returns
 true, then all profiles will have already been corrected relative to
 the centre frequency returned by Archive::get\_centre\_frequency.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -304,6 +304,3 @@ A, is most often used. Two sets of observations should be made:
 
 At Parkes, `FluxCal-Off` observations are typically made by
 pointing both north and south of Hydra A.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

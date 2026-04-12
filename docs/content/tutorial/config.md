@@ -89,6 +89,3 @@ Pulsar::Option<std::string> third_log_filename_config
 ### Indirect Use via CommandParser
 
 not finished
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -126,6 +126,3 @@ will wait for a response, appearing to have frozen.
 ### 5.0 Known bugs and features that require implementation
 
 * -d flag only works with one file
-
-Copyright © 2006 Tim Dolley
-Licensed under the Academic Free License version 2.1

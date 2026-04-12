@@ -25,6 +25,3 @@ formats, including:
   Australia Telescope National Facility;
 * [EPN](https://arxiv.org/pdf/astro-ph/9801097), the file format of the European Pulsar Network; and
 * Timer, used primarily at the Parkes Observatory
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

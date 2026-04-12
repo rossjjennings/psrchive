@@ -14,6 +14,3 @@
    Convenient access to data attributes and derived values.
 7. [Large File Support](design/large_file.md) :
    Optionally use custom virtual memory management to process large files.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

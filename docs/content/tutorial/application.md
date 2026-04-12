@@ -177,6 +177,3 @@ The `Application::main` method performs the loop over all
 files specified on the command line; inside this loop, it executes any
 pre-processing commands then calls the `example::process`
 method, which performs the work that is unique to this application.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

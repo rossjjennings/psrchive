@@ -116,6 +116,3 @@ range is chosen, the full range is used.
 
 * Finding pulses could be extended to include fitting a Gaussian / von Misses distributions (or any other function) to the pulses. This in turn would allow an easy determination of the pulse width.
 * Sometimes closing ofstream objects on Intel-based Mac OS X machines can caues a segmentation fault or bus error but the files do not appear to be corrupted in any way.
-
-Copyright © 2011 Stefan Oslowski
-Licensed under the Academic Free License version 2.1

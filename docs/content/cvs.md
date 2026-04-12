@@ -20,6 +20,3 @@ cvs -z3 -d:pserver:anonymous@psrchive.cvs.sourceforge.net:/cvsroot/psrchive co -
 
 After successfully downloading the code, follow the
 [Build and Installation](cvs/build.md) directions.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

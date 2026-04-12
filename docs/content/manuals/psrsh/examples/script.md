@@ -29,6 +29,3 @@ spc.psh -m archive1 [archive2 ...]
 
 Here, the `-m`  command line option is used to overwrite the
 original data files.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -31,6 +31,3 @@ completion of the `configure`  script:
 The TEMPO2 Predictor library was not found:
   PSRCHIVE applications will not be able to use TEMPO2 predictors.
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -101,6 +101,3 @@ else
   setenv LD_LIBRARY_PATH $PGPLOT_DIR
 endif
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

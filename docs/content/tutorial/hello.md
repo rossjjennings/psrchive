@@ -61,6 +61,3 @@ includes the basic components of every PSRCHIVE program:
     was loaded, nor what this attribute would have been named in the header
     of this file. The `Pulsar::Archive` base class
     defines a common interface to all file formats.
-
-Copyright © 2006 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -79,6 +79,3 @@ As an example, assume that the PSRHOME environment variable is
 set to /psr and the LOGIN\_ARCH environment variable is
 set to linux. Third party packages should be installed
 in the directory /psr/packages/linux.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

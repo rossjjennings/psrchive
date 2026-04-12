@@ -43,6 +43,3 @@ libcfitsio.so.5 => /home/pulsar/lib/libcfitsio.so.5 (0x00002aaaaae28000)
 ls -l /home/pulsar/lib/libcfitsio.so.5
 lrwxrwxrwx 1 pulsar pulsar 20 Sep 28 14:32 /home/pulsar/lib/libcfitsio.so.5 -> libcfitsio.so.5.3.42
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

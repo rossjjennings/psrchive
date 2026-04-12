@@ -28,6 +28,3 @@ cal
 # calibrate flux using the nearest entry in database
 cal flux
 ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

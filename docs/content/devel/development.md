@@ -197,6 +197,3 @@ Automake will rebuild the Makefile [automatically](http://gnu.open-mirror.com/so
 This should be enough information to get started. For further information,
 please refer to the
 [automake documentation](http://gnu.open-mirror.com/software/automake/manual/html_node).
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

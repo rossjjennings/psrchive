@@ -161,6 +161,3 @@ The following option sets are available:
   below:c=""
   below:r=""
   ```
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

@@ -14,6 +14,3 @@ pcm\_reports/*<source\_name>*/results\_ichan*<channel\_index>*.dat
 will be output for the initial guess and best-fit, respectively, where
 *<source\_name>* is the name of the source and
 *<channel\_index>* is the frequency channel index
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

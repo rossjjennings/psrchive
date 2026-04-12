@@ -69,6 +69,3 @@ file (as can be queried with `psredit -c rcvr:sa CAL.ar`).
 Stokes Q dips toward zero at the edges of the band, indicating
 instrumental depolarization most likely due to two-bit quantization
 effects.
-
-Copyright © 2006-2019 Willem van Straten
-Licensed under the Academic Free License version 2.1

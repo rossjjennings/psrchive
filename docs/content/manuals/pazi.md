@@ -114,6 +114,3 @@ Examples of usage and output have been described in Section 2.0.
 ### 5.0 Known bugs and features that require implementation
 
 * None at this point in time.
-
-Copyright © 2007 Jonathan Khoo
-Licensed under the Academic Free License version 2.1
