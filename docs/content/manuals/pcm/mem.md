@@ -200,6 +200,3 @@ larger reduced chi squared near the leading edge of the passband
   extension. Finally, the mean of the calibrated pulsar data is output
   in the file, total.ar and the fscrunched and tscrunched
   calibrated pulse profile is plotted in calibrated.ps.
-
-  Copyright © 2006-2019 Willem van Straten
-  Licensed under the Academic Free License version 2.1

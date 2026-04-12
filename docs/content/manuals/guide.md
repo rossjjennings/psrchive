@@ -16,6 +16,3 @@ Suggestions and contributions are welcome!
 4. [Calibrating Data](guide/calibrating.md): polarimetric calibration
 5. [Trouble Shooting](../trouble.md):
    steps that can help to debug a problem
-
-   Copyright © 2006-2019 Willem van Straten
-   Licensed under the Academic Free License version 2.1

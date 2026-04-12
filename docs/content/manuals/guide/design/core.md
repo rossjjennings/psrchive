@@ -12,6 +12,3 @@ include
   + [Standard Preprocessing](options.shtml.html#preprocessing)
   + [Standard Output](options.shtml.html#output)
 * [Evaluation of Mathematical Expressions](evaluation.md)
-
-  Copyright © 2006-2019 Willem van Straten
-  Licensed under the Academic Free License version 2.1

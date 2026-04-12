@@ -12,6 +12,3 @@ is discussed in more detail in the following sections.
    Produce calibrated Stokes parameters.
 3. [Flux](calibrating/flux.md):
    Measure the flux of the source in Janskys.
-
-   Copyright © 2006-2019 Willem van Straten
-   Licensed under the Academic Free License version 2.1

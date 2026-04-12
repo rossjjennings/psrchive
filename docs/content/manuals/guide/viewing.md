@@ -9,6 +9,3 @@ at the data.
    Ensure that the data look as expected.
 3. [Calibrator Data](viewing/cal/index.md):
    Plot the data or the solution derived from them.
-
-   Copyright © 2006-2019 Willem van Straten
-   Licensed under the Academic Free License version 2.1
