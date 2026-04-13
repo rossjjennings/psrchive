@@ -11,7 +11,7 @@ If a PSRCHIVE program issues a warning like
 
 ```
 Pulsar::FITSArchive does not support tempo2 predictors
-Pulsar::FITSArchive http://psrchive.sourceforge.net/warnings/tempo2
+Pulsar::FITSArchive https://psrchive.readthedocs.io/en/latest/content/warnings/tempo2/
 ```
 
 then the PSRFITS file from which data are being loaded contains a

@@ -61,7 +61,7 @@ if test "x$prefix" = xNONE; then
 fi
 
 PSRCHIVE_INSTALL=$prefix
-PSRCHIVE_HTTP="http://psrchive.sourceforge.net"
+PSRCHIVE_HTTP="https://psrchive.readthedocs.io/en/latest"
 
 AC_SUBST(PSRCHIVE_INSTALL)
 AC_SUBST(PSRCHIVE_HTTP)
@@ -181,7 +181,7 @@ if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   AC_MSG_ERROR([No suitable FFT library was found.
 
-  Please see http://psrchive.sourceforge.net/third/fftw
+  Please see https://psrchive.readthedocs.io/en/latest/content/third/fftw.html
 
   or simply run the following commands to install FFTW automatically
 

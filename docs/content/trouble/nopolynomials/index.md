@@ -11,7 +11,7 @@ If a PSRCHIVE program issues a warning like
 
 ```
 Tempo::Predict::generate WARNING rms=0.411525 microseconds
-Tempo::Predict::generate http://psrchive.sourceforge.net/warnings/tempo
+Tempo::Predict::generate https://psrchive.readthedocs.io/en/latest/content/warnings/tempo/
 ```
 
 then is it is likely that either `TZNSPAN` should be

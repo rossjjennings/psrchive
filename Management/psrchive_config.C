@@ -63,7 +63,7 @@ int main (int argc, char** argv)
       "Global configuration variables have been constructed \n"
       "before any operations have taken place. \n"
       " \n"
-      "To debug, see " PSRCHIVE_HTTP "/manuals/config/debug.shtml \n"
+      "To debug, see " PSRCHIVE_HTTP "/content/manuals/config.html \n"
          << endl;
 
     return -1;

@@ -477,7 +477,7 @@ MJD Tempo2::Predictor::iphase (const Pulsar::Phase& phase, const MJD* guess) con
   if (imin < 0)
     throw Error (InvalidParam, "Tempo2::Predictor::iphase",
                  "no cheby for phase\n\n"
-    "see http://psrchive.sourceforge.net/qa/?qa=241/no-cheby-for-phase");
+    "see https://psrchive.readthedocs.io/en/latest/content/qa/no-cheby-for-phase.html");
 
   return chebys[imin].iphase (phase, guess);
 }
