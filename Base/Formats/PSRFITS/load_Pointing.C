@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -128,14 +128,16 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
 
     if (RA_angle != coord.ra())
     {
-      warning << "FITSArchive::load_Pointing correcting RA_SUB currently=" << RA_angle.getHMS()
-	      << " expected=" << coord.ra().getHMS() << endl;
+      if (RA_angle != 0.0)
+        warning << "FITSArchive::load_Pointing correcting RA_SUB currently=" << RA_angle.getHMS()
+	        << " expected=" << coord.ra().getHMS() << endl;
       RA_angle = coord.ra();
     }
     if (DEC_angle != coord.dec())
     {
-      warning << "FITSArchive::load_Pointing correcting DEC_SUB currently=" << DEC_angle.getDMS()
-	      << " expected=" << coord.dec().getDMS() << endl;
+      if (DEC_angle != 0.0)
+        warning << "FITSArchive::load_Pointing correcting DEC_SUB currently=" << DEC_angle.getDMS()
+	        << " expected=" << coord.dec().getDMS() << endl;
       DEC_angle = coord.dec();
     }
   }
