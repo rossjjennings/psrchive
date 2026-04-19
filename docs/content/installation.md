@@ -1,4 +1,4 @@
-# Complete Installation Instructions
+# Detailed Installation Instructions
 
 These instructions can be followed to install PSRCHIVE and its dependencies.
 Super user (root) privileges are not required, and it is

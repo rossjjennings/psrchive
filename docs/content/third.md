@@ -1,10 +1,9 @@
-# Third Party Software
+# Dependencies
 
 New users should note that if you are installing PSRCHIVE at a
-facility that already has the required third party packages, then you can skip this section.
+facility that already has the required depenencies installed, then you can skip this section.
 
-If PSRCHIVE is not finding a package that
-is installed on your system, please see the
+If PSRCHIVE is not finding a package that is installed on your system, please see the
 [Package Detection](third/packages.md) notes.
 
 ---

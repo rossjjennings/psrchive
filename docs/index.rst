@@ -12,11 +12,13 @@ experiments.
    :caption: Overview
 
    content/download
+   content/third
    content/installation
    quickstart
    content/manuals/guide
    contributing
    citation
+   content/credits
 
 .. toctree::
    :maxdepth: 2
@@ -30,6 +32,7 @@ experiments.
    :caption: Developer Guide
 
    architecture
+   api/index
    content/devel/development
    content/devel/install
    content/devel/design
@@ -40,28 +43,13 @@ experiments.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Dependencies
-
-   content/third
-   content/trouble
-
-.. toctree::
-   :maxdepth: 2
    :caption: Troubleshooting (Q&A)
 
+   content/trouble
    content/qa/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API Reference
-
-   api/index
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Other
-
-   content/support
-   content/credits
    content/warnings/tempo/index
    content/warnings/tempo2/index
+
+
+
+
