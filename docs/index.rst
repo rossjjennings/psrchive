@@ -9,52 +9,27 @@ experiments.
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide
+   :caption: Overview
 
    content/download
    content/installation
    quickstart
-   architecture
-   content/manuals
    content/manuals/guide
    contributing
    citation
 
 .. toctree::
    :maxdepth: 2
-   :caption: CLI Tool Manuals
+   :caption: User Guide
 
-   content/manuals/psredit
-   content/manuals/psrstat
-   content/manuals/psradd
-   content/manuals/psrsh
-   content/manuals/psrplot
-   content/manuals/vap
-   content/manuals/pdv
-   content/manuals/pav
-   content/manuals/pazi
-   content/manuals/pam
-   content/manuals/psrconv
-   content/manuals/pac
-   content/manuals/pcm
-   content/manuals/fluxcal
-   content/manuals/rmfit
-   content/manuals/psrpol
-   content/manuals/pas
-   content/manuals/pat
-   content/manuals/paz
-   content/manuals/spa
-   content/manuals/psrspa
-   content/manuals/pvt
-   content/manuals/pdmp
-   content/manuals/config
+   content/manuals
    content/manuals/python
-   content/manuals/template
 
 .. toctree::
    :maxdepth: 2
    :caption: Developer Guide
 
+   architecture
    content/devel/development
    content/devel/install
    content/devel/design

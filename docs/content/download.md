@@ -1,7 +1,6 @@
 # PSRCHIVE Software Installation
 
-**NEW!** If you are installing PSRCHIVE
-and other pulsar software for the first time, then have a look at the
+If you are installing PSRCHIVE and other pulsar software for the first time, then have a look at the
 [Complete Installation Instructions](installation.md).
 
 The latest release of PSRCHIVE can be

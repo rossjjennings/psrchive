@@ -20,7 +20,6 @@ A step-by-step [User's Guide](manuals/guide.md) is also under development.
 | [pdv](manuals/pdv.md) | view some basic data as text |
 | *Graphical interfaces* | |
 | [pav](manuals/pav.md) | produce a wider variety of plots |
-| psrgui | interactive plot interface |
 | [pazi](manuals/pazi.md) | interactive plotter and zapper |
 | *General data processing* | |
 | [pam](manuals/pam.md) | command line general purpose data reduction |
@@ -36,7 +35,6 @@ A step-by-step [User's Guide](manuals/guide.md) is also under development.
 | *Pulsar Timing* | |
 | [pas](manuals/pas.md) | generate template profiles (standards) |
 | [pat](manuals/pat.md) | produce time of arrival estimates |
-| [rhythm](http://astronomy.swin.edu.au/pulsar/software/manuals/rhythm) | graphical user interface to TEMPO |
 | *Miscellaneous* | |
 | [psrchive\_config](manuals/config.md) | configuration file management |
 | [paz](manuals/paz.md) | RFI mitigation |
