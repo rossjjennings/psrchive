@@ -3,9 +3,9 @@
 The layout of any
 **psrplot** plot may be customized, including
 
-* [viewport position and size](viewport.shtml.html#position),
-* [overlaying multiple plots](viewport.shtml.html#overlay), and
-* [multiple plot style files](viewport.shtml.html#style).
+* [viewport position and size](viewport.md#position),
+* [overlaying multiple plots](viewport.md#overlay), and
+* [multiple plot style files](viewport.md#style).
 
 ### Viewport position and size
 

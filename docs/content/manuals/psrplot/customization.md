@@ -2,9 +2,9 @@
 
 **psrplot** can be customized using any combination of
 
-* [command line arguments](customization.shtml.html#command_line),
-* [style files](customization.shtml.html#style_file), and
-* [option sets](customization.shtml.html#option_sets).
+* [command line arguments](customization.md#command_line),
+* [style files](customization.md#style_file), and
+* [option sets](customization.md#option_sets).
 
 ### Customization on the Command Line
 
@@ -90,7 +90,7 @@ psrplot -p pa -s style.txt 0437n.FF -c cut=10.0
 line inside the frame.*![](pa_style.png)
 
 Style files can also be used to create and customize multiple plots,
-as described in[multiple plot style files](viewport.shtml.html#style).
+as described in[multiple plot style files](viewport.md#style).
 
 #### Embedded pre-processing commands
 

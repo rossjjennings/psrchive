@@ -3,9 +3,9 @@
 The labels on
 **psrplot** plots may be set using
 
-* [label names](label.shtml.html#name),
-* [multiple lines](label.shtml.html#multiple),
-* [variable subsitution](label.shtml.html#variable).
+* [label names](label.md#name),
+* [multiple lines](label.md#multiple),
+* [variable subsitution](label.md#variable).
 
 ### Label names
 

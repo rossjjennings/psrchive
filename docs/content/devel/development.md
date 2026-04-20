@@ -10,9 +10,6 @@ An introduction to GNU autoconf, automake, and libtool is available as
 Developers with an interest in writing robust and portable code may
 also take interest in the
 [GNU coding standards](http://www.gnu.org/prep/standards).
-If you have been developing
-with the old setup, it would be good to follow the notes on
-[switching to the GNU autotools](switching.md).
 
 ---
 
@@ -20,14 +17,13 @@ with the old setup, it would be good to follow the notes on
 
 #### Check-out
 
-Developers may check out the software from the SourceForge.net Git repo with
+Developers can check out the software from GitLab with
 
 ```
-$ git clone ssh://USERNAME@git.code.sf.net/p/psrchive/code psrchive
+$ git clone git@gitlab.com:pulsar-astronomy/psrchive.git
 ```
 
-where `USERNAME` is a valid PSRCHIVE sourceforge user account login id.
-Upon successful checkout, a single directory, psrchive,
+Upon successful checkout, a single directory, `psrchive`,
 will be created in the current working directory. If this is the
 first time you have checked out the software, the psrchive
 directory will contain the following files and directories:
@@ -83,11 +79,6 @@ been defined in the **main** directories:
   **main** directory
 * include install only the header files defined in the
   **main** directory
-
-For instructions on how to compile the rest of the Swinburne software
-repository, please refer to the
-[rest of the repository](switching.shtml.html#rest) notes in switching
-to GNU autotools.
 
 ---
 

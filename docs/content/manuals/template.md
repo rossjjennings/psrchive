@@ -2,26 +2,21 @@
 
 ### 1.0 Purpose
 
-This file represents the basic structure to which all PSRCHIVE application notes and manuals should
-conform. Authors of an application should copy this file to name.shtml
-where name is the name of their new program, then edit the text below
-each header according to the instructions. Once checked into CVS, the
-file will be automatically uploaded to the PSRCHIVE web site. When major changes are made to the
+This file represents the basic structure to which all PSRCHIVE
+application notes and manuals should conform. Authors of an
+application should copy this file to `name.md` where `name` is the
+name of their new program, then edit the text below each header
+according to the instructions. When major changes are made to the
 application source code, this file should be updated to reflect the
-new state of the software.
+new state of the software. Published documentation is rebuilt
+automatically from the Markdown sources by ReadTheDocs.
 
-Describe the purpose of the program here... The second line of this
-file selects the StyleSheet called psrchive.css, which includes a few
-extra html directives that should be used when describing code,
-commands and terminal output. Use `this` when writing
-inline C or C++ code in this document, or this style when
-describing shell variables, filenames, paths, and extenstion. To
-describe terminal input from the keyboard, use `this
-style`. Sample output from the terminal should look `like
-this`. Application names should also be highlighted like
-`this`.
-
-Please also see the [Composing Documentation](manuals/tutorial/documentation.md) tutorial.
+Describe the purpose of the program here. Use `this` when writing
+inline C or C++ code in this document, or this style when describing
+shell variables, filenames, paths, and extensions. To describe
+terminal input from the keyboard, use `this style`. Sample output
+from the terminal should look `like this`. Application names should
+also be highlighted like `this`.
 
 ### 2.0 Usage
 

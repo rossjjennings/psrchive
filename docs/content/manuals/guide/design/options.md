@@ -3,9 +3,9 @@
 For the sake of consistency, a number of PSRCHIVE programs employ a standard set of command
 line options, including
 
-* [Standard preamble](options.shtml.html#preamble),
-* [Standard preprocessing](options.shtml.html#preprocessing)
-* [Standard output](options.shtml.html#output).
+* [Standard preamble](options.md#preamble),
+* [Standard preprocessing](options.md#preprocessing)
+* [Standard output](options.md#output).
 
 ### Standard preamble
 

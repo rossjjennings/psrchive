@@ -134,7 +134,7 @@ psredit -c dm=10.35 -e fix filename[s]
 
 Here, the command `dm=10.35` sets the dispersion measure
 attribute and `-e fix` is one of the
-[standard output options](guide/design/options.shtml.html#output)
+[standard output options](guide/design/options.md#output)
 for naming the edited output file; in this case, the output file is written
 with the extension replaced by `fix`.
 
@@ -197,7 +197,7 @@ psredit -c int:point:ha=1.0 -m file.wha
 ```
 
 Here, `-m` is one of the
-[standard output options](guide/design/options.shtml.html#output)
+[standard output options](guide/design/options.md#output)
 for naming the edited output file; in this case, the output file overwrites
 the input file.
 

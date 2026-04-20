@@ -3,8 +3,8 @@
 The attributes of the pen used to draw
 **psrplot** plots may be set, including
 
-* [character font and height](pen.shtml.html#font), and
-* [line width and style](pen.shtml.html#line).
+* [character font and height](pen.md#font), and
+* [line width and style](pen.md#line).
 
 ### Character font and height
 

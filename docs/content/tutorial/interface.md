@@ -137,10 +137,10 @@ constructor of the new class interface using the
 `TextInterface::To<MyClass>::import` method. It is
 currently possible to import the text interface of:
 
-* a [parent](interface.shtml.html#parent),
-* a [member](interface.shtml.html#member),
-* the elements of a [vector](interface.shtml.html#vector), or
-* the data in a [map](interface.shtml.html#map).
+* a [parent](interface.md#parent),
+* a [member](interface.md#member),
+* the elements of a [vector](interface.md#vector), or
+* the data in a [map](interface.md#map).
 
 **Inheriting the Parent interface**
 

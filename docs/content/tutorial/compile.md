@@ -18,4 +18,4 @@ as described [here](../devel/install.md).
 If you are a developer and wish to integrate your program with the
 PSRCHIVE distribution, please follow the
 instructions at [Making
-Additions](../devel/development.shtml.html#additions).
+Additions](../devel/development.md#additions).

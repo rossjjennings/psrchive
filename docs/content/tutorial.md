@@ -13,5 +13,4 @@ Tutorial chapters:
 6. [Adding a Configuration Option](tutorial/config.md)
 7. [Building a Text Interface](tutorial/interface.md)
 8. [Adding to the Interpreter](tutorial/interpreter.md)
-9. [Composing Documentation](tutorial/documentation.md)
-10. [Building on Multiple Architectures](devel/multiple.md)
+9. [Building on Multiple Architectures](devel/multiple.md)

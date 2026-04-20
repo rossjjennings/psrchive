@@ -1,34 +1,35 @@
 # PSRCHIVE Administration Guide
 
-### Releasing a Distribution
+## Releasing a Distribution
 
-Upload the distribution file to the SourceForge File Release System (FRS)
-by running the script
+Releases are produced by the GitLab CI release pipeline, which is
+triggered automatically when a date-format tag (`YYYY-MM-DD`) is
+pushed.
 
-```
-Management/release.csh
-```
+The release maintainer's steps are:
 
-When it finishes, check that the release is posted at
-[PSRCHIVE Files](https://sourceforge.net/projects/psrchive/files/psrchive/).
+1. On a clean checkout of the release branch, update
+   `configure.ac` so that the `AC_INIT` version matches the
+   intended tag, e.g.
 
-Update the following files:
+   ```
+   AC_INIT([PSRCHIVE],[YYYY-MM-DD],[...])
+   ```
 
-```
-web/changes/index.shtml
-web/changes/release-<yyyy-mm-dd>.shtml
-Documentation/psrchive.dox (PROJECT_NUMBER)
-```
+2. Commit the change with message `release YYYY-MM-DD`.
 
-where "<yyyy-mm-dd>" is the release date.
-When creating the release notes, it is useful to update the Bugs and
-Feature Requests Trackers as follows:
+3. Tag the commit with the same date:
 
-* Visit[Update artifact groups for: Feature Requests](https://sourceforge.net/tracker/admin/index.php?group_id=159762&atid=813135&add_group=1) and scroll down to "Add a new artifact group" with the Group name "release <yyyy-mm-dd>"
-* Visit [Tracker: Feature Requests](https://sourceforge.net/tracker/?func=browse&group_id=159762&atid=813135&status=2&artgroup=804799) filtered on "Status: Closed" and "Group: next release" then "Check All" and do a "Mass Update" to set "Group: release <yyyy-mm-dd>". (It might also be a good idea to check for any stragglers in "Group: No Group".)
-* Change the filter to "Group: release <yyyy-mm-dd>" then click "Filter" then "Permalink" and cut-and-paste the URL into the release notes.
-* Visit [Update artifact groups for: Bugs](https://sourceforge.net/tracker/admin/index.php?group_id=159762&atid=813132&add_group=1) and scroll down to "Add a new artifact group" with the Group name "release <yyyy-mm-dd>"
-* Visit [Tracker: Bugs](https://sourceforge.net/tracker/?func=browse&group_id=159762&atid=813132&status=2&artgroup=804619) filtered on "Status: Closed" and "Group: next release" then "Check All" and do a "Mass Update" to set "Group: release <yyyy-mm-dd>". (Again, double-check "Group: No Group".)
-* Change the filter to "Group: release <yyyy-mm-dd>" then click "Filter" then "Permalink" and cut-and-paste the URL into the release notes.
+   ```
+   git tag YYYY-MM-DD
+   git push <remote> YYYY-MM-DD
+   ```
 
-Finally, [update the web pages](web.md).
+4. The release pipeline verifies that the tag matches
+   `configure.ac`, runs `make distcheck`, produces
+   `psrchive-YYYY-MM-DD.tar.gz`, generates a CHANGELOG from the
+   commits since the previous release tag, and publishes the
+   GitLab Release.
+
+The resulting Release page lists the tarball as a downloadable
+asset. Nothing needs to be uploaded by hand.
