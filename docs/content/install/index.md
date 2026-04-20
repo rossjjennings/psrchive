@@ -1,26 +1,39 @@
-# PSRCHIVE Software Installation
+# Installation
 
-If you are installing PSRCHIVE and other pulsar software for the first time, then have a look at the
-[Complete Installation Instructions](installation.md).
-
-The latest release of PSRCHIVE can be
-downloaded as a single file. Alternatively, the development version of
-the code can be checked out of the Git repository. The installation
-instructions are slightly different in the two cases.
+Pre-built PSRCHIVE binaries can be installed using [conda](https://docs.conda.io/en/latest/).  Alternatively, the source code can be compiled and installed.
 
 ---
 
-### Build from source
+## Pre-built binaries
 
-**Download:**
-The latest version of PSRCHIVE is available via the
-[Git repository](current.md) from SourceForge. There might also
-be a relatively recent tarball [here](https://sourceforge.net/projects/psrchive/files/latest/download).
+Binary PSRCHIVE packages for the [conda](https://docs.conda.io/en/latest/) package management system are
+available via [conda-forge](https://conda-forge.org/), as described
+in [Installation via conda](conda.md).
 
-**Install:** Please refer to the
-[development branch installation instructions](current/build.md).
+```{toctree}
+:hidden:
+:maxdepth: 2
 
-### Pre-built binaries
+conda.md
+```
 
-**conda:** Binary PSRCHIVE packages for the [conda](https://docs.conda.io/en/latest/) package management system are
-available via [conda-forge](https://conda-forge.org/).
+---
+
+## Build from source
+
+To compile the PSRCHIVE source code,
+
+1. [install dependencies](dependencies.md),
+2. [configure the environment](environment.md),
+3. [obtain the source code](obtain.md), then
+4. [compile and install](build.md). 
+
+```{toctree}
+:hidden:
+:maxdepth: 2
+
+dependencies.md
+environment.md
+obtain.md
+build.md
+```

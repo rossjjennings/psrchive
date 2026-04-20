@@ -1,5 +1,5 @@
 
-## Software Credits
+## Credits
 
 Please see our growing list of [contributors](contributors.md).
 

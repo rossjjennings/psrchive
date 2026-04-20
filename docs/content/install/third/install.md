@@ -1,11 +1,6 @@
-# Automatic Package Installation
+# Package Installation
 
-PSRCHIVE includes a number of scripts that
-may be used to automatically install its dependencies. These scripts
-are created by the `configure` script, which must be run first.
-After installing all of the required packages and setting the relevant
-environment variables as instructed, the `configure`
-script must be run again. For example,
+PSRCHIVE includes a number of scripts that may be used to automatically install its dependencies. These scripts are created by the `configure` script, which must be run first. After installing all of the required packages and setting the relevant environment variables as instructed, the `configure` script must be run again. For example,
 
 ```
 ./configure

@@ -3,10 +3,14 @@
 
 You can either download a stable release as a single file or clone the latest development version of PSRCHIVE.
 
+---
+
 ## Download a stable release
 
 Released versions of PSRCHIVE are available for download
 at [GitLab](https://gitlab.com/pulsar-astronomy/psrchive/-/releases).
+
+---
 
 ## Clone the development version
 

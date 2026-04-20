@@ -27,8 +27,10 @@ doxygen:
 		grep '^Error' $(DOXYGENDIR)/$$proj.err || true; \
 	done
 
-html: doxygen
+sphinx:
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)/html
+
+html: doxygen sphinx
 	@echo "Build finished. Open $(BUILDDIR)/html/index.html"
 
 clean:
