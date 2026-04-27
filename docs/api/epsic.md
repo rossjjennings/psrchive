@@ -3,7 +3,10 @@
 Mathematical and statistical utilities used throughout the PSRCHIVE
 library.
 
-```{eval-rst}
-.. doxygenindex::
-   :project: epsic
+```{toctree}
+:maxdepth: 1
+
+epsic/namespacelist
+epsic/classlist
+epsic/structlist
 ```

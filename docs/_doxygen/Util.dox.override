@@ -26,3 +26,7 @@ INPUT_ENCODING         = ISO-8859-1
 # Hide file-level documentation and undocumented members
 SHOW_FILES             = NO
 HIDE_UNDOC_MEMBERS     = YES
+
+# Drop std::* — Doxygen otherwise emits a stub namespacestd.xml that
+# references std::allocator etc. with no body, breaking Breathe.
+EXCLUDE_SYMBOLS        = std::*

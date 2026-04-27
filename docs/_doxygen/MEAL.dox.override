@@ -19,3 +19,7 @@ GENERATE_TAGFILE       =
 # Disable custom HTML header/footer (not generating HTML)
 HTML_HEADER            =
 HTML_FOOTER            =
+
+# Drop std::* — Doxygen otherwise emits a stub namespacestd.xml that
+# references std::allocator etc. with no body, breaking Breathe.
+EXCLUDE_SYMBOLS        = std::*

@@ -26,5 +26,7 @@ SHOW_FILES             = NO
 # Hide undocumented members to reduce noise
 HIDE_UNDOC_MEMBERS     = YES
 
-# Exclude undocumented format-specific structs
-EXCLUDE_SYMBOLS        = WAPP_HEADER* wapp_*
+# Exclude undocumented format-specific structs and any std::* references
+# (Doxygen otherwise emits a stub `namespacestd.xml` referencing
+# std::allocator etc. with no body, which breaks Breathe at sphinx-build.)
+EXCLUDE_SYMBOLS        = WAPP_HEADER* wapp_* std::*

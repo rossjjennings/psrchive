@@ -1,21 +1,25 @@
 # Makefile for PSRCHIVE Sphinx + Breathe documentation
 #
-# Builds Doxygen XML (via override configs), then runs Sphinx.
+# Builds Doxygen XML, runs breathe-apidoc to split each project into
+# per-class pages, then runs Sphinx.
 # Usage:  make html
 
 SPHINXBUILD   = sphinx-build
 SPHINXOPTS    =
 BUILDDIR      = _build
 DOXYGENDIR    = _doxygen
+APIDIR        = api
 
-# Doxygen override configs (build order matches Documentation/Makefile)
+# Doxygen project name <-> api/ subdirectory
+# (Doxygen project names are case-sensitive in conf.py; api/ uses lower-case)
 DOX_PROJECTS  = epsic Util MEAL psrchive
 
-.PHONY: help clean doxygen html
+.PHONY: help clean doxygen apidoc sphinx html
 
 help:
-	@echo "  make html    – build Doxygen XML then Sphinx HTML"
+	@echo "  make html    – build Doxygen XML, breathe-apidoc, then Sphinx HTML"
 	@echo "  make doxygen – build Doxygen XML only"
+	@echo "  make apidoc  – build Doxygen XML then per-class breathe-apidoc trees"
 	@echo "  make clean   – remove all generated output"
 
 doxygen:
@@ -27,11 +31,35 @@ doxygen:
 		grep '^Error' $(DOXYGENDIR)/$$proj.err || true; \
 	done
 
+# Per-class API trees. Generated each build; excluded from version control
+# via .gitignore. Output ends up at api/<lowercase project>/{class,struct,
+# file,namespace}/*.rst plus *list.rst index files that the per-project
+# .md page wires into a {toctree}.
+apidoc: doxygen
+	@for proj in $(DOX_PROJECTS); do \
+		out=$(APIDIR)/$$(echo $$proj | tr '[:upper:]' '[:lower:]'); \
+		xml=$(DOXYGENDIR)/$$proj/xml; \
+		echo "==> breathe-apidoc: $$proj -> $$out"; \
+		rm -rf $$out; \
+		mkdir -p $$out; \
+		breathe-apidoc -q -o $$out -p $$proj -m -f -g class,struct,namespace $$xml; \
+		: "Drop stub pages for compounds that have no XML in this project"; \
+		: "(e.g. std::allocator that Doxygen mentions but does not document)"; \
+		find $$out -name '*.rst' -mindepth 2 | while read f; do \
+			b=$$(basename $$f .rst); \
+			[ -f $$xml/$$b.xml ] || rm $$f; \
+		done; \
+	done
+
 sphinx:
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)/html
 
-html: doxygen sphinx
+html: apidoc sphinx
 	@echo "Build finished. Open $(BUILDDIR)/html/index.html"
 
 clean:
 	rm -rf $(BUILDDIR) $(DOXYGENDIR)/*/
+	@for proj in $(DOX_PROJECTS); do \
+		out=$(APIDIR)/$$(echo $$proj | tr '[:upper:]' '[:lower:]'); \
+		rm -rf $$out; \
+	done

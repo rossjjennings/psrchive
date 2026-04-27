@@ -4,19 +4,10 @@ Core data structures (`Pulsar::Archive`, `Pulsar::Integration`,
 `Pulsar::Profile`) and advanced analysis modules (Polarimetry, Timing,
 RFIMitigation).
 
-```{eval-rst}
-.. doxygenpage:: index
-   :project: psrchive
-```
+```{toctree}
+:maxdepth: 1
 
-## Namespaces
-
-```{eval-rst}
-.. doxygennamespace:: Pulsar
-   :project: psrchive
-```
-
-```{eval-rst}
-.. doxygennamespace:: Calibration
-   :project: psrchive
+psrchive/namespacelist
+psrchive/classlist
+psrchive/structlist
 ```
