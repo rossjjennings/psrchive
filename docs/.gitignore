@@ -7,6 +7,5 @@ _doxygen/*.err
 # class/struct/namespace per Doxygen project. Regenerated each build.
 # The hand-written intro lives at api/<project>.md (outside these dirs).
 api/psrchive/
-api/util/
 api/meal/
 api/epsic/
