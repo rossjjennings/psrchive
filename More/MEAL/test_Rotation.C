@@ -125,7 +125,7 @@ int main ()
   }
 
   cerr << "Testing in circular basis" << endl;
-  Pauli::basis().set_basis (Signal::Circular);
+  Pauli::basis().set_basis (Convention::Circular);
 
   for (unsigned axis=0; axis < 3; axis++)
   {

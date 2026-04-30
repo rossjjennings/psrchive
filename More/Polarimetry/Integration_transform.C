@@ -15,7 +15,7 @@ using namespace std;
 namespace Pulsar {
 
   /* Transform a full-poln profile using the PolnProfile class */
-  static void transform4(Signal::Basis basis, Signal::State state, 
+  static void transform4(Convention::Basis basis, Signal::State state, 
       Profile *prof0, Profile *prof1, Profile *prof2, Profile *prof3,
       const Jones<float>& response)
   {
@@ -47,7 +47,7 @@ void Pulsar::Integration::transform (const Jones<float>& response)
     throw Error (InvalidState, "Pulsar::Integration::transform",
 		 "incomplete polarization information");
 
-  Signal::Basis basis = get_basis();
+  Convention::Basis basis = get_basis();
   Signal::State state = get_state();
 
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
@@ -83,7 +83,7 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
   if (verbose)
     cerr << "Pulsar::Integration::transform vector<Jones<float>>" << endl;
 
-  Signal::Basis basis = get_basis();
+  Convention::Basis basis = get_basis();
   Signal::State state = get_state();
 
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {

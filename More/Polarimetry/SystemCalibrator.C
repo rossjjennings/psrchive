@@ -1354,9 +1354,9 @@ void SystemCalibrator::create_calibrator_estimate () try
   // set the initial guess and fit flags
   Stokes<double> cal_state (1,0,.9,0);
 
-  Signal::Basis basis = get_calibrator()->get_basis ();
+  Convention::Basis basis = get_calibrator()->get_basis ();
 
-  if (basis == Signal::Circular)
+  if (basis == Convention::Circular)
     cal_state = Stokes<double> (1,.9,0,0);
 
   unsigned nchan = get_nchan ();

@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Receiver.h"
 #include <iostream>
 
@@ -14,7 +15,7 @@ void parse_test (const char* filename)
     
   cerr << "\n\n\nReceiver parsed:\n" << endl;
   cerr << "Name = " << receiver->get_name() << endl;
-  cerr << "Basis = " << Signal::basis_string(receiver->get_basis()) << endl;
+  cerr << "Basis = " << tostring(receiver->get_basis()) << endl;
   cerr << endl;
   cerr << "Tracking mode = " << receiver->get_tracking_mode_string() << endl;
   cerr << "Tracking angle = " << receiver->get_tracking_angle().getDegrees()

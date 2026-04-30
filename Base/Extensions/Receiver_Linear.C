@@ -13,18 +13,18 @@ Pulsar::Receiver::Linear::Linear ()
 }
 
 //! Get the basis of the feed receptors
-Signal::Basis Pulsar::Receiver::Linear::get_basis () const
+Convention::Basis Pulsar::Receiver::Linear::get_basis () const
 {
-  return Signal::Linear;
+  return Convention::Linear;
 }
     
 //! Return true if the basis is right-handed
-Signal::Hand Pulsar::Receiver::Linear::get_hand () const
+Convention::Hand Pulsar::Receiver::Linear::get_hand () const
 {
   if (y_offset)
-    return Signal::Left;
+    return Convention::Left;
   else
-    return Signal::Right;
+    return Convention::Right;
 }
     
 //! Get the orientation of the basis about the line of sight
@@ -49,11 +49,11 @@ Angle Pulsar::Receiver::Linear::get_reference_source_phase () const
 //! Copy the state from another
 void Pulsar::Receiver::Linear::copy (const State* state)
 {
-  if (state->get_basis() != Signal::Linear)
+  if (state->get_basis() != Convention::Linear)
     throw Error (InvalidParam, "Pulsar::Receiver::Linear::copy",
-		 "input State::get_basis != Signal::Linear");
+		 "input State::get_basis != Convention::Linear");
 
-  y_offset = state->get_hand() == Signal::Left;
+  y_offset = state->get_hand() == Convention::Left;
 
   set_calibrator_offset( 0.5 * state->get_reference_source_phase() );
 
