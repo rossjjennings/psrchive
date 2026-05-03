@@ -24,19 +24,19 @@ namespace Pulsar {
     Native ();
 
     //! Get the basis of the feed receptors
-    Signal::Basis get_basis () const
+    Convention::Basis get_basis () const
     { return basis; }
 
     //! Set the basis of the feed receptors
-    void set_basis (Signal::Basis _basis)
+    void set_basis (Convention::Basis _basis)
     { basis = _basis; }
     
     //! Get the hand of the basis
-    Signal::Hand get_hand () const
+    Convention::Hand get_hand () const
     { return hand; }
     
     //! Set true if the basis is right-handed
-    void set_hand (Signal::Hand h)
+    void set_hand (Convention::Hand h)
     { hand = h; }
     
     //! Get the orientation of the basis about the line of sight
@@ -61,10 +61,10 @@ namespace Pulsar {
   protected:
     
     //! Basis of the feed receptors
-    Signal::Basis basis;
+    Convention::Basis basis;
     
     //! The hand of the basis
-    Signal::Hand hand;
+    Convention::Hand hand;
     
     //! The orientation of the basis about the line of sight
     Angle orientation;

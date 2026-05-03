@@ -117,12 +117,12 @@ void Pulsar::Integration::Meta::set_faraday_corrected (bool v)
 }
 
 //! Get the feed configuration of the receiver
-Signal::Basis Pulsar::Integration::Meta::get_basis () const
+Convention::Basis Pulsar::Integration::Meta::get_basis () const
 {
   return basis;
 }
 
-void Pulsar::Integration::Meta::set_basis (Signal::Basis v)
+void Pulsar::Integration::Meta::set_basis (Convention::Basis v)
 {
   basis = v;
 }

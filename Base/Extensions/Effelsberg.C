@@ -15,7 +15,7 @@ using namespace std;
 void Pulsar::Effelsberg::Rcvr_UHF (Receiver* r)
 {
   r->set_name ("UHF");
-  r->set_basis(Signal::Circular);
+  r->set_basis(Convention::Circular);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -23,7 +23,7 @@ void Pulsar::Effelsberg::Rcvr_UHF (Receiver* r)
 void Pulsar::Effelsberg::Rcvr_Multibeam (Receiver* r)
 {
   r->set_name ("Multibeam");
-  r->set_basis(Signal::Circular);
+  r->set_basis(Convention::Circular);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -31,7 +31,7 @@ void Pulsar::Effelsberg::Rcvr_Multibeam (Receiver* r)
 void Pulsar::Effelsberg::Rcvr_20cm (Receiver* r)
 {
   r->set_name ("20cm");
-  r->set_basis(Signal::Circular);
+  r->set_basis(Convention::Circular);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -39,7 +39,7 @@ void Pulsar::Effelsberg::Rcvr_20cm (Receiver* r)
 void Pulsar::Effelsberg::Rcvr_11cm (Receiver* r)
 {
   r->set_name ("11cm");
-  r->set_basis(Signal::Circular);
+  r->set_basis(Convention::Circular);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -47,7 +47,7 @@ void Pulsar::Effelsberg::Rcvr_11cm (Receiver* r)
 void Pulsar::Effelsberg::Rcvr_6cm (Receiver* r)
 {
   r->set_name ("6cm");
-  r->set_basis(Signal::Circular);
+  r->set_basis(Convention::Circular);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -55,7 +55,7 @@ void Pulsar::Effelsberg::Rcvr_6cm (Receiver* r)
 void Pulsar::Effelsberg::Rcvr_3_6cm (Receiver* r)
 {
   r->set_name ("3_6cm");
-  r->set_basis(Signal::Circular);
+  r->set_basis(Convention::Circular);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }

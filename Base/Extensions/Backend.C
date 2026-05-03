@@ -12,9 +12,9 @@ Pulsar::Backend::Backend (const std::string& ext_name)
   : Extension (ext_name.c_str())
 {
   name = "unknown";
-  hand = Signal::Right;
+  hand = Convention::Right;
 
-  argument = Signal::Conventional;
+  argument = Convention::Conventional;
   downconversion_corrected = false;
   corrected = false;
 
@@ -92,25 +92,25 @@ void Pulsar::Backend::set_name (const std::string& n)
 }
 
 //! Get the hand of the backend
-Signal::Hand Pulsar::Backend::get_hand () const
+Convention::Hand Pulsar::Backend::get_hand () const
 {
   return hand;
 }
 
 //! Set the hand of the backend
-void Pulsar::Backend::set_hand (Signal::Hand h)
+void Pulsar::Backend::set_hand (Convention::Hand h)
 {
   hand = h;
 }
 
 //! Get the argument of the backend
-Signal::Argument Pulsar::Backend::get_argument () const
+Convention::Argument Pulsar::Backend::get_argument () const
 {
   return argument;
 }
 
 //! Set the argument of the backend
-void Pulsar::Backend::set_argument (Signal::Argument a)
+void Pulsar::Backend::set_argument (Convention::Argument a)
 {
   argument = a;
 }

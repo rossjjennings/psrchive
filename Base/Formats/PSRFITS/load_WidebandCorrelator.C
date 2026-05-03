@@ -78,7 +78,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
   {
     int temp;
     psrfits_read_key (fptr, "BE_PHASE", &temp, 0, verbose == 3);
-    ext->set_argument( (Signal::Argument) temp );
+    ext->set_argument( (Convention::Argument) temp );
 
     if (verbose == 3)
       cerr << "FITSArchive::load_WidebandCorrelator BE_PHASE=" << temp << endl;
@@ -167,12 +167,12 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 
   bool conventional = in_grep || in_list;
 
-  if (ext->get_argument() == (Signal::Argument) 0) {
+  if (ext->get_argument() == (Convention::Argument) 0) {
     
     if (conventional)
-      ext->set_argument( Signal::Conventional );
+      ext->set_argument( Convention::Conventional );
     else
-      ext->set_argument( Signal::Conjugate );
+      ext->set_argument( Convention::Conjugate );
 
     if (verbose > 2)
       cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"

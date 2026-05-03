@@ -12,7 +12,7 @@
 #define __Pulsar_Backend_h
 
 #include "Pulsar/ArchiveExtension.h"
-#include "Conventions.h"
+#include "Convention.h"  // defined in epsic
 
 namespace Pulsar {
   
@@ -56,16 +56,16 @@ namespace Pulsar {
     void set_name (const std::string& name);
 
     //! Get the hand of the backend
-    Signal::Hand get_hand () const;
+    Convention::Hand get_hand () const;
 
     //! Set the hand of the backend
-    void set_hand (Signal::Hand);
+    void set_hand (Convention::Hand);
 
     //! Get the argument of the backend
-    Signal::Argument get_argument () const;
+    Convention::Argument get_argument () const;
 
     //! Set the argument of the backend
-    void set_argument (Signal::Argument);
+    void set_argument (Convention::Argument);
 
     //! True if backend has compensated for lower sideband downconversion
     bool get_downconversion_corrected () const;
@@ -91,10 +91,10 @@ namespace Pulsar {
     std::string name;
 
     //! The backend handedness
-    Signal::Hand hand;
+    Convention::Hand hand;
 
     //! The backend argument
-    Signal::Argument argument;
+    Convention::Argument argument;
 
     //! True if backend has compensated for lower sideband downconversion
     bool downconversion_corrected;

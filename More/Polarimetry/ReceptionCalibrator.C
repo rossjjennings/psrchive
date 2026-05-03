@@ -209,9 +209,9 @@ void ReceptionCalibrator::initial_observation (const Archive* data)
     set_standard_data (data);
   }
 
-  Signal::Basis basis = get_calibrator()->get_basis ();
+  Convention::Basis basis = get_calibrator()->get_basis ();
 
-  if (basis == Signal::Circular)
+  if (basis == Convention::Circular)
   {
     if (measure_cal_Q)
     {
@@ -580,7 +580,7 @@ void set_fixed_QUV ( Calibration::SourceEstimate* cal, double value )
 
 void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate* est)
 {
-  Signal::Basis basis = get_calibrator()->get_basis ();
+  Convention::Basis basis = get_calibrator()->get_basis ();
 
   for (unsigned istokes=0; istokes<4; istokes++)
     est->source->set_infit (istokes, false);
@@ -588,7 +588,7 @@ void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate* es
   // calibrator flux is unity by definition
   est->source->set_Estimate (0, 1.0);
     
-  if (basis == Signal::Linear)
+  if (basis == Convention::Linear)
   {
     // degree of polarization (Stokes U) may vary
     est->source->set_infit (2, true);
@@ -616,9 +616,9 @@ void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate* es
 
 void ReceptionCalibrator::setup_flux_calibrator (FluxCalManager* mgr)
 {
-  Signal::Basis basis = get_calibrator()->get_basis ();
+  Convention::Basis basis = get_calibrator()->get_basis ();
   
-  if (basis == Signal::Circular || measure_cal_V)
+  if (basis == Convention::Circular || measure_cal_V)
   {
     if (verbose)
       cerr << "ReceptionCalibrator::setup_flux_calibrator ok" << endl;

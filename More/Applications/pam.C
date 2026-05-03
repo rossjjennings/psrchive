@@ -797,12 +797,12 @@ int main (int argc, char *argv[]) try {
 	  cerr << "No Receiver Extension in " << filenames[i] << endl;
 	else {
 	  if (lin) {
-	    receiver->set_basis (Signal::Linear);
+	    receiver->set_basis (Convention::Linear);
 	    cout << "Feed basis set to Linear" << endl;
 	  }
 
 	  if (circ) {
-	    receiver->set_basis (Signal::Circular);
+	    receiver->set_basis (Convention::Circular);
 	    cout << "Feed basis set to Circular" << endl;
 	  }
 	}

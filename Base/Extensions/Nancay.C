@@ -20,7 +20,7 @@ using namespace std;
 void Pulsar::Nancay::L_band (Receiver* r)
 {
   r->set_name("L_Band");
-  r->set_basis(Signal::Linear);
+  r->set_basis(Convention::Linear);
   r->set_nrcvr(2);
   r->set_tracking_mode(Receiver::Feed);
 }

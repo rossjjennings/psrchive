@@ -8,8 +8,8 @@
 
 Pulsar::Receiver::Native::Native ()
 {
-  basis = Signal::Linear;
-  hand = Signal::Right;
+  basis = Convention::Linear;
+  hand = Convention::Right;
 }
 
 //! Copy the state from another

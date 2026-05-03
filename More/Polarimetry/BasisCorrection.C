@@ -20,7 +20,7 @@ Pulsar::BasisCorrection::get_hand (const Receiver* rcvr) const
   if (!rcvr)
     return 1.0;
 
-  if (rcvr->get_basis_corrected() || rcvr->get_hand() == Signal::Right)
+  if (rcvr->get_basis_corrected() || rcvr->get_hand() == Convention::Right)
     return 1.0;
 
   summary += " left-handed basis\n";
@@ -38,7 +38,7 @@ Pulsar::BasisCorrection::get_basis (const Receiver* rcvr) const
   if (!rcvr)
     return 1.0;
 
-  if (rcvr->get_basis_corrected() || rcvr->get_basis() == Signal::Linear)
+  if (rcvr->get_basis_corrected() || rcvr->get_basis() == Convention::Linear)
     return 1.0;
 
   summary += " circular basis\n";
@@ -112,8 +112,8 @@ bool Pulsar::BasisCorrection::required (const Receiver* receiver) const
 {
   bool required = 
     receiver->get_orientation() != 0 ||
-    receiver->get_hand() != Signal::Right ||
-    receiver->get_basis() != Signal::Linear;
+    receiver->get_hand() != Convention::Right ||
+    receiver->get_basis() != Convention::Linear;
 
   if (Archive::verbose > 2)
     cerr << "Pulsar::BasisCorrection::required"

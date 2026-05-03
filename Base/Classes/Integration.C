@@ -640,7 +640,7 @@ catch (Error& error)
 }
 
 //! Get the feed configuration of the receiver
-Signal::Basis Pulsar::Integration::get_basis () const
+Convention::Basis Pulsar::Integration::get_basis () const
 try {
   if (orphaned)
     return orphaned->get_basis ();

@@ -27,10 +27,10 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   strncpy (tempstr, ext->get_name().c_str(), FLEN_VALUE);
   fits_update_key (fptr, TSTRING, "FRONTEND", tempstr, comment, &status);
     
-  if (ext->get_basis() == Signal::Linear)
+  if (ext->get_basis() == Convention::Linear)
     strcpy (tempstr, "LIN");
   
-  else if (ext->get_basis() == Signal::Circular)
+  else if (ext->get_basis() == Convention::Circular)
     strcpy (tempstr, "CIRC");
   
   else

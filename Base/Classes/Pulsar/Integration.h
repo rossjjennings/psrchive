@@ -265,7 +265,7 @@ namespace Pulsar {
     bool get_faraday_corrected () const;
 
     //! Get the feed configuration of the receiver
-    Signal::Basis get_basis () const;
+    Convention::Basis get_basis () const;
 
     //! Get the polarimetric state of the profiles
     Signal::State get_state () const;
