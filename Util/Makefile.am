@@ -9,7 +9,7 @@ libpsrutil_la_LIBADD = third/libthird.la units/libunits.la fft/libpsrfft.la \
 			genutil/libgenutil.la stat/libstat.la \
 			tempo/libtempo.la \
 			epsic/src/libepsic.la \
-			meal/src/libmeal.la @FLIBS@
+			meal/src/libMEAL.la @FLIBS@
 
 if HAVE_CFITSIO
   SUBDIRS += fitsutil

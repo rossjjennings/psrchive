@@ -39,7 +39,6 @@ include_HEADERS = \
 	FITSUTC.h \
 	NormalDistribution.h \
 	orbital.h \
-	pairutil.h \
 	PhaseRange.h \
 	Physical.h \
 	Probability.h \
@@ -211,6 +210,7 @@ test_Barycentre_SOURCES		= test_Barycentre.C
 LDADD = libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la \
+	$(top_builddir)/Util/meal/src/util/libutil.la \
 	$(top_builddir)/Util/epsic/src/libepsic.la \
 	$(top_builddir)/Util/epsic/src/true_math/libtrue_math.la \
 	-lm

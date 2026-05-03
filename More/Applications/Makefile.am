@@ -210,6 +210,7 @@ print_Predictor_SOURCES = print_Predictor.C
 LDADD = $(top_builddir)/More/libpsrmore.la \
     $(top_builddir)/Base/libpsrbase.la \
     $(top_builddir)/Util/libpsrutil.la \
+    $(top_builddir)/Util/meal/src/libMEAL.la \
     $(top_builddir)/Util/epsic/src/libepsic.la
 
 include $(top_srcdir)/config/Makefile.include

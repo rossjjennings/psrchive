@@ -321,9 +321,9 @@ endif
 #
 
 LDADD = libPolarimetry.la \
-	$(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la \
+	$(top_builddir)/Util/meal/src/libMEAL.la \
 	$(top_builddir)/Util/epsic/src/libepsic.la 
 
 libPolarimetry_la_LIBADD = iri2001/libiri.la @GSL_LIBS@ @YAMLCPP_LIBS@
