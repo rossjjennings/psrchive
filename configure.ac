@@ -322,7 +322,6 @@ AC_CONFIG_FILES([
 		More/General/Makefile
 		More/Plotting/Makefile
 		More/Plotting/pgutil/Makefile
-		More/MEAL/Makefile
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
@@ -339,7 +338,7 @@ AC_CONFIG_FILES([
 		Management/psrchive.pc
 		Makefile])
 
-AC_CONFIG_SUBDIRS([Util/epsic/src])
+AC_CONFIG_SUBDIRS([Util/epsic Util/meal])
 
 AC_OUTPUT
 

@@ -1,5 +1,5 @@
 
-SUBDIRS                 = epsic/src units third genutil fft stat tempo
+SUBDIRS                 = epsic meal units third genutil fft stat tempo
 
 lib_LTLIBRARIES         = libpsrutil.la
 
@@ -8,7 +8,8 @@ libpsrutil_la_SOURCES =
 libpsrutil_la_LIBADD = third/libthird.la units/libunits.la fft/libpsrfft.la \
 			genutil/libgenutil.la stat/libstat.la \
 			tempo/libtempo.la \
-			epsic/src/libepsic.la @FLIBS@
+			epsic/src/libepsic.la \
+			meal/src/libmeal.la @FLIBS@
 
 if HAVE_CFITSIO
   SUBDIRS += fitsutil

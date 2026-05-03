@@ -33,15 +33,13 @@ void Pulsar::ObsDescription::load (FILE* fptr)
 {
   text = "";
   if (stringload (&text, fptr) < 0)
-    throw Error (FailedSys, "Pulsar::ObsDescription::load",
-		 "stringload");
+    throw Error (FailedSys, "Pulsar::ObsDescription::load", "stringload");
 }
 
 //! Unload to an open stream
 void Pulsar::ObsDescription::unload (FILE* fptr) const
 {
   if (fputs (text.c_str(), fptr) == EOF)
-    throw Error (FailedSys, "Pulsar::ObsDescription::unload", 
-		 "fputs");
+    throw Error (FailedSys, "Pulsar::ObsDescription::unload", "fputs");
 }
 
