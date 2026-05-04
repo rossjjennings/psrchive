@@ -45,9 +45,15 @@ if test -f $srcdir/config/epsic.sh; then
   $srcdir/config/epsic.sh $srcdir
 fi
 
+MEAL_SOURCE='$(top_srcdir)/Util/meal/src'
 EPSIC_SOURCE='$(top_srcdir)/Util/epsic/src'
-EPSIC_BUILD='$(top_builddir)/Util/epsic/src'
-INCLUDE_CPPFLAGS='-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_SOURCE)/true_math -I$(EPSIC_BUILD) -I$(EPSIC_BUILD)/util'
+EPSIC_BUILD='$(top_builddir)/Util/epsic/src'  # PromoteTraits.h is built
+
+INCLUDE_CPPFLAGS='-I$(MEAL_SOURCE) -I$(MEAL_SOURCE)/util \
+	-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_SOURCE)/true_math \
+	-I$(EPSIC_BUILD)/util'
+
+AC_SUBST(MEAL_SOURCE)
 AC_SUBST(EPSIC_SOURCE)
 AC_SUBST(EPSIC_BUILD)
 AC_SUBST(INCLUDE_CPPFLAGS)
