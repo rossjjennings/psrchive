@@ -342,7 +342,9 @@ AC_CONFIG_FILES([
 		Management/psrchive.pc
 		Makefile])
 
-ac_configure_args="$ac_configure_args --with-epsic-cflags=\"$EPSIC_UTIL_CFLAGS\""
+# configure the meal submodule to use the epsic submodule
+meal_overrides="--with-epsic-cflags=\"$EPSIC_UTIL_CFLAGS\" --with-epsic-libs=$EPSIC_BUILD/libepsic.la"
+ac_configure_args="$ac_configure_args $meal_overrides"
 
 AC_CONFIG_SUBDIRS([Util/epsic Util/meal])
 
