@@ -232,13 +232,13 @@ void Pulsar::Archive::reverse_chan ()
 
 /* Unless a Receiver Extension is present, this method assumes that the
    signal basis is linear. */
-Signal::Basis Pulsar::Archive::get_basis () const
+Convention::Basis Pulsar::Archive::get_basis () const
 {
   const Receiver* receiver = get<Receiver>();
   if (receiver)
     return receiver->get_basis();
   else
-    return Signal::Linear;
+    return Convention::Linear;
 }
 
 void Pulsar::Archive::refresh()

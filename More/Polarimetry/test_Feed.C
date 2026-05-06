@@ -13,14 +13,14 @@ int main (int argc, char** argv) try {
 
   MEAL::Function::verbose = true;
 
-  cerr << "Instantiating Calibration::Feed (Signal::Linear) " << endl;
+  cerr << "Instantiating Calibration::Feed (Convention::Linear) " << endl;
   Calibration::Feed linear;
 
   cerr << "linear=" << linear.evaluate() << endl;
 
-  Pauli::basis().set_basis (Signal::Circular);
+  Pauli::basis().set_basis (Convention::Circular);
 
-  cerr << "Instantiating Calibration::Feed (Signal::Circular)" << endl;
+  cerr << "Instantiating Calibration::Feed (Convention::Circular)" << endl;
   Calibration::Feed circular;
 
   cerr << "circular=" << circular.evaluate() << endl;

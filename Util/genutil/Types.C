@@ -59,20 +59,6 @@ const char* Signal::source_string(Source source)
   }
 }
 
-const char* Signal::basis_string(Basis basis)
-{
-  switch( basis ){
-  case Circular:
-    return "Circular";
-  case Linear:
-    return "Linear";
-  case Elliptical:
-    return "Elliptical";
-  default:
-    return "Invalid";
-  }
-}
-
 unsigned Signal::State2npol (State s)
 {
   if( s==Nyquist || s==Analytic || s==PPQQ )
@@ -241,30 +227,6 @@ std::ostream& Signal::operator<< (std::ostream& ostr, State state)
 std::istream& Signal::operator >> (std::istream& is, State& state)
 {
   return extraction (is, state, Signal::string2State);
-}
-
-// //////////////////////////////////////////////////////////////////////////
-//
-// Signal::Basis
-//
-// //////////////////////////////////////////////////////////////////////////
-
-const string Signal::Basis2string (Basis basis)
-{
-  return basis_string(basis);
-}
-
-Signal::Basis Signal::string2Basis (const string& ss)
-{
-  if(ss=="Circular")
-    return Signal::Circular;
-  if(ss=="Linear")
-    return Signal::Linear;
-  if(ss=="Elliptical")
-    return Signal::Elliptical;
-
-  throw Error (InvalidState, "Signal::string2Basis",
-	       "Unknown basis '" + ss + "'");
 }
 
 // //////////////////////////////////////////////////////////////////////////

@@ -66,7 +66,7 @@ int main (int argc, char** argv) try
   cout << "\nhand\tcalU\t f(phi)\t f(PA)\t offset" << endl;
 
   // Start with a right-handed receiver
-  Signal::Hand hand = Signal::Right;
+  Convention::Hand hand = Convention::Right;
 
   Pulsar::BasisCorrection correction;
 
@@ -235,7 +235,7 @@ int main (int argc, char** argv) try
     }
 
     // switch to a left-handed receiver
-    hand = Signal::Left;
+    hand = Convention::Left;
 
   }
   return 0;

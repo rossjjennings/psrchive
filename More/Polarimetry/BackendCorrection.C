@@ -30,7 +30,7 @@ bool BackendCorrection::must_correct_lsb (const Backend* be,
 
 bool BackendCorrection::must_correct_phase (const Backend* be) const
 {
-  bool result = !be->get_corrected() && be->get_argument() == Signal::Conjugate;
+  bool result = !be->get_corrected() && be->get_argument() == Convention::Conjugate;
 
   if (verbose)
     cerr << "must_correct_phase: corrected=" << be->get_corrected()
@@ -51,11 +51,11 @@ bool BackendCorrection::required (const Archive* arch) const
   if (!backend)
     return false;
 
-  Signal::Hand hand = backend->get_hand();
+  Convention::Hand hand = backend->get_hand();
   bool correct_lsb = must_correct_lsb (backend, arch);
   bool correct_phase = must_correct_phase (backend);
 
-  return hand == Signal::Left || correct_phase || correct_lsb;
+  return hand == Convention::Left || correct_phase || correct_lsb;
 }
 
 void BackendCorrection::operator () (Archive* arch) const try
@@ -66,9 +66,9 @@ void BackendCorrection::operator () (Archive* arch) const try
     return;
 
   Signal::State state = arch->get_state();
-  Signal::Basis basis = arch->get_basis();
-  Signal::Hand hand = backend->get_hand();
-  Signal::Argument argument = backend->get_argument();
+  Convention::Basis basis = arch->get_basis();
+  Convention::Hand hand = backend->get_hand();
+  Convention::Argument argument = backend->get_argument();
 
   bool correct_lsb = must_correct_lsb (backend, arch);
   bool correct_phase = must_correct_phase (backend);
@@ -87,10 +87,10 @@ void BackendCorrection::operator () (Archive* arch) const try
   {
     if (verbose)
       cerr << "BackendCorrection::operator down conversion" << endl;
-    if (argument == Signal::Conjugate)
-      argument = Signal::Conventional;
+    if (argument == Convention::Conjugate)
+      argument = Convention::Conventional;
     else
-      argument = Signal::Conjugate;
+      argument = Convention::Conjugate;
   }
 
   unsigned npol = arch->get_npol();
@@ -103,23 +103,23 @@ void BackendCorrection::operator () (Archive* arch) const try
 
   if (npol == 4)
   {
-    if (argument == Signal::Conjugate)
+    if (argument == Convention::Conjugate)
     {
       if (verbose)
 	cerr << "BackendCorrection::operator phase convention" << endl;
-      if (state == Signal::Stokes && basis == Signal::Circular)
+      if (state == Signal::Stokes && basis == Convention::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U
       else
 	flip[3] = !flip[3];   // Flip Stokes V or Im[AB]
     }
 
-    if (hand == Signal::Left) 
+    if (hand == Convention::Left) 
     {
       if (verbose)
 	cerr << "BackendCorrection::operator hand" << endl;
-      if (state == Signal::Stokes && basis == Signal::Circular)
+      if (state == Signal::Stokes && basis == Convention::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U and ...
-      else if (state == Signal::Stokes && basis == Signal::Linear)
+      else if (state == Signal::Stokes && basis == Convention::Linear)
 	flip[1] = !flip[1];   // Flip Stokes Q and ...
       else if (state == Signal::PseudoStokes)
 	flip[1] = !flip[1];   // Flip AA-BB and ...
@@ -128,7 +128,7 @@ void BackendCorrection::operator () (Archive* arch) const try
   }
 
   // If state == Coherence or PPQQ ...
-  if (hand == Signal::Left && 
+  if (hand == Convention::Left && 
       (state == Signal::Coherence || state == Signal::PPQQ))
     swap01 = true;
 
@@ -165,8 +165,8 @@ void BackendCorrection::operator () (Archive* arch) const try
     backend->set_corrected ();
   if (correct_lsb)
     backend->set_downconversion_corrected ();
-  if (hand == Signal::Left)
-    backend->set_hand(Signal::Right);
+  if (hand == Convention::Left)
+    backend->set_hand(Convention::Right);
 
 }
 catch (Error& error)

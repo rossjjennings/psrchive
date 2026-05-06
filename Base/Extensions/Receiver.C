@@ -94,7 +94,7 @@ string Pulsar::Receiver::get_tracking_mode_string() const
   return "unknown";
 }
 
-void Pulsar::Receiver::set_basis (Signal::Basis basis)
+void Pulsar::Receiver::set_basis (Convention::Basis basis)
 {
   get<Native>()->set_basis (basis);
 }
@@ -109,7 +109,7 @@ void Pulsar::Receiver::set_orientation (const Angle& angle)
 
 /*! If this method is called, then any changes due to set_Y_offset
   will be reset. */
-void Pulsar::Receiver::set_hand (Signal::Hand hand)
+void Pulsar::Receiver::set_hand (Convention::Hand hand)
 {
   get<Native>()->set_hand (hand);
 }

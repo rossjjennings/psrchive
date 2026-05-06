@@ -39,7 +39,7 @@ void Pulsar::Parkes::COAX10_50 (Receiver* receiver)
 //! Initialize the Receiver Extension with Parkes best guess
 void Pulsar::Parkes::guess (Receiver* receiver, Archive* archive)
 {
-  if ( receiver->get_basis() == Signal::Linear )
+  if ( receiver->get_basis() == Convention::Linear )
   {
     if ( archive->get_centre_frequency() > 1230.0 && 
 	 archive->get_centre_frequency() < 1530.0 )

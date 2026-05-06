@@ -22,7 +22,7 @@ using namespace std;
 void Pulsar::GBT::Rcvr_350 (Receiver* r)
 {
   r->set_name ("Rcvr_350");
-  r->set_basis(Signal::Linear);
+  r->set_basis(Convention::Linear);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -30,7 +30,7 @@ void Pulsar::GBT::Rcvr_350 (Receiver* r)
 void Pulsar::GBT::Rcvr_800 (Receiver* r)
 {
   r->set_name ("Rcvr_800");
-  r->set_basis(Signal::Linear);
+  r->set_basis(Convention::Linear);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
@@ -38,7 +38,7 @@ void Pulsar::GBT::Rcvr_800 (Receiver* r)
 void Pulsar::GBT::Rcvr1_2 (Receiver* r)
 {
   r->set_name ("Rcvr1_2");
-  r->set_basis(Signal::Linear);
+  r->set_basis(Convention::Linear);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
   Angle a;
@@ -49,7 +49,7 @@ void Pulsar::GBT::Rcvr1_2 (Receiver* r)
 void Pulsar::GBT::Rcvr2_3 (Receiver* r)
 {
   r->set_name ("Rcvr2_3");
-  r->set_basis(Signal::Linear);
+  r->set_basis(Convention::Linear);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
   Angle a;

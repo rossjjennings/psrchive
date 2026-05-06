@@ -11,7 +11,7 @@
 #ifndef __Types_h
 #define __Types_h
 
-#include "Conventions.h"
+#include "Convention.h"  // defined in epsic
 #include <string>
 
 //! Defines various signal types
@@ -101,14 +101,11 @@ namespace Signal {
   
   const char* source_string (Source source);
   const char* state_string (State state);
-  const char* basis_string (Basis basis);
 
   const std::string Source2string (Source source);
   const std::string State2string  (State state);
-  const std::string Basis2string  (Basis basis);
   const std::string Scale2string  (Scale scale);
 
-  Basis  string2Basis  (const std::string& ss);
   Source string2Source (const std::string& ss);
   State  string2State  (const std::string& ss);
   Scale  string2Scale  (const std::string& ss);
@@ -130,9 +127,6 @@ namespace Signal {
   std::istream& operator >> (std::istream& is, Scale& scale);
 
 }
-
-/* note that Basis extraction and insertion operators are defined in
-   Conventions.h */
 
 #endif
 

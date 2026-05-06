@@ -24,10 +24,10 @@ namespace Pulsar {
     Linear ();
 
     //! Get the basis of the feed receptors
-    Signal::Basis get_basis () const;
+    Convention::Basis get_basis () const;
     
     //! Get the hand of the basis
-    Signal::Hand get_hand () const;
+    Convention::Hand get_hand () const;
     
     //! Get the orientation of the basis about the line of sight
     Angle get_orientation () const;

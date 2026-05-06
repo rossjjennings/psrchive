@@ -40,7 +40,7 @@ namespace Pulsar {
     PolnProfile (unsigned nbin);
 
     //! Construct from four externally-managed Profile objects
-    PolnProfile (Signal::Basis basis, Signal::State state,
+    PolnProfile (Convention::Basis basis, Signal::State state,
 		 Profile* p0, Profile* p1, Profile* p2, Profile* p3);
     
     //! Destructor
@@ -83,7 +83,7 @@ namespace Pulsar {
     void diff (const PolnProfile* that);
 
     //! Get the Basis of the poln profile
-    Signal::Basis get_basis () const { return basis; }
+    Convention::Basis get_basis () const { return basis; }
 
     //! Get the State of the poln profile
     Signal::State get_state () const { return state; }
@@ -128,7 +128,7 @@ namespace Pulsar {
     void convert_state (Signal::State state);
 
     //! Convert the Stokes parameters to the specified basis
-    void convert_basis (Signal::Basis basis);
+    void convert_basis (Convention::Basis basis);
 
     //! Return the invariant interval
     void invint (Profile* invint, bool second = true) const;
@@ -171,7 +171,7 @@ namespace Pulsar {
   protected:
 
     //! The basis in which the radiation is measured
-    Signal::Basis basis;
+    Convention::Basis basis;
 
     //! The state of the polarimetric profiles
     Signal::State state;

@@ -158,7 +158,7 @@ namespace Pulsar {
     std::string telescope;
 
     //! The feed configuration of the receiver
-    Signal::Basis basis;
+    Convention::Basis basis;
 
     //! The state of the profiles
     Signal::State state;

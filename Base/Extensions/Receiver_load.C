@@ -64,9 +64,9 @@ void Pulsar::Receiver::parse (string line)
   else if ( strcasecmp (key.c_str(), "basis") == 0 ) {
 
     if ( strncasecmp (value.c_str(), "lin", 3) == 0 )
-      set_basis( Signal::Linear );
+      set_basis( Convention::Linear );
     else if ( strncasecmp (value.c_str(), "circ", 4) == 0 )
-      set_basis( Signal::Circular );
+      set_basis( Convention::Circular );
     else
       throw Error (InvalidParam, "Pulsar::Receiver::parse",
 		   "unrecognized basis: '" + value + "'");
