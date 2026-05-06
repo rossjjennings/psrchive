@@ -3,6 +3,8 @@
 
 @INCLUDE = ../Documentation/MEAL.dox
 
+FILE_PATTERNS          = *.h
+
 # Redirect output into docs/_doxygen/MEAL/
 OUTPUT_DIRECTORY       = _doxygen/MEAL
 

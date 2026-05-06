@@ -3,6 +3,8 @@
 
 @INCLUDE = ../Documentation/psrchive.dox
 
+FILE_PATTERNS          = *.h
+
 # Redirect output into docs/_doxygen/psrchive/
 OUTPUT_DIRECTORY       = _doxygen/psrchive
 

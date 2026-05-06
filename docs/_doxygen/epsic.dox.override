@@ -3,6 +3,8 @@
 
 @INCLUDE = ../Documentation/epsic.dox
 
+FILE_PATTERNS          = *.h
+
 # Redirect output into docs/_doxygen/epsic/
 OUTPUT_DIRECTORY       = _doxygen/epsic
 

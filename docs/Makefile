@@ -9,20 +9,20 @@ SPHINXBUILD   = sphinx-build
 # significantly for the large per-class breathe-apidoc tree (~1,700
 # stub pages on PSRCHIVE) and brings the RTD build under the 15-minute
 # Community-tier timeout.
-SPHINXOPTS    = -j auto
+SPHINXOPTS    = -j $(shell echo $$(($$(nproc) / 2)))
 BUILDDIR      = _build
 DOXYGENDIR    = _doxygen
 APIDIR        = api
 
 # Doxygen project name <-> api/ subdirectory
 # (Doxygen project names are case-sensitive in conf.py; api/ uses lower-case)
-DOX_PROJECTS    = epsic Util MEAL psrchive
+DOX_PROJECTS    = psrchive
 
 # Subset of DOX_PROJECTS that breathe-apidoc splits into per-class stubs.
 # Util is omitted: it is ~430 internal helper classes that push the total
 # stub count past RTD's 15-minute Community-tier build limit. api/util.md
 # still renders Util via a single `doxygenindex` directive.
-APIDOC_PROJECTS = epsic MEAL psrchive
+APIDOC_PROJECTS = psrchive
 
 .PHONY: help clean doxygen apidoc sphinx html
 
