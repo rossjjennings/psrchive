@@ -16,7 +16,7 @@ APIDIR        = api
 
 # Doxygen project name <-> api/ subdirectory
 # (Doxygen project names are case-sensitive in conf.py; api/ uses lower-case)
-DOX_PROJECTS    = psrchive
+DOX_PROJECTS    = Util psrchive
 
 # Subset of DOX_PROJECTS that breathe-apidoc splits into per-class stubs.
 # Util is omitted: it is ~430 internal helper classes that push the total
