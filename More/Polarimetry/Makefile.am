@@ -85,8 +85,6 @@ nobase_include_HEADERS = \
 	Pulsar/SystemCalibratorStepFinder.h \
 	Pulsar/SystemCalibratorUnloader.h \
 	Pulsar/UnloadJones.h \
-	Pulsar/TemplateUncertainty.h \
-	Pulsar/TotalCovariance.h \
 	Pulsar/TransformationFactory.h \
 	Pulsar/VariableBackendEstimate.h \
 	Pulsar/VariableFaradayRotation.h \
@@ -184,8 +182,6 @@ libPolarimetry_la_SOURCES = \
 	SystemCalibratorManager.C \
 	SystemCalibratorUnloader.C \
 	UnloadJones.C \
-	TemplateUncertainty.C \
-	TotalCovariance.C \
 	TransformationFactory.C \
 	VariableBackendEstimate.C \
 	VariableFaradayRotation.C \
@@ -225,17 +221,14 @@ simpol_SOURCES = simpol.C
 # test programs
 #
 
-TESTS = test_TotalCovariance test_Parallactic test_hand_xyph 
+TESTS = test_Parallactic test_hand_xyph 
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere test_ModeSeparation
-
 
 test_Parallactic_SOURCES	= test_Parallactic.C
 test_hand_xyph_SOURCES		= test_hand_xyph.C
 
-test_TotalCovariance_SOURCES	= test_TotalCovariance.C
 test_ModeSeparation_SOURCES	= test_ModeSeparation.C
-
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 
 if HAVE_YAMLCPP
