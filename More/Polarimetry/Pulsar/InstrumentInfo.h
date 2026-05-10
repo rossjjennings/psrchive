@@ -12,7 +12,7 @@
 #define __Pulsar_InstrumentInfo_H
 
 #include "Pulsar/BackendFeedInfo.h"
-#include "Pulsar/Instrument.h"
+#include "MEAL/Instrument.h"
 
 namespace Pulsar {
 

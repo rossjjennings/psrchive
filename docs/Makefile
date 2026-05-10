@@ -4,7 +4,7 @@
 # Usage:  make html
 
 SPHINXBUILD   = sphinx-build
-SPHINXOPTS    =
+SPHINXOPTS    = -j $(($(nproc) / 2))
 BUILDDIR      = _build
 DOXYGENDIR    = _doxygen
 

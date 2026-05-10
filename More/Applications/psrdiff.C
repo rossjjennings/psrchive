@@ -12,9 +12,10 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
-#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfile.h"
+
+#include "MEAL/ReceptionModelSolver.h"
 #include "MEAL/Polar.h"
 
 #include "Pulsar/StokesPlot.h"

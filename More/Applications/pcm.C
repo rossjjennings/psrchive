@@ -33,9 +33,9 @@
 #include "Pulsar/StandardPrepare.h"
 #include "Pulsar/DataSetManager.h"
 
-#include "Pulsar/ReceptionModelSolveMEAL.h"
+#include "MEAL/ReceptionModelSolveMEAL.h"
 #if HAVE_GSL
-#include "Pulsar/ReceptionModelSolveGSL.h"
+#include "MEAL/ReceptionModelSolveGSL.h"
 #endif
 
 #include "MEAL/Depolarizer.h"
@@ -47,8 +47,8 @@
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/VariableBackend.h"
+#include "MEAL/SingleAxis.h"
+#include "MEAL/VariableBackend.h"
 #include "Pulsar/ReflectStokes.h"
 #include "Pulsar/ProjectionCorrection.h"
 #include "Pulsar/Receiver.h"
@@ -626,7 +626,7 @@ struct flags
 		 "unrecognized PAR code = %c", code);
   }
 
-  void set_infit (Calibration::SingleAxis* xform)
+  void set_infit (MEAL::SingleAxis* xform)
   {
     xform->set_infit (0, gain);
     xform->set_infit (1, diff_gain);
@@ -635,14 +635,14 @@ struct flags
 
 };
 
-Calibration::ReceptionModel::Solver* new_solver (const string& name)
+MEAL::ReceptionModel::Solver* new_solver (const string& name)
 {
   if (name == "MEAL")
-    return new Calibration::SolveMEAL;
+    return new MEAL::SolveMEAL;
 
 #if HAVE_GSL
   if (name == "GSL")
-    return new Calibration::SolveGSL;
+    return new MEAL::SolveGSL;
 #endif
 
   throw Error (InvalidParam, "pcm", "no solver named " + name);
@@ -776,10 +776,10 @@ void pcm::set_verbosity (int level)
   verbose = true;
 
   if (level > 4)
-    Calibration::ReceptionModel::very_verbose = true;
+    MEAL::ReceptionModel::very_verbose = true;
 
   if (level > 3) 
-    Calibration::ReceptionModel::verbose = true;
+    MEAL::ReceptionModel::verbose = true;
 
   if (level > 2)
     Calibration::SignalPath::verbose = true;
@@ -1408,16 +1408,16 @@ void configure_model (Pulsar::SystemCalibrator* model)
   
   if (foreach_calibrator.get())
   {
-    Reference::To< Calibration::SingleAxis > foreach;
-    foreach = new Calibration::SingleAxis;
+    Reference::To< MEAL::SingleAxis > foreach;
+    foreach = new MEAL::SingleAxis;
     foreach_calibrator.set_infit (foreach);
     model->set_foreach_calibrator (foreach);
   }
   
   if (stepeach_calibrator.get())
   {
-    Reference::To< Calibration::VariableBackend > stepeach;
-    stepeach = new Calibration::VariableBackend;
+    Reference::To< MEAL::VariableBackend > stepeach;
+    stepeach = new MEAL::VariableBackend;
     stepeach_calibrator.set_infit (stepeach->get_backend());
     model->set_stepeach_calibrator (stepeach);
   }
@@ -2277,7 +2277,7 @@ void pcm::print_time_variation (SystemCalibrator* model)
 
     path->engage_time_variations();
 
-    // Calibration::ReceptionModel* equation = path->get_equation();
+    // MEAL::ReceptionModel* equation = path->get_equation();
     // path->set_transformation_index (ipath);
     // path->set_input_index (isource);
 

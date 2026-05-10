@@ -57,7 +57,6 @@ include_HEADERS = \
 	templates.h \
 	TemporaryDirectory.h \
 	TemporaryFile.h \
-	ThreadContext.h \
 	ThreadMemory.h \
 	ThreadStream.h \
 	Types.h \
@@ -129,12 +128,10 @@ libgenutil_la_SOURCES = \
 	smooth.f \
 	SmoothingSpline.C \
 	stringload.C \
-	stringprintf.C \
 	strutil.C \
 	SystemCall.C \
 	TemporaryDirectory.C \
 	TemporaryFile.C \
-	ThreadContext.C \
 	ThreadMemory.C \
 	ThreadStream.C \
 	time_string.C \

@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/VariableBackendEstimate.h"
-#include "Pulsar/SingleAxis.h"
+#include "MEAL/SingleAxis.h"
 
 #include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"

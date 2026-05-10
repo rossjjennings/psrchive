@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/ReceptionModelPlotter.h"
-#include "Pulsar/CoherencyMeasurementSet.h"
-#include "Pulsar/ReceptionModel.h"
+#include "MEAL/CoherencyMeasurementSet.h"
+#include "MEAL/ReceptionModel.h"
 
 #include "EstimatePlotter.h"
 #include "Pauli.h"
@@ -29,7 +29,7 @@ Calibration::ReceptionModelPlotter::~ReceptionModelPlotter ()
 {
 }
 
-void Calibration::ReceptionModelPlotter::set_model (ReceptionModel* _model)
+void Calibration::ReceptionModelPlotter::set_model (MEAL::ReceptionModel* _model)
 {
   model = _model;
 }
@@ -84,7 +84,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   for (unsigned idat=0; idat < ndat; idat++) try
   {
     // get the specified CoherencyMeasurementSet
-    const Calibration::CoherencyMeasurementSet& data = model->get_data (idat);
+    const MEAL::CoherencyMeasurementSet& data = model->get_data (idat);
     
     if (model_solved && plot_residual)
       model->set_transformation_index (data.get_transformation_index());

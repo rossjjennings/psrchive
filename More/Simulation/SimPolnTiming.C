@@ -21,10 +21,10 @@
 #include "Pulsar/GaussianBaseline.h"
 #include "Pulsar/PhaseWeight.h"
 
-#include "Pulsar/Instrument.h"
-#include "Pulsar/VariableBackend.h"
-
+#include "MEAL/VariableBackend.h"
+#include "MEAL/Instrument.h"
 #include "MEAL/Polar.h"
+
 #include "BoxMuller.h"
 #include "random.h"
 
@@ -628,7 +628,7 @@ Pulsar::SimPolnTiming::Result Pulsar::SimPolnTiming::one_step ()
 
     if (diff_gain || parallactic_angle) {
 
-      Calibration::Instrument* inst = new Calibration::Instrument;
+      MEAL::Instrument* inst = new MEAL::Instrument;
       J = inst;
 
       if (diff_gain) {

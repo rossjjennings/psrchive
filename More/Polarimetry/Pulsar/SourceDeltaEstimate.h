@@ -25,7 +25,7 @@ namespace Calibration
     SourceDeltaEstimate (int ibin = -1) : SourceEstimate (ibin) {}
 
     //! Create the source and add it to the measurement equation
-    void create_source (ReceptionModel* equation);
+    void create_source (MEAL::ReceptionModel* equation);
 
     //! Set the baseline to which the delta is added
     void set_baseline (SourceEstimate*);

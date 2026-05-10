@@ -20,7 +20,7 @@ Calibration::SourceEstimate::SourceEstimate (int ibin)
   add_data_failures = 0;
 }
 
-using Calibration::ReceptionModel;
+using MEAL::ReceptionModel;
 
 void Calibration::SourceEstimate::create_source (ReceptionModel* equation)
 {

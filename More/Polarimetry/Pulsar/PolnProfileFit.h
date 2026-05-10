@@ -11,10 +11,12 @@
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
 
-#include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/PhaseWeight.h"
 
+#include "MEAL/ReceptionModel.h"
+#include "MEAL/CoherencyMeasurementSet.h"
 #include "MEAL/Axis.h"
+
 #include "Matrix.h"
 #include "Estimate.h"
 #include "Stokes.h"
@@ -30,7 +32,6 @@ namespace MEAL
 
 namespace Calibration
 {
-  class ReceptionModel;
   class TemplateUncertainty;
   class StandardSpectra;
 }
@@ -92,7 +93,7 @@ namespace Pulsar
     const PolnProfile* get_standard () const;
 
     //! Add the specified observation to the measurement set
-    void add_observation ( Calibration::CoherencyMeasurementSet&, const PolnProfile* );
+    void add_observation ( MEAL::CoherencyMeasurementSet&, const PolnProfile* );
 
     //! Add the specified observation to the measurement equation
     void add_observation ( const PolnProfile* );
@@ -104,7 +105,7 @@ namespace Pulsar
     void delete_observations ();
     
     //! Set the template from which measurment sets will be constructed
-    void set_measurement_set (const Calibration::CoherencyMeasurementSet&);
+    void set_measurement_set (const MEAL::CoherencyMeasurementSet&);
 
     //! Set the transformation between the standard and observation
     void set_transformation (MEAL::Complex2* xform);
@@ -128,9 +129,9 @@ namespace Pulsar
     void set_plan (FTransform::Plan*);
 
     //! Get the measurement equation used to model the fit
-    Calibration::ReceptionModel* get_equation ();
-    const Calibration::ReceptionModel* get_equation () const;
-    void set_equation (Calibration::ReceptionModel*);
+    MEAL::ReceptionModel* get_equation ();
+    const MEAL::ReceptionModel* get_equation () const;
+    void set_equation (MEAL::ReceptionModel*);
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
@@ -199,7 +200,7 @@ namespace Pulsar
     Reference::To<Calibration::StandardSpectra> standard_data;
 
     //! The measurement equation used to model the fit
-    Reference::To<Calibration::ReceptionModel> equation;
+    Reference::To<MEAL::ReceptionModel> equation;
 
     //! Least-squares normalization includes variable template contribution
     std::vector< Reference::To<Calibration::TemplateUncertainty> > uncertainty;
@@ -217,7 +218,7 @@ namespace Pulsar
     MEAL::Axis<unsigned> index_axis;
 
     //! The template from which measurement sets are constructed
-    Calibration::CoherencyMeasurementSet measurement_set;
+    MEAL::CoherencyMeasurementSet measurement_set;
 
     //! The fit debug flag
     bool fit_debug;

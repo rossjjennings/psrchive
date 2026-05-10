@@ -11,13 +11,13 @@
 #ifndef __Calibration_TemplateUncertainty_H
 #define __Calibration_TemplateUncertainty_H
 
-#include "Pulsar/ObservationUncertainty.h"
+#include "MEAL/ObservationUncertainty.h"
 #include "MEAL/Complex2.h"
 
 namespace Calibration {
 
   //! Combines the uncertainty of the template and the observation
-  class TemplateUncertainty : public ObservationUncertainty
+  class TemplateUncertainty : public MEAL::ObservationUncertainty
   {
 
   public:

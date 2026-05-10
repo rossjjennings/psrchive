@@ -12,8 +12,8 @@
 #ifndef __Pulsar_SourceEstimate_H
 #define __Pulsar_SourceEstimate_H
 
-#include "Pulsar/MeanCoherency.h"
-#include "Pulsar/ReceptionModel.h"
+#include "MEAL/MeanCoherency.h"
+#include "MEAL/ReceptionModel.h"
 #include "MEAL/Coherency.h"
 
 #include "Types.h"
@@ -39,7 +39,7 @@ namespace Calibration
     SourceEstimate (int ibin = undefined);
 
     //! Create the source and add it to the measurement equation
-    virtual void create_source (ReceptionModel* equation);
+    virtual void create_source (MEAL::ReceptionModel* equation);
 
     //! Update source with the estimate
     void update ();
@@ -48,7 +48,7 @@ namespace Calibration
     Reference::To<MEAL::Coherency> source;
 
     //! Best estimate (first guess) of Stokes parameters
-    MeanCoherency estimate;
+    MEAL::MeanCoherency estimate;
 
     //! Validity flag for this estimate
     bool valid;

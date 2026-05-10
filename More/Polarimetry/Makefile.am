@@ -4,35 +4,26 @@ noinst_LTLIBRARIES = libPolarimetry.la
 nobase_include_HEADERS = \
 	Pulsar/BackendCorrection.h \
 	Pulsar/BackendEstimate.h \
-	Pulsar/BackendFeed.h \
 	Pulsar/BackendFeedInfo.h \
 	Pulsar/BasisCorrection.h \
 	Pulsar/BoostShiftAnalysis.h \
-	Pulsar/Britton2000.h \
 	Pulsar/BrittonInfo.h \
 	Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
-  Pulsar/CelestialProjection.h \
+        Pulsar/CelestialProjection.h \
 	Pulsar/ChannelSubsetMatch.h \
-	Pulsar/CoherencyMeasurement.h \
-	Pulsar/CoherencyMeasurementSet.h \
 	Pulsar/ComplexRVMFit.h \
 	Pulsar/ConfigurableProjection.h \
 	Pulsar/ConfigurableProjectionInfo.h \
 	Pulsar/ConstantGainInfo.h \
 	Pulsar/ConvertMJD.h \
 	Pulsar/CorrelationInfo.h \
-	Pulsar/CovarianceReport.h \
-	Pulsar/DataAndModelReport.h \
 	Pulsar/Database.h \
 	Pulsar/DataSetManager.h \
 	Pulsar/DeltaPA.h \
 	Pulsar/DeltaRM.h \
 	Pulsar/Distortion.h \
 	Pulsar/DoPCalibrator.h \
-	Pulsar/Faraday.h \
-	Pulsar/Feed.h \
-	Pulsar/FitGoodnessReport.h \
 	Pulsar/FluxCalibrator.h \
 	Pulsar/FluxCalibratorInfo.h \
 	Pulsar/FluxCalibratorPolicy.h \
@@ -41,10 +32,7 @@ nobase_include_HEADERS = \
 	Pulsar/FourthMomentInterpreter.h \
 	Pulsar/FourthMomentStats.h \
 	Pulsar/FrontendCorrection.h \
-	Pulsar/HasOrientation.h \
 	Pulsar/HybridCalibrator.h \
-	Pulsar/InputDataReport.h \
-	Pulsar/Instrument.h \
 	Pulsar/InstrumentInfo.h \
 	Pulsar/IonosphereCalibrator.h \
 	Pulsar/IRIonosphere.h \
@@ -52,16 +40,8 @@ nobase_include_HEADERS = \
 	Pulsar/KnownVariableTransformation.h \
 	Pulsar/ManualPolnCalibrator.h \
 	Pulsar/VariableTransformationFile.h \
-	Pulsar/MeanCoherency.h \
-	Pulsar/MeanFeed.h \
-	Pulsar/MeanInstrument.h \
 	Pulsar/MeanJones.h \
-	Pulsar/MeanPolar.h \
-	Pulsar/MeanSingleAxis.h \
-	Pulsar/MeasurementEquation.h \
-	Pulsar/ModelParametersReport.h \
 	Pulsar/ModeSeparation.h \
-	Pulsar/ObservationUncertainty.h \
 	Pulsar/OffPulseCalibrator.h \
 	Pulsar/Parallactic.h \
 	Pulsar/PolarCalibrator.h \
@@ -82,11 +62,6 @@ nobase_include_HEADERS = \
 	Pulsar/ProjectionCorrection.h \
 	Pulsar/PulsarCalibrator.h \
 	Pulsar/ReceptionCalibrator.h \
-	Pulsar/ReceptionModel.h \
-	Pulsar/ReceptionModelReport.h \
-	Pulsar/ReceptionModelSolver.h \
-	Pulsar/ReceptionModelSolveGSL.h \
-	Pulsar/ReceptionModelSolveMEAL.h \
 	Pulsar/ReferenceCalibrator.h \
 	Pulsar/ReflectStokes.h \
 	Pulsar/RobustStepFinder.h \
@@ -95,9 +70,6 @@ nobase_include_HEADERS = \
 	Pulsar/Simulation.h \
 	Pulsar/SingleAxisCalibrator.h \
 	Pulsar/SingleAxisCalibratorInfo.h \
-	Pulsar/SingleAxis.h \
-	Pulsar/SingleAxisPolynomial.h \
-	Pulsar/SingleAxisSolver.h \
 	Pulsar/SolverInfo.h \
 	Pulsar/SourceDeltaEstimate.h \
 	Pulsar/SourceEstimate.h \
@@ -116,23 +88,18 @@ nobase_include_HEADERS = \
 	Pulsar/TemplateUncertainty.h \
 	Pulsar/TotalCovariance.h \
 	Pulsar/TransformationFactory.h \
-	Pulsar/VariableBackend.h \
 	Pulsar/VariableBackendEstimate.h \
 	Pulsar/VariableFaradayRotation.h \
-	Pulsar/VariableGain.h \
 	Pulsar/VariableProjectionCorrection.h \
-	Pulsar/VariableTransformation.h \
 	Pulsar/VariableTransformationManager.h \
 	Pulsar/VariationInfo.h
 
 libPolarimetry_la_SOURCES = \
 	BackendCorrection.C \
 	BackendEstimate.C \
-	BackendFeed.C \
 	BackendFeedInfo.C \
 	BasisCorrection.C \
 	BoostShiftAnalysis.C \
-	Britton2000.C \
 	BrittonInfo.C \
 	CalibratorStokesInfo.C \
 	CalibratorType_factory.C \
@@ -140,8 +107,6 @@ libPolarimetry_la_SOURCES = \
   CelestialProjection.C \
 	ChannelSubsetMatch.C \
 	choose.C \
-	CoherencyMeasurement.C \
-	CoherencyMeasurementSet.C \
 	ComplexRVMFit.C \
 	ConfigurableProjection.C \
 	ConfigurableProjectionInfo.C \
@@ -149,18 +114,12 @@ libPolarimetry_la_SOURCES = \
 	ConstantGainInfo.C \
 	ConvertMJD.C \
 	CorrelationInfo.C \
-	CovarianceReport.C \
-	DataAndModelReport.C \
 	Database.C \
 	DataSetManager.C \
 	DeltaPA.C \
 	DeltaRM.C \
 	Distortion.C \
 	DoPCalibrator.C \
-	Faraday.C \
-	Feed.C \
-	Feed_load.C \
-	FitGoodnessReport.C \
 	FluxCalibrator.C \
 	FluxCalibratorExt.C \
 	FluxCalibratorInfo.C \
@@ -173,8 +132,6 @@ libPolarimetry_la_SOURCES = \
 	FourthMomentStats.C \
 	FrontendCorrection.C \
 	HybridCalibrator.C \
-	InputDataReport.C \
-	Instrument.C \
 	InstrumentInfo.C \
 	Integration_defaraday.C \
         Integration_transform.C \
@@ -183,16 +140,8 @@ libPolarimetry_la_SOURCES = \
 	IXRInfo.C \
 	KnownVariableTransformation.C \
 	ManualPolnCalibrator.C \
-	MeanCoherency.C \
-	MeanFeed.C \
-	MeanInstrument.C \
 	MeanJones.C \
-	MeanPolar.C \
-	MeanSingleAxis.C \
-	MeasurementEquation.C \
-	ModelParametersReport.C \
 	ModeSeparation.C \
-	ObservationUncertainty.C \
 	OffPulseCalibrator.C \
 	Parallactic.C \
 	PolarCalibrator.C \
@@ -214,21 +163,14 @@ libPolarimetry_la_SOURCES = \
 	ProjectionCorrection.C \
 	PulsarCalibrator.C \
 	ReceptionCalibrator.C \
-	ReceptionModel.C \
-	ReceptionModelReport.C \
-	ReceptionModelSolver.C \
-	ReceptionModelSolveMEAL.C \
 	ReferenceCalibrator.C \
 	ReflectStokes.C \
 	RobustStepFinder.C \
 	RotatingVectorModelOptions.C \
 	SignalPath.C \
 	Simulation.C \
-	SingleAxis.C \
 	SingleAxisCalibrator.C \
 	SingleAxisCalibratorInfo.C \
-	SingleAxisPolynomial.C \
-	SingleAxisSolver.C \
 	SolverInfo.C \
 	SourceDeltaEstimate.C \
 	SourceEstimate.C \
@@ -245,12 +187,9 @@ libPolarimetry_la_SOURCES = \
 	TemplateUncertainty.C \
 	TotalCovariance.C \
 	TransformationFactory.C \
-	VariableBackend.C \
 	VariableBackendEstimate.C \
 	VariableFaradayRotation.C \
-	VariableGain.C \
 	VariableProjectionCorrection.C \
-	VariableTransformation.C \
 	VariableTransformationFile.C \
 	VariableTransformationManager.C \
 	VariationInfo.C
@@ -260,7 +199,6 @@ libPolarimetry_la_SOURCES = \
 # GSL-dependent code
 #
 if HAVE_GSL
-libPolarimetry_la_SOURCES += ReceptionModelSolveGSL.C
 endif
 
 ##############################################################################
@@ -287,27 +225,17 @@ simpol_SOURCES = simpol.C
 # test programs
 #
 
-TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
-	test_Parallactic test_ReceptionComposite test_ReceptionEvaluate \
-	test_ReceptionModel test_Instrument test_hand_xyph test_permutation
+TESTS = test_TotalCovariance test_Parallactic test_hand_xyph 
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere test_ModeSeparation
 
-test_ReceptionComposite_SOURCES	= test_ReceptionComposite.C
-test_ReceptionEvaluate_SOURCES	= test_ReceptionEvaluate.C
 
-test_Feed_SOURCES		= test_Feed.C
 test_Parallactic_SOURCES	= test_Parallactic.C
-test_SingleAxis_SOURCES		= test_SingleAxis.C
-test_Instrument_SOURCES		= test_Instrument.C
 test_hand_xyph_SOURCES		= test_hand_xyph.C
-test_permutation_SOURCES        = test_permutation.C
 
-test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_TotalCovariance_SOURCES	= test_TotalCovariance.C
 test_ModeSeparation_SOURCES	= test_ModeSeparation.C
 
-test_copy_SOURCES		= test_copy.C
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 
 if HAVE_YAMLCPP
@@ -324,7 +252,7 @@ LDADD = libPolarimetry.la \
 	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la \
 	$(top_builddir)/Util/meal/src/libMEAL.la \
-	$(top_builddir)/Util/epsic/src/libepsic.la 
+	$(top_builddir)/Util/epsic/src/libepsic.la @GSL_LIBS@
 
 libPolarimetry_la_LIBADD = iri2001/libiri.la @GSL_LIBS@ @YAMLCPP_LIBS@
 

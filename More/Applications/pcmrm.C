@@ -9,7 +9,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnCalibratorExtensionUtils.h"
-#include "Pulsar/HasOrientation.h"
+#include "MEAL/HasOrientation.h"
 #include "MEAL/Complex2.h"
 
 #include "LinearRegression.h"
@@ -120,7 +120,7 @@ void pcmrm::process (Pulsar::Archive* archive)
     if (!xform)
       continue;
     
-    auto feed = dynamic_cast<Calibration::HasOrientation*>(xform.get());
+    auto feed = dynamic_cast<MEAL::HasOrientation*>(xform.get());
     if (!feed)
       continue;
 
@@ -291,7 +291,7 @@ double pcmrm::update (PolnCalibratorExtension* ext)
     if (!xform)
       continue;
     
-    auto feed = dynamic_cast<Calibration::HasOrientation*>(xform.get());
+    auto feed = dynamic_cast<MEAL::HasOrientation*>(xform.get());
     if (!feed)
       continue;
 

@@ -1626,9 +1626,9 @@ void do_refine (Pulsar::DeltaRM& delta_rm,
 }
 
 #include "Pulsar/PolnProfileFit.h"
-#include "Pulsar/ReceptionModel.h"
-#include "Pulsar/ReceptionModelSolver.h"
-#include "Pulsar/Faraday.h"
+#include "MEAL/ReceptionModel.h"
+#include "MEAL/ReceptionModelSolver.h"
+#include "MEAL/Faraday.h"
 #include "MEAL/ProductRule.h"
 #include "MEAL/Gain.h"
 
@@ -1646,7 +1646,7 @@ void mtm_estimate (Pulsar::Archive* std, Pulsar::Archive* obs) try
 
   MEAL::ProductRule<MEAL::Complex2> xform;
   MEAL::Gain<MEAL::Complex2> gain;
-  Calibration::Faraday faraday;
+  MEAL::Faraday faraday;
 
   xform.add_model (&gain);
   xform.add_model (&faraday);

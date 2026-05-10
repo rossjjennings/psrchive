@@ -11,14 +11,14 @@
  * the compiler-produced copy constructors do no always work as
  * expected (i.e. they segfault).  This little program is used to
  * check that copy construction works for three "leaf" classes,
- * Calibration::Feed, MEAL::Polar, and MEAL::Polynomial
+ * MEAL::Feed, MEAL::Polar, and MEAL::Polynomial
  *
  * NOTE: vector resize uses the copy constructor
  */
 
 
-#include "Pulsar/SingleAxisPolynomial.h"
-#include "Pulsar/Feed.h"
+#include "MEAL/SingleAxisPolynomial.h"
+#include "MEAL/Feed.h"
 #include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"
 
@@ -111,12 +111,12 @@ int main (int argc, char** argv)
   cerr << "test_copy: testing MEAL::Polar" << endl;
   test_leak (new MEAL::Polar, "MEAL::Polar");
 
-  cerr << "test_copy: testing Calibration::Feed" << endl;
-  test_leak (new Calibration::Feed, "Calibration::Feed");
+  cerr << "test_copy: testing MEAL::Feed" << endl;
+  test_leak (new MEAL::Feed, "MEAL::Feed");
 
-  cerr << "test_copy: testing Calibration::SingleAxisPolynomial" << endl;
-  test_leak (new Calibration::SingleAxisPolynomial(5),
-	     "Calibration::SingleAxisPolynomial");
+  cerr << "test_copy: testing MEAL::SingleAxisPolynomial" << endl;
+  test_leak (new MEAL::SingleAxisPolynomial(5),
+	     "MEAL::SingleAxisPolynomial");
 
 } catch (Error& error) {
   cerr << error << endl;

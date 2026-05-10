@@ -5,7 +5,6 @@ include_HEADERS = \
 	Cloude.h \
 	Configuration.h \
 	escape.h \
-	EstimateStats.h \
 	file_cast.h \
 	FilePtr.h \
 	identifiable_factory.h \

@@ -153,7 +153,7 @@ namespace Pulsar
       \param estimate contains the bin number and a running mean estimate
       \param ichan the frequency channel
     */
-    void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
+    void add_data (std::vector<MEAL::CoherencyMeasurement>& bins,
 		   Calibration::SourceEstimate* estimate,
 		   const MJD& epoch, unsigned ichan);
 
@@ -161,7 +161,7 @@ namespace Pulsar
     void prepare_calibrator_estimate (Signal::Source);
     std::vector<bool> fluxcal_observation_added;
 
-    void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
+    void submit_calibrator_data (MEAL::CoherencyMeasurementSet&,
 				 const Calibration::SourceObservation&);
 
     void integrate_calibrator_data (const Calibration::SourceObservation&);
@@ -174,14 +174,14 @@ namespace Pulsar
     //! Ensure that the pulsar observation can be added to the data set
     bool match (const Archive*, bool throw_exception = true);
 
-    void add_pulsar (Calibration::CoherencyMeasurementSet&,
+    void add_pulsar (MEAL::CoherencyMeasurementSet&,
 		     const Integration*, unsigned ichan);
 
     Calibration::SourceEstimate* get_estimate (unsigned index, unsigned ichan);
 
-    void integrate_pulsar_data (const Calibration::CoherencyMeasurementSet&);
+    void integrate_pulsar_data (const MEAL::CoherencyMeasurementSet&);
 
-    void integrate_pulsar_data (const Calibration::CoherencyMeasurement&,
+    void integrate_pulsar_data (const MEAL::CoherencyMeasurement&,
 				Calibration::SourceEstimate*,
 				const MJD& epoch, unsigned ichan);
       

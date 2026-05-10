@@ -75,7 +75,7 @@ namespace Pulsar
 
     //! Insert steps using the specified transfrom
     void insert_steps (std::vector<MJD>& steps,
-		       Calibration::VariableBackend* xform);
+		       MEAL::VariableBackend* xform);
 
     void remove_extra_calibrators ();
     void remove_outliers ();

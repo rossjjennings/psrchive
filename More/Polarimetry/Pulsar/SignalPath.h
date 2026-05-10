@@ -12,12 +12,13 @@
 #define __Calibration_SignalPath_H
 
 // Reception Model and its management
-#include "Pulsar/ReceptionModel.h"
-#include "Pulsar/ReceptionModelSolver.h"
+#include "MEAL/ReceptionModel.h"
+#include "MEAL/ReceptionModelSolver.h"
 
 #include "Pulsar/CalibratorType.h"
 #include "Pulsar/ConvertMJD.h"
 
+#include "MEAL/VariableBackend.h"
 #include "MEAL/ProductRule.h"
 #include "MEAL/ChainRule.h"
 #include "MEAL/Univariate.h"
@@ -28,7 +29,6 @@
 
 namespace Calibration
 {
-  class VariableBackend;
   class VariableBackendEstimate;
   
   //! Manages multiple signal path transformations in a reception model
@@ -104,7 +104,7 @@ namespace Calibration
     void set_foreach_calibrator (const MEAL::Complex2*);
 
     //! Set the VariableBackend step to be cloned for each calibrator
-    void set_stepeach_calibrator (const VariableBackend*);
+    void set_stepeach_calibrator (const MEAL::VariableBackend*);
 
     //! Set gain to the univariate function of time
     void set_gain_variation (MEAL::Univariate<MEAL::Scalar>*);
@@ -141,7 +141,7 @@ namespace Calibration
 
     //! Insert a step into the instrumental response at the specified time
     void add_step (const MJD& mjd,
-		   Calibration::VariableBackend* backend = 0);
+		   MEAL::VariableBackend* backend = 0);
 
     //! Record the epochs of observations
     void add_observation_epoch (const MJD&);
@@ -193,14 +193,14 @@ namespace Calibration
 			       const MEAL::Complex2* xform);
 
     //! Get the measurement equation
-    Calibration::ReceptionModel* get_equation ();
-    const Calibration::ReceptionModel* get_equation () const;
+    MEAL::ReceptionModel* get_equation ();
+    const MEAL::ReceptionModel* get_equation () const;
 
     //! Set the measurement equation
-    void set_equation (Calibration::ReceptionModel*);
+    void set_equation (MEAL::ReceptionModel*);
 
     //! Set the algorithm used to solve the measurement equation
-    void set_solver (Calibration::ReceptionModel::Solver*);
+    void set_solver (MEAL::ReceptionModel::Solver*);
 
     //! Copy the parameters for the signal path experienced by the pulsar
     void copy_transformation (const MEAL::Complex2*);
@@ -259,10 +259,10 @@ namespace Calibration
     std::string invalid_reason;
 
     //! The measurement equation
-    Reference::To< Calibration::ReceptionModel > equation;
+    Reference::To< MEAL::ReceptionModel > equation;
 
     //! The algorithm used to solve the measurement equation
-    Reference::To< Calibration::ReceptionModel::Solver > solver;
+    Reference::To< MEAL::ReceptionModel::Solver > solver;
 
     //! The common instrumental response to be modelled
     
@@ -312,7 +312,7 @@ namespace Calibration
     Reference::To< const MEAL::Complex2 > foreach_pcal;
     Reference::To< const MEAL::Complex2 > foreach_fcal;
 
-    Reference::To< const Calibration::VariableBackend > stepeach_pcal;
+    Reference::To< const MEAL::VariableBackend > stepeach_pcal;
 
     Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;

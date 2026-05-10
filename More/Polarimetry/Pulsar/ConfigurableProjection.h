@@ -10,7 +10,7 @@
 #define __Pulsar_ConfigurableProjection_h
 
 #include "Pulsar/VariableProjectionCorrection.h"
-#include "Pulsar/VariableTransformation.h"
+#include "MEAL/VariableTransformation.h"
 
 #include "Pulsar/ConfigurableProjectionExtension.h"
 
@@ -88,7 +88,7 @@ namespace Pulsar
 
     //! Model inserted between instrument and projection
     /*! This attribute is cloned in each new Transformation */
-    Reference::To< Calibration::VariableTransformation > transformation;
+    Reference::To< MEAL::VariableTransformation > transformation;
 
     //! Names of Archive attributes assigned to each abscissa/dimension
     std::map< unsigned, std::vector<std::string> > parameters;
@@ -106,25 +106,25 @@ namespace Pulsar
     protected:
   
       //! The variable transformation argument
-      MEAL::Axis< Calibration::VariableTransformation::Argument > argument;
+      MEAL::Axis< MEAL::VariableTransformation::Argument > argument;
   
       //! The variable transformation
-      Reference::To<Calibration::VariableTransformation> transformation;
+      Reference::To<MEAL::VariableTransformation> transformation;
 
     public:
   
-      Transformation (Calibration::VariableTransformation* xform)
+      Transformation (MEAL::VariableTransformation* xform)
       {
         transformation = xform;
-        argument.signal.connect (xform, &Calibration::VariableTransformation::set_argument);
+        argument.signal.connect (xform, &MEAL::VariableTransformation::set_argument);
       }
   
       //! The transformation
-      Calibration::VariableTransformation* get_transformation ()
+      MEAL::VariableTransformation* get_transformation ()
       { return transformation; }
  
       //! The transformation
-      const Calibration::VariableTransformation* get_transformation () const
+      const MEAL::VariableTransformation* get_transformation () const
       { return transformation; }
  
       //! The argument to the transformation

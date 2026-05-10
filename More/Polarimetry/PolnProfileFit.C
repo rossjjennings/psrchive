@@ -11,7 +11,7 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/ReceptionModelSolver.h"
+#include "MEAL/ReceptionModelSolver.h"
 #include "Pulsar/TotalCovariance.h"
 
 #include "MEAL/PhaseGradients.h"
@@ -147,7 +147,7 @@ void PolnProfileFit::set_regions (const PhaseWeight& on, const PhaseWeight& off)
   regions_set = true;
 }
 
-void PolnProfileFit::set_equation (Calibration::ReceptionModel* e)
+void PolnProfileFit::set_equation (MEAL::ReceptionModel* e)
 {
   if (equation)
     throw Error (InvalidState, "PolnProfileFit::set_equation",
@@ -212,7 +212,7 @@ void PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (!equation)
   {
     DEBUG("PolnProfileFit::set_standard create ReceptionModel");
-    equation = new ReceptionModel;
+    equation = new MEAL::ReceptionModel;
   }
   
   // equation->set_fit_debug( fit_debug );
@@ -370,7 +370,7 @@ catch (Error& error)
 }
 
 void PolnProfileFit::set_measurement_set
-( const CoherencyMeasurementSet& the_template)
+( const MEAL::CoherencyMeasurementSet& the_template)
 {
   measurement_set = the_template;
   if (verbose)
@@ -384,7 +384,7 @@ void PolnProfileFit::add_observation( const PolnProfile* observation ) try
     throw Error (InvalidState, "PolnProfileFit::add_observation",
 		 "equation not set");
 
-  CoherencyMeasurementSet measurements (measurement_set);
+  MEAL::CoherencyMeasurementSet measurements (measurement_set);
   add_observation (measurement_set, observation);
   equation->add_data( measurements );
 }
@@ -399,7 +399,7 @@ Estimate<double> PolnProfileFit::get_total_squared_invariant (const PolnProfile*
   return standard_data->get_total_squared_invariant();
 }
 
-void PolnProfileFit::add_observation (CoherencyMeasurementSet& measurements, const PolnProfile* observation)
+void PolnProfileFit::add_observation (MEAL::CoherencyMeasurementSet& measurements, const PolnProfile* observation)
 {
   if (!standard)
     throw Error (InvalidState, "PolnProfileFit::add_observation",
@@ -495,7 +495,7 @@ void PolnProfileFit::add_observation (CoherencyMeasurementSet& measurements, con
 
       assert (input_index.size() > ibin-1);
       
-      CoherencyMeasurement measurement (input_index[ibin-1]);
+      MEAL::CoherencyMeasurement measurement (input_index[ibin-1]);
       measurement.set_stokes (val, error);
       
       double phase_shift = -2.0 * M_PI * double(ibin);
@@ -542,20 +542,18 @@ catch (Error& error) {
 
 double PolnProfileFit::get_reduced_chisq () const
 {
-  ReceptionModel::Solver* solver = equation->get_solver();
+  MEAL::ReceptionModel::Solver* solver = equation->get_solver();
   return solver->get_chisq() / solver->get_nfree();
 }
 
 //! Get the measurement equation used to model the fit
-ReceptionModel* 
-PolnProfileFit::get_equation ()
+MEAL::ReceptionModel* PolnProfileFit::get_equation ()
 {
   return equation;
 }
 
 //! Get the measurement equation used to model the fit
-const ReceptionModel* 
-PolnProfileFit::get_equation () const
+const MEAL::ReceptionModel* PolnProfileFit::get_equation () const
 {
   return equation;
 }

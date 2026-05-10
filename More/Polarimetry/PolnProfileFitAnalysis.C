@@ -8,7 +8,7 @@
 #include "Pulsar/PolnProfileFitAnalysis.h"
 #include "Pulsar/PolnProfile.h"
 
-#include "Pulsar/ReceptionModel.h"
+#include "MEAL/ReceptionModel.h"
 #include "Pulsar/TotalCovariance.h"
 
 #include "MEAL/ProductRule.h"

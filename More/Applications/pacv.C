@@ -16,8 +16,8 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 
-#include "Pulsar/Feed.h"
-#include "Pulsar/BackendFeed.h"
+#include "MEAL/Feed.h"
+#include "MEAL/BackendFeed.h"
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -163,7 +163,7 @@ int main (int argc, char** argv)
   float cross_scale_factor = 1.0;
 
   // known feed transformation
-  Calibration::Feed* feed = 0;
+  MEAL::Feed* feed = 0;
 
   // Hybrid transformation
   Reference::To<HybridCalibrator> hybrid;
@@ -323,7 +323,7 @@ int main (int argc, char** argv)
       break;
 
     case 'r':
-      feed = new Calibration::Feed;
+      feed = new MEAL::Feed;
       feed -> load (optarg);
       cerr << "pac: Feed parameters loaded:"
 	"\n  orientation 0 = "
@@ -691,8 +691,8 @@ void print_cal_matrix (PolnCalibrator* calibrator)
       
     if (frontend_only)
     {
-      const Calibration::BackendFeed* instrument
-	= dynamic_cast<const Calibration::BackendFeed*> (xform);
+      const MEAL::BackendFeed* instrument
+	= dynamic_cast<const MEAL::BackendFeed*> (xform);
 
       if (instrument)
 	xform = instrument->get_frontend();

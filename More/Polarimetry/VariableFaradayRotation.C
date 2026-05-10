@@ -7,7 +7,7 @@
 
 #include "Pulsar/VariableFaradayRotation.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/Faraday.h"
+#include "MEAL/Faraday.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
 
 using namespace Pulsar;
@@ -109,7 +109,7 @@ void VariableFaradayRotation::build () const try
   }
 
   if (!iono_faraday)
-    iono_faraday = new Calibration::Faraday;
+    iono_faraday = new MEAL::Faraday;
 
   iono_faraday->set_rotation_measure( iono_rm );
   // correct ionospheric Faraday rotation wrt infinite frequency
@@ -136,7 +136,7 @@ void VariableFaradayRotation::build () const try
   }
 
   if (!ism_faraday)
-    ism_faraday = new Calibration::Faraday;
+    ism_faraday = new MEAL::Faraday;
 
   ism_faraday->set_rotation_measure( ism_rm );
   // correct interstellar Faraday rotation wrt centre frequency
