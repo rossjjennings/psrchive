@@ -12,7 +12,7 @@
 #include "Pulsar/Profile.h"
 
 #include "MEAL/ReceptionModelSolver.h"
-#include "Pulsar/TotalCovariance.h"
+#include "MEAL/TotalCovariance.h"
 
 #include "MEAL/PhaseGradients.h"
 #include "MEAL/Complex2Math.h"
@@ -251,7 +251,7 @@ void PolnProfileFit::set_standard (const PolnProfile* _standard)
     MEAL::Complex2Constant* jones;
     jones = new MEAL::Complex2Constant( convert(standard_value) );
 
-    uncertainty[ibin-1] = new TemplateUncertainty;
+    uncertainty[ibin-1] = new MEAL::TemplateUncertainty;
     uncertainty[ibin-1] -> set_template_variance (standard_variance);
 
     if (transformation)
@@ -480,7 +480,7 @@ void PolnProfileFit::add_observation (MEAL::CoherencyMeasurementSet& measurement
       Stokes< complex<double> > var;
       valvar( standard_data->get_stokes(ibin), val, var );
       
-      TemplateUncertainty* error = uncertainty[ibin-1]->clone();
+      MEAL::TemplateUncertainty* error = uncertainty[ibin-1]->clone();
       error -> set_variance (var);
       
 #ifdef _DEBUG

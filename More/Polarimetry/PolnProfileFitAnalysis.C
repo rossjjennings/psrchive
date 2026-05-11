@@ -9,7 +9,7 @@
 #include "Pulsar/PolnProfile.h"
 
 #include "MEAL/ReceptionModel.h"
-#include "Pulsar/TotalCovariance.h"
+#include "MEAL/TotalCovariance.h"
 
 #include "MEAL/ProductRule.h"
 #include "MEAL/PhaseGradients.h"

@@ -85,7 +85,6 @@ nobase_include_HEADERS = \
 	Pulsar/SystemCalibratorStepFinder.h \
 	Pulsar/SystemCalibratorUnloader.h \
 	Pulsar/UnloadJones.h \
-	Pulsar/TransformationFactory.h \
 	Pulsar/VariableBackendEstimate.h \
 	Pulsar/VariableFaradayRotation.h \
 	Pulsar/VariableProjectionCorrection.h \
@@ -182,7 +181,6 @@ libPolarimetry_la_SOURCES = \
 	SystemCalibratorManager.C \
 	SystemCalibratorUnloader.C \
 	UnloadJones.C \
-	TransformationFactory.C \
 	VariableBackendEstimate.C \
 	VariableFaradayRotation.C \
 	VariableProjectionCorrection.C \
@@ -244,8 +242,11 @@ endif
 LDADD = libPolarimetry.la \
 	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la \
-	$(top_builddir)/Util/meal/src/libMEAL.la \
-	$(top_builddir)/Util/epsic/src/libepsic.la @GSL_LIBS@
+	$(top_builddir)/Util/meal/src/libcore.la \
+	$(top_builddir)/Util/meal/src/util/libutil.la \
+	$(top_builddir)/Util/epsic/src/util/libutil.la \
+	$(top_builddir)/Util/epsic/src/true_math/libtrue_math.la \
+	@GSL_LIBS@
 
 libPolarimetry_la_LIBADD = iri2001/libiri.la @GSL_LIBS@ @YAMLCPP_LIBS@
 

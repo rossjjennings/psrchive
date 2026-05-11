@@ -28,11 +28,11 @@ namespace MEAL
 {
   class Complex2;
   template<typename T> class PhaseGradients;
+  class TemplateUncertainty;
 }
 
 namespace Calibration
 {
-  class TemplateUncertainty;
   class StandardSpectra;
 }
 
@@ -203,7 +203,7 @@ namespace Pulsar
     Reference::To<MEAL::ReceptionModel> equation;
 
     //! Least-squares normalization includes variable template contribution
-    std::vector< Reference::To<Calibration::TemplateUncertainty> > uncertainty;
+    std::vector< Reference::To<MEAL::TemplateUncertainty> > uncertainty;
 
     //! The phase gradient model for each observation added
     Reference::To< MEAL::PhaseGradients<MEAL::Complex2> > phases;

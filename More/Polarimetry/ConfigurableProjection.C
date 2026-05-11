@@ -10,12 +10,13 @@
 #endif
 
 #include "Pulsar/ConfigurableProjection.h"
-#include "Pulsar/TransformationFactory.h"
 
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/IntegrationInterface.h"
 #include "Pulsar/IntegrationExpert.h"
+
 #include "MEAL/NvariateScalarFactory.h"
+#include "MEAL/TransformationFactory.h"
 
 // #define _DEBUG 1
 #include "debug.h"
@@ -133,7 +134,7 @@ void ConfigurableProjection::construct (const string& text)
 
   transformation = new MEAL::VariableTransformation;
 
-  Calibration::TransformationFactory xform_factory;
+  MEAL::TransformationFactory xform_factory;
   MEAL::Complex2* model = ::construct<MEAL::Complex2> (node, xform_factory);
   transformation->set_model (model);
 
