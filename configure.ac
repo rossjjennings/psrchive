@@ -45,11 +45,15 @@ if test -f $srcdir/config/epsic.sh; then
   $srcdir/config/epsic.sh $srcdir
 fi
 
-EPSIC_SOURCE='$(top_srcdir)/Util/epsic/src'
-EPSIC_BUILD='$(top_builddir)/Util/epsic/src'
-INCLUDE_CPPFLAGS='-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_SOURCE)/true_math -I$(EPSIC_BUILD) -I$(EPSIC_BUILD)/util'
-AC_SUBST(EPSIC_SOURCE)
-AC_SUBST(EPSIC_BUILD)
+abs_top_builddir=`pwd`
+abs_top_srcdir=`cd "$srcdir" && pwd`
+
+MEAL_SOURCE=$abs_top_srcdir/Util/meal/src
+EPSIC_SOURCE=$abs_top_srcdir/Util/epsic/src
+EPSIC_BUILD=$abs_top_builddir/Util/epsic/src
+EPSIC_UTIL_CFLAGS="-I$EPSIC_SOURCE/util -I$EPSIC_SOURCE/true_math -I$EPSIC_BUILD/util"
+INCLUDE_CPPFLAGS="-I$MEAL_SOURCE -I$MEAL_SOURCE/util -I$EPSIC_SOURCE $EPSIC_UTIL_CFLAGS"
+
 AC_SUBST(INCLUDE_CPPFLAGS)
 
 ################################################################################
@@ -322,7 +326,6 @@ AC_CONFIG_FILES([
 		More/General/Makefile
 		More/Plotting/Makefile
 		More/Plotting/pgutil/Makefile
-		More/MEAL/Makefile
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
@@ -339,7 +342,11 @@ AC_CONFIG_FILES([
 		Management/psrchive.pc
 		Makefile])
 
-AC_CONFIG_SUBDIRS([Util/epsic/src])
+# configure the meal submodule to use the epsic submodule
+meal_overrides="--with-epsic-cflags=\"$EPSIC_UTIL_CFLAGS\" --with-epsic-libs=$EPSIC_BUILD/libepsic.la"
+ac_configure_args="$ac_configure_args $meal_overrides"
+
+AC_CONFIG_SUBDIRS([Util/epsic Util/meal])
 
 AC_OUTPUT
 

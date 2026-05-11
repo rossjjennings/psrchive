@@ -11,7 +11,7 @@
 #ifndef __CalibrationConwayKronberg1969_H
 #define __CalibrationConwayKronberg1969_H
 
-#include "Pulsar/BackendFeed.h"
+#include "MEAL/BackendFeed.h"
 
 namespace Calibration {
 

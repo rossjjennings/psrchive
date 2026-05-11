@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/ReceptionCalibrator.h"
-#include "Pulsar/ReceptionModelReport.h"
-#include "Pulsar/ReceptionModelSolver.h"
+#include "MEAL/ReceptionModelReport.h"
+#include "MEAL/ReceptionModelSolver.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -26,7 +26,7 @@
 #include "Pulsar/PolnProfile.h"
 
 // TODO: Report::factory that constructs by name
-#include "Pulsar/FitGoodnessReport.h"
+#include "MEAL/FitGoodnessReport.h"
 
 #include "MEAL/PhysicalCoherency.h"
 #include "MEAL/Complex2Constant.h"
@@ -367,7 +367,7 @@ double ReceptionCalibrator::get_invariant (Integration* subint, unsigned ichan)
 }
 
 void ReceptionCalibrator::add_pulsar
-( Calibration::CoherencyMeasurementSet& measurements,
+( MEAL::CoherencyMeasurementSet& measurements,
   const Integration* integration, unsigned ichan )
 {
   DEBUG("Pulsar::ReceptionCalibrator::add_pulsar standard_data=" << standard_data.ptr()
@@ -397,7 +397,7 @@ void ReceptionCalibrator::add_pulsar
 
 
 void ReceptionCalibrator::add_data
-( vector<Calibration::CoherencyMeasurement>& bins,
+( vector<MEAL::CoherencyMeasurement>& bins,
   Calibration::SourceEstimate* estimate,
   const MJD& epoch,
   unsigned ichan )
@@ -419,7 +419,7 @@ void ReceptionCalibrator::add_data
       stokes = standard_data->get_stokes( ibin );
 
     // NOTE: the measured states are not corrected / calibrated
-    Calibration::CoherencyMeasurement state (estimate->input_index);
+    MEAL::CoherencyMeasurement state (estimate->input_index);
     state.set_stokes( stokes );
     bins.push_back ( state );
   }
@@ -447,7 +447,7 @@ Calibration::SourceEstimate* ReceptionCalibrator::get_estimate (unsigned index, 
 }
       
 void ReceptionCalibrator::integrate_pulsar_data
-(const Calibration::CoherencyMeasurementSet& data)
+(const MEAL::CoherencyMeasurementSet& data)
 {
   unsigned ichan = data.get_ichan();
   MJD epoch = data.get_epoch();
@@ -464,7 +464,7 @@ void ReceptionCalibrator::integrate_pulsar_data
 }
 
 void ReceptionCalibrator::integrate_pulsar_data
-(const Calibration::CoherencyMeasurement& data,
+(const MEAL::CoherencyMeasurement& data,
  Calibration::SourceEstimate* estimate,
  const MJD& epoch,
  unsigned ichan) try
@@ -473,7 +473,7 @@ void ReceptionCalibrator::integrate_pulsar_data
 
   if (Profile::verbose)
     cerr << "ReceptionCalibrator::integrate_pulsar_data chan=" << ichan
-         << " calling Calibration::CoherencyMeasurement::set_coordinates" << endl;
+         << " calling MEAL::CoherencyMeasurement::set_coordinates" << endl;
 
   data.set_coordinates();
 
@@ -649,7 +649,7 @@ bool is_FluxCal_observation (Signal::Source source)
 
 void ReceptionCalibrator::submit_calibrator_data 
 (
- Calibration::CoherencyMeasurementSet& measurements,
+ MEAL::CoherencyMeasurementSet& measurements,
  const Calibration::SourceObservation& data
  )
 {
@@ -776,7 +776,7 @@ void ReceptionCalibrator::solve_prepare () try
     if (output_report && model[ichan]->get_valid())
     {
       string name = "fit_goodness_" + tostring(ichan) + ".txt";
-      model[ichan]->get_equation()->add_postfit_report( new Calibration::FitGoodnessReport (name) );
+      model[ichan]->get_equation()->add_postfit_report( new MEAL::FitGoodnessReport (name) );
     }
     
   for (unsigned ichan=0; ichan<fluxcal.size(); ichan++) try

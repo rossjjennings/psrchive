@@ -7,8 +7,8 @@
 
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/Receiver.h"
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/SingleAxisSolver.h"
+#include "MEAL/SingleAxis.h"
+#include "MEAL/SingleAxisSolver.h"
 #include "Pulsar/Parallactic.h"
 #include "Pauli.h"
 
@@ -49,10 +49,10 @@ int main (int argc, char** argv) try
 
   Calibration::Parallactic para;
   Pulsar::Receiver receiver;
-  Calibration::SingleAxis backend;
+  MEAL::SingleAxis backend;
 
-  Calibration::SingleAxisSolver solver;
-  Calibration::SingleAxis solution;
+  MEAL::SingleAxisSolver solver;
+  MEAL::SingleAxis solution;
 
   // The naive calibrator will assume that the noise diode has Stokes U = 1
 

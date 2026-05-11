@@ -11,7 +11,7 @@
 #ifndef __Calibration_IRIonosphere_H
 #define __Calibration_IRIonosphere_H
 
-#include "Pulsar/Faraday.h"
+#include "MEAL/Faraday.h"
 #include "Horizon.h"
 
 namespace Calibration {
@@ -48,7 +48,7 @@ namespace Calibration {
   protected:
 
     //! The Faraday rotation transformation
-    Calibration::Faraday faraday;
+    MEAL::Faraday faraday;
 
     //! The Horizon pointing paramters
     Horizon horizon;

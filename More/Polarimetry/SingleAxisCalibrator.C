@@ -45,7 +45,7 @@ SingleAxisCalibrator::~SingleAxisCalibrator ()
 SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 				     const vector<Estimate<double> >& sky)
 {
-  Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
+  Reference::To<MEAL::SingleAxis> model = new MEAL::SingleAxis;
 
   if ( !source_set || source.size() != 4 )
   {
@@ -63,7 +63,7 @@ SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
   Stokes< Estimate<double> > stokes_source = coherency( convert (source) );
 
   if (!solver)
-    solver = new Calibration::SingleAxisSolver;
+    solver = new MEAL::SingleAxisSolver;
 
   solver->set_input (reference_source);
   solver->set_output (stokes_source);

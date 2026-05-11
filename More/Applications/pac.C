@@ -33,11 +33,11 @@
 #include "Pulsar/VariableTransformationFile.h"
 
 #include "Pulsar/ReflectStokes.h"
-#include "Pulsar/BackendFeed.h"
-#include "Pulsar/VariableBackend.h"
+#include "MEAL/BackendFeed.h"
+#include "MEAL/VariableBackend.h"
 
 #include "Pulsar/ProcHistory.h"
-#include "Pulsar/Feed.h"
+#include "MEAL/Feed.h"
 
 #include "Error.h"
 #include "dirutil.h"
@@ -200,7 +200,7 @@ int main (int argc, char *argv[]) try
   bool cals_metafile = false;
 
   // known feed transformation
-  Calibration::Feed* feed = 0;
+  MEAL::Feed* feed = 0;
 
   // model ionosphere
   Pulsar::IonosphereCalibrator* ionosphere = 0;
@@ -424,7 +424,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'r':
-      feed = new Calibration::Feed;
+      feed = new MEAL::Feed;
       feed -> load (optarg);
       cerr << "pac: Feed parameters loaded:"
         "\n  orientation 0 = "
@@ -1020,7 +1020,7 @@ int main (int argc, char *argv[]) try
    return -1;
  }
 
-using Calibration::BackendFeed;
+using MEAL::BackendFeed;
 
 void keep_only_feed( PolnCalibrator* cal )
 {

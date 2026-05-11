@@ -5,16 +5,16 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/ReceptionModel.h"
-#include "Pulsar/CoherencyMeasurementSet.h"
-#include "Pulsar/MeanCoherency.h"
-#include "Pulsar/Instrument.h"
-#include "Pulsar/VariableBackend.h"
+#include "Pulsar/ReceptionModelAxisPlotter.h"
 #include "Pulsar/Parallactic.h"
+
+#include "MEAL/ReceptionModel.h"
+#include "MEAL/CoherencyMeasurementSet.h"
+#include "MEAL/MeanCoherency.h"
+#include "MEAL/Instrument.h"
+#include "MEAL/VariableBackend.h"
 #include "MEAL/Coherency.h"
 #include "MEAL/Axis.h"
-
-#include "Pulsar/ReceptionModelAxisPlotter.h"
 
 #include <cpgplot.h>
 
@@ -82,7 +82,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'V':
-      Calibration::ReceptionModel::verbose = true;
+      MEAL::ReceptionModel::verbose = true;
       MEAL::Argument::verbose = true;
     case 'v':
       break;
@@ -104,7 +104,7 @@ int main (int argc, char** argv)
   }
 
   // the complete set of observations to be read from file
-  vector<Calibration::CoherencyMeasurementSet> observations;
+  vector<MEAL::CoherencyMeasurementSet> observations;
 
   // the parallactic angle rotation transformation
   Calibration::Parallactic parallactic;
@@ -113,7 +113,7 @@ int main (int argc, char** argv)
   MEAL::Axis<double> pa_axis;
 
   // the best guess of the input (source) Stokes parameters
-  Calibration::MeanCoherency source_guess;
+  MEAL::MeanCoherency source_guess;
 
   // the model of the input (source) Stokes parameters
   MEAL::Coherency source;
@@ -155,14 +155,14 @@ int main (int argc, char** argv)
     unsigned source_index = 0;
 
     // a Stokes object with a source index
-    Calibration::CoherencyMeasurement state (source_index);
+    MEAL::CoherencyMeasurement state (source_index);
     state.set_stokes (stokes);
 
     // only one path for now
     unsigned path_index = 0;
 
     // a vector of CoherencyMeasurement instances with an abscissa value
-    Calibration::CoherencyMeasurementSet measurement (path_index);
+    MEAL::CoherencyMeasurementSet measurement (path_index);
 
     // add the independent parallactic angle 
     measurement.add_coordinate (pa_axis.new_Value(pa));
@@ -198,7 +198,7 @@ int main (int argc, char** argv)
 
   cerr << "Using Phenomenological Decomposition (Britton)" << endl;
   // construct the instrumental response transformation
-  Calibration::Instrument system;
+  MEAL::Instrument system;
 
   // construct the total signal path transformation
   MEAL::ProductRule<MEAL::Complex2> path;
@@ -206,7 +206,7 @@ int main (int argc, char** argv)
   path *= &parallactic;
 
   // the complete model of the polarimetric experiment
-  Calibration::ReceptionModel model;
+  MEAL::ReceptionModel model;
 
   // add the model of the source Stokes parameters
   source_guess.update (&source);

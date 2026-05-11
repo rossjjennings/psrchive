@@ -13,10 +13,10 @@
 
 #include "Pulsar/PolnCalibrator.h"
 
-#include "Pulsar/ReceptionModelSolver.h"
+#include "MEAL/ReceptionModelSolver.h"
 #include "Pulsar/SignalPath.h"
 
-#include "Pulsar/CoherencyMeasurementSet.h"
+#include "MEAL/CoherencyMeasurementSet.h"
 #include "Pulsar/SourceEstimate.h"
 #include "Pulsar/Processor.h"
 
@@ -51,7 +51,7 @@ namespace Pulsar
 
   public:
 
-    typedef Calibration::ReceptionModel::Solver Solver;
+    typedef MEAL::ReceptionModel::Solver Solver;
 
     //! Base class of algorithms that detect steps in instrumental response
     class StepFinder;
@@ -161,7 +161,7 @@ namespace Pulsar
     virtual void add_diff_phase_step (const MJD&);
 
     //! Add a VariableBackend step at the specified MJD
-    virtual void add_step (const MJD&, Calibration::VariableBackend*);
+    virtual void add_step (const MJD&, MEAL::VariableBackend*);
 
     //! Apply time steps afer cals
     void set_step_after_cal (bool val = true) { step_after_cal = val; }
@@ -172,7 +172,7 @@ namespace Pulsar
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
 
     //! Set the VariableBackend step to be cloned for each calibrator
-    virtual void set_stepeach_calibrator (const Calibration::VariableBackend*);
+    virtual void set_stepeach_calibrator (const MEAL::VariableBackend*);
 
     //! Prepare the data for inclusion in the model
     virtual void preprocess (Archive* data);
@@ -399,7 +399,7 @@ namespace Pulsar
     Reference::To< const MEAL::Complex2 > foreach_calibrator;
 
     //! Step in backend response at each calibrator observation
-    Reference::To< const Calibration::VariableBackend > stepeach_calibrator;
+    Reference::To< const MEAL::VariableBackend > stepeach_calibrator;
 
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
@@ -432,7 +432,7 @@ namespace Pulsar
     // submit all calibrator data
     virtual void submit_calibrator_data ();
 
-    virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
+    virtual void submit_calibrator_data (MEAL::CoherencyMeasurementSet&,
 					 const Calibration::SourceObservation&);
 
     virtual void integrate_calibrator_data (const Calibration::SourceObservation&);
@@ -445,23 +445,23 @@ namespace Pulsar
     Reference::To<StepFinder> step_finder;
     
     //! Pulsar data loaded but not submitted or integrated
-    std::vector< std::vector<Calibration::CoherencyMeasurementSet> > pulsar_data;
+    std::vector< std::vector<MEAL::CoherencyMeasurementSet> > pulsar_data;
 
     //! Add the data from the specified sub-integration
     virtual void add_pulsar (const Archive* data, unsigned isub);
 
     //! Add pulsar data constraints to coherency measurement set
     /*! Derived types must define how pulsar data are incorporated */
-    virtual void add_pulsar (Calibration::CoherencyMeasurementSet&, const Integration*, unsigned ichan) = 0;
+    virtual void add_pulsar (MEAL::CoherencyMeasurementSet&, const Integration*, unsigned ichan) = 0;
 
     //! add pulsar data to mean estimate used as initial guess
-    virtual void integrate_pulsar_data (const Calibration::CoherencyMeasurementSet&) { }
+    virtual void integrate_pulsar_data (const MEAL::CoherencyMeasurementSet&) { }
 
     //! add all pulsar data constraints to measurement equation
     virtual void submit_pulsar_data ();
 
     //! add the given pulsar observations to measurement equation constraints
-    virtual void submit_pulsar_data (Calibration::CoherencyMeasurementSet&);
+    virtual void submit_pulsar_data (MEAL::CoherencyMeasurementSet&);
 
     //! Return the invariant for the specified integration and frequency channel
     virtual double get_invariant (Integration* subint, unsigned ichan) = 0;

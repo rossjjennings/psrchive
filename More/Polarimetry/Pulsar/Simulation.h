@@ -11,7 +11,7 @@
 #ifndef __Calibration_Simulation_H
 #define __Calibration_Simulation_H
 
-#include "Pulsar/Instrument.h"
+#include "MEAL/Instrument.h"
 #include "Stokes.h"
 
 namespace Calibration {
@@ -39,7 +39,7 @@ namespace Calibration {
     Simulation ();
 
     //! Return the model of the instrument
-    Instrument* get_instrument ();
+    MEAL::Instrument* get_instrument ();
 
     //! Return the transformation of the simulated environment
     /*! The simulated environment may include the instrument or, after
@@ -72,7 +72,7 @@ namespace Calibration {
   protected:
 
     //! The model of the instrument
-    Instrument instrument;
+    MEAL::Instrument instrument;
 
     //! Stokes U of the reference signal
     double cal_U;

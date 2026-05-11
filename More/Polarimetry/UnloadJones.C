@@ -54,7 +54,7 @@ void Pulsar::UnloadJones::unload (SystemCalibrator* model)
 
     path->engage_time_variations();
 
-    // Calibration::ReceptionModel* equation = path->get_equation();
+    // MEAL::ReceptionModel* equation = path->get_equation();
     // path->set_transformation_index (ipath);
     // path->set_input_index (isource);
 

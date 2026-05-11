@@ -15,10 +15,13 @@
 
 class EstimatePlotter;
 
-namespace Calibration {
+namespace MEAL
+{
+	class ReceptionModel;
+}
 
-  class ReceptionModel;
-
+namespace Calibration
+{
   //! Plots a ReceptionModel
   class ReceptionModelPlotter : public Reference::Able
   {
@@ -32,7 +35,7 @@ namespace Calibration {
     ~ReceptionModelPlotter ();
 
     //! Set the model to yield the Stokes parameters
-    void set_model (ReceptionModel* model);
+    void set_model (MEAL::ReceptionModel* model);
 
     //! Defines the abscissa
     class Abscissa;
@@ -67,7 +70,7 @@ namespace Calibration {
   protected:
 
     //! The model from which plot data will be taken
-    Reference::To<ReceptionModel> model;
+    Reference::To<MEAL::ReceptionModel> model;
 
     //! The independent variable in each plot
     Reference::To<Abscissa> abscissa;

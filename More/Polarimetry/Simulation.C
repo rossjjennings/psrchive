@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Simulation.h"
-#include "Pulsar/SingleAxis.h"
+#include "MEAL/SingleAxis.h"
 
 #include "Pauli.h"
 
@@ -37,7 +37,7 @@ void Calibration::Simulation::set_cal_U (double val)
 
 
 //! Return the model of the instrument
-Calibration::Instrument* Calibration::Simulation::get_instrument ()
+MEAL::Instrument* Calibration::Simulation::get_instrument ()
 {
   response_changed = true;
   return &instrument;
@@ -88,7 +88,7 @@ void Calibration::Simulation::single_axis_calibrate ()
     calibrator_coh[ipol].var = 1e-4;
 
   // solve
-  Calibration::SingleAxis backend;
+  MEAL::SingleAxis backend;
   backend.solve (calibrator_coh);
 
   if (verbose)

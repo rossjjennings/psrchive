@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/RobustStepFinder.h"
-#include "Pulsar/VariableBackend.h"
+#include "MEAL/VariableBackend.h"
 #include "statutil.h"
 
 #include <cassert>
@@ -19,7 +19,7 @@ using namespace std;
 #include "debug.h"
 
 typedef vector<Calibration::SourceObservation> ObsVector;
-typedef vector<Calibration::CoherencyMeasurementSet> SetVector;
+typedef vector<MEAL::CoherencyMeasurementSet> SetVector;
 
 template<typename Container>
 unsigned remove_empty (Container& container)
@@ -195,7 +195,7 @@ template <class Container, class Element>
 	    
 void RobustStepFinder::insert_steps ()
 {
-  Reference::To<VariableBackend> backend = new VariableBackend;
+  Reference::To<MEAL::VariableBackend> backend = new MEAL::VariableBackend;
   
   // search for steps using all four Stokes parameters
   compare = all_four ();
@@ -317,12 +317,12 @@ double get_chi (const ObsVector& A, const ObsVector& B, vector<unsigned>& pol)
 // extern double sqr ( double x );
 
 void get_chi (vector<double>& chi,
-	      const CoherencyMeasurement& A,
-	      const CoherencyMeasurement& B, vector<unsigned>& pol)
+	      const MEAL::CoherencyMeasurement& A,
+	      const MEAL::CoherencyMeasurement& B, vector<unsigned>& pol)
 {
-  DEBUG ("get_chi CoherencyMeasurement");
+  DEBUG ("get_chi MEAL::CoherencyMeasurement");
 
-  Reference::To<const CoherencyMeasurement::Uncertainty> error;
+  Reference::To<const MEAL::CoherencyMeasurement::Uncertainty> error;
   error = A.get_uncertainty();
 
   /* 
@@ -348,12 +348,12 @@ void get_chi (vector<double>& chi,
       chi.push_back( fabs(Schi[ipol].imag()) );
   }
 
-  DEBUG ("get_chi CoherencyMeasurement ok");
+  DEBUG ("get_chi MEAL::CoherencyMeasurement ok");
 }
 
 void get_chi (vector<double>& chi,
-	      const CoherencyMeasurementSet& A,
-	      const CoherencyMeasurementSet& B, vector<unsigned>& pol)
+	      const MEAL::CoherencyMeasurementSet& A,
+	      const MEAL::CoherencyMeasurementSet& B, vector<unsigned>& pol)
 {
   auto Aptr = A.begin();
   auto Bptr = B.begin();
@@ -372,9 +372,9 @@ void get_chi (vector<double>& chi,
     if (Bptr == B.end())
       break;
 
-    DEBUG ("get_chi CoherencyMeasurementSet get_chi");
+    DEBUG ("get_chi MEAL::CoherencyMeasurementSet get_chi");
     get_chi (chi, *Aptr, *Bptr, pol);
-    DEBUG ("get_chi CoherencyMeasurementSet get_chi ok");
+    DEBUG ("get_chi MEAL::CoherencyMeasurementSet get_chi ok");
 
     Aptr++;
     Bptr++;
@@ -664,7 +664,7 @@ void RobustStepFinder::find_steps (vector<unsigned>& steps,
   }
 }
 
-void RobustStepFinder::insert_steps (vector<MJD>& steps, VariableBackend* xform)
+void RobustStepFinder::insert_steps (vector<MJD>& steps, MEAL::VariableBackend* xform)
 {
   vector< SetVector >& psrdata = get_pulsar_data (calibrator);
   unsigned nsubint = psrdata.size();

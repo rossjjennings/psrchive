@@ -13,10 +13,10 @@
 #define __Pulsar_VariableBackendEstimate_H
 
 #include "Pulsar/BackendEstimate.h"
-#include "Pulsar/VariableBackend.h"
-#include "Pulsar/VariableGain.h"
 #include "Pulsar/ConvertMJD.h"
 
+#include "MEAL/VariableBackend.h"
+#include "MEAL/VariableGain.h"
 #include "MEAL/Scalar.h"
 #include "MEAL/Univariate.h"
 
@@ -37,7 +37,7 @@ namespace Calibration
   };
   
   //! Manages a variable backend and its best estimate
-  class VariableBackendEstimate : public BackendEstimate
+  class VariableBackendEstimate : public Calibration::BackendEstimate
   {
     //! The response for pulsar observations
     Reference::To< IndexedProduct > psr_response;
@@ -46,7 +46,7 @@ namespace Calibration
     Reference::To< IndexedProduct > cal_response;
 
     //! The VariableBackend component of the response
-    Reference::To<VariableBackend> variable_backend;
+    Reference::To<MEAL::VariableBackend> variable_backend;
 
     //! The calibrator is transformed by only the variable_backend
     bool cal_backend_only = false;
@@ -56,12 +56,12 @@ namespace Calibration
       observations (e.g. because all observations have been normalized
       using the invariant interval), then it is necessary to include
       an additional free parameter for the calibrator observations. */
-    Reference::To<VariableGain> cal_gain;
+    Reference::To<MEAL::VariableGain> cal_gain;
     
     //! The backend variation transformations
-    Reference::To< MEAL::Scalar > gain_variation;
-    Reference::To< MEAL::Scalar > diff_gain_variation;
-    Reference::To< MEAL::Scalar > diff_phase_variation;
+    Reference::To<MEAL::Scalar> gain_variation;
+    Reference::To<MEAL::Scalar> diff_gain_variation;
+    Reference::To<MEAL::Scalar> diff_phase_variation;
 
     /*! Mapping between variation transformation indeces
       and measurement equation indeces */
@@ -88,7 +88,7 @@ namespace Calibration
     IndexedProduct* get_cal_response () { return cal_response; }
 
     //! Get the backend component
-    SingleAxis* get_backend () { return variable_backend->get_backend(); }
+    MEAL::SingleAxis* get_backend () { return variable_backend->get_backend(); }
     
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_psr_constant_gain (bool = true);

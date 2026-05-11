@@ -40,7 +40,7 @@ void Pulsar::FixFluxCal::apply (Archive* archive)
 		 "name="+name+" coord="+coord.getHMSDMS()+" type unknown");
 
   archive->set_type (type);
-  changes = Signal::Source2string(type);
+  changes = tostring(type);
 
   if (name != archive->get_source ()) {
     changes += " and name " + archive->get_source() + " -> " + name;

@@ -77,6 +77,17 @@ std::pair<unsigned,unsigned> Pulsar::PhaseVsPlot::get_rows() const
   return const_cast<PlotFrame*>(get_frame())->get_y_scale()->get_index_range();
 }
 
+void Pulsar::PhaseVsPlot::prepare (const Archive*)
+{
+  if (verbose)
+    cerr << "Pulsar::PhaseVsPlot::prepare y_alt=" << get_frame()->get_y_axis()->get_alternate() << endl;
+  if (!get_frame()->get_y_axis()->get_alternate())
+  {
+    // draw the tick marks on the right edge using the same scale as that of the left edge
+    get_frame()->get_y_axis()->set_opt ("BCINTS");
+  }
+}
+
 //! Derived classes must draw in the current viewport
 void Pulsar::PhaseVsPlot::draw (const Archive* data)
 {
@@ -231,7 +242,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 
   if (get_frame()->get_y_axis()->get_alternate())
   {
-
+    // draw the tick marks on the right edge using a different scale to that of the left edge
     float min, max;
     get_frame()->get_y_scale()->PlotScale::get_range (min, max);
 

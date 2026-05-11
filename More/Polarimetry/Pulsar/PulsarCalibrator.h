@@ -152,7 +152,7 @@ namespace Pulsar {
     void init_model (unsigned ichan);
 
     //! Solve the measurement equation for the given measurements
-    void solve1 (const Calibration::CoherencyMeasurementSet& measurements);
+    void solve1 (const MEAL::CoherencyMeasurementSet& measurements);
 
     //! Set things up for the model in the given channel
     void setup (const Integration* data, unsigned ichan);
@@ -167,7 +167,7 @@ namespace Pulsar {
     virtual void add_pulsar (const Archive* data, unsigned isub);
 
     //! Add data from the specified channel
-    virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
+    virtual void add_pulsar (MEAL::CoherencyMeasurementSet&,
 			     const Integration*, unsigned ichan);
 
     //! Add the ReferenceCalibrator observation to the set of constraints

@@ -351,7 +351,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
   if (verbose > 2)
     cerr << "Pulsar::FluxCalibrator::add_observation source name=" 
          << archive->get_source() << " type=" 
-         << Signal::Source2string(archive->get_type()) << endl;
+         << tostring(archive->get_type()) << endl;
 
   if ( archive->get_type() != Signal::FluxCalOn &&
        archive->get_type() != Signal::FluxCalOff )

@@ -91,7 +91,7 @@ Pulsar::ConfigurableProjectionExtension::ConfigurableProjectionExtension
     }
 
     const ConfigurableProjection::Transformation* transformation = calibrator->get_transformation(ichan);
-    const Calibration::VariableTransformation* xform = transformation->get_transformation();
+    const MEAL::VariableTransformation* xform = transformation->get_transformation();
 
     copy( get_transformation(ichan), xform );
 

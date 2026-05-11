@@ -6,9 +6,9 @@
  ***************************************************************************/
 
 #include "Pulsar/FluxCalManager.h"
-#include "Pulsar/BackendFeed.h"
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/CoherencyMeasurementSet.h"
+#include "MEAL/BackendFeed.h"
+#include "MEAL/SingleAxis.h"
+#include "MEAL/CoherencyMeasurementSet.h"
 
 #include "Pauli.h"
 
@@ -25,7 +25,7 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path) try
 
   MEAL::Complex2* response = path->get_transformation();
 
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
+  MEAL::BackendFeed* physical = dynamic_cast<MEAL::BackendFeed*>( response );
 
   //
   // It must be possible to separate the frontend and backend
@@ -41,7 +41,7 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path) try
 
   composite = path;
 
-  backend = new Calibration::SingleAxis;
+  backend = new MEAL::SingleAxis;
 
   frontend = new MEAL::ProductRule<MEAL::Complex2>;
 
@@ -258,7 +258,7 @@ void FluxCalManager::integrate (const Jones< Estimate<double> >& correct, const 
 }
 
 
-void FluxCalManager::submit (CoherencyMeasurementSet& measurements, const SourceObservation& data)
+void FluxCalManager::submit (MEAL::CoherencyMeasurementSet& measurements, const SourceObservation& data)
 {
   FluxCalObsVector& observations = get_observations (data.source);
    
@@ -272,7 +272,7 @@ void FluxCalManager::submit (CoherencyMeasurementSet& measurements, const Source
 
   try
   {
-    Calibration::CoherencyMeasurement state (obs->source->input_index);
+    MEAL::CoherencyMeasurement state (obs->source->input_index);
 
     state.set_stokes( data.baseline );
     

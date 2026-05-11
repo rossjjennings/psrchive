@@ -10,12 +10,13 @@
 #endif
 
 #include "Pulsar/ConfigurableProjection.h"
-#include "Pulsar/TransformationFactory.h"
 
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/IntegrationInterface.h"
 #include "Pulsar/IntegrationExpert.h"
+
 #include "MEAL/NvariateScalarFactory.h"
+#include "MEAL/TransformationFactory.h"
 
 // #define _DEBUG 1
 #include "debug.h"
@@ -131,9 +132,9 @@ void ConfigurableProjection::construct (const string& text)
 
   configuration = text;
 
-  transformation = new Calibration::VariableTransformation;
+  transformation = new MEAL::VariableTransformation;
 
-  Calibration::TransformationFactory xform_factory;
+  MEAL::TransformationFactory xform_factory;
   MEAL::Complex2* model = ::construct<MEAL::Complex2> (node, xform_factory);
   transformation->set_model (model);
 
@@ -289,7 +290,7 @@ ConfigurableProjection::get_transformation (unsigned ichan)
 
   if (!xforms[ichan])
   {
-    Calibration::VariableTransformation* xform = transformation->clone();
+    MEAL::VariableTransformation* xform = transformation->clone();
     xforms[ichan] = new ConfigurableProjection::Transformation (xform);
   }
 
@@ -315,13 +316,13 @@ bool ConfigurableProjection::get_transformation_valid (unsigned ichan) const
   return xforms[ichan];
 }
 
-using Calibration::VariableTransformation;
+using MEAL::VariableTransformation;
 
 MEAL::Argument::Value* ConfigurableProjection::new_value ()
 {
   MEAL::Argument* argument = xforms[chan]->get_argument ();
 
-  typedef MEAL::Axis< Calibration::VariableTransformation::Argument > VariableArgument;
+  typedef MEAL::Axis< MEAL::VariableTransformation::Argument > VariableArgument;
 
   VariableArgument* vararg = dynamic_cast<VariableArgument*> (argument);
 
@@ -329,7 +330,7 @@ MEAL::Argument::Value* ConfigurableProjection::new_value ()
     throw Error (InvalidParam, "ConfigurableProjection::new_value",
 		 "Transformation does not have a VariableArgument");
 
-  Calibration::VariableTransformation::Argument arg;
+  MEAL::VariableTransformation::Argument arg;
 
   auto var = dynamic_cast<VariableProjectionCorrection*>(projection.get());
 
