@@ -75,6 +75,12 @@ void Pulsar::PlotAttributes::apply_set (const std::string& name)
 
 void Pulsar::PlotAttributes::setup ()
 {
+  if (set_applied == "pub")
+  {
+    // ensure that labels above the frame are unset/empty
+    get_label_above()->set_all( PlotLabel::unset );
+  }
+
   cpgsch (character_height);
   cpgscf (character_font);
   cpgslw (line_width);
