@@ -37,13 +37,17 @@ fi
 
 ################################################################################
 #
-# Setup to use EPSIC sub-module
+# Ensure that submodules are checked out
 #
+AC_MSG_CHECKING([submodule status])
 
-# ensure that epsic source is configured
-if test -f $srcdir/config/epsic.sh; then
-  $srcdir/config/epsic.sh $srcdir
+if ! /bin/sh $srcdir/config/check_submodules.sh $srcdir >&AS_MESSAGE_LOG_FD 2>&1; then
+    AC_MSG_RESULT([missing])
+    /bin/sh $srcdir/config/check_submodules.sh $srcdir
+    AC_MSG_ERROR([Submodule check failed.])
 fi
+
+AC_MSG_RESULT([ok])
 
 abs_top_builddir=`pwd`
 abs_top_srcdir=`cd "$srcdir" && pwd`
@@ -78,6 +82,24 @@ SWIN_COMPILER
 
 # Initialize automake to place object files in sub-directories
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+
+AC_PATH_PROG([AUTOMAKE], [automake])
+
+if test -n "$AUTOMAKE"; then
+    AUTOMAKE_VERSION=$($AUTOMAKE --version | head -n 1 | sed 's/^.* //')
+else
+    AUTOMAKE_VERSION="unknown"
+fi
+
+AC_SUBST([AUTOMAKE_VERSION])
+AC_MSG_NOTICE([using automake version $AUTOMAKE_VERSION])
+
+AS_VERSION_COMPARE(["$AUTOMAKE_VERSION"], ["1.17.0"],
+    [automake_is_old=yes],
+    [automake_is_old=no],
+    [automake_is_old=no])
+
+AM_CONDITIONAL([DISABLE_DIST], [test "x$automake_is_old" = xyes])
 
 # Create static libraries by default
 LT_INIT([disable-shared])

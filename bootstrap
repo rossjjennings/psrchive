@@ -1,8 +1,8 @@
 #! /bin/sh
 
-echo "Running the GNU autotools.  Please be patient ..."
+config/check_submodules.sh || exit 1
 
-./config/epsic.sh
+echo "Running the GNU autotools.  Please be patient ..."
 
 if autoreconf --install --force; then
 
