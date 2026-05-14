@@ -1,6 +1,24 @@
 
 SUBDIRS	= config packages Util Base More Management
 
+$(RECURSIVE_TARGETS): check-submodules
+.PHONY: force-reconfig check-submodules
+
+SUBMODULE_MAKEFILES = Util/epsic/Makefile Util/meal/Makefile
+
+check-submodules:
+	@need_reconfig=no; \
+	for f in $(SUBMODULE_MAKEFILES); do \
+	  if [ ! -f "$(top_builddir)/$$f" ]; then need_reconfig=yes; break; fi; \
+	done; \
+	if [ "$$need_reconfig" = "yes" ]; then \
+	  $(MAKE) $(AM_MAKEFLAGS) force-reconfig; \
+	fi
+
+force-reconfig:
+	@echo "Missing submodule Makefiles detected. Reconfiguring project..."
+	$(top_srcdir)/configure $(shell ./config.status --config)
+
 include $(top_srcdir)/config/Makefile.root
 
 ACLOCAL_AMFLAGS = -I config

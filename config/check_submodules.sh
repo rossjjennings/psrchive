@@ -27,6 +27,7 @@ if [ -n "$MISSING" ]; then
 	    echo "cd $path_to_src"
     fi
     echo "git submodule update --init --recursive"
+    echo "./bootstrap"
     echo
     exit 1
 fi
