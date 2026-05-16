@@ -8,6 +8,4 @@ library's modular architecture.
 
 psrchive
 util
-meal
-epsic
 ```

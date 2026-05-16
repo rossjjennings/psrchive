@@ -48,10 +48,10 @@ apidoc: doxygen
 		echo "==> breathe-apidoc: $$proj -> $$out"; \
 		rm -rf $$out; \
 		mkdir -p $$out; \
-		breathe-apidoc -q -o $$out -p $$proj -m -f -g class,struct,namespace $$xml; \
+		breathe-apidoc -q -o $$out -p $$proj -m -f -g class $$xml; \
 		: "Drop stub pages for compounds that have no XML in this project"; \
 		: "(e.g. std::allocator that Doxygen mentions but does not document)"; \
-		find $$out -name '*.rst' -mindepth 2 | while read f; do \
+		find $$out -mindepth 2 -name '*.rst' | while read f; do \
 			b=$$(basename $$f .rst); \
 			[ -f $$xml/$$b.xml ] || rm $$f; \
 		done; \
