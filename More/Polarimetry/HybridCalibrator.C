@@ -13,11 +13,11 @@
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/Receiver.h"
 
-#include "Pulsar/SingleAxisSolver.h"
-#include "Pulsar/SingleAxis.h"
+#include "MEAL/SingleAxisSolver.h"
+#include "MEAL/SingleAxis.h"
 
-#include "Pulsar/BackendFeed.h"
-#include "Pulsar/VariableBackend.h"
+#include "MEAL/BackendFeed.h"
+#include "MEAL/VariableBackend.h"
 #include "Pulsar/MeanJones.h"
 
 #include "MEAL/Value.h"
@@ -198,7 +198,7 @@ get_xform (const Pulsar::PolnCalibrator* response,
   if (!backend_only)
     return xform;
 
-  auto splittable = dynamic_cast<const Calibration::BackendFeed*> (xform);
+  auto splittable = dynamic_cast<const MEAL::BackendFeed*> (xform);
 
   if (!splittable)
     throw Error (InvalidParam, "get_xform",
@@ -400,7 +400,7 @@ void Pulsar::HybridCalibrator::calculate_transformation () try
   transformation_resize (target_nchan);
 
   // the correction to supplement the PolnCalibrator
-  Reference::To<Calibration::SingleAxis> correction;
+  Reference::To<MEAL::SingleAxis> correction;
 
   for (unsigned ichan=0; ichan<target_nchan; ++ichan) try
   {
@@ -475,10 +475,10 @@ void Pulsar::HybridCalibrator::calculate_transformation () try
     input_stokes = transform (cal_stokes, cal_response);
 
     // solve for the SingleAxis model that relates input and output states
-    correction = new Calibration::SingleAxis;
+    correction = new MEAL::SingleAxis;
 
     if (!solver)
-      solver = new ::Calibration::SingleAxisSolver;
+      solver = new MEAL::SingleAxisSolver;
 
     solver->set_input (input_stokes);
     solver->set_output (output_stokes);

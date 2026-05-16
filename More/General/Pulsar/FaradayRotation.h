@@ -12,9 +12,9 @@
 #define __Pulsar_FaradayRotation_h
 
 #include "Pulsar/ColdPlasma.h"
-
-#include "Pulsar/Faraday.h"
 #include "Pulsar/BirefringenceHistory.h"
+
+#include "MEAL/Faraday.h"
 
 namespace Pulsar {
 
@@ -29,7 +29,7 @@ namespace Pulsar {
     \post All profiles will have a position angle aligned to the
           reference frequency
   */
-  class FaradayRotation : public ColdPlasma<Calibration::Faraday,BirefringenceHistory>
+  class FaradayRotation : public ColdPlasma<MEAL::Faraday,BirefringenceHistory>
   {
 
   public:

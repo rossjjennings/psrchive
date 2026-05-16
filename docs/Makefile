@@ -5,10 +5,6 @@
 # Usage:  make html
 
 SPHINXBUILD   = sphinx-build
-# -j auto: parallelise reading/writing across CPU cores. Cuts wall time
-# significantly for the large per-class breathe-apidoc tree (~1,700
-# stub pages on PSRCHIVE) and brings the RTD build under the 15-minute
-# Community-tier timeout.
 SPHINXOPTS    = -j $(shell echo $$(($$(nproc) / 2)))
 BUILDDIR      = _build
 DOXYGENDIR    = _doxygen

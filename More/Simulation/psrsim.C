@@ -22,8 +22,8 @@
 #include "Pulsar/ComponentModel.h"
 #include "Pulsar/SimplePolnProfile.h"
 #include "Pulsar/RotatingVectorModelOptions.h"
-#include "Pulsar/Feed.h"
 
+#include "MEAL/Feed.h"
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ScalarParameter.h"
 
@@ -186,7 +186,7 @@ void psrsim::process (Pulsar::Archive* data)
       throw Error (InvalidState, "psrsim:process",
 		   "simulating reception requires full-polarization input");
 
-    Calibration::Feed receiver;
+    MEAL::Feed receiver;
     receiver.set_orientation (0, receptor_angles.first * M_PI/180);
     receiver.set_orientation (1, receptor_angles.first * M_PI/180);
 

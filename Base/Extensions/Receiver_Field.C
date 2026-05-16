@@ -15,7 +15,7 @@ Pulsar::Receiver::Field::Field ()
 Angle Pulsar::Receiver::Field::get_orientation () const
 {
   Angle offset;
-  if (symmetry_angle && basis == Signal::Linear)
+  if (symmetry_angle && basis == Convention::Linear)
     offset.setDegrees (-45);
 
   return orientation + offset;
@@ -32,7 +32,7 @@ void Pulsar::Receiver::Field::set_orientation (const Angle& angle)
 Angle Pulsar::Receiver::Field::get_symmetry_angle () const
 {
   Angle offset = 0.0;
-  if (!symmetry_angle && basis == Signal::Linear)
+  if (!symmetry_angle && basis == Convention::Linear)
     offset.setDegrees (45.0);
   
   return orientation + offset;

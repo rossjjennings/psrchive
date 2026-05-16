@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/SystemCalibrator.h"
-#include "Pulsar/ReceptionModelSolver.h"
+#include "MEAL/ReceptionModelSolver.h"
 
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/BasisCorrection.h"
@@ -29,10 +29,10 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
 
-#include "Pulsar/ModelParametersReport.h"
-#include "Pulsar/InputDataReport.h"
-#include "Pulsar/DataAndModelReport.h"
-#include "Pulsar/CovarianceReport.h"
+#include "MEAL/ModelParametersReport.h"
+#include "MEAL/InputDataReport.h"
+#include "MEAL/DataAndModelReport.h"
+#include "MEAL/CovarianceReport.h"
 
 #include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/IntegrationExpert.h"
@@ -173,7 +173,7 @@ bool SystemCalibrator::has_solver () const
 }
 
 //! Return the transformation for the specified channel
-const Calibration::ReceptionModel::Solver* 
+const MEAL::ReceptionModel::Solver* 
 SystemCalibrator::get_solver (unsigned ichan) const
 {
   check_ichan ("get_solver", ichan);
@@ -181,23 +181,23 @@ SystemCalibrator::get_solver (unsigned ichan) const
 }
 
 //! Return the transformation for the specified channel
-Calibration::ReceptionModel::Solver* 
+MEAL::ReceptionModel::Solver* 
 SystemCalibrator::get_solver (unsigned ichan)
 {
   assert (ichan < model.size());
   return model[ichan]->get_equation()->get_solver();
 }
 
-void SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
+void SystemCalibrator::set_solver (MEAL::ReceptionModel::Solver* s)
 {
   DEBUG("SystemCalibrator::set_solver this=" << this << " ptr=" << (void*) s);
   solver = s;
 }
 
-Calibration::ReceptionModel::Solver* SystemCalibrator::get_solver ()
+MEAL::ReceptionModel::Solver* SystemCalibrator::get_solver ()
 {
   if (!solver)
-    solver = Calibration::ReceptionModel::new_default_Solver ();
+    solver = MEAL::ReceptionModel::new_default_Solver ();
 
   DEBUG("SystemCalibrator::get_solver this=" << this << " ptr=" << (void*) solver);
   return solver;
@@ -343,7 +343,7 @@ void SystemCalibrator::set_foreach_calibrator (const MEAL::Complex2* x)
   foreach_calibrator = x;
 }
 
-void SystemCalibrator::set_stepeach_calibrator (const Calibration::VariableBackend* x)
+void SystemCalibrator::set_stepeach_calibrator (const MEAL::VariableBackend* x)
 {
   stepeach_calibrator = x;
 }
@@ -379,7 +379,7 @@ void SystemCalibrator::add_diff_phase_step (const MJD& mjd)
 }
 
 //! Add a VariableBackend step at the specified MJD
-void SystemCalibrator::add_step (const MJD& mjd, Calibration::VariableBackend* backend)
+void SystemCalibrator::add_step (const MJD& mjd, MEAL::VariableBackend* backend)
 {
   if (model.size() == 0)
     throw Error (InvalidState, "SystemCalibrator::add_step",
@@ -598,12 +598,12 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     Argument::Value* time = model[mchan]->time.new_Value( epoch );
 
     // measurement set
-    Calibration::CoherencyMeasurementSet measurements;
+    MEAL::CoherencyMeasurementSet measurements;
 
     measurements.set_identifier( identifier );
     measurements.add_coordinate( time );
     measurements.set_ichan( ichan );
-    measurements.set_epoch( epoch );
+    measurements.set_epoch( epoch.in_days() );
     measurements.set_name( data->get_source() );
 
     if (projection)
@@ -883,7 +883,7 @@ void SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
        cal->get_type() != Signal::FluxCalOff && 
        cal->get_type() != Signal::PolnCal )
     throw Error (InvalidParam, "SystemCalibrator::add_calibrator",
-                 "invalid source=" + Source2string(cal->get_type()));
+                 "invalid source=" + tostring(cal->get_type()));
 
   string reason;
   if (!calibrator_match (cal, reason))
@@ -1190,7 +1190,7 @@ catch (Error& error)
 }
 
 void SystemCalibrator::submit_pulsar_data
-( Calibration::CoherencyMeasurementSet& measurements) try
+( MEAL::CoherencyMeasurementSet& measurements) try
 {
   unsigned ichan = measurements.get_ichan();
   MJD epoch = measurements.get_epoch();
@@ -1354,9 +1354,9 @@ void SystemCalibrator::create_calibrator_estimate () try
   // set the initial guess and fit flags
   Stokes<double> cal_state (1,0,.9,0);
 
-  Signal::Basis basis = get_calibrator()->get_basis ();
+  Convention::Basis basis = get_calibrator()->get_basis ();
 
-  if (basis == Signal::Circular)
+  if (basis == Convention::Circular)
     cal_state = Stokes<double> (1,.9,0,0);
 
   unsigned nchan = get_nchan ();
@@ -1720,35 +1720,35 @@ void SystemCalibrator::init_model (unsigned ichan)
   if (solver)
     model[ichan]->set_solver( solver->clone() );
 
-  Calibration::ReceptionModel* equation = model[ichan]->get_equation();
+  MEAL::ReceptionModel* equation = model[ichan]->get_equation();
 
   string filename;
 
   if (report_initial_state)
   {
     filename = stringprintf("prefit_model_ichan%04d.txt",ichan);
-    equation->add_prefit_report ( new Calibration::ModelParametersReport(filename) );
+    equation->add_prefit_report ( new MEAL::ModelParametersReport(filename) );
   }
 
   if (report_input_data)
   {
     filename = stringprintf("input_data_ichan%04d.txt",ichan);
-    equation->add_prefit_report ( new Calibration::InputDataReport(filename) );
+    equation->add_prefit_report ( new MEAL::InputDataReport(filename) );
   }
 
   if (report_data_and_model)
   {
     filename = stringprintf("results_init_ichan%04d.dat",ichan);
-    equation->add_prefit_report ( new Calibration::DataAndModelReport(filename) );
+    equation->add_prefit_report ( new MEAL::DataAndModelReport(filename) );
     
     filename = stringprintf("results_ichan%04d.dat",ichan);
-    equation->add_postfit_report ( new Calibration::DataAndModelReport(filename) );
+    equation->add_postfit_report ( new MEAL::DataAndModelReport(filename) );
   }
 
   if (report_covariance)
   {
     filename = stringprintf("covariance_ichan%04d.txt",ichan);
-    equation->add_postfit_report ( new Calibration::CovarianceReport(filename) );
+    equation->add_postfit_report ( new MEAL::CovarianceReport(filename) );
   }
 }
 

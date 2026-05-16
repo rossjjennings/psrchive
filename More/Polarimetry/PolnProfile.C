@@ -36,7 +36,7 @@ bool Pulsar::PolnProfile::normalize_weight_by_absolute_gain = false;
 Pulsar::PolnProfile::PolnProfile ()
 {
   state = Signal::Stokes;
-  basis = Signal::Linear;
+  basis = Convention::Linear;
 }
 
 Pulsar::PolnProfile* Pulsar::PolnProfile::clone () const
@@ -49,7 +49,7 @@ Pulsar::PolnProfile* Pulsar::PolnProfile::clone () const
 //
 //
 //
-Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state, 
+Pulsar::PolnProfile::PolnProfile (Convention::Basis _basis, Signal::State _state, 
 				  Profile* _p0, Profile* _p1,
 				  Profile* _p2, Profile* _p3)
 {
@@ -80,7 +80,7 @@ Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state,
 Pulsar::PolnProfile::PolnProfile (unsigned nbin)
 {
   state = Signal::Stokes;
-  basis = Signal::Linear;
+  basis = Convention::Linear;
 
   for (unsigned ipol=0; ipol < 4; ipol++)
     profile[ipol] = new Profile (nbin);
@@ -466,7 +466,7 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
       state = Signal::PseudoStokes;
     }
 
-    if (basis == Signal::Circular)
+    if (basis == Convention::Circular)
     {
       float* V = profile[1]->get_amps();
       float* Q = profile[2]->get_amps();
@@ -484,7 +484,7 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
   {
     // cerr << "convert_state to Signal::Coherence" << endl;
 
-    if (state == Signal::Stokes && basis == Signal::Circular)
+    if (state == Signal::Stokes && basis == Convention::Circular)
     {
       float* ReLR   = profile[1]->get_amps();
       float* ImLR   = profile[2]->get_amps();
@@ -542,9 +542,9 @@ void Pulsar::PolnProfile::sum_difference (Profile* sum, Profile* difference)
   that have been formed assuming linearly polarized receptors when in
   fact the receptors are circularly polarized.
 */
-void Pulsar::PolnProfile::convert_basis (Signal::Basis to)
+void Pulsar::PolnProfile::convert_basis (Convention::Basis to)
 {
-  if (state == Signal::Stokes && to == Signal::Circular)
+  if (state == Signal::Stokes && to == Convention::Circular)
   {
     cout << "Converting to Circular" << endl;
     float* V = profile[1]->get_amps();

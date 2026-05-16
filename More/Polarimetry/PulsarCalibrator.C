@@ -19,18 +19,17 @@
 #include "Pulsar/IntegrationExpert.h"
 
 #include "Pulsar/CalibratorTypes.h"
-#include "Pulsar/Instrument.h"
-#include "Pulsar/VariableBackend.h"
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/Feed.h"
-#include "Pulsar/MeanInstrument.h"
 #include "Pulsar/Receiver.h"
-
 #include "Pulsar/SystemCalibratorUnloader.h"
-#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/Fourier.h"
 #include "Pulsar/Pulsar.h"
 
+#include "MEAL/Instrument.h"
+#include "MEAL/VariableBackend.h"
+#include "MEAL/SingleAxis.h"
+#include "MEAL/Feed.h"
+#include "MEAL/MeanInstrument.h"
+#include "MEAL/ReceptionModelSolver.h"
 #include "MEAL/Complex2Math.h"
 #include "MEAL/GimbalLockMonitor.h"
 
@@ -403,7 +402,7 @@ double Pulsar::PulsarCalibrator::get_invariant (Integration* subint, unsigned ic
   the specified channel
 */
 void Pulsar::PulsarCalibrator::add_pulsar
-( CoherencyMeasurementSet& measurements,
+( MEAL::CoherencyMeasurementSet& measurements,
   const Integration* integration, unsigned ichan )
 {
   if (verbose > 2)
@@ -523,7 +522,7 @@ void Pulsar::PulsarCalibrator::add_calibrator (const ReferenceCalibrator* p) try
   {
     if (verbose)
       cerr << "PulsarCalibrator::add_calibrator ignoring "
-	   << Source2string(cal->get_type()) << " observation";
+	   << tostring(cal->get_type()) << " observation";
     return;
   }
 
@@ -548,21 +547,21 @@ Pulsar::PulsarCalibrator::get_transformation (const Archive* data,
 class interface : public MEAL::GimbalLockMonitor
 {
 public:
-  bool check (ReceptionModel*) { lock_detected(); return true; }
+  bool check (MEAL::ReceptionModel*) { lock_detected(); return true; }
 };
 
-Functor< bool(ReceptionModel*) >
-gimbal_lock( Instrument* instrument, unsigned receptor )
+Functor< bool(MEAL::ReceptionModel*) >
+gimbal_lock( MEAL::Instrument* instrument, unsigned receptor )
 {
-  Feed* feed = instrument->get_feed();
-  SingleAxis* backend = instrument->get_backend()->get_backend();
+  MEAL::Feed* feed = instrument->get_feed();
+  MEAL::SingleAxis* backend = instrument->get_backend()->get_backend();
 
   interface* condition = new interface;
   condition->set_yaw  ( feed->get_orientation_transformation( receptor ) );
   condition->set_pitch( feed->get_ellipticity_transformation( receptor ) );
   condition->set_roll ( backend->get_rotation_transformation() );
 
-  return Functor< bool(ReceptionModel*) >
+  return Functor< bool(MEAL::ReceptionModel*) >
     ( condition, &interface::check );
 }
 
@@ -578,7 +577,7 @@ MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
 
   MEAL::Complex2* xform = model[ichan]->get_transformation();
 
-  Instrument* instrument = dynamic_cast<Instrument*> (xform);
+  MEAL::Instrument* instrument = dynamic_cast<MEAL::Instrument*> (xform);
   if (!instrument)
     return xform;
 
@@ -640,7 +639,7 @@ string get_state (MEAL::Function* f)
   return state;
 }
 
-void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data) try
+void Pulsar::PulsarCalibrator::solve1 (const MEAL::CoherencyMeasurementSet& data) try
 {
   unsigned ichan = data.get_ichan();
   
@@ -653,7 +652,7 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data) try
     throw Error (InvalidState, "PulsarCalibrator::solve1",
                  "ichan=%u >= nchan=%u", ichan, PolnCalibrator::get_nchan(false));
 
-  CoherencyMeasurementSet measurements (data);
+  MEAL::CoherencyMeasurementSet measurements (data);
   submit_pulsar_data (measurements);
       
   for (unsigned tries=0 ; tries < 2; tries ++) try
@@ -772,7 +771,7 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data) try
 	cerr << "  BIG DIFFERENCE=" << chisq << endl;
 	cerr << "    OLD\t\t\t\tNEW" << endl;
 
-	Instrument test;
+	MEAL::Instrument test;
 	solution[ichan]->update(&test);
 	
 	unsigned nparam = test.get_nparam();
@@ -786,10 +785,10 @@ void Pulsar::PulsarCalibrator::solve1 (const CoherencyMeasurementSet& data) try
     }
   }
 
-  if ( dynamic_cast<Instrument*>( PolnCalibrator::get_transformation(ichan) ) )
+  if ( dynamic_cast<MEAL::Instrument*>( PolnCalibrator::get_transformation(ichan) ) )
   {
     if (!solution[ichan])
-      solution[ichan] = new MeanInstrument;
+      solution[ichan] = new MEAL::MeanInstrument;
 
     solution[ichan]->integrate(  PolnCalibrator::get_transformation(ichan) );
   }

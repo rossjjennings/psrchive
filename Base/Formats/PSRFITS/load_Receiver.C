@@ -55,14 +55,14 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   {
     warning << "FITSArchive::load_Receiver FD_POLN unknown; assuming linear"
 	    << endl;
-    ext->set_basis (Signal::Linear);
+    ext->set_basis (Convention::Linear);
   }
   else
   {
     if (strncasecmp(tempstr.c_str(),"LIN",3) == 0)
-      ext->set_basis (Signal::Linear);
+      ext->set_basis (Convention::Linear);
     else if (strncasecmp(tempstr.c_str(),"CIRC",4) == 0)
-      ext->set_basis (Signal::Circular);
+      ext->set_basis (Convention::Circular);
     else
       throw Error (InvalidParam, "FITSArchive::load_Receiver",
 	           "unknown FD_POLN='" + tempstr + "'");
@@ -71,7 +71,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   float temp = 0.0;
   Angle angle;
 
-  if (ext->get_basis () == Signal::Linear)  {
+  if (ext->get_basis () == Convention::Linear)  {
 
     // Read angle of X-probe wrt platform zero
 
@@ -138,10 +138,10 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   }
   else switch (hand) {
   case 1:
-    ext->set_hand ( Signal::Right );
+    ext->set_hand ( Convention::Right );
     break;
   case -1:
-    ext->set_hand ( Signal::Left );
+    ext->set_hand ( Convention::Left );
     break;
   default:
     if (verbose == 3)

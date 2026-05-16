@@ -12,8 +12,10 @@
 #define __Calibration_ReceptionModelAxisPlotter_H
 
 #include "Pulsar/ReceptionModelPlotter.h"
+#include "MEAL/ReceptionModel.h"
 #include "MEAL/Axis.h"
 #include "Pauli.h"
+#include "MJD.h"
 
 #include <cpgplot.h>
 

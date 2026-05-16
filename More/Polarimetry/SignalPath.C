@@ -6,13 +6,13 @@
  ***************************************************************************/
 
 #include "Pulsar/SignalPath.h"
-#include "Pulsar/SingleAxis.h"
+#include "MEAL/SingleAxis.h"
 
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/Instrument.h"
-#include "Pulsar/Britton2000.h"
+#include "MEAL/Instrument.h"
+#include "MEAL/Britton2000.h"
 
-#include "Pulsar/ReceptionModelSolver.h"
+#include "MEAL/ReceptionModelSolver.h"
 #include "Pulsar/VariableBackendEstimate.h"
 
 #include "MEAL/Polar.h"
@@ -184,7 +184,7 @@ void SignalPath::set_constant_pulsar_gain (bool value)
 }
 
 //! Get the measurement equation solver
-Calibration::ReceptionModel* SignalPath::get_equation ()
+MEAL::ReceptionModel* SignalPath::get_equation ()
 {
   if (!built)
     build ();
@@ -193,12 +193,12 @@ Calibration::ReceptionModel* SignalPath::get_equation ()
 }
 
 //! Get the measurement equation solver
-const Calibration::ReceptionModel* SignalPath::get_equation () const
+const MEAL::ReceptionModel* SignalPath::get_equation () const
 {
   return equation;
 }
 
-void SignalPath::set_equation (Calibration::ReceptionModel* e)
+void SignalPath::set_equation (MEAL::ReceptionModel* e)
 {
   if (equation)
     throw Error (InvalidState, "SignalPath::set_equation",
@@ -279,7 +279,7 @@ void SignalPath::build () try
 
   if (!equation)
   {
-    equation = new Calibration::ReceptionModel;
+    equation = new MEAL::ReceptionModel;
     if (verbose)
       cerr << "SignalPath::build new ReceptionModel ptr=" << (void*) equation << endl;
   }
@@ -704,7 +704,7 @@ void SignalPath::add_diff_phase_step (const MJD& mjd)
   set_free (2, mjd);
 }
 
-void SignalPath::add_step (const MJD& mjd, Calibration::VariableBackend* backend)
+void SignalPath::add_step (const MJD& mjd, MEAL::VariableBackend* backend)
 {
 #if _DEBUG
   cerr << "SignalPath::add_step epoch=" << mjd << endl;

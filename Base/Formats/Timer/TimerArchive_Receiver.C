@@ -32,9 +32,9 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
     cerr << "Pulsar::TimerArchive::unpack Receiver" << endl;
 
   if (hdr.banda.polar == 0)
-    receiver->set_basis( Signal::Circular );
+    receiver->set_basis( Convention::Circular );
   else
-    receiver->set_basis( Signal::Linear );
+    receiver->set_basis( Convention::Linear );
 
   switch (hdr.feedmode) {
     
@@ -126,7 +126,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   receiver->set_basis_corrected (hdr.corrected & FEED_CORRECTED);
   receiver->set_projection_corrected (hdr.corrected & PARA_CORRECTED);
 
-  if ( receiver->get_basis() == Signal::Circular )  {
+  if ( receiver->get_basis() == Convention::Circular )  {
     if ( supplement->X_offset != 0 )
       throw Error (InvalidState, "Pulsar::TimerArchive::unpack",
 		   "Receiver basis is Circular and X_offset=%g",
@@ -184,17 +184,17 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
   hdr.rcvr_id[RCVR_ID_STRLEN-1] = '\0'; // ensure that rcvr_id is null-terminated
 
   switch (receiver->get_basis()) {
-  case Signal::Linear:
+  case Convention::Linear:
     hdr.banda.polar = 1;
     break;
-  case Signal::Circular:
+  case Convention::Circular:
     hdr.banda.polar = 0;
     break;
   default:
     hdr.banda.polar = -1;
     throw Error (InvalidParam, "Pulsar::TimerArchive::pack Receiver",
 		 "unrecognized Basis=" 
-		 + Signal::Basis2string( receiver->get_basis() ));
+		 + tostring( receiver->get_basis() ));
   }
 
   switch (receiver->get_tracking_mode()) {
@@ -222,7 +222,7 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
   void* temp = &(hdr.bandb);
   struct supp* supplement = reinterpret_cast<struct supp*>( temp );
 
-  if ( receiver->get_basis() == Signal::Circular )  {
+  if ( receiver->get_basis() == Convention::Circular )  {
     supplement->X_offset = 0;
     supplement->Y_offset = 0;
     supplement->calibrator_offset = 0;

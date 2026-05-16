@@ -10,7 +10,7 @@
 #define __Pulsar_VariableFaradayRotation_h
 
 #include "Pulsar/KnownVariableTransformation.h"
-#include "Pulsar/Faraday.h"
+#include "MEAL/Faraday.h"
 
 namespace Pulsar {
 
@@ -18,13 +18,13 @@ namespace Pulsar {
   class VariableFaradayRotation : public KnownVariableTransformation
   {
     // ionospheric Faraday rotation transformation
-    mutable Reference::To<Calibration::Faraday> iono_faraday;
+    mutable Reference::To<MEAL::Faraday> iono_faraday;
 
     // ionospheric Faraday rotation measure
     double ionospheric_rotation_measure;
 
     // interstellar Faraday rotation transformation
-    mutable Reference::To<Calibration::Faraday> ism_faraday;
+    mutable Reference::To<MEAL::Faraday> ism_faraday;
 
     // interstellar Faraday rotation measure
     double interstellar_rotation_measure;
@@ -48,10 +48,10 @@ namespace Pulsar {
     void set_interstellar_rotation_measure (double);
 
     //! Get the transformation used to compute interstellar Faraday rotation
-    const Calibration::Faraday* get_interstellar_rotation () const { return ism_faraday; }
+    const MEAL::Faraday* get_interstellar_rotation () const { return ism_faraday; }
 
     //! Get the transformation used to compute ionospheric Faraday rotation
-    const Calibration::Faraday* get_ionospheric_rotation () const { return iono_faraday; }
+    const MEAL::Faraday* get_ionospheric_rotation () const { return iono_faraday; }
 
     //! Return true if the transformation is required
     bool required () const; 

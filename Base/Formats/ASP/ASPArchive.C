@@ -531,7 +531,7 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   } else {
     b->set_name("xASP");
   }
-  b->set_argument(Signal::Conventional); // XXX check this
+  b->set_argument(Convention::Conventional); // XXX check this
   b->set_downconversion_corrected(false);
 
   // Replace tempo code with telescope name
@@ -554,7 +554,7 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     Arecibo::guess(r, this); // Uses center freq
     // Arecibo recvrs need hand=-1, at least for ASP.  So far
     // I've only checked this for L-wide and S-wide (July 2008).
-    r->set_hand(Signal::Left);
+    r->set_hand(Convention::Left);
   } else if (get_telescope()=="f" || get_telescope()=="Nancay") {
     Nancay::guess(r, this);
   } 
@@ -568,8 +568,8 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   // Also find out if we can note the use of a hybrid separately.
   fits_read_key(f, TSTRING, "FD_POLN", ctmp, NULL, status);
   if (*status==0) {
-    if ((ctmp[0]=='L') || (ctmp[0]=='l')) r->set_basis(Signal::Linear);
-    if ((ctmp[0]=='C') || (ctmp[0]=='c')) r->set_basis(Signal::Circular);
+    if ((ctmp[0]=='L') || (ctmp[0]=='l')) r->set_basis(Convention::Linear);
+    if ((ctmp[0]=='C') || (ctmp[0]=='c')) r->set_basis(Convention::Circular);
   }
 
   // CalInfo Extension

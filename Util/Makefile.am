@@ -1,5 +1,5 @@
 
-SUBDIRS                 = epsic/src units third genutil fft stat tempo
+SUBDIRS                 = epsic meal units third genutil fft stat tempo
 
 lib_LTLIBRARIES         = libpsrutil.la
 
@@ -8,7 +8,8 @@ libpsrutil_la_SOURCES =
 libpsrutil_la_LIBADD = third/libthird.la units/libunits.la fft/libpsrfft.la \
 			genutil/libgenutil.la stat/libstat.la \
 			tempo/libtempo.la \
-			epsic/src/libepsic.la @FLIBS@
+			epsic/src/util/libutil.la epsic/src/true_math/libtrue_math.la \
+			meal/src/util/libutil.la @FLIBS@
 
 if HAVE_CFITSIO
   SUBDIRS += fitsutil
@@ -24,12 +25,4 @@ SUBDIRS += resources
 libpsrutil_la_LIBADD += resources/libresources.la
 
 include $(top_srcdir)/config/Makefile.local
-
-NOW_IN_EPSIC := Basis.h Dirac.h Matrix.h Stokes.h Estimate.h complex_promote.h \
-	BoxMuller.h Jacobi.h Minkowski.h Quaternion.h Traits.h random.h \
-	Conventions.h Jones.h Pauli.h Spinor.h Vector.h PromoteTraits.h
-
-all-local:
-	-for file in $(NOW_IN_EPSIC); do \
-	rm -f $(includedir)/$$file $(top_builddir)/local_include/$$file ; done
 

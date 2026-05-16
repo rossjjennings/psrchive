@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2002 - 2016 by Willem van Straten
+ *   Copyright (C) 2002 - 2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,7 +11,9 @@
 #ifndef __Types_h
 #define __Types_h
 
-#include "Conventions.h"
+#include "Convention.h"  // defined in epsic
+#include "SourceType.h"  // defined in meal
+
 #include <string>
 
 //! Defines various signal types
@@ -51,20 +53,7 @@ namespace Signal {
   };
     
   //! Sources of observed signals
-  enum Source {
-    //! An unknown source
-    Unknown,
-    //! A pulsar
-    Pulsar,
-    //! A polarization calibrator, such as the linear noise diode
-    PolnCal,
-    //! A flux calibrator, such as Hydra A + the linear noise diode
-    FluxCalOn,
-    //! Near a flux calibrator, such as two degrees off Hydra A
-    FluxCalOff,
-    //! A calibrator solution
-    Calibrator
-  };
+  typedef SourceType Source;
 
   //! Possible states of the data
   enum State
@@ -99,16 +88,12 @@ namespace Signal {
   
   unsigned State2npol (State s);
   
-  const char* source_string (Source source);
   const char* state_string (State state);
-  const char* basis_string (Basis basis);
 
-  const std::string Source2string (Source source);
-  const std::string State2string  (State state);
-  const std::string Basis2string  (Basis basis);
-  const std::string Scale2string  (Scale scale);
+  const std::string Source2string (Source);
+  const std::string State2string  (State);
+  const std::string Scale2string  (Scale);
 
-  Basis  string2Basis  (const std::string& ss);
   Source string2Source (const std::string& ss);
   State  string2State  (const std::string& ss);
   Scale  string2Scale  (const std::string& ss);
@@ -120,9 +105,6 @@ namespace Signal {
   //! Returns the state resulting from a pscrunch operation
   State pscrunch (State state);
 
-  std::ostream& operator << (std::ostream& ostr, Source source);
-  std::istream& operator >> (std::istream& is, Source& source);
-
   std::ostream& operator << (std::ostream& ostr, State state);
   std::istream& operator >> (std::istream& is, State& state);
 
@@ -130,9 +112,6 @@ namespace Signal {
   std::istream& operator >> (std::istream& is, Scale& scale);
 
 }
-
-/* note that Basis extraction and insertion operators are defined in
-   Conventions.h */
 
 #endif
 

@@ -12,12 +12,12 @@
 #define __Pulsar_SingleAxisCalibrator_H
 
 #include "Pulsar/ReferenceCalibrator.h"
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/SingleAxisSolver.h"
+#include "MEAL/SingleAxis.h"
+#include "MEAL/SingleAxisSolver.h"
 
 namespace Pulsar {
 
-  //! Represents the system as a Calibration::SingleAxis
+  //! Represents the system as a MEAL::SingleAxis
   class SingleAxisCalibrator : public ReferenceCalibrator {
     
   public:
@@ -48,12 +48,12 @@ namespace Pulsar {
     //
     // ///////////////////////////////////////////////////////////////////
 
-    //! Return a new Calibration::SingleAxis instance
+    //! Return a new MEAL::SingleAxis instance
     MEAL::Complex2* solve (const std::vector<Estimate<double> >& hi,
 			   const std::vector<Estimate<double> >& lo);
 
     //! Optimization for SingleAxis solve
-    Reference::To< Calibration::SingleAxisSolver > solver;
+    Reference::To< MEAL::SingleAxisSolver > solver;
 
   };
 

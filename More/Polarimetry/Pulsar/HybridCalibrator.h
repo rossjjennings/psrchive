@@ -13,7 +13,8 @@
 
 #include "Pulsar/PolnCalibrator.h"
 
-namespace Calibration {
+namespace MEAL
+{
   class SingleAxisSolver;
 }
 
@@ -75,7 +76,7 @@ namespace Pulsar {
     Reference::To<PolnCalibrator> precalibrator;
 
     //! The SingleAxis model solver
-    Reference::To<Calibration::SingleAxisSolver> solver;
+    Reference::To<MEAL::SingleAxisSolver> solver;
 
   };
 

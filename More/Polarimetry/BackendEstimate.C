@@ -6,9 +6,9 @@
  ***************************************************************************/
 
 #include "Pulsar/BackendEstimate.h"
-#include "Pulsar/MeanSingleAxis.h"
-#include "Pulsar/MeanPolar.h"
-#include "Pulsar/SingleAxis.h"
+#include "MEAL/MeanSingleAxis.h"
+#include "MEAL/MeanPolar.h"
+#include "MEAL/SingleAxis.h"
 
 #include "MEAL/Polar.h"
 
@@ -21,8 +21,8 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
 {
   backend = 0;
   
-  Calibration::SingleAxis* single_axis;
-  single_axis = MEAL::extract<Calibration::SingleAxis>( xform );
+  MEAL::SingleAxis* single_axis;
+  single_axis = MEAL::extract<MEAL::SingleAxis>( xform );
 
   if (single_axis)
   {
@@ -42,8 +42,8 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
 #endif
     
     // don't delete any mean accumulated to date
-    if (!mean || !dynamic_cast<MeanSingleAxis*>( mean.ptr() ))
-      mean = new MeanSingleAxis;
+    if (!mean || !dynamic_cast<MEAL::MeanSingleAxis*>( mean.ptr() ))
+      mean = new MEAL::MeanSingleAxis;
 
     return;
   }
@@ -59,8 +59,8 @@ void Calibration::BackendEstimate::set_response (MEAL::Complex2* xform)
     backend = polar_solution;
 
     // don't delete any mean accumulated to date
-    if (!mean || !dynamic_cast<MeanPolar*>( mean.ptr() ))
-      mean = new MeanPolar;
+    if (!mean || !dynamic_cast<MEAL::MeanPolar*>( mean.ptr() ))
+      mean = new MEAL::MeanPolar;
     
     return;
   }

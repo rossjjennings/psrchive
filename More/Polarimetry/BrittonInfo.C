@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/BrittonInfo.h"
-#include "Pulsar/Britton2000.h"
+#include "MEAL/Britton2000.h"
 
 using namespace std;
 
@@ -26,7 +26,7 @@ Pulsar::BrittonInfo::BrittonInfo (const PolnCalibrator* calibrator) :
 
     const MEAL::Complex2* xform = calibrator->get_transformation (ichan);
 
-    auto* bri00 = dynamic_cast<const Calibration::Britton2000*> (xform);
+    auto* bri00 = dynamic_cast<const MEAL::Britton2000*> (xform);
     if (!bri00)
       throw Error (InvalidState, "Pulsar::BrittonInfo::get_param_feed"
 		   "xform is not of type Britton2000");

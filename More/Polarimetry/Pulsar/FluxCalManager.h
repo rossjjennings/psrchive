@@ -68,7 +68,7 @@ namespace Calibration
     //! Integrate an estimate of the source
     void integrate (const Jones< Estimate<double> >& correct, const SourceObservation& data);
 
-    void submit (CoherencyMeasurementSet&, const SourceObservation&);
+    void submit (MEAL::CoherencyMeasurementSet&, const SourceObservation&);
 
     //! Get the number of independent FluxCalOn source states
     unsigned get_nstate_on () const;

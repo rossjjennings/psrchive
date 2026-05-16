@@ -11,7 +11,7 @@
 #include <iostream>
 using namespace std;
 
-using Calibration::ReceptionModel;
+using MEAL::ReceptionModel;
 
 void Calibration::SourceDeltaEstimate::create_source (ReceptionModel* equation)
 {

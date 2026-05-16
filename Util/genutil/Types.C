@@ -39,40 +39,6 @@ const char* Signal::state_string (State state)
   }
 }
 
-const char* Signal::source_string(Source source)
-{
-  switch( source ){
-  case Unknown:
-    return "Unknown";
-  case Pulsar:
-    return "Pulsar";
-  case PolnCal:
-    return "PolnCal";
-  case FluxCalOff:
-    return "FluxCal-Off";
-  case FluxCalOn:
-    return "FluxCal-On";
-  case Calibrator:
-    return "Calibrator";
-  default:
-    return "Invalid";
-  }
-}
-
-const char* Signal::basis_string(Basis basis)
-{
-  switch( basis ){
-  case Circular:
-    return "Circular";
-  case Linear:
-    return "Linear";
-  case Elliptical:
-    return "Elliptical";
-  default:
-    return "Invalid";
-  }
-}
-
 unsigned Signal::State2npol (State s)
 {
   if( s==Nyquist || s==Analytic || s==PPQQ )
@@ -172,6 +138,23 @@ Signal::State Signal::pscrunch (State state)
 
 // //////////////////////////////////////////////////////////////////////////
 //
+// Signal::Source
+//
+// //////////////////////////////////////////////////////////////////////////
+
+const string Signal::Source2string (Source state)
+{
+  return tostring(state);
+}
+
+Signal::Source Signal::string2Source (const string& ss)
+{
+  return fromstring<Signal::Source> (ss);
+}
+
+
+// //////////////////////////////////////////////////////////////////////////
+//
 // Signal::State
 //
 // //////////////////////////////////////////////////////////////////////////
@@ -241,68 +224,6 @@ std::ostream& Signal::operator<< (std::ostream& ostr, State state)
 std::istream& Signal::operator >> (std::istream& is, State& state)
 {
   return extraction (is, state, Signal::string2State);
-}
-
-// //////////////////////////////////////////////////////////////////////////
-//
-// Signal::Basis
-//
-// //////////////////////////////////////////////////////////////////////////
-
-const string Signal::Basis2string (Basis basis)
-{
-  return basis_string(basis);
-}
-
-Signal::Basis Signal::string2Basis (const string& ss)
-{
-  if(ss=="Circular")
-    return Signal::Circular;
-  if(ss=="Linear")
-    return Signal::Linear;
-  if(ss=="Elliptical")
-    return Signal::Elliptical;
-
-  throw Error (InvalidState, "Signal::string2Basis",
-	       "Unknown basis '" + ss + "'");
-}
-
-// //////////////////////////////////////////////////////////////////////////
-//
-// Signal::Source
-//
-// //////////////////////////////////////////////////////////////////////////
-
-const string Signal::Source2string (Source source)
-{
-  return source_string(source);
-}
-
-Signal::Source Signal::string2Source (const string& ss)
-{
-  if(ss=="Pulsar")
-    return Pulsar;
-  if(ss=="PolnCal")
-    return PolnCal;
-  if(ss=="FluxCal-Off")
-    return FluxCalOff;
-  if(ss=="FluxCal-On")
-    return FluxCalOn;
-  if(ss=="Calibrator")
-    return Calibrator;
-
-  throw Error (InvalidState, "Signal::string2Source",
-	       "Unknown source '" + ss + "'");
-}
-
-std::ostream& Signal::operator<< (std::ostream& ostr, Source source)
-{
-  return ostr << Source2string(source);
-}
-
-std::istream& Signal::operator >> (std::istream& is, Source& source)
-{
-  return extraction (is, source, Signal::string2Source);
 }
 
 // //////////////////////////////////////////////////////////////////////////

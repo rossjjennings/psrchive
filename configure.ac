@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.69)
-AC_INIT([PSRCHIVE],[2026-04-07],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2026-04-17],[psrchive-developers@lists.sourceforge.net])
 
 AUTOCONF_VERSION=m4_defn([AC_AUTOCONF_VERSION])
 AC_SUBST(AUTOCONF_VERSION)
@@ -37,19 +37,27 @@ fi
 
 ################################################################################
 #
-# Setup to use EPSIC sub-module
+# Ensure that submodules are checked out
 #
+AC_MSG_CHECKING([submodule status])
 
-# ensure that epsic source is configured
-if test -f $srcdir/config/epsic.sh; then
-  $srcdir/config/epsic.sh $srcdir
+if ! /bin/sh $srcdir/config/check_submodules.sh $srcdir >&AS_MESSAGE_LOG_FD 2>&1; then
+    AC_MSG_RESULT([missing])
+    /bin/sh $srcdir/config/check_submodules.sh $srcdir
+    AC_MSG_ERROR([Submodule check failed.])
 fi
 
-EPSIC_SOURCE='$(top_srcdir)/Util/epsic/src'
-EPSIC_BUILD='$(top_builddir)/Util/epsic/src'
-INCLUDE_CPPFLAGS='-I$(EPSIC_SOURCE) -I$(EPSIC_SOURCE)/util -I$(EPSIC_SOURCE)/true_math -I$(EPSIC_BUILD) -I$(EPSIC_BUILD)/util'
-AC_SUBST(EPSIC_SOURCE)
-AC_SUBST(EPSIC_BUILD)
+AC_MSG_RESULT([ok])
+
+abs_top_builddir=`pwd`
+abs_top_srcdir=`cd "$srcdir" && pwd`
+
+MEAL_SOURCE=$abs_top_srcdir/Util/meal/src
+EPSIC_SOURCE=$abs_top_srcdir/Util/epsic/src
+EPSIC_BUILD=$abs_top_builddir/Util/epsic/src
+EPSIC_UTIL_CFLAGS="-I$EPSIC_SOURCE/util -I$EPSIC_SOURCE/true_math -I$EPSIC_BUILD/util"
+INCLUDE_CPPFLAGS="-I$MEAL_SOURCE -I$MEAL_SOURCE/util -I$EPSIC_SOURCE $EPSIC_UTIL_CFLAGS"
+
 AC_SUBST(INCLUDE_CPPFLAGS)
 
 ################################################################################
@@ -74,6 +82,24 @@ SWIN_COMPILER
 
 # Initialize automake to place object files in sub-directories
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+
+AC_PATH_PROG([AUTOMAKE], [automake])
+
+if test -n "$AUTOMAKE"; then
+    AUTOMAKE_VERSION=$($AUTOMAKE --version | head -n 1 | sed 's/^.* //')
+else
+    AUTOMAKE_VERSION="unknown"
+fi
+
+AC_SUBST([AUTOMAKE_VERSION])
+AC_MSG_NOTICE([using automake version $AUTOMAKE_VERSION])
+
+AS_VERSION_COMPARE(["$AUTOMAKE_VERSION"], ["1.17.0"],
+    [automake_is_old=yes],
+    [automake_is_old=no],
+    [automake_is_old=no])
+
+AM_CONDITIONAL([DISABLE_DIST], [test "x$automake_is_old" = xyes])
 
 # Create static libraries by default
 LT_INIT([disable-shared])
@@ -322,7 +348,6 @@ AC_CONFIG_FILES([
 		More/General/Makefile
 		More/Plotting/Makefile
 		More/Plotting/pgutil/Makefile
-		More/MEAL/Makefile
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
@@ -339,7 +364,11 @@ AC_CONFIG_FILES([
 		Management/psrchive.pc
 		Makefile])
 
-AC_CONFIG_SUBDIRS([Util/epsic/src])
+# configure the meal submodule to use the epsic submodule
+meal_overrides="--with-epsic-cflags=\"$EPSIC_UTIL_CFLAGS\" --with-epsic-libs=$EPSIC_BUILD/libepsic.la"
+ac_configure_args="$ac_configure_args $meal_overrides"
+
+AC_CONFIG_SUBDIRS([Util/epsic Util/meal])
 
 AC_OUTPUT
 

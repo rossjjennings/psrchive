@@ -323,7 +323,7 @@ Database::Entry* Database::Entry::load (const string& str) try
     
   try
   {
-    entry->obsType = Signal::string2Source(typestr);
+    entry->obsType = fromstring<Signal::Source>(typestr);
   }
   catch (Error& e)
   {
@@ -365,7 +365,7 @@ void Database::Entry::unload (string& retval)
   if (obsType == Signal::Calibrator)
     retval += calType->get_name();
   else
-    retval += Signal::Source2string (obsType);
+    retval += tostring (obsType);
 
   retval += " ";
   retval += position.getRaDec().getHMSDMS();
@@ -1535,7 +1535,7 @@ Database::generatePolnCalibrator (const Archive* arch,
     if (entry->obsType == Signal::Calibrator)
       cerr << "CAL OF TYPE " <<  entry->calType->get_name() << endl;
     else
-      cerr << "FILE OF TYPE " << Signal::Source2string (entry->obsType) << endl;
+      cerr << "FILE OF TYPE " << tostring (entry->obsType) << endl;
   }
 
   if (entry->obsType == Signal::Calibrator)

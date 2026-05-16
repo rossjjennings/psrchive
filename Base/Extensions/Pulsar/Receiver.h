@@ -87,10 +87,10 @@ namespace Pulsar {
     void set_nrcvr( const int s_nrcvr ) { nrcvr = s_nrcvr; }
 
     //! Get the basis of the feed receptors
-    Signal::Basis get_basis () const { return state->get_basis(); }
+    Convention::Basis get_basis () const { return state->get_basis(); }
     
     //! Set the basis of the feed receptors
-    void set_basis (Signal::Basis basis);
+    void set_basis (Convention::Basis basis);
 
     /** @name General orthogonal basis interface
      *  These parameters describe the configuration of a receiver with
@@ -104,9 +104,9 @@ namespace Pulsar {
     void set_orientation (const Angle& celestial_position_angle);
 
     //! Get the hand of the basis
-    Signal::Hand get_hand () const { return state->get_hand(); }
+    Convention::Hand get_hand () const { return state->get_hand(); }
     //! Set the hand of the basis
-    void set_hand (Signal::Hand);
+    void set_hand (Convention::Hand);
  
     //! Get the phase of the reference source
     Angle get_reference_source_phase () const
@@ -185,10 +185,10 @@ namespace Pulsar {
     public:
 
       //! Get the basis of the feed receptors
-      virtual Signal::Basis get_basis () const = 0;
+      virtual Convention::Basis get_basis () const = 0;
 
       //! Get the hand of the basis
-      virtual Signal::Hand get_hand () const = 0;
+      virtual Convention::Hand get_hand () const = 0;
 
       //! Get the orientation of the basis about the line of sight
       virtual Angle get_orientation () const = 0;

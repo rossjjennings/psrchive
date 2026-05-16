@@ -1,14 +1,16 @@
 %module psrchive
 
-%rename(Archive_Extension) Pulsar::Archive::Extension;
-%rename(Integration_Extension) Pulsar::Integration::Extension;
-
+// HEADER BLOCK: For the C++ compiler
 %{
 #define SWIG_FILE_WITH_INIT
 #include "numpy/arrayobject.h"
 
 #ifndef PSRCHIVE_PyArray_DATA
   #define PSRCHIVE_PyArray_DATA(a) PyArray_DATA(a)
+#endif
+
+#if HAVE_CONFIG_H
+#include <config.h>
 #endif
 
 #include "Reference.h"
@@ -58,10 +60,6 @@
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FrontendCorrection.h"
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/PeakCumulative.h"
 #include "Pulsar/PeakConsecutive.h"
 
@@ -82,36 +80,44 @@ using Pulsar::Predictor;
 
 %}
 
+// SWIG LIBRARIES: For SWIG parser logic
+%include <exception.i>
+%include <std_string.i>
+%include <std_complex.i>
+%include <std_vector.i>
+
+// TEMPLATES: Define Python classes before they are used in functions
+%template(StringVector) std::vector<std::string>;
+%template(DoubleVector) std::vector<double>;
+%template(ComplexDoubleVector) std::vector< std::complex<double> >;
+
+// INTERFACE:
+
+%rename(Archive_Extension) Pulsar::Archive::Extension;
+%rename(Integration_Extension) Pulsar::Integration::Extension;
+
 #ifdef HAVE_CONFIG_H
 %include <config.h>
 #endif
  
-// Language independent exception handler
-%include exception.i       
-%include std_string.i
-%include std_complex.i
-%include std_vector.i
-
-namespace std {
-  %template(StringVector) vector<string>;
-  %template(DoubleVector) vector<double>;
-  %template(ComplexDoubleVector) vector<complex<double>>;
-}
-
 using namespace std;
 
 %exception {
-    try {
-        $action
-    } catch(Error& error) {
-        // Deal with out-of-range errors
-        if (error.get_code()==InvalidRange)
-            SWIG_exception(SWIG_IndexError, error.get_message().c_str());
-        else
-            SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
-    } catch(...) {
-        SWIG_exception(SWIG_RuntimeError,"Unknown exception");
-    }
+  try {
+    $action
+  }
+  catch(Error& error)
+  {
+    // Deal with out-of-range errors
+    if (error.get_code()==InvalidRange)
+      SWIG_exception(SWIG_IndexError, error.get_message().c_str());
+    else
+      SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
+  }
+  catch(...)
+  {
+    SWIG_exception(SWIG_RuntimeError,"Unknown exception");
+  }
 }
 
 %init %{
@@ -210,7 +216,7 @@ void pointer_tracker_remove(Reference::Able *ptr)
 // This conflicted with std_vector for some reason
 %ignore Pulsar::ManualPolnCalibrator::match;
 
-// Return psrchive's Estimate class as a Python tuple
+// Return Estimate<double> as a Python tuple
 %typemap(out) Estimate<double> {
     PyTupleObject *res = (PyTupleObject *)PyTuple_New(2);
     PyTuple_SetItem((PyObject *)res, 0, PyFloat_FromDouble($1.get_value()));
@@ -233,10 +239,13 @@ void pointer_tracker_remove(Reference::Able *ptr)
 #else
         const char *typestr = PyString_AsString($input);
 #endif
-        if (typestr!=NULL) {
-            $1 = Signal::string2 ## TYPE (typestr);
-        }
-    } catch (Error &error) {
+        if (typestr==NULL) 
+          throw Error (InvalidState, "SWIG string to Signal::*", "typestr == NULL");
+
+        $1 = Signal::string2 ## TYPE (typestr);
+    }
+    catch (Error &error)
+    {
         SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
     } 
 %}
@@ -980,7 +989,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         std::vector<Tempo::toa> toas;
         self->get_toas(toas);
         std::vector<std::string> result;
-        for (int i=0; i<toas.size(); i++) {
+        for (unsigned i=0; i<toas.size(); i++) {
             char toatmp[2048];
             toas[i].unload(toatmp);
             result.push_back(toatmp);
@@ -997,7 +1006,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         size[0] = toas.size();
 
         arr = (PyArrayObject *)PyArray_SimpleNew(1, size, NPY_DOUBLE);
-        for (int i=0; i<toas.size(); i++) {
+        for (unsigned i=0; i<toas.size(); i++) {
             ((double*)PSRCHIVE_PyArray_DATA(arr))[i] = toas[i].get_phase_shift();
         }
         return (PyObject*) arr;
@@ -1010,13 +1019,13 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
     //! Set the reference wavelength in metres
     void set_reference_wavelength (double metres)
     {
-        self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::BirefringenceHistory>::set_reference_wavelength(metres);
+        self->Pulsar::ColdPlasma<MEAL::Faraday,Pulsar::BirefringenceHistory>::set_reference_wavelength(metres);
     }
 
     //! Get the reference wavelength
     double get_reference_wavelength () const
     {
-        return self->Pulsar::ColdPlasma<Calibration::Faraday,Pulsar::BirefringenceHistory>::get_reference_wavelength();
+        return self->Pulsar::ColdPlasma<MEAL::Faraday,Pulsar::BirefringenceHistory>::get_reference_wavelength();
     }
 }
 

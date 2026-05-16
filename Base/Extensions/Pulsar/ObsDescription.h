@@ -15,8 +15,9 @@
 
 namespace Pulsar {
 
-  //! Stores pulsar parameters as uninterpreted text
-  class ObsDescription : public Archive::Extension {
+  //! A single string of text that describes the observation
+  class ObsDescription : public Archive::Extension
+  {
 
   public:
 

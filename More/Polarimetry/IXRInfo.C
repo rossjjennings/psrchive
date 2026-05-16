@@ -7,9 +7,8 @@
 
 #include "Pulsar/IXRInfo.h"
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/BackendFeed.h"
+#include "MEAL/BackendFeed.h"
 
-using namespace Calibration;
 using namespace std;
 
 //! Constructor
@@ -58,7 +57,7 @@ Pulsar::IXRInfo::get_param (unsigned ichan, unsigned iclass,
 
   const MEAL::Complex2* xform = poln_calibrator->get_transformation (ichan);
 
-  const BackendFeed* instrument = dynamic_cast<const BackendFeed*> (xform);
+  const MEAL::BackendFeed* instrument = dynamic_cast<const MEAL::BackendFeed*> (xform);
   if (instrument)
     xform = instrument->get_frontend();
 
@@ -89,11 +88,10 @@ Pulsar::IXRInfo::get_param (unsigned ichan, unsigned iclass,
     cerr << "************* big=" << trace( K+herm(K) ) << " small=" << trace(L) << endl;
 
     double dbeta_di = trace( (K+herm(K))/norm(det(J)) /* - L */).real() / ( 4 * sinh(2*beta) );
-cerr << "dbeta_d" << i << "=" << dbeta_di << endl;
+    cerr << "dbeta_d" << i << "=" << dbeta_di << endl;
     double dIXR_di = -2 * dbeta_di / ( sinh_beta * cosh_beta );
-cerr << "dIXR_d" << i << "=" << dIXR_di << endl;
-cerr << "var_" << i << "=" << xform->get_variance(i) << endl;
-
+    cerr << "dIXR_d" << i << "=" << dIXR_di << endl;
+    cerr << "var_" << i << "=" << xform->get_variance(i) << endl;
 
     var += dIXR_di*dIXR_di * xform->get_variance(i);
   }

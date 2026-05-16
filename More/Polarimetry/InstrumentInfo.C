@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/InstrumentInfo.h"
-#include "Pulsar/Instrument.h"
+#include "MEAL/Instrument.h"
 
 using namespace std;
 
@@ -36,8 +36,8 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
     throw Error (InvalidParam, "Pulsar::InstrumentInfo::InstrumentInfo",
                  "no valid transformation in PolnCalibrator");
 
-  const Calibration::Instrument* instrument;
-  instrument = dynamic_cast<const Calibration::Instrument*> (xform);
+  const MEAL::Instrument* instrument;
+  instrument = dynamic_cast<const MEAL::Instrument*> (xform);
 
   if (!instrument)
     throw Error (InvalidParam, "Pulsar::InstrumentInfo::InstrumentInfo",
@@ -96,8 +96,8 @@ Pulsar::InstrumentInfo::get_param_feed (unsigned ichan, unsigned iclass, unsigne
 {
   const MEAL::Complex2* xform = calibrator->get_transformation (ichan);
 
-  const Calibration::Instrument* instrument;
-  instrument = dynamic_cast<const Calibration::Instrument*> (xform);
+  const MEAL::Instrument* instrument;
+  instrument = dynamic_cast<const MEAL::Instrument*> (xform);
 
   if (!instrument)
     throw Error (InvalidState, "Pulsar::InstrumentInfo::get_param",

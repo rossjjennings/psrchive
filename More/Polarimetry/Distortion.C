@@ -11,10 +11,10 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 
-#include "Pulsar/SingleAxisSolver.h"
-#include "Pulsar/SingleAxis.h"
-#include "Pulsar/BackendFeed.h"
-#include "Pulsar/VariableBackend.h"
+#include "MEAL/SingleAxisSolver.h"
+#include "MEAL/SingleAxis.h"
+#include "MEAL/BackendFeed.h"
+#include "MEAL/VariableBackend.h"
 #include "Pulsar/BasisCorrection.h"
 
 #include "Pulsar/Integration.h"
@@ -22,7 +22,7 @@
 #include "Pauli.h"
 
 using namespace std;
-using Calibration::BackendFeed;
+using MEAL::BackendFeed;
 
 bool verbose = false;
 
@@ -54,12 +54,12 @@ void Pulsar::Distortion::set_calibrator (Archive* archive)
   reference_input = archive->get<CalibratorStokes>();
 
   // The SingleAxis model solver
-  Reference::To<Calibration::SingleAxisSolver> solver;
-  solver = new Calibration::SingleAxisSolver;
+  Reference::To<MEAL::SingleAxisSolver> solver;
+  solver = new MEAL::SingleAxisSolver;
 
   // the correction to supplement the PolnCalibrator
-  Reference::To<Calibration::SingleAxis> solution;
-  solution = new Calibration::SingleAxis;
+  Reference::To<MEAL::SingleAxis> solution;
+  solution = new MEAL::SingleAxis;
 
   // get the Receiver correction, if any
   const Receiver* receiver = precalibrator->get_Receiver();

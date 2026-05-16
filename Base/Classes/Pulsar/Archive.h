@@ -380,7 +380,7 @@ namespace Pulsar
     void convert_state (Signal::State state);
 
     //! Convenience interface to Receiver::get_basis
-    Signal::Basis get_basis () const;
+    Convention::Basis get_basis () const;
 
     //! Rotate the Profiles to remove dispersion delays b/w chans
     void dedisperse ();

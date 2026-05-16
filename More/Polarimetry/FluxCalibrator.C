@@ -264,7 +264,7 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const try
     {
       // If no receiver extension, fall back on the original code..
       // Take care of hand convention here
-      if (receiver && receiver->get_hand()==Signal::Left)
+      if (receiver && receiver->get_hand()==Convention::Left)
         diff = -diff;
 
       // This uses the Archive basis as a proxy for the cal signal 
@@ -273,14 +273,14 @@ Pulsar::FluxCalibrator::get_CalibratorStokes () const try
       // was coupled in.  In that case, the Archive data would appear
       // circular, but the cal signal is really linear (nonzero Q not V).
       // TODO: Use the Receiver reference source angle setting?
-      if (get_Archive()->get_basis() == Signal::Linear)
+      if (get_Archive()->get_basis() == Convention::Linear)
       {
         // Linear feeds, Q = diff, U = cross, V = 0
         stokes[1] = diff;
         stokes[2] = cross;
         stokes[3] = Estimate<double> (0.0, cross.var);
       }
-      else if (get_Archive()->get_basis() == Signal::Circular)
+      else if (get_Archive()->get_basis() == Convention::Circular)
       {
         // Circular feeds, Q = cross, U = 0, V = diff
         stokes[1] = cross;
@@ -351,7 +351,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
   if (verbose > 2)
     cerr << "Pulsar::FluxCalibrator::add_observation source name=" 
          << archive->get_source() << " type=" 
-         << Signal::Source2string(archive->get_type()) << endl;
+         << tostring(archive->get_type()) << endl;
 
   if ( archive->get_type() != Signal::FluxCalOn &&
        archive->get_type() != Signal::FluxCalOff )

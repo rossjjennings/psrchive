@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "Pulsar/Faraday.h"
+#include "MEAL/Faraday.h"
 
 using namespace std;
 
@@ -72,7 +72,7 @@ int main(int argc, char ** argv) try
       break;
 
     case 'v':
-      Calibration::Faraday::verbose = true;
+      MEAL::Faraday::verbose = true;
       quiet = false;
       break;
 
@@ -80,7 +80,7 @@ int main(int argc, char ** argv) try
       cerr << "invalid param '" << c << "'" << endl;
     }
 
-  Calibration::Faraday kernel;
+  MEAL::Faraday kernel;
 
   kernel.set_reference_frequency (centrefreq);
   kernel.set_rotation_measure (rm);

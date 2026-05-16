@@ -10,7 +10,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/SingleAxis.h"
+#include "MEAL/SingleAxis.h"
 #include "tostring.h"
 #include <stdio.h>
 #include <assert.h>
@@ -34,8 +34,8 @@ Pulsar::OffPulseCalibrator::extra (unsigned ichan,
   if (!get_transformation_valid(ichan))
     return;
 
-  Calibration::SingleAxis* sa;
-  sa = dynamic_cast<Calibration::SingleAxis*>(get_transformation(ichan));
+  MEAL::SingleAxis* sa;
+  sa = dynamic_cast<MEAL::SingleAxis*>(get_transformation(ichan));
   assert (sa);
 
   sa->set_diff_gain (0.0);

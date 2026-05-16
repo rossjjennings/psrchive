@@ -15,12 +15,13 @@
 #include "ColourBar.h"
 #include "ColourMap.h"
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class Profile;
 
   //! Plots images of something as a function of pulse phase vs something
-  class PhaseVsPlot : public PhasePlot {
+  class PhaseVsPlot : public PhasePlot
+  {
 
   public:
 
@@ -40,10 +41,13 @@ namespace Pulsar {
     virtual const Profile* get_Profile (const Archive* data, unsigned row) = 0;
 
     //! Remove the baseline from each sub-integration and channel independently
-    void preprocess (Archive*);
+    void preprocess (Archive*) override;
+
+    //! Prepare to draw in the current viewport
+    void prepare (const Archive*) override;
 
     //! Draw in the current viewport
-    void draw (const Archive*);
+    void draw (const Archive*) override;
 
     //! Provide access to the z-scale
     PlotScale* get_z_scale () { return &z_scale; }

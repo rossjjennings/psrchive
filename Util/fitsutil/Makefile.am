@@ -20,4 +20,6 @@ include $(top_srcdir)/config/Makefile.include
 AM_CPPFLAGS += @CFITSIO_CFLAGS@
 
 LDADD = libfitsutil.la \
-	$(top_builddir)/Util/units/libunits.la
+	$(top_builddir)/Util/units/libunits.la \
+        $(top_builddir)/Util/meal/src/util/libutil.la
+

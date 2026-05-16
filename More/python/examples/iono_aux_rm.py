@@ -109,7 +109,13 @@ def main() -> None:
         help="output filename extension",
     )
 
+    p.add_argument('--verbose', action='store_true')
+
     args, files = p.parse_known_args()
+
+    if args.verbose:
+      psr.Archive.set_verbosity(3)
+
     update_aux_rm(files, args.ext, args.itrf)
 
 if __name__ == "__main__":

@@ -59,8 +59,8 @@ namespace Pulsar {
     void set_faraday_corrected (bool);
 
     //! Get the feed configuration of the receiver
-    Signal::Basis get_basis () const;
-    void set_basis (Signal::Basis);
+    Convention::Basis get_basis () const;
+    void set_basis (Convention::Basis);
 
     //! Get the polarimetric state of the profiles
     Signal::State get_state () const;
@@ -80,7 +80,7 @@ namespace Pulsar {
     double rotation_measure = 0.0;
     bool faraday_corrected = false;
 
-    Signal::Basis basis;
+    Convention::Basis basis;
     Signal::State state;
 
     std::string telescope;
