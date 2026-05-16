@@ -1,34 +1,11 @@
-# Doxygen override for Sphinx/Breathe XML generation
-# Inherits all settings from the existing Util.dox
 
-@INCLUDE = ../Documentation/Util.dox
+@INCLUDE = common.dox
 
-FILE_PATTERNS          = *.h
+PROJECT_NAME           = "PSRCHIVE Utility Library"
+PROJECT_NUMBER         = 2026-05-15
+INPUT                  = ../Util
+EXCLUDE                = ../Util/epsic ../Util/meal
 
-# Redirect output into docs/_doxygen/Util/
 OUTPUT_DIRECTORY       = _doxygen/Util
-
-# Generate XML for Breathe, disable HTML
-GENERATE_HTML          = NO
-GENERATE_LATEX         = NO
-GENERATE_XML           = YES
 XML_OUTPUT             = xml
 
-# Disable tag files (not needed for Breathe)
-TAGFILES               =
-GENERATE_TAGFILE       =
-
-# Disable custom HTML header/footer (not generating HTML)
-HTML_HEADER            =
-HTML_FOOTER            =
-
-# Util includes epsic which has ISO-8859-1 source files (± signs)
-INPUT_ENCODING         = ISO-8859-1
-
-# Hide file-level documentation and undocumented members
-SHOW_FILES             = NO
-HIDE_UNDOC_MEMBERS     = YES
-
-# Drop std::* — Doxygen otherwise emits a stub namespacestd.xml that
-# references std::allocator etc. with no body, breaking Breathe.
-EXCLUDE_SYMBOLS        = std::*
