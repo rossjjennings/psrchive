@@ -1,6 +1,24 @@
 
 SUBDIRS	= config packages Util Base More Management
 
+$(RECURSIVE_TARGETS): check-submodules
+.PHONY: force-reconfig check-submodules
+
+SUBMODULE_MAKEFILES = Util/epsic/Makefile Util/meal/Makefile
+
+check-submodules:
+	@need_reconfig=no; \
+	for f in $(SUBMODULE_MAKEFILES); do \
+	  if [ ! -f "$(top_builddir)/$$f" ]; then need_reconfig=yes; break; fi; \
+	done; \
+	if [ "$$need_reconfig" = "yes" ]; then \
+	  $(MAKE) $(AM_MAKEFLAGS) force-reconfig; \
+	fi
+
+force-reconfig:
+	@echo "Missing submodule Makefiles detected. Reconfiguring project..."
+	$(top_srcdir)/configure $(shell ./config.status --config)
+
 include $(top_srcdir)/config/Makefile.root
 
 ACLOCAL_AMFLAGS = -I config
@@ -12,14 +30,8 @@ clean-local: clean-local-include
 clean-local-include:
 	-rm -rf local_include
 
-dist-hook:
-	@echo "Checking Autoconf version..."
-	@if [ `echo "@AUTOCONF_VERSION@ < 2.71" | bc -l` -eq 1 ]; then \
-	    echo; \
-	    echo; \
-	    echo "Error: Autoconf @AUTOCONF_VERSION@ is out of date. Please upgrade to 2.71 or greater before running 'make dist'." >&2; \
-	    echo; \
-	    echo; \
-	    exit 1; \
-	fi
+if DISABLE_DIST
+dist:
+	@echo "'make dist' is disabled for Automake versions < 1.17"
+endif
 

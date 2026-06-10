@@ -18,7 +18,7 @@ dist_aclocal_DATA = \
 
 nodist_aclocal_DATA = Makefile.aclocal
 
-EXTRA_DIST = aclocal.sh
+EXTRA_DIST = aclocal.sh check_submodules.sh
 
 CLEANFILES += Makefile.aclocal
 
