@@ -110,12 +110,13 @@ int main(int argc, char ** argv) try
     double abs_delta_PA = kernel.get_rotation () / (2.0*M_PI);
     double abs_dgd = 2.0 * fabs(abs_delta_PA) / centrefreq;
 
-    cout << "\nOutput parameters:\n"
+    cout << "\nRelative parameters (across the bandwidth):\n"
       "Position angle change:    " << delta_PA*360.0 << " deg\n"
       "Differential group delay: " << dgd*1e3 << " ns (across band)\n"
       "\n"
-      "Absolute position angle change: " << abs_delta_PA*360.0 << " deg\n"
-      "Absolute differential delay: " << abs_dgd*1e3 << " ns \n";
+      "Absolute parameters (with respect to infinity, at the centre frequency)\n"
+      "Position angle change: " << abs_delta_PA*360.0 << " deg\n"
+      "Dfferential delay: " << abs_dgd*1e3 << " ns \n";
   }
   else
     cout << delta_PA*360.0 << endl;
