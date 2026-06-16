@@ -3,4 +3,4 @@
 	url = https://github.com/straten/epsic.git
 [submodule "Util/meal"]
 	path = Util/meal
-	url = git@gitlab.com:pulsar-astronomy/meal.git
+	url = https://gitlab.com/pulsar-astronomy/meal.git
