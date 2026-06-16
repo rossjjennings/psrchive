@@ -25,6 +25,7 @@ BatchQueue::BatchQueue (unsigned nthread)
 #if HAVE_PTHREAD
   context = new ThreadContext;
   resize (nthread);
+  assert (ThreadContext::enabled());
 #else
   context = 0;
   if (nthread != 1)
