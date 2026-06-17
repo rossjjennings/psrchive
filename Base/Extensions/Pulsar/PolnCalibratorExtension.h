@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -192,15 +192,20 @@ namespace Pulsar {
     //! Set the best fit value of chi squared
     void set_chisq (double);
 
-    //! Get the logarithm of the determinant of the curvature matrix
-    double get_log_det_curvature () const;
-    //! Set the logarithm of the determinant of the curvature matrix
-    void set_log_det_curvature (double);
+    //! Get the logarithm of the determinant of the total covariance matrix
+    double get_log_det_covariance () const;
+    //! Set the logarithm of the determinant of the total covariance matrix
+    void set_log_det_covariance (double);
 
-    //! Get the logarithm of the condition number of the curvature matrix
-    double get_log_cond_curvature () const;
-    //! Set the logarithm of the condition number of the curvature matrix
-    void set_log_cond_curvature (double);
+    //! Get the logarithm of the trace of the total covariance matrix
+    double get_log_tr_covariance () const;
+    //! Set the logarithm of the trace of the total covariance matrix
+    void set_log_tr_covariance (double);
+
+    //! Get the logarithm of the condition number of the total covariance matrix
+    double get_log_cond_covariance () const;
+    //! Set the logarithm of the condition number of the total covariance matrix
+    void set_log_cond_covariance (double);
 
     //! Get the number of degrees of freedom
     unsigned get_nfree() const;
@@ -232,6 +237,9 @@ namespace Pulsar {
     //! Get the stochastic information complexity
     double get_stochastic_information_complexity() const;
 
+    //! Get the information complexity of the covariance (inverse Fisher information) matrix by Bozdogan
+    double get_information_complexity() const;
+
     // Text interface to a PolnCalibratorExtension instance
     class Interface : public TextInterface::To<Transformation>
     {
@@ -247,8 +255,9 @@ namespace Pulsar {
 
     std::vector<double> covariance;
     double chisq = 0.0;
-    double log_det_curvature = 0.0;
-    double log_cond_curvature = 0.0;
+    double log_det_covariance = 0.0;
+    double log_tr_covariance = 0.0;
+    double log_cond_covariance = 0.0;
     unsigned nfree = 0;
     unsigned nfit = 0;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -383,24 +383,34 @@ double PolnCalibratorExtension::Transformation::get_reduced_chisq () const
     return 0.0;
 }
 
-double PolnCalibratorExtension::Transformation::get_log_det_curvature () const
+double PolnCalibratorExtension::Transformation::get_log_tr_covariance () const
 {
-  return log_det_curvature;
+  return log_tr_covariance;
 }
 
-void PolnCalibratorExtension::Transformation::set_log_det_curvature (double val)
+void PolnCalibratorExtension::Transformation::set_log_tr_covariance (double val)
 {
-  log_det_curvature = val;
+  log_tr_covariance = val;
 }
 
-double PolnCalibratorExtension::Transformation::get_log_cond_curvature () const
+double PolnCalibratorExtension::Transformation::get_log_det_covariance () const
 {
-  return log_cond_curvature;
+  return log_det_covariance;
 }
 
-void PolnCalibratorExtension::Transformation::set_log_cond_curvature (double val)
+void PolnCalibratorExtension::Transformation::set_log_det_covariance (double val)
 {
-  log_cond_curvature = val;
+  log_det_covariance = val;
+}
+
+double PolnCalibratorExtension::Transformation::get_log_cond_covariance () const
+{
+  return log_cond_covariance;
+}
+
+void PolnCalibratorExtension::Transformation::set_log_cond_covariance (double val)
+{
+  log_cond_covariance = val;
 }
 
 double PolnCalibratorExtension::Transformation::get_Akaike_information_criterion() const
@@ -442,11 +452,25 @@ double PolnCalibratorExtension::Transformation::get_stochastic_information_compl
     return 0;
 
 #if _DEBUG
-  cerr << "PolnCalibratorExtension::Transformation::get_stochastic_information_complexity: log(det(curv))=" << log_det_curvature << endl;
+  cerr << "PolnCalibratorExtension::Transformation::get_stochastic_information_complexity: log(det(cov))=" << log_det_covariance << endl;
 #endif
 
   double ndat = nfree + nfit;
-  return chisq + nfit * log(ndat) + log_det_curvature;
+  return chisq + nfit * log(ndat) - log_det_covariance;
+}
+
+double PolnCalibratorExtension::Transformation::get_information_complexity() const
+{
+  if (nfree == 0)
+    return 0;
+
+#if _DEBUG
+  cerr << "PolnCalibratorExtension::Transformation::get_information_complexity:"
+          " log(tr(cov))=" << log_tr_covariance << 
+          " log(det(cov))=" << log_det_covariance << endl;
+#endif
+
+  return chisq + nfit * (log_tr_covariance - log(nfit)) - log_det_covariance;
 }
 
 //! Get the covariance matrix of the model paramters

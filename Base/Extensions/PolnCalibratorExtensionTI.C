@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -67,11 +67,17 @@ Pulsar::PolnCalibratorExtension::Transformation::Interface::Interface ()
    add( &Transformation::get_reduced_chisq,
         "gof", "Reduced chi squared" );
 
-   add( &Transformation::get_log_det_curvature,
-        "ln_det", "Logarithm of determinant of curvature" );
+   add( &Transformation::get_log_det_covariance,
+        "ln_det", "Logarithm of determinant of covariance matrix" );
 
-   add( &Transformation::get_log_cond_curvature,
-        "ln_cond", "Logarithm of condition number of curvature" );
+   add( &Transformation::get_log_det_covariance,
+        "ln_tr", "Logarithm of trace of covariance matrix" );
+
+   add( &Transformation::get_log_cond_covariance,
+        "ln_cond", "Logarithm of condition number of covariance matrix" );
+
+   add( &Transformation::get_information_complexity,
+        "ICOMP", "Information complexity of covariance matrix" );
 
    add( &Transformation::get_Akaike_information_criterion,
         "AIC", "Akaike information criterion" );
