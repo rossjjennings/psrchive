@@ -413,6 +413,16 @@ void PolnCalibratorExtension::Transformation::set_log_cond_covariance (double va
   log_cond_covariance = val;
 }
 
+double PolnCalibratorExtension::Transformation::get_log_prod_variance () const
+{
+  return log_prod_variance;
+}
+
+void PolnCalibratorExtension::Transformation::set_log_prod_variance (double val)
+{
+  log_prod_variance = val;
+}
+
 double PolnCalibratorExtension::Transformation::get_Akaike_information_criterion() const
 {
   if (nfree == 0)
@@ -459,18 +469,18 @@ double PolnCalibratorExtension::Transformation::get_stochastic_information_compl
   return chisq + nfit * log(ndat) - log_det_covariance;
 }
 
-double PolnCalibratorExtension::Transformation::get_information_complexity() const
+double PolnCalibratorExtension::Transformation::get_correlation_information_complexity() const
 {
   if (nfree == 0)
     return 0;
 
 #if _DEBUG
-  cerr << "PolnCalibratorExtension::Transformation::get_information_complexity:"
-          " log(tr(cov))=" << log_tr_covariance << 
+  cerr << "PolnCalibratorExtension::Transformation::get_correlation_information_complexity:"
+          " log(prod(cov))=" << log_prod_variance << 
           " log(det(cov))=" << log_det_covariance << endl;
 #endif
 
-  return chisq + nfit * (log_tr_covariance - log(nfit)) - log_det_covariance;
+  return chisq - log_det_covariance + log_prod_variance;
 }
 
 //! Get the covariance matrix of the model paramters

@@ -207,6 +207,11 @@ namespace Pulsar {
     //! Set the logarithm of the condition number of the total covariance matrix
     void set_log_cond_covariance (double);
 
+    //! Get the logarithm of the diagonal product of the total covariance matrix
+    double get_log_prod_variance () const;
+    //! Set the logarithm of the diagonal product of the total covariance matrix
+    void set_log_prod_variance (double);
+
     //! Get the number of degrees of freedom
     unsigned get_nfree() const;
     //! Set the number of degress of freedom
@@ -237,8 +242,8 @@ namespace Pulsar {
     //! Get the stochastic information complexity
     double get_stochastic_information_complexity() const;
 
-    //! Get the information complexity of the covariance (inverse Fisher information) matrix by Bozdogan
-    double get_information_complexity() const;
+    //! Get the information complexity of the correlation matrix
+    double get_correlation_information_complexity() const;
 
     // Text interface to a PolnCalibratorExtension instance
     class Interface : public TextInterface::To<Transformation>
@@ -258,6 +263,7 @@ namespace Pulsar {
     double log_det_covariance = 0.0;
     double log_tr_covariance = 0.0;
     double log_cond_covariance = 0.0;
+    double log_prod_variance = 0.0;
     unsigned nfree = 0;
     unsigned nfit = 0;
 

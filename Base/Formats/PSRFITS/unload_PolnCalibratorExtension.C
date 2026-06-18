@@ -19,14 +19,11 @@
 
 using namespace std;
 
-void unload_variances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
-		       int ncpar, vector<float>& data);
+void unload_variances (fitsfile*, const Pulsar::PolnCalibratorExtension*, int ncpar, vector<float>& data);
 
-void unload_covariances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
-			 int ncovar, vector<float>& data);
+void unload_covariances (fitsfile*, const Pulsar::PolnCalibratorExtension*, int ncovar, vector<float>& data);
 
-void unload_solver (fitsfile* fptr, const Pulsar::PolnCalibratorExtension* pce,
-		    vector<float>& data);
+void unload_solver (fitsfile* fptr, const Pulsar::PolnCalibratorExtension* pce, vector<float>& data);
 
 void delete_solver (fitsfile* fptr);
 
@@ -242,6 +239,7 @@ void unload_solver (fitsfile* fptr,
   vector<float> log_tr_covariance( nchan, 0.0 );
   vector<float> log_det_covariance( nchan, 0.0 );
   vector<float> log_cond_covariance( nchan, 0.0 );
+  vector<float> log_prod_variance( nchan, 0.0 );
 
   for (unsigned i = 0; i < nchan; i++)
   {
@@ -253,6 +251,7 @@ void unload_solver (fitsfile* fptr,
       log_tr_covariance[i] = pce->get_transformation(i)->get_log_tr_covariance();
       log_det_covariance[i] = pce->get_transformation(i)->get_log_det_covariance();
       log_cond_covariance[i] = pce->get_transformation(i)->get_log_cond_covariance();
+      log_prod_variance[i] = pce->get_transformation(i)->get_log_prod_variance();
    }
     else
     {
@@ -262,6 +261,7 @@ void unload_solver (fitsfile* fptr,
       log_tr_covariance[i]  = 0.0;
       log_det_covariance[i]  = 0.0;
       log_cond_covariance[i]  = 0.0;
+      log_prod_variance[i]  = 0.0;
     }
   }
 
@@ -273,6 +273,7 @@ void unload_solver (fitsfile* fptr,
   psrfits_write_col (fptr, "LN_TR",  1, log_tr_covariance, no_dimensions);
   psrfits_write_col (fptr, "LN_DET", 1, log_det_covariance, no_dimensions);
   psrfits_write_col (fptr, "LN_COND", 1, log_cond_covariance, no_dimensions);
+  psrfits_write_col (fptr, "LN_PROD", 1, log_prod_variance, no_dimensions);
 }
 
 void delete_solver (fitsfile* fptr)
@@ -283,4 +284,5 @@ void delete_solver (fitsfile* fptr)
   psrfits_delete_col (fptr, "LN_TR");
   psrfits_delete_col (fptr, "LN_DET");
   psrfits_delete_col (fptr, "LN_COND");
+  psrfits_delete_col (fptr, "LN_PROD");
 }

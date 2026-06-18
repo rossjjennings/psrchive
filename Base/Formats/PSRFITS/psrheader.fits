@@ -463,9 +463,11 @@ TTYPE#  = NFIT                 / Number of model parameters varied in fit
 TFORM#  = J                    / NCHAN long (32-bit) integers
 TTYPE#  = LN_TR                / Logarithm of trace of total covariance matrix
 TFORM#  = E                    / NCHAN floats
-TTYPE#  = LN_DET               / Logarithm of determinant of total covariance
+TTYPE#  = LN_DET               / Logarithm of determinant of covariance matrix
 TFORM#  = E                    / NCHAN floats
-TTYPE#  = LN_COND              / Logarithm of condition no. of total covariance
+TTYPE#  = LN_COND              / Logarithm of condition number of covariance
+TFORM#  = E                    / NCHAN floats
+TTYPE#  = LN_PROD              / Logarithm of product of variances
 TFORM#  = E                    / NCHAN floats
 END
 #

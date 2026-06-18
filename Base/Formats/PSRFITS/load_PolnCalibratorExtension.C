@@ -21,14 +21,11 @@
 
 using namespace std;
 
-void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		     int ncpar, vector<float>& data);
+void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, int ncpar, vector<float>& data);
 
-void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		       int ncovar, vector<float>& data);
+void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, int ncovar, vector<float>& data);
 
-void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		  vector<float>& data);
+void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<float>& data);
 
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
 {
@@ -369,6 +366,19 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<f
     log_cond_covariance.resize (0);
   }
 
+  // WvS new on 18 Jun 2026 - needed to compute the information complexity of the Fisher information correlation matrix
+  vector<float> log_prod_variance ( nchan, 0.0 );
+  try
+  {
+    psrfits_read_col (fptr, "LN_PROD", log_prod_variance);
+  }
+  catch (Error& error)
+  {
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "FITSArchive::load_PolnCalibratorExtension no LN_PROD" << endl;
+    log_prod_variance.resize (0);
+  }
+  
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
     if (! pce->get_valid(ichan))
@@ -392,6 +402,10 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<f
     // WvS new on 29 Dec 2024
     if (log_cond_covariance.size() == nchan)
       pce->get_transformation(ichan)->set_log_cond_covariance( log_cond_covariance[ichan] );
+
+    // WvS new on 18 Jun 2026 - needed to compute the information complexity of the Fisher information correlation matrix
+    if (log_prod_variance.size() == nchan)
+      pce->get_transformation(ichan)->set_log_prod_variance( log_prod_variance[ichan] );
   }
 
   pce->set_has_solver (true);
