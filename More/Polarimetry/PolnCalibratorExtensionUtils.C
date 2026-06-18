@@ -100,6 +100,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
       get_transformation(ichan)->set_log_tr_covariance( solver->get_log_tr_covariance() );
       get_transformation(ichan)->set_log_det_covariance( solver->get_log_det_covariance() );
       get_transformation(ichan)->set_log_cond_covariance( solver->get_log_cond_covariance() );
+      get_transformation(ichan)->set_log_prod_variance( solver->get_log_prod_variance() );
     }
   }
 }
