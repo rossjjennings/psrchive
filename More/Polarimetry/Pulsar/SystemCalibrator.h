@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2008-2025 by Willem van Straten
+ *   Copyright (C) 2008-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -58,12 +58,6 @@ namespace Pulsar
     
     //! Construct with optional processed calibrator Archive
     SystemCalibrator (Archive* archive = 0);
-
-    //! Copy constructor
-    SystemCalibrator (const SystemCalibrator&);
-
-    //! Destructor
-    virtual ~SystemCalibrator ();
 
     //! Share reception model and common transformations of other instance
     /*! Common transformations are experienced by all sources. */
@@ -328,11 +322,13 @@ namespace Pulsar
     bool match_check_nchan;
     std::string mismatch_reason;
   
-    //! SystemCalibrator with whom common reception model is shared
-    /* and common polarimetric transformations */
+    //! SystemCalibrator with whom common reception model and common polarimetric transformations are shared
     Reference::To<SystemCalibrator> partner;
     void setup_sharing (unsigned ichan);
     
+    //! If set, all frequency channels are simultaneously solved in a single measurement equation 
+    Reference::To<MEAL::ReceptionModel> allchan_equation;
+
     friend class SystemCalibratorPlotter;
     friend class MatrixTemplateMatching;
 
@@ -403,6 +399,9 @@ namespace Pulsar
 
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
+
+    //! Set up the reception model to produce configured reports 
+    void setup_reports (MEAL::ReceptionModel* equation, const std::string& postfix);
 
     typedef Reference::To<Calibration::SourceEstimate> SourceEstimate;
     

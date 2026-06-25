@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008-2025 by Willem van Straten
+ *   Copyright (C) 2008-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -201,16 +201,6 @@ MEAL::ReceptionModel::Solver* SystemCalibrator::get_solver ()
 
   DEBUG("SystemCalibrator::get_solver this=" << this << " ptr=" << (void*) solver);
   return solver;
-}
-
-//! Copy constructor
-SystemCalibrator::SystemCalibrator (const SystemCalibrator& calibrator)
-{
-}
-
-//! Destructor
-SystemCalibrator::~SystemCalibrator ()
-{
 }
 
 //! Set the algorithm used to automatically insert steps in response
@@ -1620,10 +1610,18 @@ void SystemCalibrator::create_model () try
     if (basis)
       model[ichan]->set_basis (basis);
 
+    if (allchan_equation)
+      model[ichan]->set_equation (allchan_equation);
+
     if (partner)
       setup_sharing( ichan );
 
     init_model( ichan );
+  }
+
+  if (allchan_equation)
+  {
+    setup_reports (allchan_equation, "allchan");
   }
 
   if (report_total_invariant)
@@ -1720,34 +1718,41 @@ void SystemCalibrator::init_model (unsigned ichan)
   if (solver)
     model[ichan]->set_solver( solver->clone() );
 
-  MEAL::ReceptionModel* equation = model[ichan]->get_equation();
+  if (!allchan_equation)
+  {
+    string postfix = stringprintf("ichan%04d",ichan);
+    setup_reports (model[ichan]->get_equation(), postfix);
+  }
+}
 
+void SystemCalibrator::setup_reports (MEAL::ReceptionModel* equation, const string& postfix)
+{
   string filename;
 
   if (report_initial_state)
   {
-    filename = stringprintf("prefit_model_ichan%04d.txt",ichan);
+    filename = "prefit_model_" + postfix + ".txt";
     equation->add_prefit_report ( new MEAL::ModelParametersReport(filename) );
   }
 
   if (report_input_data)
   {
-    filename = stringprintf("input_data_ichan%04d.txt",ichan);
+    filename = "input_data_" + postfix + ".txt";
     equation->add_prefit_report ( new MEAL::InputDataReport(filename) );
   }
 
   if (report_data_and_model)
   {
-    filename = stringprintf("results_init_ichan%04d.dat",ichan);
+    filename = "results_init_" + postfix + ".dat";
     equation->add_prefit_report ( new MEAL::DataAndModelReport(filename) );
     
-    filename = stringprintf("results_ichan%04d.dat",ichan);
+    filename = "results_" + postfix + ".dat";
     equation->add_postfit_report ( new MEAL::DataAndModelReport(filename) );
   }
 
   if (report_covariance)
   {
-    filename = stringprintf("covariance_ichan%04d.txt",ichan);
+    filename = "covariance_" + postfix + ".txt";
     equation->add_postfit_report ( new MEAL::CovarianceReport(filename) );
   }
 }

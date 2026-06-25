@@ -125,7 +125,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   if (has_Receiver())
   {
     if (verbose)
-      cerr << "PulsarCalibrator::create_model receiver set" << endl;
+      cerr << "PulsarCalibrator::set_standard receiver set" << endl;
 
     Pauli::basis().set_basis( get_Receiver()->get_basis() );
   }
@@ -226,8 +226,8 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     if (integration->get_weight (mchan) == 0)
     {
       if (verbose > 2)
-	cerr << "PulsarCalibrator::build ichan="
-	     << ichan << " flagged invalid" << endl;
+        cerr << "PulsarCalibrator::build ichan="
+            << ichan << " flagged invalid" << endl;
 
       continue;
     }
