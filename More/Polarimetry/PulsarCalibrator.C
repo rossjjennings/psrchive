@@ -8,7 +8,7 @@
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/StandardSpectra.h"
-#include "Pulsar/PolnSpectrumStats.h"
+#include "Pulsar/PolnFluctSpectStats.h"
 #include "Pulsar/PolnProfileStats.h"
 
 #include "Pulsar/FrontendCorrection.h"
@@ -152,7 +152,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     Reference::To<Integration> clone = integration->clone();
     clone->expert()->fscrunch ();
 
-    Pulsar::PolnSpectrumStats stats;
+    Pulsar::PolnFluctSpectStats stats;
     stats.select_profile( clone->new_PolnProfile (0) );
     stats.get_regions( onpulse, baseline );
 

@@ -14,7 +14,7 @@ using namespace std;
 /*! If specified, baseline and on-pulse regions are defined by select */
 Calibration::StandardSpectra::StandardSpectra (const Pulsar::PolnProfile* pp)
 {
-  stats = new Pulsar::PolnSpectrumStats;
+  stats = new Pulsar::PolnFluctSpectStats;
 
   if (pp)
     select_profile (pp);
@@ -46,7 +46,7 @@ catch (Error& error)
   throw error += "Calibration::StandardSpectra::set_profile";
 }
 
-Pulsar::PolnSpectrumStats* Calibration::StandardSpectra::get_stats ()
+Pulsar::PolnFluctSpectStats* Calibration::StandardSpectra::get_stats ()
 {
   return stats;
 }

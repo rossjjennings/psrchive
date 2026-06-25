@@ -56,7 +56,7 @@ nobase_include_HEADERS = \
 	Pulsar/PolnProfileFitAnalysis.h \
 	Pulsar/PolnProfileStats.h \
 	Pulsar/PolnProfileStatsInterface.h \
-	Pulsar/PolnSpectrumStats.h \
+	Pulsar/PolnFluctSpectStats.h \
 	Pulsar/PolnStatistics.h \
 	Pulsar/PolynomialInfo.h \
 	Pulsar/ProjectionCorrection.h \
@@ -154,7 +154,7 @@ libPolarimetry_la_SOURCES = \
 	PolnProfileFitAnalysis.C \
 	PolnProfileStats.C \
 	PolnProfileStatsInterface.C \
-	PolnSpectrumStats.C \
+	PolnFluctSpectStats.C \
 	PolnStatistics.C \
 	PolynomialInfo.C \
 	ProjectionCorrection.C \

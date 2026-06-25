@@ -6,10 +6,10 @@
  *
  ***************************************************************************/
 
-// psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h
+// psrchive/More/Polarimetry/Pulsar/PolnFluctSpectStats.h
 
-#ifndef __Pulsar_PolnSpectrumStats_h
-#define __Pulsar_PolnSpectrumStats_h
+#ifndef __Pulsar_PolnFluctSpectStats_h
+#define __Pulsar_PolnFluctSpectStats_h
 
 #include "Pulsar/FluctSpectStats.h"
 #include "Pulsar/PolnProfileStats.h"
@@ -18,7 +18,7 @@
 namespace Pulsar {
 
   //! Computes statistics of full-polarization fluctuation spectra
-  class PolnSpectrumStats : public FluctSpectStats<PolnProfile,PolnProfileStats>
+  class PolnFluctSpectStats : public FluctSpectStats<PolnProfile,PolnProfileStats>
   {   
   public:
 

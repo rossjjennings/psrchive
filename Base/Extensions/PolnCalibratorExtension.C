@@ -434,6 +434,7 @@ double PolnCalibratorExtension::Transformation::get_Akaike_information_criterion
   return chisq + 2*nfit * (1.0 + (nfit + 1.0) / (nfree - 1.0));
 }
 
+/*! Also known as the Schwarz (1978) criterion */
 double PolnCalibratorExtension::Transformation::get_Bayesian_information_criterion() const
 {
   if (nfree == 0)
