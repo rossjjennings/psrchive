@@ -276,10 +276,12 @@ catch (Error& error)
 unsigned Pulsar::PulsarCalibrator::get_nchan () const
 {
   if (verbose > 2)
-    cerr << "PulsarCalibrator::get_nchan" << endl;
+    cerr << "PulsarCalibrator::get_nchan mtm.size=" << mtm.size() << endl;
 
   if (mtm.size())
+  {
     return mtm.size();
+  }
 
   return SystemCalibrator::get_nchan ();
 }

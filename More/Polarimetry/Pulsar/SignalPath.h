@@ -140,8 +140,7 @@ namespace Calibration
     void add_diff_phase_step (const MJD&);
 
     //! Insert a step into the instrumental response at the specified time
-    void add_step (const MJD& mjd,
-		   MEAL::VariableBackend* backend = 0);
+    void add_step (const MJD& mjd, MEAL::VariableBackend* backend = 0);
 
     //! Record the epochs of observations
     void add_observation_epoch (const MJD&);

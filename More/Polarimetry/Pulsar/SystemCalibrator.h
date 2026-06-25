@@ -329,6 +329,9 @@ namespace Pulsar
     //! If set, all frequency channels are simultaneously solved in a single measurement equation 
     Reference::To<MEAL::ReceptionModel> allchan_equation;
 
+    //! If set, all frequency channels are passed through a single response
+    Reference::To<MEAL::Complex2> allchan_response;
+
     friend class SystemCalibratorPlotter;
     friend class MatrixTemplateMatching;
 
@@ -361,11 +364,14 @@ namespace Pulsar
     //! The ionospheric and interstellar Faraday rotation transformation
     Reference::To<VariableFaradayRotation> faraday_rotation;
 
+    //! The Faraday rotation transformation shared by all channels
+    Reference::To<MEAL::Variable<MEAL::Complex2>> allchan_faraday_rotation;
+
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 
     //! Response transformation
-    Reference::To< MEAL::Complex2 > response;
+    Reference::To<MEAL::Complex2> response;
 
     //! Indeces of response parameters to be held fixed
     std::vector<unsigned> response_fixed;

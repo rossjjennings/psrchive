@@ -1657,7 +1657,13 @@ void SystemCalibrator::init_model (unsigned ichan)
         response->set_infit ( response_fixed[i], false );
     }
   
-    if (response)
+    if (allchan_response)
+    {
+      if (verbose > 2)
+        cerr << "SystemCalibrator::init_model all-channel response name=" << allchan_response->get_name() << endl;
+      model[ichan]->set_response( allchan_response );
+    }
+    else if (response)
     {
       if (verbose > 2)
         cerr << "SystemCalibrator::init_model response name=" << response->get_name() << endl;
@@ -1678,7 +1684,13 @@ void SystemCalibrator::init_model (unsigned ichan)
       model[ichan]->set_projection( projection->get_transformation(ichan) );
     }
 
-    if (faraday_rotation)
+    if (allchan_faraday_rotation)
+    {
+      if (verbose > 2)
+        cerr << "SystemCalibrator::init_model all-channel Faraday rotation" << endl;
+      model[ichan]->set_faraday_rotation( allchan_faraday_rotation );
+    }
+    else if (faraday_rotation)
     {
       if (verbose > 2)
         cerr << "SystemCalibrator::init_model Faraday rotation" << endl;
@@ -1941,6 +1953,9 @@ void SystemCalibrator::solve_prepare () try
     invint_out.open("invint_out.txt");
   }
 
+  if (verbose)
+    cerr << "SystemCalibrator::solve_prepare done" << endl;
+
   is_prepared = true;
 }
 catch (Error& error)
@@ -1971,6 +1986,20 @@ void SystemCalibrator::solve () try
     cerr << "SystemCalibrator::solve calling solve_prepare" << endl;
   
   solve_prepare ();
+
+  if (allchan_equation)
+  {
+    if (verbose > 1)
+      cerr << "SystemCalibrator::solve single model for all channels" << endl;
+    allchan_equation->solve();
+
+    // ensure that calculate_transformation is called again
+    transformation_resize (0);
+
+    is_solved = true;
+
+    return;
+  }
 
   unsigned nchan = get_nchan ();
 

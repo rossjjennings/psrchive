@@ -12,9 +12,20 @@
 #define __Pulsar_FrequencyMTM_H
 
 #include "Pulsar/PulsarCalibrator.h"
+#include "MEAL/Faraday.h"
 
 namespace Pulsar
 {
+
+  class AllChanFaradayRotation : public MEAL::Variable<MEAL::Complex2>
+  {
+    MEAL::Faraday faraday;
+    MEAL::Axis<double> frequency;
+
+    public:
+      MEAL::Faraday* get_transformation () override { return &faraday; }
+      MEAL::Argument* get_argument () override { return &frequency; }
+  };
 
   //! Implements spectral Matrix Template Matching
   /*! This class determines the frequency-dependent system response 
@@ -33,6 +44,8 @@ namespace Pulsar
     FrequencyMTM (Calibrator::Type* = 0);
 
   protected:
+
+    Reference::To<AllChanFaradayRotation> faraday;
 
   };
 
