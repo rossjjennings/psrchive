@@ -76,6 +76,9 @@ Pulsar::PolnCalibratorExtension::Transformation::Interface::Interface ()
    add( &Transformation::get_log_cond_covariance,
         "ln_cond", "Logarithm of condition number of covariance matrix" );
 
+   add( &Transformation::get_information_complexity,
+        "ICOMP", "Bozdogan's information complexity of covariance matrix" );
+
    add( &Transformation::get_correlation_information_complexity,
         "CIC", "Information complexity of correlation matrix" );
 

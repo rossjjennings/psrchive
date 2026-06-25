@@ -242,6 +242,9 @@ namespace Pulsar {
     //! Get the stochastic information complexity
     double get_stochastic_information_complexity() const;
 
+    //! Get the information complexity
+    double get_information_complexity() const;
+
     //! Get the information complexity of the correlation matrix
     double get_correlation_information_complexity() const;
 

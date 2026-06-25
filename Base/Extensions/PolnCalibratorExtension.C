@@ -456,6 +456,21 @@ double PolnCalibratorExtension::Transformation::get_geometric_information_criter
   return chisq + 2*nfit + 2*N*ndim;
 }
 
+/*! Bozdogan's ICOMP */
+double PolnCalibratorExtension::Transformation::get_information_complexity() const
+{
+  if (nfree == 0)
+    return 0;
+
+#if _DEBUG
+  cerr << "PolnCalibratorExtension::Transformation::get_information_complexity:"
+          " log(tr(cov))=" << log_tr_covariance <<
+          " log(det(cov))=" << log_det_covariance << endl;
+#endif
+
+  return chisq + nfit * ( log_tr_covariance - log(nfit) ) - log_det_covariance;
+}
+
 double PolnCalibratorExtension::Transformation::get_stochastic_information_complexity() const
 {
   if (nfree == 0)
@@ -480,7 +495,13 @@ double PolnCalibratorExtension::Transformation::get_correlation_information_comp
           " log(det(cov))=" << log_det_covariance << endl;
 #endif
 
-  return chisq - log_det_covariance + log_prod_variance;
+  /* log|R| = log|C| - log|D| 
+     where
+     - R is the correlation matrix
+     - C is the covariance matrix
+     - D is the diagonal of C (variance matrix)
+  */
+  return get_stochastic_information_complexity () + log_prod_variance;
 }
 
 //! Get the covariance matrix of the model paramters
