@@ -13,6 +13,7 @@
 
 #include "Pulsar/SystemCalibrator.h"
 #include "Pulsar/PhaseWeight.h"
+#include "MEAL/PhaseGradients.h"
 
 #include "MEAL/Mean.h"
 
@@ -126,6 +127,9 @@ namespace Pulsar {
 
     //! The array of transformation Model instances
     Reference::Vector<MeanXform> solution;
+
+    //! Phase gradients shared by all frequency channels
+    Reference::To<MEAL::PhaseGradients<MEAL::Complex2>> allchan_phases;
 
     //! Flag set when phase should be held fixed
     bool fixed_phase;

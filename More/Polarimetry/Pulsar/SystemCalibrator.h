@@ -31,6 +31,7 @@ namespace Pulsar
   class CalibratorStokes;
   class VariableTransformationManager;
   class VariableFaradayRotation;
+  class SpectralFaradayRotation;
 
   //! PolnCalibrator with estimated calibrator Stokes parameters
   /*! The SystemCalibrator is the virtual base class of polarization
@@ -365,7 +366,7 @@ namespace Pulsar
     Reference::To<VariableFaradayRotation> faraday_rotation;
 
     //! The Faraday rotation transformation shared by all channels
-    Reference::To<MEAL::Variable<MEAL::Complex2>> allchan_faraday_rotation;
+    Reference::To<SpectralFaradayRotation> allchan_faraday_rotation;
 
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;

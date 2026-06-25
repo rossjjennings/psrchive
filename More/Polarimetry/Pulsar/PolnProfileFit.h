@@ -133,6 +133,9 @@ namespace Pulsar
     const MEAL::ReceptionModel* get_equation () const;
     void set_equation (MEAL::ReceptionModel*);
 
+    //! Set phase gradients used to model the shifts
+    void set_phases (MEAL::PhaseGradients<MEAL::Complex2>*);
+
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
 

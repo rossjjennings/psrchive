@@ -198,8 +198,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 		 "template nchan=%d != required nchan=%d", model_nchan, nchan);
 
   correct_interstellar_Faraday_rotation =
-    standard->get_faraday_corrected() ||
-    (model_nchan == 1 && nchan > model_nchan);
+    standard->get_faraday_corrected() || (model_nchan == 1 && nchan > model_nchan);
 
   mtm.resize (nchan);
 
@@ -239,6 +238,12 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 
     if (shared_phase)
       mtm[ichan]->share_phase ();
+
+    if (allchan_phases)
+    {
+      mtm[ichan]->share_phase ();
+      mtm[ichan]->set_phases (allchan_phases);
+    }
 
     // the equation transformation will be managed by the SignalPath class
     mtm[ichan]->manage_equation_transformation = false;

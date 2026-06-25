@@ -12,8 +12,9 @@
 #include "Pulsar/BasisCorrection.h"
 
 #include "Pulsar/VariableProjectionCorrection.h"
-#include "Pulsar/VariableFaradayRotation.h"
 #include "Pulsar/ConfigurableProjection.h"
+#include "Pulsar/VariableFaradayRotation.h"
+#include "Pulsar/SpectralFaradayRotation.h"
 #include "Pulsar/AuxColdPlasma.h"
 #include "Pulsar/BirefringenceHistory.h"
 
@@ -607,7 +608,14 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     {
       // Faraday rotation
       faraday_rotation->set_chan (ichan);
-      measurements.add_coordinate( faraday_rotation->new_value () );
+      measurements.add_coordinate( faraday_rotation->new_value() );
+    }
+
+    if (allchan_faraday_rotation)
+    {
+      double freq = integration->get_centre_frequency (ichan);
+      cerr << "SystemCalibrator::add_pulsar ichan=" << ichan << " freq=" << freq << endl;
+      measurements.add_coordinate( allchan_faraday_rotation->new_value (freq) );
     }
 
     try

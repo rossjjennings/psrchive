@@ -5,23 +5,21 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/FrequencyMTM.h"
-#include "Pulsar/VariableFaradayRotation.h"
-
-using namespace std;
+#include "Pulsar/SpectralMETM.h"
 
 //! Constructor
-Pulsar::FrequencyMTM::FrequencyMTM (Calibrator::Type* model)
+Pulsar::SpectralMETM::SpectralMETM (Calibrator::Type* model)
   : PulsarCalibrator (model)
 {
   allchan_equation = new MEAL::ReceptionModel;
+  // allchan_phases = new MEAL::PhaseGradients<MEAL::Complex2>;
 
-  SystemCalibrator::faraday_rotation = 0;
+  SystemCalibrator::set_faraday_rotation (nullptr);
   
   response_fixed.resize(6);
   for (unsigned i=0; i<6; i++)
     response_fixed[i] = i+1;
 
-  allchan_faraday_rotation = faraday = new AllChanFaradayRotation;
+  allchan_faraday_rotation = faraday = new SpectralFaradayRotation;
   faraday->get_transformation()->set_reference_wavelength(0.0);
 }

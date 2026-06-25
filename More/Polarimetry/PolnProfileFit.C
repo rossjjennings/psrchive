@@ -110,6 +110,11 @@ void PolnProfileFit::init ()
   shared_phase = false;
 }
 
+void PolnProfileFit::set_phases (MEAL::PhaseGradients<MEAL::Complex2>* ph)
+{
+  phases = ph;
+}
+
 void PolnProfileFit::set_plan (FTransform::Plan* p)
 {
   get_spectra()->get_stats()->set_plan (p);
