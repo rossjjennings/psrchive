@@ -16,6 +16,7 @@
 #include "Pulsar/VariableFaradayRotation.h"
 #include "Pulsar/SpectralFaradayRotation.h"
 #include "Pulsar/AuxColdPlasma.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 #include "Pulsar/BirefringenceHistory.h"
 
 #include "Pulsar/VariableBackendEstimate.h"
@@ -614,7 +615,8 @@ void SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     if (allchan_faraday_rotation)
     {
       double freq = integration->get_centre_frequency (ichan);
-      cerr << "SystemCalibrator::add_pulsar ichan=" << ichan << " freq=" << freq << endl;
+      if (verbose > 2)
+        cerr << "SystemCalibrator::add_pulsar ichan=" << ichan << " freq=" << freq << endl;
       measurements.add_coordinate( allchan_faraday_rotation->new_value (freq) );
     }
 
@@ -2319,6 +2321,17 @@ void SystemCalibrator::precalibrate (Archive* data)
   }
 
   bool faraday_rotation_corrected = false;
+  double aux_rm = 0.0;
+
+  if (allchan_faraday_rotation)
+  {
+    faraday_rotation_corrected = true;
+
+    double rm = data->get_rotation_measure();
+    Estimate<double> new_rm = allchan_faraday_rotation->get_rotation_measure();
+    cerr << "SystemCalibrator::precalibrate new RM=" << new_rm << endl;
+    aux_rm = new_rm.get_value() - rm;
+  }
 
   BackendCorrection correct_backend;
   correct_backend (data);
@@ -2340,6 +2353,12 @@ void SystemCalibrator::precalibrate (Archive* data)
 
       if (faraday_rotation->required())
         faraday_rotation_corrected = true;
+    }
+
+    if (allchan_faraday_rotation)
+    {
+      auto aux = integration->getadd<AuxColdPlasmaMeasures>();
+      aux->set_rotation_measure(aux_rm);
     }
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -2367,6 +2386,11 @@ void SystemCalibrator::precalibrate (Archive* data)
       {
         faraday_rotation->set_chan (ichan);
         faraday_rotation->update();
+      }
+
+      if (allchan_faraday_rotation)
+      {
+        allchan_faraday_rotation->set_frequency (integration->get_centre_frequency(ichan));
       }
 
       try
@@ -2427,18 +2451,23 @@ void SystemCalibrator::precalibrate (Archive* data)
 
     if (faraday_rotation_corrected)
     {
-      auto ism = faraday_rotation->get_interstellar_rotation();
-      auto iono = faraday_rotation->get_ionospheric_rotation();
+      double ism_rm = data->get_rotation_measure();
+      double reference_wavelength = MEAL::speed_of_light * 1e-6 / data->get_centre_frequency();
+      double iono_rm = aux_rm;
 
-      double ism_rm = ism->get_rotation_measure().get_value();
-      double iono_rm = iono->get_rotation_measure().get_value();
+      if (faraday_rotation)
+      {
+        auto ism = faraday_rotation->get_interstellar_rotation();
+        auto iono = faraday_rotation->get_ionospheric_rotation();
+
+        ism_rm = ism->get_rotation_measure().get_value();
+        iono_rm = iono->get_rotation_measure().get_value();
+        reference_wavelength = ism->get_reference_wavelength();
+      }
 
       if (ism_rm != 0 || iono_rm != 0)
       {
         auto corrected = integration->getadd<BirefringenceHistory>();
-
-        double reference_wavelength = ism->get_reference_wavelength();
-
         if (ism_rm != 0)
         {
           corrected->get_relative()->set_corrected(true);

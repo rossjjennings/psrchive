@@ -29,6 +29,8 @@ namespace Pulsar
       MEAL::Faraday* get_transformation () override { return &faraday; }
       MEAL::Argument* get_argument () override { return &frequency; }
       MEAL::Argument::Value* new_value (double freq) { return frequency.new_Value (freq); }
+      void set_frequency (double MHz) { faraday.set_frequency(MHz); }
+      Estimate<double> get_rotation_measure() { return faraday.get_rotation_measure(); }
   };
 
 }
