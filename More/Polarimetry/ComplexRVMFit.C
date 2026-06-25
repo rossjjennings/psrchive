@@ -313,19 +313,9 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
     
     double slope = Q[ibin]*dU[ibin] - U[ibin]*dQ[ibin];
     double norm = 2.0 * (Q[ibin]*Q[ibin] + U[ibin]*U[ibin]) * phi_per_bin;
-    double slope2 = 0.0;
-
-    if (ibin > 0 && mask[ibin-1] != 0)
-    {
-      std::complex< Estimate<double> > L0 = linear[ibin-1];
-      double pa0 = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
-      std::complex< Estimate<double> > L1 = linear[ibin];
-      double pa1 = 0.5 * atan2(L1.imag().get_value(), L1.real().get_value());
-      slope2 = (pa1 - pa0) / phi_per_bin;
-    }
 
 #if _DEBUG
-    out << ibin << " " << slope << " " << slope2*norm << endl;
+    out << ibin << " " << slope << endl;
 #endif
     
     if (max_bin < 0 || fabs(slope) > max_slope) 
@@ -816,9 +806,6 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
   float best_alpha = 0.0;
   float best_zeta = 0.0;
   
-  float best_phi0 = peak_phase;
-  float best_psi0 = peak_pa;
-  
   vector<double> chisq_surface;
   unsigned chisq_index = 0;
 
@@ -840,13 +827,9 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
   cerr << "second 1=" << range_zeta.first
        << " 2=" << range_zeta.second << endl;
 
-  for (double alpha=range_alpha.first; 
-       alpha <= range_alpha.second; 
-       alpha += step_alpha)
+  for (double alpha=range_alpha.first; alpha <= range_alpha.second; alpha += step_alpha)
   {
-    for (double zeta=range_zeta.first; 
-	 zeta <= range_zeta.second;
-	 zeta += step_zeta) try
+    for (double zeta=range_zeta.first; zeta <= range_zeta.second; zeta += step_zeta) try
     {
 
       cerr << "first=" << alpha << " second=" << zeta << endl;
@@ -854,16 +837,16 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
       if (alpha == zeta)
       {
         if (chisq_map)
-	{
-	  if (chisq_index >= chisq_surface.size())
-	    cerr << "ABORT 1: chisq_index=" << chisq_index
-		 << " chisq_surface.size()=" << chisq_surface.size() << endl;
+        {
+          if (chisq_index >= chisq_surface.size())
+            cerr << "ABORT 1: chisq_index=" << chisq_index
+                << " chisq_surface.size()=" << chisq_surface.size() << endl;
 
           assert (chisq_index < chisq_surface.size());
           chisq_surface[chisq_index] = 0.0;
           chisq_index ++;
         }
-	continue;
+        continue;
       }
 
       cerr << "alpha=" << alpha;
@@ -871,60 +854,50 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
 
       if (map_beta)
       {
-	cerr << " beta=" << zeta << endl;
-	rvm->impact->set_value (zeta);
+        cerr << " beta=" << zeta << endl;
+        rvm->impact->set_value (zeta);
       }
       else
       {
-	cerr << " zeta=" << zeta << endl;
-	rvm->line_of_sight->set_value (zeta);
+        cerr << " zeta=" << zeta << endl;
+        rvm->line_of_sight->set_value (zeta);
       }
 
       // ensure that each attempt starts with the same guess
-#if 1
       rvm->magnetic_meridian->set_value (peak_phase);
       rvm->reference_position_angle->set_value (peak_pa);
       for (unsigned i=0; i<nstate; i++)
-	cRVM->set_linear(i, linear[i]);
-#else
-      // start each attempt with the values from the best fit
-      rvm->magnetic_meridian->set_value (best_phi0);
-      rvm->reference_position_angle->set_value (best_psi0);
-      for (unsigned i=0; i<nstate; i++)
-	cRVM->set_linear(i, best_linear[i]);
-#endif
+        cRVM->set_linear(i, linear[i]);
 
       solve ();
 
       if (chisq_map)
       {
-	if (chisq_index >= chisq_surface.size())
-	  cerr << "ABORT 2: chisq_index=" << chisq_index
-	       << " chisq_surface.size()=" << chisq_surface.size() << endl;
+        if (chisq_index >= chisq_surface.size())
+          cerr << "ABORT 2: chisq_index=" << chisq_index
+              << " chisq_surface.size()=" << chisq_surface.size() << endl;
 
-	assert (chisq_index < chisq_surface.size());
-	chisq_surface[chisq_index] = chisq;
+        assert (chisq_index < chisq_surface.size());
+        chisq_surface[chisq_index] = chisq;
         chisq_index ++;
       }
 
       if (best_chisq == 0 || chisq < best_chisq)
       {
-	// cerr << "current best chisq=" << chisq << endl;
-	best_chisq = chisq;
-	best_alpha = alpha;
-	best_zeta = zeta;
+        // cerr << "current best chisq=" << chisq << endl;
+        best_chisq = chisq;
+        best_alpha = alpha;
+        best_zeta = zeta;
 
-	best_phi0 = rvm->magnetic_meridian->get_value ().val;
-	best_psi0 = rvm->reference_position_angle->get_value ().val;
-	for (unsigned i=0; i<nstate; i++)
-	  best_linear[i] = cRVM->get_linear(i).get_value();
+        for (unsigned i=0; i<nstate; i++)
+          best_linear[i] = cRVM->get_linear(i).get_value();
       }
     }
     catch (Error& error)
     {
       cerr << "fit failed on alpha=" << alpha << " zeta=" << zeta << endl;
       if (verbose)
-	cerr << error.get_message() << endl;
+        cerr << error.get_message() << endl;
 
       chisq_index ++;
     }
@@ -934,7 +907,7 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
   {
     if (chisq_index != chisq_surface.size())
       cerr << "ABORT 3: chisq_index=" << chisq_index
-	   << " chisq_surface.size()=" << chisq_surface.size() << endl;
+          << " chisq_surface.size()=" << chisq_surface.size() << endl;
 
     assert (chisq_index == chisq_surface.size());
     double min=0, max=0;
@@ -944,18 +917,16 @@ void Pulsar::ComplexRVMFit::search_2D (unsigned nalpha, unsigned nzeta)
 
     chisq_index = 0;
 
-    for (double alpha=range_alpha.first; 
-	 alpha < range_alpha.second; 
-	 alpha += step_alpha)
+    for (double alpha=range_alpha.first; alpha < range_alpha.second; alpha += step_alpha)
     {
       for (double zeta=range_zeta.first; 
 	   zeta < range_zeta.second;
 	   zeta += step_zeta)
       {
-	const double deg = 180/M_PI;
-	cout << alpha*deg << " " << zeta*deg 
-	     << " " << chisq_surface[chisq_index] << endl;
-	chisq_index ++;
+        const double deg = 180/M_PI;
+        cout << alpha*deg << " " << zeta*deg 
+            << " " << chisq_surface[chisq_index] << endl;
+        chisq_index ++;
       }
       cout << endl;
     }
@@ -1041,11 +1012,8 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
   }
 
   float best_chisq = 0.0;
-
   float best_search = 0.0;
   float best_other = 0.0;  
-  float best_phi0 = peak_phase;
-  float best_psi0 = peak_pa;
   
   vector<double> chisq_surface;
   unsigned chisq_index = 0;
@@ -1082,8 +1050,8 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
     if (chisq_map)
     {
       if (chisq_index >= chisq_surface.size())
-	cerr << "ABORT 4: chisq_index=" << chisq_index
-	     << " chisq_surface.size()=" << chisq_surface.size() << endl;
+        cerr << "ABORT 4: chisq_index=" << chisq_index
+            << " chisq_surface.size()=" << chisq_surface.size() << endl;
 
       assert (chisq_index < chisq_surface.size());
       chisq_surface[chisq_index] = chisq;
@@ -1097,10 +1065,9 @@ void Pulsar::ComplexRVMFit::search_1D (unsigned nsearch)
       best_search = search->get_param (0);
 
       best_other = other->get_value ().val;
-      best_phi0 = rvm->magnetic_meridian->get_value ().val;
-      best_psi0 = rvm->reference_position_angle->get_value ().val;
+
       for (unsigned i=0; i<nstate; i++)
-	best_linear[i] = cRVM->get_linear(i).get_value();
+        best_linear[i] = cRVM->get_linear(i).get_value();
     }
   }
   catch (Error& error)
