@@ -33,7 +33,7 @@ namespace MEAL
 
 namespace Calibration
 {
-  class StandardSpectra;
+  class StandardFluctSpect;
 }
 
 namespace Pulsar
@@ -166,7 +166,7 @@ namespace Pulsar
     bool manage_equation_transformation;
 
     //! Get the statistical interface to the data
-    Calibration::StandardSpectra* get_spectra ();
+    Calibration::StandardFluctSpect* get_spectra ();
 
     //! Get the total squared invariant used to normalize the Stokes parameters
     Estimate<double> get_total_squared_invariant (const PolnProfile*);
@@ -197,7 +197,7 @@ namespace Pulsar
     Reference::To<MEAL::Complex2> transformation;
 
     //! Normalization by total invariant interval with error propagation
-    Reference::To<Calibration::StandardSpectra> standard_data;
+    Reference::To<Calibration::StandardFluctSpect> standard_data;
 
     //! The measurement equation used to model the fit
     Reference::To<MEAL::ReceptionModel> equation;

@@ -7,7 +7,7 @@
 
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/PolnProfileFit.h"
-#include "Pulsar/StandardSpectra.h"
+#include "Pulsar/StandardFluctSpect.h"
 #include "Pulsar/PolnFluctSpectStats.h"
 #include "Pulsar/PolnProfileStats.h"
 

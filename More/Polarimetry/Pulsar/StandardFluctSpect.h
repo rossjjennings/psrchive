@@ -6,10 +6,10 @@
  *
  ***************************************************************************/
 
-// psrchive/More/Polarimetry/Pulsar/StandardSpectra.h
+// psrchive/More/Polarimetry/Pulsar/StandardFluctSpect.h
 
-#ifndef __Calibration_StandardSpectra_H
-#define __Calibration_StandardSpectra_H
+#ifndef __Calibration_StandardFluctSpect_H
+#define __Calibration_StandardFluctSpect_H
 
 #include "Pulsar/PolnFluctSpectStats.h"
 #include "MEAL/NormalizeStokes.h"
@@ -21,13 +21,13 @@ namespace Calibration {
     The harmonics are those of the fluctuation power spectrum.
     This class is the Fourier domain equivalent of the StandardData class.
   */
-  class StandardSpectra : public Reference::Able
+  class StandardFluctSpect : public Reference::Able
   {
   public:
     
     //! Default constructor
     /*! If specified, baseline and last harmonic are defined by select */
-    StandardSpectra (const Pulsar::PolnProfile* select = 0);
+    StandardFluctSpect (const Pulsar::PolnProfile* select = 0);
 
     //! Select the baseline and last harmonic from profile
     void select_profile (const Pulsar::PolnProfile*);

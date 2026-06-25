@@ -76,7 +76,7 @@ nobase_include_HEADERS = \
 	Pulsar/SourceInfo.h \
 	Pulsar/StandardData.h \
 	Pulsar/StandardPrepare.h \
-	Pulsar/StandardSpectra.h \
+	Pulsar/StandardFluctSpect.h \
 	Pulsar/StepsInfo.h \
 	Pulsar/StokesCovariance.h \
 	Pulsar/StokesCrossCovariance.h \
@@ -174,7 +174,7 @@ libPolarimetry_la_SOURCES = \
 	SourceInfo.C \
 	StandardData.C \
 	StandardPrepare.C \
-	StandardSpectra.C \
+	StandardFluctSpect.C \
 	StepsInfo.C \
 	StokesCovariance.C StokesCrossCovariance.C \
 	SystemCalibrator.C \
