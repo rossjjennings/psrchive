@@ -2322,15 +2322,25 @@ void SystemCalibrator::precalibrate (Archive* data)
 
   bool faraday_rotation_corrected = false;
   double aux_rm = 0.0;
+  bool aux_rm_offset = false;
 
   if (allchan_faraday_rotation)
   {
     faraday_rotation_corrected = true;
 
-    double rm = data->get_rotation_measure();
     Estimate<double> new_rm = allchan_faraday_rotation->get_rotation_measure();
     cerr << "SystemCalibrator::precalibrate new RM=" << new_rm << endl;
-    aux_rm = new_rm.get_value() - rm;
+
+    if (!data->get_faraday_corrected())
+    {
+      aux_rm = new_rm.get_value() - data->get_rotation_measure();
+    }
+    else 
+    {
+      aux_rm = new_rm.get_value();
+      auto ext = data->get<AuxColdPlasma>();
+      aux_rm_offset = ext && ext->get_birefringence_corrected();
+    }
   }
 
   BackendCorrection correct_backend;
@@ -2358,7 +2368,10 @@ void SystemCalibrator::precalibrate (Archive* data)
     if (allchan_faraday_rotation)
     {
       auto aux = integration->getadd<AuxColdPlasmaMeasures>();
-      aux->set_rotation_measure(aux_rm);
+      double set_aux_rm = aux_rm;
+      if (aux_rm_offset)
+        set_aux_rm += aux->get_rotation_measure();
+      aux->set_rotation_measure(set_aux_rm);
     }
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
