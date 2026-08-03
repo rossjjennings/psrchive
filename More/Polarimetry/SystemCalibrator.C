@@ -1177,9 +1177,10 @@ void SystemCalibrator::submit_pulsar_data () try
     }
     catch (Error& error)
     {
-      cerr << "SystemCalibrator::submit_pulsar_data ichan="
-           << ichan << " error\n"
-           << error << endl;
+      if (verbose > 2)
+        cerr << "SystemCalibrator::submit_pulsar_data ichan="
+             << ichan << " error\n"
+             << error << endl;
       continue;
     }
   }
