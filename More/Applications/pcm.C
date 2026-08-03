@@ -15,8 +15,10 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/CalibratorTypes.h"
 
-#include "Pulsar/ReceptionCalibrator.h"
-#include "Pulsar/PulsarCalibrator.h"
+#include "Pulsar/ReceptionCalibrator.h"  // MEM
+#include "Pulsar/PulsarCalibrator.h"     // METM
+#include "Pulsar/SpectralMETM.h"         // Spectral METM
+
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
 
@@ -429,6 +431,9 @@ bool solve_each = false;
 
 // METM Mode: Share a single phase estimate between all observations
 bool shared_phase = false;
+
+// model all frequency channels in a single measurement equation
+bool spectral_METM = false;
 
 // significance of phase shift required to fail test
 float alignment_threshold = 4.0; // sigma
@@ -1050,12 +1055,10 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg = menu.add (calibrate_these, 'W', "file");
   arg->set_help ("filename with list of other data files to be calibrated");
 
-  arg = menu.add (data_manager.get(), &DataSetManager::set_fluxcal_days,
-		  'F', "days");
+  arg = menu.add (data_manager.get(), &DataSetManager::set_fluxcal_days, 'F', "days");
   arg->set_help ("use flux calibrators within days of pulsar data mid-time");
 
-  arg = menu.add (data_manager.get(), &DataSetManager::set_polncal_hours,
-		  'L', "hours");
+  arg = menu.add (data_manager.get(), &DataSetManager::set_polncal_hours, 'L', "hours");
   arg->set_help ("use reference sources within hours of pulsar data mid-time");
 
   arg = menu.add (must_have_cals, 'w');
@@ -1249,6 +1252,9 @@ void pcm::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (solve_each, '1');
   arg->set_help ("solve independently for each observation");
+
+  arg = menu.add (spectral_METM, "spectral");
+  arg->set_help ("model all frequency channels in a single measurement equation");
 }
 
 Reference::To<Pulsar::PolnCalibrator> previous_solution;
@@ -2010,7 +2016,17 @@ catch (Error& error)
 
 SystemCalibrator* pcm::matrix_template_matching (const string& stdname)
 {
-  PulsarCalibrator* model = new PulsarCalibrator (model_type);
+  PulsarCalibrator* model = 0;
+
+  if (spectral_METM)
+  {
+    shared_phase = true;
+    model = new SpectralMETM (model_type);
+  }
+  else
+  {
+    model = new PulsarCalibrator (model_type);
+  }
 
   if (shared_phase)
     model->share_phase ();

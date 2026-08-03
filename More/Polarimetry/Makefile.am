@@ -10,7 +10,7 @@ nobase_include_HEADERS = \
 	Pulsar/BrittonInfo.h \
 	Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
-        Pulsar/CelestialProjection.h \
+	Pulsar/CelestialProjection.h \
 	Pulsar/ChannelSubsetMatch.h \
 	Pulsar/ComplexRVMFit.h \
 	Pulsar/ConfigurableProjection.h \
@@ -31,6 +31,8 @@ nobase_include_HEADERS = \
 	Pulsar/FluxCalManagerInfo.h \
 	Pulsar/FourthMomentInterpreter.h \
 	Pulsar/FourthMomentStats.h \
+	Pulsar/SpectralFaradayRotation.h \
+	Pulsar/SpectralMETM.h \
 	Pulsar/FrontendCorrection.h \
 	Pulsar/HybridCalibrator.h \
 	Pulsar/InstrumentInfo.h \
@@ -56,7 +58,7 @@ nobase_include_HEADERS = \
 	Pulsar/PolnProfileFitAnalysis.h \
 	Pulsar/PolnProfileStats.h \
 	Pulsar/PolnProfileStatsInterface.h \
-	Pulsar/PolnSpectrumStats.h \
+	Pulsar/PolnFluctSpectStats.h \
 	Pulsar/PolnStatistics.h \
 	Pulsar/PolynomialInfo.h \
 	Pulsar/ProjectionCorrection.h \
@@ -76,7 +78,7 @@ nobase_include_HEADERS = \
 	Pulsar/SourceInfo.h \
 	Pulsar/StandardData.h \
 	Pulsar/StandardPrepare.h \
-	Pulsar/StandardSpectra.h \
+	Pulsar/StandardFluctSpect.h \
 	Pulsar/StepsInfo.h \
 	Pulsar/StokesCovariance.h \
 	Pulsar/StokesCrossCovariance.h \
@@ -101,7 +103,7 @@ libPolarimetry_la_SOURCES = \
 	CalibratorStokesInfo.C \
 	CalibratorType_factory.C \
 	CalInterpreter.C \
-  CelestialProjection.C \
+	CelestialProjection.C \
 	ChannelSubsetMatch.C \
 	choose.C \
 	ComplexRVMFit.C \
@@ -127,11 +129,12 @@ libPolarimetry_la_SOURCES = \
 	FluxCalManagerInfo.C \
 	FourthMomentInterpreter.C \
 	FourthMomentStats.C \
+	SpectralMETM.C \
 	FrontendCorrection.C \
 	HybridCalibrator.C \
 	InstrumentInfo.C \
 	Integration_defaraday.C \
-        Integration_transform.C \
+	Integration_transform.C \
 	IonosphereCalibrator.C \
 	IRIonosphere.C \
 	IXRInfo.C \
@@ -154,7 +157,7 @@ libPolarimetry_la_SOURCES = \
 	PolnProfileFitAnalysis.C \
 	PolnProfileStats.C \
 	PolnProfileStatsInterface.C \
-	PolnSpectrumStats.C \
+	PolnFluctSpectStats.C \
 	PolnStatistics.C \
 	PolynomialInfo.C \
 	ProjectionCorrection.C \
@@ -174,7 +177,7 @@ libPolarimetry_la_SOURCES = \
 	SourceInfo.C \
 	StandardData.C \
 	StandardPrepare.C \
-	StandardSpectra.C \
+	StandardFluctSpect.C \
 	StepsInfo.C \
 	StokesCovariance.C StokesCrossCovariance.C \
 	SystemCalibrator.C \
@@ -219,7 +222,7 @@ simpol_SOURCES = simpol.C
 # test programs
 #
 
-TESTS = test_Parallactic test_hand_xyph 
+TESTS = test_Parallactic test_hand_xyph
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere test_ModeSeparation
 

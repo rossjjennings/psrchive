@@ -120,13 +120,8 @@ namespace Calibration
     void engage_time_variations ();
     void disengage_time_variations ();
 
-    void unmap_variations (std::vector<unsigned>& imap,
-			   MEAL::Complex2* composite);
-    
-    void compute_covariance (std::vector<unsigned>& imap,
-			     std::vector< std::vector<double> >& Ctotal);
-    
-
+    void unmap_variations (std::vector<unsigned>& imap, MEAL::Complex2* composite);
+    void compute_covariance (std::vector<unsigned>& imap, std::vector<std::vector<double>>& C);
   };
 }
 

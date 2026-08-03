@@ -81,8 +81,8 @@ protected:
   
   float log_err_madm_threshold = 0.0;
 
-  bool convert_epochs;
-  bool use_native_scale;
+  bool convert_epochs = false;
+  bool use_native_scale = false;
 
   void fit_polynomial (const vector< double >& data_x,
                        const vector< Estimate<double> >& data_y);
@@ -100,12 +100,13 @@ protected:
   void add_options (CommandLine::Menu&);
 
   // determine smoothing by minimizing generalized cross-validation
-  bool minimize_gcv;
+  bool minimize_gcv = false;
+
   // determine smoothing by minimizing true mean-squared error
-  bool minimize_tmse;
+  bool minimize_tmse = false;
 
   // determine smoothing by m-fold cross-validation
-  bool cross_validate;
+  bool cross_validate = false;
 
   CrossValidatedSmoothing* cross_validated_smoothing;
 
@@ -113,26 +114,27 @@ protected:
   CrossValidatedSmooth2D* cross_validated_smoothing_2D;
 #endif
 
-  bool unload_solution;
-  bool unload_smoothed;
+  bool unload_solution = true;
+  bool unload_smoothed = false;
   
   // find the median effective number of free parameters
-  bool find_median_nfree;
+  bool find_median_nfree = false;
+  double median_nfree = 0.0;
 
-  double median_nfree;
-  double pspline_alpha;
+  double pspline_alpha = 0.0;
+  double pspline_nfree = 0.0;
 
-  double interquartile_range;
-  double outlier_smoothing;
+  double interquartile_range = 0.0;
+  double outlier_smoothing = 0.0;
 
-  bool interpolate;
-  bool bootstrap_uncertainty;
+  bool interpolate = true;
+  bool bootstrap_uncertainty = false;
 
   bool use_smoothing_spline ();
   
-  unsigned freq_order;
-  unsigned time_order;
-  float threshold;
+  unsigned freq_order = 0;
+  unsigned time_order = 0;
+  float threshold = 0.001;
 
   string plot_device;
 
@@ -237,13 +239,13 @@ protected:
   double plot_xmax;
   
   // fit 2-D data using a bunch of 1-D fits
-  bool row_by_row;
+  bool row_by_row = false;
 
   // the current sub-integration when fitting profile data
-  Pulsar::Integration* current_subint;
+  Pulsar::Integration* current_subint = nullptr;
 
   // the current polarization when fitting profile data
-  unsigned current_ipol;
+  unsigned current_ipol = 0;
   
   void fit (set&);
 
@@ -316,33 +318,11 @@ smint::smint ()
 {
   add( new Pulsar::StandardOptions );
 
-  use_native_scale = false;
-  freq_order = time_order = 0;
-  threshold = 0.001;
-  pspline_alpha = 0.0;
-  row_by_row = false;
-  minimize_gcv = false;
-  minimize_tmse = false;
-  find_median_nfree = false;
-  median_nfree = 0;
-  current_subint = 0;
-
-  interquartile_range = 0.0;
-  outlier_smoothing = 0.0;
-
-  interpolate = true;
-
-  cross_validate = false;
   cross_validated_smoothing = new CrossValidatedSmoothing;
 
 #if HAVE_SPLINTER
   cross_validated_smoothing_2D = new CrossValidatedSmooth2D;
 #endif
-  
-  bootstrap_uncertainty = false;
-
-  unload_solution = true;
-  unload_smoothed = false;
 }
 
 /*!
@@ -376,7 +356,10 @@ void smint::add_options (CommandLine::Menu& menu)
   menu.add ("\n" "Penalized spline (p-spline) fitting options:");
 
   arg = menu.add (pspline_alpha, 'p', "double");
-  arg->set_help ("p-spline smoothing factor 'alpha'");
+  arg->set_help ("set p-spline smoothing factor 'alpha'");
+
+  arg = menu.add (pspline_nfree, 'n', "double");
+  arg->set_help ("set p-spline effective degrees of freedom 'Nfree'");
 
   arg = menu.add (minimize_gcv, "gcv");
   arg->set_help ("compute p-spline smoothing by minimizing GCV");
@@ -438,7 +421,7 @@ void smint::add_options (CommandLine::Menu& menu)
 bool smint::use_smoothing_spline ()
 {
   return minimize_gcv || minimize_tmse || find_median_nfree
-    || pspline_alpha > 0 || cross_validate;
+    || pspline_alpha > 0 || pspline_nfree > 0 || cross_validate;
 }
 
 /*!
@@ -1287,7 +1270,10 @@ void smint::fit_pspline (SmoothingSpline& spline,
   if (pspline_alpha)
     spline.set_smoothing (pspline_alpha);
 
-  if (find_median_nfree)
+  else if (pspline_nfree)
+    spline.set_effective_nfree (pspline_nfree);
+
+  else if (find_median_nfree)
     spline.set_effective_nfree (median_nfree);
 
   if (minimize_tmse)
