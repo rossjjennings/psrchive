@@ -11,23 +11,18 @@ nobase_include_HEADERS = \
 	Pulsar/CommonOptions.h \
 	Pulsar/StandardOptions.h
 
-
-check_PROGRAMS = test_FrequencyMTM
-test_FrequencyMTM_SOURCES = test_FrequencyMTM.C
-
 ##############################################################################
 #
 # yamlcpp-dependent code
 #
 if HAVE_YAMLCPP
 
-  check_PROGRAMS += test_ConfigurableProjection
+  check_PROGRAMS = test_ConfigurableProjection
   test_ConfigurableProjection_SOURCES = test_ConfigurableProjection.C
 
 endif
-
-#############################################################################
 #
+#############################################################################
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \
