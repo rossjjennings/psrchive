@@ -5,7 +5,7 @@
 # Usage:  make html
 
 SPHINXBUILD   = sphinx-build
-SPHINXOPTS    = -j $(shell echo $$(($$(nproc) / 2)))
+SPHINXOPTS    = -j 2
 BUILDDIR      = _build
 DOXYGENDIR    = _doxygen
 APIDIR        = api
@@ -35,6 +35,7 @@ doxygen:
 		doxygen $(DOXYGENDIR)/$$proj.dox.override \
 			> $(DOXYGENDIR)/$$proj.out 2> $(DOXYGENDIR)/$$proj.err; \
 		grep '^Error' $(DOXYGENDIR)/$$proj.err || true; \
+		./clean_xml.sh $(DOXYGENDIR)/$$proj/xml; \
 	done
 
 # Per-class API trees. Generated each build; excluded from version control
