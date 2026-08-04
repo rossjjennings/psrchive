@@ -1,0 +1,22 @@
+# General patterns
+struct*.xml
+dir_*.xml
+
+# Standard library types
+classstring*.xml
+classvector*.xml
+classpair*.xml
+
+# Framework / Specific classes
+classStokes.xml
+class_stokes.xml
+classJones.xml
+class_jones.xml
+classPavApp.xml
+class_pav_app.xml
+classKaraFit.xml
+class_kara_fit.xml
+classMEAL*.xml
+class_m_e_a_l*.xml
+classsetMJD.xml
+

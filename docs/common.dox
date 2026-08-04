@@ -34,5 +34,6 @@ GENERATE_HTML          = NO
 GENERATE_XML           = YES
 
 # Do not generate documentation for things in the std namespace.
-EXCLUDE_SYMBOLS        = std
-
+EXCLUDE_SYMBOLS          = std
+EXCLUDE_EXTERNAL_SYMBOLS = YES
+EXCLUDE_PATTERNS         = */std/*
