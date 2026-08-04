@@ -26,8 +26,8 @@ namespace Pulsar
 {
   //! Contains the enumeration of all calibrator types
   /*! A separate namespace is used to keep the enumeration separate from
-    the definition of the Calibrator::Type class */
-
+    the definition of the Calibrator::Type class
+   */
   namespace CalibratorTypes
   {
     //! Flux calibrator

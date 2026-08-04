@@ -109,7 +109,6 @@ nobase_include_HEADERS = \
 	Pulsar/ScalarTemplateMatching.h \
 	Pulsar/ScatteredPowerCorrection.h \
 	Pulsar/ScrunchFactor.h \
-	Pulsar/SimPolnTiming.h \
 	Pulsar/Smooth.h \
 	Pulsar/SmoothMean.h \
 	Pulsar/SmoothMedian.h \

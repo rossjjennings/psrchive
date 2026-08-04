@@ -4,7 +4,7 @@ PSRCHIVE is an Open Source C++ development library for the analysis of pulsar as
 
 [Pulsar data analysis with PSRCHIVE](http://arxiv.org/abs/1205.6276) (van Straten, Demorest & Osłowski 2012) provides an overview of functionality, including detailed usage examples and directions to sample data.
 
-### Portability
+## Portability
 
 PSRCHIVE aims to increase the portability of both algorithms and data. The software is installed and compiled using the GNU autotools, and it is able to read astronomical data in a number of different file formats, including:
 

@@ -18,7 +18,7 @@ DOX_PROJECTS    = Util psrchive
 # Util is omitted: it is ~430 internal helper classes that push the total
 # stub count past RTD's 15-minute Community-tier build limit. api/util.md
 # still renders Util via a single `doxygenindex` directive.
-APIDOC_PROJECTS = psrchive
+APIDOC_PROJECTS = Util psrchive
 
 .PHONY: help clean doxygen apidoc sphinx html
 
@@ -50,12 +50,7 @@ apidoc: doxygen
 		rm -rf $$out; \
 		mkdir -p $$out; \
 		breathe-apidoc -q -o $$out -p $$proj -m -f -g class $$xml; \
-		: "Drop stub pages for compounds that have no XML in this project"; \
-		: "(e.g. std::allocator that Doxygen mentions but does not document)"; \
-		find $$out -mindepth 2 -name '*.rst' | while read f; do \
-			b=$$(basename $$f .rst); \
-			[ -f $$xml/$$b.xml ] || rm $$f; \
-		done; \
+		python post_apidoc.py $$xml $$out; \
 	done
 
 sphinx:
