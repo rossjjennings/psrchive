@@ -3,7 +3,9 @@
 Low-level utilities: FFT wrappers, ephemeris interfaces, TextInterface
 dynamic configuration framework.
 
-```{eval-rst}
-.. doxygenindex::
-   :project: Util
+```{toctree}
+:maxdepth: 1
+:glob:
+
+util/class/*
 ```

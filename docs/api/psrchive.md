@@ -6,8 +6,7 @@ RFIMitigation).
 
 ```{toctree}
 :maxdepth: 1
+:glob:
 
-psrchive/namespacelist
-psrchive/classlist
-psrchive/structlist
+psrchive/class/*
 ```
