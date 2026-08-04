@@ -5,13 +5,13 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/PolnSpectrumStats.h"
+#include "Pulsar/PolnFluctSpectStats.h"
 
 using namespace std;
 
 //! Get the Stokes parameters for the specified harmonic
 Stokes< std::complex< Estimate<double> > > 
-Pulsar::PolnSpectrumStats::get_stokes (unsigned ibin) const
+Pulsar::PolnFluctSpectStats::get_stokes (unsigned ibin) const
 {
   std::complex< Estimate<double> > zero ( 0.0, 0.0 );
   Stokes< std::complex< Estimate<double> > > result ( zero, zero, zero, zero );
@@ -26,21 +26,21 @@ Pulsar::PolnSpectrumStats::get_stokes (unsigned ibin) const
 }
 
 //! Returns the total squared invariant of the on-pulse phase bins
-Estimate<double> Pulsar::PolnSpectrumStats::get_total_squared_invariant() const
+Estimate<double> Pulsar::PolnFluctSpectStats::get_total_squared_invariant() const
 {
   return real->get_total_squared_invariant() + imag->get_total_squared_invariant();
 }
 
 //! Returns the variance of the baseline for the specified polarization
 std::complex< Estimate<double> >
-Pulsar::PolnSpectrumStats::get_baseline_variance (unsigned ipol) const
+Pulsar::PolnFluctSpectStats::get_baseline_variance (unsigned ipol) const
 {
   // note that real and imag store the baseline mask passed to their set_regions method
   return std::complex< Estimate<double> >
     ( real->get_baseline_variance(ipol), imag->get_baseline_variance(ipol) );
 }
 
-void Pulsar::PolnSpectrumStats::preprocess (PolnProfile* fourier)
+void Pulsar::PolnFluctSpectStats::preprocess (PolnProfile* fourier)
 {
   // convert to Stokes parameters
   fourier->convert_state (Signal::Stokes);

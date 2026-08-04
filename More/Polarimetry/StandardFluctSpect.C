@@ -5,16 +5,16 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/StandardSpectra.h"
+#include "Pulsar/StandardFluctSpect.h"
 #include "Pulsar/PolnProfileStats.h"
 
 using namespace std;
 
 //! Default constructor
 /*! If specified, baseline and on-pulse regions are defined by select */
-Calibration::StandardSpectra::StandardSpectra (const Pulsar::PolnProfile* pp)
+Calibration::StandardFluctSpect::StandardFluctSpect (const Pulsar::PolnProfile* pp)
 {
-  stats = new Pulsar::PolnSpectrumStats;
+  stats = new Pulsar::PolnFluctSpectStats;
 
   if (pp)
     select_profile (pp);
@@ -22,7 +22,7 @@ Calibration::StandardSpectra::StandardSpectra (const Pulsar::PolnProfile* pp)
 
 //! Select the baseline and on-pulse regions from profile
 void
-Calibration::StandardSpectra::select_profile (const Pulsar::PolnProfile* pp)
+Calibration::StandardFluctSpect::select_profile (const Pulsar::PolnProfile* pp)
 {
   stats->select_profile (pp);
   total_squared_invariant = stats->get_total_squared_invariant ();
@@ -30,12 +30,12 @@ Calibration::StandardSpectra::select_profile (const Pulsar::PolnProfile* pp)
 
 //! Set the profile from which estimates will be derived
 void
-Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p) try
+Calibration::StandardFluctSpect::set_profile (const Pulsar::PolnProfile* p) try
 {
   stats->set_profile (p);
 
 #ifdef _DEBUG
-  cerr << "Calibration::StandardSpectra::set_profile onpulse nbin=" 
+  cerr << "Calibration::StandardFluctSpect::set_profile onpulse nbin=" 
        << stats->get_real()->get_stats()->get_onpulse_nbin() << endl;
 #endif
 
@@ -43,25 +43,25 @@ Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p) try
 }
 catch (Error& error)
 {
-  throw error += "Calibration::StandardSpectra::set_profile";
+  throw error += "Calibration::StandardFluctSpect::set_profile";
 }
 
-Pulsar::PolnSpectrumStats* Calibration::StandardSpectra::get_stats ()
+Pulsar::PolnFluctSpectStats* Calibration::StandardFluctSpect::get_stats ()
 {
   return stats;
 }
 
-unsigned Calibration::StandardSpectra::get_last_harmonic () const
+unsigned Calibration::StandardFluctSpect::get_last_harmonic () const
 {
   return stats->get_last_harmonic ();
 }
 
-const Pulsar::PolnProfile* Calibration::StandardSpectra::get_fourier () const
+const Pulsar::PolnProfile* Calibration::StandardFluctSpect::get_fourier () const
 {
   return stats->get_fourier ();
 }
 
-void Calibration::StandardSpectra::set_normalize (bool norm)
+void Calibration::StandardFluctSpect::set_normalize (bool norm)
 {
   if (norm)
     normalize = new MEAL::NormalizeStokes;
@@ -71,7 +71,7 @@ void Calibration::StandardSpectra::set_normalize (bool norm)
 
 //! Get the Stokes parameters of the specified phase bin
 Stokes< std::complex< Estimate<double> > >
-Calibration::StandardSpectra::get_stokes (unsigned ibin)
+Calibration::StandardFluctSpect::get_stokes (unsigned ibin)
 {
   Stokes< Estimate<double> > re = stats->get_real()->get_stokes (ibin);
   Stokes< Estimate<double> > im = stats->get_imag()->get_stokes (ibin);

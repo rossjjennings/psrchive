@@ -241,7 +241,7 @@ void Calibration::ReceptionModelPlotter::plot_stokes (EstimatePlotter& plot,
 {
   char stokes_label[64] = "\\fiS'\\b\\d\\fnk";
   int  position = strlen (stokes_label) - 1;
-  char* stokes_index = "0123";
+  const char* stokes_index = "0123";
 
   plot.plot (iplot);
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -19,14 +19,11 @@
 
 using namespace std;
 
-void unload_variances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
-		       int ncpar, vector<float>& data);
+void unload_variances (fitsfile*, const Pulsar::PolnCalibratorExtension*, int ncpar, vector<float>& data);
 
-void unload_covariances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
-			 int ncovar, vector<float>& data);
+void unload_covariances (fitsfile*, const Pulsar::PolnCalibratorExtension*, int ncovar, vector<float>& data);
 
-void unload_solver (fitsfile* fptr, const Pulsar::PolnCalibratorExtension* pce,
-		    vector<float>& data);
+void unload_solver (fitsfile* fptr, const Pulsar::PolnCalibratorExtension* pce, vector<float>& data);
 
 void delete_solver (fitsfile* fptr);
 
@@ -239,8 +236,10 @@ void unload_solver (fitsfile* fptr,
   chisq.resize( nchan );
   vector<unsigned> nfree( nchan, 0 );
   vector<unsigned> nfit( nchan, 0 );
-  vector<float> log_det_curvature( nchan, 0.0 );
-  vector<float> log_cond_curvature( nchan, 0.0 );
+  vector<float> log_tr_covariance( nchan, 0.0 );
+  vector<float> log_det_covariance( nchan, 0.0 );
+  vector<float> log_cond_covariance( nchan, 0.0 );
+  vector<float> log_prod_variance( nchan, 0.0 );
 
   for (unsigned i = 0; i < nchan; i++)
   {
@@ -249,16 +248,20 @@ void unload_solver (fitsfile* fptr,
       chisq[i] = pce->get_transformation(i)->get_chisq();
       nfree[i] = pce->get_transformation(i)->get_nfree();
       nfit[i]  = pce->get_transformation(i)->get_nfit();
-      log_det_curvature[i] = pce->get_transformation(i)->get_log_det_curvature();
-      log_cond_curvature[i] = pce->get_transformation(i)->get_log_cond_curvature();
+      log_tr_covariance[i] = pce->get_transformation(i)->get_log_tr_covariance();
+      log_det_covariance[i] = pce->get_transformation(i)->get_log_det_covariance();
+      log_cond_covariance[i] = pce->get_transformation(i)->get_log_cond_covariance();
+      log_prod_variance[i] = pce->get_transformation(i)->get_log_prod_variance();
    }
     else
     {
       chisq[i] = 0.0;
       nfree[i] = 0;
       nfit[i]  = 0;
-      log_det_curvature[i]  = 0.0;
-      log_cond_curvature[i]  = 0.0;
+      log_tr_covariance[i]  = 0.0;
+      log_det_covariance[i]  = 0.0;
+      log_cond_covariance[i]  = 0.0;
+      log_prod_variance[i]  = 0.0;
     }
   }
 
@@ -267,8 +270,10 @@ void unload_solver (fitsfile* fptr,
   psrfits_write_col (fptr, "CHISQ", 1, chisq, no_dimensions);
   psrfits_write_col (fptr, "NFREE", 1, nfree, no_dimensions);
   psrfits_write_col (fptr, "NFIT",  1, nfit,  no_dimensions);
-  psrfits_write_col (fptr, "LN_DET_H", 1, log_det_curvature, no_dimensions);
-  psrfits_write_col (fptr, "LN_COND", 1, log_cond_curvature, no_dimensions);
+  psrfits_write_col (fptr, "LN_TR",  1, log_tr_covariance, no_dimensions);
+  psrfits_write_col (fptr, "LN_DET", 1, log_det_covariance, no_dimensions);
+  psrfits_write_col (fptr, "LN_COND", 1, log_cond_covariance, no_dimensions);
+  psrfits_write_col (fptr, "LN_PROD", 1, log_prod_variance, no_dimensions);
 }
 
 void delete_solver (fitsfile* fptr)
@@ -276,6 +281,8 @@ void delete_solver (fitsfile* fptr)
   psrfits_delete_col (fptr, "CHISQ");
   psrfits_delete_col (fptr, "NFREE");
   psrfits_delete_col (fptr, "NFIT");
-  psrfits_delete_col (fptr, "LN_DET_H");
+  psrfits_delete_col (fptr, "LN_TR");
+  psrfits_delete_col (fptr, "LN_DET");
   psrfits_delete_col (fptr, "LN_COND");
+  psrfits_delete_col (fptr, "LN_PROD");
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2024 by Willem van Straten
+ *   Copyright (C) 2003-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -97,8 +97,10 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
       get_transformation(ichan)->set_chisq( solver->get_chisq() );
       get_transformation(ichan)->set_nfree( solver->get_nfree() );
       get_transformation(ichan)->set_nfit( solver->get_nparam_infit() );
-      get_transformation(ichan)->set_log_det_curvature( solver->get_log_det_curvature() );
-      get_transformation(ichan)->set_log_cond_curvature( solver->get_log_cond_curvature() );
+      get_transformation(ichan)->set_log_tr_covariance( solver->get_log_tr_covariance() );
+      get_transformation(ichan)->set_log_det_covariance( solver->get_log_det_covariance() );
+      get_transformation(ichan)->set_log_cond_covariance( solver->get_log_cond_covariance() );
+      get_transformation(ichan)->set_log_prod_variance( solver->get_log_prod_variance() );
     }
   }
 }

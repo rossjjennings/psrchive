@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -383,24 +383,44 @@ double PolnCalibratorExtension::Transformation::get_reduced_chisq () const
     return 0.0;
 }
 
-double PolnCalibratorExtension::Transformation::get_log_det_curvature () const
+double PolnCalibratorExtension::Transformation::get_log_tr_covariance () const
 {
-  return log_det_curvature;
+  return log_tr_covariance;
 }
 
-void PolnCalibratorExtension::Transformation::set_log_det_curvature (double val)
+void PolnCalibratorExtension::Transformation::set_log_tr_covariance (double val)
 {
-  log_det_curvature = val;
+  log_tr_covariance = val;
 }
 
-double PolnCalibratorExtension::Transformation::get_log_cond_curvature () const
+double PolnCalibratorExtension::Transformation::get_log_det_covariance () const
 {
-  return log_cond_curvature;
+  return log_det_covariance;
 }
 
-void PolnCalibratorExtension::Transformation::set_log_cond_curvature (double val)
+void PolnCalibratorExtension::Transformation::set_log_det_covariance (double val)
 {
-  log_cond_curvature = val;
+  log_det_covariance = val;
+}
+
+double PolnCalibratorExtension::Transformation::get_log_cond_covariance () const
+{
+  return log_cond_covariance;
+}
+
+void PolnCalibratorExtension::Transformation::set_log_cond_covariance (double val)
+{
+  log_cond_covariance = val;
+}
+
+double PolnCalibratorExtension::Transformation::get_log_prod_variance () const
+{
+  return log_prod_variance;
+}
+
+void PolnCalibratorExtension::Transformation::set_log_prod_variance (double val)
+{
+  log_prod_variance = val;
 }
 
 double PolnCalibratorExtension::Transformation::get_Akaike_information_criterion() const
@@ -414,6 +434,7 @@ double PolnCalibratorExtension::Transformation::get_Akaike_information_criterion
   return chisq + 2*nfit * (1.0 + (nfit + 1.0) / (nfree - 1.0));
 }
 
+/*! Also known as the Schwarz (1978) criterion */
 double PolnCalibratorExtension::Transformation::get_Bayesian_information_criterion() const
 {
   if (nfree == 0)
@@ -436,17 +457,52 @@ double PolnCalibratorExtension::Transformation::get_geometric_information_criter
   return chisq + 2*nfit + 2*N*ndim;
 }
 
+/*! Bozdogan's ICOMP */
+double PolnCalibratorExtension::Transformation::get_information_complexity() const
+{
+  if (nfree == 0)
+    return 0;
+
+#if _DEBUG
+  cerr << "PolnCalibratorExtension::Transformation::get_information_complexity:"
+          " log(tr(cov))=" << log_tr_covariance <<
+          " log(det(cov))=" << log_det_covariance << endl;
+#endif
+
+  return chisq + nfit * ( log_tr_covariance - log(nfit) ) - log_det_covariance;
+}
+
 double PolnCalibratorExtension::Transformation::get_stochastic_information_complexity() const
 {
   if (nfree == 0)
     return 0;
 
 #if _DEBUG
-  cerr << "PolnCalibratorExtension::Transformation::get_stochastic_information_complexity: log(det(curv))=" << log_det_curvature << endl;
+  cerr << "PolnCalibratorExtension::Transformation::get_stochastic_information_complexity: log(det(cov))=" << log_det_covariance << endl;
 #endif
 
   double ndat = nfree + nfit;
-  return chisq + nfit * log(ndat) + log_det_curvature;
+  return chisq + nfit * log(ndat) - log_det_covariance;
+}
+
+double PolnCalibratorExtension::Transformation::get_correlation_information_complexity() const
+{
+  if (nfree == 0)
+    return 0;
+
+#if _DEBUG
+  cerr << "PolnCalibratorExtension::Transformation::get_correlation_information_complexity:"
+          " log(prod(cov))=" << log_prod_variance << 
+          " log(det(cov))=" << log_det_covariance << endl;
+#endif
+
+  /* log|R| = log|C| - log|D| 
+     where
+     - R is the correlation matrix
+     - C is the covariance matrix
+     - D is the diagonal of C (variance matrix)
+  */
+  return get_stochastic_information_complexity () + log_prod_variance;
 }
 
 //! Get the covariance matrix of the model paramters

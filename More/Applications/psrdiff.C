@@ -47,6 +47,7 @@ void usage ()
     " -M metafile      Specify list of archive filenames in metafile \n"
     " -X               print the reduced chi squared of the difference \n"
     " -W               print the weighted reduced chi squared of the difference \n"
+    " -w [pol|chan]   print the weighted reduced chi squared for each pol or chan \n"
     " -q               Quiet mode \n"
     " -v               Verbose mode \n"
     " -V               Very verbose mode \n"
@@ -64,6 +65,9 @@ bool print_reduced_chisq = false;
 
 // weight the reduced chi squared by the inverse of the off-pulse variance
 bool weighted_reduced_chisq = false;
+
+// print the weighted reduced chisq for each 'what'
+std::string weighted_reduced_chisq_what;
 
 void diff_two (const std::string& fileA, const std::string& fileB);
 
@@ -84,6 +88,9 @@ public:
 
   //! return the reduced chisq for an entire archive
   double reduced_chisq(const Archive*);
+
+  //! return the reduced chisq for the specified ipol
+  double reduced_chisq_pol(const Archive* archive, unsigned ipol);
 
   //! Perform any setup for the current sub-integration
   virtual void set_subint (const Integration*) {}
@@ -140,7 +147,7 @@ int main (int argc, char** argv) try
   bool likelihood = false;
 
   char c;
-  while ((c = getopt(argc, argv, "c:dfhLM:pqs:tWXvV")) != -1)
+  while ((c = getopt(argc, argv, "c:dfhLM:pqs:tWw:XvV")) != -1)
   {
     switch (c)
     {
@@ -200,6 +207,12 @@ int main (int argc, char** argv) try
     case 'W':
       print_reduced_chisq = true;
       weighted_reduced_chisq = true;
+      break;
+
+    case 'w':
+      print_reduced_chisq = true;
+      weighted_reduced_chisq = true;
+      weighted_reduced_chisq_what = optarg;
       break;
     }
   }
@@ -463,7 +476,19 @@ void diff_two (const std::string& fileA, const std::string& fileB)
     {
       TemplateDifference diff;
       diff.set_reference(A);
-      cout << "Weighted reduced chisq: " << diff.reduced_chisq(B) << endl;
+
+      if (weighted_reduced_chisq_what.empty())
+      {
+        cout << "Weighted reduced chisq: " << diff.reduced_chisq(B) << endl;
+      }
+      else if (weighted_reduced_chisq_what == "pol")
+      {
+        unsigned npol=B->get_npol();
+        for (unsigned ipol=0; ipol < npol; ipol++)
+        {
+          cout << ipol << " " << diff.reduced_chisq_pol(B, ipol) << endl;
+        }
+      }
     }
     else
     {
@@ -498,12 +523,26 @@ void diff_two (const std::string& fileA, const std::string& fileB)
 
 double Difference::reduced_chisq(const Archive* archive)
 {
+  const unsigned npol = archive->get_npol();
+  double total_chisq = 0.0;
+
+  for (ipol=0; ipol < npol; ipol++)
+  {
+     total_chisq += reduced_chisq_pol(archive, ipol);
+  }
+
+  return total_chisq / npol;
+}
+
+double Difference::reduced_chisq_pol(const Archive* archive, unsigned _ipol)
+{
   const unsigned nsubint = archive->get_nsubint();
   const unsigned nchan = archive->get_nchan();
-  const unsigned npol = archive->get_npol();
-  
+
   double total_chisq = 0.0;
   unsigned count = 0;
+
+  ipol = _ipol;
 
   for (isubint=0; isubint < nsubint; isubint++)
   {
@@ -515,17 +554,14 @@ double Difference::reduced_chisq(const Archive* archive)
       if (subint->get_weight(ichan) == 0 || get_weight(ichan) == 0)
         continue;
 
-      for (ipol=0; ipol < npol; ipol++)
-      {
-        const Profile* profile = subint->get_Profile (ipol,ichan);
-        double chi2 = chisq(profile);
+      const Profile* profile = subint->get_Profile (ipol,ichan);
+      double chi2 = chisq(profile);
 
-        if (verbose)
-          cout << ichan << " ipol=" << ipol << " chisq=" << chi2 << endl;
+      if (verbose)
+        cout << ichan << " ipol=" << ipol << " chisq=" << chi2 << endl;
 
-        total_chisq += chi2;
-        count ++;
-      }
+      total_chisq += chi2;
+      count ++;
     }
   }
 

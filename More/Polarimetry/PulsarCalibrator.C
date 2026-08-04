@@ -7,8 +7,8 @@
 
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/PolnProfileFit.h"
-#include "Pulsar/StandardSpectra.h"
-#include "Pulsar/PolnSpectrumStats.h"
+#include "Pulsar/StandardFluctSpect.h"
+#include "Pulsar/PolnFluctSpectStats.h"
 #include "Pulsar/PolnProfileStats.h"
 
 #include "Pulsar/FrontendCorrection.h"
@@ -125,7 +125,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   if (has_Receiver())
   {
     if (verbose)
-      cerr << "PulsarCalibrator::create_model receiver set" << endl;
+      cerr << "PulsarCalibrator::set_standard receiver set" << endl;
 
     Pauli::basis().set_basis( get_Receiver()->get_basis() );
   }
@@ -152,7 +152,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     Reference::To<Integration> clone = integration->clone();
     clone->expert()->fscrunch ();
 
-    Pulsar::PolnSpectrumStats stats;
+    Pulsar::PolnFluctSpectStats stats;
     stats.select_profile( clone->new_PolnProfile (0) );
     stats.get_regions( onpulse, baseline );
 
@@ -198,8 +198,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 		 "template nchan=%d != required nchan=%d", model_nchan, nchan);
 
   correct_interstellar_Faraday_rotation =
-    standard->get_faraday_corrected() ||
-    (model_nchan == 1 && nchan > model_nchan);
+    standard->get_faraday_corrected() || (model_nchan == 1 && nchan > model_nchan);
 
   mtm.resize (nchan);
 
@@ -226,8 +225,8 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     if (integration->get_weight (mchan) == 0)
     {
       if (verbose > 2)
-	cerr << "PulsarCalibrator::build ichan="
-	     << ichan << " flagged invalid" << endl;
+        cerr << "PulsarCalibrator::build ichan="
+            << ichan << " flagged invalid" << endl;
 
       continue;
     }
@@ -239,6 +238,12 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 
     if (shared_phase)
       mtm[ichan]->share_phase ();
+
+    if (allchan_phases)
+    {
+      mtm[ichan]->share_phase ();
+      mtm[ichan]->set_phases (allchan_phases);
+    }
 
     // the equation transformation will be managed by the SignalPath class
     mtm[ichan]->manage_equation_transformation = false;
@@ -276,10 +281,12 @@ catch (Error& error)
 unsigned Pulsar::PulsarCalibrator::get_nchan () const
 {
   if (verbose > 2)
-    cerr << "PulsarCalibrator::get_nchan" << endl;
+    cerr << "PulsarCalibrator::get_nchan mtm.size=" << mtm.size() << endl;
 
   if (mtm.size())
+  {
     return mtm.size();
+  }
 
   return SystemCalibrator::get_nchan ();
 }

@@ -6,29 +6,28 @@
  *
  ***************************************************************************/
 
-// psrchive/More/Polarimetry/Pulsar/StandardSpectra.h
+// psrchive/More/Polarimetry/Pulsar/StandardFluctSpect.h
 
-#ifndef __Calibration_StandardSpectra_H
-#define __Calibration_StandardSpectra_H
+#ifndef __Calibration_StandardFluctSpect_H
+#define __Calibration_StandardFluctSpect_H
 
-#include "Pulsar/PolnSpectrumStats.h"
+#include "Pulsar/PolnFluctSpectStats.h"
 #include "MEAL/NormalizeStokes.h"
 
 namespace Calibration {
 
-  //! Computes the normalized complex Stokes parameters in each harmonic
-
+  //! Computes the normalized complex-valued Stokes parameters in each harmonic
   /*!
+    The harmonics are those of the fluctuation power spectrum.
     This class is the Fourier domain equivalent of the StandardData class.
   */
-
-  class StandardSpectra : public Reference::Able
+  class StandardFluctSpect : public Reference::Able
   {
   public:
     
     //! Default constructor
     /*! If specified, baseline and last harmonic are defined by select */
-    StandardSpectra (const Pulsar::PolnProfile* select = 0);
+    StandardFluctSpect (const Pulsar::PolnProfile* select = 0);
 
     //! Select the baseline and last harmonic from profile
     void select_profile (const Pulsar::PolnProfile*);
@@ -49,14 +48,14 @@ namespace Calibration {
     Stokes< std::complex< Estimate<double> > > get_stokes (unsigned ibin);
 
     //! Get the statistical interface to the data
-    Pulsar::PolnSpectrumStats* get_stats ();
+    Pulsar::PolnFluctSpectStats* get_stats ();
 
     //! Get the total squared invariant used to normalize the Stokes parameters
     Estimate<double> get_total_squared_invariant() { return total_squared_invariant; }
     
  protected:
 
-    Reference::To< Pulsar::PolnSpectrumStats > stats;
+    Reference::To< Pulsar::PolnFluctSpectStats > stats;
     Reference::To< MEAL::NormalizeStokes > normalize;
 
     Estimate<double> total_squared_invariant;

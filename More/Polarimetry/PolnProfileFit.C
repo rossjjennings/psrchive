@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/PolnProfileFit.h"
-#include "Pulsar/StandardSpectra.h"
+#include "Pulsar/StandardFluctSpect.h"
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
@@ -89,7 +89,7 @@ void PolnProfileFit::set_normalize_by_invariant (bool set)
 
 void PolnProfileFit::init ()
 {
-  standard_data = new StandardSpectra;
+  standard_data = new StandardFluctSpect;
 
   phases = new MEAL::PhaseGradients<MEAL::Complex2>;
   DEBUG("PolnProfileFit::init new phases=" << (void*) phases);
@@ -108,6 +108,11 @@ void PolnProfileFit::init ()
   fit_debug = false;
   phase_lock = false;
   shared_phase = false;
+}
+
+void PolnProfileFit::set_phases (MEAL::PhaseGradients<MEAL::Complex2>* ph)
+{
+  phases = ph;
 }
 
 void PolnProfileFit::set_plan (FTransform::Plan* p)
@@ -559,7 +564,7 @@ const MEAL::ReceptionModel* PolnProfileFit::get_equation () const
 }
 
 //! Get the statistical interface to the data
-StandardSpectra* PolnProfileFit::get_spectra ()
+StandardFluctSpect* PolnProfileFit::get_spectra ()
 {
   return standard_data;
 }

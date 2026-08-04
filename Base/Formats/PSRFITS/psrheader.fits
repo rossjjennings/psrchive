@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '6.9             '   / Header version
+HDRVER  = '7.0             '   / Header version
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -461,9 +461,13 @@ TTYPE#  = NFREE                / Number of degrees of freedom
 TFORM#  = J                    / NCHAN long (32-bit) integers
 TTYPE#  = NFIT                 / Number of model parameters varied in fit
 TFORM#  = J                    / NCHAN long (32-bit) integers
-TTYPE#  = LN_DET_H             / Logarithm of chi-squared Hessian determinant
+TTYPE#  = LN_TR                / Logarithm of trace of total covariance matrix
 TFORM#  = E                    / NCHAN floats
-TTYPE#  = LN_COND              / Logarithm of chi-squared Hessian condition no.
+TTYPE#  = LN_DET               / Logarithm of determinant of covariance matrix
+TFORM#  = E                    / NCHAN floats
+TTYPE#  = LN_COND              / Logarithm of condition number of covariance
+TFORM#  = E                    / NCHAN floats
+TTYPE#  = LN_PROD              / Logarithm of product of variances
 TFORM#  = E                    / NCHAN floats
 END
 #

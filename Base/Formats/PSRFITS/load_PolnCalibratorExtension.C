@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -21,14 +21,11 @@
 
 using namespace std;
 
-void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		     int ncpar, vector<float>& data);
+void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, int ncpar, vector<float>& data);
 
-void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		       int ncovar, vector<float>& data);
+void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, int ncovar, vector<float>& data);
 
-void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
-		  vector<float>& data);
+void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<float>& data);
 
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
 {
@@ -319,32 +316,69 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<f
     nfit.resize (0);
   }
 
-  // WvS new on 24 Dec 2024 - needed to compute the SIC
-  vector<float> log_det_curvature ( nchan, 0.0 );
+  // WvS new on 18 Jun 2026 - needed to compute the ICOMP
+  vector<float> log_tr_covariance ( nchan, 0.0 );
   try
   {
-    psrfits_read_col (fptr, "LN_DET_H", log_det_curvature);
+    psrfits_read_col (fptr, "LN_TR", log_tr_covariance);
   }
   catch (Error& error)
   {
     if (Pulsar::Archive::verbose > 2)
-      cerr << "FITSArchive::load_PolnCalibratorExtension no LN_DET_H" << endl;
-    log_det_curvature.resize (0);
+      cerr << "FITSArchive::load_PolnCalibratorExtension no LN_TR" << endl;
+    log_tr_covariance.resize (0);
+  }
+
+  // WvS new on 24 Dec 2024 - needed to compute the SIC
+  vector<float> log_det_covariance ( nchan, 0.0 );
+  try
+  {
+    psrfits_read_col (fptr, "LN_DET", log_det_covariance);
+  }
+  catch (Error& error)
+  {
+    // WvS on 18 Jun 2026
+    // backward compatibility: logarithim of determinant of curvature matrix
+    try 
+    {
+      psrfits_read_col (fptr, "LN_DET_H", log_det_covariance);
+      // negate log(det(cov)) = -log(det(curv))
+      for (auto& el: log_det_covariance) { el = -el;}
+    }
+    catch (Error& error)
+    {
+      if (Pulsar::Archive::verbose > 2)
+        cerr << "FITSArchive::load_PolnCalibratorExtension no LN_DET_H" << endl;
+      log_det_covariance.resize (0);
+    }
   }
 
   // WvS new on 29 Dec 2024
-  vector<float> log_cond_curvature ( nchan, 0.0 );
+  vector<float> log_cond_covariance ( nchan, 0.0 );
   try
   {
-    psrfits_read_col (fptr, "LN_COND", log_cond_curvature);
+    psrfits_read_col (fptr, "LN_COND", log_cond_covariance);
   }
   catch (Error& error)
   {
     if (Pulsar::Archive::verbose > 2)
       cerr << "FITSArchive::load_PolnCalibratorExtension no LN_COND" << endl;
-    log_cond_curvature.resize (0);
+    log_cond_covariance.resize (0);
   }
 
+  // WvS new on 18 Jun 2026 - needed to compute the information complexity of the Fisher information correlation matrix
+  vector<float> log_prod_variance ( nchan, 0.0 );
+  try
+  {
+    psrfits_read_col (fptr, "LN_PROD", log_prod_variance);
+  }
+  catch (Error& error)
+  {
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "FITSArchive::load_PolnCalibratorExtension no LN_PROD" << endl;
+    log_prod_variance.resize (0);
+  }
+  
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
     if (! pce->get_valid(ichan))
@@ -357,13 +391,21 @@ void load_solver (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce, vector<f
     if (nfit.size() == nchan)
       pce->get_transformation(ichan)->set_nfit( nfit[ichan] );
 
+    // WvS new on 18 Jun 2026 - needed to compute the ICOMP
+    if (log_tr_covariance.size() == nchan)
+      pce->get_transformation(ichan)->set_log_tr_covariance( log_tr_covariance[ichan] );
+
     // WvS new on 24 Dec 2024 - needed to compute the SIC
-    if (log_det_curvature.size() == nchan)
-      pce->get_transformation(ichan)->set_log_det_curvature( log_det_curvature[ichan] );
+    if (log_det_covariance.size() == nchan)
+      pce->get_transformation(ichan)->set_log_det_covariance( log_det_covariance[ichan] );
 
     // WvS new on 29 Dec 2024
-    if (log_cond_curvature.size() == nchan)
-      pce->get_transformation(ichan)->set_log_cond_curvature( log_cond_curvature[ichan] );
+    if (log_cond_covariance.size() == nchan)
+      pce->get_transformation(ichan)->set_log_cond_covariance( log_cond_covariance[ichan] );
+
+    // WvS new on 18 Jun 2026 - needed to compute the information complexity of the Fisher information correlation matrix
+    if (log_prod_variance.size() == nchan)
+      pce->get_transformation(ichan)->set_log_prod_variance( log_prod_variance[ichan] );
   }
 
   pce->set_has_solver (true);

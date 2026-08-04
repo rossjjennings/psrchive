@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2008-2025 by Willem van Straten
+ *   Copyright (C) 2008-2026 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -31,6 +31,7 @@ namespace Pulsar
   class CalibratorStokes;
   class VariableTransformationManager;
   class VariableFaradayRotation;
+  class SpectralFaradayRotation;
 
   //! PolnCalibrator with estimated calibrator Stokes parameters
   /*! The SystemCalibrator is the virtual base class of polarization
@@ -58,12 +59,6 @@ namespace Pulsar
     
     //! Construct with optional processed calibrator Archive
     SystemCalibrator (Archive* archive = 0);
-
-    //! Copy constructor
-    SystemCalibrator (const SystemCalibrator&);
-
-    //! Destructor
-    virtual ~SystemCalibrator ();
 
     //! Share reception model and common transformations of other instance
     /*! Common transformations are experienced by all sources. */
@@ -328,11 +323,16 @@ namespace Pulsar
     bool match_check_nchan;
     std::string mismatch_reason;
   
-    //! SystemCalibrator with whom common reception model is shared
-    /* and common polarimetric transformations */
+    //! SystemCalibrator with whom common reception model and common polarimetric transformations are shared
     Reference::To<SystemCalibrator> partner;
     void setup_sharing (unsigned ichan);
     
+    //! If set, all frequency channels are simultaneously solved in a single measurement equation 
+    Reference::To<MEAL::ReceptionModel> allchan_equation;
+
+    //! If set, all frequency channels are passed through a single response
+    Reference::To<MEAL::Complex2> allchan_response;
+
     friend class SystemCalibratorPlotter;
     friend class MatrixTemplateMatching;
 
@@ -365,11 +365,14 @@ namespace Pulsar
     //! The ionospheric and interstellar Faraday rotation transformation
     Reference::To<VariableFaradayRotation> faraday_rotation;
 
+    //! The Faraday rotation transformation shared by all channels
+    Reference::To<SpectralFaradayRotation> allchan_faraday_rotation;
+
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<const CalibratorStokes> calibrator_stokes;
 
     //! Response transformation
-    Reference::To< MEAL::Complex2 > response;
+    Reference::To<MEAL::Complex2> response;
 
     //! Indeces of response parameters to be held fixed
     std::vector<unsigned> response_fixed;
@@ -403,6 +406,9 @@ namespace Pulsar
 
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
+
+    //! Set up the reception model to produce configured reports 
+    void setup_reports (MEAL::ReceptionModel* equation, const std::string& postfix);
 
     typedef Reference::To<Calibration::SourceEstimate> SourceEstimate;
     

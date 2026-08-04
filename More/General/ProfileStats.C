@@ -32,10 +32,10 @@ Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
 {
   instance_count ++;
 
-  PeakConsecutive* on_est = new PeakConsecutive;
+  Reference::To<PeakConsecutive> on_est = new PeakConsecutive;
   set_onpulse_estimator (on_est);
 
-  GaussianBaseline* off_est = new GaussianBaseline;
+  Reference::To<GaussianBaseline> off_est = new GaussianBaseline;
   set_baseline_estimator (off_est);
   on_est->set_baseline_estimator (off_est);
 
@@ -204,6 +204,9 @@ void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
     
   built = false;
   regions_set = false;
+
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_baseline_estimator done" << endl;
 }
 
 void Pulsar::ProfileStats::set_width_estimator (WidthEstimator* est)

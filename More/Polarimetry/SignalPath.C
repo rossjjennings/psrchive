@@ -103,8 +103,7 @@ void SignalPath::set_response (MEAL::Complex2* x)
 }
 
 //! Allow the specified response parameter to vary as a function of time 
-void SignalPath::set_response_variation (unsigned iparam, 
-					 Univariate<Scalar>* function)
+void SignalPath::set_response_variation (unsigned iparam, Univariate<Scalar>* function)
 {
   if (!built)
     build ();
