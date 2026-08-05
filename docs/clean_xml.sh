@@ -44,7 +44,7 @@ remove_xml_and_index_entry() {
 
 # --- Phase 1: Namespace Deduplication ---
 for ns in "${KNOWN_NAMESPACES[@]}"; do
-  for ns_file in "$XML_DIR"/class"${ns}"_1_1*.xml "$XML_DIR"/class_"${ns}"_1_1*.xml; do
+  for ns_file in "$XML_DIR"/class"${ns}"_1_1*.xml; do
     [ -e "$ns_file" ] || continue
 
     filename=$(basename "$ns_file")
@@ -53,13 +53,10 @@ for ns in "${KNOWN_NAMESPACES[@]}"; do
     while [[ "$curr_filename" == *"_1_1"* ]]; do
       suffix="${curr_filename#*_1_1}"
 
-      if [[ "$suffix" == _* ]]; then
-        candidate_filename="class$suffix"
-      else
-        candidate_filename="class_$suffix"
-      fi
-
+      candidate_filename="class$suffix"
       candidate_path="$XML_DIR/$candidate_filename"
+
+      echo "Testing $candidate_path"
 
       if [ -f "$candidate_path" ] && [ "$candidate_path" != "$ns_file" ]; then
         remove_xml_and_index_entry "$candidate_path"
