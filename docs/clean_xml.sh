@@ -56,8 +56,6 @@ for ns in "${KNOWN_NAMESPACES[@]}"; do
       candidate_filename="class$suffix"
       candidate_path="$XML_DIR/$candidate_filename"
 
-      echo "Testing $candidate_path"
-
       if [ -f "$candidate_path" ] && [ "$candidate_path" != "$ns_file" ]; then
         remove_xml_and_index_entry "$candidate_path"
       fi

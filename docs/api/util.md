@@ -1,7 +1,6 @@
 # Utility Library
 
-Low-level utilities: FFT wrappers, ephemeris interfaces, TextInterface
-dynamic configuration framework.
+Utilities such as FFT wrappers, command-line parsers, tempo/tempo2 interfaces, ...
 
 ```{toctree}
 :maxdepth: 1
