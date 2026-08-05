@@ -11,6 +11,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
@@ -23,6 +24,13 @@ breathe_projects = {
     "util": "_doxygen/util/xml",
 }
 breathe_default_project = "psrchive"
+
+# -- Intersphinx (cross-references to MEAL and EPSIC) -----------------------
+
+intersphinx_mapping = {
+    "meal": ("https://meal.readthedocs.io/en/latest/", None),
+    "epsic": ("https://epsic.readthedocs.io/en/latest/", None),
+}
 
 # -- General configuration ---------------------------------------------------
 
