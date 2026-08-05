@@ -20,7 +20,7 @@ extensions = [
 
 breathe_projects = {
     "psrchive": "_doxygen/psrchive/xml",
-    "Util": "_doxygen/Util/xml",
+    "util": "_doxygen/util/xml",
 }
 breathe_default_project = "psrchive"
 

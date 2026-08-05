@@ -10,15 +10,8 @@ BUILDDIR      = _build
 DOXYGENDIR    = _doxygen
 APIDIR        = api
 
-# Doxygen project name <-> api/ subdirectory
-# (Doxygen project names are case-sensitive in conf.py; api/ uses lower-case)
-DOX_PROJECTS    = Util psrchive
-
-# Subset of DOX_PROJECTS that breathe-apidoc splits into per-class stubs.
-# Util is omitted: it is ~430 internal helper classes that push the total
-# stub count past RTD's 15-minute Community-tier build limit. api/util.md
-# still renders Util via a single `doxygenindex` directive.
-APIDOC_PROJECTS = Util psrchive
+# Doxygen project name -> api/ subdirectory
+DOX_PROJECTS  = util psrchive
 
 .PHONY: help clean doxygen apidoc sphinx html
 
@@ -32,7 +25,7 @@ doxygen:
 	@for proj in $(DOX_PROJECTS); do \
 		echo "==> Doxygen: $$proj"; \
 		mkdir -p $(DOXYGENDIR)/$$proj; \
-		doxygen $(DOXYGENDIR)/$$proj.dox.override \
+		doxygen $$proj.dox \
 			> $(DOXYGENDIR)/$$proj.out 2> $(DOXYGENDIR)/$$proj.err; \
 		grep '^Error' $(DOXYGENDIR)/$$proj.err || true; \
 		./clean_xml.sh $(DOXYGENDIR)/$$proj/xml; \
@@ -43,8 +36,8 @@ doxygen:
 # file,namespace}/*.rst plus *list.rst index files that the per-project
 # .md page wires into a {toctree}.
 apidoc: doxygen
-	@for proj in $(APIDOC_PROJECTS); do \
-		out=$(APIDIR)/$$(echo $$proj | tr '[:upper:]' '[:lower:]'); \
+	@for proj in $(DOX_PROJECTS); do \
+		out=$(APIDIR)/$$proj; \
 		xml=$(DOXYGENDIR)/$$proj/xml; \
 		echo "==> breathe-apidoc: $$proj -> $$out"; \
 		rm -rf $$out; \
@@ -60,8 +53,4 @@ html: apidoc sphinx
 	@echo "Build finished. Open $(BUILDDIR)/html/index.html"
 
 clean:
-	rm -rf $(BUILDDIR) $(DOXYGENDIR)/*/
-	@for proj in $(APIDOC_PROJECTS); do \
-		out=$(APIDIR)/$$(echo $$proj | tr '[:upper:]' '[:lower:]'); \
-		rm -rf $$out; \
-	done
+	rm -rf $(BUILDDIR) $(DOXYGENDIR) $(APIDIR)/*/class
