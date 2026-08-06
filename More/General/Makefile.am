@@ -123,7 +123,6 @@ nobase_include_HEADERS = \
 	Pulsar/Statistics.h \
 	Pulsar/StatisticsInterface.h \
 	Pulsar/Subtract.h \
-	Pulsar/SyntheticPolnProfile.h \
 	Pulsar/TargetDuration.h \
 	Pulsar/TimeAppend.h \
 	Pulsar/TimeDomainCovariance.h \
