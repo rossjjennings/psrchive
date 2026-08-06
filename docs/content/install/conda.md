@@ -9,20 +9,20 @@ the [miniconda
 installation instructions](https://www.anaconda.com/docs/getting-started/miniconda/main).
 First, add the `conda-forge` channel (this can also be done by editing `$HOME/.condarc`):
 
-```
+```sh
 conda config --add channels conda-forge
 ```
 
 Then either create a new environment ("pulsar" in this example) that includes psrchive:
 
-```
+```sh
 conda create -n pulsar psrchive
 conda activate pulsar
 ```
 
 Or, add it to an existing environment:
 
-```
+```sh
 conda activate my_env
 conda install psrchive
 ```

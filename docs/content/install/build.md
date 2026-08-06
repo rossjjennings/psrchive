@@ -9,7 +9,7 @@ directory is set when you run the `configure` script, and is
 stored in the Makefile variable, `$prefix`. When you type
 `make install`, build products are installed in
 
-```
+```text
 $prefix/include
 $prefix/lib
 $prefix/bin
@@ -24,7 +24,8 @@ directory will be set to `$PSRHOME/$LOGIN_ARCH`.
 
 2. Command line: the install directory may be specified using the
 `--prefix` argument to the `configure` script; e.g. 
-```
+
+```sh
 ./configure --prefix=$HOME/Pulsar
 ```
 
@@ -36,27 +37,34 @@ will default to `/usr/local/psrchive`.
 
 To configure the compilation and installation of PSRCHIVE, run the
 configure script; e.g.
-```
+
+```sh
 ./configure
 ```
+
 will configure the compilation of static libraries.  To compile
 shared object libraries that can be dynamically loaded at runtime,
-```
+
+```sh
 ./configure --enable-shared
 ```
 
 The configure script may finish with messages like
-```
+
+```text
 The PGPLOT library was not found:
   PSRCHIVE applications will not be able to plot.
   Run ./packages/pgplot.csh to automatically install.
 ```
-To automatically install any dependencies, simply run the scripts as suggested, set any environment variables as directed, then re-run the configure script, as described in the section on [Automatic Package Installation](third/install.md).
+
+To automatically install any dependencies, simply run the scripts as suggested, set any environment 
+variables as directed, then re-run the configure script, as described in the section on [Automatic Package Installation](third/install.md).
 
 ## Compile, run tests, and install
 
 When satisfied that the configure script has found all of the desired dependencies, run
-```
+
+```sh
 make
 make check
 make install

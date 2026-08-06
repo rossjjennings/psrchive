@@ -15,7 +15,7 @@ perform arbitrarily complex preprocessing tasks using the
    specified on the command line are combined along the time dimensioninto a single output file;
    e.g.
 
-   ```
+   ```sh
    psradd -o output.ar input*.ar
    ```
 
@@ -27,7 +27,7 @@ perform arbitrarily complex preprocessing tasks using the
    specified on the command line are combined along the frequency dimension into a single output file;
    e.g.
 
-   ```
+   ```sh
    psradd -R -o output.ar subband*.ar
    ```
 
@@ -44,7 +44,7 @@ perform arbitrarily complex preprocessing tasks using the
    default, .it). e.g. to form five-minute integrations from
    the input files, with the extension .5min,
 
-   ```
+   ```sh
    psradd -I 300 -e 5min input*.ar
    ```
 
@@ -57,7 +57,7 @@ used to generate the phase model may be specified using the
 `-p ephemfile` command line option. The ephemfile can be obtained
 using `psrcat`; e.g.
 
-```
+```sh
 psrcat -e Jname > Jname.eph
 ```
 
@@ -71,7 +71,7 @@ archive before it is added to the output file, as described in the [psrsh](psrsh
 weight each profile by its signal-to-noise ratio before adding to the
 total,
 
-```
+```sh
 psradd -o output.ar -j 'w snr' input*.ar
 ```
 
@@ -82,7 +82,7 @@ frequencies (e.g. the output of an oversampled polyphase filter bank [PFB]),
 it can be useful to first delete the channels from the edeges of each
 sub-band; e.g.
 
-```
+```sh
 psradd -o output.ar -R -j "delete edge .125" subband_*.ar
 ```
 
@@ -100,7 +100,7 @@ A simple example:
 
 1. Generate ephem file J1643-1224.eph:
 
-```
+```sh
 psrcat -e J1643-1224 > J1643-1224.eph
 ```
 
@@ -108,14 +108,14 @@ psrcat -e J1643-1224 > J1643-1224.eph
 20cm.lis into file called 20cmadd.Ft, using ephemeris file
 J1643-1224.eph:
 
-```
+```sh
 psradd -f 20cmadd.Ft -p J1643-1224.eph `cat20cm.lis`
 ```
 
 3. To check for phase alignment, plot an image of the dedispersed total intensity
 as a function of pulse phase on the x-axis and time on the y-axis
 
-```
+```sh
 psrplot -pY -jDp 20cmadd.Ft
 ```
 

@@ -10,14 +10,14 @@ see [Configurable Algorithms and Options](algorithms.md).)
 For example, to see the configuration of
 the algorithms used to identify the on- and off-pulse regions
 
-```
+```sh
 psrstat -c on,off filename[s]
 ```
 
 The algorithms can also be selected and configured using commands of
 the following form
 
-```
+```sh
 psrstat -c ALGORITHM=NAME:OPTIONS filename[s]
 ```
 
@@ -27,14 +27,14 @@ and `OPTIONS`  is a comma-separated list of options. For
 example, to set the on-pulse region to all phase bins greater than
 five sigma above the mean off-pulse noise:
 
-```
+```sh
 psrstat -c on=above:threshold=5 filename[s]
 ```
 
 To see all available on-pulse identificaiton algorithms and their
 options, type
 
-```
+```sh
 psrstat -c on=help
 ```
 
@@ -59,7 +59,7 @@ After configuring the signal-to-noise ratio
 estimator, `psrstat` then queries the signal-to-noise ratio
 and queries the region identified by the on-pulse estimator.
 
-```
+```sh
 psrstat -c 'snr=modular:{on=minimum:{find_min=0,smooth:width=0.05}}' -c snr -c snr:on:found filename[s]
 ```
 
@@ -69,7 +69,7 @@ above command line that sets, configures, and queries the
 signal-to-noise ratio estimator is equivalent to running the following
 script.
 
-```
+```text
 #!/usr/bin/env psrstat -C
 # 
 # snr.psh
@@ -99,13 +99,13 @@ Note that
 command passed to `env`](http://unix.stackexchange.com/questions/63979/shebang-line-with-usr-bin-env-command-argument-fails-on-linux). In this case, execute the above
 script using
 
-```
+```sh
 psrstat -C snr.psh filename[s]
 ```
 
 The `snr.psh` script is equivalent to the following C++ code
 
-```
+```text
 //
 // snr.cpp
 //

@@ -17,17 +17,20 @@ at [GitLab](https://gitlab.com/pulsar-astronomy/psrchive/-/releases).
 To compile the development version of PSRCHIVE requires the [GNU autotools](third/autotools).
 
 For anonymous access via HTTPS,
-```
+
+```sh
 git clone --recursive https://gitlab.com/pulsar-astronomy/psrchive.git
 ```
 
 If you have a GitLab account, clone with SSH.
-```
+
+```sh
 git clone --recursive git@gitlab.com:pulsar-astronomy/psrchive.git
 ```
 
 After cloning the repository, run the bootstrap script.
-```
+
+```sh
 cd psrchive/
 ./bootstrap
 ```

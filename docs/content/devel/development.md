@@ -19,8 +19,8 @@ also take interest in the
 
 Developers can check out the software from GitLab with
 
-```
-$ git clone git@gitlab.com:pulsar-astronomy/psrchive.git
+```sh
+git clone git@gitlab.com:pulsar-astronomy/psrchive.git
 ```
 
 Upon successful checkout, a single directory, `psrchive`,
@@ -28,7 +28,7 @@ will be created in the current working directory. If this is the
 first time you have checked out the software, the psrchive
 directory will contain the following files and directories:
 
-```
+```text
 AUTHORS     config/       Doxyfile     psrchive_cflags.in*   Util/
 Base/       configure.in  Makefile.am  psrchive_ldflags.in*
 bootstrap*  COPYING       More/        README
@@ -46,7 +46,7 @@ running the GNU build tools. This procedure is performed by the
 `bootstrap` script, which must be run in the
 psrchive directory:
 
-```
+```sh
 cd psrchive
 ./bootstrap
 ```
@@ -97,7 +97,7 @@ in a specific order. Therefore, it is not possible to compile code that
 depends upon header files or libraries that are produced later in the list.
 The order in which the sub-directories are compiled is as follows:
 
-```
+```text
 Util/units
 Util/third
 Util/genutil

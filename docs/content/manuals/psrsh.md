@@ -22,7 +22,7 @@ list of available commands can be obtained by entering `?` or
 `help`. More detailed help on a specific command is
 available by typing
 
-```
+```sh
 psrsh> help command
 ```
 
@@ -33,7 +33,7 @@ To exit the shell, type `quit`.
 To execute a sequence of commands on one or more archives without
 any interaction, run
 
-```
+```sh
 psrsh script archive1 [archive2 ...]
 ```
 
@@ -43,14 +43,14 @@ lines, and lines beginning with # are treated as comments.
 
 It is also possible to make script executable by placing
 
-```
+```text
 #!/usr/bin/env psrsh
 ```
 
 in the first line of the file and appropriately setting the permissions
 of the file. The script may then be run as
 
-```
+```sh
 script archive1 [archive2 ...]
 ```
 
@@ -69,7 +69,7 @@ using the `-j` and `-J` command-line options. The
 `-j` option accepts a semicolon-separated list of commands and
 the `-J` option accepts a `psrsh` script; for example:
 
-```
+```sh
 psrplot -j job1[;job2;...] -J script ...
 ```
 
@@ -78,7 +78,7 @@ same time, and both may be used more than once. If a job command
 requires one or more arguments, then the command and its argument[s]
 must be enclosed in single or double quotes; for example:
 
-```
+```sh
 psradd -j 'cmd1 arg1 arg2,cmd2,cmd3 arg1'
 ```
 
@@ -99,7 +99,7 @@ that string does not equal another command name). For example, to
 integrate an archive in frequency and time, reduce the number of phase
 bins to 128, and rotate by one quarter turn of phase before plotting:
 
-```
+```sh
 psrplot -j 'FTB 128,r .25' etc.
 ```
 
@@ -156,22 +156,13 @@ previously possible.
 
 ## 4.0 Testing and examples
 
-* [Interactive shell](psrsh/examples/shell.md)
-* [Executable script](psrsh/examples/script.md)
-* [Polarimetric calibration](psrsh/examples/calibration.md)
+```{toctree}
+psrsh/examples/shell
+psrsh/examples/script
+psrsh/examples/calibration
+```
 
 ## 5.0 Known bugs and features that require implementation
 
 * plotting?
 
-
-```{toctree}
-:hidden:
-
-guide/design/options
-psrplot
-psradd
-psrsh/examples/shell
-psrsh/examples/script
-psrsh/examples/calibration
-```

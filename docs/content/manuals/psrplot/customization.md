@@ -12,14 +12,14 @@
 Customization options may be specified as a comma-separated list on the
 command line, using one or more options of the form
 
-```
+```text
 -c option1[,option2,...]
 ```
 
 For example, start with plotting the Stokes parameters in a single
 frame with QUV = RGB:
 
-```
+```sh
 psrplot -p stokes 0437n.FF
 ```
 
@@ -27,7 +27,7 @@ psrplot -p stokes 0437n.FF
 
 To zoom in on a range in pulse phase:
 
-```
+```sh
 psrplot -p stokes -c 'x:range=(.7,.74)' 0437n.FF
 ```
 
@@ -37,7 +37,7 @@ expansion of the round brackets*![](zoom.png)
 To extend the y-axis a bit so that the label is not obscured by the
 plot, and plot using the histogram style:
 
-```
+```sh
 psrplot -p stokes -c 'x:range=(.7,.74),y:range=(0,1.1),hist=1' 0437n.FF
 ```
 
@@ -47,7 +47,7 @@ To plot the Stokes vector in cylindrical coordinates, with units of
 milliseconds on the x-axis, the origin at the pulse peak, and no
 filename over the frame:
 
-```
+```sh
 psrplot -p Scyl -c x:unit=ms,x:origin=-.525,pa:above:c=" " 0437n.FF
 ```
 
@@ -65,7 +65,7 @@ bandwidth appear in the top-right corner. Also, suppose you want the
 filename to the left of the frame instead of over the centre. You
 could write the following style file:
 
-```
+```text
 above:c=unset
 above:l=$file
 below:l=unset
@@ -77,13 +77,13 @@ class text interface may be specified by preceding the variable name with
 a dollar sign ($). The variable names are the same as those understood
 by **psredit**; for a complete listing, run:
 
-```
+```sh
 psredit -H
 ```
 
 Continuing with the example, name the style file style.txt and run
 
-```
+```sh
 psrplot -p pa -s style.txt 0437n.FF -c cut=10.0
 ```
 
@@ -98,7 +98,7 @@ as described in [multiple plot style files](viewport:Multiple plot style files).
 It is also possible to embed data pre-processing commands in a style
 file using the `exec` command; for example,
 
-```
+```text
 exec dedisperse
 
 #################################################
@@ -130,7 +130,7 @@ Customization option sets provide shortcuts to commonly used sets of
 plot attributes. Option sets are used by setting the `set`
 attribute to the name of the desired option set, e.g.
 
-```
+```text
 -c set=name
 ```
 
@@ -139,7 +139,7 @@ The following option sets are available:
 * `pub` for publication quality plots; `set=pub`
   is equivalent to
 
-  ```
+  ```text
   ch=1.5
   cf=2
   lw=3
@@ -150,7 +150,7 @@ The following option sets are available:
 * `blank` removes all text labels; `set=blank`
   is equivalent to
 
-  ```
+  ```text
   x:opt=BCST
   y:opt=BCST
   x:lab=""

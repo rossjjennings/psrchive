@@ -9,7 +9,7 @@ query, modify, add or remove the data in a Pulsar Archive.
 
 **psredit** commands are of the form:
 
-```
+```sh
 psredit -c command[s] [output options] filename[s]
 ```
 
@@ -22,7 +22,7 @@ Each command either gets, sets, or adds a parameter value.
 
 A get command is simply the name of the paramter to be queried; e.g.
 
-```
+```sh
 psredit -c bw,freq filename[s]
 ```
 
@@ -31,7 +31,7 @@ will query the bandwidth and centre frequency of the specified archives.
 To print a list of every parameter in the data file, including a short description
 of each parameter and its current value,
 
-```
+```sh
 psredit filename[s]
 ```
 
@@ -39,7 +39,7 @@ Note that some parameters may be either vectors or attributes of the elements of
 For example, when listing every parameter in a data file, the attribute that provides access
 to the vector of sub-integrations is output as
 
-```
+```text
 int*:@           int:help for attribute list
 ```
 
@@ -47,7 +47,7 @@ The asterisk indicates that the file contains a vector of integrations, and the 
 indicates that each element of this vector has its own list of attributes that can be
 listed by querying the help; e.g.
 
-```
+```text
 psredit -c int:help file.ar 
 nchan            Number of frequency channels
 npol             Number of polarizations
@@ -78,8 +78,8 @@ be extended as described in the following section.
 For vector attributes, if only the parameter name is specified, then the query will return all elements of the vector.
 Multiple output values are separated by commas, as in the following example:
 
-```
-psredit -c int:mjd file.ar
+```console
+$ psredit -c int:mjd file.ar
 file.ar int:mjd=52678.077,52751.281,52794.848,52795.401,52795.688,52804.146,52812.626,52812.695,52839.118
 ```
 
@@ -87,8 +87,8 @@ Here, the epoch (MJD) of each sub-integration in `file.ar` is output as a comma-
 
 It is also possible to specify an element or range of elements, using simple array syntax; e.g.
 
-```
-psredit -c 'int[2,5-]:duration' file.ar
+```console
+$ psredit -c 'int[2,5-]:duration' file.ar
 file.ar int[2,5-]:duration=8686.6640625,8686.6640625,8686.6640625,8686.6640625,8686.6640625
 ```
 
@@ -104,23 +104,23 @@ are necessary to protect the square brackets from interpretation by the shell.
 With the `-q` command line option, `psredit` will
 not output the name of the file from which the parameters are queried; e.g.
 
-```
-psredit -qc freq,bw filename.ar
+```console
+$ psredit -qc freq,bw filename.ar
 freq=1420 bw=-64
 ```
 
 With the `-Q` command line option, `psredit` will
 not output the names of the queried queried; e.g.
 
-```
-psredit -Qqc freq,bw filename.ar
+```console
+$ psredit -Qqc freq,bw filename.ar
  1420 -64
 ```
 
 To change the precision with which values are printed append a `%<digits>` to the parameter name; e.g.
 
-```
-psredit -Qqc int:mjd%30 filename.ar
+```console
+$ psredit -Qqc int:mjd%30 filename.ar
  55915.5135737132842719265823916
 ```
 
@@ -128,7 +128,7 @@ psredit -Qqc int:mjd%30 filename.ar
 
 A set command is an assignment expression with the parameter name on the left; e.g.
 
-```
+```sh
 psredit -c dm=10.35 -e fix filename[s]
 ```
 
@@ -142,13 +142,13 @@ As for queries, array notation can be used to set specific values in a vector qu
 If only the parameter name is specified, then all elements of the vector will be set to the specified value.
 For example, to zero the weight of channel zero in every sub-integration,
 
-```
+```sh
 psredit -c 'int:wt[0]=0.0' -e zap file.ar
 ```
 
 To zero the weight of every channel in only the first sub-integration
 
-```
+```sh
 psredit -c 'int[0]:wt=0.0' -e zap file.ar
 ```
 
@@ -158,14 +158,14 @@ The PSRFITS file format supports extending the `point` attribute of every sub-in
 For example, to add a new parameter named `ha` (hour angle) to every sub-integration,
 and write out a new file with the extension `wha`
 
-```
+```sh
 psredit -c 'int:point:info=+ha' -c int:point:ha:desc="Hour angle in radians" -e wha file.ar
 ```
 
 Subsequent queries of the sub-integration information will show the new parameter as an element with its own attributes
 
-```
-psredit -c int:help file.wha 
+```console
+$ psredit -c int:help file.wha 
 point:lst        Local sidereal time (seconds)
 point:gb         Galactic longitude (deg)
 point:gl         Galactic latitude (deg)
@@ -180,8 +180,8 @@ point:ha[:@]     Hour angle in radians
 
 The attributes of the new hour angle parameter can be queried with `help`; e.g.
 
-```
-psredit -c int:point:ha:help file.wha 
+```console
+$ psredit -c int:point:ha:help file.wha 
 name             name of the information
 unit             physical unit of the information
 desc             description of the information
@@ -192,7 +192,7 @@ The `name` and `desc` were set when the parameter was added.
 The new parameter can be queried and modified like any other; e.g. to set the hour angle in every
 sub-integration equal to 1.0
 
-```
+```sh
 psredit -c int:point:ha=1.0 -m file.wha
 ```
 
@@ -205,8 +205,8 @@ the input file.
 
 To view the list of extensions that can be added to each sub-integration in a file, run
 
-```
-psredit -c int:ext=+help file.ar
+```console
+$ psredit -c int:ext=+help file.ar
 Options:
 
 aux
@@ -221,7 +221,7 @@ for more information.
 To add an `aux` extension to each sub-integration in a file and set the auxiliary RM
 in all sub-integrations to 0.5
 
-```
+```sh
 psredit -c int:ext=+aux -c int:aux:rm=0.5 -e wrm file.ar
 ```
 
@@ -229,8 +229,8 @@ psredit -c int:ext=+aux -c int:aux:rm=0.5 -e wrm file.ar
 
 To view the list of extensions that can be added to a file, run
 
-```
-psredit -a help file.ar
+```console
+$ psredit -a help file.ar
 Options:
 
 itrf
@@ -251,7 +251,7 @@ and the `aux` extensions can be used to store information about the
 auxiliary dispersion measure and rotation measure.
 To add an `aux` extension to a file and set the auxiliary RM corrected flag,
 
-```
+```sh
 psredit -a aux -c aux:rmc=1 -e wrm file.ar
 ```
 
@@ -260,7 +260,7 @@ psredit -a aux -c aux:rmc=1 -e wrm file.ar
 The `-r` option is used to remove an extension from an archive by name; e.g.
 to remove the auxiliary cold plasma extension from a file
 
-```
+```sh
 psredit -r aux -e noaux file.ar
 ```
 
@@ -271,7 +271,7 @@ and passed as a list of instructions using the `-C` command-line option;
 e.g. to add the hour angle attribute to every sub-integration and set unique
 values for each sub-integration
 
-```
+```text
 int:point:info=+ha
 int:point:ha:desc="Hour angle in radians"
 int[0]:point:ha=-1.0
@@ -283,7 +283,7 @@ int[4]:point:ha=1.0
 
 If the above text was saved to a file named set\_ha.ped, then the commands could be executed with
 
-```
+```sh
 psredit -C set_ha.ped -e wha file.ar
 ```
 
@@ -298,7 +298,7 @@ tutorial.
 To add auxiliary cold plasma measures to every sub-integration and set unique
 values for each of the 3 sub-integrations:
 
-```
+```text
 int:ext=+aux
 int[0]:aux:rm=-1.0
 int[0]:aux:dm=1.0e-4

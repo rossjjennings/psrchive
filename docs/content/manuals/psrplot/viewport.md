@@ -14,7 +14,7 @@ The position and size of the plot window (viewport) are set using the
 are specified in normalized device coordinates, and the default value
 for each is `(0.15, 0.85)`. For example,
 
-```
+```sh
 psrplot -p flux -c 'x:view=(0.5,0.9),y:view=(0.1,0.5)' 0437n.FF
 ```
 
@@ -29,13 +29,13 @@ it may also be necessary to send customization options to a specific
 plot. This is done by prefixing a plot index between two colons to
 the customization options and/or style file name, as in
 
-```
+```sh
 -c :index:option1[,option2,...]
 ```
 
 For example,
 
-```
+```sh
 psrplot -O -p Scyl -p stokes -c set=pub \
      -c ':1:x:view=(0.6,0.8),y:view=(0.4,0.6),x:range=(.675,.71)' \
      -c ':1:val=IL,set=blank' 0437n.FF
@@ -46,7 +46,7 @@ psrplot -O -p Scyl -p stokes -c set=pub \
 The same syntax can be used to specify plot-specific preprocessing
 operations; e.g.
 
-```
+```sh
 psrplot -N 2x1 -p time -p freq -j dedisperse -j :0:fscrunch -j :1:tscrunch
 ```
 
@@ -61,7 +61,7 @@ To avoid long cryptic command lines, it is also possible to create
 and customize multiple plots using style files. For example, save
 the following style file as style.txt
 
-```
+```text
 # publication quality 
 set=pub
 
@@ -97,7 +97,7 @@ chan=I
 
 and run
 
-```
+```sh
 psrplot -O -s style.txt 0437n.std
 ```
 

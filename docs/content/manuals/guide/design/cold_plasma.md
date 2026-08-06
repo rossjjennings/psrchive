@@ -55,7 +55,7 @@ rotation measure due to the ionosphere to -9.9 for the first
 sub-integration and -8.7 for the second sub-integration, create and
 run the following `psrsh` script:
 
-```
+```text
 #!/usr/bin/env psrsh
 
 edit rm=166
@@ -69,7 +69,7 @@ If a data file supports optional storage of auxiliary cold plasma parameters
 but does not yet contain the relevant extensions, they can be added with a
 command like the following
 
-```
+```sh
 psredit -c int:ext=+aux -c int:aux:rm=1.0 filename.ar -e new
 ```
 
@@ -79,19 +79,19 @@ The auxiliary RM must be set to a non-zero value in at least one sub-integration
 Instead of setting it to unity in every sub-integration, it is possible to set the
 values independently for every sub-integration, either on the command line; e.g.
 
-```
+```sh
 psredit -c int:ext=+aux -c 'int[0]:aux:rm=1.2' -c 'int[1]:aux:rm=3.4' filename.ar -e new
 ```
 
 or by providing a text file containing all of the same strings; e.g.
 
-```
+```sh
 psredit -c int:ext=+aux -C setrm.txt filename.ar -e new
 ```
 
 where setrm.txt contains the following lines
 
-```
+```text
 int[0]:aux:rm=1.2
 int[1]:aux:rm=3.4
 ```

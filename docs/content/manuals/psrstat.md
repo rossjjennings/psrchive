@@ -15,7 +15,7 @@ syntax understood by `psrplot`.
 
 **psrstat** commands are of the form:
 
-```
+```sh
 psrstat -c quantity[ies] [-l index=range] filename[s]
 ```
 
@@ -28,7 +28,7 @@ expression enclosed in braces; e.g. to query the center frequency,
 off-pulse r.m.s., and the natural logarithm of the signal-to-noise
 ratio
 
-```
+```sh
 psrstat -c freq,off:rms,'{log($snr)}' filename[s]
 ```
 
