@@ -250,3 +250,16 @@ algorithm described in van Straten, W. 2013,
 ## 5.0 Known bugs and features that require implementation
 
 * Currently, `pcm` can handle data from only one pulsar.
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+
+pcm/data
+pcm/mem
+pcm/metm
+pcm/degeneracy
+pcm/beam
+pcm/report
+pcm/choose
+

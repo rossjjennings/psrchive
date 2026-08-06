@@ -1,6 +1,7 @@
-# pcm
 
 ## Data and Model
+
+*Part of [PCM](../pcm.md)*
 
 Use the `-D data`  command line option to enable two reports that
 print the input data (Stokes parameters and errors) and the model evaluated

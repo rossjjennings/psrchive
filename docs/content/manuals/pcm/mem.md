@@ -1,6 +1,7 @@
-# pcm
 
 ## Measurement Equation Modeling Example
+
+*Part of [PCM](../pcm.md)*
 
 For this example, suppose that all of the pulsar observations are
 located in the current working directory and have the extension

@@ -1,6 +1,7 @@
-# pcm
 
 ## Optimal selection of pulse phase bins for MEM
+
+*Part of [PCM](../pcm.md)*
 
 `pcm` can automatically choose the best on-pulse phase bins
 to use as model constraints. These are chosen from the pulsar
