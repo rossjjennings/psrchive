@@ -1,5 +1,5 @@
 
-@INCLUDE = common.dox
+@INCLUDE = ../.build-commons/docs/common.dox
 
 PROJECT_NAME           = "PSRCHIVE Utility Library"
 PROJECT_NUMBER         = 2026-05-15
@@ -7,5 +7,4 @@ INPUT                  = ../Util
 EXCLUDE                = ../Util/epsic ../Util/meal
 
 OUTPUT_DIRECTORY       = _doxygen/util
-XML_OUTPUT             = xml
 
