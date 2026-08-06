@@ -1,4 +1,7 @@
-# Citation
+
+# Attribution & Legal
+
+## Citation
 
 If you use PSRCHIVE in published research, please cite:
 
@@ -8,7 +11,7 @@ If you use PSRCHIVE in published research, please cite:
 > **21**, 302.
 > [doi:10.1071/AS04022](https://doi.org/10.1071/AS04022)
 
-## BibTeX
+### BibTeX
 
 ```bibtex
 @article{Hotan2004,
@@ -22,3 +25,19 @@ If you use PSRCHIVE in published research, please cite:
   doi     = {10.1071/AS04022},
 }
 ```
+
+## Credits
+
+Please see our growing list of [contributors](content/contributors.md).
+
+```{toctree}
+:hidden:
+
+content/contributors
+```
+
+## Legal
+
+As information resulting from fundamental research,
+PSRCHIVE is not subject to United States of America
+Export Administration Regulations. See §734.3(b)(3)(ii) and §734.8.

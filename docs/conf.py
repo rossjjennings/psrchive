@@ -25,3 +25,5 @@ intersphinx_mapping = {
     "epsic": ("https://epsic.readthedocs.io/en/latest/", None),
 }
 
+html_static_path = ['_static']
+

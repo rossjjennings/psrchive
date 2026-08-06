@@ -1,15 +1,15 @@
-# PSRCHIVE User's Guide: Overview of Calibration
+# Overview of Calibration
 
 The progam [pac](../../pac.md) calibrates pulsar data using
 available combinations of:
 
 1. polarimetric calibrator observations as described in
-   [Appendix A](../../pac.html#observations) of the
-   [pac manual](../../pac.md).
+   [Appendix A](../../pac:Appendix A%3A Calibrator observations) of the
+   [pac manual](../../pac).
 2. flux calibration solutions as output by
-   [fluxcal](../../fluxcal.md);
+   [fluxcal](../../fluxcal);
 3. a reception model (including cross-coupling parameters) as output by
-   [pcm](../../pcm.md) [required only when the `pac -S`
+   [pcm](../../pcm) [required only when the `pac -S`
    command line option is used]
 
 `pcm` is used to produce a reception model, but it will also

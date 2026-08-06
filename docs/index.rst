@@ -7,15 +7,14 @@
 
    content/install/index
    quickstart
-   content/manuals/guide
    contributing
    citation
-   content/credits
 
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
 
+   content/manuals/guide
    content/manuals
    content/manuals/python
 

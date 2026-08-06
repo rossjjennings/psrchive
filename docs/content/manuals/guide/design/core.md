@@ -1,4 +1,4 @@
-# User's Guide: Core Applications
+# Core Applications
 
 The core applications provide access to the vast majority of PSRCHIVE functionality commonly used for inspection,
 visualization, and reduction of pulsar data. Core applications make
@@ -8,7 +8,7 @@ preprocess the data. Typical features of the core applications
 include
 
 * [Standard Command Line Options](options.md)
-  + [Standard Preamble](options.md#preamble)
-  + [Standard Preprocessing](options.md#preprocessing)
-  + [Standard Output](options.md#output)
+  + [Standard Preamble](options:Standard preamble)
+  + [Standard Preprocessing](options:Standard preprocessing)
+  + [Standard Output](options:Standard output)
 * [Evaluation of Mathematical Expressions](evaluation.md)

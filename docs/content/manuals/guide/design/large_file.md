@@ -1,4 +1,4 @@
-# User's Guide: Large File Support
+# Large File Support
 
 Some instruments create files that are so large they cannot be loaded
 without consuming all physical and virtual memory.

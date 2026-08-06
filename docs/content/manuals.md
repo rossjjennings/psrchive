@@ -47,9 +47,6 @@ A step-by-step [User's Guide](manuals/guide.md) is also under development.
 ```{toctree}
 :hidden:
 
-manuals/python
-manuals/guide
-manuals/guide/design/core
 manuals/psredit
 manuals/psrstat
 manuals/psradd

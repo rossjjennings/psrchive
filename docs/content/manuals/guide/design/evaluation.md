@@ -1,4 +1,4 @@
-# User's Guide: Evaluation of Mathematical Expressions
+# Evaluation of Mathematical Expressions
 
 Both [psrstat](../../psrstat.md) and
 [psrplot](../../psrstat.md) make use of the same
@@ -20,8 +20,7 @@ psrplot -c below:r='DM: $dm' [...]
 
 would print a string like "DM: 2.64510488510132" just below the upper
 right hand corner of the plot frame. (To set the number of significant
-digits printed, see the notes on [numerical
-precision](evaluation.md#precision) below.)
+digits printed, see the notes on [numerical precision](Numerical precision) below.)
 
 For a full list of available variable names,
 run `psrstat <filename>`.

@@ -2,9 +2,10 @@
 
 **psrplot** can be customized using any combination of
 
-* [command line arguments](customization.md#command_line),
-* [style files](customization.md#style_file), and
-* [option sets](customization.md#option_sets).
+```{contents}
+:depth: 1
+:local:
+```
 
 ## Customization on the Command Line
 

@@ -1,11 +1,12 @@
-# User's Guide: Standard Command Line Options
+# Standard Command Line Options
 
 For the sake of consistency, a number of PSRCHIVE programs employ a standard set of command
 line options, including
 
-* [Standard preamble](options.md#preamble),
-* [Standard preprocessing](options.md#preprocessing)
-* [Standard output](options.md#output).
+```{contents}
+:depth: 1
+:local:
+```
 
 ## Standard preamble
 
@@ -16,7 +17,9 @@ line options, including
   -v             verbose mode
   -V             very verbose mode
   -M metafile    metafile contains list of archive filenames
-```### Standard preprocessing
+```
+
+### Standard preprocessing
 
 Some programs make use of the[psrsh](../../psrsh.md)
 command language interpreter to preprocess data. The relevant
@@ -27,8 +30,9 @@ command line options are
   -J script      execute pulsar shell preprocessing script
 ```
 
-Please see the [psrsh](../../psrsh.html#jobs) manual for more
+Please see the [psrsh](../../psrsh:2.3 Job preprocessor) manual for more
 details.
+
 ## Standard output
 
 Some programs that output a modified version of the data

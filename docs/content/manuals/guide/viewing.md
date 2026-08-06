@@ -1,4 +1,4 @@
-# PSRCHIVE User's Guide: Viewing Data
+# Viewing Data
 
 In any experiment that involves data analysis, the first step is looking
 at the data.

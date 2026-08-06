@@ -14,9 +14,8 @@ Suggestions and contributions are welcome!
 2. Installation: installation requirements and instructions
 3. [Viewing Data](guide/viewing.md): querying and editing metadata and making plots
 4. [Calibrating Data](guide/calibrating.md): polarimetric calibration
-5. [Trouble Shooting](../trouble.md):
-   steps that can help to debug a problem
 
+Also see the [Trouble Shooting](../trouble.md) section for steps that can help to debug a problem.
 
 ```{toctree}
 :hidden:
@@ -24,5 +23,4 @@ Suggestions and contributions are welcome!
 guide/design
 guide/viewing
 guide/calibrating
-../trouble
 ```

@@ -1,11 +1,11 @@
 # psrplot** layout
 
-The layout of any
-**psrplot** plot may be customized, including
+The layout of any **psrplot** plot may be customized, including
 
-* [viewport position and size](viewport.md#position),
-* [overlaying multiple plots](viewport.md#overlay), and
-* [multiple plot style files](viewport.md#style).
+```{contents}
+:depth: 1
+:local:
+```
 
 ## Viewport position and size
 
@@ -53,7 +53,9 @@ psrplot -N 2x1 -p time -p freq -j dedisperse -j :0:fscrunch -j :1:tscrunch
 will plot a phase-versus-time plot of a copy of the input data that
 have been dedispersed and integrated over all frequency channels and a
 phase-versus-frequency plot of a copy of the input data that have been
-dedispersed and integrated over all sub-integrations.### Multiple plot style files
+dedispersed and integrated over all sub-integrations.
+
+## Multiple plot style files
 
 To avoid long cryptic command lines, it is also possible to create
 and customize multiple plots using style files. For example, save

@@ -52,7 +52,7 @@ cd psrchive
 ```
 
 If you encounter problems during bootstrap, please ensure
-that your [GNU autotools](../third/autotools.md) are up-to-date.
+that your [GNU autotools](../install/third/autotools.md) are up-to-date.
 
 ### Configure
 
@@ -61,7 +61,7 @@ determine the system configuration and produce the Makefiles.
 If you plan to develop PSRCHIVE in parallel with
 the software maintained at Swinburne or the ATNF, then please read these
 important notes on [choosing an installation
-directory](install.md).
+directory](../install/third/install.md).
 If the configure script fails, please refer to the
 [Common Problems](../problems.md).
 

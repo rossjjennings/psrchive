@@ -67,7 +67,7 @@ load any private catalogues with additional, unpublished data.
 ### 2.1 Preprocessing of input archives
 
 Arbitrarily complex preprocessing tasks can be performed on each input
-archive before it is added to the output file, as described in the [psrsh](psrsh.html#jobs) manual. For example, to
+archive before it is added to the output file, as described in the [psrsh](psrsh:2.3 Job preprocessor) manual. For example, to
 weight each profile by its signal-to-noise ratio before adding to the
 total,
 

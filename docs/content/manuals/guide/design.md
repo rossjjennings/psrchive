@@ -1,4 +1,4 @@
-# User's Guide: Design Features
+# Design Features
 
 1. [Core Applications](design/core.md) :
    A tightly knit core of applications provide access to most functionality.

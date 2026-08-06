@@ -1,4 +1,4 @@
-# PSRCHIVE User's Guide: Calibrating Data
+# Calibrating Data
 
 Here, calibration is divided into two stages: polarimetric and flux
 calibration. For some instruments or experimental designs, depending

@@ -1,4 +1,4 @@
-# Hello, pulsar!
+# Hello, Pulsar!
 
 In the tradition of computing language tutorials, the following
 example provides a simple introduction to the PSRCHIVE library.

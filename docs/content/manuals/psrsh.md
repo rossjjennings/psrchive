@@ -26,7 +26,9 @@ available by typing
 psrsh> help command
 ```
 
-To exit the shell, type `quit`.#### 2.2 Shell script
+To exit the shell, type `quit`.
+
+### 2.2 Shell script
 
 To execute a sequence of commands on one or more archives without
 any interaction, run
@@ -57,6 +59,7 @@ method, the results of the script will not be written to disk.
 However, if any of the[standard output
 options](guide/design/options.md#output) are used, then `psrsh`  will unload the results
 as specified. This allows scripts to behave like most other PSRCHIVE programs.
+
 ### 2.3 Job preprocessor
 
 Some PSRCHIVE programs (e.g.[psrplot](psrplot.md) and [psradd](psradd.md)) use the `psrsh`

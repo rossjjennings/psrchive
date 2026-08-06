@@ -1,4 +1,4 @@
-# User's Guide: Reading and Writing Metadata
+# Reading and Writing Metadata
 
 The [`psredit`](../../psredit.md) program is used
 to read and write metadata in an archive. To see all of the

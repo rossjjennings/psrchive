@@ -12,5 +12,4 @@ tutorial/plugin
 tutorial/config
 tutorial/interface
 tutorial/interpreter
-devel/multiple
 ```

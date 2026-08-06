@@ -5,7 +5,7 @@
 The `fluxcal` program uses observations of the reference
 source and a standard candle in order to determine both the system
 temperature and the flux density of the reference source. The
-solutions produced by `fluxcal` are used by [`pac`](manuals/fluxcal/pac.md) to perform absolute flux
+solutions produced by `fluxcal` are used by [`pac`](pac.md) to perform absolute flux
 calibration of pulsar observations. Absolute flux calibration must be
 preceded by a stage of polarimetric calibration that normalizes the
 observed flux density by the flux density of the reference source.
@@ -18,7 +18,7 @@ observed flux density by the flux density of the reference source.
 
 In order to run `fluxcal`, you will need sets of
 `Pulsar::Archive` files containing observations of the
-reference source (as described in Appendix A of the  [`pac`](manuals/fluxcal/pac.md) documentation). A set of flux
+reference source (as described in Appendix A of the  [`pac`](pac.md) documentation). A set of flux
 calibrator observations must include at least one of each of the
 following:
 
@@ -84,9 +84,9 @@ There are two modes of operation, as determined by the input method:
    `fluxcal` sorts the files by name and, as they are
    loaded, breaks the list up into sets. In order for the solutions
    to be used, the calibrator database text file must later be
-   regenerated using [`pac`](manuals/fluxcal/pac.md).
+   regenerated using [`pac`](pac.md).
 2. With Database: In this mode of operation, a calibrator database
-   text file, as produced by [`pac`](manuals/fluxcal/pac.md),
+   text file, as produced by [`pac`](pac.md),
    is provided using the -d filename command
    line option; `fluxcal` sorts the observations by
    the MJD of each database entry and, as they are loaded, breaks
@@ -120,8 +120,7 @@ running `pacv filename.fluxcal`.
 
 ## 3.0 Algorithms
 
-The solution implemented by `fluxcal` is described in
-the [appendix](../appendices/fluxcal/fluxcal.pdf).
+The solution implemented by `fluxcal` is described in the {download}`appendix </_static/fluxcal.pdf>`.
 
 ## 4.0 Testing and examples
 

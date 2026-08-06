@@ -36,7 +36,7 @@ where:
 * `loop` is an index over which to loop (such as plotting
   for each sub-integration).
 
-Please see the [psrsh](psrsh.html#jobs)
+Please see the [psrsh](psrsh:2.3 Job preprocessor)
 documentation for more about `jobs`.
 
 The available plotting options will depend upon the
@@ -69,23 +69,14 @@ in sequence, one after the other.
 
 Please follow the links for more detailed information on each topic:
 
-* [Available plots](psrplot/plots.md)
-* [Plot customization](psrplot/customization.md)
-  + [Command line arguments](psrplot/customization.md#command_line)
-  + [Style files](psrplot/customization.md#style_file)
-  + [Option sets](psrplot/customization.md#option_sets)
-* [Plot labels](psrplot/label.md)
-  + [Label names](psrplot/label.md#name)
-  + [Multiple lines](psrplot/label.md#multiple)
-  + [Variable substitution](psrplot/label.md#variable)
-* [Viewport layout](psrplot/viewport.md)
-  + [Position and size](psrplot/viewport.md#position)
-  + [Overlaying multiple plots](psrplot/viewport.md#overlay)
-  + [Multiple plot style files](psrplot/viewport.md#style)
-* [Pen attributes](psrplot/pen.md)
-  + [Character font and height](psrplot/pen.md#font)
-  + [Line width and style](psrplot/pen.md#line)
-* [Looping over data dimensions](psrplot/loop.md)
+```{toctree}
+psrplot/plots
+psrplot/customization
+psrplot/label
+psrplot/viewport
+psrplot/pen
+psrplot/loop
+```
 
 ## 3.0 Algorithms
 
@@ -101,15 +92,3 @@ Examples are given throughout the documentation in section 2.1.
 
 * None at this time.
 
-
-```{toctree}
-:hidden:
-
-psrplot/plots
-psrplot/customization
-psrplot/label
-psrplot/viewport
-psrplot/pen
-psrplot/loop
-../tutorial/interface
-```

@@ -1,4 +1,4 @@
-# User's Guide: Baseline Removal
+# Baseline Removal
 
 PSRCHIVE implements two high-level strategies for removing the off-pulse baseline from folded profiles
 

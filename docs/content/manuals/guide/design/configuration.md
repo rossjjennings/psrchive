@@ -1,4 +1,4 @@
-# User's Guide: Configuration
+# Configuration
 
 There may be more than one way to compute a certain value or perform a
 certain operation. For example, there are a number of baseline
@@ -21,4 +21,4 @@ which allows the strategy to be implemented using a pointer to a
 
 ## Common Configuration Cravings
 
-* [Always use tempo2 predictors instead of tempo polycos](manuals/guide/design/configuration/predictor.md)
+* [Always use tempo2 predictors instead of tempo polycos](predictor.md)

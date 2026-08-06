@@ -1,11 +1,11 @@
 # psrplot** labels
 
-The labels on
-**psrplot** plots may be set using
+The labels on **psrplot** plots may be set using
 
-* [label names](label.md#name),
-* [multiple lines](label.md#multiple),
-* [variable subsitution](label.md#variable).
+```{contents}
+:depth: 1
+:local:
+```
 
 ## Label names
 
