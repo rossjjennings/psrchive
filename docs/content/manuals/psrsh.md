@@ -57,7 +57,7 @@ script archive1 [archive2 ...]
 By default, unless the script contains a call to the `unload` 
 method, the results of the script will not be written to disk.
 However, if any of the[standard output
-options](guide/design/options.md#output) are used, then `psrsh`  will unload the results
+options](guide/design/options#Standard output) are used, then `psrsh`  will unload the results
 as specified. This allows scripts to behave like most other PSRCHIVE programs.
 
 ### 2.3 Job preprocessor

@@ -91,7 +91,7 @@ psrplot -p pa -s style.txt 0437n.FF -c cut=10.0
 line inside the frame.*![](pa_style.png)
 
 Style files can also be used to create and customize multiple plots,
-as described in[multiple plot style files](viewport.md#style).
+as described in [multiple plot style files](viewport:Multiple plot style files).
 
 ### Embedded pre-processing commands
 

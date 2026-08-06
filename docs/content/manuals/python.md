@@ -43,7 +43,7 @@ requires PSRCHIVE shared libraries to be built.
 The Python interface will be compiled and installed automatically when
 the `--enable-shared` option is given to `configure`,
 and the necessary external software (see above) is found. Refer to the
-[standard installation instructions](../download.md) for
+[standard installation instructions](../install/index.md) for
 more information.
 
 It may be necessary to update the `PYTHONPATH` environment
@@ -64,7 +64,7 @@ on. Currently, only the core PSRCHIVE classes -
 Archive, Integration, and Profile - are represented in Python. However,
 these three classes alone provide access to a very large fraction of
 PSRCHIVE's functionality. Detailed documentation
-about the class methods can be found in the [C++ Library Reference Manual](../classes/psrchive.md).
+about the class methods can be found in the [C++ Library Reference Manual](../../api/index.md).
 
 In addition to the C++ methods, each of these classes has some extra
 Python-specific functionality added to it:
@@ -76,7 +76,7 @@ collection of Integration objects, also known as subintegrations. An
 Archive can be loaded into python using the `Archive_load`
 function, as demonstrated in the following IPython session:
 
-```
+```python
 In [1]: import psrchive
 
 In [2]: arch = psrchive.Archive_load('file.fits')
@@ -88,7 +88,7 @@ Out[3]: '1744-1134'
 The `get_data()` method is an extra Python function that
 returns the raw data from the file as a NumPy array:
 
-```
+```python
 In [4]: data = arch.get_data()
 
 In [5]: data.shape
@@ -103,7 +103,7 @@ the returned array will not be reflected in the Archive, and vice-versa.
 Integrations within an Archive can be accessed in Python by indexing the
 Archive object. So the following two lines are equivalent:
 
-```
+```python
 In [6]: subint = arch.get_Integration(0)
 
 In [7]: subint = arch[0]
@@ -115,7 +115,7 @@ An Integration object represents a collection of pulse profiles recorded
 simultaneously, typically from a number of frequency channels and
 polarization states (Stokes parameters):
 
-```
+```python
 In [8]: subint.get_duration()
 Out[8]: 60.230205439999999
 
@@ -127,7 +127,7 @@ The existing `baseline_stats()` and `cal_levels()`
 methods have been modified for Python to return tuples of arrays, for
 example:
 
-```
+```python
 In [10]: (b_mean, b_var) = subint.baseline_stats()
 
 In [11]: b_mean.shape
@@ -137,7 +137,7 @@ Out[11]: (4, 2048)
 An Integration object contains a number of pulse profiles that can be
 accessed via `get_Profile(ipol,ichan)`:
 
-```
+```python
 In [12]: prof = subint.get_Profile(0,0)
 ```
 
@@ -146,7 +146,7 @@ In [12]: prof = subint.get_Profile(0,0)
 A Profile object represents a single pulse profile. The
 `get_amps()` method returns the profile data as a NumPy array:
 
-```
+```python
 In [13]: pdata = prof.get_amps()
 
 In [14]: pdata.shape
@@ -161,7 +161,7 @@ object.
 The profile data values can also be read and/or altered by indexing the
 Profile object directly, for example:
 
-```
+```python
 In [15]: pdata[16]
 Out[15]: 91.366058
 
@@ -176,7 +176,7 @@ Out[18]: 500.0
 
 ### MJD
 
-The [MJD class](../classes/Util/classMJD.md) is also now
+The [MJD class](../../api/util/class/classMJD) is also now
 available in Python to deal with high-precision date/time values.
 Return values for date/time functions such as
 `Integration.get_epoch()` were previously converted to doubles
@@ -184,17 +184,17 @@ for convenience. To reproduce the old behavior and get a
 double-precision MJD value, use the `MJD.in_days()` method, for
 example:
 
-```
+```python
 mjd_dbl = arch.get_Integration(0).get_start_time().in_days()
 ```
 
 ### Generating TOAs with ArrivalTime
 
 The [ArrivalTime
-class](../classes/psrchive/classPulsar_1_1ArrivalTime.md) can be used to generate pulse times of arrival (TOAs) directly in
+class](../../api/psrchive/class/classPulsar_1_1ArrivalTime) can be used to generate pulse times of arrival (TOAs) directly in
 Python, as an alternative to using the command-line utility [pat](pat.md). Here is an example illustrating the basic usage:
 
-```
+```python
 import psrchive
 
 arrtim = psrchive.ArrivalTime()
@@ -222,7 +222,7 @@ toas = arrtim.get_toas()
 In this example, we recreate the helpful "`pav -GTdp`" plot
 using python, and demonstrate some common psrchive functionality:
 
-```
+```python
 #! /usr/bin/env python
 import pylab
 import psrchive

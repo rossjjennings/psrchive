@@ -58,8 +58,9 @@ line option.
 
 This algorithm corrects the data for Faraday rotation using the
 current RM, splits the bandwidth in two and integrates each half
-over frequency, then computes the [weighted
-differential polarization angle](rmfit/DeltaPA.pdf), delta-PA, between the two
+over frequency, then computes the 
+{download}`weighted differential polarization angle </_static/DeltaPA.pdf>`,
+delta-PA, between the two
 halves of the band. By default, only those pulse phase bins with
 linearly polarized flux that is 3 sigma above the off-pulse noise in
 both halves of the band are included in the estimate of differential
@@ -96,7 +97,7 @@ In this case, the PA is computed per each frequency channel as an average on the
 ## 3.0 Algorithms
 
 The iterative differential position angle refinement algorithm is based
-on the derivation presented [here](rmfit/DeltaPA.pdf).
+on the derivation presented {download}`here </_static/DeltaPA.pdf>`.
 
 ## 4.0 Testing and examples
 

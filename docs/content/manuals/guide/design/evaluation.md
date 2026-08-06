@@ -14,7 +14,7 @@ Any word preceded by a dollar sign (`$`) will be treated as a
 variable name, and its value will be queried from the archive and
 substituted. For example:
 
-```
+```sh
 psrplot -c below:r='DM: $dm' [...]
 ```
 
@@ -31,7 +31,7 @@ Any string of characters enclosed in braces (`{ }`) will be
 evaluated as a mathematical expression and the result will be
 substituted into the string. For example:
 
-```
+```sh
 psrstat -c '{fabs($bw)/$freq}' [...]
 ```
 
@@ -59,7 +59,7 @@ print the mean value of the reduced chi-squared statistic stored in
 the polarization calibrator solution extension, averaged over
 frequency channels 16 through 121:
 
-```
+```sh
 psrstat -c '{sum{$pcal:eqn[16-121]:chisq}/sum{$pcal:eqn[16-121]:nfree}}' [...]
 ```
 
@@ -74,14 +74,14 @@ mathematical expression. This specifier is a percent sign followed by
 an integer (`%N`) where *N* is the total number
 of significant digits to be printed. For example:
 
-```
+```sh
 psrplot -c below:r='DM: $dm%4' [...]
 ```
 
 would add a string like "DM: 2.645" below the upper right hand corner of
 each plot. Likewise:
 
-```
+```sh
 psrstat -c 'Fractional BW: {fabs($bw)/$freq}%2' [...]
 ```
 

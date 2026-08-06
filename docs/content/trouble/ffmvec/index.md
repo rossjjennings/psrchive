@@ -15,7 +15,7 @@ The latest version of PSRCHIVE comes with a script
 that will patch the bug in CFITSIO. To install the patched CFITSIO library,
 run the following
 
-```
+```sh
 cd psrchive
 ./update
 if you build in a different directory, then "cd $buildir"
@@ -26,7 +26,7 @@ make
 
 When the script has finished installing, configure, compile, and install PSRCHIVE; e.g.
 
-```
+```sh
 cd ..
 ./configure [plus your favourite arguments]
 make clean
@@ -37,7 +37,7 @@ make install
 Verify that PSRCHIVE programs have linked against
 the newly installed CFITSIO library with something like the following:
 
-```
+```sh
 ldd `which psredit` | grep fits
 libcfitsio.so.5 => /home/pulsar/lib/libcfitsio.so.5 (0x00002aaaaae28000)
 ls -l /home/pulsar/lib/libcfitsio.so.5

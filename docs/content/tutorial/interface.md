@@ -136,12 +136,12 @@ constructor of the new class interface using the
 `TextInterface::To<MyClass>::import` method. It is
 currently possible to import the text interface of:
 
-* a [parent](interface.md#parent),
-* a [member](interface.md#member),
-* the elements of a [vector](interface.md#vector), or
-* the data in a [map](interface.md#map).
+* a [parent](interface:Inheriting the parent interface),
+* a [member](interface:Importing a member interface),
+* the elements of a [vector](interface:Importing the interface to the elements of a vector), or
+* the data in a [map](interface:Importing the interface to the data in a map).
 
-**Inheriting the Parent interface**
+### Inheriting the parent interface
 
 For example, suppose that a class named `Child` inherits a
 class named `Parent`, and that `Parent` has
@@ -193,7 +193,7 @@ void quick_set (T* instance, std::string& key, std::string& value)
 }
 ```
 
-**Importing a member interface**
+### Importing a member interface
 
 For example, suppose that a class named `Composite` has an
 attribute of type `Component`, and that the text interface
@@ -243,7 +243,7 @@ member:max
 member:code
 ```
 
-**Importing the interface to the elements of a vector**
+### Importing the interface to the elements of a vector
 
 Now consider a class named `Vector` which contains an array
 of attributes of type `Element`, and that the text
@@ -290,7 +290,7 @@ x[4-]:code
 
 The last notation means "from the fourth element to the end of the array".
 
-**Importing the interface to the data in a map**
+### Importing the interface to the data in a map
 
 Now consider a class named `Map` which contains data of
 type `Data` indexed by a variable of type `Key`;

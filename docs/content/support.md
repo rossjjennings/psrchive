@@ -1,21 +1,20 @@
 # PSRCHIVE Software Support
 
-## [Ask a Question!](qa)
-
 ## Bug Reports
 
-Please submit bug reports using the PSRCHIVE
-[Bug Tracker](http://sourceforge.net/tracker/?group_id=159762&atid=813132&status=1). You can also browse past bug reports here.
+Please submit bug reports as a new 
+[Work Item](https://gitlab.com/pulsar-astronomy/psrchive/-/work_items). You can also browse past bug reports here.
 
 ## Feature Requests
 
 If you have a great idea for a feature that should be implemented in
-PSRCHIVE, please tells us about it using the
-[Feature Requests Tracker](http://sourceforge.net/tracker/?group_id=159762&atid=813135&status=1).
+PSRCHIVE, please also submit a new
+[Work Item](https://gitlab.com/pulsar-astronomy/psrchive/-/work_items).
 
 ## Developers Welcome!
 
 If you have written or may some day write code or documentation that
-you would like to contribute to the project, simply obtain a
-SourceForge account and send your user name to
-[psrchive-developers@lists.sourceforge.net](mailto:psrchive-developers@lists.sourceforge.net)
+you would like to contribute to the project, simply
+[fork the repository](https://gitlab.com/pulsar-astronomy/psrchive/-/forks/new)
+to your own account, make changes there, and then open a merge request back to 
+pulsar-astronomy/psrchive.

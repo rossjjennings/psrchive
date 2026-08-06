@@ -14,7 +14,7 @@ band with some frequency resolution, and an observation that spans the
 same band with the same frequency resolution. You can match the
 observation to the template by running
 
-```
+```sh
 pcm -H -S template.ar observation.ar
 ```
 
@@ -23,7 +23,7 @@ harmonics to include as constraints (the fit is performed in the
 fluctuation frequency domain).
 You might get an error message like
 
-```
+```console
 Error::message
         mismatch between calibrator
         template.ar and
@@ -35,8 +35,8 @@ This is telling you that the one of receiver parameters is configured
 differently in these files. To work around this, first have a look at the
 receiver parameters; e.g.
 
-```
-psredit template.ar | grep rcvr
+```console
+$ psredit template.ar | grep rcvr
 
 rcvr:name   Receiver name                      MULTI
 rcvr:basis  Basis of receptors                 lin
@@ -63,15 +63,14 @@ Annoyingly, none of the parameters mention the word orientation; but you
 notice that the difference in "Symmetry angle of receptor basis" is
 equal to 135 degrees and conclude that this is the parameter to change; e.g.
 
-```
+```sh
 psredit -c rcvr:sa=-90 observation.ar -m
 ```
 
 Try again and if all goes well, you'll see messages like the following
 
-```
-pcm -H -S template.ar observation.ar
-
+```console
+$ pcm -H -S template.ar observation.ar
 pcm: loading archives
 pcm: loaded archive: observation.ar
 pcm: creating model
@@ -112,15 +111,14 @@ Calibration::SignalPath::solve failure
 
 The output can be plotted with
 
-```
+```sh
 psrplot -p calm pcm.fits
 ```
 
 and queried using `psredit`; e.g. to list all polarization calibrator solution parameters
 
-```
-psredit pcm.fits | grep pcal
-
+```console
+$ psredit pcm.fits | grep pcal
 pcal:name         Name of calibrator model                 van04e18
 pcal:nparam       Number of calibrator model parameters    7
 pcal:nchan        Number of frequency channels             128
@@ -137,9 +135,8 @@ pcal:eqn*:nfree   Number of degrees of freedom
 
 To see the names of the model parameters
 
-```
-psredit -c 'pcal:eqn[64]:name' pcm.fits
-
+```console
+$ psredit -c 'pcal:eqn[64]:name' pcm.fits
 pcm.fits pcal:eqn[64]:name=G,gamma,phi,el0,or0,el1,or1
 ```
 
@@ -150,15 +147,14 @@ when what you really want is a single parameter that describes the rotation
 about the line of sight, as in Equation 19 of Britton (2000). So now you
 rerun pcm with that model
 
-```
+```sh
 pcm -H -S template.ar -m bri00e19 observation.ar
 ```
 
 ... wait a while and when pcm is finished
 
-```
-psredit -c 'pcal:eqn[64]:name' pcm.fits
-
+```console
+$ psredit -c 'pcal:eqn[64]:name' pcm.fits
 pcm.fits pcal:eqn[64]:name=G,gamma,phi,b_1,b_2,r_1,r_2
 ```
 
@@ -166,32 +162,32 @@ Now you have some boosts and rotations that have numerical indeces instead
 of letters, but they appear in the same order, so r\_2 is r\_v, the rotation
 about the line of sight. It's value in all frequency channels can be printed with
 
-```
+```sh
 psredit -c 'pcal:eqn:val[6]' pcm.fits
 ```
 
 but this spits out a long comma-separated list. You might want the values on separate lines in a single column, which can be achieved with
 
-```
+```sh
 psredit -c 'pcal:eqn:val[6]' pcm.fits -d '\n'
 ```
 
 and to get rid of the leading `pcm.fits pcal:eqn:val[6]=`
 
-```
+```sh
 psredit -c 'pcal:eqn:val[6]' pcm.fits -d '\n' -Qq
 ```
 
 this output can be redirected to a file named `radians.txt` and the
 radio frequency of each channel can be queried and saved to file with
 
-```
+```sh
 psredit -c 'pcal:freq' pcm.fits -d '\n' -Qq > frequencies.txt
 ```
 
 Paste the two columns into a single file
 
-```
+```sh
 paste frequencies.txt radians.txt > plot.txt
 ```
 
