@@ -1,10 +1,48 @@
 # Quick Start
 
-## Loading an archive
+## Key command-line tools
 
-The primary entry point for most work with PSRCHIVE is the
-`Pulsar::Archive` class.  Use the static `load` factory to open any
+[`psredit`](content/manuals/psredit.md)
+:   Edit or query metadata.
+
+[`psrstat`](content/manuals/psrstat.md)
+:   Query metadata and derived statistical quantities.
+
+[`pam`](content/manuals/pam.md)
+:   General-purpose processing (dedisperse, integrate, etc.).
+
+[`psrsh`](content/manuals/psrsh.md)
+:   Command language interpreter for interactive or scripted processing.
+
+[`paz`](content/manuals/paz.md)
+:   Zap (flag) frequency channels or sub-integrations affected by RFI.
+
+[`psradd`](content/manuals/psradd.md)
+:   Combine data in various ways.
+
+[`pat`](content/manuals/pat.md)
+:   Generate pulse times of arrival (TOAs) for pulsar timing.
+
+### Example script
+
+```bash
+# Inspect metadata parameters
+psredit -c "name,freq,bw,nchan,nbin,length" observation.ar
+
+# Dedisperse, integrate in frequency and polarization, and overwrite the file
+pam -d -F -p -m observation.ar
+
+# Generate an arrival time
+pat -f tempo2 -s template.std observation.ar
+```
+
+## Software Interface
+
+The primary entry point for most applications that use PSRCHIVE is the
+`Pulsar::Archive` class.  Use the `load` factory to open any
 supported file format:
+
+### C++ Example
 
 ```c++
 #include "Pulsar/Archive.h"
@@ -13,48 +51,17 @@ auto archive = Pulsar::Archive::load("observation.ar");
 archive->fscrunch();       // Integrate over frequency
 archive->tscrunch();       // Integrate over time
 archive->pscrunch();       // Form total intensity
+
+auto nbin   = archive->get_nbin();
+auto nchan  = archive->get_nchan();
+auto source = archive->get_source();
 ```
 
-## Key command-line tools
+Also see the full [Application Programming Interface (API)](api/index.md).
 
-`pam`
-:   General-purpose archive manipulation (scrunch, calibrate, dedisperse).
+## Python Example
 
-`vap`
-:   Print archive header parameters in tabular form.
-
-`psrsh`
-:   Interactive scripting shell for PSRCHIVE operations.
-
-`paz`
-:   Zap (remove) frequency channels or sub-integrations affected by RFI.
-
-`pat`
-:   Generate pulse times of arrival (TOAs) for pulsar timing.
-
-`psredit`
-:   Edit or query archive metadata.
-
-`psrconv`
-:   Convert between archive file formats.
-
-## Example workflow
-
-```bash
-# Inspect archive parameters
-vap -c "name,freq,bw,nchan,nbin,length" observation.ar
-
-# Dedisperse, scrunch in frequency and polarization
-pam -d -F -p observation.ar
-
-# Generate a TOA
-pat -f tempo2 -s template.std observation.ar
-```
-
-## Python interface
-
-When built with `--enable-shared` and SWIG, PSRCHIVE provides Python
-bindings:
+Using the [Python bindings](content/manuals/python.md), the above example is equivalent to
 
 ```python
 import psrchive
@@ -62,6 +69,7 @@ import psrchive
 archive = psrchive.Archive_load("observation.ar")
 archive.fscrunch()
 archive.tscrunch()
+archive.pscrunch()
 
 nbin   = archive.get_nbin()
 nchan  = archive.get_nchan()

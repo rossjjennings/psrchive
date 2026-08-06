@@ -1,9 +1,9 @@
-# Git: Quick Guide (for Developers)
+# Git Overview
 
-Clone the PSRCHIVE Git repo using your sf.net username and password.
+Developers with a GitLab account clone the PSRCHIVE repository with
 
-```console
-$ git clone ssh://USERNAME@git.code.sf.net/p/psrchive/code psrchive
+```sh
+git clone --recursive git@gitlab.com:pulsar-astronomy/psrchive.git
 ```
 
 Each development task (e.g. new *feature* or *bug fix* should be

@@ -20,16 +20,10 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Developer Guide
+   :caption: Developer Resources
 
-   architecture
    api/index
-   content/devel/development
-   content/devel/install
-   content/devel/design
-   content/devel/style
-   content/devel/git_guide
-   content/devel/policy
+   content/devel
    content/tutorial
 
 .. toctree::

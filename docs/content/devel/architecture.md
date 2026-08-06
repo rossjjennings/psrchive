@@ -54,10 +54,3 @@ implement I/O for specific file formats (PSRFITS, Timer, WAPP, BPP,
 etc.).  New instances are created via the `Pulsar::Archive::load`
 static factory, which auto-detects the format.
 
-## MEAL library
-
-The Measurement and Error Analysis Library (MEAL) implements non-linear
-least-squares fitting and error propagation.  Arbitrary functions are
-built by modular construction of elementary functions, each
-parameterized by any number of arguments.  MEAL is used extensively by
-the Polarimetry module for calibration model fitting.

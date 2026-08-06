@@ -1,4 +1,4 @@
-# PSRCHIVE Development Policy
+# Development Policy
 
 The PSRCHIVE team welcomes contributions to the
 development effort. You can either submit code that you think would

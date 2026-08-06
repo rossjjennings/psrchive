@@ -1,9 +1,10 @@
-# PSRCHIVE: Building for multiple architectures/compilers
+# Build Directory
 
 When compiling the PSRCHIVE source code, the
-location of the **build** directory is arbitrary. That is, your
-present working directory need not necessarily be the top of the
-source code tree when you run `configure` and `make`.
+location of the **build** directory is arbitrary. That is, 
+when you run `configure` and `make`, your
+current working directory need not necessarily be the top of the
+source code tree.
 
 This fact enables the PSRCHIVE software to be
 compiled on multiple architectures or with different compilers using
@@ -12,16 +13,16 @@ directory for each architecture/compiler combination and change to
 this directory before running `configure` and `make`.
 
 For example, suppose that the software has been unpacked into the
-$HOME/psrchive-3.1 directory, and that you wish to compile
+`$HOME/psrchive` directory, and that you wish to compile
 the software twice, once using the GNU compiler collection, and once
 using the Intel compilers. Create two separate **build**
-directories, e.g. $HOME/gnu and $HOME/intel.
+directories, e.g. `$HOME/gnu` and `$HOME/intel`.
 
 To compile with GNU:
 
 ```
 cd $HOME/gnu
-$HOME/psrchive-3.1/configure --prefix=$PWD
+$HOME/psrchive/configure --prefix=$PWD
 make
 make install
 ```
@@ -33,7 +34,7 @@ cd $HOME/intel
 setenv CXX icc
 setenv CC icc
 setenv F77 ifort
-$HOME/psrchive-3.1/configure --prefix=$PWD
+$HOME/psrchive/configure --prefix=$PWD
 make
 make install
 ```
