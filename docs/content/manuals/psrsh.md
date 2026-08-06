@@ -160,3 +160,15 @@ previously possible.
 ## 5.0 Known bugs and features that require implementation
 
 * plotting?
+
+
+```{toctree}
+:hidden:
+
+guide/design/options
+psrplot
+psradd
+psrsh/examples/shell
+psrsh/examples/script
+psrsh/examples/calibration
+```

@@ -15,3 +15,15 @@
 * [TEMPO2 warnings](warnings/tempo2/index.md)
 * [no polynomials loaded](trouble/nopolynomials/index.md)
 * [CFITSIO memory violation bug](trouble/ffmvec/index.md)
+
+
+```{toctree}
+:hidden:
+
+trouble/verbose
+problems
+warnings/tempo/index
+warnings/tempo2/index
+trouble/nopolynomials/index
+trouble/ffmvec/index
+```

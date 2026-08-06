@@ -1,6 +1,5 @@
-# interface
+# Building a text interface
 
-**Building a text interface**
 Sometimes it is useful to enable the configuration of a class
 through a text interface. For example, text parsed from the command
 line may be used to set the attributes of a class; also, a configuration
@@ -33,7 +32,7 @@ usefulness of this feature will be demonstrated later.
 
 ---
 
-# Adding Attributes
+## Adding Attributes
 
 To add an interface to an attribute of a class, there must be separate
 methods that get and (optionally) set the value of this attribute.

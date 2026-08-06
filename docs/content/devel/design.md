@@ -5,10 +5,10 @@ but what does this mean, on a *practical* level, when
 developing PSRCHIVE? The following handy rules
 of thumb can help when making design decisions:
 
-1. [Avoid adding methods](design.md#methods) to the container classes
-   (Archive, Integration, Profile)
-2. [Implement algorithms as classes](design.md#classes)
-3. [Use extensions](design.md#extensions) to customize functionality
+```{contents}
+:depth: 1
+:local:
+```
 
 ---
 

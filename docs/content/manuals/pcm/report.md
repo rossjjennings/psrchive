@@ -1,5 +1,5 @@
 
-## Fit Report
+# Fit Report
 
 *Part of [PCM](../pcm.md)*
 

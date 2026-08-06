@@ -78,4 +78,3 @@ psrplot -p psd
 
 ![](psd.png)
 
----

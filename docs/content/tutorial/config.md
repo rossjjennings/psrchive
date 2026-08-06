@@ -1,10 +1,8 @@
-# config
+# Adding a Configuration Option
 
-**Adding a Configuration Option**
 A number of PSRCHIVE classes have default
 behaviours that can be configured using a configuration file, as
-described in the [psrchive\_config
-manual](../manuals/config.md).
+described in the [psrchive\_config manual](../manuals/config.md).
 
 This tutorial describes how to add new configuration options using
 the `Pulsar::Config<>` template class.

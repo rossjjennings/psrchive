@@ -1,6 +1,5 @@
-# application
+# Writing an Application
 
-**Writing an Application**
 One of the main hurdles when writing a new application is setting up
 the skeleton, including command line parsing, file loading,
 preprocessing options, etc. This task can be made simpler using the

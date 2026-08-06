@@ -1,6 +1,5 @@
-# interpreter
+# Adding to the Interpreter
 
-**Adding to the Interpreter**
 A number of PSRCHIVE programs, most notably
 [psrsh](../manuals/psrsh.md), make use of the
 `Pulsar::Interpreter` class to process user commands.
@@ -20,7 +19,7 @@ the new command:
 
 ---
 
-# In More Detail ...
+## In More Detail ...
 
 To serve as an example, consider adding a new command named
 `cal`, which performs polarimetric calibration. The new

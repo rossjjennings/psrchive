@@ -42,3 +42,36 @@ A step-by-step [User's Guide](manuals/guide.md) is also under development.
 | [psrspa](manuals/psrspa.md) | Reimplementation of spa with added functionality |
 | [pvt](manuals/pvt.md) | analysis of pulse variability |
 | [pdmp](manuals/pdmp.md) | find optimal period and dispersion measure |
+
+
+```{toctree}
+:hidden:
+
+manuals/python
+manuals/guide
+manuals/guide/design/core
+manuals/psredit
+manuals/psrstat
+manuals/psradd
+manuals/psrsh
+manuals/psrplot
+manuals/vap
+manuals/pdv
+manuals/pav
+manuals/pazi
+manuals/pam
+manuals/psrconv
+manuals/pac
+manuals/pcm
+manuals/fluxcal
+manuals/rmfit
+manuals/psrpol
+manuals/pas
+manuals/pat
+manuals/config
+manuals/paz
+manuals/spa
+manuals/psrspa
+manuals/pvt
+manuals/pdmp
+```

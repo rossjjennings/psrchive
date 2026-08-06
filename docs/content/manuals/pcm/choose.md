@@ -1,5 +1,5 @@
 
-## Optimal selection of pulse phase bins for MEM
+# Optimal selection of pulse phase bins for MEM
 
 *Part of [PCM](../pcm.md)*
 

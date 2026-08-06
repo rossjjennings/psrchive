@@ -16,3 +16,13 @@ Suggestions and contributions are welcome!
 4. [Calibrating Data](guide/calibrating.md): polarimetric calibration
 5. [Trouble Shooting](../trouble.md):
    steps that can help to debug a problem
+
+
+```{toctree}
+:hidden:
+
+guide/design
+guide/viewing
+guide/calibrating
+../trouble
+```

@@ -1,6 +1,5 @@
-# structure
+# Structure of an Archive
 
-**Structure of an Archive**
 The `Pulsar::Archive` class is a data container that holds
 
 * an array of integrations,

@@ -1,6 +1,5 @@
-# compile
+# How to compile
 
-**How to compile**
 To compile the code from the [previous example](hello.md),
 simply save it in a file named hello.C and run
 

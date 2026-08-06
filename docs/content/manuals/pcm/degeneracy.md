@@ -1,5 +1,5 @@
 
-## Measurement Equation Modeling (MEM) Degeneracy Under Commutation
+# Measurement Equation Modeling (MEM) Degeneracy Under Commutation
 
 *Part of [PCM](../pcm.md)*
 

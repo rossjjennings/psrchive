@@ -1,5 +1,5 @@
 
-## Data and Model
+# Data and Model
 
 *Part of [PCM](../pcm.md)*
 

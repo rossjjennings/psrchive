@@ -14,3 +14,16 @@
    Convenient access to data attributes and derived values.
 7. [Large File Support](design/large_file.md) :
    Optionally use custom virtual memory management to process large files.
+
+
+```{toctree}
+:hidden:
+
+design/core
+design/weighted_means
+design/cold_plasma
+design/baseline_removal
+design/configuration
+design/evaluation
+design/large_file
+```

@@ -5,7 +5,7 @@ wider variety of related tools and problem solving strategies. If you
 have limited time, first skim the instructions and then follow the
 correct path.
 
-## Measurement Equation Template Matching Example
+# Measurement Equation Template Matching Example
 
 *Part of [PCM](../pcm.md)*
 

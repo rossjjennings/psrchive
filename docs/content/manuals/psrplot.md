@@ -100,3 +100,16 @@ Examples are given throughout the documentation in section 2.1.
 ## 5.0 Known bugs and features that require implementation
 
 * None at this time.
+
+
+```{toctree}
+:hidden:
+
+psrplot/plots
+psrplot/customization
+psrplot/label
+psrplot/viewport
+psrplot/pen
+psrplot/loop
+../tutorial/interface
+```

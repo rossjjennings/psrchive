@@ -1,6 +1,5 @@
-# plugin
+# Writing a File Format Plugin
 
-**Writing a File Format Plugin**
 To add a new file format to the list supported by the PSRCHIVE library, it is necessary to write a new
 class that inherits the `Pulsar::Archive` base class. This
 class must implement at least:

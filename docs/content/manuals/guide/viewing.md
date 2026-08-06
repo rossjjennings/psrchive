@@ -9,3 +9,12 @@ at the data.
    Ensure that the data look as expected.
 3. [Calibrator Data](viewing/cal/index.md):
    Plot the data or the solution derived from them.
+
+
+```{toctree}
+:hidden:
+
+viewing/metadata
+viewing/data
+viewing/cal/index
+```
