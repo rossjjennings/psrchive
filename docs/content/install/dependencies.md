@@ -14,7 +14,7 @@ third/install.md
 
 ---
 
-### Necessary
+## Necessary
 
 These packages provide basic functionality and must be installed
 before attempting to compile or install PSRCHIVE.
@@ -43,7 +43,7 @@ third/mac.md
 ```
 ---
 
-### Optional
+## Optional
 
 PSRCHIVE can compile without these packages,
 but its subsequent use may be limited.
@@ -77,7 +77,7 @@ third/pgplot.md
 
 ---
 
-### Build tools
+## Build tools
 
 If you wish to check out and compile the code from the Git repository,
 you will need the following:

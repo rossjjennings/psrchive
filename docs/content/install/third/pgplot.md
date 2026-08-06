@@ -5,7 +5,7 @@ Library to produce publication quality plots in a variety of styles.
 [PGPLOT](http://www.astro.caltech.edu/~tjp/pgplot/) is
 available from T. J. Pearson.
 
-### Automatic Installation
+## Automatic Installation
 
 The PSRCHIVE configure  script
 produces a package installation script that can be used to automatically
@@ -23,7 +23,7 @@ environment variables. After setting these variables, re-run the
 
 ---
 
-### Manual Download/Installation
+## Manual Download/Installation
 
 Download PGPLOT as described in
 [step one](http://www.astro.caltech.edu/~tjp/pgplot/install.md).

@@ -1,6 +1,6 @@
 # pazi
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 Pazi is a program developed from psrplot (Willem van Straten) and
 pav (Aidan Hotan) to create two main plots (phase vs frequency and
@@ -17,7 +17,7 @@ frequency, time and polarisation scrunched profile. Files can be
 saved at the user's request where a new file filename.rz or
 filename.cz is created with the changes.
 
-### 2.0 Usage
+## 2.0 Usage
 
 The command is in the form:
 
@@ -63,7 +63,7 @@ image using the mouse and keyboard. The program is designed to
 output the equivalent paz command and/or to create a new file
 with the channels/subints/bins zapped.
 
-### 2.1 Mouse and Keyboard commands
+## 2.1 Mouse and Keyboard commands
 
 The list of mouse and keyboard commands as follows:
 
@@ -84,7 +84,7 @@ toggle dedispersion:        'd'
 binzap mod:                 'b'
 ```
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 In order to manipulate the data while interchanging between
 plots, two instances of the archive are used. The original
@@ -107,10 +107,10 @@ mean + (random Gaussian number \* variance)
 Where the mean is calculated within each channel belonging to
 the subint.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 Examples of usage and output have been described in Section 2.0.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this point in time.

@@ -1,6 +1,6 @@
 # psrstat
 
-### Selecting, configuring, executing, and querying algorithms
+## Selecting, configuring, executing, and querying algorithms
 
 Some [algorithms](algorithms.md) can be selected, configured,
 executed, and queried using syntax that is similar to that used for

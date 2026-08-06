@@ -12,7 +12,7 @@ of thumb can help when making design decisions:
 
 ---
 
-### Avoid adding new methods to container classes
+## Avoid adding new methods to container classes
 
 As much as possible, avoid the urge to add new methods to the
 container classes.
@@ -40,7 +40,7 @@ that must resize the container.
 
 ---
 
-### Implement algorithms as classes
+## Implement algorithms as classes
 
 There are a number of reasons to implement an algorithm as a class:
 
@@ -101,7 +101,7 @@ recomputation.
 
 ---
 
-### Use extensions to customize functionality
+## Use extensions to customize functionality
 
 If an algorithm must be adapted according to the type of the
 container, then first consider adding an Extension class to implement

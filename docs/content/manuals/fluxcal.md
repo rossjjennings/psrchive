@@ -1,6 +1,6 @@
 # fluxcal
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The `fluxcal` program uses observations of the reference
 source and a standard candle in order to determine both the system
@@ -10,11 +10,11 @@ calibration of pulsar observations. Absolute flux calibration must be
 preceded by a stage of polarimetric calibration that normalizes the
 observed flux density by the flux density of the reference source.
 
-### 2.0 Usage
+## 2.0 Usage
 
-### 2.1 Before running `fluxcal`
+## 2.1 Before running `fluxcal`
 
-#### The Observations
+### The Observations
 
 In order to run `fluxcal`, you will need sets of
 `Pulsar::Archive` files containing observations of the
@@ -36,7 +36,7 @@ The observations in each set must have the same observing parameters,
 such as centre frequency and bandwidth, as determined by the
 `Pulsar::Archive::calibrator_match` method.
 
-#### The Standard Candles
+### The Standard Candles
 
 The `fluxcal` program also requires information about the
 standard candle(s) to be used for absolute flux calibration. This
@@ -73,9 +73,9 @@ aka J0918-1205
 aka CAL
 ```
 
-### 2.2 Running `fluxcal`
+## 2.2 Running `fluxcal`
 
-#### Input
+### Input
 
 There are two modes of operation, as determined by the input method:
 
@@ -101,7 +101,7 @@ observation in the next set. This separation time is 5 minutes by
 default and can be changed using the `-i` command line
 option.
 
-#### Output
+### Output
 
 For each set, `fluxcal` solves for the system temperature and
 reference flux density, and outputs these values as a function of
@@ -118,12 +118,12 @@ the extension, use the `-e` command line option.
 The solutions produced by `fluxcal` may be plotted by
 running `pacv filename.fluxcal`.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 The solution implemented by `fluxcal` is described in
 the [appendix](../appendices/fluxcal/fluxcal.pdf).
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 The following simple example shows a successful run. Notice that the
 output filename need not necessarily be based upon the first file
@@ -245,6 +245,6 @@ fluxcal: creating PSRFITS Archive
 fluxcal: unloading w040509_091501.fluxcal
 ```
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 None at this time.

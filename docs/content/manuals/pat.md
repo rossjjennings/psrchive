@@ -1,6 +1,6 @@
 # pat
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 `pat` is used to determine the time of arrival (TOA) of
 each integrated Profile in an Archive. It can use a variety of methods
@@ -10,7 +10,7 @@ Integration in which the Profile resides to give the representative
 site arrival time. These TOAs can then be analysed with TEMPO or
 TEMPO2.
 
-### 2.0 Usage
+## 2.0 Usage
 
 `pat` is very easy to use, all commands are of the form
 
@@ -30,7 +30,7 @@ pat -h
 Multiple filenames can be specified on the command line either
 individually or using wildcard characters.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 At the present time, `pat` can use any one of five
 algorithms to determine the phase shift between the standard template
@@ -78,7 +78,7 @@ Additional flags can be added to the default output when using the
 tempo2 format, allowing the user to carry extra information (like the
 name of the instrument used to record the data) along with the TOAs.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 Typically, `pat` will be invoked in the following
 fashion:
@@ -91,6 +91,6 @@ The above command prints a formatted list containing the TOAs and
 associated information like frequency and uncertainty. If no algorithm
 is specified (with the -A option), the PGS method is used.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

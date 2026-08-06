@@ -1,9 +1,9 @@
 
-## Credits
+# Credits
 
 Please see our growing list of [contributors](contributors.md).
 
-## Legal
+# Legal
 
 As information resulting from fundamental research,
 PSRCHIVE is not subject to United States of America

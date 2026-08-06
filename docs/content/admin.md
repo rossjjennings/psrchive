@@ -1,6 +1,6 @@
 # PSRCHIVE Administration Guide
 
-### Table of Contents
+## Table of Contents
 
 * [Preparing a Distribution](admin/prepare.md)
 * [Releasing a Distribution](admin/release.md)
@@ -10,7 +10,7 @@
 
 ---
 
-### SourceForge Support
+## SourceForge Support
 
 * Consult the [SourceForge Site Documentation](https://apps.sourceforge.net/trac/sitedocs/wiki)
 * Login to the [Interactive Shell Service](https://apps.sourceforge.net/trac/sourceforge/wiki/Shell%20service) and use `adminrepo`

@@ -1,6 +1,6 @@
 # PSRCHIVE developer's guide
 
-### Introduction
+## Introduction
 
 The PSRCHIVE software makes use of the GNU
 autotools to compile the source code and install the header files,
@@ -13,9 +13,9 @@ also take interest in the
 
 ---
 
-### Check-out, bootstrap, configure, and compile
+## Check-out, bootstrap, configure, and compile
 
-#### Check-out
+### Check-out
 
 Developers can check out the software from GitLab with
 
@@ -38,7 +38,7 @@ ChangeLog   NEWS         upload.csh*
 The directories shown in white are the **main** directories of the
 PSRCHIVE software distribution.
 
-#### Bootstrap
+### Bootstrap
 
 Before configuring and compiling, developers must create the
 `configure` script and Makefile.in input files by
@@ -54,7 +54,7 @@ cd psrchive
 If you encounter problems during bootstrap, please ensure
 that your [GNU autotools](../third/autotools.md) are up-to-date.
 
-#### Configure
+### Configure
 
 After running bootstrap, the `configure` script is run to
 determine the system configuration and produce the Makefiles.
@@ -65,7 +65,7 @@ directory](install.md).
 If the configure script fails, please refer to the
 [Common Problems](../problems.md).
 
-#### Compile
+### Compile
 
 In the top-level build directory (psrchive in most simple
 cases), type `make` to compile and `make install` to
@@ -82,7 +82,7 @@ been defined in the **main** directories:
 
 ---
 
-### Making additions
+## Making additions
 
 If you haven't already done so, please review the rules of thumb outlined
 in the [design philosophy](design.md).
@@ -90,7 +90,7 @@ in the [design philosophy](design.md).
 New code is added to the Makefile.am file in the relevant
 sub-directory.
 
-#### Choosing a sub-directory
+### Choosing a sub-directory
 
 Sub-directories of the GNU configured and built software tree are compiled
 in a specific order. Therefore, it is not possible to compile code that
@@ -121,7 +121,7 @@ More/Applications
 More/rhythm
 ```
 
-#### Modifying Makefile.am
+### Modifying Makefile.am
 
 The syntax of the `automake` input file, Makefile.am,
 is fairly straight-forward. There are basically four main targets:

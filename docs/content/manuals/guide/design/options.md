@@ -7,7 +7,7 @@ line options, including
 * [Standard preprocessing](options.md#preprocessing)
 * [Standard output](options.md#output).
 
-### Standard preamble
+## Standard preamble
 
 ```
   -h,--help      print this help page
@@ -29,7 +29,7 @@ command line options are
 
 Please see the [psrsh](../../psrsh.html#jobs) manual for more
 details.
-### Standard output
+## Standard output
 
 Some programs that output a modified version of the data
 (e.g. psredit, psrsh, and paz) accept the following

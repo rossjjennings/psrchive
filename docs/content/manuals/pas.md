@@ -1,6 +1,6 @@
 # pas
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 Pulsar timing is done by comparing the phase of each observed pulse
 with the fiducial phase of a standard template profile. The absolute
@@ -18,7 +18,7 @@ or fractional bin increments (using the Fourier shift theorem),
 baseline noise can be zeroed and two different profiles can be
 mutually aligned by maximising their cross-correlation function.
 
-### 2.0 Usage
+## 2.0 Usage
 
 `pas` is slightly different to most other PSRCHIVE applications in that it is an interactive
 GUI based on the PGPLOT subroutine library. It is invoked with the
@@ -50,14 +50,14 @@ polarisation. If this is not the case, `pas` simply
 extracts the Profile in the first integration, polarisation and
 frequency channel.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 `pas` makes use of the various Profile::rotate methods
 and the same shift detection routines used to calculate arrival times.
 In addition, it allows the user to modify Profile amplitudes in order
 to zero out unwanted baseline noise.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 During a typical pas session, the first in a series of standard
 templates (representing widely separated frequency bands for example)
@@ -69,6 +69,6 @@ reference. The automatic alignment function is then used to bring each
 of the other templates into line with the first, creating a set of
 templates with the same reference phase.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

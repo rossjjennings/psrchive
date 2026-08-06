@@ -1,11 +1,11 @@
 # psredit
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Pulsar Archive Editor, **psredit**, enables one to
 query, modify, add or remove the data in a Pulsar Archive.
 
-### 2.0 Usage
+## 2.0 Usage
 
 **psredit** commands are of the form:
 
@@ -18,7 +18,7 @@ separated by commas. (Multiple commands may also be specified by
 using multiple `-c` options.)
 Each command either gets, sets, or adds a parameter value.
 
-#### 2.1 Query (get)
+### 2.1 Query (get)
 
 A get command is simply the name of the paramter to be queried; e.g.
 
@@ -99,7 +99,7 @@ as a comma-separated list.
 **NOTE:** the single quotation marks in the above command-line example
 are necessary to protect the square brackets from interpretation by the shell.
 
-#### Formatting output
+### Formatting output
 
 With the `-q` command line option, `psredit` will
 not output the name of the file from which the parameters are queried; e.g.
@@ -124,7 +124,7 @@ psredit -Qqc int:mjd%30 filename.ar
  55915.5135737132842719265823916
 ```
 
-#### 2.2 Modify (set)
+### 2.2 Modify (set)
 
 A set command is an assignment expression with the parameter name on the left; e.g.
 
@@ -152,7 +152,7 @@ To zero the weight of every channel in only the first sub-integration
 psredit -c 'int[0]:wt=0.0' -e zap file.ar
 ```
 
-#### 2.3 Add sub-integration pointing parameters
+### 2.3 Add sub-integration pointing parameters
 
 The PSRFITS file format supports extending the `point` attribute of every sub-integration with additional parameters.
 For example, to add a new parameter named `ha` (hour angle) to every sub-integration,
@@ -201,7 +201,7 @@ Here, `-m` is one of the
 for naming the edited output file; in this case, the output file overwrites
 the input file.
 
-#### 2.4 Add sub-integration extensions
+### 2.4 Add sub-integration extensions
 
 To view the list of extensions that can be added to each sub-integration in a file, run
 
@@ -225,7 +225,7 @@ in all sub-integrations to 0.5
 psredit -c int:ext=+aux -c int:aux:rm=0.5 -e wrm file.ar
 ```
 
-#### 2.5 Add archive extensions
+### 2.5 Add archive extensions
 
 To view the list of extensions that can be added to a file, run
 
@@ -255,7 +255,7 @@ To add an `aux` extension to a file and set the auxiliary RM corrected flag,
 psredit -a aux -c aux:rmc=1 -e wrm file.ar
 ```
 
-#### 2.6 Remove archive extensions
+### 2.6 Remove archive extensions
 
 The `-r` option is used to remove an extension from an archive by name; e.g.
 to remove the auxiliary cold plasma extension from a file
@@ -264,7 +264,7 @@ to remove the auxiliary cold plasma extension from a file
 psredit -r aux -e noaux file.ar
 ```
 
-#### 2.7 Editing scripts
+### 2.7 Editing scripts
 
 Multiple `psredit` commands can be combined into a single text file
 and passed as a list of instructions using the `-C` command-line option;
@@ -287,13 +287,13 @@ If the above text was saved to a file named set\_ha.ped, then the commands could
 psredit -C set_ha.ped -e wha file.ar
 ```
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 For a description of the `TextInterface::Class`, please set
 the [Building a text interface](../tutorial/interface.md)
 tutorial.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 To add auxiliary cold plasma measures to every sub-integration and set unique
 values for each of the 3 sub-integrations:
@@ -308,6 +308,6 @@ int[2]:aux:rm=0.5
 int[2]:aux:dm=2.0e-4
 ```
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

@@ -1,6 +1,6 @@
 # pvt
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 One of the foundations of pulsar timing is the assumption that the
 mean pulse profile (obtained from several thousand integrated single
@@ -22,7 +22,7 @@ profiles. `pvt` was designed to detect differences
 between integrated pulse profiles, using a number of comparison
 methods.
 
-### 2.0 Usage
+## 2.0 Usage
 
 `pvt` has a number of options that govern the type of
 analysis performed. In general, it is invoked along with a list of
@@ -61,7 +61,7 @@ pvt -h
 Multiple filenames can be specified on the command line either
 individually or using wildcard characters.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 `pvt` uses simple flux normalisation methods and the
 Profile::morphological\_difference method. It can also implement more
@@ -69,7 +69,7 @@ specific analytical techniques related to the comparison of
 individual features in the integrated Profile, as described by Kramer
 et al. in the Astrophysical Journal, 520, 324, 1999.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 This program is still somewhat experimental and the algorithms it
 employs could change. Often, the program makes hidden assumptions
@@ -79,6 +79,6 @@ available). Users are warned that until the code matures, this program
 may require some experimentation and even editing to produce the
 desired output.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * Nothing specific, just lots of polishing.

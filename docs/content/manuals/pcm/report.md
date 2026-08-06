@@ -1,6 +1,6 @@
 # pcm
 
-### Fit Report
+## Fit Report
 
 Use the `-D report`  command line option to enable a report
 of the reduced chisq for each Stokes parameter of each input state.

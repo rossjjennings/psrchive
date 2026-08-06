@@ -86,7 +86,7 @@ as follows:
 
 ---
 
-### Implementing the method
+## Implementing the method
 
 The `Pulsar::Interpreter` class provides some utility
 methods that greatly simplify the implementation of new methods. The

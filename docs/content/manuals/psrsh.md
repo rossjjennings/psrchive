@@ -1,6 +1,6 @@
 # psrsh
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 `psrsh`  is a command language interpreter that provides
 access to PSRCHIVE data processing
@@ -12,9 +12,9 @@ completion, and history mechanism. The development and use of
 be loaded once and processed in many different ways, including
 polarimetric calibration and RFI mitigation.
 
-### 2.0 Usage
+## 2.0 Usage
 
-#### 2.1 Interactive shell
+### 2.1 Interactive shell
 
 When `psrsh` is started without any command-line options, it
 presents a command prompt and waits for a command to be entered. A
@@ -57,7 +57,7 @@ method, the results of the script will not be written to disk.
 However, if any of the[standard output
 options](guide/design/options.md#output) are used, then `psrsh`  will unload the results
 as specified. This allows scripts to behave like most other PSRCHIVE programs.
-#### 2.3 Job preprocessor
+### 2.3 Job preprocessor
 
 Some PSRCHIVE programs (e.g.[psrplot](psrplot.md) and [psradd](psradd.md)) use the `psrsh`
 interpreter to perform preprocessing on input archives. These
@@ -88,7 +88,7 @@ expressions.
 
 For a complete list of supported commands, type `psrsh -H`.
 
-#### 2.4 Shortcut Keys
+### 2.4 Shortcut Keys
 
 Certain commands can be entered using a single character shortcut key,
 and shortcut keys may be combined to form a single string (so long as
@@ -143,7 +143,7 @@ Some commands require a name as an argument, such as:
   copies data from the named archive into the archive
   currently at the top of the stack.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 The `psrsh` interpreter acts as an interface to various
 algorithms in the PSRCHIVE library. It does
@@ -151,12 +151,12 @@ not implement any new data reduction algorithms, but makes it possible
 to conveniently combine commands in ways that may not have been
 previously possible.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 * [Interactive shell](psrsh/examples/shell.md)
 * [Executable script](psrsh/examples/script.md)
 * [Polarimetric calibration](psrsh/examples/calibration.md)
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * plotting?

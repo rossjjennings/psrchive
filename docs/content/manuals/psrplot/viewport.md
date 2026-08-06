@@ -7,7 +7,7 @@ The layout of any
 * [overlaying multiple plots](viewport.md#overlay), and
 * [multiple plot style files](viewport.md#style).
 
-### Viewport position and size
+## Viewport position and size
 
 The position and size of the plot window (viewport) are set using the
 `x:view` and `y:view` customization options. These
@@ -20,7 +20,7 @@ psrplot -p flux -c 'x:view=(0.5,0.9),y:view=(0.1,0.5)' 0437n.FF
 
 ![](view.png)
 
-### Overlaying multiple plots
+## Overlaying multiple plots
 
 By default, each selected plot is printed on a clean page. However,
 it is also possible to overlay multiple plots on a single page with

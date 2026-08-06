@@ -1,6 +1,6 @@
 # pdv
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Pulsar Data Viewer, `pdv`, is designed to display some basic
 archive data. Including
@@ -9,7 +9,7 @@ archive data. Including
 * Polarization summary
 * raw profile data as ascii
 
-### 2.0 Usage
+## 2.0 Usage
 
 `pdv` is very simple to use, it accepts the following arguments.
 

@@ -1,6 +1,6 @@
 # pcm
 
-### Modeling variations of instrumental response across the beam
+## Modeling variations of instrumental response across the beam
 
 By default, `pcm` uses a single Jones matrices to model the linear
 transformation of the electric field vector along the boresight of a steerable dish.
@@ -30,7 +30,7 @@ using the (overloaded) `-P` option; for example
 pcm -c 0742-2822.DFT -c 2111+46.DFT -c 0450+55.DFT -P beam.yaml [...]
 ```
 
-#### Example beam configuration
+### Example beam configuration
 
 Consider a model in which both the differential gain (`gamma`) and the differential phase (`phi`)
 of a single-axis transformation (`SingleAxis`) each vary as a two-dimensional polynomial

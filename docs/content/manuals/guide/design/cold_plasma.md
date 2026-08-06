@@ -12,7 +12,7 @@ interstellar DM / RM.
 * Interstellar cold plasma effects are corrected with respect to the centre frequency stored in the archive header.
 * Auxiliary cold plasma effects are corrected with respect to infinite frequency.
 
-### Interstellar DM and RM parameters
+## Interstellar DM and RM parameters
 
 The interstellar dispersion measure (DM) and Faraday rotation measure (RM)
 and their related correction flags are stored in the primary header of a file
@@ -27,7 +27,7 @@ and can be queried and set using `psredit`:
 * `dm` [double-precision floating-point value]
   The interstellar dispersion measure; applies to all sub-integrations
 
-### Auxiliary DM and RM parameters
+## Auxiliary DM and RM parameters
 
 The following six parameters are used to store information about
 auxiliary dispersion and birefringence and can be queried and set
@@ -48,7 +48,7 @@ using `psredit`:
   for each sub-integration, the auxiliary dispersion measure predicted
   by the model for the corresponding epoch
 
-#### Example Usage: Edit auxiliary RM using a `psrsh`script
+### Example Usage: Edit auxiliary RM using a `psrsh`script
 
 For example set the rotation measure due to the ISM to 166 and the
 rotation measure due to the ionosphere to -9.9 for the first
@@ -63,7 +63,7 @@ edit int[0]:aux:rm=-9.9
 edit int[1]:aux:rm=-8.7
 ```
 
-#### Example Usage: Add the required auxiliary RM extension using `psredit`
+### Example Usage: Add the required auxiliary RM extension using `psredit`
 
 If a data file supports optional storage of auxiliary cold plasma parameters
 but does not yet contain the relevant extensions, they can be added with a
@@ -96,9 +96,9 @@ int[0]:aux:rm=1.2
 int[1]:aux:rm=3.4
 ```
 
-### Expected Behaviour
+## Expected Behaviour
 
-#### When either an fscrunch or tscrunch is performed:
+### When either an fscrunch or tscrunch is performed:
 
 1. If `rmc`/`dmc` is false (0), then the interstellar RM/DM that
    applies to all sub-integrations is corrected with reference to the weighted centre-frequency
@@ -108,7 +108,7 @@ int[1]:aux:rm=3.4
    the auxiliary RM/DM of each sub-integration is corrected with respect to infinite frequency
    and the `aux:rmc`/`aux:dmc` flags are set to true (1).
 
-#### When defaraday/dedisperse is performed:
+### When defaraday/dedisperse is performed:
 
 1. If `rmc`/`dmc` is false (0), then the interstellar RM/DM that
    applies to all sub-integrations is corrected with reference to the centre frequency stored

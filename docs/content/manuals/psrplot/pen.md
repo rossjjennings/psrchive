@@ -6,14 +6,14 @@ The attributes of the pen used to draw
 * [character font and height](pen.md#font), and
 * [line width and style](pen.md#line).
 
-### Character font and height
+## Character font and height
 
 The character font and height may be set via the `cf` and
 `ch` attributes. The default value for each of these is 1 (one).
 The character font may be set to any integer supported by the[PGSCF](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSCF) subroutine. The character height may be set to any
 floating point value, as described in the
 [PGSCH](http://www.astro.caltech.edu/~tjp/pgplot/subroutines.html#PGSCH) documentation.
-### Line width and style
+## Line width and style
 
 The line width may be set via the `lw` attribute.
 The default value is 1 (one), and the line width may be set to any integer

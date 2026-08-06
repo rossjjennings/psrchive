@@ -17,7 +17,7 @@ software packages using one or more of the following environment variables:
 
 ---
 
-### Using the PACKAGES environment variable
+## Using the PACKAGES environment variable
 
 You can specify one or more root directories in which to search for
 packages using the PACKAGES environment variable.
@@ -38,7 +38,7 @@ before running the `configure` script.
 
 ---
 
-### Using `configure` script options
+## Using `configure` script options
 
 The above example could also have been handled with
 

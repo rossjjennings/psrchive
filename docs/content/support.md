@@ -1,19 +1,19 @@
 # PSRCHIVE Software Support
 
-### [Ask a Question!](qa)
+## [Ask a Question!](qa)
 
-### Bug Reports
+## Bug Reports
 
 Please submit bug reports using the PSRCHIVE
 [Bug Tracker](http://sourceforge.net/tracker/?group_id=159762&atid=813132&status=1). You can also browse past bug reports here.
 
-### Feature Requests
+## Feature Requests
 
 If you have a great idea for a feature that should be implemented in
 PSRCHIVE, please tells us about it using the
 [Feature Requests Tracker](http://sourceforge.net/tracker/?group_id=159762&atid=813135&status=1).
 
-### Developers Welcome!
+## Developers Welcome!
 
 If you have written or may some day write code or documentation that
 you would like to contribute to the project, simply obtain a

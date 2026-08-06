@@ -8,7 +8,7 @@ to stdout, and `psrplot` can use it to label plots. This
 page documents the features and syntax of the interpreter that are
 common to both programs.
 
-### Variable substitution
+## Variable substitution
 
 Any word preceded by a dollar sign (`$`) will be treated as a
 variable name, and its value will be queried from the archive and
@@ -26,7 +26,7 @@ precision](evaluation.md#precision) below.)
 For a full list of available variable names,
 run `psrstat <filename>`.
 
-### Mathematical expressions
+## Mathematical expressions
 
 Any string of characters enclosed in braces (`{ }`) will be
 evaluated as a mathematical expression and the result will be
@@ -42,7 +42,7 @@ command line.
 Any mathematical expression that can be parsed by the [Parsifal
 evaluateExpression](http://www.parsifalsoft.com/examples/evalexpression/index.md) function may be used inside the braces.
 
-### Vector functions
+## Vector functions
 
 A number of functions that operate on arrays of values are also
 available, including
@@ -67,7 +67,7 @@ psrstat -c '{sum{$pcal:eqn[16-121]:chisq}/sum{$pcal:eqn[16-121]:nfree}}' [...]
 Note that the outer braces are required to invoke evaluation of
 the final division operation.
 
-### Numerical precision
+## Numerical precision
 
 The numerical precision of floating point values may be set by
 appending a precision specifier to either the variable name or

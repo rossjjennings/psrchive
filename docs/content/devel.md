@@ -1,6 +1,6 @@
 # PSRCHIVE Developer Guide
 
-### Table of Contents
+## Table of Contents
 
 * Quick Start
   + [Git clone](install/obtain.md)

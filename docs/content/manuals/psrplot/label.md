@@ -7,7 +7,7 @@ The labels on
 * [multiple lines](label.md#multiple),
 * [variable subsitution](label.md#variable).
 
-### Label names
+## Label names
 
 There are a total of eight label positions on each panel of a
 **psrplot** plot:
@@ -29,7 +29,7 @@ For example:
 psrplot -p stokes -c above:l="Template profile" 0437n.FF
 ```
 
-### Multiple lines
+## Multiple lines
 
 Multiple lines may be printed above and below the top of the frame.
 Each line in a plot label is separated by a C-style newline
@@ -39,7 +39,7 @@ Each line in a plot label is separated by a C-style newline
 psrplot -p stokes -c below:l="PSR J0437-4715\nStokes parameters" 0437n.FF
 ```
 
-### Variable substitution and mathematical expressions
+## Variable substitution and mathematical expressions
 
 Plot labels may also include variable names and mathematical
 expressions that are interpreted before plotting using the syntax

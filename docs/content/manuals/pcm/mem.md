@@ -1,6 +1,6 @@
 # pcm
 
-### Measurement Equation Modeling Example
+## Measurement Equation Modeling Example
 
 For this example, suppose that all of the pulsar observations are
 located in the current working directory and have the extension
@@ -20,7 +20,7 @@ should be normalized to compensate for temporal flux variations and
 the `-t2` option specifies to use two processing threads
 (not useful if your machine has only one single-core CPU).
 
-### Manaual selection of phase bins
+## Manaual selection of phase bins
 
 Alternatively, it is also possible to specify the phase bins to be
 used as constraints. When plotting data to support phase bin selection,

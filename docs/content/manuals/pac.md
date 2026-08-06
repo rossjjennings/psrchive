@@ -1,6 +1,6 @@
 # pac
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Pulsar Archive Calibration program, `pac`, performs
 both polarimetric and flux calibration of pulsar observations.
@@ -11,7 +11,7 @@ table of model parameters that describe the instrumental response
 To simplify the task of matching calibrators with observations,
 `pac` uses a database and selection criteria.
 
-### 1.1 Supported Models
+## 1.1 Supported Models
 
 Currently, `pac` can perform polarimetric calibration
 using a number of different models of the instrumental response:
@@ -69,9 +69,9 @@ calibrated to an absolute scale in mJy by using a flux calibration
 solution of the form produced by the
 [`fluxcal`](fluxcal.md) program.
 
-### 2.0 Usage
+## 2.0 Usage
 
-### 2.1 Creating the calibrator database
+## 2.1 Creating the calibrator database
 
 Use of the calibrator database not only simplifies the process of
 matching calibrator archives with pulsar observations, it also reduces
@@ -108,7 +108,7 @@ text file, $MYCALS/database.txt.
 The amount of time required to run will depend upon the number and types
 of calibrator archives in the directory.
 
-#### Example: Specify Extension
+### Example: Specify Extension
 
 All of the calibrator archives have been gathered into the directory
 /psr/data/calibrators, this is the current working
@@ -122,7 +122,7 @@ pac: Writing database summary file to /psr/data/calibrators/database.txt
 pac: Finished all files
 ```
 
-#### Example: Specify Files
+### Example: Specify Files
 
 All of the calibrator archives have been gathered into sub-directories
 of /psr/data/calibrators, this is the current working
@@ -136,7 +136,7 @@ pac: Writing database summary file to /psr/data/calibrators/database.txt
 pac: Finished all files
 ```
 
-### 2.2 Calibrating pulsar observations
+## 2.2 Calibrating pulsar observations
 
 By default, `pac` will attempt to calibrate both the
 polarization and flux density of each pulsar archive supplied as a
@@ -152,7 +152,7 @@ following command line options:
 
 The `SingleAxis` model is the default.
 
-#### Matching Criteria
+### Matching Criteria
 
 Calibration information is matched to each pulsar observation using the
 following criteria.
@@ -192,7 +192,7 @@ for flux calibration, a message will be printed, the output file
 will have only its polarization calibrated, and the output filename
 will have the letter 'P' appended to it.
 
-#### Output
+### Output
 
 For each input pulsar archive, a calibrated archive with a similar
 filename will be output using the same file format as the input
@@ -210,9 +210,9 @@ amplified noise to the total integrated profile. To normalize
 the profile weight by the absolute gain, use the `-G` command
 line option. This option should be used with great care and reservation.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
-### 3.1 Known Configuration
+## 3.1 Known Configuration
 
 The PSRFITS file format includes a number of parameters that describe
 the known configurations of both the front and backends. For a
@@ -220,27 +220,27 @@ complete description, please refer to the
 [PSRCHIVE/PSRFITS Basis](../appendices/basis/basis.pdf)
 documentation.
 
-### 3.2 Polarimetric Calibration
+## 3.2 Polarimetric Calibration
 
 Polarimetric transformations are represented by Jones matrices. Each
 calibration model produces a Jones matrix for each observed frequency
 channel (or sub-band).
 
-### 3.3 Flux Calibration
+## 3.3 Flux Calibration
 
 To perform absolute flux calibration, `pac` requires
 flux calibration solutions of the form produced by the [`fluxcal`](fluxcal.md) program.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 No test outputs are yet available.
 
-### 4.1 Choice of calibration model
+## 4.1 Choice of calibration model
 
 To use the `Reception` model, it will be necessary to run
 [`pcm`](pcm.md).
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * The program does not ensure that output filenames do not equal input
   filenames.
@@ -250,7 +250,7 @@ To use the `Reception` model, it will be necessary to run
 
 ---
 
-### Appendix A: Calibrator observations
+## Appendix A: Calibrator observations
 
 All of the `pac` calibration models require observations of a
 noise diode that is somehow coupled to the receptors, called a CAL,
@@ -274,7 +274,7 @@ used at Parkes). Record for as long as is necessary to achieve a
 sufficiently strong integrated signal in each of the frequency
 channels.
 
-### A.1 Polarimetric calibrator observations
+## A.1 Polarimetric calibrator observations
 
 The calibrator reference source should be observed directly before or
 after the pulsar observation. At Parkes, this is usually done while
@@ -283,7 +283,7 @@ however, this isn't really necessary if the pulsar is weak. For this
 observation, `psredit -c type filename` should return
 `PolnCal`.
 
-### A.2 Flux calibrator observations
+## A.2 Flux calibrator observations
 
 Approximately once per day, and for each instrumental configuration
 (e.g. centre frequency, bandwidth, receiver, etc.), a set of flux

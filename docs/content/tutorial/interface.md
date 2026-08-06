@@ -97,7 +97,7 @@ attribute. Two important things to note:
 
 ---
 
-### Arrays of Values
+## Arrays of Values
 
 To add an interface to an array of values managed by a class, there
 must be separate methods that report the size of the array, as well as
@@ -127,7 +127,7 @@ to the return type of the `get_frequency` method.
 
 ---
 
-### Importing Text Interfaces
+## Importing Text Interfaces
 
 When the class for which an interface is being constructed inherits
 another class and/or is composed of one or more other classes, it

@@ -1,6 +1,6 @@
 # PSRCHIVE User's Guide
 
-### Introduction
+## Introduction
 
 This is a draft user's manual for the PSRCHIVE
 software package. The intent is to provide sample step-by-step

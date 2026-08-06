@@ -1,6 +1,6 @@
 # pcm
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Polarization Calibration Modeling (`pcm`) program may be
 used to estimate the polarimetric response of the observing system, as
@@ -32,9 +32,9 @@ in order to map the two-dimensional response of the instrument.
 Please see [Modeling variations of instrumental response across the beam](pcm/beam.md)
 for more information.
 
-### 2.0 Usage
+## 2.0 Usage
 
-#### 2.1 Before running `pcm`
+### 2.1 Before running `pcm`
 
 In order to run `pcm` in MEM mode, you will need
 Pulsar::Archive files containing:
@@ -93,9 +93,9 @@ to converge to a solution. For starters, use only four phase bins;
 estimate of the instrumental parameters. More phase bins can then be
 added to descrease the experimental uncertainty of the results.
 
-#### 2.2 Running `pcm`
+### 2.2 Running `pcm`
 
-##### 2.2.1 MEM mode
+#### 2.2.1 MEM mode
 
 In MEM mode, `pcm` does the following (not necessarily in this order):
 
@@ -116,7 +116,7 @@ In MEM mode, `pcm` does the following (not necessarily in this order):
 
 [An example of MEM usage.](pcm/mem.md)
 
-##### 2.2.2 METM mode
+#### 2.2.2 METM mode
 
 When run with the `-S standard.ar`
 option, `pcm` performs measurement equation template
@@ -132,7 +132,7 @@ input sub-integration and a separate file is output for each solution
 technique can be used to estimate the differential Faraday rotation
 between the template and the observation.
 
-#### 2.3 Diagnostic outputs
+### 2.3 Diagnostic outputs
 
 **pcm** can optionally produce a number of diagnostic outputs.
 These are enabled with the `-D name`  command line option,
@@ -162,7 +162,7 @@ where *name* is any one of:
   parameters in result\_cal.ps, and the pulsar Stokes parameters
   in result\_psr.ps.
 
-#### 2.4 Modeling time variations
+### 2.4 Modeling time variations
 
  **Intrinsic variations (including interstellar scintillation)** 
 
@@ -213,7 +213,7 @@ For example, to model all three parameters as a third order
 polynomial, use -o a:3; to model absolute and differential gain
 variations with a step function at each CAL, add -u g -u b.
 
-#### 2.5 Recommended and useful command-line options
+### 2.5 Recommended and useful command-line options
 
 | Option | Description |
 | --- | --- |
@@ -227,7 +227,7 @@ variations with a step function at each CAL, add -u g -u b.
 | `-X 2.0` | mask channels with reduced chisq > 2.0 Activate this only after you start getting good model fits. |
 | `-N` | do not unload calibrated data files This can speed things up during cycles of development and testing. |
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 In MEM mode, `pcm` implements the model of reception and the
 algorithm for solution described in van Straten, W. 2004,
@@ -241,12 +241,12 @@ algorithm described in van Straten, W. 2013,
 *Astrophys. J. Supp.* **204**, 13.
 [arXiv:1212.3446](https://arxiv.org/abs/1212.3446)
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
-#### [4.1 MEM Example](pcm/mem.md)
+### [4.1 MEM Example](pcm/mem.md)
 
-#### [4.2 METM Example](pcm/metm.md)
+### [4.2 METM Example](pcm/metm.md)
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * Currently, `pcm` can handle data from only one pulsar.

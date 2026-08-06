@@ -63,7 +63,7 @@ Pulsar::Option<float> Prune:default_threshold
 
 ---
 
-### Indirect Use via Pointer
+## Indirect Use via Pointer
 
 The above solution may be too invasive for some applications. For example,
 it may be desireable to set the default value of a variable belonging to
@@ -86,6 +86,6 @@ Pulsar::Option<std::string> third_log_filename_config
 
 ---
 
-### Indirect Use via CommandParser
+## Indirect Use via CommandParser
 
 not finished

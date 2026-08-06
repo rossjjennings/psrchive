@@ -6,7 +6,7 @@
 * [style files](customization.md#style_file), and
 * [option sets](customization.md#option_sets).
 
-### Customization on the Command Line
+## Customization on the Command Line
 
 Customization options may be specified as a comma-separated list on the
 command line, using one or more options of the form
@@ -53,7 +53,7 @@ psrplot -p Scyl -c x:unit=ms,x:origin=-.525,pa:above:c=" " 0437n.FF
 ***Note:** the label*, above:c, *belongs to the plot
 named* pa, a sub-plot of Scyl.![](cyl.png)
 
-### Customization using Style Files
+## Customization using Style Files
 
 It can become cumbersome to repeatedly enter long lists of
 customization options on the command line; there is the option to
@@ -92,7 +92,7 @@ line inside the frame.*![](pa_style.png)
 Style files can also be used to create and customize multiple plots,
 as described in[multiple plot style files](viewport.md#style).
 
-#### Embedded pre-processing commands
+### Embedded pre-processing commands
 
 It is also possible to embed data pre-processing commands in a style
 file using the `exec` command; for example,
@@ -123,7 +123,7 @@ Note that
 * exec commands encountered after a plot is created
   will be applied to the data input only to the last created plot.
 
-### Customization Option Sets
+## Customization Option Sets
 
 Customization option sets provide shortcuts to commonly used sets of
 plot attributes. Option sets are used by setting the `set`

@@ -1,6 +1,6 @@
 # psrstat
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The pulsar data statistical query interface, **psrstat**,
 provides access to various quantities that can be derived from the
@@ -11,7 +11,7 @@ parameters available in `psredit` are also available in
 index ranges and evaluate mathematical expressions using the same
 syntax understood by `psrplot`.
 
-### 2.0 Usage
+## 2.0 Usage
 
 **psrstat** commands are of the form:
 
@@ -44,7 +44,7 @@ The syntax for variable substitution, mathematical expressions, and
 numerical precision is described
 [here](guide/design/evaluation.md).
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 Different algorithms are available for computing the signal-to-noise
 ratio and for identifying the off-pulse and on-pulse regions of the
@@ -52,10 +52,10 @@ pulse profile. The algorithms can be selected, configured, executed,
 and queried using syntax similar to that of other parameters, as
 described [here](psrstat/algorithms.md).
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 * None at this time.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

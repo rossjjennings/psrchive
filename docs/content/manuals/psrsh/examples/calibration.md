@@ -1,6 +1,6 @@
 # psrsh` examples
 
-#### Polarimetric Calibration
+## Polarimetric Calibration
 
 Running the following script with the
 `-e ext filenames`  command line options

@@ -19,6 +19,6 @@ which allows the strategy to be implemented using a pointer to a
 * functor instance; or
 * instance of a class and a pointer to a member function
 
-### Common Configuration Cravings
+## Common Configuration Cravings
 
 * [Always use tempo2 predictors instead of tempo polycos](manuals/guide/design/configuration/predictor.md)

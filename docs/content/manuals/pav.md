@@ -1,6 +1,6 @@
 # pav
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Pulsar Archive Viewer, `pav`, is designed to visually
 display the data stored in an archive. It uses the PGPLOT graphics
@@ -19,7 +19,7 @@ display fine-tuning options, then show the result on screen or direct
 it to a file according to the drivers installed in the local version
 of pgplot.
 
-### 2.0 Usage
+## 2.0 Usage
 
 `pav` is fairly simple to use, though the wide range of
 options available to the user can cause confusion. All commands are of
@@ -42,14 +42,14 @@ in sequence, one after the other. Alternatively, the view panel can be
 partitioned into a grid of smaller panels (using the "-N" option) so
 as to fit multiple files in the same window.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 The PSRCHIVE Plotter class contains a wide range of visualisation
 algorithms. The simplest of these allows single profiles to be extracted
 and plotted, more complex algorithms combine multiple dimensions to form
 a colour or contour map, or a composite of various visualisation styles.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 `pav` works by setting a flag for each of the available
 plot styles and processing options. It will run and exit cleanly even
@@ -87,6 +87,6 @@ a light background. The umbrella option "--publn" handles the
 formatting of labels and headers; there are multiple options for
 manipulating colour schemes, depending on the type of plot.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

@@ -1,13 +1,13 @@
 # psrchive\_config
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 Various features of the PSRCHIVE library can be
 configured using a simple text file. This page describes how to use
 this configuration file and how the **psrchive\_config**
 program can be used to generate and update the configuration file.
 
-### 2.0 Usage
+## 2.0 Usage
 
 PSRCHIVE looks for a configuration file in
 the following two locations:
@@ -30,7 +30,7 @@ found in $PSRCHIVE\_CONFIG.
 Configuration options are specified as key = value pairs and
 comments preceded by a hash (#) character are ignored.
 
-### 2.1 Creating a configuration file
+## 2.1 Creating a configuration file
 
 To create a template configuration file containing every available
 configuration option, run **psrchive\_config**; e.g.
@@ -45,7 +45,7 @@ effect.
 To set a configuration option, simply uncomment the line for the
 key = value pair and set the value as required.
 
-### 2.1 Updating a configuration file
+## 2.1 Updating a configuration file
 
 Over time, new configuration options will be introduced. To update
 your configuration file, simply run
@@ -59,14 +59,14 @@ set configuration options from both $PSRCHIVE\_CONFIG and
 $HOME/.psrchive.cfg. These will appear in the output
 configuration file uncommented.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 PSRCHIVE configuration options are declared
 using the `Pulsar::Config<>` template class, which is
 documented in the [Adding a
 Configuration Option](../tutorial/config.md) tutorial.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 To change the default width of the window used to find the off-pulse
 baseline, look for the following lines in the template configuration
@@ -89,7 +89,7 @@ and change the last line to
 Profile::default_duty_cycle = new value
 ```
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 The **psrchive\_config** program will always print the
 current state of the configuration options. That is, if either

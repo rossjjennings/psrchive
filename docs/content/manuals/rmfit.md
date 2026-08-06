@@ -1,11 +1,11 @@
 # rmfit
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Faraday Rotation Measure (RM) fitting code (`rmfit`) implements
 a number of different algorithms for RM estimation.
 
-### 2.0 Usage
+## 2.0 Usage
 
 **Prerequisite:** Data should be calibrated.
 
@@ -20,7 +20,7 @@ a number of different algorithms for RM estimation.
 3. Using the quadratic fitting algorithm presented by
    [Noutsos et al. (2008)](http://adsabs.harvard.edu/abs/2008MNRAS.386.1881N)
 
-#### 2.1 Brute Force Search
+### 2.1 Brute Force Search
 
 The brute force search is executed by specifying the `-t`
 command line option. In this case, `rmfit` automatically
@@ -51,7 +51,7 @@ uses the centroid of this Gaussian to determine the best RM.
 If this fit fails, then the best RM is set to the trial RM at
 which the linear polarization reaches its maximum value.
 
-#### 2.2 Iterative differential position angle refinement
+### 2.2 Iterative differential position angle refinement
 
 The RM-refinement algorithm is executed with the `-r` command
 line option.
@@ -83,7 +83,7 @@ rmfit -t -r -D -K /xs filename
 In this case, the best RM output by the brute force search is the
 first guess used by the RM-refinement algorithm.
 
-#### 2.3 Quadratic Fitting (Noutsos et al. 2008)
+### 2.3 Quadratic Fitting (Noutsos et al. 2008)
 
 The quadratic fitting algorithm is executed with the `-w` command line option and can be run as:
 
@@ -93,12 +93,12 @@ rmfit -w start_pulse,end_pulse archive -D -K /xs
 
 In this case, the PA is computed per each frequency channel as an average on the pulse window identified by start\_pulse and end\_pulse. The RM is evaluated as a fit on the PAs.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 The iterative differential position angle refinement algorithm is based
 on the derivation presented [here](rmfit/DeltaPA.pdf).
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 The special command-line option `-J` is equivalent to running
 
@@ -111,4 +111,4 @@ than 100. That is, the maximum RM will be set to 6 times the DM
 (`-U 6`), but it will never be greater than 2000 (`-u
 2000`), and never less than 100.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation

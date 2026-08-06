@@ -1,6 +1,6 @@
 # psrsh` examples
 
-#### Interactive shell
+## Interactive shell
 
 To load an archive, combine all frequency channels, and unload the
 reduced archive with a new extension, the following sequence of

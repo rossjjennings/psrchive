@@ -1,6 +1,6 @@
 # pam
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Pulsar Archive Manipulator, `pam`, is designed to do
 the dirty work of messing around with archives on disk, processing
@@ -28,7 +28,7 @@ different name, etc. The essential options involved are:
       the given location (can be combined with "-e").
 ```
 
-### 2.0 Usage
+## 2.0 Usage
 
 `pam` is very simple to use, all commands are of the form
 
@@ -51,14 +51,14 @@ friendly reminder that you have just wasted a whole bunch of CPU
 cycles (but possibly spared your hair and / or sanity for a few more
 days).
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 `pam` has a job lot of functionality, built around the
 core of the PSRCHIVE base classes and their methods. It'll even let
 you override header parameters in some cases, if you need to change
 the recorded feed basis in an archive for example.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 Pretty straight forward really. The following command will reduce each
 ".ar" file to a single profile, saving a lot of disk space.
@@ -76,6 +76,6 @@ pam -e tt -FTp *.ar
 
 then run `pat` on the resulting ".tt" files.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

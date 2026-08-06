@@ -1,15 +1,15 @@
 # The PSRCHIVE Trouble Shooting
 
-### General Debugging Tips
+## General Debugging Tips
 
 * [Increase the Verbosity](trouble/verbose.md):
   By default, error messages are quite terse.
 
-### Compilation Issues
+## Compilation Issues
 
 * [Common configuration and compilation issues](problems.md)
 
-### Operation Issues
+## Operation Issues
 
 * [TEMPO warnings](warnings/tempo/index.md)
 * [TEMPO2 warnings](warnings/tempo2/index.md)

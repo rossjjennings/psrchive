@@ -5,7 +5,7 @@ PSRCHIVE maintains and can assign a weight
 to each frequency channel and integration interval. These weights
 can be used to maximize signal-to-noise ratio, flag bad data, etc.
 
-### Flagging Bad Data
+## Flagging Bad Data
 
 Data can be manually or automatically flagged by
 [paz](../../paz.md) or interactively flagged by
@@ -17,7 +17,7 @@ these channels will be automatically flagged bad in the calibrator.
 The corresponding channels will be flagged bad in any pulsar data to
 which the calibrator is applied.
 
-### Weighted Reference Frequency
+## Weighted Reference Frequency
 
 Profile weights are applied whenever data are integrated in frequency
 or time. Before computing the weighted means of the pulse profile

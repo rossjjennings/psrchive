@@ -12,7 +12,7 @@ us.
 
 ---
 
-### Configuration
+## Configuration
 
 The `configure` script can fail for a number of reasons:
 
@@ -57,7 +57,7 @@ is found first.
 
 ---
 
-### Compilation
+## Compilation
 
 `make` can fail for a number of reasons:
 

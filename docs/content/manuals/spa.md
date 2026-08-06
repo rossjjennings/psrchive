@@ -1,6 +1,6 @@
 # spa
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Single Pulse Analysis program, `spa`, is designed to
 search for giant pulses and giant micropulses. It calculates the flux
@@ -16,7 +16,7 @@ library and any of its associated output devices. It is designed to
 extract and display information only, it will not modify archives in
 any way. All flux measurements are given in units of mean flux.
 
-### 2.0 Usage
+## 2.0 Usage
 
 All of `spa`'s commands are of the form:
 
@@ -41,7 +41,7 @@ individually or using wildcard characters. Not much output is
 displayed while files are being loaded and analysed, unless verbose
 mode is used, so be patient if loading multiple files.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 `spa` uses the Archive and Profile classes to examine
 individual pulses. It calculates pulse flux densities and removes the
@@ -50,7 +50,7 @@ the baseline rms is removed. All distribution plots show flux in terms
 of the mean flux, which is calculated for each individual file to
 compensate for possible changes due to scintillation.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 The flags which can be set with `spa` are explained reasonably
 well by using the `-h` option, as below.
@@ -123,6 +123,6 @@ instead of the `-f`, but the pgplot prompt requesting an
 output device will also be sent to the output file and the program
 will wait for a response, appearing to have frozen.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * -d flag only works with one file

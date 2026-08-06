@@ -1,6 +1,6 @@
 # vap
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Viewer of Archive Parameters, `vap`, is designed to
 interrogate headers and glean simple numerical quantities from the
@@ -10,7 +10,7 @@ produce large summary listings of multiple archives for the purpose of
 organisation, sorting and classification. It does not do any graphical
 visualisation or file manipulation.
 
-### 2.0 Usage
+## 2.0 Usage
 
 `vap` is very simple to use, all commands are of the form
 
@@ -28,13 +28,13 @@ vap -h
 Multiple filenames can be specified on the command line either
 individually or using wildcard characters.
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
 `vap` serves primarily as a simple interface between the
 user and member functions of various classes in the PSRCHIVE
 scheme. It does not (in general) implement any additional algorithms.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 The header parameters in an archive are designed to provide information
 about the way the main body of data was observed, recorded and stored.
@@ -76,6 +76,6 @@ can be printed alongside observation length using the command:
 vap -rc *.ar
 ```
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

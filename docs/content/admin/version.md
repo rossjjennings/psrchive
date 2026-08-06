@@ -1,6 +1,6 @@
 # PSRCHIVE Administration Guide
 
-### Version Control
+## Version Control
 
 To use the current stable version of the PSRCHIVE
 system installation, simply run

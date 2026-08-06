@@ -69,7 +69,7 @@ Utility options:
  -S         Silent mode. Reduce text written to standard output.
 ```
 
-#### Output
+### Output
 
 Once the search is complete, it will display four plots along with a number of
 values, including the original pulsar parameter values for:

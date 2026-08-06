@@ -6,7 +6,7 @@ wider variety of related tools and problem solving strategies. If you
 have limited time, first skim the instructions and then follow the
 correct path.
 
-### Measurement Equation Template Matching Example
+## Measurement Equation Template Matching Example
 
 Suppose that you have a well-calibrated template that spans some wide
 band with some frequency resolution, and an observation that spans the

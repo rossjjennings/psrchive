@@ -3,7 +3,7 @@
 Before starting, please read [Section 1.1:
 Supported Models](../../pac.html#models) of the `pac` manual.
 
-### Step One: obtain and view calibrator data
+## Step One: obtain and view calibrator data
 
 To perform the most rudimentary (and in most cases incorrect) form of
 calibration, you will need at least one observation of an artificial
@@ -22,7 +22,7 @@ are available here:
 * [CAL.ar](manuals/guide/calibrating/CAL.ar)
 * [PSR.ar](manuals/guide/calibrating/PSR.ar)
 
-### Step Two: clean data and prepare a calibrator database
+## Step Two: clean data and prepare a calibrator database
 
 The previous step may have highlighted problems in the data, such
 as strong radio frequency interference or regions of the spectrum
@@ -48,7 +48,7 @@ After all invalid data have been flagged, a calibrator database can be
 created as described in the
 [pac reference manual](../../pac.html#database).
 
-### Step Three: calibrate the pulsar observations
+## Step Three: calibrate the pulsar observations
 
 For example:
 

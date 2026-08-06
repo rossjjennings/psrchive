@@ -1,6 +1,6 @@
 # paz
 
-### 1.0 Purpose
+## 1.0 Purpose
 
 The Pulsar Archive Zapper `paz` combines a number of manual
 and automatic modes of interference excision. Lists and/or ranges of
@@ -8,7 +8,7 @@ frequency channels and/or sub-integrations to be excised can be
 specified on the command line. Automatic interference excision
 algorithms are described in section 3 below.
 
-### 2.0 Usage
+## 2.0 Usage
 
 For a full list of options, use:
 
@@ -32,9 +32,9 @@ Note that there are three kinds of zapping:
    * `paz -p ...`  (interpolate over every pth phase bin)
    * `paz -L`  (mow the lawn; see below).
 
-### 3.0 Algorithms
+## 3.0 Algorithms
 
-#### 3.1 Median Smoothed Difference Channel Zapping
+### 3.1 Median Smoothed Difference Channel Zapping
 
 Use `paz -r`  to enable an automatic channel zapping algorithm
 based on tolerance to differences between the bandpass and a median
@@ -68,7 +68,7 @@ zap median
 unload ext=zz
 ```
 
-#### 3.2 Profile Lawn Mowing
+### 3.2 Profile Lawn Mowing
 
 Use `paz -L`  to enable an algorithm that replaces spikey
 phase bins with the local median plus noise.
@@ -97,7 +97,7 @@ less than 2.5 times the standard deviation of the off-pulse baseline,
 then the phase bin that has been flagged as a spike will be replaced
 by its local median plus the difference from the random phase bin.
 
-### 4.0 Testing and examples
+## 4.0 Testing and examples
 
 For example, to zero-weight the first three subints:
 
@@ -107,6 +107,6 @@ paz -w "0 1 2" *.ar
 
 **Note:** Frequency channel and sub-integration indeces start at zero.
 
-### 5.0 Known bugs and features that require implementation
+## 5.0 Known bugs and features that require implementation
 
 * None at this time.

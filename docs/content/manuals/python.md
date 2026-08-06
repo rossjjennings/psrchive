@@ -1,13 +1,13 @@
 # PSRCHIVE Python Interface
 
-### Introduction
+## Introduction
 
 This is a draft user's manual for the PSRCHIVE
 Python interface.
 
 Suggestions and contributions are welcome!
 
-### Prerequisites
+## Prerequisites
 
 In addition to the standard PSRCHIVE
 dependencies, the Python interface requires a small number of additional
@@ -33,7 +33,7 @@ Not strictly required, but very useful are:
   Python interpreter for interactive use (e.g., tab completion, help
   screens, etc).
 
-### Installation
+## Installation
 
 It is easiest install the PSRCHIVE Python
 interface using `conda`, as described at <https://anaconda.org/conda-forge/psrchive>.
@@ -56,7 +56,7 @@ export PYTHONPATH=$PSRHOME/lib/python2.7/site-packages:$PYTHONPATH
 If the installation was successful, running `import psrchive`
 in Python should not return an error.
 
-### Usage
+## Usage
 
 The basic way the interface works is to provide Python programs with
 access to the C++ classes that PSRCHIVE is built
@@ -69,7 +69,7 @@ about the class methods can be found in the [C++ Library Reference Manual](../cl
 In addition to the C++ methods, each of these classes has some extra
 Python-specific functionality added to it:
 
-#### Archive
+### Archive
 
 An Archive object represents a single data file, and contains a
 collection of Integration objects, also known as subintegrations. An
@@ -109,7 +109,7 @@ In [6]: subint = arch.get_Integration(0)
 In [7]: subint = arch[0]
 ```
 
-#### Integration
+### Integration
 
 An Integration object represents a collection of pulse profiles recorded
 simultaneously, typically from a number of frequency channels and
@@ -141,7 +141,7 @@ accessed via `get_Profile(ipol,ichan)`:
 In [12]: prof = subint.get_Profile(0,0)
 ```
 
-#### Profile
+### Profile
 
 A Profile object represents a single pulse profile. The
 `get_amps()` method returns the profile data as a NumPy array:
@@ -174,7 +174,7 @@ In [18]: pdata[16]
 Out[18]: 500.0
 ```
 
-#### MJD
+### MJD
 
 The [MJD class](../classes/Util/classMJD.md) is also now
 available in Python to deal with high-precision date/time values.
@@ -188,7 +188,7 @@ example:
 mjd_dbl = arch.get_Integration(0).get_start_time().in_days()
 ```
 
-#### Generating TOAs with ArrivalTime
+### Generating TOAs with ArrivalTime
 
 The [ArrivalTime
 class](../classes/psrchive/classPulsar_1_1ArrivalTime.md) can be used to generate pulse times of arrival (TOAs) directly in
@@ -217,7 +217,7 @@ arrtim.set_observation(obs)
 toas = arrtim.get_toas()
 ```
 
-### Simple Example
+## Simple Example
 
 In this example, we recreate the helpful "`pav -GTdp`" plot
 using python, and demonstrate some common psrchive functionality:
@@ -244,7 +244,7 @@ pylab.savefig('python_plot_example.png')
 This results in the following plot:
 ![](python/python_plot_example.png)
 
-### More Examples
+## More Examples
 
 * Example 1 (TBD)
 * Example 2 (TBD)
