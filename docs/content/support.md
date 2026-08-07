@@ -1,4 +1,4 @@
-# PSRCHIVE Software Support
+# Support
 
 ## Bug Reports
 

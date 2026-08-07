@@ -1,4 +1,4 @@
-# no polynomials loaded
+# TEMPO no polynomials loaded
 
 PSRCHIVE throws
 

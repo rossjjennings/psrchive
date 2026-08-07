@@ -1,4 +1,4 @@
-# PSRCHIVE Developer Guide
+# Developer Guide
 
 ```{toctree}
 devel/install

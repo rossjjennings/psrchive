@@ -59,7 +59,7 @@ auto source = archive->get_source();
 
 Also see the full [Application Programming Interface (API)](api/index.md).
 
-## Python Example
+### Python Example
 
 Using the [Python bindings](content/manuals/python.md), the above example is equivalent to
 

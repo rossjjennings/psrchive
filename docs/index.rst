@@ -13,11 +13,12 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide
+   :caption: User Resources
 
    content/manuals/guide
    content/manuals
    content/manuals/python
+   content/trouble
 
 .. toctree::
    :maxdepth: 2
@@ -27,14 +28,6 @@
    content/devel
    content/tutorial
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Troubleshooting
-
-   content/trouble
-   content/qa/index
-   content/warnings/tempo/index
-   content/warnings/tempo2/index
 
 
 

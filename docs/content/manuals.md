@@ -1,4 +1,4 @@
-# PSRCHIVE Applications
+# Application Manuals
 
 The following table provides links to the user manuals of the various
 pulsar data processing applications that are distributed with the

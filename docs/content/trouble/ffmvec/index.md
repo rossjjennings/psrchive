@@ -1,4 +1,4 @@
-# CFITSIO Bug
+# CFITSIO memory violation bug
 
 PSRCHIVE makes use the CFITSIO library to read and
 write PSRFITS files. There is a major bug in CFITSIO version 3.420 (and

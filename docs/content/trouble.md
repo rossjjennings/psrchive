@@ -1,4 +1,4 @@
-# PSRCHIVE Trouble Shooting
+# Trouble Shooting
 
 ## General Debugging Tips
 
@@ -11,19 +11,11 @@
 
 ## Operation Issues
 
-* [TEMPO warnings](warnings/tempo/index.md)
-* [TEMPO2 warnings](warnings/tempo2/index.md)
-* [no polynomials loaded](trouble/nopolynomials/index.md)
-* [CFITSIO memory violation bug](trouble/ffmvec/index.md)
-
-
 ```{toctree}
-:hidden:
 
-trouble/verbose
-problems
-warnings/tempo/index
-warnings/tempo2/index
-trouble/nopolynomials/index
-trouble/ffmvec/index
+trouble/tempo/index.md
+trouble/tempo/no-polynomials-loaded.md
+trouble/tempo2/index.md
+trouble/tempo2/no-cheby-for-phase.md
+trouble/ffmvec/index.md
 ```

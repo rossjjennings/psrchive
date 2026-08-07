@@ -1,9 +1,6 @@
-# PSRCHIVE Python Interface
+# Python Interface
 
-## Introduction
-
-This is a draft user's manual for the PSRCHIVE
-Python interface.
+This is a draft user's manual for the PSRCHIVE Python interface.
 
 Suggestions and contributions are welcome!
 

@@ -1,4 +1,4 @@
-# no cheby for phase
+# TEMPO2 no cheby for phase
 
 PSRCHIVE throws
 
