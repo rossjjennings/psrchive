@@ -14,5 +14,5 @@ PSRCHIVE team believes that:
 * benchmarks for both performance and fidelity should be included
   in the development process.
 
-Having said all that, please bear in mind our [disclaimer](../../citation.md:Disclaimer).
+Having said all that, please bear in mind our [disclaimer](../citation:Disclaimer).
 

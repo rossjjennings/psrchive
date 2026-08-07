@@ -9,7 +9,7 @@
    quickstart
    contributing
    content/support
-   citation
+   content/citation
 
 .. toctree::
    :maxdepth: 2

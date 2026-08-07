@@ -1,4 +1,3 @@
-
 # Signal-to-noise ratio estimation
 
 ## phase

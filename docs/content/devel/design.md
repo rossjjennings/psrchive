@@ -9,7 +9,8 @@ The following guidelines are common to most software development projects:
 
 ## Use design patterns
 
-[Design patterns](http://en.wikipedia.org/wiki/Design_pattern_%28computer_science%29) are general repeatable solutions to problems
+[Design patterns](http://en.wikipedia.org/wiki/Design_pattern_%28computer_science%29) 
+are general repeatable solutions to problems
 commonly encountered in software design. It is very infrequent that a
 specific software design question has not already been answered, and
 it saves a lot of time and effort to be familiar with this body of
@@ -24,7 +25,7 @@ container classes.
 Container classes include `Pulsar::Archive`,
 `Pulsar::Integration`, and
 `Pulsar::Profile`.
-In an [ideal world](../../citation:Disclaimer), these containers would
+In an [ideal world](../citation:Disclaimer), these containers would
 implement only the methods required to manage their data (e.g. resize, load,
 unload, append). However, many commonly used algorithms have already been
 implemented as member functions
@@ -55,7 +56,7 @@ passed as arguments to a function or be set as attributes of a class.
 The following example demonstrates the descriptive power of the latter
 option:
 
-```
+```cpp
 // Call a function to compute S/N
 
 double SNR = snr (archive, 3.0, 0.1, false);
@@ -63,7 +64,7 @@ double SNR = snr (archive, 3.0, 0.1, false);
 
 versus
 
-```
+```cpp
 // Use a well-designed class to compute S/N
 
 Pulsar::SignalToNoise snr;

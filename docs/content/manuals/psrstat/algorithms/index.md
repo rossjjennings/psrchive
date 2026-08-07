@@ -3,6 +3,14 @@
 Some of the parameters listed below employ a special data type for
 representing pulse phase, as explained [here](../phases).
 
+```{toctree}
+:hidden:
+
+onoff
+snr
+width
+```
+
 ## On-pulse and off-pulse identification
 
 These algorithms identify regions of pulse phase and can be set 
@@ -31,7 +39,7 @@ identified using the currently configured off-pulse estimator.
 region is defined as the region between the last bin to fall below `threshold` times
 the total flux and the first bin to rise above `1.0-threshold` times the total flux. 
 The off-pulse baseline is computed using the currently configured off-pulse estimator.
-For more detail, see [cumulative](./onoff.md:cumulative).
+For more detail, see [cumulative](onoff:cumulative).
 
   * `threshold` fraction of total integrated flux [default: 10%]
 
@@ -65,7 +73,7 @@ normally distributed data.
 ---
 
 `minimum`: Select continuous region with minimum mean.
-  For more detail, see [`minimum`](onoff:minimum).
+  For more detail, see [minimum](onoff:minimum).
 
   * `smooth` the smoothing algorithm [default: boxcar mean with 15% duty cycle]
   * `find_min` boolean = find the minimum [default] or maximum
@@ -79,7 +87,7 @@ These can be set using `psrstat -c snr=NAME:OPTIONS`.
 ---
 
 `phase`: Default algorithm uses cumulative to find the on-pulse region and minimum to find the baseline.
-  For more detail, see [`phase`](snr:phase).
+  For more detail, see [phase](snr:phase).
 
 ---
 
@@ -110,7 +118,7 @@ These can be set using `psrstat -c snr=NAME:OPTIONS`.
 ---
 
 `pdmp`: Smooths profile with box-car mean of varying width and returns the maximum S/N.
-  For more detail, see [`pdmp`](snr:pdmp).
+  For more detail, see [pdmp](snr:pdmp).
 
 ## Pulse width estimation
 
@@ -119,7 +127,7 @@ These can be set using `psrstat -c width=NAME:OPTIONS`.
 ---
 
 `transitions`: Searches for phases at which pulsed flux rises above and falls below a threshold.
-  For more detail, see [`transitions`](width:transitions).
+  For more detail, see [transitions](width:transitions).
 
   * `bdc` baseline duty cycle (fraction of pulse period) of the boxcar used to smooth the profile when searching for the off-pulse baseline [default: 0.15]
   * `fmax` threshold (fraction of maximum pulsed flux) at which rising and falling edges will be sought [default: 0.5]
@@ -141,11 +149,3 @@ These can be set using `psrstat -c width=NAME:OPTIONS`.
 `sinc`:
 
   * `width` [phase range](../phases) (effective width) of the sinc function; inversely proportional to the width of the lowpass filter in the frequency domain [default: 15%]
-
-```{toctree}
-:hidden:
-
-onoff
-snr
-width
-```

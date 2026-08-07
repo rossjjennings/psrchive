@@ -1,4 +1,3 @@
-
 # On-pulse and off-pulse identification
 
 ## cumulative
