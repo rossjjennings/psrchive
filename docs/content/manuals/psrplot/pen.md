@@ -1,4 +1,4 @@
-# psrplot** pen attributes
+# Pen attributes
 
 The attributes of the pen used to draw
 **psrplot** plots may be set, including

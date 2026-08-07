@@ -1,7 +1,7 @@
-# Evaluation of Mathematical Expressions
+# Expression Evaluation
 
-Both [psrstat](../../psrstat.md) and
-[psrplot](../../psrstat.md) make use of the same
+Applications like [psrstat](../../psrstat.md) and
+[psrplot](../../psrstat.md) use the same
 interpreter for the evaluation of mathematical expressions.
 `psrstat` uses this interpreter to print useful information
 to stdout, and `psrplot` can use it to label plots. This
@@ -38,8 +38,9 @@ psrstat -c '{fabs($bw)/$freq}' [...]
 would print the fractional bandwidth for each file specified on the
 command line.
 
-Any mathematical expression that can be parsed by the [Parsifal
-evaluateExpression](http://www.parsifalsoft.com/examples/evalexpression/index.md) function may be used inside the braces.
+Any mathematical expression that can be parsed by the 
+[Parsifal evaluateExpression](http://www.parsifalsoft.com/examples/evalexpression/index.html)
+function may be used inside the braces.
 
 ## Vector functions
 

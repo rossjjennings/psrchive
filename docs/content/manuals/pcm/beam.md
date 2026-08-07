@@ -1,8 +1,6 @@
 
 # Modeling variations of instrumental response across the beam
 
-*Part of [PCM](../pcm.md)*
-
 By default, `pcm` uses a single Jones matrices to model the linear
 transformation of the electric field vector along the boresight of a steerable dish.
 For antennas that are not fully steerable (like a dipole array), or for which

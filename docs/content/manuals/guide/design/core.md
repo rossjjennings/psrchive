@@ -8,7 +8,7 @@ preprocess the data. Typical features of the core applications
 include
 
 * [Standard Command Line Options](options.md)
-  + [Standard Preamble](options:Standard preamble)
-  + [Standard Preprocessing](options:Standard preprocessing)
-  + [Standard Output](options:Standard output)
-* [Evaluation of Mathematical Expressions](evaluation.md)
+  + [Standard Preamble](label-options-preamble)
+  + [Standard Preprocessing](label-options-preprocessing)
+  + [Standard Output](label-options-output)
+* [Mathematical Expression Evaluation](evaluation.md)

@@ -1,4 +1,4 @@
-# psrplot** available plots
+# Available plots
 
 ```
 psrplot -p flux

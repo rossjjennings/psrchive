@@ -7,8 +7,6 @@ correct path.
 
 # Measurement Equation Template Matching Example
 
-*Part of [PCM](../pcm.md)*
-
 Suppose that you have a well-calibrated template that spans some wide
 band with some frequency resolution, and an observation that spans the
 same band with the same frequency resolution. You can match the

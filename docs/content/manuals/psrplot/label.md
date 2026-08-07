@@ -1,4 +1,4 @@
-# psrplot** labels
+# Labels
 
 The labels on **psrplot** plots may be set using
 

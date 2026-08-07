@@ -23,6 +23,8 @@
 [`pat`](content/manuals/pat.md)
 :   Generate pulse times of arrival (TOAs) for pulsar timing.
 
+See more at [Application Manuals](content/manuals).
+
 ### Example script
 
 ```bash
@@ -57,11 +59,11 @@ auto nchan  = archive->get_nchan();
 auto source = archive->get_source();
 ```
 
-Also see the full [Application Programming Interface (API)](api/index.md).
+See more at [Application Programming Interface (API)](api/index).
 
 ### Python Example
 
-Using the [Python bindings](content/manuals/python.md), the above example is equivalent to
+The above example is equivalent to
 
 ```python
 import psrchive
@@ -75,3 +77,5 @@ nbin   = archive.get_nbin()
 nchan  = archive.get_nchan()
 source = archive.get_source()
 ```
+
+See more at [Python Interface](content/manuals/python).

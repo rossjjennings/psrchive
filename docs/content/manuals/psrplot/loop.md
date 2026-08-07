@@ -1,4 +1,4 @@
-# psrplot** looping over data dimensions
+# Looping over data dimensions
 
 Some plots support specification of an index along a certain dimension
 of the data to be plotted. For example, the simple `flux`

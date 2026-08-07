@@ -1,16 +1,15 @@
 # Polarimetric Calibration
 
 Before starting, please read [Section 1.1:
-Supported Models](../../pac:1.1 Supported Models) of the `pac` manual.
+Supported Models](label-pac-supported) of the `pac` manual.
 
 ## Step One: obtain and view calibrator data
 
 To perform the most rudimentary (and in most cases incorrect) form of
 calibration, you will need at least one observation of an artificial
 calibrator, known as the reference source, or noise diode, or CAL.
-Please see [Appendix A: Calibrator
-observations](../../pac:Appendix A%3A Calibrator observations) for more details about the instrumental setup and
-format of CAL observations.
+Please see [Appendix A: Calibrator observations](label-pac-appendix) 
+for more details about the instrumental setup and format of CAL observations.
 
 When calibrator data are obtained, confirm that the observations
 look as expected by
@@ -46,7 +45,7 @@ previously flagged frequency channels).
 
 After all invalid data have been flagged, a calibrator database can be
 created as described in the
-[pac reference manual](../../pac:2.1 Creating the calibrator database).
+[pac reference manual](label-pac-database).
 
 ## Step Three: calibrate the pulsar observations
 

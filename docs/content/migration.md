@@ -15,7 +15,10 @@ Everything is pretty much as it was before, with the following exceptions
 
 * The default branch is now main (not master).
 
-* The `More/MEAL` sub-directory and various supporting bits from `Util/units` have been extracted to a new project (pulsar-astronomy/meal) that is now included as a Git submodule at Util/meal.
+* The `More/MEAL` sub-directory and various bits of supporting code from `Util/units` have been extracted as [meal](https://meal.readthedocs.io/), which is now included as a Git submodule at `Util/meal`.
+
+* The project documentation has been converted from HTML with server-side includes (SSI) to Markdown,
+and is now stored in the `docs/` folder.  See [here](admin/web) for more information.
 
 ## Modify the Repository
 

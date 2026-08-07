@@ -1,8 +1,6 @@
 
 # Measurement Equation Modeling (MEM) Degeneracy Under Commutation
 
-*Part of [PCM](../pcm.md)*
-
 It is necessary to make two assumptions to constrain
 the degeneracy under commutation described in Appendix B of
 [van Straten (2004)](http://adsabs.harvard.edu/abs/2004ApJS..152..129V).

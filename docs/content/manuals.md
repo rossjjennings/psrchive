@@ -4,10 +4,6 @@ The following table provides links to the user manuals of the various
 pulsar data processing applications that are distributed with the
 PSRCHIVE package.
 
-In addition to the applications listed here, a [Python interface](manuals/python.md) exists as well.
-
-A step-by-step [User's Guide](manuals/guide.md) is also under development.
-
 | [*Core Applications*](manuals/guide/design/core.md) | |
 | --- | --- |
 | [psredit](manuals/psredit.md) | query or change metadata |

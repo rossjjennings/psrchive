@@ -11,6 +11,7 @@ table of model parameters that describe the instrumental response
 To simplify the task of matching calibrators with observations,
 `pac` uses a database and selection criteria.
 
+(label-pac-supported)=
 ## 1.1 Supported Models
 
 Currently, `pac` can perform polarimetric calibration
@@ -71,6 +72,7 @@ solution of the form produced by the
 
 ## 2.0 Usage
 
+(label-pac-database)=
 ### 2.1 Creating the calibrator database
 
 Use of the calibrator database not only simplifies the process of
@@ -250,6 +252,7 @@ To use the `Reception` model, it will be necessary to run
 
 ---
 
+(label-pac-appendix)=
 ## Appendix A: Calibrator observations
 
 All of the `pac` calibration models require observations of a

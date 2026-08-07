@@ -1,6 +1,4 @@
-# psrsh` examples
-
-## Shell script
+# Shell script
 
 The following script reduces the number of phase bins in each profile
 to 512, performs scattered power correction, and weights each profile

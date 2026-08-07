@@ -1,4 +1,4 @@
-# psrplot** layout
+# Layout
 
 The layout of any **psrplot** plot may be customized, including
 

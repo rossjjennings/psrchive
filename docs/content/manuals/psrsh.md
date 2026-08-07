@@ -104,7 +104,9 @@ bins to 128, and rotate by one quarter turn of phase before plotting:
 psrplot -j 'FTB 128,r .25' etc.
 ```
 
-Shortcut keys are shown in square brackets when you run `psrsh -H`.#### 2.5 Archive Stack
+Shortcut keys are shown in square brackets when you run `psrsh -H`.
+
+### 2.5 Archive Stack
 
 The `psrsh` interpreter supports storage of multiple archives
 on a stack, enabling backup of data before an operation is performed

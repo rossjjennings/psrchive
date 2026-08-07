@@ -1,4 +1,4 @@
-# psrplot** customization
+# Customization
 
 **psrplot** can be customized using any combination of
 

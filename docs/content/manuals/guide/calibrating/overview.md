@@ -4,7 +4,7 @@ The progam [pac](../../pac.md) calibrates pulsar data using
 available combinations of:
 
 1. polarimetric calibrator observations as described in
-   [Appendix A](../../pac:Appendix A%3A Calibrator observations) of the
+   [Appendix A](label-pac-appendix) of the
    [pac manual](../../pac).
 2. flux calibration solutions as output by
    [fluxcal](../../fluxcal);
