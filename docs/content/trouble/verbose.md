@@ -1,4 +1,4 @@
-# PSRCHIVE User's Guide: Increasing Verbosity
+# Increasing Verbosity
 
 By default, the error messages produced by PSRCHIVE
 programs are quite terse. For example,

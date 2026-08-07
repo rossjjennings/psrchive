@@ -396,7 +396,7 @@ polyco Tempo::Predict::generate_work () const
             warn << "Tempo::Predict::generate WARNING rms=" 
                  << rms_turns * 1e3 << " milliturns" << endl;
             warn << "Tempo::Predict::generate "
-                    "https://psrchive.readthedocs.io/en/latest/content/warnings/tempo/" << endl;
+                    "https://psrchive.readthedocs.io/en/latest/content/trouble/tempo/" << endl;
           }
         }
       }

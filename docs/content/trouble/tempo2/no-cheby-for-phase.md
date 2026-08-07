@@ -1,6 +1,6 @@
 # TEMPO2 no cheby for phase
 
-PSRCHIVE throws
+PSRCHIVE prints the following error message
 
 ```
 Tempo2::Predictor::iphase: no cheby for phase

@@ -1,4 +1,4 @@
-# PSRCHIVE: common problems
+# Installation problems
 
 The PSRCHIVE code makes use of a number of
 third-party packages. The `configure` script will do its best

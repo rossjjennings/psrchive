@@ -1,6 +1,6 @@
 # TEMPO no polynomials loaded
 
-PSRCHIVE throws
+PSRCHIVE prints the following error message
 
 ```
 polyco::load(FILE*): no polynomials loaded
@@ -38,6 +38,6 @@ inspect its stderr for the underlying failure.
 
 ## Related
 
-- [TEMPO warnings](../trouble/nopolynomials/index.md) describes how
+- [TEMPO warnings](index) describes how
   to tune `TZNSPAN` and `TZNCOEF` when the polynomial accuracy is
   insufficient but polynomials are generated.
