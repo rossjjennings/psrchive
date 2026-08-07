@@ -46,8 +46,8 @@ If you plan to develop PSRCHIVE in parallel with
 the software maintained at Swinburne or the ATNF, then please read these
 important notes on [choosing an installation
 directory](../install/third/install.md).
-If the configure script fails, please refer to the
-[Common Problems](../problems.md).
+If the configure script fails, please refer to
+[Installation Problems](../trouble/installation).
 
 ### Compile
 

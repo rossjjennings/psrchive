@@ -1,4 +1,4 @@
-# TEMPO Warnings
+# TEMPO warnings
 
 PSRCHIVE makes use of tempo to generate
 polynomials that approximate the relationship between apparent

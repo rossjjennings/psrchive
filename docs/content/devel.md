@@ -13,7 +13,7 @@ admin.md
 
 Also see the following sections:
 * [Installation](install/index.md)
-* [Troubleshooting](problems.md)
+* [Troubleshooting](trouble.md)
 * [API Reference](../api/index.md)
 
 
