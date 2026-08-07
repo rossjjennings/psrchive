@@ -24,10 +24,10 @@
    :maxdepth: 2
    :caption: Developer Resources
 
-   api/index
+   content/migration
    content/devel
    content/tutorial
-
+   api/index
 
 
 
