@@ -1,5 +1,6 @@
 # On-pulse and off-pulse identification
 
+(label-onoff-cumulative)=
 ## cumulative
 
 The on-pulse region is estimated using the cumulative profile, and is
@@ -32,6 +33,7 @@ trials and takes the solution that results in the narrowest pulse.
 The second issue (linear increase in variance with pulse phase) is
 ignored in the current implementation.
 
+(label-onoff-minimum)=
 ## minimum
 
 This algorithm can be used to find either the on-pulse or off-pulse

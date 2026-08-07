@@ -36,6 +36,7 @@ Please see our growing list of [contributors](contributors.md).
 contributors
 ```
 
+(label-disclaimer)=
 ## Disclaimer
 
 PSRCHIVE is designed and developed primarily by astronomers who have been learning about

@@ -1,6 +1,7 @@
 
 # Pulse width estimation
 
+(label-width-transitions)=
 ## transitions
 
 Pulse width is estimated by searching for the phase bins in which the
@@ -22,6 +23,7 @@ and -&sigma;, where &sigma; is the standard deviation of the flux
 density in the off-pulse phase bins.  The uncertainty is half of the
 difference between the -&sigma; and &sigma; width estimates.
 
+(label-width-mtm)=
 ## mtm
 
 Computes the effective pulse width as defined by combining Equation 13 of

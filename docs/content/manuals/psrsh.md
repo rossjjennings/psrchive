@@ -60,6 +60,7 @@ However, if any of the[standard output
 options](guide/design/options#Standard output) are used, then `psrsh`  will unload the results
 as specified. This allows scripts to behave like most other PSRCHIVE programs.
 
+(job-preprocessor)=
 ### 2.3 Job preprocessor
 
 Some PSRCHIVE programs (e.g.[psrplot](psrplot.md) and [psradd](psradd.md)) use the `psrsh`

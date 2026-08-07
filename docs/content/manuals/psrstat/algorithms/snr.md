@@ -1,5 +1,6 @@
 # Signal-to-noise ratio estimation
 
+(label-snr-phase)=
 ## phase
 
 This algorithm computes the signal-to-noise ratio (S/N) by integrating the flux in the 
@@ -8,15 +9,16 @@ phase bins, where the standard deviation of the <i>smoothed</i> off-pulse phase 
 equal to that of the <i>unsmoothed</i> off-pulse phase bins multiplied 
 by the square root of the number of on-pulse phase bins.
 
-The on-pulse region is found using the [cumulative](onoff:cumulative) algorithm.
+The on-pulse region is found using the [cumulative](label-onoff-cumulative) algorithm.
 
+(label-snr-pdmp)=
 ## pdmp
 
 This algorithm computes the signal-to-noise ratio (S/N) by smoothing the pulse profile with boxcars of varying width, somewhat like matched filtering, and returning the maximum S/N.
 
 Before smoothing with various boxcar widths, the off-pulse mean is
 subtracted.  The off-pulse region is found using an algorithm that
-is effectively like the [minimum](onoff:minimum) algorithm,
+is effectively like the [minimum](label-onoff-minimum) algorithm,
 with a boxcar width hard-coded to 40%.  Also, the off-pulse standard deviation is computed using the
 currently installed baseline estimator.
 

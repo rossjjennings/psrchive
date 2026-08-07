@@ -36,7 +36,7 @@ where:
 * `loop` is an index over which to loop (such as plotting
   for each sub-integration).
 
-Please see the [psrsh](psrsh:2.3 Job preprocessor)
+Please see the [psrsh](job-preprocessor)
 documentation for more about `jobs`.
 
 The available plotting options will depend upon the
