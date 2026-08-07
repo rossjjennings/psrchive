@@ -1,5 +1,5 @@
 
-# Pulse Phase Predictor Configuration
+# Phase predictor configuration
 
 Currently, PSRCHIVE supports the use of three
 different pulse phase predictor models:

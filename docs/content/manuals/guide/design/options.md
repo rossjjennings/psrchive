@@ -19,7 +19,7 @@ line options, including
   -M metafile    metafile contains list of archive filenames
 ```
 
-### Standard preprocessing
+## Standard preprocessing
 
 Some programs make use of the[psrsh](../../psrsh.md)
 command language interpreter to preprocess data. The relevant

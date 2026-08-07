@@ -8,6 +8,7 @@
    content/install/index
    quickstart
    contributing
+   content/support
    citation
 
 .. toctree::

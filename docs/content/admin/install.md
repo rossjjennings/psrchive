@@ -1,6 +1,5 @@
-# PSRCHIVE Administration Guide
 
-## System Installation
+# System Installation
 
 At sites where some level of stability is important, it is useful to
 maintain previous working versions of compiled binaries and revert to

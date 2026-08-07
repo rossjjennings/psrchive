@@ -71,4 +71,5 @@ manuals/spa
 manuals/psrspa
 manuals/pvt
 manuals/pdmp
+manuals/template
 ```

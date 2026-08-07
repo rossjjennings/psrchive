@@ -1,11 +1,9 @@
-# psrstat
+# Selecting, configuring, executing, and querying algorithms
 
-## Selecting, configuring, executing, and querying algorithms
-
-Some [algorithms](algorithms.md) can be selected, configured,
+Some [algorithms](algorithms/index.md) can be selected, configured,
 executed, and queried using syntax that is similar to that used for
 other variables. (For a complete list,
-see [Configurable Algorithms and Options](algorithms.md).)
+see [Configurable Algorithms and Options](algorithms/index.md).)
 
 For example, to see the configuration of
 the algorithms used to identify the on- and off-pulse regions
@@ -105,7 +103,7 @@ psrstat -C snr.psh filename[s]
 
 The `snr.psh` script is equivalent to the following C++ code
 
-```text
+```cpp
 //
 // snr.cpp
 //

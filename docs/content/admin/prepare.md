@@ -1,6 +1,5 @@
-# PSRCHIVE Administration Guide
 
-## Preparing a Release
+# Prepare a release
 
 When ready to distribute the next release of
 PSRCHIVE, it is important to first thoroughly test

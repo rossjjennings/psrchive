@@ -19,6 +19,9 @@ which allows the strategy to be implemented using a pointer to a
 * functor instance; or
 * instance of a class and a pointer to a member function
 
-## Common Configuration Cravings
+## Commonly-used configuration options
 
-* [Always use tempo2 predictors instead of tempo polycos](predictor.md)
+```{toctree}
+
+predictor
+```

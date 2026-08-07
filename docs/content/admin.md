@@ -1,18 +1,10 @@
-# PSRCHIVE Administration Guide
+# Project Administration
 
-## Table of Contents
+```{toctree}
 
-* [Preparing a Distribution](admin/prepare.md)
-* [Releasing a Distribution](admin/release.md)
-* [Updating web pages](admin/web.md)
-* [System Installation](admin/install.md)
-* [Version Control](admin/version.md)
-
----
-
-## SourceForge Support
-
-* Consult the [SourceForge Site Documentation](https://apps.sourceforge.net/trac/sitedocs/wiki)
-* Login to the [Interactive Shell Service](https://apps.sourceforge.net/trac/sourceforge/wiki/Shell%20service) and use `adminrepo`
-* Submit a Support request by
-  [Creating a New Ticket](https://apps.sourceforge.net/trac/sourceforge/newticket).
+admin/prepare
+admin/release
+admin/web
+admin/install
+admin/version
+```

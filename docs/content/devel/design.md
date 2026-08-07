@@ -24,7 +24,7 @@ container classes.
 Container classes include `Pulsar::Archive`,
 `Pulsar::Integration`, and
 `Pulsar::Profile`.
-In an [ideal world](../disclaimer.md), these containers would
+In an [ideal world](../../citation:Disclaimer), these containers would
 implement only the methods required to manage their data (e.g. resize, load,
 unload, append). However, many commonly used algorithms have already been
 implemented as member functions

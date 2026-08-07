@@ -36,8 +36,18 @@ Please see our growing list of [contributors](content/contributors.md).
 content/contributors
 ```
 
+## Disclaimer
+
+PSRCHIVE is designed and developed primarily by astronomers who have been learning about
+good principles of software engineering as we go. The software will
+continue to evolve and improve over time: new bugs will be introduced
+and old bugs will be eliminated. Kind words of support, suggestions
+for improvement, and contributions to the development effort are greatly
+appreciated!
+
 ## Legal
 
 As information resulting from fundamental research,
 PSRCHIVE is not subject to United States of America
-Export Administration Regulations. See §734.3(b)(3)(ii) and §734.8.
+Export Administration Regulations. See 734.3(b)(3)(ii) and 734.8.
+

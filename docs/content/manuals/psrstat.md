@@ -50,7 +50,14 @@ Different algorithms are available for computing the signal-to-noise
 ratio and for identifying the off-pulse and on-pulse regions of the
 pulse profile. The algorithms can be selected, configured, executed,
 and queried using syntax similar to that of other parameters, as
-described [here](psrstat/algorithms.md).
+described in the following sections.
+
+```{toctree}
+
+psrstat/algorithms
+psrstat/algorithms/index
+psrstat/phases
+```
 
 ## 4.0 Testing and examples
 

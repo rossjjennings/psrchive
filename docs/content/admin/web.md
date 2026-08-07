@@ -1,24 +1,23 @@
-# PSRCHIVE Administration Guide
 
-## Updating web pages
+# Update documentation
 
-Check out the web/  module; e.g. from the top-level directory
+Documentation is published at [ReadTheDocs](https://psrchive.readthedocs.io/)
+and managed in the `docs/` folder.  Each page is written using Markdown
+and the HTML is generated using a combination of `doxygen`, `breathe-apidocs`,
+and `sphinx`.
 
+To install the necessary Python packages,
 ```
-git clone ssh://USERNAME@git.code.sf.net/p/psrchive/web web
-```
-
-To upload the web pages
-
-```
-cd web/
-./upload.csh
+git submodule update --init
+pip install -r .build-commons/docs/requirements.txt
 ```
 
-To upload the doxygen-generated API documentation, from the top-level
+To generate the HTML,
 
 ```
-cd Documentation/
-make
-make install
+cd docs/
+make html
 ```
+
+The top-level HTML file is output is output in `_build/html/index.html`.
+

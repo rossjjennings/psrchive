@@ -1,6 +1,5 @@
-# PSRCHIVE Administration Guide
 
-## Releasing a Distribution
+# Release a distribution
 
 Releases are produced by the GitLab CI release pipeline, which is
 triggered automatically when a date-format tag (`YYYY-MM-DD`) is
@@ -12,7 +11,7 @@ The release maintainer's steps are:
    `configure.ac` so that the `AC_INIT` version matches the
    intended tag, e.g.
 
-   ```
+   ```text
    AC_INIT([PSRCHIVE],[YYYY-MM-DD],[...])
    ```
 
@@ -20,7 +19,7 @@ The release maintainer's steps are:
 
 3. Tag the commit with the same date:
 
-   ```
+   ```sh
    git tag YYYY-MM-DD
    git push <remote> YYYY-MM-DD
    ```

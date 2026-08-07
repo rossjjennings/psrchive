@@ -1,4 +1,4 @@
-# myprog
+# template
 
 ## 1.0 Purpose
 
@@ -23,7 +23,7 @@ also be highlighted like `this`.
 Describe the usage of the program here, including command line arguments.
 Show examples of configuration files or input data like this:
 
-```
+```text
 # myprog configuration file
 
 # Values are assigned to keys by name
@@ -32,8 +32,8 @@ key = value
 
 Give examples of execution like this:
 
-```
-> myprog -c config filenames
+```console
+$ myprog -c config filenames
 
 myprog: running ... done.
 ```
@@ -43,7 +43,7 @@ myprog: running ... done.
 If relevant, describe the way in which the program works, or some of the
 routines that it calls. Show code samples like this:
 
-```
+```cpp
 class MyClass {
 public:
   void something ();

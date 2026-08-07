@@ -3,7 +3,7 @@
 The PSRCHIVE team welcomes contributions to the
 development effort. You can either submit code that you think would
 be useful, and let us take care of the rest, or join the development
-team on SourceForge and gain write access to the CVS repository. The
+team on GitLab and gain write access to the repository. The
 PSRCHIVE team believes that:
 
 * a core of general-purpose data analysis software should be open
@@ -14,4 +14,5 @@ PSRCHIVE team believes that:
 * benchmarks for both performance and fidelity should be included
   in the development process.
 
-Having said all that, please bear in mind our [disclaimer](../disclaimer.md).
+Having said all that, please bear in mind our [disclaimer](../../citation.md:Disclaimer).
+
