@@ -18,11 +18,11 @@ the software twice, once using the GNU compiler collection, and once
 using the Intel compilers. Create two separate **build**
 directories, e.g. `$HOME/gnu` and `$HOME/intel`.
 
-To compile with GNU:
+To compile with GNU (the default):
 
 ```
 cd $HOME/gnu
-$HOME/psrchive/configure --prefix=$PWD
+$HOME/psrchive/configure --prefix=/usr/local/psrchive_gnu
 make
 make install
 ```
@@ -34,10 +34,12 @@ cd $HOME/intel
 setenv CXX icc
 setenv CC icc
 setenv F77 ifort
-$HOME/psrchive/configure --prefix=$PWD
+$HOME/psrchive/configure --prefix=/usr/local/psrchive_intel
 make
 make install
 ```
 
-In each case, the final step installs the PSRCHIVE
-software into sub-directories of the current **build** directory.
+In each case, the final step installs all PSRCHIVE
+build products (header files, libraries, and applications)
+into sub-directories (`include/`, `lib/`, and `bin/`, respectively) 
+of the separate installation directories specified by `prefix`.

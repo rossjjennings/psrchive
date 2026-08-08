@@ -4,17 +4,16 @@ To compile the code from the [previous example](hello.md),
 simply save it in a file named hello.C and run
 
 ```sh
-g++ hello.C `psrchive --cflags --ldflags`
+g++ hello.C `pkg-config psrchive --cflags --libs`
 ```
 
-The shell script, `psrchive` is an idea borrowed from the
-[GNU Scientific Library](http://www.gnu.org/software/gsl).
-Depending on its arguments, it lists all of the compiler or linker
-flags required to compile and link a PSRCHIVE
-program. This script is installed with the rest of the software,
-as described [here](../install/index.md).
+To use [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config),
+the `PKG_CONFIG_PATH` environment variable includes the path
+to the location where the file `psrchive.pc` is installed, as shown
+in the example [environment configuration](../install/environment).
+
+When the PSRCHIVE software is installed as described [here](../install/build),
+the `psrchive.pc` package configuration is installed in `$prefix/lib/pkgconfig`.
 
 If you are a developer and wish to integrate your program with the
-PSRCHIVE distribution, please follow the
-instructions at [Making
-Additions](../devel/development:Making additions).
+PSRCHIVE distribution, please see the notes at [making additions](../devel/additions).

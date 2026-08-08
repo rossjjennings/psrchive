@@ -17,11 +17,12 @@ The release maintainer's steps are:
 
 2. Commit the change with message `release YYYY-MM-DD`.
 
-3. Tag the commit with the same date:
+3. Tag the commit with the same date, 
+   then push both the commit and the new tag with
 
    ```sh
    git tag YYYY-MM-DD
-   git push <remote> YYYY-MM-DD
+   git push --follow-tags
    ```
 
 4. The release pipeline verifies that the tag matches

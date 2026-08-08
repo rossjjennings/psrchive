@@ -13,10 +13,10 @@ also take interest in the
 
 ### Check-out
 
-Developers can check out the software from GitLab with
+Developers with a GitLab account can check out the software with
 
 ```sh
-git clone git@gitlab.com:pulsar-astronomy/psrchive.git
+git clone --recursive git@gitlab.com:pulsar-astronomy/psrchive.git
 ```
 
 Upon successful checkout, a single directory, `psrchive`,

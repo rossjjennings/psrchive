@@ -77,7 +77,7 @@ libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C
 ```
 
 Note how the name of the library has been
-[canonicalized](http://gnu.open-mirror.com/software/automake/manual/html_node/Canonicalization.md).
+[canonicalized](https://www.gnu.org/software/automake/manual/html_node/Canonicalization.html).
 
 **executables**: are divided into two categories.
 Programs listed in the bin\_PROGRAMS macro are compiled and installed
@@ -100,8 +100,7 @@ pac_SOURCES     = pac.C
 ```
 
 After modifying Makefile.am, simply type `make`.
-Automake will rebuild the Makefile [automatically](http://gnu.open-mirror.com/software/automake/manual/html_node/Rebuilding.md).
+Automake will rebuild the Makefile [automatically](https://www.gnu.org/software/automake/manual/html_node/Rebuilding.html).
 
 This should be enough information to get started. For further information,
-please refer to the
-[automake documentation](http://gnu.open-mirror.com/software/automake/manual/html_node).
+please refer to the [automake documentation](http://www.gnu.com/software/automake/manual/html_node).
