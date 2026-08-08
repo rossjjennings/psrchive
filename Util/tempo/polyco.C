@@ -737,7 +737,7 @@ void polyco::load (FILE* fptr)
   if (load (&total) <= 0)
     throw Error (InvalidState, "polyco::load(FILE*)", 
                  "no polynomials loaded\n\n"
-    "see https://psrchive.readthedocs.io/en/latest/trouble/no-polynomials-loaded.html");
+    "see https://psrchive.readthedocs.io/en/latest/trouble/tempo/no-polynomials-loaded.html");
 }
 
 int polyco::load (string* instr)
