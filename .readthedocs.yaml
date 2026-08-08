@@ -17,7 +17,7 @@ build:
       - bash .build-commons/docs/pre_build.sh
 
 sphinx:
-  configuration: docs/conf.py
+  configuration: docs/content/conf.py
 
 python:
   install:
