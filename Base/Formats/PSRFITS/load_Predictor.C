@@ -50,7 +50,7 @@ void Pulsar::FITSArchive::load_Predictor (fitsfile* fptr)
   if (status == 0)
     warning <<
       "Pulsar::FITSArchive does not support tempo2 predictors \n"
-      "Pulsar::FITSArchive https://psrchive.readthedocs.io/en/latest/content/trouble/tempo2/"
+      "Pulsar::FITSArchive https://psrchive.readthedocs.io/en/latest/trouble/tempo2/"
 	    << endl;
 
 #endif

@@ -3,7 +3,7 @@
 import os
 import sys
 
-with open("../.build-commons/docs/conf.py") as f:
+with open("../../.build-commons/docs/conf.py") as f:
     exec(f.read())
 
 project = "PSRCHIVE"
@@ -13,8 +13,8 @@ author = "Willem van Straten"
 # -- Breathe (Doxygen XML) configuration ------------------------------------
 
 breathe_projects = {
-    "psrchive": "_doxygen/psrchive/xml",
-    "util": "_doxygen/util/xml",
+    "psrchive": "../_doxygen/psrchive/xml",
+    "util": "../_doxygen/util/xml",
 }
 breathe_default_project = "psrchive"
 

@@ -14,6 +14,6 @@ admin.md
 Also see the following sections:
 * [Installation](install/index.md)
 * [Troubleshooting](trouble.md)
-* [API Reference](../api/index.md)
+* [API Reference](api/index.md)
 
 

@@ -2,28 +2,28 @@
 
 ## Key command-line tools
 
-[`psredit`](content/manuals/psredit.md)
+[`psredit`](manuals/psredit.md)
 :   Edit or query metadata.
 
-[`psrstat`](content/manuals/psrstat.md)
+[`psrstat`](manuals/psrstat.md)
 :   Query metadata and derived statistical quantities.
 
-[`pam`](content/manuals/pam.md)
+[`pam`](manuals/pam.md)
 :   General-purpose processing (dedisperse, integrate, etc.).
 
-[`psrsh`](content/manuals/psrsh.md)
+[`psrsh`](manuals/psrsh.md)
 :   Command language interpreter for interactive or scripted processing.
 
-[`paz`](content/manuals/paz.md)
+[`paz`](manuals/paz.md)
 :   Zap (flag) frequency channels or sub-integrations affected by RFI.
 
-[`psradd`](content/manuals/psradd.md)
+[`psradd`](manuals/psradd.md)
 :   Combine data in various ways.
 
-[`pat`](content/manuals/pat.md)
+[`pat`](manuals/pat.md)
 :   Generate pulse times of arrival (TOAs) for pulsar timing.
 
-See more at [Application Manuals](content/manuals).
+See more at [Application Manuals](manuals).
 
 ### Example script
 
@@ -78,4 +78,4 @@ nchan  = archive.get_nchan()
 source = archive.get_source()
 ```
 
-See more at [Python Interface](content/manuals/python).
+See more at [Python Interface](manuals/python).

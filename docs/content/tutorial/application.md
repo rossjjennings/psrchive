@@ -128,7 +128,7 @@ void example::add_options (CommandLine::Menu& menu)
 }
 ```
 
-See the [`CommandLine::Menu` Class Reference](/api/util/class/classCommandLine_1_1Menu.rst) for further details on the variety of
+See the [`CommandLine::Menu` Class Reference](../api/util/class/classCommandLine_1_1Menu.rst) for further details on the variety of
 ways to add command line options. Other psrchive programs provide further examples; for
 example, see the source code in More/Applications/psradd.C.
 

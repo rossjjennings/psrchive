@@ -61,7 +61,7 @@ on. Currently, only the core PSRCHIVE classes -
 Archive, Integration, and Profile - are represented in Python. However,
 these three classes alone provide access to a very large fraction of
 PSRCHIVE's functionality. Detailed documentation
-about the class methods can be found in the [C++ Library Reference Manual](../../api/index.md).
+about the class methods can be found in the [C++ Library Reference Manual](../api/index.md).
 
 In addition to the C++ methods, each of these classes has some extra
 Python-specific functionality added to it:
@@ -173,7 +173,7 @@ Out[18]: 500.0
 
 ### MJD
 
-The [MJD class](../../api/util/class/classMJD) is also now
+The [MJD class](../api/util/class/classMJD) is also now
 available in Python to deal with high-precision date/time values.
 Return values for date/time functions such as
 `Integration.get_epoch()` were previously converted to doubles
@@ -188,7 +188,7 @@ mjd_dbl = arch.get_Integration(0).get_start_time().in_days()
 ### Generating TOAs with ArrivalTime
 
 The [ArrivalTime
-class](../../api/psrchive/class/classPulsar_1_1ArrivalTime) can be used to generate pulse times of arrival (TOAs) directly in
+class](../api/psrchive/class/classPulsar_1_1ArrivalTime) can be used to generate pulse times of arrival (TOAs) directly in
 Python, as an alternative to using the command-line utility [pat](pat.md). Here is an example illustrating the basic usage:
 
 ```python

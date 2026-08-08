@@ -207,7 +207,7 @@ if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   AC_MSG_ERROR([No suitable FFT library was found.
 
-  Please see https://psrchive.readthedocs.io/en/latest/content/third/fftw.html
+  Please see https://psrchive.readthedocs.io/en/latest/install/third/fftw.html
 
   or simply run the following commands to install FFTW automatically
 
