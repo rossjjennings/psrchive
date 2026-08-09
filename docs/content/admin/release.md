@@ -30,11 +30,13 @@ The release maintainer's steps are:
    git push --follow-tags
    ```
 
-5. The release pipeline verifies that the tag matches
-   `configure.ac`, runs `make distcheck`, produces
-   `psrchive-YYYY-MM-DD.tar.gz`, generates a CHANGELOG from the
-   commits since the previous release tag, and publishes the
-   GitLab Release.
+5. Currently, the above command results in the launch of two 
+   [GitLab Pipelines](https://gitlab.com/pulsar-astronomy/psrchive/-/pipelines).
+   One has the final set of `release` jobs; the other can be cancelled.
 
-The resulting Release page lists the tarball as a downloadable
-asset. Nothing needs to be uploaded by hand.
+The release pipeline verifies that the tag matches `configure.ac`, 
+runs `make dist`, produces `psrchive-YYYY-MM-DD.tar.gz`, 
+generates a CHANGELOG from the commits since the previous release tag,
+and publishes the release as a set of downloadable assets at 
+[GitLab Releases](https://gitlab.com/pulsar-astronomy/psrchive/-/releases).
+

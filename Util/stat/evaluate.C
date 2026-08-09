@@ -84,7 +84,7 @@ UnaryStatistic* get_command (string& text)
 
   DEBUG ("get_command text='" << text << "'");
 
-  string::size_type start = find_last_if (text, std::not1(alnum));
+  string::size_type start = find_last_if (text, std::not_fn(alnum));
 
   DEBUG ("get_command start=" << start);
 
@@ -233,7 +233,7 @@ string evaluate (const string& text, char cstart, char cend, char escape) try
       // make an Adaptable Predicate out of std C isdigit
       Functor< bool(char) > pred ( (int(*)(int)) isdigit );
 
-      string::size_type pend = find_first_if (remain, std::not1(pred), end);
+      string::size_type pend = find_first_if (remain, std::not_fn(pred), end);
       string::size_type len = (pend != string::npos ) ? pend-end : pend;
 
       precision = fromstring<unsigned> (remain.substr (end, len));

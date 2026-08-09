@@ -86,7 +86,7 @@ try
 
     // find the end of the variable name
     std::string::size_type end;
-    end = find_first_if (remain, std::not1(in_name), name_start);
+    end = find_first_if (remain, std::not_fn(in_name), name_start);
 
     // length to end of variable name
     std::string::size_type length = std::string::npos;
