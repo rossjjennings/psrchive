@@ -15,17 +15,22 @@ The release maintainer's steps are:
    AC_INIT([PSRCHIVE],[YYYY-MM-DD],[...])
    ```
 
-2. Commit the change with message `release YYYY-MM-DD`.
-
-3. Tag the commit with the same date, 
-   then push both the commit and the new tag with
-
+2. Commit the change with
    ```sh
-   git tag YYYY-MM-DD
+   git commit -m "release YYYY-MM-DD"
+   ```
+
+3. Create an annotated tag with
+   ```sh
+   git tag -a YYYY-MM-DD -m "release YYYY-MM-DD"
+   ````
+
+4. Push both commits and the new tag with
+   ```sh
    git push --follow-tags
    ```
 
-4. The release pipeline verifies that the tag matches
+5. The release pipeline verifies that the tag matches
    `configure.ac`, runs `make distcheck`, produces
    `psrchive-YYYY-MM-DD.tar.gz`, generates a CHANGELOG from the
    commits since the previous release tag, and publishes the

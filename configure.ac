@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.69)
-AC_INIT([PSRCHIVE],[2026-08-04],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2026-08-10],[psrchive-developers@lists.sourceforge.net])
 
 AUTOCONF_VERSION=m4_defn([AC_AUTOCONF_VERSION])
 AC_SUBST(AUTOCONF_VERSION)
@@ -110,7 +110,7 @@ SWIN_PROG_FIND
 # Checks for programs.
 
 AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX([11], [noext], [mandatory])
+AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
 SWIN_BEST_F77
 
 AC_PROG_CC
