@@ -17,7 +17,7 @@ The release maintainer's steps are:
 
 2. Commit the change with
    ```sh
-   git commit -m "release YYYY-MM-DD"
+   git commit -m "release YYYY-MM-DD" .
    ```
 
 3. Create an annotated tag with

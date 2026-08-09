@@ -1,7 +1,7 @@
 # PSRCHIVE GitLab CI/CD Configuration
 #
 # Two CI modes (mutually exclusive):
-#   1. Shared-runner CI: ubuntu:22.04 on gitlab.com (when ENABLE_SKA_CI is unset)
+#   1. Shared-runner CI: ubuntu:24.04 on gitlab.com (when ENABLE_SKA_CI is unset)
 #   2. SKA infrastructure CI: tagged runners (when ENABLE_SKA_CI is "true")
 #
 # Both modes run the same jobs. When one set runs, the other is skipped.
@@ -25,8 +25,8 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GITLAB_CI_TAG: k8srunner-psi-low
 
-# Use Ubuntu 22.04 LTS as base image
-image: ubuntu:22.04
+# Use Ubuntu 24.04 LTS as base image
+image: ubuntu:24.04
 
 .install_dependencies: &install_dependencies
   - apt-get update -qq
@@ -83,6 +83,17 @@ test:
       - "*/test-suite.log"
       - "*/*/test-suite.log"
     expire_in: 1 week
+
+distcheck:
+  stage: test
+  extends: .shared_rules
+  needs:
+    - job: build
+      optional: true
+  before_script:
+    - *install_dependencies
+  script:
+    - make distcheck
 
 python-bindings:
   stage: build
@@ -153,7 +164,7 @@ clang-tidy:
 build-ska:
   stage: build
   extends: .ska_rules
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   tags:
     - $GITLAB_CI_TAG
   before_script:
@@ -170,7 +181,7 @@ build-ska:
 test-ska:
   stage: test
   extends: .ska_rules
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   tags:
     - $GITLAB_CI_TAG
   needs:
@@ -190,7 +201,7 @@ test-ska:
 python-bindings-ska:
   stage: build
   extends: .ska_rules
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   tags:
     - $GITLAB_CI_TAG
   before_script:
@@ -208,7 +219,7 @@ python-bindings-ska:
 cppcheck-ska:
   stage: analysis
   extends: .ska_rules
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   tags:
     - $GITLAB_CI_TAG
   before_script:
@@ -232,7 +243,7 @@ cppcheck-ska:
 clang-tidy-ska:
   stage: analysis
   extends: .ska_rules
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   tags:
     - $GITLAB_CI_TAG
   needs:
@@ -313,7 +324,7 @@ release:
 release-distcheck-ska:
   stage: release
   extends: .release_ska_rules
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   tags:
     - $GITLAB_CI_TAG
   needs:
