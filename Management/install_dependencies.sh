@@ -10,7 +10,7 @@ for pkg in tempo2 psrcat splinter; do
   echo Installing $pkg
   sed -e 's|@prefix@|/pulsar|g' -e 's|@download@|curl -O -f -L|g' -e 's|@CC@|gcc|g' packages/${pkg}.sh.in > /tmp/${pkg}.sh
   chmod a+x /tmp/${pkg}.sh
-  /tmp/${pkg}.sh
+  /tmp/${pkg}.sh -j4
   rm -f /tmp/${pkg}.sh
 done
 
