@@ -60,22 +60,30 @@ void Pulsar::Range::parse (const string& txt)
 {
   int c;
   c = sscanf (txt.c_str(), "%u:%lf,%lf:%u,%u", &steps, &min,&max, &start,&stop);
-  switch (c) {
-  case 3:
-    start = 0;
-  case 4:
+  if (c < 5)
+  {
     stop = steps;
-  case 5:
+  } 
+  if (c < 4)
+  {
+    start = 0;
+  }
+  if (c > 3)
+  {
     return;
   }
 
   c = sscanf (txt.c_str(), "%u::%u,%u", &steps,&start,&stop);
-  switch (c) {
-  case 1:
-    start = 0;
-  case 2:
+  if (c < 3)
+  {
     stop = steps;
-  case 3:
+  }
+  if (c < 2)
+  {
+    start = 0;
+  }
+  if (c > 1)
+  {
     return;
   }
 

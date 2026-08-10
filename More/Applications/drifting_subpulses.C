@@ -24,6 +24,7 @@ using namespace std;
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <random>
 #include <cstring>
 
 class drifting_subpulses : public Pulsar::Application
@@ -482,8 +483,12 @@ void drifting_subpulses::perform_FFT()
 	    deleted_count++;
 	  }
 	}
-	// scramble data
-	random_shuffle( scrambled_data.begin(), scrambled_data.end() );
+
+        // scramble data
+        std::random_device rd;
+        std::mt19937 gen (rd());
+        std::shuffle (scrambled_data.begin(), scrambled_data.end(), gen);
+
 	// copy data back
 	unsigned used_count = 0;
 	for ( unsigned i = 0; i < fft_size; i++ )

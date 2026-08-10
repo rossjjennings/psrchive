@@ -1788,7 +1788,9 @@ pa_plot( int rise_bin, int fall_bin,
   goodl.clear();
   goodlrms.clear();
 
+#if HAVE_PGPLOT
   static int iplot = 0;
+#endif
 
   for (int i = 0; i < good_nchan; i++) { // channel loop (begin)	  
 

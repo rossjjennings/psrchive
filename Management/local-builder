@@ -1,0 +1,38 @@
+#!/usr/bin/bash
+
+run_as_root=0
+
+if [[ "$1" != "root" ]]; then
+  run_as_root=1
+fi
+
+image=`grep PSRCHIVE_BASE_IMAGE: .gitlab-ci.yml | awk '{print $2}'`
+
+SET_HTTPS_PROXY=""
+USER_INFO=""
+
+if [ -v https_proxy ]; then
+  echo "passing the https_proxy environment variable"
+  SET_HTTPS_PROXY="-e https_proxy=$https_proxy"
+fi
+
+if [ -f $HOME/.Xauthority ]; then
+  echo "setting up X11"
+  chmod a+r $HOME/.Xauthority
+  X11_ARGS="--net=host -e DISPLAY -v ${HOME}/.Xauthority:/root/.Xauthority"
+fi
+
+if [ $run_as_root ]; then
+  echo Run container as root
+else
+  echo Run container as user
+  USER_INFO="-u $(id -u):$(id -g) -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro"
+fi
+
+echo "docker run $image"
+
+docker run --rm -ti $USER_INFO \
+	-v ${PWD}:/mnt/psrchive -w /mnt/psrchive \
+	${SET_HTTPS_PROXY} ${X11_ARGS} \
+	${image} bash
+

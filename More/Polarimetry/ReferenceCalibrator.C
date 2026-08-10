@@ -115,7 +115,7 @@ void ReferenceCalibrator::init ()
 }
 
 //! Copy constructor
-ReferenceCalibrator::ReferenceCalibrator (const ReferenceCalibrator& other)
+ReferenceCalibrator::ReferenceCalibrator (const ReferenceCalibrator& other) : PolnCalibrator(other)
 {
   set_calibrator( other.get_calibrator() );
   init ();

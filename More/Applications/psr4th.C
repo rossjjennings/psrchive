@@ -350,7 +350,6 @@ void psr4th::compute_means (Archive* archive)
 
 
   unsigned nsub = archive->get_nsubint();
-  unsigned npol = archive->get_npol();
 
 #if 0
   ofstream baselines;

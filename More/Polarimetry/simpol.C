@@ -201,8 +201,6 @@ int main (int argc, char** argv)
   double non_linearity = 0.0;
   double adc_feedback = 0.0;
   
-  bool verbose = false;
-
   int c;
   while ((c = getopt(argc, argv, "hb:c:d:f:l:L:n:N:op:P:s:U")) != -1) {
     switch (c)  {
@@ -302,10 +300,6 @@ int main (int argc, char** argv)
     case 'U':
       cerr << "simpol: uniformly distributed" << endl;
       uniform = true;
-      break;
-
-    case 'v':
-      verbose = true;
       break;
     }
   }

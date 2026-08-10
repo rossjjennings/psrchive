@@ -619,7 +619,8 @@ void psrspa::initialise_histograms ()
   if ( verbose )
     cerr << "psrspa::initialise_histograms entered" << endl;
   // determine the count of request phase_bins
-  unsigned low_end, high_end;
+  unsigned low_end = 0;
+  unsigned high_end = 0;
   // if the phase range was not chosen by the user, default to full range
   if ( phase_range.size () == 0 )
   {
@@ -762,7 +763,8 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
   double *L_amps = new double [ nbin ];
   float *V_amps = new float [ nbin ];
 
-  unsigned bin_min, bin_max;
+  unsigned bin_min = 0;
+  unsigned bin_max = 0;
 
   if ( verbose && max_bscrunch > 1 )
     cerr << "psrspa::create_histograms entering the bscrunch loop for the " << archive->get_filename () << " archive" << endl;
@@ -946,7 +948,7 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 
 void psrspa::write_histograms ()
 {
-  FILE *out;
+  FILE *out = NULL;
   stringstream ss;
 
   if ( verbose )
@@ -963,7 +965,7 @@ void psrspa::write_histograms ()
 	gsl_histogram_fprintf ( out, h_flux_pr_vec[ihist], "%g", "%g" );
       else
 	gsl_histogram_fwrite ( out, h_flux_pr_vec[ihist] );
-      fclose ( out );
+      fclose ( out );  out = NULL;
       ss.str( "" );
     }
   }
@@ -979,7 +981,7 @@ void psrspa::write_histograms ()
 	gsl_histogram_fprintf ( out, h_polar_degree_vec[ihist], "%g", "%g" );
       else
 	gsl_histogram_fwrite ( out, h_polar_degree_vec[ihist] );
-      fclose ( out );
+      fclose ( out );  out = NULL;
       ss.str( "" );
     }
   }
@@ -1006,7 +1008,10 @@ void psrspa::write_histograms ()
         out_stream.close ();
       }
       else
+      {
+        assert (out != NULL);
 	gsl_histogram_fwrite ( out, h_polar_angle_vec[ihist] );
+      }
       ss.str( "" );
     }
   }
@@ -1022,7 +1027,7 @@ void psrspa::write_histograms ()
 	gsl_histogram_fprintf ( out, h_polar_linear_vec[ihist], "%g", "%g" );
       else
 	gsl_histogram_fwrite ( out, h_polar_linear_vec[ihist] );
-      fclose ( out );
+      fclose ( out );  out = NULL;
       ss.str( "" );
     }
   }
@@ -1038,7 +1043,7 @@ void psrspa::write_histograms ()
 	gsl_histogram_fprintf ( out, h_polar_circular_vec[ihist], "%g", "%g" );
       else
 	gsl_histogram_fwrite ( out, h_polar_circular_vec[ihist] );
-      fclose ( out );
+      fclose ( out );  out = NULL;
       ss.str( "" );
     }
   }
@@ -1057,7 +1062,7 @@ void psrspa::write_histograms ()
 //	else
 //	  fwrite ( out, s_linear_vs_PA_pr[ihist].at(i).real(), s_linear_vs_PA_pr[ihist].at(i).imag() );
       }
-      fclose ( out );
+      fclose ( out );  out = NULL;
       ss.str( "" );
     }
   }
@@ -1072,7 +1077,6 @@ void psrspa::write_histograms ()
     }
     else
       out_stream.open ( ss.str().c_str(), ios::out | ios::trunc );
-    unsigned b_scrunch = 1;
     for ( unsigned ientry = 0; ientry < max_amp_info.size (); ientry++ )
     {
       out_stream << max_amp_info[ientry].file << " " << max_amp_info[ientry].integration << " " << max_amp_info[ientry].bscrunch_factor;

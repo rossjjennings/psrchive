@@ -667,7 +667,9 @@ static bool plot_total = false;
 static bool plot_result = false;
 static bool print_variation = false;
 
+#if HAVE_PGPLOT
 static bool publication_plots = false;
+#endif
 
 static unsigned solver_verbosity = 0;
 

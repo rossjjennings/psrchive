@@ -77,7 +77,6 @@ int main (int argc, char** argv) try {
 
   simulate.title = "Simulated Profile";
   string device = "?";
-  bool verbose = false;
 
   const char* args = "A:a:B:b:C:cD:d:eF:f:G:g:H:hi:k:K:lM:N:n:O:p:S:s:tVvW:w:";
   char c;
@@ -219,8 +218,10 @@ int main (int argc, char** argv) try {
 
     case 'V':
       Pulsar::Archive::set_verbosity (3);
+      break;
+
     case 'v':
-      verbose = true;
+      Pulsar::Archive::set_verbosity (1);
       break;
 
     case 'W':      

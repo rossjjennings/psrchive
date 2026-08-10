@@ -72,9 +72,7 @@ int main (int argc, char** argv) try
   int tscrunch = -1;
   int pscrunch = -1;
 
-  bool verbose = false;
   bool quiet = false;
-  bool display = false;
   bool unload_result = true;
   bool normal = true;
   bool normalize_data = false;
@@ -103,7 +101,7 @@ int main (int argc, char** argv) try
   Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFGhm:M:no:Pp:qrTt:Us:S:vVw:";
+  const char* args = "b:c:dFGhm:M:no:Pp:qrTt:Us:S:vVw:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -117,10 +115,6 @@ int main (int argc, char** argv) try
       mask.set_threshold (cutoff);
       break;
     }
-
-    case 'D':
-      display = true;
-      break;
 
     case 'd':
       unload_result = false;
@@ -264,8 +258,10 @@ int main (int argc, char** argv) try
       Pulsar::Archive::verbose = true;
       Pulsar::Integration::verbose = true;
       Pulsar::Profile::verbose = true;
+      break;
+
     case 'v':
-      verbose = true;
+      Pulsar::Archive::verbose = true;
       break;
 
     case 'q':
@@ -326,8 +322,6 @@ int main (int argc, char** argv) try
 
     if (from_tscrunched > 1)
       copy -> tscrunch (from_tscrunched);
-
-    unsigned tscrunch_offset = 0;
 
     for (unsigned isub=0; isub < copy->get_nsubint(); isub++)
     {

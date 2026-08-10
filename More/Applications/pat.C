@@ -245,7 +245,13 @@ int main (int argc, char** argv) try
   bool output_profile_residuals = false;
 
   bool plot_difference = false;
+
+#if HAVE_PGPLOT
   bool centre_template_peak = false;
+  double min_phase = 0.0;
+  double max_phase = 1.0;
+  string plot_device = "/xs";
+#endif
 
   char *metafile = NULL;
 
@@ -253,10 +259,6 @@ int main (int argc, char** argv) try
   string outFormat(""),outFormatFlags;
   string flagsep(" ");
   string tname;
-
-  double min_phase = 0.0;
-  double max_phase = 1.0;
-  string plot_device = "/xs";
 
   vector<string> archives;
   vector<string> stdprofiles;
@@ -380,9 +382,11 @@ int main (int argc, char** argv) try
       loadlines (optarg, jobs);
       break;
 
+#if HAVE_PGPLOT
     case 'K':
       plot_device = optarg;
       break;
+#endif
 
     case 'm':
       cerr << "pat: loading component model from " << optarg << endl;
@@ -475,6 +479,7 @@ int main (int argc, char** argv) try
       arrival->set_extra_text(optarg);
       break;
 
+#if HAVE_PGPLOT
     case 'z':
       {
         string s1, s2;
@@ -483,6 +488,7 @@ int main (int argc, char** argv) try
         max_phase = fromstring<double>(s2);
       }
       break;
+#endif
 
     default:
       cout << "Unrecognised option " << gotc << endl;

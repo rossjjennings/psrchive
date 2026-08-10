@@ -42,7 +42,6 @@ void usage ()
     " -S secs                seconds between sessions \n"
     " -L                     read and write session lengths \n"
     " -v                     verbose output \n"
-    " -V                     very verbose output \n"
        << endl;
 }
 
@@ -95,15 +94,11 @@ int main (int argc, char** argv)
   // by default, different centre frequencies in different sessions
   bool divide_frequencies = true;
 
-  // by default, different sources in different sessions
-  bool divide_sources = true;
-
   bool verbose = false;
-  bool vverbose = false;
   
   double frequency = 0.0;
   
-  const char* args = "hb:f:jLnS:T:vV";
+  const char* args = "hb:f:jLnS:T:v";
   int c = 0;
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -126,7 +121,6 @@ int main (int argc, char** argv)
       break;
 
     case 'n':
-      divide_sources = false;
       Pulsar::ArchiveSort::compare_sources = false;
       break;
       
@@ -139,8 +133,6 @@ int main (int argc, char** argv)
       usage ();
       return 0;
 
-    case 'V':
-      vverbose = true;
     case 'v':
       verbose = true;
       break;

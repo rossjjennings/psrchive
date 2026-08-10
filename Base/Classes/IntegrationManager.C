@@ -10,6 +10,9 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 
+#include <algorithm>
+#include <random>
+
 using namespace std;
 
 unsigned Pulsar::IntegrationManager::verbose = 0;
@@ -221,7 +224,10 @@ bool Pulsar::temporal_order (const Reference::To<Integration>& A,
 void Pulsar::IntegrationManager::shuffle ()
 {
   load_all ();
-  std::random_shuffle (subints.begin(), subints.begin()+get_nsubint());
+
+  std::random_device rd;
+  std::mt19937 gen (rd());
+  std::shuffle (subints.begin(), subints.begin()+get_nsubint(), gen);
 }
 
 void Pulsar::IntegrationManager::load_all ()

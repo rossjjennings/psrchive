@@ -226,12 +226,6 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     Matrix<4,4,double> C = covariance->get_covariance (ibin);
 
     Stokes<double> mean = profile->get_Stokes(ibin);
-    double P = mean.abs_vect()/mean.get_scalar();
-    double Pell = 0;
-
-    if (P < 1 && P > 0)
-      Pell = sqrt((1+P*P)/(1-P*P));
-      
     Stokes<double> result;
 
     // get the eigen vectors of the coherency matrix
@@ -337,46 +331,13 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
     C = rotate * C * herm(rotate);
 
-#if 0
-    Vector<3,double> pmean = mean.get_vector();
-
-    double cos_theta = regression * pmean / norm(pmean);
-    double theta = acos (cos_theta);
-
-    if (theta > M_PI/2)
-    {
-      regression *= -1;
-      theta = M_PI - theta;
-    }
-#endif
-
-#if 0
-    cout << ibin << " " << theta*180/M_PI 
-	 << " " << Pell << " " << Cell
-	 << " " << P << " " << CP << endl;
-//#else
-    cout << ibin;
-    for (unsigned i=0; i<3; i++)
-      cout << " " << sqrt(pvar[i])/mean.get_scalar();
-    cout << endl;
-#endif
-
     for (unsigned i=0; i<4; i++)
       result[i] = C[0][i];
-
-    // v[0]->set_Stokes (ibin, result);
 
     if (CP==0.0)
       regression = 0;
 
     Stokes<double> Rstokes (Ivar, Rvar*regression);
-
-    // v[0]->set_Stokes (ibin, R*Rstokes);
-
-    //v[0]->set_Stokes (ibin, Stokes<double>(Ivar, peigen[imax]));
-    //v[0]->set_Stokes (ibin, Stokes<double>(Ivar, peigen[imax]*pvar[imax]));
-
-
   }
 
   if (remove_eigen_baseline)
@@ -397,7 +358,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   double sigma = sqrt(off_pulse_var);
 
-  // if (Profile::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::FourthMomentStats::eigen denominator sigma="
 	 << sigma << endl;
 

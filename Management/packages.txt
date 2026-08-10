@@ -1,0 +1,11 @@
+autoconf
+automake
+libtool
+g++
+gfortran
+make
+pkg-config
+libfftw3-dev
+libgsl-dev
+libreadline-dev
+git

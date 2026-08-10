@@ -41,7 +41,7 @@ PolnProfileFit::PolnProfileFit ()
 }
 
 //! Copy constructor
-PolnProfileFit::PolnProfileFit (const PolnProfileFit& fit)
+PolnProfileFit::PolnProfileFit (const PolnProfileFit& fit) : Reference::Able()
 {
   init ();
   operator = (fit);

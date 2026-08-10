@@ -170,21 +170,23 @@ int main (int argc, char** argv) try
   // vector of bad channels
   vector<unsigned> zapchan;
 
+#if HAVE_PGPLOT
   // produce publication quality plots
   bool publication = false;
 
+  bool print_summary = false;
+  bool print_relative_likelihood = false;
+  bool print_only = false;
+
   // plot device
   string device = "?";
+#endif
 
   Reference::To<Pulsar::PolnCalibrator> compare;
   Reference::To<Pulsar::CalibratorStokes> compare_stokes;
 
-  bool plot_errors = true;
-  bool plot_calibrator_stokes = true;
-  
   bool print_summary = false;
   bool print_relative_likelihood = false;
-  bool print_only = false;
   
   vector<ipair> swaps;
   
@@ -199,12 +201,16 @@ int main (int argc, char** argv) try
 
     case 'A':
       print_relative_likelihood = true;
+#if HAVE_PGPLOT
       print_only = true;
+#endif
       break;
-      
+
+#if HAVE_PGPLOT
     case 'C':
       plot_calibrator_stokes = false;
       break;
+#endif
 
     case 'c': {
 
@@ -226,6 +232,7 @@ int main (int argc, char** argv) try
       break;
     }
 
+#if HAVE_PGPLOT
     case 'D':
       device = optarg;
       break;
@@ -233,7 +240,12 @@ int main (int argc, char** argv) try
     case 'E':
       plot_errors = false;
       break;
-      
+
+    case 'P':
+      publication = true;
+      break;
+#endif
+
     case 'M':
       metafile = optarg;
       break;
@@ -248,23 +260,21 @@ int main (int argc, char** argv) try
       swaps.push_back( fromstring<ipair>(optarg) );
       break;
       
-    case 'P':
-      publication = true;
-      break;
-
     case 'p':
       print_summary = true;
+#if HAVE_PGPLOT
       print_only = true;
+#endif
       break;
       
     case 'V':
+      verbose = true;
       Pulsar::Archive::set_verbosity (3);
       Pulsar::Calibrator::verbose = true;
-      //Calibration::Model::verbose = true;
-
 #if HAVE_PGPLOT
       Pulsar::CalibratorPlotter::verbose = true;
 #endif
+      break;
 
     case 'v':
       verbose = true;
