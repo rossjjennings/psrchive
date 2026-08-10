@@ -43,8 +43,6 @@ include:
 build:
   stage: build
   extends: .shared_rules
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - ./bootstrap
     - ./configure --enable-shared --enable-werror
@@ -60,8 +58,6 @@ test:
   needs:
     - job: build
       optional: true
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - make check
   artifacts:
@@ -77,8 +73,6 @@ distcheck:
   needs:
     - job: build
       optional: true
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - make distcheck
 
@@ -86,7 +80,6 @@ python-bindings:
   stage: build
   extends: .shared_rules
   before_script:
-    - Management/install_dependencies.sh
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
   script:
     - ./bootstrap
@@ -125,7 +118,6 @@ clang-tidy:
     - job: build
       optional: true
   before_script:
-    - Management/install_dependencies.sh
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
   script:
     - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
@@ -154,8 +146,6 @@ build-ska:
   image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - ./bootstrap
     - ./configure --enable-shared --enable-werror
@@ -174,8 +164,6 @@ test-ska:
   needs:
     - job: build-ska
       optional: true
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - make check
   artifacts:
@@ -192,7 +180,6 @@ python-bindings-ska:
   tags:
     - $GITLAB_CI_TAG
   before_script:
-    - Management/install_dependencies.sh
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
   script:
     - ./bootstrap
@@ -237,7 +224,6 @@ clang-tidy-ska:
     - job: build-ska
       optional: true
   before_script:
-    - Management/install_dependencies.sh
     - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
   script:
     - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
@@ -274,11 +260,9 @@ make-dist:
   needs:
     - job: test
       optional: true
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - ./bootstrap
-    - ./configure --enable-shared
+    - ./configure
     - make dist
 
 release:
@@ -286,10 +270,10 @@ release:
   extends: .release_shared_rules
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: release-distcheck
+    - job: make-dist
       optional: true
   before_script:
-    - Management/install_dependencies.sh
+    - .build-commons/docker/install-deps.sh
   script:
     - ./bootstrap
     - ./configure --enable-shared
@@ -320,8 +304,6 @@ release-distcheck-ska:
   needs:
     - job: test-ska
       optional: true
-  before_script:
-    - Management/install_dependencies.sh
   script:
     - ./bootstrap
     - ./configure --enable-shared
@@ -337,7 +319,7 @@ release-ska:
     - job: release-distcheck-ska
       optional: true
   before_script:
-    - Management/install_dependencies.sh
+    - .build-commons/docker/install-deps.sh
   script:
     - ./bootstrap
     - ./configure --enable-shared
