@@ -79,8 +79,6 @@ distcheck:
 python-bindings:
   stage: build
   extends: .shared_rules
-  before_script:
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
   script:
     - ./bootstrap
     - ./configure --prefix=/tmp/psrchive --enable-shared
@@ -93,9 +91,6 @@ python-bindings:
 cppcheck:
   stage: analysis
   extends: .shared_rules
-  before_script:
-    - apt-get update -qq
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cppcheck
   script:
     - cppcheck --enable=warning,performance,portability
         --suppress=missingIncludeSystem
@@ -117,8 +112,6 @@ clang-tidy:
   needs:
     - job: build
       optional: true
-  before_script:
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
   script:
     - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
         | head -50
@@ -179,8 +172,6 @@ python-bindings-ska:
   image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
-  before_script:
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-dev python3-numpy swig
   script:
     - ./bootstrap
     - ./configure --prefix=/tmp/psrchive --enable-shared
@@ -196,9 +187,6 @@ cppcheck-ska:
   image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
-  before_script:
-    - apt-get update -qq
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cppcheck
   script:
     - cppcheck --enable=warning,performance,portability
         --suppress=missingIncludeSystem
@@ -223,8 +211,6 @@ clang-tidy-ska:
   needs:
     - job: build-ska
       optional: true
-  before_script:
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang-tidy
   script:
     - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
         | head -50
