@@ -35,3 +35,6 @@ dist:
 	@echo "'make dist' is disabled for Automake versions < 1.17"
 endif
 
+BUILDER_NAME := psrchive-builder
+include $(top_srcdir)/.build-commons/docker/Makefile
+

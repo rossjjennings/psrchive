@@ -1,7 +1,7 @@
 # PSRCHIVE GitLab CI/CD Configuration
 #
 # Two CI modes (mutually exclusive):
-#   1. Shared-runner CI: $PSRCHIVE_BASE_IMAGE on gitlab.com (when ENABLE_SKA_CI is unset)
+#   1. Shared-runner CI: $BUILDER_IMAGE on gitlab.com (when ENABLE_SKA_CI is unset)
 #   2. SKA infrastructure CI: tagged runners (when ENABLE_SKA_CI is "true")
 #
 # Both modes run the same jobs. When one set runs, the other is skipped.
@@ -16,6 +16,7 @@ workflow:
     - if: $CI_COMMIT_TAG
 
 stages:
+  - prepare
   - build
   - test
   - analysis
@@ -24,10 +25,10 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GITLAB_CI_TAG: k8srunner-psi-low
-  PSRCHIVE_BASE_IMAGE: ubuntu:24.04
 
-# Use Ubuntu 24.04 LTS as base image
-image: $PSRCHIVE_BASE_IMAGE
+include:
+  - project: 'pulsar-astronomy/build-commons'
+    file: 'gitlab/builder.yml'
 
 # ============================================================
 # Shared-runner CI (when ENABLE_SKA_CI is not set)
@@ -150,7 +151,7 @@ clang-tidy:
 build-ska:
   stage: build
   extends: .ska_rules
-  image: $PSRCHIVE_BASE_IMAGE
+  image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
   before_script:
@@ -167,7 +168,7 @@ build-ska:
 test-ska:
   stage: test
   extends: .ska_rules
-  image: $PSRCHIVE_BASE_IMAGE
+  image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
   needs:
@@ -187,7 +188,7 @@ test-ska:
 python-bindings-ska:
   stage: build
   extends: .ska_rules
-  image: $PSRCHIVE_BASE_IMAGE
+  image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
   before_script:
@@ -205,7 +206,7 @@ python-bindings-ska:
 cppcheck-ska:
   stage: analysis
   extends: .ska_rules
-  image: $PSRCHIVE_BASE_IMAGE
+  image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
   before_script:
@@ -229,7 +230,7 @@ cppcheck-ska:
 clang-tidy-ska:
   stage: analysis
   extends: .ska_rules
-  image: $PSRCHIVE_BASE_IMAGE
+  image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
   needs:
@@ -313,7 +314,7 @@ release:
 release-distcheck-ska:
   stage: release
   extends: .release_ska_rules
-  image: $PSRCHIVE_BASE_IMAGE
+  image: $BUILDER_IMAGE
   tags:
     - $GITLAB_CI_TAG
   needs:
