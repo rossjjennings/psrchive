@@ -25,7 +25,6 @@ Management/psrchive
 Management/psrchive_config
 Management/psrchive_info
 Management/psrchive_install.h
-Management/release.csh
 More/Applications/calavg
 More/Applications/distortion
 More/Applications/drifting_subpulses
@@ -134,9 +133,10 @@ packages/cfitsio.csh
 packages/epsic.csh
 packages/fftw.csh
 packages/pgplot.csh
-packages/psrcat.csh
+packages/psrcat.sh
 packages/tempo.csh
-packages/tempo2.csh
+packages/tempo2.sh
+packages/splinter.sh
 stamp-h1
 update.log
 conf.cmd

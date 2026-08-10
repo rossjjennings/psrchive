@@ -194,7 +194,7 @@ AC_CONFIG_FILES([packages/Makefile
 	packages/tempo.csh
 	packages/tempo2.sh])
 
-AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*.csh])
+AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*sh])
 
 #
 # Check that at least one FFT library is available
@@ -388,7 +388,7 @@ if test x"$have_tempo2" != xyes; then
    echo
    echo "The TEMPO2 Predictor library was not found: (desirable)"
    echo "  PSRCHIVE applications will not be able to use TEMPO2 predictors."
-   echo "  Run ./packages/tempo2.csh to automatically install."
+   echo "  Run ./packages/tempo2.sh to automatically install."
 fi
 
 if test x"$have_cfitsio" != xyes; then

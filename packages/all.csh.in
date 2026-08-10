@@ -14,7 +14,7 @@ echo "Installing FFTW"
 set psrpkg_FFTW_status=$status
 
 echo "Installing PSRCAT"
-./psrcat.csh
+./psrcat.sh
 set psrpkg_PSRCAT_status=$status
 
 echo "Installing PGPLOT"
@@ -30,7 +30,7 @@ echo "Installing TEMPO"
 set psrpkg_TEMPO_status=$status
 
 echo "Installing TEMPO2"
-./tempo2.csh
+./tempo2.sh
 set psrpkg_TEMPO2_status=$status
 
 if ( $psrpkg_FFTW_status )     echo "Error installing FFTW"

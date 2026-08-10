@@ -1,10 +1,10 @@
 
 
-noinst_SCRIPTS = fftw.csh pgplot.csh tempo2.csh cfitsio.csh psrcat.csh tempo.csh
+noinst_SCRIPTS = fftw.csh pgplot.csh tempo2.sh cfitsio.csh psrcat.sh tempo.csh splinter.sh
 EXTRA_DIST = editcol.patch pgplot.patch makemake.sharedcpg.patch
 
 all:
-	-chmod +x *.csh
+	-chmod +x *.csh *.sh
 
 libs:
 

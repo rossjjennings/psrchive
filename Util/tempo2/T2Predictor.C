@@ -103,7 +103,7 @@ void Tempo2::Predictor::sanity_check (const char* context) const
 {
   string sub_context = context;
 
-  for (unsigned iseg=0; iseg < predictor.modelset.cheby.nsegments; iseg++)
+  for (int iseg=0; iseg < predictor.modelset.cheby.nsegments; iseg++)
   {
     ChebyModel& seg = predictor.modelset.cheby.segments[iseg];
     ::sanity_check (sub_context + " (phase)", seg.cheby);
