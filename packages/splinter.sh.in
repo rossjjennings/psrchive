@@ -1,18 +1,22 @@
-#!/bin/csh -ef
+#!/usr/bin/env bash
 
 # @configure_input@
+
+# Exit immediately if a command exits with a non-zero status,
+# and treat unset variables as an error
+set -euo pipefail
 
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-if ( ! -d splinter ) then
+if [ ! -d splinter ]; then
 
   echo "Downloading SPLINTER source code from github"
 
-  setenv SPLINTER_GIT https://github.com/bgrimstad/splinter.git
+  SPLINTER_GIT=https://github.com/bgrimstad/splinter.git
   git clone $SPLINTER_GIT
 
-endif
+fi
 
 cd splinter
 git pull

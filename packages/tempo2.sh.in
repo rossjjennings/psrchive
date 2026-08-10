@@ -1,20 +1,22 @@
-#!/bin/csh -ef
+#!/usr/bin/env bash
 
 # @configure_input@
 
-if ( ! $?TEMPO2 ) setenv TEMPO2 @prefix@/tempo2
+if [[ -v TEMPO2 ]]; then
+  echo "using TEMPO2=$TEMPO2"
+else
+  TEMPO2=@prefix@/tempo2
+  echo "setting TEMPO2=$TEMPO2"
+fi
 
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-if ( ! -d tempo2 ) then
-
-  echo "Downloading TEMPO2 source code from bitbucket"
-
-  setenv TEMPO2_GIT https://bitbucket.org/psrsoft/tempo2.git
+if [ ! -d tempo2 ]; then
+  echo "Downloading TEMPO2 source code from GitHub"
+  TEMPO2_GIT=https://github.com/ipta/tempo2.git
   git clone $TEMPO2_GIT
-
-endif
+fi
 
 cd tempo2
 git pull
@@ -23,6 +25,9 @@ mkdir -p $TEMPO2
 rsync -at T2runtime/* $TEMPO2
 
 ./bootstrap
+libtoolize --force --copy --ltdl
+autoreconf --install --force -I /usr/share/aclocal
+
 ./configure
 make
 make install
@@ -33,7 +38,7 @@ echo "TEMPO2 library installation completed"
 echo
 echo "To use the library, please set the environment variable"
 echo
-echo 'setenv TEMPO2 @prefix@/tempo2'
+echo 'export TEMPO2=$TEMPO2'
 echo
 echo "and then re-run the PSRCHIVE configure script"
 echo

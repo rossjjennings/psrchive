@@ -186,13 +186,13 @@ SWIN_DOWNLOAD
 AC_CONFIG_FILES([packages/Makefile
 	packages/yaml-cpp.csh
 	packages/armadillo.csh
-	packages/splinter.csh
+	packages/splinter.sh
 	packages/cfitsio.csh
 	packages/fftw.csh
 	packages/pgplot.csh
-	packages/psrcat.csh
+	packages/psrcat.sh
 	packages/tempo.csh
-	packages/tempo2.csh])
+	packages/tempo2.sh])
 
 AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*.csh])
 

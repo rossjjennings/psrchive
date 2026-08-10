@@ -1,11 +1,15 @@
-#!/bin/csh -ef
+#!/usr/bin/env bash
 
 # @configure_input@
+
+# Exit immediately if a command exits with a non-zero status,
+# and treat unset variables as an error
+set -euo pipefail
 
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-setenv URL http://www.atnf.csiro.au/research/pulsar/psrcat/downloads
+URL=https://www.atnf.csiro.au/research/pulsar/psrcat/downloads
 
 rm -rf psrcat_pkg.tar.gz
 @download@ ${URL}/psrcat_pkg.tar.gz
@@ -31,6 +35,6 @@ echo "PSRCAT installation completed"
 echo
 echo "To use psrcat, please set the environment variable"
 echo
-echo 'setenv PSRCAT_FILE @prefix@/psrcat/psrcat.db'
+echo 'export PSRCAT_FILE=@prefix@/psrcat/psrcat.db'
 echo
 echo

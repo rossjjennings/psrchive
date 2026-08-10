@@ -1,5 +1,5 @@
-csh
 curl
+rsync
 git
 
 autotools-dev
@@ -9,6 +9,7 @@ libtool
 libltdl-dev
 pkg-config
 make
+cmake
 
 g++
 gcc
