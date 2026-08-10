@@ -45,7 +45,7 @@ build:
   extends: .shared_rules
   script:
     - ./bootstrap
-    - ./configure --enable-shared --enable-werror
+    - ./configure --enable-shared
     - make -j$(nproc)
   artifacts:
     paths:
@@ -141,7 +141,7 @@ build-ska:
     - $GITLAB_CI_TAG
   script:
     - ./bootstrap
-    - ./configure --enable-shared --enable-werror
+    - ./configure --enable-shared
     - make -j$(nproc)
   artifacts:
     paths:

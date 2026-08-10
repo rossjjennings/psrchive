@@ -170,12 +170,15 @@ int main (int argc, char** argv) try
   // vector of bad channels
   vector<unsigned> zapchan;
 
+  bool print_summary = false;
+  bool print_relative_likelihood = false;
+
 #if HAVE_PGPLOT
   // produce publication quality plots
   bool publication = false;
 
-  bool print_summary = false;
-  bool print_relative_likelihood = false;
+  bool plot_calibrator_stokes = true;
+  bool plot_errors = true;
   bool print_only = false;
 
   // plot device
@@ -185,9 +188,6 @@ int main (int argc, char** argv) try
   Reference::To<Pulsar::PolnCalibrator> compare;
   Reference::To<Pulsar::CalibratorStokes> compare_stokes;
 
-  bool print_summary = false;
-  bool print_relative_likelihood = false;
-  
   vector<ipair> swaps;
   
   char c;
@@ -205,12 +205,6 @@ int main (int argc, char** argv) try
       print_only = true;
 #endif
       break;
-
-#if HAVE_PGPLOT
-    case 'C':
-      plot_calibrator_stokes = false;
-      break;
-#endif
 
     case 'c': {
 
@@ -233,6 +227,11 @@ int main (int argc, char** argv) try
     }
 
 #if HAVE_PGPLOT
+
+    case 'C':
+      plot_calibrator_stokes = false;
+      break;
+
     case 'D':
       device = optarg;
       break;
