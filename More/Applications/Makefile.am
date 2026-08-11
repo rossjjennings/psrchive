@@ -204,14 +204,25 @@ check_PROGRAMS = $(TESTS) print_Predictor
 test_ProfileStatistic_factory_SOURCES = test_ProfileStatistic_factory.C
 print_Predictor_SOURCES = print_Predictor.C
 
-#############################################################################
+##############################################################################
 #
+# yamlcpp-dependent code
+#
+if HAVE_YAMLCPP
+
+  check_PROGRAMS += test_ConfigurableProjection
+  test_ConfigurableProjection_SOURCES = test_ConfigurableProjection.C
+
+endif
+#
+#############################################################################
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
-    $(top_builddir)/Base/libpsrbase.la \
-    $(top_builddir)/Util/libpsrutil.la \
-    $(top_builddir)/Util/meal/src/libMEAL.la \
-    $(top_builddir)/Util/epsic/src/libepsic.la @ARMADILLO_LIBS@
+        $(top_builddir)/Base/libpsrbase.la \
+        $(top_builddir)/Util/libpsrutil.la \
+        $(top_builddir)/Util/meal/src/libMEAL.la \
+        $(top_builddir)/Util/epsic/src/libepsic.la \
+        @ARMADILLO_LIBS@ @YAMLCPP_LIBS@ @GSL_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
 
