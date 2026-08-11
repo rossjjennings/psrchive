@@ -47,6 +47,7 @@ build:
     - source .build-commons/gitlab/init-local.sh
     - make -j$(nproc)
     - make install
+    - python -c "import psrchive; print('Python bindings OK')"
   artifacts:
     paths:
       - .
@@ -59,7 +60,8 @@ test:
     - job: build
       optional: true
   script:
-    - make check
+    - source .build-commons/gitlab/init-local.sh
+    - make -j$(nproc) check
   artifacts:
     when: always
     paths:
@@ -74,16 +76,8 @@ distcheck:
     - job: build
       optional: true
   script:
-    - make distcheck
-
-python-bindings:
-  stage: build
-  extends: .shared_rules
-  script:
     - source .build-commons/gitlab/init-local.sh
-    - make -j$(nproc)
-    - make install
-    - python3 -c "import psrchive; print('Python bindings OK')"
+    - make distcheck
 
 cppcheck:
   stage: analysis
