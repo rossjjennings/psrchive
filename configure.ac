@@ -94,7 +94,7 @@ fi
 AC_SUBST([AUTOMAKE_VERSION])
 AC_MSG_NOTICE([using automake version $AUTOMAKE_VERSION])
 
-AS_VERSION_COMPARE(["$AUTOMAKE_VERSION"], ["1.17.0"],
+AS_VERSION_COMPARE(["$AUTOMAKE_VERSION"], ["1.17"],
     [automake_is_old=yes],
     [automake_is_old=no],
     [automake_is_old=no])
