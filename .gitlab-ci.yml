@@ -1,7 +1,12 @@
 # PSRCHIVE GitLab CI/CD Configuration
 
+include:
+  - project: 'pulsar-astronomy/build-commons'
+    file: 'gitlab/builder.yml'
+
 workflow:
   rules:
+    - !reference [.builder-rules]
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH =~ /^adacs\//
@@ -17,10 +22,6 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GITLAB_CI_TAG: k8srunner-psi-low
-
-include:
-  - project: 'pulsar-astronomy/build-commons'
-    file: 'gitlab/builder.yml'
 
 # ============================================================
 # Shared-runner CI
