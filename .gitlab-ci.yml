@@ -39,13 +39,16 @@ full:
     - job: builder-image
       optional: true
   script:
-    - source .build-commons/gitlab/init-local.sh
+    - ./bootstrap
+    - mkdir -p build
+    - cd build
+    - ../configure --enable-shared --prefix=/pulsar
     - make -j$(nproc)
     - make install
     - python -c "import psrchive; print('Python bindings OK')"
   artifacts:
     paths:
-      - .
+      - build
     expire_in: 1 hour
 
 # barebones build with no optional dependencies installed
@@ -64,21 +67,19 @@ barebones:
       - .
     expire_in: 1 hour
 
-# full build and check with all optional dependencies installed
 test:
   stage: test
   extends: .shared_rules
   needs:
-    - job: build
-      optional: true
+    - job: full
+      optional: false
   script:
-    - source .build-commons/gitlab/init-local.sh
+    - cd build
     - make -j$(nproc) check
   artifacts:
     when: always
     paths:
-      - "*/test-suite.log"
-      - "*/*/test-suite.log"
+      - "build/test-suite.log"
     expire_in: 1 week
 
 # full build and distcheck with all optional dependencies installed
@@ -86,11 +87,12 @@ distcheck:
   stage: test
   extends: .shared_rules
   needs:
-    - job: builder-image
-      optional: true
+    - job: full
+      optional: false
   script:
-    - source .build-commons/gitlab/init-local.sh
+    - cd build
     - make distcheck
+    - mv "*.tar.gz" ..
   artifacts:
     paths:
       - "*.tar.gz"
@@ -118,8 +120,8 @@ clang-tidy:
   stage: analysis
   extends: .shared_rules
   needs:
-    - job: build
-      optional: true
+    - job: full
+      optional: false
   script:
     - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
         | head -50
