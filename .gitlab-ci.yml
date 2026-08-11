@@ -34,6 +34,9 @@ include:
 full:
   stage: build
   extends: .shared_rules
+  needs:
+    - job: builder-image
+      optional: true
   script:
     - source .build-commons/gitlab/init-local.sh
     - make -j$(nproc)
@@ -65,7 +68,7 @@ test:
   stage: test
   extends: .shared_rules
   needs:
-    - job: build
+    - job: builder-image
       optional: true
   script:
     - source .build-commons/gitlab/init-local.sh
@@ -82,7 +85,7 @@ distcheck:
   stage: test
   extends: .shared_rules
   needs:
-    - job: build
+    - job: builder-image
       optional: true
   script:
     - source .build-commons/gitlab/init-local.sh
