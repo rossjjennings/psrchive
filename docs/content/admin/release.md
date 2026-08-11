@@ -15,24 +15,21 @@ The release maintainer's steps are:
    AC_INIT([PSRCHIVE],[YYYY-MM-DD],[...])
    ```
 
-2. Commit the change with
+2. Commit the change and skip the pipeline with
    ```sh
    git commit -m "release YYYY-MM-DD" .
+   git push origin -o ci.skip
    ```
 
-3. Create an annotated tag with
+3. Create an annotated tag and launch the pipeline with
    ```sh
    git tag -a YYYY-MM-DD -m "release YYYY-MM-DD"
+   git push origin --tags
    ````
 
-4. Push both commits and the new tag with
-   ```sh
-   git push --follow-tags
-   ```
-
-5. Currently, the above command results in the launch of two 
-   [GitLab Pipelines](https://gitlab.com/pulsar-astronomy/psrchive/-/pipelines).
-   One has the final set of `release` jobs; the other can be cancelled.
+The above commands result in the creation of two
+[GitLab Pipelines](https://gitlab.com/pulsar-astronomy/psrchive/-/pipelines).
+One has the final `release` job; the other is skipped.
 
 The release pipeline verifies that the tag matches `configure.ac`, 
 runs `make dist`, produces `psrchive-YYYY-MM-DD.tar.gz`, 
