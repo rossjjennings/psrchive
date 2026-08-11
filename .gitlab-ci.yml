@@ -141,13 +141,13 @@ release:
   extends: .release_shared_rules
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: test
+    - job: distcheck
       optional: true
   before_script:
-    - .build-commons/docker/install-deps.sh
+    - apk add --no-cache autoconf automake libtool m4 tar gzip
   script:
     - ./bootstrap
-    - ./configure --enable-shared
+    - ./configure
     - make dist
     - echo "***"
     - echo "*** SHA-256 (256-bit) cryptographic checksum:"
