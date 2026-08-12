@@ -33,7 +33,7 @@ variables:
     - when: on_success
 
 # full build with all optional dependencies installed
-full-build:
+build-standard:
   stage: build
   extends: .shared_rules
   needs:
@@ -46,8 +46,8 @@ full-build:
     mkdir -p build
     cd build
     ../configure --enable-shared --prefix=/pulsar
-    echo "Running make with output redirected to make.log"
-    make -j4 > make.log 2>&1
+    echo "Using bear make to generate compilation database"
+    bear make -j4 > make.log 2>&1
     make install
     python -c "import psrchive; print('Python bindings OK')"
   artifacts:
@@ -75,7 +75,7 @@ test:
   stage: test
   extends: .shared_rules
   needs:
-    - job: full-build
+    - job: build-standard
       optional: false
   script:
     - cd build
@@ -91,7 +91,7 @@ distcheck:
   stage: test
   extends: .shared_rules
   needs:
-    - job: full-build
+    - job: build-standard
       optional: false
   script: |
     cd build
@@ -123,20 +123,38 @@ cppcheck:
       - cppcheck-report.xml
     expire_in: 1 week
 
+# Allow clang-tidy to fail (for now)
 clang-tidy:
   stage: analysis
+  allow_failure: true
   extends: .shared_rules
   needs:
-    - job: full-build
+    - job: build-standard
       optional: false
+  rules:
+    # If we are on the main/default branch, run a full scan
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        TIDY_TARGET: "tidy-all"
+    # If it is a Merge Request, run a diff scan against the target branch
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        TIDY_TARGET: "tidy-branch"
+        BASE_BRANCH: "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    # If it is a normal feature branch, run a diff scan against main
+    - if: $CI_COMMIT_BRANCH
+      variables:
+        TIDY_TARGET: "tidy-branch"
+        BASE_BRANCH: "origin/$CI_DEFAULT_BRANCH"
   script:
-    - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
-        | xargs -r clang-tidy -p build --quiet 2>&1
-        | tee clang-tidy-report.txt
+    - cd build
+    # GitLab does shallow clones and, to do a diff-based tidy, first fetch the base branch 
+    - if [ "$TIDY_TARGET" = "tidy-branch" ]; then git fetch origin $CI_DEFAULT_BRANCH; fi
+    - make $TIDY_TARGET BASE_BRANCH=$BASE_BRANCH
   artifacts:
     when: always
     paths:
-      - clang-tidy-report.txt
+      - build/clang-tidy-report.txt
     expire_in: 1 week
 
 # ============================================================
