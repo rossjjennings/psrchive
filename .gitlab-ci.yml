@@ -130,9 +130,8 @@ clang-tidy:
       optional: false
   script: |
     find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
-      | head -50
-      | xargs -r clang-tidy -p . --quiet 2>&1
-      | tee clang-tidy-report.txt || true
+      | xargs -r clang-tidy -p build --quiet 2>&1
+      | tee clang-tidy-report.txt
   artifacts:
     when: always
     paths:
