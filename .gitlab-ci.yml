@@ -43,7 +43,7 @@ full:
     - mkdir -p build
     - cd build
     - ../configure --enable-shared --prefix=/pulsar
-    - make -j$(nproc)
+    - make -j4
     - make install
     - python -c "import psrchive; print('Python bindings OK')"
   artifacts:
@@ -60,12 +60,8 @@ barebones:
     - .build-commons/docker/install-deps.sh
   script:
     - ./bootstrap
-    - ./configure --enable-shared
-    - make -j$(nproc)
-  artifacts:
-    paths:
-      - .
-    expire_in: 1 hour
+    - ./configure
+    - make -j4
 
 test:
   stage: test
@@ -75,7 +71,7 @@ test:
       optional: false
   script:
     - cd build
-    - make -j$(nproc) check
+    - make -j4 check
   artifacts:
     when: always
     paths:
@@ -91,11 +87,10 @@ distcheck:
       optional: false
   script:
     - cd build
-    - make distcheck
-    - mv "*.tar.gz" ..
+    - make -j4 distcheck
   artifacts:
     paths:
-      - "*.tar.gz"
+      - .
     expire_in: 1 day
 
 cppcheck:
@@ -150,6 +145,7 @@ release:
     - job: distcheck
       optional: false
   script:
+    - mv build/psrchive-${CI_COMMIT_TAG}.tar.gz .
     - echo "***"
     - echo "*** SHA-256 (256-bit) cryptographic checksum:"
     - sha256sum psrchive-${CI_COMMIT_TAG}.tar.gz
