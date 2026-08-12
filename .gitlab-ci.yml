@@ -46,7 +46,7 @@ build-standard:
     ../configure --enable-shared --prefix=/pulsar
     set -o pipefail
     # bear generates the compilation database used by clang-tidy
-    bear make -j4 2>&1 | tee make.log
+    bear -- make -j4 2>&1 | tee make.log
     make install
     python -c "import psrchive; print('Python bindings OK')"
   artifacts:
