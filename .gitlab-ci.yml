@@ -48,7 +48,7 @@ full:
     - python -c "import psrchive; print('Python bindings OK')"
   artifacts:
     paths:
-      - build
+      - .
     expire_in: 1 hour
 
 # barebones build with no optional dependencies installed
