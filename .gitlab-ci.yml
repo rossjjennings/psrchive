@@ -43,7 +43,8 @@ full:
     - mkdir -p build
     - cd build
     - ../configure --enable-shared --prefix=/pulsar
-    - make -j4
+    - echo "Running make with output redirected to make.log"
+    - make -j4 > make.log 2>&1
     - make install
     - python -c "import psrchive; print('Python bindings OK')"
   artifacts:
@@ -61,7 +62,8 @@ barebones:
   script:
     - ./bootstrap
     - ./configure
-    - make -j4
+    - echo "Running make with output redirected to make.log"
+    - make -j4 > make.log 2>&1
 
 test:
   stage: test
@@ -87,10 +89,14 @@ distcheck:
       optional: false
   script:
     - cd build
-    - make -j4 distcheck
+    - echo "Running make distcheck with output redirected to distcheck.log"
+    - make -j4 distcheck > distcheck.log 2>&1
+    - cd ..
+    - ls -d -- build/*.tar.gz
   artifacts:
     paths:
-      - .
+      - build/*.tar.gz
+      - build/distcheck.log
     expire_in: 1 day
 
 cppcheck:
@@ -145,6 +151,7 @@ release:
     - job: distcheck
       optional: false
   script:
+    - ls -d -- build/*.tar.gz
     - mv build/psrchive-${CI_COMMIT_TAG}.tar.gz .
     - echo "***"
     - echo "*** SHA-256 (256-bit) cryptographic checksum:"
