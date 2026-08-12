@@ -6,12 +6,10 @@ include:
 
 workflow:
   rules:
-    - !reference [.builder-rules]
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Prevent duplicate branch pipelines
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
-    - if: $CI_COMMIT_BRANCH
-    - if: $CI_COMMIT_TAG
+    - !reference [.builder-rules]
 
 stages:
   - prepare
@@ -46,11 +44,13 @@ build-standard:
     mkdir -p build
     cd build
     ../configure --enable-shared --prefix=/pulsar
-    echo "Using bear make to generate compilation database"
-    bear make -j4 > make.log 2>&1
+    set -o pipefail
+    # bear generates the compilation database used by clang-tidy
+    bear make -j4 2>&1 | tee make.log
     make install
     python -c "import psrchive; print('Python bindings OK')"
   artifacts:
+    when: always
     paths:
       - .
     expire_in: 1 hour
