@@ -32,11 +32,13 @@ variables:
     - when: on_success
 
 # full build with all optional dependencies installed
-full:
+full-build:
   stage: build
   extends: .shared_rules
   needs:
     - job: builder-image
+      optional: true
+    - job: validate-tag-version
       optional: true
   script: |
     ./bootstrap
@@ -57,6 +59,9 @@ barebones:
   stage: build
   extends: .shared_rules
   image: ubuntu:24.04
+  needs:
+    - job: validate-tag-version
+      optional: true
   before_script:
     - .build-commons/docker/install-deps.sh
   script: |
@@ -69,7 +74,7 @@ test:
   stage: test
   extends: .shared_rules
   needs:
-    - job: full
+    - job: full-build
       optional: false
   script:
     - cd build
@@ -85,7 +90,7 @@ distcheck:
   stage: test
   extends: .shared_rules
   needs:
-    - job: full
+    - job: full-build
       optional: false
   script: |
     cd build
@@ -121,7 +126,7 @@ clang-tidy:
   stage: analysis
   extends: .shared_rules
   needs:
-    - job: full
+    - job: full-build
       optional: false
   script: |
     find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
