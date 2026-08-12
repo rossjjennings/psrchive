@@ -7,4 +7,5 @@ admin/release
 admin/web
 admin/install
 admin/version
+admin/conda
 ```
