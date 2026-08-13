@@ -1,12 +1,1 @@
----
-Checks: >
-  bugprone-*,
-  performance-*,
-  -bugprone-easily-swappable-parameters,
-  -bugprone-narrowing-conversions
-
-WarningsAsErrors: ''
-
-HeaderFilterRegex: '.*'
-
-FormatStyle: none
+.build-commons/clang-tidy/config
