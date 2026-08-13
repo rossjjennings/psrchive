@@ -151,10 +151,11 @@ clang-tidy:
     # GitLab does shallow clones and, to do a diff-based tidy, first fetch the base branch 
     - if [ "$TIDY_TARGET" = "tidy-branch" ]; then git fetch origin $CI_DEFAULT_BRANCH; fi
     - make $TIDY_TARGET BASE_BRANCH=$BASE_BRANCH
+    - mv clang-tidy-report.txt ..
   artifacts:
     when: always
     paths:
-      - build/clang-tidy-report.txt
+      - clang-tidy-report.txt
     expire_in: 1 week
 
 # ============================================================
