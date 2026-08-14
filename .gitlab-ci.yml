@@ -2,5 +2,5 @@
 
 include:
   - project: 'pulsar-astronomy/build-commons'
-    file: 'gitlab/top-level.yml'
+    file: 'gitlab/top.yml'
 
