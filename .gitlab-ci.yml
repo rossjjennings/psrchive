@@ -65,11 +65,10 @@ barebones:
       optional: true
   before_script:
     - .build-commons/docker/install-deps.sh
-  script: |
-    ./bootstrap
-    ./configure
-    echo "Running make with output redirected to make.log"
-    make -j4 > make.log 2>&1
+  script:
+    - ./bootstrap
+    - ./configure
+    - make -j4 2>&1 | tee make.log
 
 test:
   stage: test
@@ -93,12 +92,9 @@ distcheck:
   needs:
     - job: build-standard
       optional: false
-  script: |
-    cd build
-    echo "Running make distcheck with output redirected to distcheck.log"
-    make -j4 distcheck > distcheck.log 2>&1
-    cd ..
-    ls -d -- build/*.tar.gz
+  script:
+    - cd build
+    - make -j4 distcheck 2>&1 | tee distcheck.log
   artifacts:
     paths:
       - build/*.tar.gz
@@ -173,25 +169,28 @@ release:
   needs:
     - job: distcheck
       optional: false
-  script: |
-    ls -d -- build/*.tar.gz
-    mv build/psrchive-${CI_COMMIT_TAG}.tar.gz .
-    echo "***"
-    echo "*** SHA-256 (256-bit) cryptographic checksum:"
-    sha256sum psrchive-${CI_COMMIT_TAG}.tar.gz
-    echo "***"
+  script:
+    - TARBALL=psrchive-${CI_COMMIT_TAG}.tar.gz
+    - |
+      mv build/$TARBALL .
+      echo "***"
+      echo "*** SHA-256 (256-bit) cryptographic checksum:"
+      sha256sum $TARBALL
+      echo "***"
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+           --upload-file ${TARBALL} \
+           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myproject/${CI_COMMIT_TAG}/${TARBALL}"
   release:
-    tag_name: $CI_COMMIT_TAG
-    name: "Release $CI_COMMIT_TAG"
-    description: "Release $CI_COMMIT_TAG"
+    name: 'Release $CI_COMMIT_TAG'
+    description: 'Created using the release-cli'
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_TAG'
     assets:
       links:
-        - name: "Source tarball"
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/raw/psrchive-${CI_COMMIT_TAG}.tar.gz"
-  artifacts:
-    paths:
-      - psrchive-${CI_COMMIT_TAG}.tar.gz
-    expire_in: 1 year
+        - name: '${TARBALL}'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myproject/${CI_COMMIT_TAG}/${TARBALL}'
+          filepath: '/${TARBALL}'
 
 validate-tag-version:
   stage: .pre
