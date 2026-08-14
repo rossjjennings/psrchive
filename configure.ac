@@ -4,7 +4,7 @@
 AC_PREREQ(2.69)
 AC_INIT(
   [PSRCHIVE],
-  [2026-08-12],
+  [2026-08-14],
   [https://gitlab.com/pulsar-astronomy/psrchive],
   [psrchive],
   [https://psrchive.readthedocs.io/]
