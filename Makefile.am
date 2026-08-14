@@ -35,6 +35,10 @@ dist:
 	@echo "'make dist' is disabled for Automake versions < 1.17"
 endif
 
+# For building the builder Docker image used in GitLab
 COMMONS_NAME := psrchive
 include $(top_srcdir)/.build-commons/docker/Makefile
+
+# For running clang-tidy
+include $(top_srcdir)/.build-commons/clang-tidy/Makefile
 

@@ -31,3 +31,4 @@ python-is-python3
 
 cppcheck
 clang-tidy
+bear

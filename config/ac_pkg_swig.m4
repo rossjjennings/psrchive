@@ -125,7 +125,29 @@ AC_DEFUN([SWIG_PYTHON],[
         AC_REQUIRE([AC_PROG_SWIG])
         AC_REQUIRE([AC_PYTHON_DEVEL])
         test "x$1" != "xno" || swig_shadow=" -noproxy"
-        AC_SUBST([SWIG_PYTHON_OPT],[-python$swig_shadow])
+        AC_MSG_CHECKING([for SWIG Python flatstaticmethod support])
+        [swig_flatstaticmethod=""]
+        if test -n "$swig_version" ; then
+                [swig_major=`echo $swig_version | cut -d. -f1`]
+                [swig_minor=`echo $swig_version | cut -d. -f2`]
+                if test -z "$swig_major" ; then [swig_major=0] ; fi
+                if test -z "$swig_minor" ; then [swig_minor=0] ; fi
+                #
+                # SWIG 4.1.0 and later removed flattened methods by default.
+                # Enable -flatstaticmethod for SWIG >= 4.1.0.
+                #
+                if test "$swig_major" -gt 4 ; then
+                        [swig_flatstaticmethod=" -flatstaticmethod"]
+                elif test "$swig_major" -eq 4 && test "$swig_minor" -ge 1 ; then
+                        [swig_flatstaticmethod=" -flatstaticmethod"]
+                fi
+        fi
+        if test -n "$swig_flatstaticmethod" ; then
+                AC_MSG_RESULT([yes])
+        else
+                AC_MSG_RESULT([no])
+        fi
+        AC_SUBST([SWIG_PYTHON_OPT],[-python$swig_shadow$swig_flatstaticmethod])
         AC_SUBST([SWIG_PYTHON_CPPFLAGS],[$PYTHON_CPPFLAGS])
 ])
 
@@ -155,3 +177,4 @@ AC_DEFUN([AC_LIB_WAD],
                 AC_SUBST(WADPY)
         fi
 ])
+

@@ -6,12 +6,10 @@ include:
 
 workflow:
   rules:
-    - !reference [.builder-rules]
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Prevent duplicate branch pipelines
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
-    - if: $CI_COMMIT_BRANCH
-    - if: $CI_COMMIT_TAG
+    - !reference [.builder-rules]
 
 stages:
   - prepare
@@ -33,7 +31,7 @@ variables:
     - when: on_success
 
 # full build with all optional dependencies installed
-full-build:
+build-standard:
   stage: build
   extends: .shared_rules
   needs:
@@ -46,11 +44,13 @@ full-build:
     mkdir -p build
     cd build
     ../configure --enable-shared --prefix=/pulsar
-    echo "Running make with output redirected to make.log"
-    make -j4 > make.log 2>&1
+    set -o pipefail
+    # bear generates the compilation database used by clang-tidy
+    bear -- make -j4 2>&1 | tee make.log
     make install
     python -c "import psrchive; print('Python bindings OK')"
   artifacts:
+    when: always
     paths:
       - .
     expire_in: 1 hour
@@ -65,17 +65,16 @@ barebones:
       optional: true
   before_script:
     - .build-commons/docker/install-deps.sh
-  script: |
-    ./bootstrap
-    ./configure
-    echo "Running make with output redirected to make.log"
-    make -j4 > make.log 2>&1
+  script:
+    - ./bootstrap
+    - ./configure
+    - make -j4 2>&1 | tee make.log
 
 test:
   stage: test
   extends: .shared_rules
   needs:
-    - job: full-build
+    - job: build-standard
       optional: false
   script:
     - cd build
@@ -91,14 +90,11 @@ distcheck:
   stage: test
   extends: .shared_rules
   needs:
-    - job: full-build
+    - job: build-standard
       optional: false
-  script: |
-    cd build
-    echo "Running make distcheck with output redirected to distcheck.log"
-    make -j4 distcheck > distcheck.log 2>&1
-    cd ..
-    ls -d -- build/*.tar.gz
+  script:
+    - cd build
+    - make -j4 distcheck 2>&1 | tee distcheck.log
   artifacts:
     paths:
       - build/*.tar.gz
@@ -123,16 +119,35 @@ cppcheck:
       - cppcheck-report.xml
     expire_in: 1 week
 
+# Allow clang-tidy to fail (for now)
 clang-tidy:
   stage: analysis
+  allow_failure: true
   extends: .shared_rules
   needs:
-    - job: full-build
+    - job: build-standard
       optional: false
+  rules:
+    # If we are on the main/default branch, run a full scan
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        TIDY_TARGET: "tidy-all"
+    # If it is a Merge Request, run a diff scan against the target branch
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        TIDY_TARGET: "tidy-branch"
+        BASE_BRANCH: "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    # If it is a normal feature branch, run a diff scan against main
+    - if: $CI_COMMIT_BRANCH
+      variables:
+        TIDY_TARGET: "tidy-branch"
+        BASE_BRANCH: "origin/$CI_DEFAULT_BRANCH"
   script:
-    - find Util Base More -name '*.C' -o -name '*.cc' -o -name '*.cpp'
-        | xargs -r clang-tidy -p build --quiet 2>&1
-        | tee clang-tidy-report.txt
+    - cd build
+    # GitLab does shallow clones and, to do a diff-based tidy, first fetch the base branch 
+    - if [ "$TIDY_TARGET" = "tidy-branch" ]; then git fetch origin $CI_DEFAULT_BRANCH; fi
+    - make $TIDY_TARGET BASE_BRANCH=$BASE_BRANCH
+    - mv clang-tidy-report.txt ..
   artifacts:
     when: always
     paths:
@@ -154,25 +169,28 @@ release:
   needs:
     - job: distcheck
       optional: false
-  script: |
-    ls -d -- build/*.tar.gz
-    mv build/psrchive-${CI_COMMIT_TAG}.tar.gz .
-    echo "***"
-    echo "*** SHA-256 (256-bit) cryptographic checksum:"
-    sha256sum psrchive-${CI_COMMIT_TAG}.tar.gz
-    echo "***"
+  script:
+    - TARBALL=psrchive-${CI_COMMIT_TAG}.tar.gz
+    - |
+      mv build/$TARBALL .
+      echo "***"
+      echo "*** SHA-256 (256-bit) cryptographic checksum:"
+      sha256sum $TARBALL
+      echo "***"
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+           --upload-file ${TARBALL} \
+           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myproject/${CI_COMMIT_TAG}/${TARBALL}"
   release:
-    tag_name: $CI_COMMIT_TAG
-    name: "Release $CI_COMMIT_TAG"
-    description: "Release $CI_COMMIT_TAG"
+    name: 'Release $CI_COMMIT_TAG'
+    description: 'Created using the release-cli'
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_TAG'
     assets:
       links:
-        - name: "Source tarball"
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/raw/psrchive-${CI_COMMIT_TAG}.tar.gz"
-  artifacts:
-    paths:
-      - psrchive-${CI_COMMIT_TAG}.tar.gz
-    expire_in: 1 year
+        - name: '${TARBALL}'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myproject/${CI_COMMIT_TAG}/${TARBALL}'
+          filepath: '/${TARBALL}'
 
 validate-tag-version:
   stage: .pre

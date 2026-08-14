@@ -19,7 +19,7 @@ _psrchive_la_LIBADD = $(top_builddir)/More/libpsrmore.la \
 LOCAL_CFLAGS = -I$(top_builddir)/local_include -I$(top_builddir) -I$(top_srcdir)/Util/meal/src/util
 
 SWIG_FILE = $(srcdir)/psrchive.i
-SWIG_FLAGS = -Wall -python $(LOCAL_CFLAGS)
+SWIG_FLAGS = -Wall @SWIG_PYTHON_OPT@ $(LOCAL_CFLAGS)
 SWIG_DEPS = $(DEPDIR)/swig.deps
 
 psrchive_wrap.cxx: $(SWIG_FILE) $(top_builddir)/config.h
