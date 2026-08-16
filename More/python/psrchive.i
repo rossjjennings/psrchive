@@ -3,10 +3,27 @@
 // HEADER BLOCK: For the C++ compiler
 %{
 #define SWIG_FILE_WITH_INIT
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 
 #ifndef PSRCHIVE_PyArray_DATA
   #define PSRCHIVE_PyArray_DATA(a) PyArray_DATA(a)
+#endif
+
+#include <Python.h>
+
+/*
+  Python 2 and 3 compatibility macros
+  String handling changed between python 2 and 3.
+*/
+#if PY_MAJOR_VERSION >= 3
+  #define compat_PyString_FromString PyUnicode_FromString
+  #define compat_PyString_AsString   PyUnicode_AsUTF8
+  #define compat_PyString_Check      PyUnicode_Check
+#else
+  #define compat_PyString_FromString PyString_FromString
+  #define compat_PyString_AsString   PyString_AsString
+  #define compat_PyString_Check      PyString_Check
 #endif
 
 #if HAVE_CONFIG_H
@@ -228,17 +245,11 @@ void pointer_tracker_remove(Reference::Able *ptr)
 // Convert various enums to/from string
 %define %map_enum(TYPE)
 %typemap(out) Signal:: ## TYPE {
-    $result = PyString_FromString( TYPE ## 2string($1).c_str());
+    $result = compat_PyString_FromString( TYPE ## 2string($1).c_str());
 }
 %typemap(in) Signal:: ## TYPE %{
     try {
-        // String handling changed between python 2 and 3.
-        // This approach should be OK for 2.7 and 3.3+
-#if PY_VERSION_HEX >= 0x03030000
-        const char *typestr = PyUnicode_AsUTF8($input);
-#else
-        const char *typestr = PyString_AsString($input);
-#endif
+        const char *typestr = compat_PyString_AsString($input);
         if (typestr==NULL) 
           throw Error (InvalidState, "SWIG string to Signal::*", "typestr == NULL");
 
@@ -254,17 +265,6 @@ void pointer_tracker_remove(Reference::Able *ptr)
 %map_enum(Basis)
 %map_enum(Scale)
 %map_enum(Source)
-
-// return long doubles as  numpy scalars
-// implementation left in case wanted later
-//%typemap(out) (long double) {
-//  npy_intp size[1];
-//  size[0] = 1;
-//  PyArrayObject *rval;
-//  rval = (PyArrayObject *)PyArray_SimpleNew(0, size, NPY_LONGDOUBLE);
-//  *((long double *)(rval->data)) = $1;
-//  $result = (PyObject *) rval;
-//}
 
 // return long doubles as Python floats
 %typemap(out) (long double) {
@@ -742,7 +742,7 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
         }
         else
         {
-            PyObject *result = (PyObject *)PyString_FromString("undefined");
+            PyObject *result = (PyObject *)compat_PyString_FromString("undefined");
             return (PyObject *)result;
         } 
     }
@@ -948,8 +948,8 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
         // Pack arrays into tuple
         PyTupleObject *result = (PyTupleObject *)PyTuple_New(2);
-        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyInt_FromLong((long)hi));
-        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyInt_FromLong((long)lo));
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyLong_FromLong((long)hi));
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyLong_FromLong((long)lo));
         return (PyObject *)result;
     }
 }
@@ -964,8 +964,8 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
 
         // Pack arrays into tuple
         PyTupleObject *result = (PyTupleObject *)PyTuple_New(2);
-        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyInt_FromLong((long)hi));
-        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyInt_FromLong((long)lo));
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)PyLong_FromLong((long)hi));
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)PyLong_FromLong((long)lo));
         return (PyObject *)result;
     }
 }
