@@ -140,10 +140,13 @@ packages/splinter.sh
 stamp-h1
 update.log
 conf.cmd
+
 build*
+# Unignore the docker/builder folder
+!docker/builder/
+
 diff
 web/
-
 Base/Applications/test_threads
 Base/Classes/test_Config
 Base/Classes/test_IntegrationManagerExpert
