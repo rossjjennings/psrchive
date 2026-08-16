@@ -3,4 +3,6 @@
 include:
   - project: 'pulsar-astronomy/build-commons'
     file: 'gitlab/top.yml'
+  - project: 'pulsar-astronomy/build-commons'
+    file: 'gitlab/conda_forge.yml'
 
