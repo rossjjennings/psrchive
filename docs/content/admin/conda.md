@@ -1,5 +1,15 @@
 
-# Release via conda-forge
+# Create conda-forge release
+
+The `conda_forge` job of the release pipeline creates a new release branch at
+[pulsar-astronomy-bot psrchive-feedstock](https://github.com/pulsar-astronomy-bot/psrchive-feedstock),
+updates the release configuration, and submits a pull request.
+If all goes well, the pull request can be reviewed and merged at
+[conda-forge psrchive-feedstock](https://github.com/conda-forge/psrchive-feedstock).
+
+The scripts that define the `conda_forge` job are maintained in the
+[Build Commons](https://gitlab.com/pulsar-astronomy/build-commons/-/tree/main/gitlab)
+git submodule.  If this jobs fails to execute, the process can also be performed by hand as follows:
 
 1. Fork a copy of the [feedstock repo](https://github.com/conda-forge/psrchive-feedstock) to your own github area.
 
