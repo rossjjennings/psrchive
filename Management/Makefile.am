@@ -11,8 +11,6 @@ endif
 
 bin_SCRIPTS = psrchive
 
-noinst_SCRIPTS = release.csh
-
 INSTALL_SCRIPT = $(srcdir)/install_with_githash.sh
 EXTRA_DIST = install_with_githash.sh
 
