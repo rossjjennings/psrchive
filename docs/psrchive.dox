@@ -5,5 +5,3 @@ PROJECT_NAME           = PSRCHIVE
 PROJECT_NUMBER         = 2026-05-15
 INPUT                  = ../Base ../More
 
-OUTPUT_DIRECTORY       = _doxygen/psrchive
-

@@ -73,18 +73,24 @@ void Pulsar::WaveletTransform::init_mem() {
         "npts=%u is not a power of two", npts);
   log2_npts = tmp_log;
   
-  if (decimate) {
+  if (decimate)
+  {
     data = new double[npts];
     work = gsl_wavelet_workspace_alloc(npts);
-  } else {
+    if (work==NULL)
+    throw Error (FailedSys, "Pulsar::WaveletTransform::init_mem",
+                            "Error gsl_wavelet_workspace_alloc");
+  }
+  else
+  {
     data = new double[npts*log2_npts];
   }
     
   wave = gsl_wavelet_alloc(type, order);
 
-  if ((decimate && work==NULL) || (wave==NULL)) 
+  if (wave==NULL) 
     throw Error (FailedSys, "Pulsar::WaveletTransform::init_mem",
-        "Error allocating working space");
+        "Error gsl_wavelet_alloc");
 }
 
 void Pulsar::WaveletTransform::transform(const std::vector<float>& in) {

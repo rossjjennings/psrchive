@@ -13,8 +13,6 @@ bin_SCRIPTS = psrchive
 
 noinst_SCRIPTS = release.csh
 
-dist_bin_SCRIPTS = psrchive_install
-
 INSTALL_SCRIPT = $(srcdir)/install_with_githash.sh
 EXTRA_DIST = install_with_githash.sh
 
@@ -22,9 +20,6 @@ dist_data_DATA = psrchive_version
 
 aclocaldir = $(datadir)/aclocal
 dist_aclocal_DATA = psrchive.m4
-
-htmldir = $(datadir)/html
-dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 
 # Install the pkg-config file
 pkgconfigdir = $(libdir)/pkgconfig
