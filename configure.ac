@@ -366,7 +366,6 @@ AC_CONFIG_FILES([
 		Management/Makefile
 		Management/psrchive
 		Management/psrchive_install.h
-		Management/release.csh
 		Management/psrchive.pc
 		Makefile])
 
