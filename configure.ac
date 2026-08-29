@@ -7,8 +7,7 @@ AC_INIT(
   [2026-08-15],
   [https://gitlab.com/pulsar-astronomy/psrchive],
   [psrchive],
-  [https://psrchive.readthedocs.io/]
-)
+  [https://psrchive.readthedocs.io])
 
 AUTOCONF_VERSION=m4_defn([AC_AUTOCONF_VERSION])
 AC_SUBST(AUTOCONF_VERSION)
