@@ -7,6 +7,7 @@
 
 #include "Pulsar/SystemCalibrator.h"
 #include "MEAL/ReceptionModelSolver.h"
+#include "MEAL/RobustLoss.h"
 
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/BasisCorrection.h"
@@ -146,6 +147,26 @@ void SystemCalibrator::set_name (const std::string& name)
 std::string SystemCalibrator::get_name () const
 {
   return instance_name;
+}
+
+void SystemCalibrator::set_loss_function_name (const std::string& name)
+{
+  loss_function_name = name;
+}
+
+std::string SystemCalibrator::get_loss_function_name () const
+{
+  return loss_function_name;
+}
+
+void SystemCalibrator::set_loss_function_f_scale (double f_scale)
+{
+  loss_function_f_scale = f_scale;
+}
+
+double SystemCalibrator::get_loss_function_f_scale () const
+{
+  return loss_function_f_scale;
 }
 
 void SystemCalibrator::set_projection (VariableTransformationManager* _projection)
@@ -1740,6 +1761,13 @@ void SystemCalibrator::init_model (unsigned ichan)
 
   if (solver)
     model[ichan]->set_solver( solver->clone() );
+
+  if (!loss_function_name.empty())
+  {
+    Solver* ichan_solver = model[ichan]->get_equation()->get_solver();
+    if (ichan_solver)
+      ichan_solver->set_robust_loss( MEAL::RobustLoss::factory(loss_function_name, loss_function_f_scale) );
+  }
 
   if (!allchan_equation)
   {

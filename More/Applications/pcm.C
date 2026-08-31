@@ -39,6 +39,7 @@
 #if HAVE_GSL
 #include "MEAL/ReceptionModelSolveGSL.h"
 #endif
+#include "MEAL/RobustLoss.h"
 
 #include "MEAL/Depolarizer.h"
 #include "MEAL/Polynomial.h"
@@ -767,6 +768,12 @@ string calibrate_these;
 // name of least squares minimization algorithm
 string least_squares;
 
+// name of robust loss function used to downweight outliers
+string loss_function_name;
+
+// scale factor of the robust loss function (<= 0 means auto-estimate)
+double f_scale = 0.0;
+
 // name of file containing MEAL::Function text interface commands
 vector<string> equation_configuration;
 
@@ -1131,6 +1138,13 @@ void pcm::add_options (CommandLine::Menu& menu)
   arg = menu.add (least_squares, 'l', "solver");
   arg->set_help ("solver: MEAL [default] or GSL");
 
+  arg = menu.add (loss_function_name, "loss", "name");
+  arg->set_help ("robust loss function: " + MEAL::RobustLoss::get_loss_names());
+  arg->set_long_help ("enabes iteratively reweighted least squares");
+
+  arg = menu.add (f_scale, "f_scale", "value");
+  arg->set_help ("robust loss scale factor (default: auto-estimated from data)");
+
   arg = menu.add (nthread, 't', "ncore");
   arg->set_help ("solve using ncore threads");
 
@@ -1450,6 +1464,12 @@ void configure_model (Pulsar::SystemCalibrator* model)
 
   if (!least_squares.empty())
     model->set_solver( new_solver(least_squares) );
+
+  if (!loss_function_name.empty())
+  {
+    model->set_loss_function_name (loss_function_name);
+    model->set_loss_function_f_scale (f_scale);
+  }
 
   model->get_solver()->set_verbosity( solver_verbosity );
 
