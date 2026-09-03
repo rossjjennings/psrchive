@@ -72,7 +72,19 @@ namespace Pulsar
 
     //! Get the name associated with this SystemCalibrator instance
     std::string get_name () const;
-    
+
+    //! Set the name of the robust loss function used by each channel's solver
+    void set_loss_function_name (const std::string& name);
+
+    //! Get the name of the robust loss function used by each channel's solver
+    std::string get_loss_function_name () const;
+
+    //! Set the scale factor of the robust loss function (<= 0 means auto-estimate)
+    void set_loss_function_f_scale (double f_scale);
+
+    //! Get the scale factor of the robust loss function
+    double get_loss_function_f_scale () const;
+
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
 
@@ -337,7 +349,13 @@ namespace Pulsar
     friend class MatrixTemplateMatching;
 
     std::string instance_name;
-    
+
+    //! Name of the robust loss function used by each channel's solver
+    std::string loss_function_name;
+
+    //! Scale factor of the robust loss function (<= 0 means auto-estimate)
+    double loss_function_f_scale = 0.0;
+
     //! Prepare the model
     virtual void prepare (const Archive* data);
 
